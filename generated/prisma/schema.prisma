@@ -1,0 +1,497 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+  // Further reading:
+  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  url      = env("DATABASE_URL")
+}
+
+enum ROLE {
+  ADMIN
+  USER
+}
+
+// Necessary for Better Auth
+
+model User {
+  id            String    @id
+  name          String //@db.Text
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String? //@db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  role ROLE @default(USER)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([email, businessId]) // Same email can exist across different businesses
+  @@index([businessId])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String? //@db.Text
+  userAgent String? //@db.Text
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String //@db.Text
+  providerId            String //@db.Text
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String? //@db.Text
+  refreshToken          String? //@db.Text
+  idToken               String? //@db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String? //@db.Text
+  password              String? //@db.Text
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String //@db.Text
+  value      String //@db.Text
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("verification")
+}
+
+enum BusinessDomainStatus {
+  NONE
+  PENDING_DNS
+  ACTIVE
+}
+
+model Business {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Identity
+  name         String
+  slug         String               @unique // URL-friendly version of name
+  subdomain    String               @unique // "anothershop" for anothershop.myapplication.com
+  customDomain String?              @unique // "anothershop.co"
+  domainStatus BusinessDomainStatus @default(NONE) // none | pending_dns | active
+
+  // Template & Branding
+  templateId String @default("modern") // modern | vintage | minimal
+
+  // Contact & Legal
+  ownerEmail      String
+  supportEmail    String?
+  businessAddress String?
+  taxId           String? // For tax purposes
+
+  // Integrations
+  stripeAccountId String? @unique // Stripe Connect account ID
+
+  // Analytics
+  umamiWebsiteId String? // Each business gets their own website ID
+  umamiEnabled   Boolean @default(false)
+
+  // Status
+  status             String  @default("active") // active | suspended | closed
+  onboardingComplete Boolean @default(false)
+
+  // Relationships
+  users       User[]
+  products    Product[]
+  collections Collection[]
+  orders      Order[]
+  customers   Customer[]
+  siteContent SiteContent?
+  images      Image[]
+
+  @@index([subdomain])
+  @@index([customDomain])
+}
+
+model SiteContent {
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt
+
+  // Hero Section
+  heroTitle      String?
+  heroSubtitle   String?
+  heroImageUrl   String?
+  heroButtonText String?
+  heroButtonLink String?
+
+  // About Section
+  aboutTitle    String?
+  aboutText     String? @db.Text
+  aboutImageUrl String?
+
+  // Features (stored as JSON for flexibility)
+  features Json? // [{ title, description, icon }]
+
+  // Footer
+  footerText  String?
+  socialLinks Json? // { instagram, facebook, twitter }
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  faviconUrl      String?
+
+  // Logo
+  logoUrl     String?
+  logoAltText String?
+
+  // Colors & Styling (template customization)
+  primaryColor   String? @default("#000000")
+  secondaryColor String? @default("#ffffff")
+  accentColor    String? @default("#3b82f6")
+
+  // Navigation (custom menu items)
+  navigationItems Json? // [{ label, href }]
+
+  //Misc Business Information
+  customFields Json? // { key: value }
+
+  // One-to-one with Business
+  businessId String   @unique
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Basic Info
+  name        String
+  slug        String // URL-friendly, unique per business
+  description String? @db.Text
+
+  // Pricing
+  price          Decimal  @db.Decimal(10, 2) // Base price in cents or dollars
+  compareAtPrice Decimal? @db.Decimal(10, 2) // Original price for "sale" display
+  cost           Decimal? @db.Decimal(10, 2) // Cost to business (for profit tracking)
+
+  // Inventory
+  sku             String?
+  barcode         String?
+  trackInventory  Boolean @default(false)
+  inventoryQty    Int     @default(0)
+  allowBackorders Boolean @default(false)
+
+  // Physical attributes
+  weight     Decimal? @db.Decimal(10, 2) // in lbs or kg
+  weightUnit String?  @default("lb") // lb | kg
+
+  // Organization
+  published Boolean @default(false)
+  featured  Boolean @default(false)
+  sortOrder Int     @default(0)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Multi-tenancy
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  images             Image[]
+  variants           ProductVariant[]
+  collectionProducts CollectionProduct[]
+  orderItems         OrderItem[]
+
+  @@unique([businessId, slug])
+  @@index([businessId, published])
+  @@index([businessId, featured])
+}
+
+model ProductVariant {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Variant details
+  name    String // e.g., "Small / Red"
+  sku     String?
+  barcode String?
+
+  // Pricing (overrides product price if set)
+  price          Decimal? @db.Decimal(10, 2)
+  compareAtPrice Decimal? @db.Decimal(10, 2)
+
+  // Inventory
+  inventoryQty Int @default(0)
+
+  // Options (stored as JSON for flexibility)
+  options Json // { size: "Small", color: "Red" }
+
+  // Image
+  imageUrl String?
+
+  // Relationships
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  orderItems OrderItem[]
+
+  @@index([productId])
+}
+
+model Collection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  slug        String
+  description String? @db.Text
+  imageUrl    String?
+
+  published Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Multi-tenancy
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  collectionProducts CollectionProduct[]
+
+  @@unique([businessId, slug])
+  @@index([businessId])
+}
+
+model CollectionProduct {
+  id        String @id @default(cuid())
+  sortOrder Int    @default(0)
+
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, productId])
+  @@index([collectionId])
+  @@index([productId])
+}
+
+model Image {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  url       String
+  altText   String?
+  width     Int?
+  height    Int?
+  sortOrder Int     @default(0)
+
+  // What this image is for
+  productId  String?
+  businessId String?
+
+  product  Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  business Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([businessId])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email     String
+  firstName String?
+  lastName  String?
+  phone     String?
+
+  // Marketing
+  acceptsMarketing Boolean @default(false)
+
+  // Stats
+  totalSpent Decimal @default(0) @db.Decimal(10, 2)
+  orderCount Int     @default(0)
+
+  // Multi-tenancy (customer exists per business)
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  orders            Order[]
+  shippingAddresses ShippingAddress[]
+
+  @@unique([businessId, email])
+  @@index([businessId])
+}
+
+model ShippingAddress {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  firstName String
+  lastName  String
+  company   String?
+  address1  String
+  address2  String?
+  city      String
+  province  String? // State/Province
+  country   String
+  zip       String
+  phone     String?
+
+  isDefault Boolean @default(false)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  orders Order[]
+
+  @@index([customerId])
+}
+
+model Order {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Order number (human-readable, e.g., #1001)
+  orderNumber Int
+
+  // Status
+  status            String @default("pending") // pending | paid | fulfilled | cancelled | refunded
+  paymentStatus     String @default("pending") // pending | paid | failed | refunded
+  fulfillmentStatus String @default("unfulfilled") // unfulfilled | fulfilled | partially_fulfilled
+
+  // Stripe
+  stripeSessionId       String? @unique
+  stripePaymentIntentId String?
+
+  // Pricing
+  subtotal Decimal @db.Decimal(10, 2)
+  tax      Decimal @default(0) @db.Decimal(10, 2)
+  shipping Decimal @default(0) @db.Decimal(10, 2)
+  discount Decimal @default(0) @db.Decimal(10, 2)
+  total    Decimal @db.Decimal(10, 2)
+
+  // Customer info (denormalized for historical record)
+  customerEmail     String
+  customerFirstName String?
+  customerLastName  String?
+  customerPhone     String?
+
+  // Notes
+  customerNote String? @db.Text
+  internalNote String? @db.Text
+
+  // Multi-tenancy
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  shippingAddressId String?
+  shippingAddress   ShippingAddress? @relation(fields: [shippingAddressId], references: [id], onDelete: SetNull)
+
+  items OrderItem[]
+
+  @@unique([businessId, orderNumber])
+  @@index([businessId, status])
+  @@index([businessId, createdAt])
+  @@index([customerId])
+}
+
+model OrderItem {
+  id String @id @default(cuid())
+
+  // Product info (snapshot at time of order)
+  productName String
+  variantName String?
+  sku         String?
+
+  // Pricing (snapshot)
+  price    Decimal @db.Decimal(10, 2)
+  quantity Int
+  total    Decimal @db.Decimal(10, 2) // price * quantity
+
+  // Relationships (nullable in case product is deleted)
+  productId        String?
+  productVariantId String?
+
+  product        Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productVariant ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: SetNull)
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// For tracking which domains need to be added to Coolify
+model DomainQueue {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  domain     String @unique
+  businessId String
+  status     String @default("pending") // pending | processing | completed | failed
+
+  attempts  Int     @default(0)
+  lastError String?
+
+  @@index([status])
+}
+
+// Analytics (optional - could also use external service)
+model PageView {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  path      String
+  referrer  String?
+  userAgent String?
+  ipAddress String?
+
+  businessId String
+
+  @@index([businessId, createdAt])
+  @@index([createdAt])
+}
