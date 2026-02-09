@@ -10,11 +10,11 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
-import { ProductsTable } from "./_components/products-client-data-table";
+import { auth } from "~/lib/auth";
+import { prisma } from "~/server/db";
+import { DiscountsTable } from "./_components/discounts-table";
 
-export default async function ProductsPage() {
+export default async function DiscountsPage() {
   // Get session
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -25,7 +25,7 @@ export default async function ProductsPage() {
   }
 
   // Get user's business
-  const user = await db.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { businessId: true },
   });
@@ -34,18 +34,9 @@ export default async function ProductsPage() {
     redirect("/admin/welcome");
   }
 
-  // Get all products for this business
-  const products = await db.product.findMany({
+  // Get all discount codes
+  const discounts = await prisma.discountCode.findMany({
     where: { businessId: user.businessId },
-    include: {
-      images: {
-        orderBy: { sortOrder: "asc" },
-        take: 1,
-      },
-      _count: {
-        select: { variants: true },
-      },
-    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -55,49 +46,39 @@ export default async function ProductsPage() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-            <p className="mt-1 text-gray-600">Manage your product catalog</p>
+            <h1 className="text-3xl font-bold text-gray-900">Discount Codes</h1>
+            <p className="mt-1 text-gray-600">
+              Create and manage discount codes for your store
+            </p>
           </div>
           <Button asChild>
-            <Link href="/admin/products/new">
+            <Link href="/admin/discounts/new">
               <Plus className="mr-2 h-4 w-4" />
-              Add Product
+              Create Discount
             </Link>
           </Button>
         </div>
 
-        {/* Products List */}
-        {products.length === 0 ? (
+        {/* Discounts List */}
+        {discounts.length === 0 ? (
           <Card>
             <CardHeader>
-              <CardTitle>No products yet</CardTitle>
+              <CardTitle>No discount codes yet</CardTitle>
               <CardDescription>
-                Get started by adding your first product
+                Create your first discount code to offer special deals
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild>
-                <Link href="/admin/products/new">
+                <Link href="/admin/discounts/new">
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Your First Product
+                  Create Your First Discount
                 </Link>
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <ProductsTable
-            products={
-              products as unknown as {
-                id: string;
-                name: string;
-                slug: string;
-                price: number;
-                published: boolean;
-                images: Array<{ url: string; altText: string | null }>;
-                _count: { variants: number };
-              }[]
-            }
-          />
+          <DiscountsTable discounts={discounts} />
         )}
       </div>
     </div>

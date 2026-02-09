@@ -1,8 +1,8 @@
-import { CTASection } from "./_components/cta-section";
-import { FeaturesSection } from "./_components/features-section";
-import { HeroSection } from "./_components/hero-section";
-import { PlatformHeader } from "./_components/platform-header";
-import { TemplatesShowcase } from "./_components/templates-showcase";
+import { CTASection } from "./(platform)/_components/cta-section";
+import { FeaturesSection } from "./(platform)/_components/features-section";
+import { HeroSection } from "./(platform)/_components/hero-section";
+import { PlatformHeader } from "./(platform)/_components/platform-header";
+import { TemplatesShowcase } from "./(platform)/_components/templates-showcase";
 
 export default function PlatformLandingPage() {
   return (

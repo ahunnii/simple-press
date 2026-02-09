@@ -1,7 +1,7 @@
 import { postRouter } from "~/server/api/routers/post";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
-import { announcementRouter } from "./routers/announcement";
 import { clubRouter } from "./routers/club";
+import { announcementRouter } from "./routers/domain";
 import { eventRouter } from "./routers/event";
 import { exportRouter } from "./routers/export";
 import { memberRouter } from "./routers/member";

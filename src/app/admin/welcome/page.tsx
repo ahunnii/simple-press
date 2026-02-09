@@ -1,89 +1,93 @@
-import { getSession } from "~/server/better-auth/server";
-import { db } from "~/server/db";
+import { redirect } from "next/navigation";
 
-export default async function WelcomePage() {
-  const session = await getSession();
-  const business = await db.business.findUnique({
-    where: { id: session?.user.businessId ?? undefined },
-    select: {
-      name: true,
-      subdomain: true,
-      customDomain: true,
-      domainStatus: true,
-      stripeAccountId: true,
+import { auth } from "~/server/better-auth";
+import { db } from "~/server/db";
+import { QuickActions } from "../_components/quick-actions";
+import { SetupChecklist } from "../_components/setup-checklist";
+import { WelcomeHeader } from "../_components/welcome-header";
+
+export default async function AdminWelcomePage() {
+  // Get current session
+  const session = await auth.api.getSession({
+    headers: await import("next/headers").then((mod) => mod.headers()),
+  });
+
+  if (!session?.user) {
+    redirect("/auth/sign-in");
+  }
+
+  // Get user with business info
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    include: {
+      business: {
+        include: {
+          siteContent: true,
+          _count: {
+            select: {
+              products: true,
+              orders: true,
+            },
+          },
+        },
+      },
     },
   });
 
+  if (!user?.business) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <h1 className="mb-4 text-2xl font-bold">No Business Found</h1>
+          <p className="text-gray-600">
+            Your account is not associated with a business.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { business } = user;
+
+  // Calculate setup completion
+  const setupSteps = {
+    businessCreated: true,
+    stripeConnected: !!business.stripeAccountId,
+    domainConfigured:
+      business.domainStatus === "ACTIVE" || business.subdomain !== null,
+    firstProductAdded: business._count.products > 0,
+  };
+
+  const completedSteps = Object.values(setupSteps).filter(Boolean).length;
+  const totalSteps = Object.keys(setupSteps).length;
+  const isComplete = completedSteps === totalSteps;
+
   return (
-    <div className="mx-auto max-w-2xl p-8">
-      <h1>Welcome to {business?.name}! 🎉</h1>
-
-      {/* Setup Checklist
-      <SetupChecklist>
-        <ChecklistItem
-          completed={true}
-          title="Create your store"
-          description="You're all set up!"
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <WelcomeHeader
+          businessName={business.name}
+          userName={user.name || user.email}
+          isComplete={isComplete}
         />
 
-        <ChecklistItem
-          completed={false}
-          title="Connect Stripe"
-          description="Start accepting payments"
-          action={
-            <Button href="/admin/settings/payments">Connect Stripe</Button>
-          }
-        />
-
-        <ChecklistItem
-          completed={business.domainStatus === "active"}
-          title="Set up custom domain"
-          description={
-            business.customDomain
-              ? `Waiting for DNS: ${business.customDomain}`
-              : "Optional: Use your own domain"
-          }
-          action={
-            business.customDomain && business.domainStatus === "pending_dns" ? (
-              <DNSInstructions domain={business.customDomain} />
-            ) : !business.customDomain ? (
-              <Button href="/admin/settings/domain">Add Domain</Button>
-            ) : null
-          }
-        />
-
-        <ChecklistItem
-          completed={false}
-          title="Add your first product"
-          description="Start selling"
-          action={<Button href="/admin/products/new">Add Product</Button>}
-        />
-      </SetupChecklist>
-
-      {/* Preview Links */}
-      {/* <div className="mt-8 rounded bg-blue-50 p-4">
-        <h3>Your Store is Live!</h3>
-        <p className="mb-2 text-sm text-gray-600">Preview your storefront:</p>
-        <a
-          href={`https://${business.subdomain}.myapplication.com`}
-          target="_blank"
-          className="text-blue-600 underline"
-        >
-          {business.subdomain}.myapplication.com
-        </a>
-
-        {business.customDomain && business.domainStatus === "active" && (
-          <div className="mt-2">
-            <a
-              href={`https://${business.customDomain}`}
-              target="_blank"
-              className="text-blue-600 underline"
-            >
-              {business.customDomain}
-            </a>
+        <div className="mt-8 grid gap-8 lg:grid-cols-3">
+          {/* Main Setup Checklist */}
+          <div className="lg:col-span-2">
+            <SetupChecklist
+              business={business}
+              setupSteps={setupSteps}
+              completedSteps={completedSteps}
+              totalSteps={totalSteps}
+            />
           </div>
-        )}
-      </div> */}
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <QuickActions business={business} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
