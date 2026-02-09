@@ -1,0 +1,226 @@
+"use client";
+
+import { AlertTriangle, Loader2, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
+
+type Order = {
+  id: string;
+  total: number;
+  status: string;
+  stripePaymentIntentId: string | null;
+};
+
+type RefundHandlerProps = {
+  order: Order;
+};
+
+export function RefundHandler({ order }: RefundHandlerProps) {
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [refundType, setRefundType] = useState<"full" | "partial">("full");
+  const [partialAmount, setPartialAmount] = useState("");
+  const [reason, setReason] = useState("");
+
+  const canRefund = order.status === "paid" && order.stripePaymentIntentId;
+
+  const formatPrice = (cents: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(cents / 100);
+  };
+
+  const handleRefund = async () => {
+    setError(null);
+    setIsProcessing(true);
+
+    try {
+      let amountToRefund = order.total;
+
+      if (refundType === "partial") {
+        if (!partialAmount || parseFloat(partialAmount) <= 0) {
+          throw new Error("Please enter a valid refund amount");
+        }
+        amountToRefund = Math.round(parseFloat(partialAmount) * 100);
+
+        if (amountToRefund > order.total) {
+          throw new Error("Refund amount cannot exceed order total");
+        }
+      }
+
+      const response = await fetch(`/api/orders/${order.id}/refund`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: amountToRefund,
+          reason: reason || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to process refund");
+      }
+
+      setIsOpen(false);
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  if (!canRefund) {
+    return null;
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="w-full" size="sm">
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Issue Refund
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Issue Refund</DialogTitle>
+          <DialogDescription>
+            Process a refund for this order via Stripe
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Refund Type */}
+          <div>
+            <Label>Refund Type</Label>
+            <div className="mt-2 flex gap-4">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  name="refundType"
+                  value="full"
+                  checked={refundType === "full"}
+                  onChange={() => setRefundType("full")}
+                  className="h-4 w-4"
+                />
+                <span>Full Refund ({formatPrice(order.total)})</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  name="refundType"
+                  value="partial"
+                  checked={refundType === "partial"}
+                  onChange={() => setRefundType("partial")}
+                  className="h-4 w-4"
+                />
+                <span>Partial Refund</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Partial Amount */}
+          {refundType === "partial" && (
+            <div>
+              <Label htmlFor="partialAmount">Refund Amount (USD)</Label>
+              <div className="relative">
+                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                  $
+                </span>
+                <Input
+                  id="partialAmount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  max={(order.total / 100).toFixed(2)}
+                  value={partialAmount}
+                  onChange={(e) => setPartialAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="pl-7"
+                />
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Maximum: {formatPrice(order.total)}
+              </p>
+            </div>
+          )}
+
+          {/* Reason */}
+          <div>
+            <Label htmlFor="reason">Reason (Optional)</Label>
+            <Textarea
+              id="reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Customer requested refund..."
+              rows={3}
+            />
+          </div>
+
+          {/* Warning */}
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              This will process a refund through Stripe. This action cannot be
+              undone.
+            </AlertDescription>
+          </Alert>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setIsOpen(false)}
+            disabled={isProcessing}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleRefund}
+            disabled={isProcessing}
+            variant="destructive"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Issue Refund
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

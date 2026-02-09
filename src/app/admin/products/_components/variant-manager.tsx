@@ -203,7 +203,7 @@ export function VariantManager({
                 </div>
                 <Input
                   placeholder="Values (comma separated, e.g., Small, Medium, Large)"
-                  value={option.values.join(", ")}
+                  defaultValue={option.values.join(", ")}
                   onChange={(e) => updateOptionValues(index, e.target.value)}
                 />
               </div>

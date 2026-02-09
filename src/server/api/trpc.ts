@@ -8,6 +8,7 @@
  */
 
 import { initTRPC, TRPCError } from "@trpc/server";
+import { headers } from "next/headers";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -126,6 +127,52 @@ export const protectedProcedure = t.procedure
     if (!ctx.session?.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
+    return next({
+      ctx: {
+        // infers the `session` as non-nullable
+        session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
+  });
+
+/**
+ * Business Owner / Admin  procedure
+ *
+ * If the current business owner or admin needs to make a query or mutation, use this. It verifies
+ * the session is valid and guarantees `ctx.session.user` is not null.
+ *
+ * @see https://trpc.io/docs/procedures
+ */
+export const ownerAdminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    const headersList = await headers();
+    const hostname = headersList.get("host") ?? "";
+
+    // Extract subdomain or custom domain
+    const domain = hostname.split(":")[0]; // Remove port
+
+    const business = await ctx.db.business.findFirst({
+      where: {
+        OR: [
+          { customDomain: domain },
+          { subdomain: domain?.split(".")[0] }, // Extract subdomain
+        ],
+      },
+      select: { id: true },
+    });
+
+    if (
+      ctx.session.user.businessId !== business?.id &&
+      ctx.session.user.role !== "ADMIN"
+    ) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
     return next({
       ctx: {
         // infers the `session` as non-nullable

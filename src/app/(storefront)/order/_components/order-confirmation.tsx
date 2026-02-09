@@ -1,11 +1,12 @@
 "use client";
 
+import type { Order } from "generated/prisma";
 import { CheckCircle, Package } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { useCart } from "~/lib/cart-context";
+import { useCart } from "~/providers/cart-context";
 
 type Business = {
   id: string;
@@ -22,11 +23,11 @@ type OrderConfirmationProps = {
 export function OrderConfirmation({ business }: OrderConfirmationProps) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
-  const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [orderDetails, setOrderDetails] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
 
   const sessionId = searchParams.get("session_id");
-  const primaryColor = business.siteContent?.primaryColor || "#3b82f6";
+  const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
 
   useEffect(() => {
     if (!sessionId) {
@@ -54,7 +55,7 @@ export function OrderConfirmation({ business }: OrderConfirmationProps) {
       }
     };
 
-    fetchOrderDetails();
+    void fetchOrderDetails();
   }, [sessionId, clearCart]);
 
   if (loading) {
@@ -101,18 +102,18 @@ export function OrderConfirmation({ business }: OrderConfirmationProps) {
               What happens next?
             </h2>
             <ul className="space-y-1 text-sm text-gray-600">
-              <li>• You'll receive an email confirmation shortly</li>
-              <li>• We'll notify you when your order ships</li>
+              <li>• You&apos;ll receive an email confirmation shortly</li>
+              <li>• We&apos;ll notify you when your order ships</li>
               <li>• Track your order status via email</li>
             </ul>
           </div>
         </div>
 
-        {orderDetails?.customer_email && (
+        {orderDetails?.customerEmail && (
           <div className="mt-4 border-t pt-4 text-sm text-gray-600">
             <p>
               Confirmation sent to:{" "}
-              <strong>{orderDetails.customer_email}</strong>
+              <strong>{orderDetails.customerEmail}</strong>
             </p>
           </div>
         )}

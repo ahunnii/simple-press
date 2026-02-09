@@ -214,6 +214,8 @@ exports.Prisma.SiteContentScalarFieldEnum = {
   socialLinks: 'socialLinks',
   metaTitle: 'metaTitle',
   metaDescription: 'metaDescription',
+  metaKeywords: 'metaKeywords',
+  ogImage: 'ogImage',
   faviconUrl: 'faviconUrl',
   logoUrl: 'logoUrl',
   logoAltText: 'logoAltText',
@@ -347,14 +349,17 @@ exports.Prisma.OrderScalarFieldEnum = {
   discount: 'discount',
   total: 'total',
   customerEmail: 'customerEmail',
+  customerName: 'customerName',
   customerFirstName: 'customerFirstName',
   customerLastName: 'customerLastName',
   customerPhone: 'customerPhone',
+  trackingNumber: 'trackingNumber',
   customerNote: 'customerNote',
   internalNote: 'internalNote',
   businessId: 'businessId',
   customerId: 'customerId',
-  shippingAddressId: 'shippingAddressId'
+  shippingAddressId: 'shippingAddressId',
+  discountCodeId: 'discountCodeId'
 };
 
 exports.Prisma.OrderItemScalarFieldEnum = {
@@ -388,6 +393,23 @@ exports.Prisma.PageViewScalarFieldEnum = {
   userAgent: 'userAgent',
   ipAddress: 'ipAddress',
   businessId: 'businessId'
+};
+
+exports.Prisma.DiscountCodeScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  code: 'code',
+  type: 'type',
+  value: 'value',
+  active: 'active',
+  usageLimit: 'usageLimit',
+  usageCount: 'usageCount',
+  startsAt: 'startsAt',
+  expiresAt: 'expiresAt',
+  minPurchase: 'minPurchase',
+  maxDiscount: 'maxDiscount'
 };
 
 exports.Prisma.SortOrder = {
@@ -449,7 +471,8 @@ exports.Prisma.ModelName = {
   Order: 'Order',
   OrderItem: 'OrderItem',
   DomainQueue: 'DomainQueue',
-  PageView: 'PageView'
+  PageView: 'PageView',
+  DiscountCode: 'DiscountCode'
 };
 
 /**

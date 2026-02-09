@@ -1,47 +1,17 @@
-import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
+import { notFound } from "next/navigation";
+
+import { api } from "~/trpc/server";
 import { ProductForm } from "../_components/product-form";
 
-type PageProps = {
+type Props = {
   params: Promise<{ id: string }>;
 };
 
-export default async function EditProductPage({ params }: PageProps) {
+export default async function EditProductPage({ params }: Props) {
   const { id } = await params;
 
-  // Get session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  // Get user's business
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { businessId: true },
-  });
-
-  if (!user?.businessId) {
-    redirect("/admin/welcome");
-  }
-
   // Get product
-  const product = await db.product.findFirst({
-    where: {
-      id,
-      businessId: user.businessId,
-    },
-    include: {
-      variants: {
-        orderBy: { createdAt: "asc" },
-      },
-    },
-  });
+  const product = await api.product.secureGet(id);
 
   if (!product) {
     notFound();
@@ -56,7 +26,7 @@ export default async function EditProductPage({ params }: PageProps) {
         </div>
 
         <ProductForm
-          businessId={user.businessId}
+          businessId={product.businessId}
           product={
             product as unknown as {
               id: string;

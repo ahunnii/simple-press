@@ -1,26 +1,14 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { prisma } from "~/server/db";
+
+import { api } from "~/trpc/server";
 import { StorefrontFooter } from "../../_components/storefront-footer";
 import { StorefrontHeader } from "../../_components/storefront-header";
-import { OrderConfirmation } from "./_components/order-confirmation";
+import { OrderConfirmation } from "../_components/order-confirmation";
 
 export default async function OrderSuccessPage() {
-  const headersList = await headers();
-  const hostname = headersList.get("host") || "";
-  let domain = hostname.split(":")[0];
-
   // Find business
-  const business = await prisma.business.findFirst({
-    where: {
-      OR: [{ customDomain: domain }, { subdomain: domain.split(".")[0] }],
-      status: "active",
-    },
-    include: {
-      siteContent: true,
-    },
-  });
+  const business = await api.business.get();
 
   if (!business) {
     notFound();

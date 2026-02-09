@@ -1,26 +1,47 @@
-import { CTASection } from "./(platform)/_components/cta-section";
-import { FeaturesSection } from "./(platform)/_components/features-section";
-import { HeroSection } from "./(platform)/_components/hero-section";
-import { PlatformHeader } from "./(platform)/_components/platform-header";
-import { TemplatesShowcase } from "./(platform)/_components/templates-showcase";
+import { api, HydrateClient } from "~/trpc/server";
+import { MinimalTemplate } from "./(storefront)/_templates/minimal-template";
+import { ModernTemplate } from "./(storefront)/_templates/modern-template";
+import { VintageTemplate } from "./(storefront)/_templates/vintage-template";
+import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
 
-export default function PlatformLandingPage() {
+export default async function PlatformLandingPage() {
+  const business = await api.business.get();
+
+  if (!business) {
+    return <PlatformLandingPageComponent />;
+  }
+
+  const TemplateComponent =
+    {
+      modern: ModernTemplate,
+      vintage: VintageTemplate,
+      minimal: MinimalTemplate,
+    }[business.templateId] ?? ModernTemplate;
+
   return (
-    <div className="min-h-screen bg-white">
-      <PlatformHeader />
-      <main>
-        <HeroSection />
-        <FeaturesSection />
-        <TemplatesShowcase />
-        <CTASection />
-      </main>
-      <footer className="border-t">
-        <div className="container mx-auto px-4 py-8">
-          <p className="text-center text-sm text-gray-600">
-            © {new Date().getFullYear()} Shop Platform. All rights reserved.
-          </p>
-        </div>
-      </footer>
-    </div>
+    <HydrateClient>
+      <TemplateComponent
+        business={
+          business as unknown as {
+            id: string;
+            name: string;
+            siteContent: {
+              aboutTitle: string | null;
+              heroTitle: string | null;
+              heroSubtitle: string | null;
+              aboutText: string | null;
+              primaryColor: string | null;
+            } | null;
+            products: Array<{
+              id: string;
+              name: string;
+              slug: string;
+              price: number;
+              images: Array<{ url: string; altText: string | null }>;
+            }>;
+          }
+        }
+      />
+    </HydrateClient>
   );
 }

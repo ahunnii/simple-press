@@ -4,12 +4,13 @@ import { CreditCard, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useCart } from "~/app/_providers/cart-context";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { useCart } from "~/lib/cart-context";
+import { DiscountInput } from "./discount-input";
 
 type Business = {
   id: string;
@@ -38,7 +39,18 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
   const [zipCode, setZipCode] = useState("");
   const [country, setCountry] = useState("US");
 
+  // Discount state
+  const [appliedDiscount, setAppliedDiscount] = useState<{
+    id: string;
+    code: string;
+    discountAmount: number;
+  } | null>(null);
+
   const primaryColor = business.siteContent?.primaryColor || "#3b82f6";
+
+  const subtotal = total;
+  const discountAmount = appliedDiscount?.discountAmount || 0;
+  const finalTotal = subtotal - discountAmount;
 
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -78,6 +90,8 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
             zipCode,
             country,
           },
+          discountCodeId: appliedDiscount?.id || null,
+          discountAmount: appliedDiscount?.discountAmount || 0,
         }),
       });
 
@@ -266,18 +280,33 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 ))}
               </div>
 
+              {/* Discount Code Input */}
+              <div className="pt-4">
+                <DiscountInput
+                  businessId={business.id}
+                  cartTotal={subtotal}
+                  onDiscountApplied={setAppliedDiscount}
+                />
+              </div>
+
               <div className="space-y-2 border-t pt-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal</span>
-                  <span>{formatPrice(total)}</span>
+                  <span>{formatPrice(subtotal)}</span>
                 </div>
+                {appliedDiscount && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Discount ({appliedDiscount.code})</span>
+                    <span>-{formatPrice(discountAmount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Shipping</span>
                   <span>Calculated by Stripe</span>
                 </div>
                 <div className="flex justify-between border-t pt-2 font-bold">
                   <span>Total</span>
-                  <span>{formatPrice(total)}</span>
+                  <span>{formatPrice(finalTotal)}</span>
                 </div>
               </div>
 

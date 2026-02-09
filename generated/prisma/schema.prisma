@@ -136,13 +136,14 @@ model Business {
   onboardingComplete Boolean @default(false)
 
   // Relationships
-  users       User[]
-  products    Product[]
-  collections Collection[]
-  orders      Order[]
-  customers   Customer[]
-  siteContent SiteContent?
-  images      Image[]
+  users         User[]
+  products      Product[]
+  collections   Collection[]
+  orders        Order[]
+  customers     Customer[]
+  siteContent   SiteContent?
+  images        Image[]
+  discountCodes DiscountCode[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -174,6 +175,8 @@ model SiteContent {
   // SEO
   metaTitle       String?
   metaDescription String?
+  metaKeywords    String?
+  ogImage         String?
   faviconUrl      String?
 
   // Logo
@@ -207,9 +210,9 @@ model Product {
   description String? @db.Text
 
   // Pricing
-  price          Decimal  @db.Decimal(10, 2) // Base price in cents or dollars
-  compareAtPrice Decimal? @db.Decimal(10, 2) // Original price for "sale" display
-  cost           Decimal? @db.Decimal(10, 2) // Cost to business (for profit tracking)
+  price          Float // Base price in cents or dollars
+  compareAtPrice Float? // Original price for "sale" display
+  cost           Float? // Cost to business (for profit tracking)
 
   // Inventory
   sku             String?
@@ -219,8 +222,8 @@ model Product {
   allowBackorders Boolean @default(false)
 
   // Physical attributes
-  weight     Decimal? @db.Decimal(10, 2) // in lbs or kg
-  weightUnit String?  @default("lb") // lb | kg
+  weight     Float? // in lbs or kg
+  weightUnit String? @default("lb") // lb | kg
 
   // Organization
   published Boolean @default(false)
@@ -257,8 +260,8 @@ model ProductVariant {
   barcode String?
 
   // Pricing (overrides product price if set)
-  price          Decimal? @db.Decimal(10, 2)
-  compareAtPrice Decimal? @db.Decimal(10, 2)
+  price          Float?
+  compareAtPrice Float?
 
   // Inventory
   inventoryQty Int @default(0)
@@ -355,8 +358,8 @@ model Customer {
   acceptsMarketing Boolean @default(false)
 
   // Stats
-  totalSpent Decimal @default(0) @db.Decimal(10, 2)
-  orderCount Int     @default(0)
+  totalSpent Float @default(0)
+  orderCount Int   @default(0)
 
   // Multi-tenancy (customer exists per business)
   businessId String
@@ -412,18 +415,24 @@ model Order {
   stripeSessionId       String? @unique
   stripePaymentIntentId String?
 
-  // Pricing
-  subtotal Decimal @db.Decimal(10, 2)
-  tax      Decimal @default(0) @db.Decimal(10, 2)
-  shipping Decimal @default(0) @db.Decimal(10, 2)
-  discount Decimal @default(0) @db.Decimal(10, 2)
-  total    Decimal @db.Decimal(10, 2)
+  // Pricing (in cents)
+  subtotal Int
+  tax      Int @default(0)
+  shipping Int @default(0)
+  discount Int @default(0)
+  total    Int
 
   // Customer info (denormalized for historical record)
   customerEmail     String
+  customerName      String? // For simpler storage (combines first+last)
   customerFirstName String?
   customerLastName  String?
   customerPhone     String?
+
+  // Shipping (direct fields for webhook/manual orders)
+  // shippingName    String?
+  // shippingAddress String? @db.Text // JSON string for simple address storage
+  trackingNumber String?
 
   // Notes
   customerNote String? @db.Text
@@ -438,6 +447,9 @@ model Order {
 
   shippingAddressId String?
   shippingAddress   ShippingAddress? @relation(fields: [shippingAddressId], references: [id], onDelete: SetNull)
+
+  discountCodeId String?
+  discountCode   DiscountCode? @relation(fields: [discountCodeId], references: [id], onDelete: SetNull)
 
   items OrderItem[]
 
@@ -456,9 +468,9 @@ model OrderItem {
   sku         String?
 
   // Pricing (snapshot)
-  price    Decimal @db.Decimal(10, 2)
+  price    Float
   quantity Int
-  total    Decimal @db.Decimal(10, 2) // price * quantity
+  total    Float // price * quantity
 
   // Relationships (nullable in case product is deleted)
   productId        String?
@@ -503,4 +515,45 @@ model PageView {
 
   @@index([businessId, createdAt])
   @@index([createdAt])
+}
+
+// ============================================
+// DISCOUNTS & PROMOTIONS
+// ============================================
+
+model DiscountCode {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Code details
+  code  String // "SUMMER20", "SAVE10"
+  type  String // "percentage" | "fixed"
+  value Int // 20 (for 20%) or 1000 (for $10 in cents)
+
+  // Status
+  active Boolean @default(true)
+
+  // Usage limits
+  usageLimit Int? // null = unlimited
+  usageCount Int  @default(0)
+
+  // Validity period
+  startsAt  DateTime?
+  expiresAt DateTime?
+
+  // Restrictions (future enhancements)
+  minPurchase Int? // minimum order value in cents
+  maxDiscount Int? // cap discount amount in cents
+
+  // Relationships
+  orders Order[]
+
+  @@unique([businessId, code])
+  @@index([businessId])
+  @@index([businessId, active])
+  @@index([code])
 }

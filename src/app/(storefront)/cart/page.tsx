@@ -1,25 +1,13 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { db } from "~/server/db";
+
+import { api } from "~/trpc/server";
 import { StorefrontFooter } from "../_components/storefront-footer";
 import { StorefrontHeader } from "../_components/storefront-header";
 import { CartContents } from "./_components/cart-contents";
 
 export default async function CartPage() {
-  const headersList = await headers();
-  const hostname = headersList.get("host") ?? "";
-  const domain = hostname.split(":")[0];
-
   // Find business
-  const business = await db.business.findFirst({
-    where: {
-      OR: [{ customDomain: domain }, { subdomain: domain?.split(".")[0] }],
-      status: "active",
-    },
-    include: {
-      siteContent: true,
-    },
-  });
+  const business = await api.business.get();
 
   if (!business) {
     notFound();

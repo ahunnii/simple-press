@@ -1,24 +1,12 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { prisma } from "~/server/db";
+
+import { api } from "~/trpc/server";
 import { StorefrontHeader } from "../_components/storefront-header";
 import { CheckoutForm } from "./_components/checkout-form";
 
 export default async function CheckoutPage() {
-  const headersList = await headers();
-  const hostname = headersList.get("host") || "";
-  let domain = hostname.split(":")[0];
-
   // Find business
-  const business = await prisma.business.findFirst({
-    where: {
-      OR: [{ customDomain: domain }, { subdomain: domain.split(".")[0] }],
-      status: "active",
-    },
-    include: {
-      siteContent: true,
-    },
-  });
+  const business = await api.business.get();
 
   if (!business) {
     notFound();
@@ -35,8 +23,8 @@ export default async function CheckoutPage() {
               Checkout Unavailable
             </h1>
             <p className="text-gray-600">
-              This store hasn't set up payment processing yet. Please contact
-              the store owner.
+              This store hasn&apos;t set up payment processing yet. Please
+              contact the store owner.
             </p>
           </div>
         </main>

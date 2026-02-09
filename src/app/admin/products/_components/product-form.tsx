@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import type { ProductVariant } from "generated/prisma";
 import { AlertCircle, Loader2, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -18,6 +19,7 @@ import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { slugify } from "~/lib/utils";
+import { api } from "~/trpc/react";
 import { VariantManager } from "./variant-manager";
 
 type ProductFormProps = {
@@ -73,6 +75,31 @@ export function ProductForm({ businessId, product }: ProductFormProps) {
     }
   };
 
+  const createProductMutation = api.product.create.useMutation({
+    onError: (error) => {
+      setError(error.message ?? "Failed to save product");
+    },
+    onSuccess: (data) => {
+      router.push(`/admin/products/${data.id}`);
+    },
+    onSettled: () => {
+      setIsSubmitting(false);
+      router.refresh();
+    },
+  });
+  const updateProductMutation = api.product.update.useMutation({
+    onError: (error) => {
+      setError(error.message ?? "Failed to save product");
+    },
+    onSuccess: (data) => {
+      router.push(`/admin/products/${data.id}`);
+    },
+    onSettled: () => {
+      setIsSubmitting(false);
+      router.refresh();
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -95,37 +122,71 @@ export function ProductForm({ businessId, product }: ProductFormProps) {
       // Convert price to cents
       const priceInCents = Math.round(parseFloat(price) * 100);
 
-      const endpoint = product
-        ? `/api/products/${product.id}`
-        : "/api/products/create";
-
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessId,
+      if (product) {
+        updateProductMutation.mutate({
+          id: product.id,
           name,
           slug,
-          description: description || null,
+          description: description || undefined,
           price: priceInCents,
           published,
-          variants,
-        }),
-      });
+          variants: variants?.map((v: ProductVariant) => ({
+            id: v.id,
+            name: v.name,
+            sku: v.sku ?? undefined,
+            price: v.price ?? 0,
 
-      if (!response.ok) {
-        const data = (await response.json()) as { error: string };
-        throw new Error(data.error ?? "Failed to save product");
-      }
-
-      const data = (await response.json()) as { product: { id: string } };
-
-      // Redirect to product edit page or products list
-      if (product) {
-        router.push(`/admin/products/${product.id}`);
+            inventoryQty: v.inventoryQty,
+            options: v.options as Record<string, string>,
+          })),
+        });
       } else {
-        router.push(`/admin/products/${data.product.id}`);
+        createProductMutation.mutate({
+          name,
+          slug,
+          description: description || undefined,
+          price: priceInCents,
+          published,
+          variants: variants?.map((v: ProductVariant) => ({
+            name: v.name,
+            sku: v.sku ?? undefined,
+            price: v.price ?? 0,
+            inventoryQty: v.inventoryQty,
+            options: v.options as Record<string, string>,
+          })),
+        });
       }
+      // const endpoint = product
+      //   ? `/api/products/${product.id}`
+      //   : "/api/products/create";
+
+      // const response = await fetch(endpoint, {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     businessId,
+      //     name,
+      //     slug,
+      //     description: description || null,
+      //     price: priceInCents,
+      //     published,
+      //     variants,
+      //   }),
+      // });
+
+      // if (!response.ok) {
+      //   const data = (await response.json()) as { error: string };
+      //   throw new Error(data.error ?? "Failed to save product");
+      // }
+
+      // const data = (await response.json()) as { product: { id: string } };
+
+      // // Redirect to product edit page or products list
+      // if (product) {
+      //   router.push(`/admin/products/${product.id}`);
+      // } else {
+      //   router.push(`/admin/products/${data.product.id}`);
+      // }
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save product");

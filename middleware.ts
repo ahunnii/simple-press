@@ -92,7 +92,7 @@ export async function middleware(req: NextRequest) {
   // Determine if this is the platform domain (no subdomain)
   const isPlatformDomain = isDevelopment
     ? hostname === "localhost:3000" || hostname === "localhost"
-    : hostname === platformDomain || hostname === `shop-app.${platformDomain}`;
+    : hostname === platformDomain || hostname === `mystore.${platformDomain}`;
 
   // ========================================
   // PLATFORM DOMAIN (localhost:3000 in dev)

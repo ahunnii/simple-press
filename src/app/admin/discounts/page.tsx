@@ -10,35 +10,24 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { auth } from "~/lib/auth";
-import { prisma } from "~/server/db";
+import { checkBusiness } from "~/lib/check-business";
+import { db } from "~/server/db";
 import { DiscountsTable } from "./_components/discounts-table";
 
 export default async function DiscountsPage() {
   // Get session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const business = await checkBusiness();
 
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  // Get user's business
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { businessId: true },
-  });
-
-  if (!user?.businessId) {
+  if (!business) {
     redirect("/admin/welcome");
   }
 
   // Get all discount codes
-  const discounts = await prisma.discountCode.findMany({
-    where: { businessId: user.businessId },
-    orderBy: { createdAt: "desc" },
-  });
+  // const discounts = await db.discountCode.findMany({
+  //   where: { businessId: user.businessId },
+  //   orderBy: { createdAt: "desc" },
+  // });
+  const discounts = [] as const;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -60,7 +49,7 @@ export default async function DiscountsPage() {
         </div>
 
         {/* Discounts List */}
-        {discounts.length === 0 ? (
+        {/* {discounts.length === 0 ? (
           <Card>
             <CardHeader>
               <CardTitle>No discount codes yet</CardTitle>
@@ -79,7 +68,7 @@ export default async function DiscountsPage() {
           </Card>
         ) : (
           <DiscountsTable discounts={discounts} />
-        )}
+        )} */}
       </div>
     </div>
   );

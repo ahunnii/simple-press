@@ -1,5 +1,8 @@
+import { Plus } from "lucide-react";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,9 +12,17 @@ import {
 } from "~/components/ui/card";
 import { auth } from "~/lib/auth";
 import { prisma } from "~/server/db";
+import { OrderFilters } from "./_components/order-filters";
 import { OrdersTable } from "./_components/orders-table";
 
-export default async function OrdersPage() {
+type PageProps = {
+  searchParams: Promise<{
+    status?: string;
+    search?: string;
+  }>;
+};
+
+export default async function OrdersPage({ searchParams }: PageProps) {
   // Get session
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -31,9 +42,30 @@ export default async function OrdersPage() {
     redirect("/admin/welcome");
   }
 
+  const params = await searchParams;
+  const statusFilter = params.status;
+  const searchQuery = params.search;
+
+  // Build where clause
+  const where: any = {
+    businessId: user.businessId,
+  };
+
+  if (statusFilter && statusFilter !== "all") {
+    where.status = statusFilter;
+  }
+
+  if (searchQuery) {
+    where.OR = [
+      { customerEmail: { contains: searchQuery, mode: "insensitive" } },
+      { customerName: { contains: searchQuery, mode: "insensitive" } },
+      { id: { contains: searchQuery, mode: "insensitive" } },
+    ];
+  }
+
   // Get all orders for this business
   const orders = await prisma.order.findMany({
-    where: { businessId: user.businessId },
+    where,
     include: {
       items: true,
     },
@@ -49,9 +81,17 @@ export default async function OrdersPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
-          <p className="mt-1 text-gray-600">Manage your customer orders</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
+            <p className="mt-1 text-gray-600">Manage your customer orders</p>
+          </div>
+          <Button asChild>
+            <Link href="/admin/orders/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Order
+            </Link>
+          </Button>
         </div>
 
         {/* Stats */}
@@ -79,6 +119,9 @@ export default async function OrdersPage() {
             </CardHeader>
           </Card>
         </div>
+
+        {/* Filters */}
+        <OrderFilters />
 
         {/* Orders List */}
         {orders.length === 0 ? (

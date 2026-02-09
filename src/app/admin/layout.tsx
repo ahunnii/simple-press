@@ -11,7 +11,7 @@ export default async function AdminLayout({ children }: Props) {
   const session = await getSession();
 
   if (!session) {
-    redirect("/auth/sign-in");
+    redirect("/auth/sign-in?callbackUrl=/admin");
   }
 
   if (session.user.role !== "ADMIN" && session.user.role !== "OWNER") {

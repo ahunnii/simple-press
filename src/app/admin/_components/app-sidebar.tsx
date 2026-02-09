@@ -8,6 +8,7 @@ import {
   IconConfetti,
   IconDashboard,
   IconDatabase,
+  IconDiscount,
   IconFileAi,
   IconFileDescription,
   IconFileWord,
@@ -16,9 +17,12 @@ import {
   IconInnerShadowTop,
   IconLanguage,
   IconListDetails,
+  IconPackage,
   IconReport,
   IconSearch,
   IconSettings,
+  IconShoppingCart,
+  IconTerminal,
   IconUsers,
 } from "@tabler/icons-react";
 import Image from "next/image";
@@ -53,21 +57,21 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Clubs",
-      url: "/admin/clubs",
-      icon: IconBuildingCommunity,
+      title: "Orders",
+      url: "/admin/orders",
+      icon: IconShoppingCart,
     },
 
     {
-      title: "Events",
-      url: "/admin/events",
-      icon: IconConfetti,
+      title: "Products",
+      url: "/admin/products",
+      icon: IconPackage,
     },
 
     {
-      title: "Newsletters",
-      url: "/admin/newsletters",
-      icon: IconArticle,
+      title: "Discounts",
+      url: "/admin/discounts",
+      icon: IconDiscount,
     },
     // {
     //   title: "Members",
@@ -177,15 +181,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="size-24 data-[slot=sidebar-menu-button]:!p-1.5"
+              className="h-20 w-full data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <Link href="/">
-                <Image
-                  src="/logo-transparent.png"
-                  alt="Crossroads Community Association"
-                  width={100}
-                  height={100}
-                />
+              <Link href="/" className="flex flex-col items-start">
+                <span className="flex flex-row items-center gap-1 font-mono text-2xl font-bold">
+                  <IconTerminal className="size-8" />
+                  simple_press
+                </span>
+                <span className="text-sm text-gray-500">Artisanal Futures</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

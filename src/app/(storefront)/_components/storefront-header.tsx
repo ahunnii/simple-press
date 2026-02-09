@@ -2,8 +2,8 @@
 
 import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
-import { useCart } from "~/app/_providers/cart-context";
 import { Button } from "~/components/ui/button";
+import { useCart } from "~/providers/cart-context";
 
 type Business = {
   name: string;

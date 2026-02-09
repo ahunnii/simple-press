@@ -7,7 +7,7 @@ import { TooltipProvider } from "~/components/ui/tooltip";
 import Script from "next/script";
 import { env } from "~/env";
 import { TRPCReactProvider } from "~/trpc/react";
-import { Providers } from "./_components/providers/providers";
+import { Providers } from "../providers/providers";
 
 export const metadata: Metadata = {
   title: {

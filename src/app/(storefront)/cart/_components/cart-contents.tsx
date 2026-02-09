@@ -4,8 +4,8 @@ import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCart } from "~/app/_providers/cart-context";
 import { Button } from "~/components/ui/button";
+import { useCart } from "~/providers/cart-context";
 
 type Business = {
   id: string;

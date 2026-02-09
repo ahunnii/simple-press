@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
-import { headers } from "next/headers";
+
 import Link from "next/link";
-import { redirect } from "next/navigation";
+
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -10,96 +10,65 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
+
+import { api, HydrateClient } from "~/trpc/server";
 import { ProductsTable } from "./_components/products-client-data-table";
 
 export default async function ProductsPage() {
-  // Get session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  // Get user's business
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { businessId: true },
-  });
-
-  if (!user?.businessId) {
-    redirect("/admin/welcome");
-  }
-
-  // Get all products for this business
-  const products = await db.product.findMany({
-    where: { businessId: user.businessId },
-    include: {
-      images: {
-        orderBy: { sortOrder: "asc" },
-        take: 1,
-      },
-      _count: {
-        select: { variants: true },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
+  const products = await api.product.secureListAll();
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-            <p className="mt-1 text-gray-600">Manage your product catalog</p>
+    <HydrateClient>
+      <div className="min-h-screen bg-gray-50">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Products</h1>
+              <p className="mt-1 text-gray-600">Manage your product catalog</p>
+            </div>
+            <Button asChild>
+              <Link href="/admin/products/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Product
+              </Link>
+            </Button>
           </div>
-          <Button asChild>
-            <Link href="/admin/products/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Product
-            </Link>
-          </Button>
-        </div>
 
-        {/* Products List */}
-        {products.length === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>No products yet</CardTitle>
-              <CardDescription>
-                Get started by adding your first product
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild>
-                <Link href="/admin/products/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Your First Product
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <ProductsTable
-            products={
-              products as unknown as {
-                id: string;
-                name: string;
-                slug: string;
-                price: number;
-                published: boolean;
-                images: Array<{ url: string; altText: string | null }>;
-                _count: { variants: number };
-              }[]
-            }
-          />
-        )}
+          {/* Products List */}
+          {products.length === 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>No products yet</CardTitle>
+                <CardDescription>
+                  Get started by adding your first product
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild>
+                  <Link href="/admin/products/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Your First Product
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <ProductsTable
+              products={
+                products as unknown as {
+                  id: string;
+                  name: string;
+                  slug: string;
+                  price: number;
+                  published: boolean;
+                  images: Array<{ url: string; altText: string | null }>;
+                  _count: { variants: number };
+                }[]
+              }
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </HydrateClient>
   );
 }
