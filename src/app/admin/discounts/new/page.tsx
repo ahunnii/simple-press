@@ -1,26 +1,12 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "~/lib/auth";
-import { prisma } from "~/server/db";
+
+import { checkBusiness } from "~/lib/check-business";
 import { DiscountForm } from "../_components/discount-form";
 
 export default async function NewDiscountPage() {
-  // Get session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const business = await checkBusiness();
 
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  // Get user's business
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { businessId: true },
-  });
-
-  if (!user?.businessId) {
+  if (!business) {
     redirect("/admin/welcome");
   }
 
@@ -36,7 +22,7 @@ export default async function NewDiscountPage() {
           </p>
         </div>
 
-        <DiscountForm businessId={user.businessId} />
+        <DiscountForm businessId={business.id} />
       </div>
     </div>
   );

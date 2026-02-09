@@ -1,8 +1,7 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { auth } from "~/lib/auth";
-import { prisma } from "~/server/db";
+
+import { api } from "~/trpc/server";
 import { BrandingSettings } from "./_components/branding-settings";
 import { DomainSettings } from "./_components/domain-settings";
 import { GeneralSettings } from "./_components/general-settings";
@@ -10,32 +9,7 @@ import { IntegrationsSettings } from "./_components/integrations-settings";
 import { SeoSettings } from "./_components/seo-settings";
 
 export default async function SettingsPage() {
-  // Get session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  // Get user's business
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { businessId: true },
-  });
-
-  if (!user?.businessId) {
-    redirect("/admin/welcome");
-  }
-
-  // Get business with all settings
-  const business = await prisma.business.findUnique({
-    where: { id: user.businessId },
-    include: {
-      siteContent: true,
-    },
-  });
+  const business = await api.business.get();
 
   if (!business) {
     redirect("/admin/welcome");

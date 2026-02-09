@@ -1,5 +1,6 @@
 "use client";
 
+import type { Order } from "generated/prisma";
 import { Loader2, Package, Truck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -8,74 +9,48 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { api } from "~/trpc/react";
 
-type Order = {
-  id: string;
-  fulfillmentStatus: string | null;
-  trackingNumber: string | null;
-};
-
-type FulfillmentTrackerProps = {
+type Props = {
   order: Order;
 };
 
-export function FulfillmentTracker({ order }: FulfillmentTrackerProps) {
+export function FulfillmentTracker({ order }: Props) {
   const router = useRouter();
   const [trackingNumber, setTrackingNumber] = useState(
-    order.trackingNumber || "",
+    order.trackingNumber ?? "",
   );
   const [isUpdating, setIsUpdating] = useState(false);
 
+  const updateFulfillmentMutation = api.order.updateFulfillment.useMutation({
+    onSuccess: () => {
+      router.refresh();
+    },
+    onError: (error) => {
+      console.error("Update fulfillment error:", error);
+      alert("Failed to update fulfillment");
+    },
+    onSettled: () => {
+      setIsUpdating(false);
+    },
+  });
   const handleMarkFulfilled = async () => {
     setIsUpdating(true);
 
-    try {
-      const response = await fetch(`/api/orders/${order.id}/fulfillment`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fulfillmentStatus: "fulfilled",
-          trackingNumber: trackingNumber || null,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update fulfillment");
-      }
-
-      router.refresh();
-    } catch (error) {
-      console.error("Update fulfillment error:", error);
-      alert("Failed to update fulfillment");
-    } finally {
-      setIsUpdating(false);
-    }
+    updateFulfillmentMutation.mutate({
+      orderId: order.id,
+      fulfillmentStatus: "fulfilled",
+      trackingNumber: trackingNumber ?? null,
+    });
   };
 
   const handleMarkUnfulfilled = async () => {
     setIsUpdating(true);
-
-    try {
-      const response = await fetch(`/api/orders/${order.id}/fulfillment`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fulfillmentStatus: "unfulfilled",
-          trackingNumber: null,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update fulfillment");
-      }
-
-      router.refresh();
-    } catch (error) {
-      console.error("Update fulfillment error:", error);
-      alert("Failed to update fulfillment");
-    } finally {
-      setIsUpdating(false);
-    }
+    updateFulfillmentMutation.mutate({
+      orderId: order.id,
+      fulfillmentStatus: "unfulfilled",
+      trackingNumber: undefined,
+    });
   };
 
   const isFulfilled = order.fulfillmentStatus === "fulfilled";

@@ -158,6 +158,24 @@ export const productRouter = createTRPCRouter({
     return products;
   }),
 
+  secureGetAll: ownerAdminProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
+    const products = await ctx.db.product.findMany({
+      where: { businessId: business.id },
+      include: { variants: true },
+      orderBy: { name: "asc" },
+    });
+
+    return products;
+  }),
+
   get: publicProcedure.input(z.string()).query(async ({ ctx, input: slug }) => {
     const business = await checkBusiness();
     if (!business) {

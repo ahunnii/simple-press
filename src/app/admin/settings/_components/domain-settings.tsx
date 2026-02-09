@@ -1,5 +1,6 @@
 "use client";
 
+import type { Business, SiteContent } from "generated/prisma";
 import {
   CheckCircle,
   Clock,
@@ -22,16 +23,17 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { api } from "~/trpc/react";
 
-type Business = {
-  id: string;
-  subdomain: string;
-  customDomain: string | null;
-  domainStatus: string;
-};
+// type Business = {
+//   id: string;
+//   subdomain: string;
+//   customDomain: string | null;
+//   domainStatus: string;
+// };
 
 type DomainSettingsProps = {
-  business: Business;
+  business: Business & { siteContent?: SiteContent | null };
 };
 
 export function DomainSettings({ business }: DomainSettingsProps) {
@@ -44,7 +46,7 @@ export function DomainSettings({ business }: DomainSettingsProps) {
 
   const isDev = process.env.NODE_ENV === "development";
   const platformDomain =
-    process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "myapplication.com";
+    process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? "myapplication.com";
   const subdomainUrl = isDev
     ? `http://${business.subdomain}.localhost:3000`
     : `https://${business.subdomain}.${platformDomain}`;
@@ -75,39 +77,59 @@ export function DomainSettings({ business }: DomainSettingsProps) {
     }
   };
 
+  const addDomainMutation = api.domain.add.useMutation({
+    onSuccess: () => {
+      router.refresh();
+      setSuccess("Domain added! Configure DNS and verify below.");
+      setCustomDomain("");
+    },
+    onError: (error) => {
+      setError(error.message ?? "Failed to add domain");
+    },
+    onSettled: () => {
+      setIsAdding(false);
+    },
+  });
+
+  const verifyDomainMutation = api.domain.verify.useMutation({
+    onSuccess: () => {
+      router.refresh();
+      setSuccess("Domain verified successfully!");
+    },
+    onError: (error) => {
+      setError(error.message ?? "Failed to verify domain");
+    },
+    onSettled: () => {
+      setIsVerifying(false);
+    },
+  });
+
   const handleAddDomain = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
     setIsAdding(true);
 
-    try {
-      if (!customDomain.trim()) {
-        throw new Error("Please enter a domain");
-      }
-
-      const response = await fetch("/api/domain/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessId: business.id,
-          domain: customDomain.trim().toLowerCase(),
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to add domain");
-      }
-
-      setSuccess("Domain added! Configure DNS and verify below.");
-      setCustomDomain("");
-      router.refresh();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsAdding(false);
+    // try {
+    if (!customDomain.trim()) {
+      throw new Error("Please enter a domain");
     }
+
+    addDomainMutation.mutate(customDomain.trim().toLowerCase());
+
+    //   if (!response.ok) {
+    //     const data = await response.json();
+    //     throw new Error(data.error || "Failed to add domain");
+    //   }
+
+    //   setSuccess("Domain added! Configure DNS and verify below.");
+    //   setCustomDomain("");
+    //   router.refresh();
+    // } catch (err: any) {
+    //   setError(err.message);
+    // } finally {
+    //   setIsAdding(false);
+    // }
   };
 
   const handleVerifyDomain = async () => {
@@ -115,33 +137,37 @@ export function DomainSettings({ business }: DomainSettingsProps) {
     setSuccess(null);
     setIsVerifying(true);
 
-    try {
-      const response = await fetch("/api/domain/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessId: business.id,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to verify domain");
-      }
-
-      const data = await response.json();
-
-      if (data.verified) {
-        setSuccess("Domain verified successfully!");
-        router.refresh();
-      } else {
-        setError("Domain not verified yet. Please check your DNS settings.");
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsVerifying(false);
+    if (!business.customDomain) {
+      throw new Error("No custom domain found");
     }
+    verifyDomainMutation.mutate(business.customDomain);
+    // try {
+    //   const response = await fetch("/api/domain/verify", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({
+    //       businessId: business.id,
+    //     }),
+    //   });
+
+    //   if (!response.ok) {
+    //     const data = await response.json();
+    //     throw new Error(data.error || "Failed to verify domain");
+    //   }
+
+    //   const data = await response.json();
+
+    //   if (data.verified) {
+    //     setSuccess("Domain verified successfully!");
+    //     router.refresh();
+    //   } else {
+    //     setError("Domain not verified yet. Please check your DNS settings.");
+    //   }
+    // } catch (err: any) {
+    //   setError(err.message);
+    // } finally {
+    //   setIsVerifying(false);
+    // }
   };
 
   return (
@@ -164,7 +190,7 @@ export function DomainSettings({ business }: DomainSettingsProps) {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Default Subdomain</CardTitle>
-              <CardDescription>Your store's default URL</CardDescription>
+              <CardDescription>Your store&apos;s default URL</CardDescription>
             </div>
             <Badge variant="default">Active</Badge>
           </div>
@@ -211,7 +237,7 @@ export function DomainSettings({ business }: DomainSettingsProps) {
                 />
               </div>
 
-              {business.domainStatus === "pending_dns" && (
+              {business.domainStatus === "PENDING_DNS" && (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
                   <h4 className="mb-2 font-semibold text-amber-900">
                     DNS Configuration Required
@@ -223,12 +249,12 @@ export function DomainSettings({ business }: DomainSettingsProps) {
                     <div>Type: A</div>
                     <div>Name: @</div>
                     <div>
-                      Value: {process.env.NEXT_PUBLIC_VPS_IP || "YOUR_VPS_IP"}
+                      Value: {process.env.NEXT_PUBLIC_VPS_IP ?? "YOUR_VPS_IP"}
                     </div>
                     <div className="mt-2 border-t pt-2">Type: A</div>
                     <div>Name: www</div>
                     <div>
-                      Value: {process.env.NEXT_PUBLIC_VPS_IP || "YOUR_VPS_IP"}
+                      Value: {process.env.NEXT_PUBLIC_VPS_IP ?? "YOUR_VPS_IP"}
                     </div>
                   </div>
                   <Button
@@ -249,7 +275,7 @@ export function DomainSettings({ business }: DomainSettingsProps) {
                 </div>
               )}
 
-              {business.domainStatus === "active" && (
+              {business.domainStatus === "ACTIVE" && (
                 <Alert>
                   <CheckCircle className="h-4 w-4" />
                   <AlertDescription>
@@ -271,7 +297,8 @@ export function DomainSettings({ business }: DomainSettingsProps) {
                     placeholder="example.com"
                   />
                   <p className="mt-1 text-sm text-gray-500">
-                    Enter your domain without "http://" or "www"
+                    Enter your domain without &quot;http://&quot; or
+                    &quot;www&quot;
                   </p>
                 </div>
 

@@ -1,11 +1,12 @@
 "use client";
 
+import type { Order } from "generated/prisma";
 import { AlertTriangle, Loader2, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+
 import {
   Dialog,
   DialogContent,
@@ -18,19 +19,13 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { api } from "~/trpc/react";
 
-type Order = {
-  id: string;
-  total: number;
-  status: string;
-  stripePaymentIntentId: string | null;
-};
-
-type RefundHandlerProps = {
+type Props = {
   order: Order;
 };
 
-export function RefundHandler({ order }: RefundHandlerProps) {
+export function RefundHandler({ order }: Props) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -48,45 +43,41 @@ export function RefundHandler({ order }: RefundHandlerProps) {
     }).format(cents / 100);
   };
 
+  const refundMutation = api.order.refund.useMutation({
+    onSuccess: () => {
+      setIsOpen(false);
+    },
+    onError: (error) => {
+      setError(error.message ?? "Failed to process refund");
+    },
+    onSettled: () => {
+      setIsProcessing(false);
+      router.refresh();
+    },
+  });
+
   const handleRefund = async () => {
     setError(null);
     setIsProcessing(true);
 
-    try {
-      let amountToRefund = order.total;
+    let amountToRefund = order.total;
 
-      if (refundType === "partial") {
-        if (!partialAmount || parseFloat(partialAmount) <= 0) {
-          throw new Error("Please enter a valid refund amount");
-        }
-        amountToRefund = Math.round(parseFloat(partialAmount) * 100);
-
-        if (amountToRefund > order.total) {
-          throw new Error("Refund amount cannot exceed order total");
-        }
+    if (refundType === "partial") {
+      if (!partialAmount || parseFloat(partialAmount) <= 0) {
+        throw new Error("Please enter a valid refund amount");
       }
+      amountToRefund = Math.round(parseFloat(partialAmount) * 100);
 
-      const response = await fetch(`/api/orders/${order.id}/refund`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: amountToRefund,
-          reason: reason || undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to process refund");
+      if (amountToRefund > order.total) {
+        throw new Error("Refund amount cannot exceed order total");
       }
-
-      setIsOpen(false);
-      router.refresh();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsProcessing(false);
     }
+
+    refundMutation.mutate({
+      orderId: order.id,
+      amount: amountToRefund,
+      reason: reason || undefined,
+    });
   };
 
   if (!canRefund) {

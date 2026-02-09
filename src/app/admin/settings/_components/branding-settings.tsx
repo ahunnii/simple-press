@@ -1,5 +1,6 @@
 "use client";
 
+import type { Business, SiteContent } from "generated/prisma";
 import { Loader2, Palette, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -22,23 +23,24 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import { api } from "~/trpc/react";
 
-type Business = {
-  id: string;
-  templateId: string;
-  siteContent: {
-    heroTitle: string | null;
-    heroSubtitle: string | null;
-    aboutText: string | null;
-    primaryColor: string | null;
-    logoUrl: string | null;
-    faviconUrl: string | null;
-    footerText: string | null;
-  } | null;
-};
+// type Business = {
+//   id: string;
+//   templateId: string;
+//   siteContent: {
+//     heroTitle: string | null;
+//     heroSubtitle: string | null;
+//     aboutText: string | null;
+//     primaryColor: string | null;
+//     logoUrl: string | null;
+//     faviconUrl: string | null;
+//     footerText: string | null;
+//   } | null;
+// };
 
 type BrandingSettingsProps = {
-  business: Business;
+  business: Business & { siteContent?: SiteContent | null };
 };
 
 export function BrandingSettings({ business }: BrandingSettingsProps) {
@@ -47,21 +49,35 @@ export function BrandingSettings({ business }: BrandingSettingsProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const siteContent = business.siteContent || {};
+  const siteContent = business?.siteContent ?? null;
 
   // Form state
   const [templateId, setTemplateId] = useState(business.templateId);
-  const [heroTitle, setHeroTitle] = useState(siteContent.heroTitle || "");
+  const [heroTitle, setHeroTitle] = useState(siteContent?.heroTitle ?? "");
   const [heroSubtitle, setHeroSubtitle] = useState(
-    siteContent.heroSubtitle || "",
+    siteContent?.heroSubtitle ?? "",
   );
-  const [aboutText, setAboutText] = useState(siteContent.aboutText || "");
+  const [aboutText, setAboutText] = useState(siteContent?.aboutText ?? "");
   const [primaryColor, setPrimaryColor] = useState(
-    siteContent.primaryColor || "#3b82f6",
+    siteContent?.primaryColor ?? "#3b82f6",
   );
-  const [logoUrl, setLogoUrl] = useState(siteContent.logoUrl || "");
-  const [faviconUrl, setFaviconUrl] = useState(siteContent.faviconUrl || "");
-  const [footerText, setFooterText] = useState(siteContent.footerText || "");
+  const [logoUrl, setLogoUrl] = useState(siteContent?.logoUrl ?? "");
+  const [faviconUrl, setFaviconUrl] = useState(siteContent?.faviconUrl ?? "");
+  const [footerText, setFooterText] = useState(siteContent?.footerText ?? "");
+
+  const updateBrandingMutation = api.business.updateBranding.useMutation({
+    onSuccess: () => {
+      router.refresh();
+      setSuccess(true);
+    },
+    onError: (error) => {
+      setError(error.message ?? "Failed to update branding");
+    },
+    onSettled: () => {
+      setIsSaving(false);
+      router.refresh();
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,38 +85,51 @@ export function BrandingSettings({ business }: BrandingSettingsProps) {
     setSuccess(false);
     setIsSaving(true);
 
-    try {
-      const response = await fetch(`/api/business/${business.id}/branding`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          templateId,
-          siteContent: {
-            heroTitle: heroTitle || null,
-            heroSubtitle: heroSubtitle || null,
-            aboutText: aboutText || null,
-            primaryColor,
-            logoUrl: logoUrl || null,
-            faviconUrl: faviconUrl || null,
-            footerText: footerText || null,
-          },
-        }),
-      });
+    updateBrandingMutation.mutate({
+      templateId,
+      siteContent: {
+        heroTitle: heroTitle ?? undefined,
+        heroSubtitle: heroSubtitle ?? undefined,
+        aboutText: aboutText ?? undefined,
+        primaryColor,
+        logoUrl: logoUrl ?? undefined,
+        faviconUrl: faviconUrl ?? undefined,
+        footerText: footerText ?? undefined,
+      },
+    });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to update branding");
-      }
+    // try {
+    //   const response = await fetch(`/api/business/${business.id}/branding`, {
+    //     method: "PATCH",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({
+    //       templateId,
+    //       siteContent: {
+    //         heroTitle: heroTitle || null,
+    //         heroSubtitle: heroSubtitle || null,
+    //         aboutText: aboutText || null,
+    //         primaryColor,
+    //         logoUrl: logoUrl || null,
+    //         faviconUrl: faviconUrl || null,
+    //         footerText: footerText || null,
+    //       },
+    //     }),
+    //   });
 
-      setSuccess(true);
-      router.refresh();
+    //   if (!response.ok) {
+    //     const data = await response.json();
+    //     throw new Error(data.error || "Failed to update branding");
+    //   }
 
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSaving(false);
-    }
+    //   setSuccess(true);
+    //   router.refresh();
+
+    //   setTimeout(() => setSuccess(false), 3000);
+    // } catch (err: any) {
+    //   setError(err.message);
+    // } finally {
+    //   setIsSaving(false);
+    // }
   };
 
   return (

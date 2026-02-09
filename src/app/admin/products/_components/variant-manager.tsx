@@ -2,7 +2,7 @@
 
 import { GripVertical, Plus, X } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "~/components/ui/badge";
+
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -28,17 +28,13 @@ type Variant = {
   options: Record<string, string>; // { size: "Small", color: "Red" }
 };
 
-type VariantManagerProps = {
+type Props = {
   variants: Variant[];
   onChange: (variants: Variant[]) => void;
   basePrice: number; // in cents
 };
 
-export function VariantManager({
-  variants,
-  onChange,
-  basePrice,
-}: VariantManagerProps) {
+export function VariantManager({ variants, onChange, basePrice }: Props) {
   const [variantOptions, setVariantOptions] = useState<VariantOption[]>([
     { name: "Size", values: [] },
   ]);
@@ -241,7 +237,7 @@ export function VariantManager({
                   key={index}
                   className="flex items-center gap-3 rounded-lg border bg-white p-3"
                 >
-                  <GripVertical className="h-4 w-4 flex-shrink-0 text-gray-400" />
+                  <GripVertical className="h-4 w-4 shrink-0 text-gray-400" />
 
                   <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-4">
                     <div>
@@ -325,7 +321,7 @@ export function VariantManager({
                     variant="ghost"
                     size="sm"
                     onClick={() => removeVariant(index)}
-                    className="flex-shrink-0"
+                    className="shrink-0"
                   >
                     <X className="h-4 w-4" />
                   </Button>

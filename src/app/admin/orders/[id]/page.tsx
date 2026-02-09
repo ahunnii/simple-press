@@ -1,12 +1,12 @@
 import { ArrowLeft } from "lucide-react";
-import { headers } from "next/headers";
+
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { auth } from "~/lib/auth";
-import { prisma } from "~/server/db";
+
+import { api } from "~/trpc/server";
 import { FulfillmentTracker } from "../_components/fulfillment-tracker";
 import { OrderStatusUpdater } from "../_components/order-status-updater";
 import { RefundHandler } from "../_components/refund-handler";
@@ -18,35 +18,8 @@ type PageProps = {
 export default async function OrderDetailPage({ params }: PageProps) {
   const { id } = await params;
 
-  // Get session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  // Get user's business
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { businessId: true },
-  });
-
-  if (!user?.businessId) {
-    redirect("/admin/welcome");
-  }
-
   // Get order
-  const order = await prisma.order.findFirst({
-    where: {
-      id,
-      businessId: user.businessId,
-    },
-    include: {
-      items: true,
-    },
-  });
+  const order = await api.order.getById(id);
 
   if (!order) {
     notFound();
@@ -69,9 +42,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
     }).format(new Date(date));
   };
 
-  const shippingAddress = order.shippingAddress
-    ? JSON.parse(order.shippingAddress)
-    : null;
+  const shippingAddress = order?.shippingAddress ?? null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -188,12 +159,16 @@ export default async function OrderDetailPage({ params }: PageProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="text-sm">
-                    <p>{order.shippingName}</p>
-                    <p>{shippingAddress.line1}</p>
-                    {shippingAddress.line2 && <p>{shippingAddress.line2}</p>}
                     <p>
-                      {shippingAddress.city}, {shippingAddress.state}{" "}
-                      {shippingAddress.postal_code}
+                      {shippingAddress.firstName} {shippingAddress.lastName}
+                    </p>
+                    <p>{shippingAddress.address1}</p>
+                    {shippingAddress.address2 && (
+                      <p>{shippingAddress.address2}</p>
+                    )}
+                    <p>
+                      {shippingAddress.city}, {shippingAddress.province}{" "}
+                      {shippingAddress.zip}
                     </p>
                     <p>{shippingAddress.country}</p>
                   </div>

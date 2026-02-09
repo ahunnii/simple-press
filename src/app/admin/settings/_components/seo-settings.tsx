@@ -1,5 +1,6 @@
 "use client";
 
+import type { Business, SiteContent } from "generated/prisma";
 import { Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,19 +16,20 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { api } from "~/trpc/react";
 
-type Business = {
-  id: string;
-  siteContent: {
-    metaTitle: string | null;
-    metaDescription: string | null;
-    metaKeywords: string | null;
-    ogImage: string | null;
-  } | null;
-};
+// type Business = {
+//   id: string;
+//   siteContent: {
+//     metaTitle: string | null;
+//     metaDescription: string | null;
+//     metaKeywords: string | null;
+//     ogImage: string | null;
+//   } | null;
+// };
 
 type SeoSettingsProps = {
-  business: Business;
+  business: Business & { siteContent?: SiteContent | null };
 };
 
 export function SeoSettings({ business }: SeoSettingsProps) {
@@ -36,17 +38,31 @@ export function SeoSettings({ business }: SeoSettingsProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const siteContent = business.siteContent || {};
+  const siteContent = business?.siteContent ?? null;
 
   // Form state
-  const [metaTitle, setMetaTitle] = useState(siteContent.metaTitle || "");
+  const [metaTitle, setMetaTitle] = useState(siteContent?.metaTitle ?? "");
   const [metaDescription, setMetaDescription] = useState(
-    siteContent.metaDescription || "",
+    siteContent?.metaDescription ?? "",
   );
   const [metaKeywords, setMetaKeywords] = useState(
-    siteContent.metaKeywords || "",
+    siteContent?.metaKeywords ?? "",
   );
-  const [ogImage, setOgImage] = useState(siteContent.ogImage || "");
+  const [ogImage, setOgImage] = useState(siteContent?.ogImage ?? "");
+
+  const updateSeoMutation = api.business.updateSeo.useMutation({
+    onSuccess: () => {
+      router.refresh();
+      setSuccess(true);
+    },
+    onError: (error) => {
+      setError(error.message ?? "Failed to update SEO settings");
+    },
+    onSettled: () => {
+      setIsSaving(false);
+      router.refresh();
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,32 +70,39 @@ export function SeoSettings({ business }: SeoSettingsProps) {
     setSuccess(false);
     setIsSaving(true);
 
-    try {
-      const response = await fetch(`/api/business/${business.id}/seo`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          metaTitle: metaTitle || null,
-          metaDescription: metaDescription || null,
-          metaKeywords: metaKeywords || null,
-          ogImage: ogImage || null,
-        }),
-      });
+    updateSeoMutation.mutate({
+      metaTitle: metaTitle ?? undefined,
+      metaDescription: metaDescription ?? undefined,
+      metaKeywords: metaKeywords ?? undefined,
+      ogImage: ogImage ?? undefined,
+    });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to update SEO settings");
-      }
+    // try {
+    //   const response = await fetch(`/api/business/${business.id}/seo`, {
+    //     method: "PATCH",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({
+    //       metaTitle: metaTitle || null,
+    //       metaDescription: metaDescription || null,
+    //       metaKeywords: metaKeywords || null,
+    //       ogImage: ogImage || null,
+    //     }),
+    //   });
 
-      setSuccess(true);
-      router.refresh();
+    //   if (!response.ok) {
+    //     const data = await response.json();
+    //     throw new Error(data.error || "Failed to update SEO settings");
+    //   }
 
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSaving(false);
-    }
+    //   setSuccess(true);
+    //   router.refresh();
+
+    //   setTimeout(() => setSuccess(false), 3000);
+    // } catch (err: any) {
+    //   setError(err.message);
+    // } finally {
+    //   setIsSaving(false);
+    // }
   };
 
   return (

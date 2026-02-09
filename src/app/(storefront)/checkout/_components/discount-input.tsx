@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { api } from "~/trpc/react";
 
 type DiscountInputProps = {
   businessId: string;
@@ -39,6 +40,19 @@ export function DiscountInput({
     }).format(cents / 100);
   };
 
+  const validateDiscountMutation = api.discount.validate.useMutation({
+    onSuccess: ({ discount }) => {
+      setAppliedDiscount(discount);
+      onDiscountApplied(discount);
+    },
+    onError: (error) => {
+      setError(error.message ?? "Failed to validate discount code");
+    },
+    onSettled: () => {
+      setIsValidating(false);
+    },
+  });
+
   const handleApply = async () => {
     if (!code.trim()) {
       setError("Please enter a discount code");
@@ -47,40 +61,45 @@ export function DiscountInput({
 
     setError(null);
     setIsValidating(true);
+    validateDiscountMutation.mutate({
+      code: code.trim().toUpperCase(),
+      businessId,
+      cartTotal,
+    });
 
-    try {
-      const response = await fetch("/api/discounts/validate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code: code.trim().toUpperCase(),
-          businessId,
-          cartTotal,
-        }),
-      });
+    // try {
+    //   const response = await fetch("/api/discounts/validate", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({
+    //       code: code.trim().toUpperCase(),
+    //       businessId,
+    //       cartTotal,
+    //     }),
+    //   });
 
-      const data = await response.json();
+    //   const data = await response.json();
 
-      if (!data.valid) {
-        setError(data.error || "Invalid discount code");
-        return;
-      }
+    //   if (!data.valid) {
+    //     setError(data.error || "Invalid discount code");
+    //     return;
+    //   }
 
-      // Apply discount
-      const discount = {
-        id: data.discount.id,
-        code: data.discount.code,
-        discountAmount: data.discount.discountAmount,
-      };
+    //   // Apply discount
+    //   const discount = {
+    //     id: data.discount.id,
+    //     code: data.discount.code,
+    //     discountAmount: data.discount.discountAmount,
+    //   };
 
-      setAppliedDiscount(discount);
-      onDiscountApplied(discount);
-      setCode("");
-    } catch (err: any) {
-      setError("Failed to validate discount code");
-    } finally {
-      setIsValidating(false);
-    }
+    //   setAppliedDiscount(discount);
+    //   onDiscountApplied(discount);
+    //   setCode("");
+    // } catch (err: any) {
+    //   setError("Failed to validate discount code");
+    // } finally {
+    //   setIsValidating(false);
+    // }
   };
 
   const handleRemove = () => {
@@ -134,7 +153,7 @@ export function DiscountInput({
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleApply();
+                void handleApply();
               }
             }}
             className="pl-10"

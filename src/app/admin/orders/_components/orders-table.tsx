@@ -1,30 +1,20 @@
 "use client";
 
+import type { Order, OrderItem, ShippingAddress } from "generated/prisma";
 import { Eye } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 
-type Order = {
-  id: string;
-  createdAt: Date;
-  customerEmail: string;
-  customerName: string;
-  total: number;
-  status: string;
-  paymentStatus: string;
-  items: Array<{
-    productName: string;
-    quantity: number;
-  }>;
+type Props = {
+  orders: (Order & {
+    items: OrderItem[];
+    shippingAddress?: ShippingAddress;
+  })[];
 };
 
-type OrdersTableProps = {
-  orders: Order[];
-};
-
-export function OrdersTable({ orders }: OrdersTableProps) {
+export function OrdersTable({ orders }: Props) {
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",

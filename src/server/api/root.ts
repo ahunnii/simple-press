@@ -2,11 +2,12 @@ import { postRouter } from "~/server/api/routers/post";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { businessRouter } from "./routers/business";
 import { clubRouter } from "./routers/club";
-import { announcementRouter } from "./routers/domain";
-import { eventRouter } from "./routers/event";
+import { discountRouter } from "./routers/discount";
+import { domainRouter } from "./routers/domain";
 import { exportRouter } from "./routers/export";
 import { memberRouter } from "./routers/member";
 import { newsletterRouter } from "./routers/newsletter";
+import { orderRouter } from "./routers/order";
 import { pageRouter } from "./routers/page";
 import { productRouter } from "./routers/product";
 import { siteContentRouter } from "./routers/site-content";
@@ -19,8 +20,8 @@ import { siteContentRouter } from "./routers/site-content";
 export const appRouter = createTRPCRouter({
   post: postRouter,
   club: clubRouter,
-  announcement: announcementRouter,
-  event: eventRouter,
+  domain: domainRouter,
+  discount: discountRouter,
   export: exportRouter,
   member: memberRouter,
   newsletter: newsletterRouter,
@@ -28,6 +29,7 @@ export const appRouter = createTRPCRouter({
   siteContent: siteContentRouter,
   business: businessRouter,
   product: productRouter,
+  order: orderRouter,
 });
 
 // export type definition of API

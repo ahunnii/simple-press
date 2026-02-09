@@ -1,75 +1,33 @@
 import { Plus } from "lucide-react";
-import { headers } from "next/headers";
+
 import Link from "next/link";
-import { redirect } from "next/navigation";
+
 import { Button } from "~/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { auth } from "~/lib/auth";
-import { prisma } from "~/server/db";
+
+import { api } from "~/trpc/server";
 import { OrderFilters } from "./_components/order-filters";
 import { OrdersTable } from "./_components/orders-table";
 
-type PageProps = {
+type Props = {
   searchParams: Promise<{
     status?: string;
     search?: string;
   }>;
 };
 
-export default async function OrdersPage({ searchParams }: PageProps) {
-  // Get session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  // Get user's business
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { businessId: true },
-  });
-
-  if (!user?.businessId) {
-    redirect("/admin/welcome");
-  }
-
+export default async function OrdersPage({ searchParams }: Props) {
   const params = await searchParams;
-  const statusFilter = params.status;
-  const searchQuery = params.search;
-
-  // Build where clause
-  const where: any = {
-    businessId: user.businessId,
-  };
-
-  if (statusFilter && statusFilter !== "all") {
-    where.status = statusFilter;
-  }
-
-  if (searchQuery) {
-    where.OR = [
-      { customerEmail: { contains: searchQuery, mode: "insensitive" } },
-      { customerName: { contains: searchQuery, mode: "insensitive" } },
-      { id: { contains: searchQuery, mode: "insensitive" } },
-    ];
-  }
 
   // Get all orders for this business
-  const orders = await prisma.order.findMany({
-    where,
-    include: {
-      items: true,
-    },
-    orderBy: { createdAt: "desc" },
+  const orders = await api.order.getAll({
+    status: params.status,
+    search: params.search,
   });
 
   // Calculate stats

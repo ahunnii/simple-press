@@ -1,5 +1,6 @@
 "use client";
 
+import type { Order } from "generated/prisma";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -12,45 +13,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { api } from "~/trpc/react";
 
-type Order = {
-  id: string;
-  status: string;
-};
-
-type OrderStatusUpdaterProps = {
+type Props = {
   order: Order;
 };
 
-export function OrderStatusUpdater({ order }: OrderStatusUpdaterProps) {
+export function OrderStatusUpdater({ order }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState(order.status);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const updateStatusMutation = api.order.updateStatus.useMutation({
+    onSuccess: () => {
+      router.refresh();
+    },
+    onError: (error) => {
+      console.error("Update status error:", error);
+      alert("Failed to update order status");
+      setStatus(order.status);
+    },
+    onSettled: () => {
+      setIsUpdating(false);
+      router.refresh();
+    },
+  });
 
   const handleUpdate = async () => {
     if (status === order.status) return;
 
     setIsUpdating(true);
 
-    try {
-      const response = await fetch(`/api/orders/${order.id}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update status");
-      }
-
-      router.refresh();
-    } catch (error) {
-      console.error("Update status error:", error);
-      alert("Failed to update order status");
-      setStatus(order.status); // Reset
-    } finally {
-      setIsUpdating(false);
-    }
+    updateStatusMutation.mutate({
+      orderId: order.id,
+      status,
+    });
   };
 
   return (

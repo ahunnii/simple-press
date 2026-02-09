@@ -1,5 +1,6 @@
 "use client";
 
+import type { OrderItem, Product, ProductVariant } from "generated/prisma";
 import { Loader2, Plus, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -16,36 +17,23 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import { api } from "~/trpc/react";
 
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  variants: Array<{
-    id: string;
-    name: string;
-    price: number | null;
-  }>;
-};
+// type OrderItem = {
+//   productId: string;
+//   productName: string;
+//   variantId: string | null;
+//   variantName: string | null;
+//   quantity: number;
+//   price: number;
+// };
 
-type OrderItem = {
-  productId: string;
-  productName: string;
-  variantId: string | null;
-  variantName: string | null;
-  quantity: number;
-  price: number;
-};
-
-type ManualOrderFormProps = {
+type Props = {
   businessId: string;
-  products: Product[];
+  products: (Product & { variants: ProductVariant[] })[];
 };
 
-export function ManualOrderForm({
-  businessId,
-  products,
-}: ManualOrderFormProps) {
+export function ManualOrderForm({ businessId, products }: Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +51,7 @@ export function ManualOrderForm({
   const [country, setCountry] = useState("US");
 
   // Items
-  const [items, setItems] = useState<OrderItem[]>([]);
+  const [items, setItems] = useState<Partial<OrderItem>[]>([]);
 
   // Additional charges
   const [shippingCost, setShippingCost] = useState("");
@@ -83,7 +71,7 @@ export function ManualOrderForm({
       {
         productId: "",
         productName: "",
-        variantId: null,
+        productVariantId: null,
         variantName: null,
         quantity: 1,
         price: 0,
@@ -105,7 +93,7 @@ export function ManualOrderForm({
       productId: product.id,
       productName: product.name,
       price: product.price,
-      variantId: null,
+      productVariantId: null,
       variantName: null,
     };
     setItems(updated);
@@ -113,7 +101,7 @@ export function ManualOrderForm({
 
   const updateVariant = (index: number, variantId: string) => {
     const item = items[index];
-    const product = products.find((p) => p.id === item.productId);
+    const product = products.find((p) => p.id === item?.productId);
     if (!product) return;
 
     const variant = product.variants.find((v) => v.id === variantId);
@@ -122,21 +110,24 @@ export function ManualOrderForm({
     const updated = [...items];
     updated[index] = {
       ...updated[index],
-      variantId: variant.id,
+      productVariantId: variant.id,
       variantName: variant.name,
-      price: variant.price || product.price,
+      price: variant.price ?? product.price,
     };
     setItems(updated);
   };
 
   const updateQuantity = (index: number, quantity: number) => {
     const updated = [...items];
-    updated[index].quantity = quantity;
+    updated[index]!.quantity = quantity;
     setItems(updated);
   };
 
   const calculateSubtotal = () => {
-    return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return items.reduce(
+      (sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 0),
+      0,
+    );
   };
 
   const calculateTotal = () => {
@@ -148,75 +139,68 @@ export function ManualOrderForm({
     return subtotal + shipping + taxAmount;
   };
 
+  const createManualOrderMutation = api.order.createManual.useMutation({
+    onSuccess: (data) => {
+      router.push(`/admin/orders/${data.id}`);
+    },
+    onError: (error) => {
+      setError(error.message ?? "Failed to create order");
+    },
+    onSettled: () => {
+      setIsSubmitting(false);
+    },
+  });
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
 
-    try {
-      // Validation
-      if (!customerName || !customerEmail) {
-        throw new Error("Customer name and email are required");
-      }
-
-      if (items.length === 0) {
-        throw new Error("Add at least one item to the order");
-      }
-
-      if (items.some((item) => !item.productId)) {
-        throw new Error("All items must have a product selected");
-      }
-
-      const subtotal = calculateSubtotal();
-      const shipping = shippingCost
-        ? Math.round(parseFloat(shippingCost) * 100)
-        : 0;
-      const taxAmount = tax ? Math.round(parseFloat(tax) * 100) : 0;
-      const total = subtotal + shipping + taxAmount;
-
-      const response = await fetch("/api/orders/create-manual", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessId,
-          customerName,
-          customerEmail,
-          shippingName: shippingName || customerName,
-          shippingAddress: {
-            line1: address,
-            city,
-            state,
-            postal_code: zipCode,
-            country,
-          },
-          items: items.map((item) => ({
-            productId: item.productId,
-            productName: item.productName,
-            variantId: item.variantId,
-            quantity: item.quantity,
-            price: item.price,
-            total: item.price * item.quantity,
-          })),
-          subtotal,
-          shipping,
-          tax: taxAmount,
-          total,
-          notes,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to create order");
-      }
-
-      const data = await response.json();
-      router.push(`/admin/orders/${data.order.id}`);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSubmitting(false);
+    // Validation
+    if (!customerName || !customerEmail) {
+      throw new Error("Customer name and email are required");
     }
+
+    if (items.length === 0) {
+      throw new Error("Add at least one item to the order");
+    }
+
+    if (items.some((item) => !item.productId)) {
+      throw new Error("All items must have a product selected");
+    }
+
+    const subtotal = calculateSubtotal();
+    const shipping = shippingCost
+      ? Math.round(parseFloat(shippingCost) * 100)
+      : 0;
+    const taxAmount = tax ? Math.round(parseFloat(tax) * 100) : 0;
+    const total = subtotal + shipping + taxAmount;
+
+    createManualOrderMutation.mutate({
+      businessId,
+      customerName,
+      customerEmail,
+      shippingName: shippingName || customerName,
+      shippingAddress: {
+        line1: address,
+        city,
+        state,
+        postal_code: zipCode,
+        country,
+      },
+      items: items.map((item) => ({
+        productId: item.productId,
+        productName: item.productName,
+        productVariantId: item.productVariantId,
+        quantity: item.quantity ?? 1,
+        price: item.price ?? 0,
+        total: (item.price ?? 0) * (item.quantity ?? 0),
+      })),
+      subtotal,
+      shipping,
+      tax: taxAmount,
+      total,
+      notes,
+    });
   };
 
   return (
@@ -333,7 +317,7 @@ export function ManualOrderForm({
                   <div>
                     <Label>Product</Label>
                     <Select
-                      value={item.productId}
+                      value={item?.productId ?? undefined}
                       onValueChange={(value) => updateItem(index, value)}
                     >
                       <SelectTrigger>
@@ -353,7 +337,7 @@ export function ManualOrderForm({
                     <div>
                       <Label>Variant</Label>
                       <Select
-                        value={item.variantId || ""}
+                        value={item?.productVariantId ?? undefined}
                         onValueChange={(value) => updateVariant(index, value)}
                       >
                         <SelectTrigger>
@@ -384,7 +368,7 @@ export function ManualOrderForm({
 
                   <div>
                     <Label>Price</Label>
-                    <Input value={formatPrice(item.price)} disabled />
+                    <Input value={formatPrice(item.price ?? 0)} disabled />
                   </div>
                 </div>
 
@@ -402,7 +386,7 @@ export function ManualOrderForm({
 
           {items.length === 0 && (
             <p className="py-4 text-center text-sm text-gray-500">
-              No items added. Click "Add Item" to start.
+              No items added. Click &quot;Add Item&quot; to start.
             </p>
           )}
         </CardContent>

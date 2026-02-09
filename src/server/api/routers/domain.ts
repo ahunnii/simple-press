@@ -1,81 +1,154 @@
-import type { Announcement } from "generated/prisma";
+import { TRPCError } from "@trpc/server";
+import { headers } from "next/headers";
 import { z } from "zod";
+import { checkBusiness } from "~/lib/check-business";
+import { isValidDomain } from "~/lib/utils";
 
 import {
   createTRPCRouter,
-  protectedProcedure,
+  ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
-export const announcementRouter = createTRPCRouter({
-  getById: publicProcedure
+export const domainRouter = createTRPCRouter({
+  add: ownerAdminProcedure
     .input(z.string())
-    .query(async ({ ctx, input: id }) => {
-      const announcement = await ctx.db.announcement.findUnique({
-        where: { id },
-        include: { club: true },
-      });
-      return announcement;
-    }),
+    .mutation(async ({ ctx, input: domain }) => {
+      if (!isValidDomain(domain)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid domain",
+        });
+      }
 
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const announcements = await ctx.db.announcement.findMany({
-      include: { club: true },
-      orderBy: { updatedAt: "desc" },
-    });
-    return announcements as (Announcement & { club: { id: string; name: string } })[];
-  }),
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
 
-  create: protectedProcedure
-    .input(
-      z.object({
-        clubId: z.string().min(1),
-        title: z.string().min(1),
-        content: z.string().min(1),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const announcement = await ctx.db.announcement.create({
-        data: {
-          clubId: input.clubId,
-          title: input.title,
-          content: input.content,
+      // Check if domain is already taken
+      const existingDomain = await ctx.db.business.findFirst({
+        where: {
+          customDomain: domain,
+          id: { not: business.id },
         },
       });
+
+      if (existingDomain) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This domain is already in use",
+        });
+      }
+
+      // Update business with custom domain
+      await ctx.db.business.update({
+        where: { id: business.id },
+        data: {
+          customDomain: domain,
+          domainStatus: "PENDING_DNS",
+        },
+      });
+
+      // Add to domain queue for Coolify
+      await ctx.db.domainQueue.create({
+        data: {
+          domain,
+          businessId: business.id,
+          status: "pending",
+        },
+      });
+
+      // TODO: Send notification to admin to add domain to Coolify
+      // This could be an email, Slack message, or webhook
+
       return {
-        data: announcement,
-        message: "Announcement created successfully",
+        success: true,
+        domain,
+        status: "PENDING_DNS",
       };
     }),
 
-  update: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        title: z.string().min(1),
-        content: z.string().min(1),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const announcement = await ctx.db.announcement.update({
-        where: { id: input.id },
-        data: {
-          title: input.title,
-          content: input.content,
+  verify: ownerAdminProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input: domain }) => {
+      const currentBusiness = await checkBusiness();
+      if (!currentBusiness) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      // Verify this domain belongs to this business
+      const business = await ctx.db.business.findFirst({
+        where: {
+          id: currentBusiness.id,
+          customDomain: domain,
         },
       });
-      return {
-        data: announcement,
-        message: "Announcement updated successfully",
-      };
-    }),
 
-  delete: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db.announcement.delete({
-        where: { id: input.id },
-      });
-      return { message: "Announcement deleted successfully" };
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Domain not found for your business",
+        });
+      }
+
+      // Check DNS records
+      const vpsIp = process.env.VPS_IP;
+
+      if (!vpsIp) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "VPS IP not configured",
+        });
+      }
+
+      // Use DNS lookup to check if domain points to our VPS
+      const dns = await import("dns").then((m) => m.promises);
+
+      try {
+        const addresses = await dns.resolve4(domain);
+        const pointsToUs = addresses.includes(vpsIp);
+
+        if (pointsToUs) {
+          // DNS is configured correctly!
+          // Update business status
+          await ctx.db.business.update({
+            where: { id: currentBusiness.id },
+            data: { domainStatus: "ACTIVE" },
+          });
+
+          // Update domain queue
+          await ctx.db.domainQueue.updateMany({
+            where: {
+              domain,
+              businessId: currentBusiness.id,
+            },
+            data: { status: "completed" },
+          });
+
+          return {
+            verified: true,
+            message: "Domain verified successfully",
+          };
+        } else {
+          return {
+            verified: false,
+            message: `Domain points to ${addresses.join(", ")} but should point to ${vpsIp}`,
+          };
+        }
+      } catch (dnsError: unknown) {
+        // DNS lookup failed - domain not configured yet
+        console.error("DNS lookup failed:", dnsError);
+        return {
+          verified: false,
+          message: "DNS records not found. Please check your configuration.",
+        };
+      }
     }),
 });

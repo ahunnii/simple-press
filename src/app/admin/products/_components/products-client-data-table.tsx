@@ -64,7 +64,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     {product.images[0] ? (
-                      <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-gray-100">
                         <Image
                           src={product.images[0].url}
                           alt={product.images[0].altText ?? product.name}
@@ -73,7 +73,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
                         />
                       </div>
                     ) : (
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded bg-gray-200">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-gray-200">
                         <span className="text-xs text-gray-400">No img</span>
                       </div>
                     )}

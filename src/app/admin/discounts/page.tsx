@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { headers } from "next/headers";
+
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "~/components/ui/button";
@@ -23,11 +23,10 @@ export default async function DiscountsPage() {
   }
 
   // Get all discount codes
-  // const discounts = await db.discountCode.findMany({
-  //   where: { businessId: user.businessId },
-  //   orderBy: { createdAt: "desc" },
-  // });
-  const discounts = [] as const;
+  const discounts = await db.discountCode.findMany({
+    where: { businessId: business.id },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,7 +48,7 @@ export default async function DiscountsPage() {
         </div>
 
         {/* Discounts List */}
-        {/* {discounts.length === 0 ? (
+        {discounts.length === 0 ? (
           <Card>
             <CardHeader>
               <CardTitle>No discount codes yet</CardTitle>
@@ -68,7 +67,7 @@ export default async function DiscountsPage() {
           </Card>
         ) : (
           <DiscountsTable discounts={discounts} />
-        )} */}
+        )}
       </div>
     </div>
   );

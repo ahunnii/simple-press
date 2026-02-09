@@ -156,37 +156,7 @@ export function ProductForm({ businessId, product }: ProductFormProps) {
           })),
         });
       }
-      // const endpoint = product
-      //   ? `/api/products/${product.id}`
-      //   : "/api/products/create";
 
-      // const response = await fetch(endpoint, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     businessId,
-      //     name,
-      //     slug,
-      //     description: description || null,
-      //     price: priceInCents,
-      //     published,
-      //     variants,
-      //   }),
-      // });
-
-      // if (!response.ok) {
-      //   const data = (await response.json()) as { error: string };
-      //   throw new Error(data.error ?? "Failed to save product");
-      // }
-
-      // const data = (await response.json()) as { product: { id: string } };
-
-      // // Redirect to product edit page or products list
-      // if (product) {
-      //   router.push(`/admin/products/${product.id}`);
-      // } else {
-      //   router.push(`/admin/products/${data.product.id}`);
-      // }
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save product");

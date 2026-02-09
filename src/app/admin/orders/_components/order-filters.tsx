@@ -16,8 +16,8 @@ import {
 export function OrderFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [search, setSearch] = useState(searchParams.get("search") || "");
-  const status = searchParams.get("status") || "all";
+  const [search, setSearch] = useState(searchParams.get("search") ?? "");
+  const status = searchParams.get("status") ?? "all";
 
   const handleStatusChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());

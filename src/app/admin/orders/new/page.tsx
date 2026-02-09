@@ -1,37 +1,17 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "~/lib/auth";
-import { prisma } from "~/server/db";
+
+import { checkBusiness } from "~/lib/check-business";
+
+import { api } from "~/trpc/server";
 import { ManualOrderForm } from "../_components/manual-order-form";
 
 export default async function NewOrderPage() {
-  // Get session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const business = await checkBusiness();
 
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  // Get user's business
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { businessId: true },
-  });
-
-  if (!user?.businessId) {
+  if (!business) {
     redirect("/admin/welcome");
   }
-
-  // Get products for selection
-  const products = await prisma.product.findMany({
-    where: { businessId: user.businessId },
-    include: {
-      variants: true,
-    },
-    orderBy: { name: "asc" },
-  });
+  const products = await api.product.secureGetAll();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -45,7 +25,7 @@ export default async function NewOrderPage() {
           </p>
         </div>
 
-        <ManualOrderForm businessId={user.businessId} products={products} />
+        <ManualOrderForm businessId={business?.id} products={products} />
       </div>
     </div>
   );

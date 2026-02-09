@@ -1,5 +1,6 @@
 "use client";
 
+import type { Business, SiteContent } from "generated/prisma";
 import {
   CheckCircle,
   ExternalLink,
@@ -22,19 +23,20 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
+import { api } from "~/trpc/react";
 
-type Business = {
-  id: string;
-  stripeAccountId: string | null;
-  umamiWebsiteId: string | null;
-  umamiEnabled: boolean;
+// type Business = {
+//   id: string;
+//   stripeAccountId: string | null;
+//   umamiWebsiteId: string | null;
+//   umamiEnabled: boolean;
+// };
+
+type Props = {
+  business: Business & { siteContent?: SiteContent | null };
 };
 
-type IntegrationsSettingsProps = {
-  business: Business;
-};
-
-export function IntegrationsSettings({ business }: IntegrationsSettingsProps) {
+export function IntegrationsSettings({ business }: Props) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export function IntegrationsSettings({ business }: IntegrationsSettingsProps) {
 
   // Form state
   const [umamiWebsiteId, setUmamiWebsiteId] = useState(
-    business.umamiWebsiteId || "",
+    business.umamiWebsiteId ?? "",
   );
   const [umamiEnabled, setUmamiEnabled] = useState(business.umamiEnabled);
 
@@ -55,39 +57,58 @@ export function IntegrationsSettings({ business }: IntegrationsSettingsProps) {
     window.location.href = `https://connect.stripe.com/oauth/authorize?response_type=code&client_id=${clientId}&scope=read_write&redirect_uri=${redirectUri}&state=${state}`;
   };
 
+  const updateIntegrationsMutation =
+    api.business.updateIntegrations.useMutation({
+      onSuccess: () => {
+        router.refresh();
+        setSuccess(true);
+      },
+      onError: (error) => {
+        setError(error.message ?? "Failed to update integrations");
+      },
+      onSettled: () => {
+        setIsSaving(false);
+        router.refresh();
+      },
+    });
   const handleSaveUmami = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
     setIsSaving(true);
 
-    try {
-      const response = await fetch(
-        `/api/business/${business.id}/integrations`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            umamiWebsiteId: umamiWebsiteId || null,
-            umamiEnabled,
-          }),
-        },
-      );
+    updateIntegrationsMutation.mutate({
+      umamiWebsiteId: umamiWebsiteId ?? undefined,
+      umamiEnabled: umamiEnabled ?? undefined,
+    });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to update integrations");
-      }
+    // try {
+    //   const response = await fetch(
+    //     `/api/business/${business.id}/integrations`,
+    //     {
+    //       method: "PATCH",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({
+    //         umamiWebsiteId: umamiWebsiteId || null,
+    //         umamiEnabled,
+    //       }),
+    //     },
+    //   );
 
-      setSuccess(true);
-      router.refresh();
+    //   if (!response.ok) {
+    //     const data = await response.json();
+    //     throw new Error(data.error || "Failed to update integrations");
+    //   }
 
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSaving(false);
-    }
+    //   setSuccess(true);
+    //   router.refresh();
+
+    //   setTimeout(() => setSuccess(false), 3000);
+    // } catch (err: any) {
+    //   setError(err.message);
+    // } finally {
+    //   setIsSaving(false);
+    // }
   };
 
   return (
@@ -221,7 +242,7 @@ export function IntegrationsSettings({ business }: IntegrationsSettingsProps) {
 
             <div className="border-t pt-2">
               <p className="mb-2 text-sm text-gray-600">
-                Don't have a Umami account?
+                Don&apos;t have a Umami account?
               </p>
               <Button type="button" variant="outline" size="sm" asChild>
                 <a

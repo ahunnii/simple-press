@@ -15,6 +15,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
+import { api } from "~/trpc/react";
 
 type DiscountFormProps = {
   businessId: string;
@@ -33,60 +34,83 @@ export function DiscountForm({ businessId }: DiscountFormProps) {
   const [usageLimit, setUsageLimit] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
 
+  const createDiscountMutation = api.discount.create.useMutation({
+    onSuccess: () => {
+      router.push("/admin/discounts");
+      router.refresh();
+    },
+    onError: (error) => {
+      setError(error.message ?? "Failed to create discount");
+    },
+    onSettled: () => {
+      setIsSubmitting(false);
+      router.refresh();
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
 
-    try {
-      // Validation
-      if (!code.trim()) {
-        throw new Error("Discount code is required");
-      }
-
-      if (!value || parseFloat(value) <= 0) {
-        throw new Error("Valid discount value is required");
-      }
-
-      if (type === "percentage" && parseFloat(value) > 100) {
-        throw new Error("Percentage discount cannot exceed 100%");
-      }
-
-      // Convert value based on type
-      let discountValue: number;
-      if (type === "percentage") {
-        discountValue = parseFloat(value);
-      } else {
-        // Convert dollars to cents
-        discountValue = Math.round(parseFloat(value) * 100);
-      }
-
-      const response = await fetch("/api/discounts/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessId,
-          code: code.toUpperCase().trim(),
-          type,
-          value: discountValue,
-          active,
-          usageLimit: usageLimit ? parseInt(usageLimit) : null,
-          expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to create discount");
-      }
-
-      router.push("/admin/discounts");
-      router.refresh();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSubmitting(false);
+    // try {
+    // Validation
+    if (!code.trim()) {
+      throw new Error("Discount code is required");
     }
+
+    if (!value || parseFloat(value) <= 0) {
+      throw new Error("Valid discount value is required");
+    }
+
+    if (type === "percentage" && parseFloat(value) > 100) {
+      throw new Error("Percentage discount cannot exceed 100%");
+    }
+
+    // Convert value based on type
+    let discountValue: number;
+    if (type === "percentage") {
+      discountValue = parseFloat(value);
+    } else {
+      // Convert dollars to cents
+      discountValue = Math.round(parseFloat(value) * 100);
+    }
+
+    createDiscountMutation.mutate({
+      businessId,
+      code: code.toUpperCase().trim(),
+      type,
+      value: discountValue,
+      active,
+      usageLimit: usageLimit ? parseInt(usageLimit) : undefined,
+      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
+    });
+    //   const response = await fetch("/api/discounts/create", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({
+    //       businessId,
+    //       code: code.toUpperCase().trim(),
+    //       type,
+    //       value: discountValue,
+    //       active,
+    //       usageLimit: usageLimit ? parseInt(usageLimit) : null,
+    //       expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+    //     }),
+    //   });
+
+    //   if (!response.ok) {
+    //     const data = await response.json();
+    //     throw new Error(data.error || "Failed to create discount");
+    //   }
+
+    //   router.push("/admin/discounts");
+    //   router.refresh();
+    // } catch (err: any) {
+    //   setError(err.message);
+    // } finally {
+    //   setIsSubmitting(false);
+    // }
   };
 
   return (

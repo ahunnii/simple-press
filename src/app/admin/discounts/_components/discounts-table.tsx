@@ -1,24 +1,25 @@
 "use client";
 
+import type { DiscountCode } from "generated/prisma";
 import { Edit, Trash } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 
-type Discount = {
-  id: string;
-  code: string;
-  type: string;
-  value: number;
-  active: boolean;
-  usageLimit: number | null;
-  usageCount: number;
-  expiresAt: Date | null;
-};
+// type Discount = {
+//   id: string;
+//   code: string;
+//   type: string;
+//   value: number;
+//   active: boolean;
+//   usageLimit: number | null;
+//   usageCount: number;
+//   expiresAt: Date | null;
+// };
 
 type DiscountsTableProps = {
-  discounts: Discount[];
+  discounts: DiscountCode[];
 };
 
 export function DiscountsTable({ discounts }: DiscountsTableProps) {

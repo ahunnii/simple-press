@@ -9,7 +9,9 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { useCart } from "~/lib/cart-context";
+
+import Link from "next/link";
+import { useCart } from "~/providers/cart-context";
 import { DiscountInput } from "./discount-input";
 
 type Business = {
@@ -46,10 +48,10 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
     discountAmount: number;
   } | null>(null);
 
-  const primaryColor = business.siteContent?.primaryColor || "#3b82f6";
+  const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
 
   const subtotal = total;
-  const discountAmount = appliedDiscount?.discountAmount || 0;
+  const discountAmount = appliedDiscount?.discountAmount ?? 0;
   const finalTotal = subtotal - discountAmount;
 
   const formatPrice = (cents: number) => {
@@ -90,22 +92,22 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
             zipCode,
             country,
           },
-          discountCodeId: appliedDiscount?.id || null,
-          discountAmount: appliedDiscount?.discountAmount || 0,
+          discountCodeId: appliedDiscount?.id ?? null,
+          discountAmount: appliedDiscount?.discountAmount ?? 0,
         }),
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to create checkout session");
+        const data = (await response.json()) as { error: string };
+        throw new Error(data.error ?? "Failed to create checkout session");
       }
 
-      const { sessionUrl } = await response.json();
+      const { sessionUrl } = (await response.json()) as { sessionUrl: string };
 
       // Redirect to Stripe Checkout
       window.location.href = sessionUrl;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err as Error).message ?? "Failed to create checkout session");
       setIsProcessing(false);
     }
   };
@@ -115,7 +117,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
       <div className="py-16 text-center">
         <p className="mb-4 text-gray-600">Your cart is empty</p>
         <Button asChild>
-          <a href="/products">Continue Shopping</a>
+          <Link href="/products">Continue Shopping</Link>
         </Button>
       </div>
     );
@@ -337,7 +339,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               </Button>
 
               <p className="text-center text-xs text-gray-500">
-                You'll be redirected to Stripe to complete your payment
+                You&apos;ll be redirected to Stripe to complete your payment
               </p>
             </CardContent>
           </Card>

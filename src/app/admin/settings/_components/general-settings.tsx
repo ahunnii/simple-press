@@ -1,5 +1,6 @@
 "use client";
 
+import type { Business, SiteContent } from "generated/prisma";
 import { Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,19 +16,20 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { api } from "~/trpc/react";
 
-type Business = {
-  id: string;
-  name: string;
-  slug: string;
-  ownerEmail: string;
-  supportEmail: string | null;
-  businessAddress: string | null;
-  taxId: string | null;
-};
+// type Business = {
+//   id: string;
+//   name: string;
+//   slug: string;
+//   ownerEmail: string;
+//   supportEmail: string | null;
+//   businessAddress: string | null;
+//   taxId: string | null;
+// };
 
 type GeneralSettingsProps = {
-  business: Business;
+  business: Business & { siteContent?: SiteContent | null };
 };
 
 export function GeneralSettings({ business }: GeneralSettingsProps) {
@@ -39,11 +41,25 @@ export function GeneralSettings({ business }: GeneralSettingsProps) {
   // Form state
   const [name, setName] = useState(business.name);
   const [ownerEmail, setOwnerEmail] = useState(business.ownerEmail);
-  const [supportEmail, setSupportEmail] = useState(business.supportEmail || "");
+  const [supportEmail, setSupportEmail] = useState(business.supportEmail ?? "");
   const [businessAddress, setBusinessAddress] = useState(
-    business.businessAddress || "",
+    business.businessAddress ?? "",
   );
-  const [taxId, setTaxId] = useState(business.taxId || "");
+  const [taxId, setTaxId] = useState(business.taxId ?? "");
+
+  const updateGeneralMutation = api.business.updateGeneral.useMutation({
+    onSuccess: () => {
+      router.refresh();
+      setSuccess(true);
+    },
+    onError: (error) => {
+      setError(error.message ?? "Failed to update general settings");
+    },
+    onSettled: () => {
+      setIsSaving(false);
+      router.refresh();
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,34 +67,42 @@ export function GeneralSettings({ business }: GeneralSettingsProps) {
     setSuccess(false);
     setIsSaving(true);
 
-    try {
-      const response = await fetch(`/api/business/${business.id}/general`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          ownerEmail,
-          supportEmail: supportEmail || null,
-          businessAddress: businessAddress || null,
-          taxId: taxId || null,
-        }),
-      });
+    updateGeneralMutation.mutate({
+      name,
+      ownerEmail,
+      supportEmail: supportEmail ?? undefined,
+      businessAddress: businessAddress ?? undefined,
+      taxId: taxId ?? undefined,
+    });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to update settings");
-      }
+    // try {
+    //   const response = await fetch(`/api/business/${business.id}/general`, {
+    //     method: "PATCH",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({
+    //       name,
+    //       ownerEmail,
+    //       supportEmail: supportEmail || null,
+    //       businessAddress: businessAddress || null,
+    //       taxId: taxId || null,
+    //     }),
+    //   });
 
-      setSuccess(true);
-      router.refresh();
+    //   if (!response.ok) {
+    //     const data = await response.json();
+    //     throw new Error(data.error || "Failed to update settings");
+    //   }
 
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSaving(false);
-    }
+    //   setSuccess(true);
+    //   router.refresh();
+
+    //   // Clear success message after 3 seconds
+    //   setTimeout(() => setSuccess(false), 3000);
+    // } catch (err: any) {
+    //   setError(err.message);
+    // } finally {
+    //   setIsSaving(false);
+    // }
   };
 
   return (
