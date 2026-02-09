@@ -1,98 +1,181 @@
-export async function POST(req: Request) {
-  const formData = await req.json();
+import { headers } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { isSubdomainReserved, slugify } from "~/lib/utils";
+import { auth } from "~/server/better-auth";
+import { db } from "~/server/db";
 
+export async function POST(req: NextRequest) {
   try {
-    // 1. Create business
-    const subdomain = slugify(formData.businessName);
+    const formData = (await req.json()) as {
+      email: string;
+      password: string;
+      name: string;
+      businessName: string;
+      subdomain: string;
+      customDomain: string;
+      templateId: string;
+      heroTitle: string;
+      heroSubtitle: string;
+      aboutText: string;
+      primaryColor: string;
+    };
 
-    const business = await prisma.business.create({
-      data: {
-        name: formData.businessName,
-        slug: subdomain,
-        subdomain: subdomain,
-        customDomain: formData.customDomain || null,
-        domainStatus: formData.customDomain ? "pending_dns" : "none",
-        templateId: formData.templateId,
-        ownerEmail: formData.ownerEmail,
-        status: "active",
-        onboardingComplete: false, // Will complete after Stripe setup
+    const {
+      email,
+      password,
+      name,
+      businessName,
+      subdomain,
+      customDomain,
+      templateId,
+      heroTitle,
+      heroSubtitle,
+      aboutText,
+      primaryColor,
+    } = formData;
 
-        // Create site content
-        siteContent: {
-          create: {
-            heroTitle: formData.heroTitle,
-            heroSubtitle: formData.heroSubtitle,
-            heroImageUrl: formData.heroImageUrl,
-            logoUrl: formData.logoUrl,
-            aboutText: formData.aboutText,
-          },
-        },
-      },
-    });
-
-    // 2. Create owner user account
-    const hashedPassword = await hash(formData.password);
-
-    const user = await prisma.user.create({
-      data: {
-        email: formData.ownerEmail,
-        password: hashedPassword,
-        name: formData.ownerName,
-        role: "OWNER",
-        businessId: business.id,
-      },
-    });
-
-    // 3. Create Umami analytics website
-    const umamiWebsiteId = await createUmamiWebsite(business);
-    await prisma.business.update({
-      where: { id: business.id },
-      data: { umamiWebsiteId, umamiEnabled: true },
-    });
-
-    // 4. If custom domain provided, queue for addition
-    if (formData.customDomain) {
-      await prisma.domainQueue.create({
-        data: {
-          domain: formData.customDomain,
-          businessId: business.id,
-          status: "pending",
-        },
-      });
-
-      // Send yourself notification to add domain to Coolify
-      await sendAdminNotification({
-        subject: "New Domain to Add",
-        message: `Add ${formData.customDomain} to Coolify for ${business.name}`,
-      });
+    // Validation
+    if (!email || !password || !name || !businessName || !subdomain) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
     }
 
-    // 5. Auto-login the user
-    const session = await auth.api.signInEmail({
-      body: {
-        email: formData.ownerEmail,
-        password: formData.password,
+    // Check subdomain availability
+    if (isSubdomainReserved(subdomain)) {
+      return NextResponse.json(
+        { error: "This subdomain is reserved" },
+        { status: 400 },
+      );
+    }
+
+    const existingBusiness = await db.business.findUnique({
+      where: { subdomain },
+    });
+
+    if (existingBusiness) {
+      return NextResponse.json(
+        { error: "This subdomain is already taken" },
+        { status: 400 },
+      );
+    }
+
+    // Check if email already exists
+    const existingUser = await db.user.findFirst({
+      where: { email, businessId: null },
+    });
+
+    if (!existingUser) {
+      return NextResponse.json(
+        { error: "An account with this email does not exist" },
+        { status: 400 },
+      );
+    }
+
+    //First, create the user.
+
+    // const authUser = await auth.api.signUpEmail({
+    //   body: {
+    //     email,
+    //     password,
+    //     name,
+    //   },
+    // });
+
+    // if (!authUser.user) {
+    //   return NextResponse.json(
+    //     { error: "Failed to create user" },
+    //     { status: 400 },
+    //   );
+    // }
+
+    // Then, create business, and site content in a transaction
+    const business = await db.$transaction(async (tx) => {
+      // 1. Create business
+      const newBusiness = await tx.business.create({
+        data: {
+          name: businessName,
+          slug: slugify(businessName),
+          subdomain,
+          customDomain: customDomain || null,
+          domainStatus: customDomain ? "PENDING_DNS" : "NONE",
+          templateId: templateId || "modern",
+          ownerEmail: email,
+          status: "active",
+          onboardingComplete: false,
+        },
+      });
+
+      // 2. Create site content
+      await tx.siteContent.create({
+        data: {
+          businessId: newBusiness.id,
+          heroTitle: heroTitle || `Welcome to ${businessName}`,
+          heroSubtitle: heroSubtitle || "",
+          aboutText: aboutText || "",
+          primaryColor: primaryColor || "#3b82f6",
+          secondaryColor: "#ffffff",
+          accentColor: "#3b82f6",
+        },
+      });
+
+      // 3. Create owner user (WITHOUT password - Better Auth will handle it)
+      await tx.user.update({
+        where: { id: existingUser.id },
+        data: {
+          role: "OWNER",
+          businessId: newBusiness.id,
+          emailVerified: false,
+        },
+      });
+
+      // 4. If custom domain, add to domain queue
+      if (customDomain) {
+        await tx.domainQueue.create({
+          data: {
+            domain: customDomain,
+            businessId: newBusiness.id,
+            status: "pending",
+          },
+        });
+      }
+
+      return newBusiness;
+    });
+
+    // Create a one-time signup token for secure cross-domain session creation
+    const { randomBytes } = await import("crypto");
+    const token = randomBytes(32).toString("hex");
+
+    await db.signupToken.create({
+      data: {
+        token,
+        userId: existingUser.id,
+        businessId: business.id,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+        used: false,
       },
     });
 
-    // 6. Return success with redirect URL
-    return Response.json({
+    // Redirect to signup completion page with token
+    const isDev = process.env.NODE_ENV === "development";
+    const subdomainUrl = isDev
+      ? `http://${subdomain}.localhost:3000`
+      : `https://${subdomain}.myapplication.com`;
+
+    const redirectUrl = `${subdomainUrl}/auth/signup-complete?token=${token}`;
+
+    return NextResponse.json({
       success: true,
-      redirectUrl: `https://${business.subdomain}.myapplication.com/admin/welcome`,
+      redirectUrl,
+      businessId: business.id,
     });
   } catch (error) {
     console.error("Onboarding error:", error);
-    return Response.json(
-      { error: "Failed to create account" },
+    return NextResponse.json(
+      { error: "Failed to create your store. Please try again." },
       { status: 500 },
     );
   }
-}
-
-// Helper function
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
 }

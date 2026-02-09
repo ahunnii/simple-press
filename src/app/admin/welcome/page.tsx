@@ -1,7 +1,10 @@
+import { getSession } from "~/server/better-auth/server";
+import { db } from "~/server/db";
+
 export default async function WelcomePage() {
   const session = await getSession();
-  const business = await prisma.business.findUnique({
-    where: { id: session.businessId },
+  const business = await db.business.findUnique({
+    where: { id: session?.user.businessId ?? undefined },
     select: {
       name: true,
       subdomain: true,
@@ -13,9 +16,9 @@ export default async function WelcomePage() {
 
   return (
     <div className="mx-auto max-w-2xl p-8">
-      <h1>Welcome to {business.name}! 🎉</h1>
+      <h1>Welcome to {business?.name}! 🎉</h1>
 
-      {/* Setup Checklist */}
+      {/* Setup Checklist
       <SetupChecklist>
         <ChecklistItem
           completed={true}
@@ -58,7 +61,7 @@ export default async function WelcomePage() {
       </SetupChecklist>
 
       {/* Preview Links */}
-      <div className="mt-8 rounded bg-blue-50 p-4">
+      {/* <div className="mt-8 rounded bg-blue-50 p-4">
         <h3>Your Store is Live!</h3>
         <p className="mb-2 text-sm text-gray-600">Preview your storefront:</p>
         <a
@@ -80,7 +83,7 @@ export default async function WelcomePage() {
             </a>
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

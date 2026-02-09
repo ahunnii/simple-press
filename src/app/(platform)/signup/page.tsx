@@ -1,41 +1,97 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { OnboardingForm } from "../_components/onboarding-form";
+import { AccountDetailsStep } from "./_components/account-details-step";
+import { BusinessInfoStep } from "./_components/business-info-step";
+import { InvitationCodeStep } from "./_components/invitation-code-step";
+import { SignupProgress } from "./_components/signup-progress";
+import { StoreCustomizationStep } from "./_components/store-customization-step";
+import { TemplateSelectionStep } from "./_components/template-selection-step";
+
+export type SignupFormData = {
+  // Invitation
+  invitationCode: string;
+
+  // Account
+  email: string;
+  password: string;
+  name: string;
+
+  // Business
+  businessName: string;
+  subdomain: string;
+  customDomain?: string;
+
+  // Template
+  templateId: string;
+
+  // Customization
+  logoUrl?: string;
+  heroImageUrl?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  aboutText?: string;
+  primaryColor?: string;
+};
+
+const STEPS = [
+  { id: 1, name: "Invitation", component: InvitationCodeStep },
+  { id: 2, name: "Account", component: AccountDetailsStep },
+  { id: 3, name: "Business", component: BusinessInfoStep },
+  { id: 4, name: "Template", component: TemplateSelectionStep },
+  { id: 5, name: "Customize", component: StoreCustomizationStep },
+] as const;
 
 export default function SignupPage() {
-  const [step, setStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<Partial<SignupFormData>>({
+    templateId: "modern", // Default template
+  });
 
-  if (step === 1) {
-    return (
-      <form onSubmit={handleVerifyCode}>
-        <h2>Enter Invitation Code</h2>
-        <Input name="invitationCode" placeholder="Enter your code" required />
-        <Button type="submit">Continue</Button>
-      </form>
-    );
-  }
+  const CurrentStepComponent = STEPS[currentStep - 1]?.component ?? null;
 
-  if (step === 2) {
-    return (
-      <form onSubmit={handleCreateAccount}>
-        <h2>Create Your Account</h2>
-        <Input name="email" type="email" placeholder="Email" required />
-        <Input
-          name="password"
-          type="password"
-          placeholder="Password"
-          required
-        />
-        <Input name="name" placeholder="Your Name" required />
-        <Button type="submit">Create Account</Button>
-      </form>
-    );
-  }
+  const handleNext = (data: Partial<SignupFormData>) => {
+    setFormData((prev) => ({ ...prev, ...data }));
 
-  if (step === 3) {
-    return <OnboardingForm />;
-  }
+    if (currentStep < STEPS.length) {
+      setCurrentStep((prev) => prev + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1);
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col bg-gray-50">
+      {/* Header */}
+      <header className="border-b bg-white">
+        <div className="container mx-auto px-4 py-4">
+          <h1 className="text-xl font-bold">Create Your Store</h1>
+        </div>
+      </header>
+
+      {/* Progress Indicator */}
+      <div className="border-b bg-white">
+        <div className="container mx-auto px-4 py-6">
+          <SignupProgress currentStep={currentStep} steps={STEPS} />
+        </div>
+      </div>
+
+      {/* Form Content */}
+      <main className="container mx-auto flex-1 px-4 py-8">
+        <div className="mx-auto max-w-2xl">
+          {CurrentStepComponent ? (
+            <CurrentStepComponent
+              formData={formData}
+              onNext={handleNext}
+              onBack={currentStep > 1 ? handleBack : undefined}
+            />
+          ) : null}
+        </div>
+      </main>
+    </div>
+  );
 }

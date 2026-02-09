@@ -14,7 +14,7 @@ export default async function AdminLayout({ children }: Props) {
     redirect("/auth/sign-in");
   }
 
-  if (session.user.role !== "ADMIN") {
+  if (session.user.role !== "ADMIN" && session.user.role !== "OWNER") {
     redirect("/not-permitted");
   }
 

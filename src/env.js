@@ -21,6 +21,8 @@ export const env = createEnv({
     MINIO_SECRET_KEY: z.string(),
     BETTER_AUTH_BASE_URL: z.string().url(),
     UMAMI_BASE_URL: z.string().url(),
+
+    INVITATION_CODE: z.string(),
   },
 
   /**
@@ -56,6 +58,7 @@ export const env = createEnv({
     NEXT_PUBLIC_ENABLE_UMAMI: process.env.NEXT_PUBLIC_ENABLE_UMAMI,
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID,
     UMAMI_BASE_URL: process.env.UMAMI_BASE_URL,
+    INVITATION_CODE: process.env.INVITATION_CODE,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

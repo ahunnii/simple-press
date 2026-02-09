@@ -8,7 +8,15 @@ export const metadata = {
   description: "Sign in to your Crossroads Community Association account",
 };
 
-export default async function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirectTo: string }>;
+}) {
+  const { redirectTo } = await searchParams;
+
+  console.log(redirectTo);
+
   return (
     <div className="bg-background flex min-h-screen">
       <div className="bg-primary relative hidden overflow-hidden lg:flex lg:w-1/2">
@@ -36,7 +44,7 @@ export default async function SignInPage() {
 
           <div className="max-w-md">
             <h1 className="mb-4 text-4xl font-bold text-balance">
-              Welcome Back to Your Community
+              Welcome Back to Your Community {redirectTo}
             </h1>
             <p className="text-primary-foreground/80 mb-8 text-lg">
               Sign in to access your dashboard, manage your membership, and stay
@@ -82,7 +90,7 @@ export default async function SignInPage() {
               </span>
             </div>
 
-            <AuthView view="SIGN_IN" />
+            <AuthView view="SIGN_IN" redirectTo={redirectTo} />
 
             <div className="mt-8 hidden text-left lg:block">
               <Link

@@ -133,6 +133,14 @@ exports.Prisma.UserScalarFieldEnum = {
   businessId: 'businessId'
 };
 
+exports.Prisma.SignupTokenScalarFieldEnum = {
+  token: 'token',
+  userId: 'userId',
+  businessId: 'businessId',
+  expiresAt: 'expiresAt',
+  used: 'used'
+};
+
 exports.Prisma.SessionScalarFieldEnum = {
   id: 'id',
   expiresAt: 'expiresAt',
@@ -413,7 +421,8 @@ exports.Prisma.JsonNullValueFilter = {
 };
 exports.ROLE = exports.$Enums.ROLE = {
   ADMIN: 'ADMIN',
-  USER: 'USER'
+  USER: 'USER',
+  OWNER: 'OWNER'
 };
 
 exports.BusinessDomainStatus = exports.$Enums.BusinessDomainStatus = {
@@ -424,6 +433,7 @@ exports.BusinessDomainStatus = exports.$Enums.BusinessDomainStatus = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  SignupToken: 'SignupToken',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
