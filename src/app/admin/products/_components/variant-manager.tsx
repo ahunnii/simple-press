@@ -32,12 +32,18 @@ type Props = {
   variants: Variant[];
   onChange: (variants: Variant[]) => void;
   basePrice: number; // in cents
+  existingVariantOptions: VariantOption[];
 };
 
-export function VariantManager({ variants, onChange, basePrice }: Props) {
-  const [variantOptions, setVariantOptions] = useState<VariantOption[]>([
-    { name: "Size", values: [] },
-  ]);
+export function VariantManager({
+  variants,
+  onChange,
+  basePrice,
+  existingVariantOptions,
+}: Props) {
+  const [variantOptions, setVariantOptions] = useState<VariantOption[]>(
+    existingVariantOptions ?? [{ name: "Size", values: [] }],
+  );
   const [showOptionsEditor, setShowOptionsEditor] = useState(false);
 
   // Generate all variant combinations from options
@@ -199,7 +205,7 @@ export function VariantManager({ variants, onChange, basePrice }: Props) {
                 </div>
                 <Input
                   placeholder="Values (comma separated, e.g., Small, Medium, Large)"
-                  defaultValue={option.values.join(", ")}
+                  value={option.values.join(",")}
                   onChange={(e) => updateOptionValues(index, e.target.value)}
                 />
               </div>

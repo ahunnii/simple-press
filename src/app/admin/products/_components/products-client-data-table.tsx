@@ -3,6 +3,19 @@
 import { Edit, Eye, MoreVertical, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -12,6 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { api } from "~/trpc/react";
 
 type Product = {
   id: string;
@@ -28,12 +42,32 @@ type ProductsTableProps = {
 };
 
 export function ProductsTable({ products }: ProductsTableProps) {
+  const apiUtils = api.useUtils();
+  const router = useRouter();
+
+  const [open, setOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [productName, setProductName] = useState<string | null>(null);
+
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
     }).format(cents / 100);
   };
+
+  const deleteProduct = api.product.delete.useMutation({
+    onError: (error) => {
+      toast.error(error.message ?? "Failed to delete product");
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onSettled: () => {
+      void apiUtils.product.invalidate();
+      router.refresh();
+    },
+  });
 
   return (
     <Card>
@@ -125,7 +159,14 @@ export function ProductsTable({ products }: ProductsTableProps) {
                           Preview
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">
+                      <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => {
+                          setDeleteId(product.id);
+                          setProductName(product.name);
+                          setOpen(true);
+                        }}
+                      >
                         <Trash className="mr-2 h-4 w-4" />
                         Delete
                       </DropdownMenuItem>
@@ -137,6 +178,50 @@ export function ProductsTable({ products }: ProductsTableProps) {
           </tbody>
         </table>
       </div>
+
+      <DeleteProductAlertDialog
+        deleteId={deleteId}
+        open={open}
+        setOpen={setOpen}
+        productName={productName}
+        onDelete={() => deleteProduct.mutate(deleteId ?? "")}
+      />
     </Card>
   );
 }
+
+const DeleteProductAlertDialog = ({
+  deleteId,
+  open,
+  setOpen,
+  onDelete,
+  productName,
+}: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  deleteId: string | null;
+  onDelete: () => void;
+  productName: string | null;
+}) => {
+  if (!deleteId) {
+    return null;
+  }
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete product</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete &quot;{productName}&quot;? This
+            action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};

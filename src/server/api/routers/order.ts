@@ -172,51 +172,65 @@ export const orderRouter = createTRPCRouter({
         },
       });
 
-      // Restore inventory for refunded items
+      // Restore inventory for refunded items (variant-level or product-level for no-variant items)
       if (isFullRefund) {
         try {
           await ctx.db.$transaction(async (tx) => {
             for (const item of updatedOrder.items) {
-              if (!item.productVariantId) continue;
-
-              const variant = await tx.productVariant.findUnique({
-                where: { id: item.productVariantId },
-                select: {
-                  id: true,
-                  inventoryQty: true,
-                  productId: true,
-                  product: {
-                    select: { businessId: true },
+              if (item.productVariantId) {
+                const variant = await tx.productVariant.findUnique({
+                  where: { id: item.productVariantId },
+                  select: {
+                    id: true,
+                    inventoryQty: true,
+                    productId: true,
+                    product: {
+                      select: { businessId: true },
+                    },
                   },
-                },
-              });
+                });
 
-              if (!variant) continue;
+                if (!variant) continue;
 
-              const newQty = variant.inventoryQty + item.quantity;
+                const newQty = variant.inventoryQty + item.quantity;
 
-              // Update inventory
-              await tx.productVariant.update({
-                where: { id: item.productVariantId },
-                data: {
-                  inventoryQty: newQty,
-                },
-              });
+                await tx.productVariant.update({
+                  where: { id: item.productVariantId },
+                  data: { inventoryQty: newQty },
+                });
 
-              // Create history record
-              await tx.inventoryHistory.create({
-                data: {
-                  variantId: item.productVariantId,
-                  productId: variant.productId,
-                  businessId: variant.product.businessId,
-                  previousQty: variant.inventoryQty,
-                  newQty,
-                  changeQty: item.quantity,
-                  reason: "return",
-                  note: `Refund Order #${updatedOrder.id.slice(0, 8)}`,
-                  orderId: updatedOrder.id,
-                },
-              });
+                await tx.inventoryHistory.create({
+                  data: {
+                    variantId: item.productVariantId,
+                    productId: variant.productId,
+                    businessId: variant.product.businessId,
+                    previousQty: variant.inventoryQty,
+                    newQty,
+                    changeQty: item.quantity,
+                    reason: "return",
+                    note: `Refund Order #${updatedOrder.id.slice(0, 8)}`,
+                    orderId: updatedOrder.id,
+                  },
+                });
+              } else if (item.productId) {
+                const product = await tx.product.findUnique({
+                  where: { id: item.productId },
+                  select: {
+                    id: true,
+                    inventoryQty: true,
+                    trackInventory: true,
+                  },
+                });
+
+                if (!product || !product.trackInventory) continue;
+
+                const newQty = product.inventoryQty + item.quantity;
+
+                await tx.product.update({
+                  where: { id: item.productId },
+                  data: { inventoryQty: newQty },
+                });
+              }
             }
           });
         } catch (invError) {

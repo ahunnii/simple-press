@@ -217,9 +217,9 @@ model Product {
   description String? @db.Text
   
   // Pricing
-  price       Float   // Base price in cents or dollars
-  compareAtPrice Float?  // Original price for "sale" display
-  cost        Float?  // Cost to business (for profit tracking)
+  price           Float   // Base price in cents or dollars
+  compareAtPrice  Float?  // Original price for "sale" display
+  cost            Float?  // Cost to business (for profit tracking)
   
   // Inventory
   sku              String?

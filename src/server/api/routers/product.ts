@@ -1,7 +1,10 @@
 import { TRPCError } from "@trpc/server";
-import { headers } from "next/headers";
 import { z } from "zod";
 import { checkBusiness } from "~/lib/check-business";
+import {
+  productCreateSchema,
+  productUpdateSchema,
+} from "~/lib/validators/product";
 
 import {
   createTRPCRouter,
@@ -11,24 +14,7 @@ import {
 
 export const productRouter = createTRPCRouter({
   create: ownerAdminProcedure
-    .input(
-      z.object({
-        name: z.string(),
-        slug: z.string(),
-        description: z.string().optional(),
-        price: z.number(),
-        published: z.boolean(),
-        variants: z.array(
-          z.object({
-            name: z.string(),
-            sku: z.string().optional(),
-            price: z.number(),
-            inventoryQty: z.number(),
-            options: z.record(z.string(), z.string()),
-          }),
-        ),
-      }),
-    )
+    .input(productCreateSchema)
     .mutation(async ({ ctx, input }) => {
       const { name, slug, description, price, published, variants } = input;
 
@@ -38,6 +24,21 @@ export const productRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Business not found",
+        });
+      }
+
+      // Check if slug is already taken for this business
+      const existingProduct = await ctx.db.product.findFirst({
+        where: {
+          businessId: business.id,
+          slug,
+        },
+      });
+
+      if (existingProduct) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "A product with this slug already exists",
         });
       }
 
@@ -60,55 +61,88 @@ export const productRouter = createTRPCRouter({
           },
         },
       });
-      return product;
+      return {
+        message: "Product created successfully!",
+        productId: product.id,
+      };
     }),
 
   update: ownerAdminProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        slug: z.string(),
-        description: z.string().optional(),
-        price: z.number(),
-        published: z.boolean(),
-        variants: z.array(
-          z.object({
-            id: z.string(),
-            name: z.string(),
-            sku: z.string().optional(),
-            price: z.number(),
-            inventoryQty: z.number(),
-            options: z.record(z.string(), z.string()),
-          }),
-        ),
-      }),
-    )
+    .input(productUpdateSchema)
     .mutation(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       const { id, name, slug, description, price, published, variants } = input;
 
+      // Check if slug is already taken for this business
+      const existingProduct = await ctx.db.product.findFirst({
+        where: {
+          businessId: business.id,
+          slug,
+          id: { not: id },
+        },
+      });
+
+      if (existingProduct) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "A product with this slug already exists",
+        });
+      }
+
       const product = await ctx.db.product.update({
-        where: { id },
+        where: { id, businessId: business.id },
         data: { name, slug, description, price, published },
       });
       if (variants) {
         await ctx.db.$transaction(async (tx) => {
+          const variantIds = variants
+            .filter((v): v is typeof v & { id: string } => !!v.id)
+            .map((v) => v.id);
           await tx.productVariant.deleteMany({
-            where: { productId: product.id },
+            where:
+              variantIds.length > 0
+                ? { productId: product.id, id: { notIn: variantIds } }
+                : { productId: product.id },
           });
-          await tx.productVariant.createMany({
-            data: variants.map((v) => ({
-              productId: product.id,
-              name: v.name,
-              sku: v.sku,
-              price: v.price,
-              inventoryQty: v.inventoryQty,
-              options: v.options,
-            })),
-          });
+          for (const v of variants) {
+            if (v.id) {
+              await tx.productVariant.update({
+                where: { id: v.id, productId: product.id },
+                data: {
+                  name: v.name,
+                  sku: v.sku ?? null,
+                  price: v.price,
+                  inventoryQty: v.inventoryQty,
+                  options: v.options,
+                },
+              });
+            } else {
+              await tx.productVariant.create({
+                data: {
+                  productId: product.id,
+                  name: v.name,
+                  sku: v.sku ?? null,
+                  price: v.price,
+                  inventoryQty: v.inventoryQty,
+                  options: v.options,
+                },
+              });
+            }
+          }
         });
       }
-      return product;
+      return {
+        message: "Product updated successfully!",
+        productId: product.id,
+      };
     }),
 
   secureGet: ownerAdminProcedure
@@ -124,7 +158,7 @@ export const productRouter = createTRPCRouter({
       }
 
       const product = await ctx.db.product.findUnique({
-        where: { id },
+        where: { id, businessId: business.id },
         include: {
           variants: {
             orderBy: { createdAt: "asc" },
@@ -136,6 +170,7 @@ export const productRouter = createTRPCRouter({
 
   secureListAll: ownerAdminProcedure.query(async ({ ctx }) => {
     const business = await checkBusiness();
+
     if (!business) {
       throw new TRPCError({
         code: "NOT_FOUND",
@@ -201,4 +236,25 @@ export const productRouter = createTRPCRouter({
     });
     return product;
   }),
+
+  delete: ownerAdminProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input: id }) => {
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      const product = await ctx.db.product.delete({
+        where: { id, businessId: business.id },
+      });
+
+      return {
+        message: "Product deleted successfully!",
+        productId: product.id,
+      };
+    }),
 });

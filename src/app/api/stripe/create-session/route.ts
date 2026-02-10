@@ -144,19 +144,128 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate cart: all items must exist, be published, and be in stock
+    const itemList = Array.isArray(items) ? (items as any[]) : [];
+    if (itemList.length === 0) {
+      return NextResponse.json(
+        { error: "Your cart is empty" },
+        { status: 400 },
+      );
+    }
+
+    const variantIds = [
+      ...new Set(
+        itemList
+          .map((i: any) => i.variantId)
+          .filter((id: unknown): id is string => !!id),
+      ),
+    ] as string[];
+    const productIds = [
+      ...new Set(itemList.map((i: any) => i.productId).filter(Boolean)),
+    ] as string[];
+
+    const [variantsWithProduct, productsNoVariant] = await Promise.all([
+      variantIds.length > 0
+        ? prisma.productVariant.findMany({
+            where: { id: { in: variantIds } },
+            select: {
+              id: true,
+              inventoryQty: true,
+              name: true,
+              productId: true,
+              product: {
+                select: { businessId: true, published: true },
+              },
+            },
+          })
+        : [],
+      prisma.product.findMany({
+        where: {
+          id: { in: productIds },
+          businessId,
+        },
+        select: {
+          id: true,
+          name: true,
+          published: true,
+          trackInventory: true,
+          inventoryQty: true,
+          _count: { select: { variants: true } },
+        },
+      }),
+    ]);
+
+    const variantMap = new Map(
+      variantsWithProduct
+        .filter((v) => v.product.businessId === businessId)
+        .map((v) => [v.id, v]),
+    );
+    const productMap = new Map(productsNoVariant.map((p) => [p.id, p]));
+
+    const unavailableItems: string[] = [];
+    for (const item of itemList) {
+      const name = item.variantName
+        ? `${item.productName} (${item.variantName})`
+        : item.productName;
+      const qty = Number(item.quantity) || 1;
+
+      if (item.variantId) {
+        const variant = variantMap.get(item.variantId);
+        if (
+          !variant ||
+          !variant.product.published ||
+          variant.inventoryQty < qty
+        ) {
+          unavailableItems.push(name);
+          continue;
+        }
+      } else {
+        const product = productMap.get(item.productId);
+        if (!product || !product.published) {
+          unavailableItems.push(name);
+          continue;
+        }
+        if (product._count.variants > 0) {
+          unavailableItems.push(name);
+          continue;
+        }
+        if (product.trackInventory && product.inventoryQty < qty) {
+          unavailableItems.push(name);
+        }
+      }
+    }
+
+    if (unavailableItems.length > 0) {
+      const uniqueNames = [...new Set(unavailableItems)];
+      return NextResponse.json(
+        {
+          error:
+            "Some items in your cart are out of stock or no longer available. Please update your cart and try again.",
+          unavailableItems: uniqueNames,
+        },
+        { status: 400 },
+      );
+    }
+
     // Initialize Stripe with platform account
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: "2024-11-20.acacia",
     });
 
-    // Create line items for Stripe
-    const lineItems = items.map((item: any) => ({
+    // Create line items for Stripe (metadata so webhook can store product/variant and deduct inventory)
+    const lineItems = itemList.map((item: any) => ({
       price_data: {
         currency: "usd",
         product_data: {
           name: item.productName,
           description: item.variantName || undefined,
           images: item.imageUrl ? [item.imageUrl] : undefined,
+          metadata: {
+            productId: String(item.productId ?? ""),
+            productVariantId: String(item.variantId ?? ""),
+            variantName: String(item.variantName ?? ""),
+            sku: String(item.sku ?? ""),
+          },
         },
         unit_amount: item.price,
       },

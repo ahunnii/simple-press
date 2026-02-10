@@ -29,3 +29,16 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 - [ ] Need to add functionality to the newsletter sign up form on the homepage.
 - [ ] Need privacy policy as well as terms of service pages.
 - [ ] Need to ask if we have social media accounts and if so, add them to the footer.
+
+## TODO List for Products
+
+- [ ] Image upload for product create/edit
+- [ ] Duplicate product action (copy product + variants with new slug)
+- [ ] Bulk actions on products table (multi-select: Publish / Unpublish / Delete)
+- [ ] Success toast after product save
+- [ ] Delete dialog: show product name (e.g. "Delete **{name}**?")
+- [ ] Products table: search/filter (e.g. by name, by status)
+- [ ] Products table: sort (e.g. by name, date, status)
+- [ ] Unsaved changes warning when leaving product form
+- [ ] Align types: add variants to edit page / shared types to avoid casting
+- [ ] Need to switch Float to Int for priceInCents

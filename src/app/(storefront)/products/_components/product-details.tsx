@@ -50,8 +50,11 @@ export function ProductDetails({ product, business }: ProductDetailsProps) {
     (v) => v.id === selectedVariantId,
   );
 
-  // Calculate price
-  const displayPrice = selectedVariant?.price ?? product.price;
+  // Calculate price (treat variant price 0 or null as "use product base price")
+  const displayPrice =
+    selectedVariant?.price != null && selectedVariant.price !== 0
+      ? selectedVariant.price
+      : product.price;
 
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {

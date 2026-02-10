@@ -5,6 +5,7 @@ import type { ProductVariant } from "generated/prisma";
 import { AlertCircle, Loader2, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -42,7 +43,34 @@ type ProductFormProps = {
   };
 };
 
-export function ProductForm({ businessId, product }: ProductFormProps) {
+/** Derive option names and values from existing variants (e.g. Size → [S,M,L], Color → [Red]). */
+function getExistingVariantOptions(
+  variants: Array<{ options: Record<string, string> }> | undefined,
+): Array<{ name: string; values: string[] }> {
+  if (!variants?.length) return [];
+  const keys: string[] = [];
+  const seen = new Set<string>();
+  for (const v of variants) {
+    const opts = v.options ?? {};
+    for (const k of Object.keys(opts)) {
+      if (!seen.has(k)) {
+        seen.add(k);
+        keys.push(k);
+      }
+    }
+  }
+  return keys.map((name) => {
+    const valueSet = new Set<string>();
+    for (const v of variants) {
+      const opts = v.options ?? {};
+      const val = opts[name];
+      if (val != null && val !== "") valueSet.add(val);
+    }
+    return { name, values: Array.from(valueSet) };
+  });
+}
+
+export function ProductForm({ product }: ProductFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,9 +106,11 @@ export function ProductForm({ businessId, product }: ProductFormProps) {
   const createProductMutation = api.product.create.useMutation({
     onError: (error) => {
       setError(error.message ?? "Failed to save product");
+      toast.error(error.message ?? "Failed to save product");
     },
     onSuccess: (data) => {
-      router.push(`/admin/products/${data.id}`);
+      router.push(`/admin/products/${data.productId}`);
+      toast.success(data.message);
     },
     onSettled: () => {
       setIsSubmitting(false);
@@ -90,9 +120,11 @@ export function ProductForm({ businessId, product }: ProductFormProps) {
   const updateProductMutation = api.product.update.useMutation({
     onError: (error) => {
       setError(error.message ?? "Failed to save product");
+      toast.error(error.message ?? "Failed to save product");
     },
     onSuccess: (data) => {
-      router.push(`/admin/products/${data.id}`);
+      router.push(`/admin/products/${data.productId}`);
+      toast.success(data.message);
     },
     onSettled: () => {
       setIsSubmitting(false);
@@ -134,7 +166,7 @@ export function ProductForm({ businessId, product }: ProductFormProps) {
             id: v.id,
             name: v.name,
             sku: v.sku ?? undefined,
-            price: v.price ?? 0,
+            price: v.price ?? priceInCents,
 
             inventoryQty: v.inventoryQty,
             options: v.options as Record<string, string>,
@@ -150,7 +182,7 @@ export function ProductForm({ businessId, product }: ProductFormProps) {
           variants: variants?.map((v: ProductVariant) => ({
             name: v.name,
             sku: v.sku ?? undefined,
-            price: v.price ?? 0,
+            price: v.price ?? priceInCents,
             inventoryQty: v.inventoryQty,
             options: v.options as Record<string, string>,
           })),
@@ -258,6 +290,11 @@ export function ProductForm({ businessId, product }: ProductFormProps) {
         variants={variants}
         onChange={setVariants}
         basePrice={price ? Math.round(parseFloat(price) * 100) : 0}
+        existingVariantOptions={getExistingVariantOptions(
+          product?.variants as
+            | Array<{ options: Record<string, string> }>
+            | undefined,
+        )}
       />
 
       {/* Publishing */}

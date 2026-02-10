@@ -76,8 +76,8 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
         throw new Error("Your cart is empty");
       }
 
-      // Create checkout session
-      const response = await fetch("/api/checkout/create-session", {
+      // Create checkout session (validates stock and availability before redirecting to Stripe)
+      const response = await fetch("/api/stripe/create-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -97,12 +97,30 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
         }),
       });
 
+      const data = (await response.json()) as {
+        error?: string;
+        unavailableItems?: string[];
+        sessionUrl?: string;
+      };
+
       if (!response.ok) {
-        const data = (await response.json()) as { error: string };
-        throw new Error(data.error ?? "Failed to create checkout session");
+        if (data.unavailableItems && data.unavailableItems.length > 0) {
+          setError(
+            `${data.error ?? "Some items are unavailable."} Remove or update: ${data.unavailableItems.join(", ")}`,
+          );
+        } else {
+          setError(data.error ?? "Failed to create checkout session");
+        }
+        setIsProcessing(false);
+        return;
       }
 
-      const { sessionUrl } = (await response.json()) as { sessionUrl: string };
+      const sessionUrl = data.sessionUrl;
+      if (!sessionUrl) {
+        setError("Failed to create checkout session");
+        setIsProcessing(false);
+        return;
+      }
 
       // Redirect to Stripe Checkout
       window.location.href = sessionUrl;

@@ -291,11 +291,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true });
       }
 
-      // Retrieve full session with line items
+      // Retrieve full session with line items and product (for metadata: productId, productVariantId)
       const fullSession = await stripeClient.checkout.sessions.retrieve(
         session.id,
         {
-          expand: ["line_items", "total_details"],
+          expand: ["line_items", "line_items.data.price.product", "total_details"],
         },
         {
           stripeAccount: session.metadata?.stripeAccountId,
@@ -342,15 +342,36 @@ export async function POST(req: NextRequest) {
           // Discount code
           discountCodeId: discountCodeId || null,
 
-          // Order items
+          // Order items (with product/variant ids from product_data.metadata for inventory and refunds)
           items: {
             create:
-              fullSession.line_items?.data.map((item) => ({
-                productName: item.description ?? "Unknown Product",
-                quantity: item.quantity ?? 1,
-                price: item.price?.unit_amount ?? 0,
-                total: item.amount_total,
-              })) || [],
+              fullSession.line_items?.data.map((item) => {
+                const product = item.price?.product;
+                const metadata =
+                  product &&
+                  typeof product === "object" &&
+                  !("deleted" in product && product.deleted) &&
+                  "metadata" in product
+                    ? (product as { metadata: Record<string, string> }).metadata
+                    : {};
+                const productId =
+                  (metadata.productId as string)?.trim() || null;
+                const productVariantId =
+                  (metadata.productVariantId as string)?.trim() || null;
+                const variantName =
+                  (metadata.variantName as string)?.trim() || null;
+                const sku = (metadata.sku as string)?.trim() || null;
+                return {
+                  productName: item.description ?? "Unknown Product",
+                  variantName,
+                  sku,
+                  productId,
+                  productVariantId,
+                  quantity: item.quantity ?? 1,
+                  price: item.price?.unit_amount ?? 0,
+                  total: item.amount_total,
+                };
+              }) || [],
           },
         },
         include: {
@@ -372,50 +393,78 @@ export async function POST(req: NextRequest) {
 
       console.log("Order created:", order.id);
 
-      // Deduct inventory automatically
+      // Deduct inventory (variant-level or product-level for no-variant items); prevent negative stock
+      const orderItems = (
+        order as unknown as {
+          items: {
+            productId: string | null;
+            productVariantId: string | null;
+            quantity: number;
+          }[];
+        }
+      ).items;
       try {
         await db.$transaction(async (tx) => {
-          for (const item of order.items) {
-            if (!item.variantId) continue;
+          for (const item of orderItems) {
+            const qty = item.quantity;
 
-            const variant = await tx.db.productVariant.findUnique({
-              where: { id: item.variantId },
-              select: {
-                id: true,
-                inventoryQty: true,
-                productId: true,
-                product: {
-                  select: { businessId: true },
+            if (item.productVariantId) {
+              const variant = await tx.productVariant.findUnique({
+                where: { id: item.productVariantId },
+                select: {
+                  id: true,
+                  inventoryQty: true,
+                  productId: true,
+                  product: {
+                    select: { businessId: true },
+                  },
                 },
-              },
-            });
+              });
 
-            if (!variant) continue;
+              if (!variant) continue;
 
-            const newQty = variant.inventoryQty - item.quantity;
+              const newQty = variant.inventoryQty - qty;
+              if (newQty < 0) continue;
 
-            // Update inventory
-            await tx.productVariant.update({
-              where: { id: item.variantId },
-              data: {
-                inventoryQty: newQty,
-              },
-            });
+              await tx.productVariant.update({
+                where: { id: item.productVariantId },
+                data: { inventoryQty: newQty },
+              });
 
-            // Create history record
-            await tx.inventoryHistory.create({
-              data: {
-                variantId: item.variantId,
-                productId: variant.productId,
-                businessId: variant.product.businessId,
-                previousQty: variant.inventoryQty,
-                newQty,
-                changeQty: -item.quantity,
-                reason: "sale",
-                note: `Order #${order.id.slice(0, 8)}`,
-                orderId: order.id,
-              },
-            });
+              await tx.inventoryHistory.create({
+                data: {
+                  variantId: item.productVariantId,
+                  productId: variant.productId,
+                  businessId: variant.product.businessId,
+                  previousQty: variant.inventoryQty,
+                  newQty,
+                  changeQty: -qty,
+                  reason: "sale",
+                  note: `Order #${order.id.slice(0, 8)}`,
+                  orderId: order.id,
+                },
+              });
+            } else if (item.productId) {
+              const product = await tx.product.findUnique({
+                where: { id: item.productId },
+                select: {
+                  id: true,
+                  inventoryQty: true,
+                  businessId: true,
+                  trackInventory: true,
+                },
+              });
+
+              if (!product || !product.trackInventory) continue;
+
+              const newQty = product.inventoryQty - qty;
+              if (newQty < 0) continue;
+
+              await tx.product.update({
+                where: { id: item.productId },
+                data: { inventoryQty: newQty },
+              });
+            }
           }
         });
 
