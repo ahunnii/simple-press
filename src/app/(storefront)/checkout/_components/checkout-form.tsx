@@ -1,3 +1,4 @@
+// app/(storefront)/checkout/_components/checkout-form.tsx
 "use client";
 
 import { useState } from "react";
@@ -36,11 +37,6 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
   // Form state
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [country, setCountry] = useState("US");
 
   // Discount state
   const [appliedDiscount, setAppliedDiscount] = useState<{
@@ -69,7 +65,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
 
     try {
       // Validation
-      if (!email || !name || !address || !city || !state || !zipCode) {
+      if (!email || !name) {
         throw new Error("Please fill in all required fields");
       }
 
@@ -77,21 +73,16 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
         throw new Error("Your cart is empty");
       }
 
-      // Create checkout session (validates stock and availability before redirecting to Stripe)
-      const response = await fetch("/api/stripe/create-session", {
+      // 🔑 KEY CHANGE: Don't send businessId - API derives it from domain
+      const response = await fetch("/api/checkout/create-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          businessId: business.id,
+          // businessId: business.id, ← REMOVED!
           items,
           customerInfo: {
             email,
             name,
-            address,
-            city,
-            state,
-            zipCode,
-            country,
           },
           discountCodeId: appliedDiscount?.id ?? null,
           discountAmount: appliedDiscount?.discountAmount ?? 0,
@@ -164,15 +155,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                   required
                 />
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Shipping Address */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Shipping Address</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="name">Full Name *</Label>
                 <Input
@@ -184,70 +167,19 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                   required
                 />
               </div>
+            </CardContent>
+          </Card>
 
-              <div>
-                <Label htmlFor="address">Address *</Label>
-                <Input
-                  id="address"
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="123 Main St"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="city">City *</Label>
-                  <Input
-                    id="city"
-                    type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="New York"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="state">State *</Label>
-                  <Input
-                    id="state"
-                    type="text"
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    placeholder="NY"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="zipCode">ZIP Code *</Label>
-                  <Input
-                    id="zipCode"
-                    type="text"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    placeholder="10001"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="country">Country *</Label>
-                  <Input
-                    id="country"
-                    type="text"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    placeholder="US"
-                    required
-                  />
-                </div>
-              </div>
+          {/* Note about shipping */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Shipping Address</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">
+                You&apos;ll enter your shipping address on the next page (Stripe
+                Checkout)
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -323,7 +255,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 )}
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Shipping</span>
-                  <span>Calculated by Stripe</span>
+                  <span>Calculated at checkout</span>
                 </div>
                 <div className="flex justify-between border-t pt-2 font-bold">
                   <span>Total</span>
@@ -339,7 +271,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
 
               <Button
                 type="submit"
-                disabled={isProcessing}
+                disabled={isProcessing || !business.stripeAccountId}
                 className="w-full text-white"
                 size="lg"
                 style={{ backgroundColor: primaryColor }}
@@ -357,8 +289,16 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 )}
               </Button>
 
+              {!business.stripeAccountId && (
+                <Alert>
+                  <AlertDescription>
+                    Payment processing is not yet configured for this store.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <p className="text-center text-xs text-gray-500">
-                You&apos;ll be redirected to Stripe to complete your payment
+                Secure checkout powered by Stripe
               </p>
             </CardContent>
           </Card>

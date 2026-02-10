@@ -1,99 +1,11 @@
-// import { NextRequest, NextResponse } from "next/server";
-// import Stripe from "stripe";
-// import { prisma } from "~/server/db";
-
-// export async function POST(req: NextRequest) {
-//   try {
-//     const { businessId, items, customerInfo } = await req.json();
-
-//     if (!businessId || !items || !customerInfo) {
-//       return NextResponse.json(
-//         { error: "Missing required fields" },
-//         { status: 400 },
-//       );
-//     }
-
-//     // Get business with Stripe account
-//     const business = await prisma.business.findUnique({
-//       where: { id: businessId },
-//       select: {
-//         stripeAccountId: true,
-//         name: true,
-//         subdomain: true,
-//         customDomain: true,
-//       },
-//     });
-
-//     if (!business || !business.stripeAccountId) {
-//       return NextResponse.json(
-//         { error: "Store payment processing not configured" },
-//         { status: 400 },
-//       );
-//     }
-
-//     // Initialize Stripe with platform account
-//     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-//       apiVersion: "2024-11-20.acacia",
-//     });
-
-//     // Create line items for Stripe
-//     const lineItems = items.map((item: any) => ({
-//       price_data: {
-//         currency: "usd",
-//         product_data: {
-//           name: item.productName,
-//           description: item.variantName || undefined,
-//           images: item.imageUrl ? [item.imageUrl] : undefined,
-//         },
-//         unit_amount: item.price,
-//       },
-//       quantity: item.quantity,
-//     }));
-
-//     // Determine success/cancel URLs
-//     const isDev = process.env.NODE_ENV === "development";
-//     const baseUrl = isDev
-//       ? `http://${business.subdomain}.localhost:3000`
-//       : business.customDomain
-//         ? `https://${business.customDomain}`
-//         : `https://${business.subdomain}.myapplication.com`;
-
-//     // Create Stripe Checkout session
-//     const session = await stripe.checkout.sessions.create(
-//       {
-//         mode: "payment",
-//         line_items: lineItems,
-//         success_url: `${baseUrl}/order/success?session_id={CHECKOUT_SESSION_ID}`,
-//         cancel_url: `${baseUrl}/checkout`,
-//         customer_email: customerInfo.email,
-//         shipping_address_collection: {
-//           allowed_countries: ["US", "CA"],
-//         },
-//         metadata: {
-//           businessId,
-//           customerName: customerInfo.name,
-//           customerEmail: customerInfo.email,
-//         },
-//       },
-//       {
-//         stripeAccount: business.stripeAccountId, // Connect to store's Stripe account
-//       },
-//     );
-
-//     return NextResponse.json({ sessionUrl: session.url });
-//   } catch (error: any) {
-//     console.error("Create checkout session error:", error);
-//     return NextResponse.json(
-//       { error: error.message || "Failed to create checkout session" },
-//       { status: 500 },
-//     );
-//   }
-// }
-
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-import { prisma } from "~/server/db";
+import { env } from "~/env";
+import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { stripeClient } from "~/lib/stripe/client";
+import { db } from "~/server/db";
 
 // Helper function to create a one-time Stripe coupon for the discount
 async function createStripeCoupon(
@@ -117,28 +29,48 @@ async function createStripeCoupon(
 
 export async function POST(req: NextRequest) {
   try {
-    const { businessId, items, customerInfo, discountCodeId, discountAmount } =
-      await req.json();
+    const { items, customerInfo, discountCodeId, discountAmount } =
+      (await req.json()) as {
+        items: {
+          productId: string;
+          variantId: string | null;
+          productName: string;
+          variantName: string | null;
+          price: number;
+          quantity: number;
+          imageUrl: string | null;
+          sku?: string;
+        }[];
+        customerInfo: {
+          email: string;
+          name: string;
+        };
+        discountCodeId: string;
+        discountAmount: number;
+      };
 
-    if (!businessId || !items || !customerInfo) {
+    if (!items || !customerInfo) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
       );
     }
 
-    // Get business with Stripe account
-    const business = await prisma.business.findUnique({
-      where: { id: businessId },
-      select: {
-        stripeAccountId: true,
-        name: true,
-        subdomain: true,
-        customDomain: true,
-      },
-    });
+    const domain = getCurrentDomain(req.headers);
+    const business = await getBusinessByDomain(domain);
 
-    if (!business || !business.stripeAccountId) {
+    // // Get business with Stripe account
+    // const business = await db.business.findUnique({
+    //   where: { id: businessId },
+    //   select: {
+    //     stripeAccountId: true,
+    //     name: true,
+    //     subdomain: true,
+    //     customDomain: true,
+    //   },
+    // });
+
+    if (!business?.stripeAccountId) {
       return NextResponse.json(
         { error: "Store payment processing not configured" },
         { status: 400 },
@@ -146,7 +78,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate cart: all items must exist, be published, and be in stock
-    const itemList = Array.isArray(items) ? (items as any[]) : [];
+    const itemList = Array.isArray(items) ? items : [];
     if (itemList.length === 0) {
       return NextResponse.json(
         { error: "Your cart is empty" },
@@ -157,17 +89,17 @@ export async function POST(req: NextRequest) {
     const variantIds = [
       ...new Set(
         itemList
-          .map((i: any) => i.variantId)
+          .map((i) => i.variantId)
           .filter((id: unknown): id is string => !!id),
       ),
     ] as string[];
     const productIds = [
-      ...new Set(itemList.map((i: any) => i.productId).filter(Boolean)),
+      ...new Set(itemList.map((i) => i.productId).filter(Boolean)),
     ] as string[];
 
     const [variantsWithProduct, productsNoVariant] = await Promise.all([
       variantIds.length > 0
-        ? prisma.productVariant.findMany({
+        ? db.productVariant.findMany({
             where: { id: { in: variantIds } },
             select: {
               id: true,
@@ -180,10 +112,10 @@ export async function POST(req: NextRequest) {
             },
           })
         : [],
-      prisma.product.findMany({
+      db.product.findMany({
         where: {
           id: { in: productIds },
-          businessId,
+          businessId: business.id,
         },
         select: {
           id: true,
@@ -198,7 +130,7 @@ export async function POST(req: NextRequest) {
 
     const variantMap = new Map(
       variantsWithProduct
-        .filter((v) => v.product.businessId === businessId)
+        .filter((v) => v.product.businessId === business.id)
         .map((v) => [v.id, v]),
     );
     const productMap = new Map(productsNoVariant.map((p) => [p.id, p]));
@@ -222,7 +154,7 @@ export async function POST(req: NextRequest) {
         }
       } else {
         const product = productMap.get(item.productId);
-        if (!product || !product.published) {
+        if (!product?.published) {
           unavailableItems.push(name);
           continue;
         }
@@ -249,17 +181,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Initialize Stripe with platform account
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: "2024-11-20.acacia",
-    });
 
     // Create line items for Stripe (metadata so webhook can store product/variant and deduct inventory)
-    const lineItems = itemList.map((item: any) => ({
+    const lineItems = itemList.map((item) => ({
       price_data: {
         currency: "usd",
         product_data: {
           name: item.productName,
-          description: item.variantName || undefined,
+          description: item.variantName ?? undefined,
           images: item.imageUrl ? [item.imageUrl] : undefined,
           metadata: {
             productId: String(item.productId ?? ""),
@@ -275,14 +204,15 @@ export async function POST(req: NextRequest) {
 
     // Determine success/cancel URLs
     const isDev = process.env.NODE_ENV === "development";
+    const platformDomain = env.NEXT_PUBLIC_PLATFORM_DOMAIN;
     const baseUrl = isDev
-      ? `http://${business.subdomain}.localhost:3000`
-      : business.customDomain
+      ? `http://${domain}`
+      : business.customDomain && business.domainStatus === "ACTIVE"
         ? `https://${business.customDomain}`
-        : `https://${business.subdomain}.myapplication.com`;
+        : `https://${business.subdomain}.${platformDomain}`;
 
     // Build session params
-    const sessionParams: any = {
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "payment",
       line_items: lineItems,
       success_url: `${baseUrl}/order/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -292,7 +222,7 @@ export async function POST(req: NextRequest) {
         allowed_countries: ["US", "CA"],
       },
       metadata: {
-        businessId,
+        businessId: business.id,
         customerName: customerInfo.name,
         customerEmail: customerInfo.email,
         discountCodeId: discountCodeId || "",
@@ -304,8 +234,8 @@ export async function POST(req: NextRequest) {
       sessionParams.discounts = [
         {
           coupon: await createStripeCoupon(
-            stripe,
-            business.stripeAccountId!,
+            stripeClient,
+            business.stripeAccountId,
             discountAmount,
           ),
         },
@@ -313,15 +243,20 @@ export async function POST(req: NextRequest) {
     }
 
     // Create Stripe Checkout session
-    const session = await stripe.checkout.sessions.create(sessionParams, {
+    const session = await stripeClient.checkout.sessions.create(sessionParams, {
       stripeAccount: business.stripeAccountId, // Connect to store's Stripe account
     });
 
     return NextResponse.json({ sessionUrl: session.url });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Create checkout session error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to create checkout session" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to create checkout session",
+      },
       { status: 500 },
     );
   }

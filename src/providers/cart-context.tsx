@@ -10,6 +10,7 @@ type CartItem = {
   price: number; // in cents
   quantity: number;
   imageUrl: string | null;
+  sku?: string;
 };
 
 type CartContextType = {
