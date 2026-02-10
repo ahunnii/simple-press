@@ -4,7 +4,7 @@
 import type { ProductVariant } from "generated/prisma";
 import { AlertCircle, Loader2, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -21,6 +21,7 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { slugify } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { ImageUploader, type ProductImage } from "./image-uploader";
 import { VariantManager } from "./variant-manager";
 
 type ProductFormProps = {
@@ -39,6 +40,12 @@ type ProductFormProps = {
       price: number | null;
       inventoryQty: number;
       options: any;
+    }>;
+    images?: Array<{
+      id: string;
+      url: string;
+      altText: string | null;
+      sortOrder: number;
     }>;
   };
 };
@@ -75,6 +82,22 @@ export function ProductForm({ product }: ProductFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [images, setImages] = useState<ProductImage[]>([]);
+  /** Captured at submit time so syncImages uses the user's order even if product refetch overwrites state */
+  const imagesToSyncRef = useRef<ProductImage[]>([]);
+
+  useEffect(() => {
+    if (product?.images) {
+      setImages(
+        product.images.map((img) => ({
+          id: img.id,
+          url: img.url,
+          altText: img.altText,
+          sortOrder: img.sortOrder,
+        })),
+      );
+    }
+  }, [product]);
   // Form state
   const [name, setName] = useState(product?.name ?? "");
   const [slug, setSlug] = useState(product?.slug ?? "");
@@ -103,12 +126,49 @@ export function ProductForm({ product }: ProductFormProps) {
     }
   };
 
+  const addImageMutation = api.product.addImage.useMutation({
+    onError: (error) => {
+      setError(error.message ?? "Failed to add image");
+      toast.error(error.message ?? "Failed to add image");
+    },
+    onSuccess: (data) => {
+      toast.success("Image added successfully");
+    },
+    onSettled: () => {
+      setIsSubmitting(false);
+      router.refresh();
+    },
+  });
+
+  const syncImagesMutation = api.product.syncImages.useMutation({
+    onError: (error) => {
+      setError(error.message ?? "Failed to sync images");
+      toast.error(error.message ?? "Failed to sync images");
+    },
+    onSuccess: (data) => {
+      toast.success("Images synced successfully");
+    },
+  });
+
   const createProductMutation = api.product.create.useMutation({
     onError: (error) => {
       setError(error.message ?? "Failed to save product");
       toast.error(error.message ?? "Failed to save product");
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      if (images.length > 0) {
+        await Promise.all(
+          images.map((image) =>
+            addImageMutation.mutateAsync({
+              productId: data.productId,
+              url: image.url,
+              altText: image.altText,
+              sortOrder: image.sortOrder,
+            }),
+          ),
+        );
+      }
+
       router.push(`/admin/products/${data.productId}`);
       toast.success(data.message);
     },
@@ -122,7 +182,11 @@ export function ProductForm({ product }: ProductFormProps) {
       setError(error.message ?? "Failed to save product");
       toast.error(error.message ?? "Failed to save product");
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      await syncImagesMutation.mutateAsync({
+        productId: data.productId,
+        images: imagesToSyncRef.current,
+      });
       router.push(`/admin/products/${data.productId}`);
       toast.success(data.message);
     },
@@ -155,6 +219,7 @@ export function ProductForm({ product }: ProductFormProps) {
       const priceInCents = Math.round(parseFloat(price) * 100);
 
       if (product) {
+        imagesToSyncRef.current = images;
         updateProductMutation.mutate({
           id: product.id,
           name,
@@ -319,6 +384,12 @@ export function ProductForm({ product }: ProductFormProps) {
           </div>
         </CardContent>
       </Card>
+
+      <ImageUploader
+        images={images}
+        onImagesChange={setImages}
+        maxImages={10}
+      />
 
       {/* Actions */}
       <div className="flex items-center gap-3">

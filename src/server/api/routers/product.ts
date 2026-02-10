@@ -9,6 +9,7 @@ import {
 import {
   createTRPCRouter,
   ownerAdminProcedure,
+  protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
@@ -163,6 +164,9 @@ export const productRouter = createTRPCRouter({
           variants: {
             orderBy: { createdAt: "asc" },
           },
+          images: {
+            orderBy: { sortOrder: "asc" },
+          },
         },
       });
       return product;
@@ -256,5 +260,179 @@ export const productRouter = createTRPCRouter({
         message: "Product deleted successfully!",
         productId: product.id,
       };
+    }),
+  // Add image to product
+  addImage: protectedProcedure
+    .input(
+      z.object({
+        productId: z.string(),
+        url: z.string().url(),
+        altText: z.string().nullable(),
+        sortOrder: z.number().int(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify product ownership
+      const product = await ctx.db.product.findUnique({
+        where: { id: input.productId },
+        select: { businessId: true },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { businessId: true },
+      });
+
+      if (user?.businessId !== product.businessId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Not authorized",
+        });
+      }
+
+      const image = await ctx.db.image.create({
+        data: {
+          productId: input.productId,
+          url: input.url,
+          altText: input.altText,
+          sortOrder: input.sortOrder,
+        },
+      });
+
+      return image;
+    }),
+
+  // Update image
+  updateImage: protectedProcedure
+    .input(
+      z.object({
+        imageId: z.string(),
+        altText: z.string().nullable(),
+        sortOrder: z.number().int(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const image = await ctx.db.image.update({
+        where: { id: input.imageId },
+        data: {
+          altText: input.altText,
+          sortOrder: input.sortOrder,
+        },
+      });
+
+      return image;
+    }),
+
+  // Delete image
+  deleteImage: protectedProcedure
+    .input(
+      z.object({
+        imageId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.image.delete({
+        where: { id: input.imageId },
+      });
+
+      return { success: true };
+    }),
+
+  // Sync all images (helper for bulk update)
+  syncImages: ownerAdminProcedure
+    .input(
+      z.object({
+        productId: z.string(),
+        images: z.array(
+          z.object({
+            id: z.string().optional(),
+            url: z.string().url(),
+            altText: z.string().nullable(),
+            sortOrder: z.number().int(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+      // Verify ownership
+      const product = await ctx.db.product.findUnique({
+        where: { id: input.productId, businessId: business.id },
+        include: { images: true },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { businessId: true },
+      });
+
+      if (user?.businessId !== product.businessId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Not authorized",
+        });
+      }
+
+      // Get existing image IDs
+      const existingIds = new Set(product.images.map((img) => img.id));
+      const newIds = new Set(
+        input.images.filter((img) => img.id).map((img) => img.id!),
+      );
+
+      // Delete removed images
+      const toDelete = [...existingIds].filter((id) => !newIds.has(id));
+      await ctx.db.image.deleteMany({
+        where: {
+          id: { in: toDelete },
+        },
+      });
+
+      // Update or create images
+      await Promise.all(
+        input.images.map(async (image) => {
+          if (image.id) {
+            // Update existing
+            await ctx.db.image.update({
+              where: { id: image.id },
+              data: {
+                altText: image.altText,
+                sortOrder: image.sortOrder,
+              },
+            });
+          } else {
+            // Create new
+            await ctx.db.image.create({
+              data: {
+                productId: input.productId,
+                url: image.url,
+                altText: image.altText,
+                sortOrder: image.sortOrder,
+              },
+            });
+          }
+        }),
+      );
+
+      return { success: true };
     }),
 });
