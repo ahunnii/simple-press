@@ -1,10 +1,19 @@
 "use client";
 
 import type { Business, SiteContent } from "generated/prisma";
-import { Loader2, Palette, Save } from "lucide-react";
+import { useRef } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Alert, AlertDescription } from "~/components/ui/alert";
+import { useUploadFiles } from "@better-upload/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import type { BusinessBrandingFormSchema } from "~/lib/validators/branding";
+import { businessBrandingFormSchema } from "~/lib/validators/branding";
+import { api } from "~/trpc/react";
+import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -13,31 +22,13 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { Form, FormField } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { Textarea } from "~/components/ui/textarea";
-import { api } from "~/trpc/react";
-
-// type Business = {
-//   id: string;
-//   templateId: string;
-//   siteContent: {
-//     heroTitle: string | null;
-//     heroSubtitle: string | null;
-//     aboutText: string | null;
-//     primaryColor: string | null;
-//     logoUrl: string | null;
-//     faviconUrl: string | null;
-//     footerText: string | null;
-//   } | null;
-// };
+import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { SelectFormField } from "~/components/inputs/select-form-field";
+import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type BrandingSettingsProps = {
   business: Business & { siteContent?: SiteContent | null };
@@ -45,272 +36,305 @@ type BrandingSettingsProps = {
 
 export function BrandingSettings({ business }: BrandingSettingsProps) {
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const siteContent = business?.siteContent ?? null;
 
-  // Form state
-  const [templateId, setTemplateId] = useState(business.templateId);
-  const [heroTitle, setHeroTitle] = useState(siteContent?.heroTitle ?? "");
-  const [heroSubtitle, setHeroSubtitle] = useState(
-    siteContent?.heroSubtitle ?? "",
-  );
-  const [aboutText, setAboutText] = useState(siteContent?.aboutText ?? "");
-  const [primaryColor, setPrimaryColor] = useState(
-    siteContent?.primaryColor ?? "#3b82f6",
-  );
-  const [logoUrl, setLogoUrl] = useState(siteContent?.logoUrl ?? "");
-  const [faviconUrl, setFaviconUrl] = useState(siteContent?.faviconUrl ?? "");
-  const [footerText, setFooterText] = useState(siteContent?.footerText ?? "");
+  // Form refs
+  const formRef = useRef<HTMLFormElement>(null);
+  const logoFileInputRef = useRef<HTMLInputElement | null>(null);
+  const faviconFileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const form = useForm<BusinessBrandingFormSchema>({
+    resolver: zodResolver(businessBrandingFormSchema),
+    defaultValues: {
+      ...business,
+      siteContent: {
+        ...siteContent,
+        primaryColor: siteContent?.primaryColor ?? "#3b82f6",
+      },
+      logoFile: null,
+      faviconFile: null,
+    },
+  });
+
+  // Image uploads
+  const logoUploader = useUploadFiles({
+    api: "/api/upload",
+    route: "logo",
+    onError: (error) => {
+      toast.error(error.message ?? "Logo upload failed.");
+    },
+  });
+
+  const faviconUploader = useUploadFiles({
+    api: "/api/upload",
+    route: "favicon",
+    onError: (error) => {
+      toast.error(error.message ?? "Favicon upload failed.");
+    },
+  });
+
+  // Operations
   const updateBrandingMutation = api.business.updateBranding.useMutation({
-    onSuccess: () => {
-      router.refresh();
-      setSuccess(true);
+    onSuccess: (data) => {
+      toast.dismiss();
+      toast.success(data.message);
     },
     onError: (error) => {
-      setError(error.message ?? "Failed to update branding");
+      toast.error(error.message ?? "Failed to update branding");
+    },
+    onMutate: () => {
+      toast.loading("Updating branding...");
     },
     onSettled: () => {
-      setIsSaving(false);
       router.refresh();
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
-    setIsSaving(true);
+  const handleSubmit = async (data: BusinessBrandingFormSchema) => {
+    let logoUrl: string | undefined = data?.siteContent?.logoUrl ?? undefined;
+    let faviconUrl: string | undefined =
+      data?.siteContent?.faviconUrl ?? undefined;
+
+    const faviconFile = data.faviconFile;
+    if (faviconFile instanceof File) {
+      try {
+        const { metadata } = await faviconUploader.upload([faviconFile]);
+        const fileLocation = (metadata?.pathName as string | undefined) ?? "";
+        if (fileLocation) faviconUrl = fileLocation;
+      } catch {
+        toast.error("Failed to upload favicon.");
+        return;
+      }
+    }
+    const logoFile = data.logoFile;
+    if (logoFile instanceof File) {
+      try {
+        const { metadata } = await logoUploader.upload([logoFile]);
+        const fileLocation = (metadata?.pathName as string | undefined) ?? "";
+        if (fileLocation) logoUrl = fileLocation;
+      } catch {
+        toast.error("Failed to upload logo.");
+        return;
+      }
+    }
 
     updateBrandingMutation.mutate({
-      templateId,
+      templateId: data.templateId,
       siteContent: {
-        heroTitle: heroTitle ?? undefined,
-        heroSubtitle: heroSubtitle ?? undefined,
-        aboutText: aboutText ?? undefined,
-        primaryColor,
-        logoUrl: logoUrl ?? undefined,
-        faviconUrl: faviconUrl ?? undefined,
-        footerText: footerText ?? undefined,
+        heroTitle: data.siteContent?.heroTitle ?? undefined,
+        heroSubtitle: data.siteContent?.heroSubtitle ?? undefined,
+        aboutText: data.siteContent?.aboutText ?? undefined,
+        primaryColor: data.siteContent?.primaryColor ?? undefined,
+        logoUrl,
+        faviconUrl,
+        footerText: data.siteContent?.footerText ?? undefined,
       },
     });
-
-    // try {
-    //   const response = await fetch(`/api/business/${business.id}/branding`, {
-    //     method: "PATCH",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({
-    //       templateId,
-    //       siteContent: {
-    //         heroTitle: heroTitle || null,
-    //         heroSubtitle: heroSubtitle || null,
-    //         aboutText: aboutText || null,
-    //         primaryColor,
-    //         logoUrl: logoUrl || null,
-    //         faviconUrl: faviconUrl || null,
-    //         footerText: footerText || null,
-    //       },
-    //     }),
-    //   });
-
-    //   if (!response.ok) {
-    //     const data = await response.json();
-    //     throw new Error(data.error || "Failed to update branding");
-    //   }
-
-    //   setSuccess(true);
-    //   router.refresh();
-
-    //   setTimeout(() => setSuccess(false), 3000);
-    // } catch (err: any) {
-    //   setError(err.message);
-    // } finally {
-    //   setIsSaving(false);
-    // }
   };
 
+  const handleReset = () => {
+    form.reset({ ...business, logoFile: null, faviconFile: null });
+    if (logoFileInputRef.current) logoFileInputRef.current.value = "";
+    if (faviconFileInputRef.current) faviconFileInputRef.current.value = "";
+  };
+
+  // Checks
+  const isSubmitting =
+    updateBrandingMutation.isPending ||
+    logoUploader.isPending ||
+    faviconUploader.isPending;
+
+  const isDirty = form.formState.isDirty;
+
+  useKeyboardEnter(form, handleSubmit);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {success && (
-        <Alert>
-          <AlertDescription>Branding updated successfully!</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Template */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Store Template</CardTitle>
-          <CardDescription>
-            Choose the design template for your storefront
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div>
-            <Label htmlFor="template">Template</Label>
-            <Select value={templateId} onValueChange={setTemplateId}>
-              <SelectTrigger id="template">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="modern">Modern</SelectItem>
-                <SelectItem value="vintage">Vintage</SelectItem>
-                <SelectItem value="minimal">Minimal</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Colors & Logo */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Brand Identity</CardTitle>
-          <CardDescription>
-            Logo and color scheme for your store
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="primaryColor">Primary Color</Label>
+    <Form {...form}>
+      <form
+        ref={formRef}
+        onSubmit={(e) => void form.handleSubmit(handleSubmit)(e)}
+        className="space-y-6"
+      >
+        <div className="border-border/30 sticky top-0 z-10 -mx-4 -mt-4 flex w-[calc(100%+2rem)] justify-center border-b px-4 py-3 transition-all duration-300 md:-mx-6 md:w-[calc(100%+3rem)] md:px-6">
+          <div
+            className={`flex w-[90%] items-center justify-between gap-2 rounded-full border px-4 py-3 shadow-sm backdrop-blur transition-all duration-300 ${
+              isDirty
+                ? "bg-background/95 supports-backdrop-filter:bg-background/80 border-amber-200 shadow-md dark:border-amber-800"
+                : "border-border/50 bg-background/60 supports-backdrop-filter:bg-background/50"
+            }`}
+          >
+            <Button variant="ghost" size="sm" asChild className="shrink-0">
+              <Link href="/admin/dashboard">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Link>
+            </Button>
             <div className="flex gap-2">
-              <Input
-                id="primaryColor"
-                type="color"
-                value={primaryColor}
-                onChange={(e) => setPrimaryColor(e.target.value)}
-                className="h-10 w-20"
-              />
-              <Input
-                type="text"
-                value={primaryColor}
-                onChange={(e) => setPrimaryColor(e.target.value)}
-                placeholder="#3b82f6"
-                className="flex-1"
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isSubmitting}
+                onClick={handleReset}
+              >
+                Reset
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <span className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2" />
+                    {logoUploader.isPending
+                      ? "Uploading logo..."
+                      : faviconUploader.isPending
+                        ? "Uploading favicon..."
+                        : "Saving..."}
+                  </>
+                ) : (
+                  "Update business branding"
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Template */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Store Template</CardTitle>
+            <CardDescription>
+              Choose the design template for your storefront
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SelectFormField
+              form={form}
+              name="templateId"
+              label="Template"
+              description="Choose the design template for your storefront"
+              values={[
+                { value: "modern", label: "Modern" },
+                { value: "vintage", label: "Vintage" },
+                { value: "minimal", label: "Minimal" },
+              ]}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Colors & Logo */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Brand Identity</CardTitle>
+            <CardDescription>
+              Logo and color scheme for your store
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="siteContent.primaryColor"
+              render={({ field }) => (
+                <>
+                  <Label htmlFor="primaryColor">Primary Color</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="primaryColor"
+                      type="color"
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      className="h-10 w-20"
+                    />
+                    <Input
+                      type="text"
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      placeholder="#3b82f6"
+                      className="flex-1"
+                    />
+                  </div>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Main color used for buttons and accents
+                  </p>
+                </>
+              )}
+            />
+
+            <div>
+              <ImageUploadFormField
+                form={form}
+                name="logoFile"
+                label="Logo image"
+                description="Upload your store logo image here!"
+                disabled={isSubmitting}
+                existingPreviewUrl={business.siteContent?.logoUrl ?? undefined}
+                inputRef={logoFileInputRef}
               />
             </div>
-            <p className="mt-1 text-sm text-gray-500">
-              Main color used for buttons and accents
-            </p>
-          </div>
 
-          <div>
-            <Label htmlFor="logoUrl">Logo URL</Label>
-            <Input
-              id="logoUrl"
-              type="url"
-              value={logoUrl}
-              onChange={(e) => setLogoUrl(e.target.value)}
-              placeholder="https://example.com/logo.png"
-            />
-            <p className="mt-1 text-sm text-gray-500">
-              URL to your store logo image
-            </p>
-          </div>
+            <div>
+              <ImageUploadFormField
+                form={form}
+                name="faviconFile"
+                label="Favicon image"
+                description="Upload your store favicon image here!"
+                disabled={isSubmitting}
+                existingPreviewUrl={
+                  business.siteContent?.faviconUrl ?? undefined
+                }
+                inputRef={faviconFileInputRef}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-          <div>
-            <Label htmlFor="faviconUrl">Favicon URL</Label>
-            <Input
-              id="faviconUrl"
-              type="url"
-              value={faviconUrl}
-              onChange={(e) => setFaviconUrl(e.target.value)}
-              placeholder="https://example.com/favicon.ico"
-            />
-            <p className="mt-1 text-sm text-gray-500">
-              Small icon shown in browser tabs (recommended: 32x32px)
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Homepage Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Homepage Content</CardTitle>
-          <CardDescription>
-            Hero section and about text for your homepage
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="heroTitle">Hero Title</Label>
-            <Input
-              id="heroTitle"
-              value={heroTitle}
-              onChange={(e) => setHeroTitle(e.target.value)}
+        {/* Homepage Content */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Homepage Content</CardTitle>
+            <CardDescription>
+              Hero section and about text for your homepage
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <InputFormField
+              form={form}
+              name="siteContent.heroTitle"
+              label="Hero Title"
               placeholder="Welcome to Our Store"
             />
-          </div>
 
-          <div>
-            <Label htmlFor="heroSubtitle">Hero Subtitle</Label>
-            <Input
-              id="heroSubtitle"
-              value={heroSubtitle}
-              onChange={(e) => setHeroSubtitle(e.target.value)}
+            <InputFormField
+              form={form}
+              name="siteContent.heroSubtitle"
+              label="Hero Subtitle"
               placeholder="Discover amazing products"
             />
-          </div>
 
-          <div>
-            <Label htmlFor="aboutText">About Section</Label>
-            <Textarea
-              id="aboutText"
-              value={aboutText}
-              onChange={(e) => setAboutText(e.target.value)}
+            <TextareaFormField
+              form={form}
+              name="siteContent.aboutText"
+              label="About Text"
               placeholder="Tell customers about your business..."
-              rows={4}
             />
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Footer */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Footer</CardTitle>
-          <CardDescription>Footer text for your store</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div>
-            <Label htmlFor="footerText">Footer Text</Label>
-            <Textarea
-              id="footerText"
-              value={footerText}
-              onChange={(e) => setFooterText(e.target.value)}
+        {/* Footer */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Footer</CardTitle>
+            <CardDescription>Footer text for your store</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TextareaFormField
+              form={form}
+              name="siteContent.footerText"
+              label="Footer Text"
               placeholder="© 2024 Your Store. All rights reserved."
               rows={3}
             />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isSaving}>
-          {isSaving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <Save className="mr-2 h-4 w-4" />
-              Save Changes
-            </>
-          )}
-        </Button>
-      </div>
-    </form>
+          </CardContent>
+        </Card>
+      </form>
+    </Form>
   );
 }

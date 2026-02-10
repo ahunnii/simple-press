@@ -1,8 +1,10 @@
 "use client";
 
-import { CheckCircle, Loader2, XCircle } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { CheckCircle, Loader2, XCircle } from "lucide-react";
+
+import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -11,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { authClient } from "~/server/better-auth/client";
 
 export default function SignupCompletePage() {
   const router = useRouter();

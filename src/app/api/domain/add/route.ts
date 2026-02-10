@@ -1,7 +1,8 @@
-import { type NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-import { isValidDomain } from "~/lib/utils";
 import type { DomainRouteInput } from "~/lib/validators/domain";
+import { isValidDomain } from "~/lib/utils";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
 

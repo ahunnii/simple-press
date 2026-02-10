@@ -1,9 +1,10 @@
 "use client";
 
-import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 

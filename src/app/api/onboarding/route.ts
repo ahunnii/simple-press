@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+
 import { isSubdomainReserved, slugify } from "~/lib/utils";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";

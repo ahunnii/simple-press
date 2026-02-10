@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
-import { AppSidebar } from "~/app/admin/_components/app-sidebar";
-import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 
 import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
+import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
+import { AppSidebar } from "~/app/admin/_components/app-sidebar";
+
 import WelcomeNotification from "./_components/welcome-notification";
 
 type Props = {
@@ -11,7 +12,6 @@ type Props = {
 };
 export default async function AdminLayout({ children }: Props) {
   const session = await getSession();
-  const business = await api.business.get();
 
   if (!session) {
     redirect("/auth/sign-in?callbackUrl=/admin");
@@ -33,10 +33,7 @@ export default async function AdminLayout({ children }: Props) {
       >
         <AppSidebar variant="inset" />
         <SidebarInset>
-          <>
-            {!business?.customDomain && <WelcomeNotification />}
-            {children}
-          </>
+          <>{children}</>
         </SidebarInset>
       </SidebarProvider>
     </>

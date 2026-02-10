@@ -1,10 +1,16 @@
 "use client";
 
-import { File as FileIcon, FileText, ImageIcon } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  File as FileIcon,
+  FileText,
+  ImageIcon,
+  Trash,
+  Upload,
+} from "lucide-react";
 
-import { Trash, Upload } from "lucide-react";
+import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
   FormControl,
@@ -14,7 +20,6 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { cn } from "~/lib/utils";
 
 type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;

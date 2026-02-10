@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
+
 import { ProductCard } from "../_components/product-card";
 import { StorefrontFooter } from "../_components/storefront-footer";
 import { StorefrontHeader } from "../_components/storefront-header";
@@ -22,12 +23,12 @@ export default async function ProductsPage() {
               All Products
             </h1>
             <p className="text-gray-600">
-              {business.products.length} product
-              {business.products.length !== 1 ? "s" : ""}
+              {business.products?.length} product
+              {business.products?.length !== 1 ? "s" : ""}
             </p>
           </div>
 
-          {business.products.length === 0 ? (
+          {business.products?.length === 0 ? (
             <div className="py-16 text-center">
               <p className="text-lg text-gray-500">
                 No products available at this time.
@@ -35,7 +36,7 @@ export default async function ProductsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {business.products.map((product) => (
+              {business.products?.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={

@@ -1,15 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Sparkles } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { InputFormField } from "~/components/inputs/input-form-field";
-import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import { api } from "~/trpc/react";
+import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -21,8 +21,8 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Form } from "~/components/ui/form";
-import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
-import { api } from "~/trpc/react";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 const schema = z.object({
   key: z.string().min(1, "Key is required"),

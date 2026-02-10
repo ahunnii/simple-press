@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
+
 import { api } from "~/trpc/server";
-import { SiteHeader } from "../../_components/site-header";
+
 import { PageForm } from "../_components/page-form";
+import { SiteHeader } from "../../_components/site-header";
 
 type Props = {
   params: Promise<{ pageId: string }>;

@@ -1,12 +1,13 @@
 "use client";
 
-import { Check, Copy, ExternalLink, Globe, Loader2, X } from "lucide-react";
 import { useState } from "react";
+import { Check, Copy, ExternalLink, Globe, Loader2, X } from "lucide-react";
+
+import { isValidDomain } from "~/lib/utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { isValidDomain } from "~/lib/utils";
 
 type Business = {
   id: string;

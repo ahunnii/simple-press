@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+
 import { checkBusiness } from "~/lib/check-business";
 
 import { ProductForm } from "../_components/product-form";

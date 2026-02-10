@@ -1,7 +1,7 @@
-import { AuthView } from "@daveyplate/better-auth-ui";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { AuthView } from "@daveyplate/better-auth-ui";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 
 export const metadata = {
   title: "Sign Up",

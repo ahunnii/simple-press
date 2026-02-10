@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   ArrowRight,
   CheckCircle2,
@@ -7,7 +8,7 @@ import {
   Package,
   Store,
 } from "lucide-react";
-import Link from "next/link";
+
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -16,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+
 import { ConnectStripeButton } from "./connect-stripe-button";
 import { DomainSetup } from "./domain-setup";
 

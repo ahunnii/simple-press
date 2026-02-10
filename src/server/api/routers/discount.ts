@@ -1,9 +1,8 @@
-import { TRPCError } from "@trpc/server";
 import { NextResponse } from "next/server";
-
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { checkBusiness } from "~/lib/check-business";
 
+import { checkBusiness } from "~/lib/check-business";
 import {
   createTRPCRouter,
   ownerAdminProcedure,

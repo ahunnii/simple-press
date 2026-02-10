@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+
+import { api } from "~/trpc/react";
 import {
   Alert,
   AlertAction,
@@ -8,6 +12,11 @@ import {
 import { Button } from "~/components/ui/button";
 
 export default function WelcomeNotification() {
+  const { data: business } = api.business.get.useQuery();
+
+  if (business?.customDomain) {
+    return null;
+  }
   return (
     <Alert variant="default" className="mx-auto my-6 w-full max-w-3xl">
       <AlertTitle>Welcome to your store!</AlertTitle>
@@ -17,7 +26,7 @@ export default function WelcomeNotification() {
         </p>{" "}
       </AlertDescription>
       <AlertAction>
-        <Button variant="outline" asChild>
+        <Button variant="outline" asChild size="xs">
           <Link href="/admin/welcome">Finish setup</Link>
         </Button>
       </AlertAction>

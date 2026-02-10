@@ -248,6 +248,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
 
@@ -295,7 +296,11 @@ export async function POST(req: NextRequest) {
       const fullSession = await stripeClient.checkout.sessions.retrieve(
         session.id,
         {
-          expand: ["line_items", "line_items.data.price.product", "total_details"],
+          expand: [
+            "line_items",
+            "line_items.data.price.product",
+            "total_details",
+          ],
         },
         {
           stripeAccount: session.metadata?.stripeAccountId,

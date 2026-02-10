@@ -1,8 +1,11 @@
 "use client";
 
-import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
+
+import type { SignupFormData } from "../page";
+import { authClient } from "~/server/better-auth/client";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -14,8 +17,6 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { authClient } from "~/server/better-auth/client";
-import type { SignupFormData } from "../page";
 
 type StoreCustomizationStepProps = {
   formData: Partial<SignupFormData>;

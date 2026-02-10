@@ -1,20 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import type { Editor } from "@tiptap/react";
 import type { VariantProps } from "class-variance-authority";
 import * as React from "react";
+import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
+
+import type { toggleVariants } from "~/components/ui/toggle";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import type { toggleVariants } from "~/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+
 import { useTheme } from "../../hooks/use-theme";
 import { ToolbarButton } from "../toolbar-button";
 

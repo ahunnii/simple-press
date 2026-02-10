@@ -1,5 +1,6 @@
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
+import { cn } from "~/lib/utils";
 import {
   FormControl,
   FormDescription,
@@ -9,7 +10,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Switch } from "~/components/ui/switch";
-import { cn } from "~/lib/utils";
 
 type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;

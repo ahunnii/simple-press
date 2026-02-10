@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
+
 import { StorefrontFooter } from "../_components/storefront-footer";
 import { StorefrontHeader } from "../_components/storefront-header";
 import { CartContents } from "./_components/cart-contents";

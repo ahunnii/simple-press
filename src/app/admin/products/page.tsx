@@ -1,7 +1,9 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Plus } from "lucide-react";
 
-import Link from "next/link";
-
+import { checkBusiness } from "~/lib/check-business";
+import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -11,9 +13,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
-import { redirect } from "next/navigation";
-import { checkBusiness } from "~/lib/check-business";
-import { api, HydrateClient } from "~/trpc/server";
 import { ProductsTable } from "./_components/products-client-data-table";
 
 export default async function ProductsPage() {

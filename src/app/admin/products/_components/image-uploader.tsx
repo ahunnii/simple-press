@@ -2,8 +2,9 @@
 // app/admin/products/_components/image-uploader.tsx
 "use client";
 
+import type { DragEndEvent } from "@dnd-kit/core";
 import { useState } from "react";
-
+import Image from "next/image";
 import { useUploadFiles } from "@better-upload/client";
 import {
   closestCenter,
@@ -12,7 +13,6 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -23,12 +23,12 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Upload, X } from "lucide-react";
-import Image from "next/image";
+
+import { env } from "~/env";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { env } from "~/env";
 
 export type ProductImage = {
   id?: string; // For existing images
@@ -310,7 +310,7 @@ export function ImageUploader({
           </DndContext>
         ) : (
           <div
-            className="rounded-lg border-2 border-dashed p-12 text-center transition-colors data-[drag=true]:border-primary data-[drag=true]:bg-primary/5"
+            className="data-[drag=true]:border-primary data-[drag=true]:bg-primary/5 rounded-lg border-2 border-dashed p-12 text-center transition-colors"
             data-drag="false"
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -319,7 +319,8 @@ export function ImageUploader({
             <Upload className="mx-auto mb-4 h-12 w-12 text-gray-400" />
             <p className="mb-2 text-gray-600">No images yet</p>
             <p className="mb-4 text-sm text-gray-500">
-              Drag and drop images here, or click to select multiple (JPG, PNG, WebP)
+              Drag and drop images here, or click to select multiple (JPG, PNG,
+              WebP)
             </p>
             <Button
               type="button"
@@ -334,7 +335,7 @@ export function ImageUploader({
 
         {canUploadMore && images.length > 0 && (
           <div
-            className="rounded-lg border-2 border-dashed border-gray-200 p-6 text-center transition-colors data-[drag=true]:border-primary data-[drag=true]:bg-primary/5"
+            className="data-[drag=true]:border-primary data-[drag=true]:bg-primary/5 rounded-lg border-2 border-dashed border-gray-200 p-6 text-center transition-colors"
             data-drag="false"
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}

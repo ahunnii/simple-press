@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+
+import { Button } from "~/components/ui/button";
 import { ProductCard } from "~/app/(storefront)/_components/product-card";
 import { StorefrontFooter } from "~/app/(storefront)/_components/storefront-footer";
 import { StorefrontHeader } from "~/app/(storefront)/_components/storefront-header";
-import { Button } from "~/components/ui/button";
 
 type Business = {
   id: string;
@@ -72,7 +73,7 @@ export function ModernTemplate({ business }: ModernTemplateProps) {
       </section>
 
       {/* Featured Products */}
-      {business.products.length > 0 && (
+      {business?.products?.length > 0 && (
         <section className="px-4 py-16">
           <div className="mx-auto max-w-7xl">
             <div className="mb-8 flex items-center justify-between">
@@ -84,7 +85,7 @@ export function ModernTemplate({ business }: ModernTemplateProps) {
               </Button>
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {business.products.map((product) => (
+              {business?.products?.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

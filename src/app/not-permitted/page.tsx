@@ -1,9 +1,9 @@
-import { Home, ShieldX } from "lucide-react";
 import Link from "next/link";
+import { Home, ShieldX } from "lucide-react";
 
+import { Button } from "~/components/ui/button";
 import { Footer } from "~/components/layout/footer";
 import { Header } from "~/components/layout/header";
-import { Button } from "~/components/ui/button";
 
 export const metadata = {
   title: "Not permitted",
@@ -21,9 +21,7 @@ export default function NotPermittedPage() {
               <div className="bg-primary/10 text-primary mb-6 flex size-20 items-center justify-center rounded-full">
                 <ShieldX className="size-10" aria-hidden />
               </div>
-              <p className="text-primary mb-2 text-sm font-medium">
-                Error 403
-              </p>
+              <p className="text-primary mb-2 text-sm font-medium">Error 403</p>
               <h1 className="text-foreground mb-4 text-4xl font-bold text-balance md:text-5xl">
                 You are not permitted
               </h1>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { checkBusiness } from "~/lib/check-business";
+
 import { DiscountForm } from "../_components/discount-form";
 
 export default async function NewDiscountPage() {

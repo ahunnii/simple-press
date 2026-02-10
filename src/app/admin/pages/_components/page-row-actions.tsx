@@ -1,12 +1,13 @@
 "use client";
 
 import type { Page } from "generated/prisma";
-import { MoreHorizontal } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
+import Link from "next/link";
+import { MoreHorizontal } from "lucide-react";
+import { useRouter } from "nextjs-toploader/app";
 import { toast } from "sonner";
 
+import { api } from "~/trpc/react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +28,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { api } from "~/trpc/react";
 
 type PageWithClub = Page & {
   club: { id: string; name: string };

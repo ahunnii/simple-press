@@ -1,8 +1,6 @@
-import * as React from "react"
-import type { Editor } from "@tiptap/react"
-import type { FormatAction } from "../../types"
-import type { toggleVariants } from "~/components/ui/toggle"
-import type { VariantProps } from "class-variance-authority"
+import type { Editor } from "@tiptap/react";
+import type { VariantProps } from "class-variance-authority";
+import * as React from "react";
 import {
   CodeIcon,
   DotsHorizontalIcon,
@@ -11,8 +9,12 @@ import {
   StrikethroughIcon,
   TextNoneIcon,
   UnderlineIcon,
-} from "@radix-ui/react-icons"
-import { ToolbarSection } from "../toolbar-section"
+} from "@radix-ui/react-icons";
+
+import type { FormatAction } from "../../types";
+import type { toggleVariants } from "~/components/ui/toggle";
+
+import { ToolbarSection } from "../toolbar-section";
 
 type TextStyleAction =
   | "bold"
@@ -20,10 +22,10 @@ type TextStyleAction =
   | "underline"
   | "strikethrough"
   | "code"
-  | "clearFormatting"
+  | "clearFormatting";
 
 interface TextStyle extends FormatAction {
-  value: TextStyleAction
+  value: TextStyleAction;
 }
 
 const formatActions: TextStyle[] = [
@@ -93,12 +95,12 @@ const formatActions: TextStyle[] = [
       !editor.isActive("codeBlock"),
     shortcuts: ["mod", "\\"],
   },
-]
+];
 
 interface SectionTwoProps extends VariantProps<typeof toggleVariants> {
-  editor: Editor
-  activeActions?: TextStyleAction[]
-  mainActionCount?: number
+  editor: Editor;
+  activeActions?: TextStyleAction[];
+  mainActionCount?: number;
 }
 
 export const SectionTwo: React.FC<SectionTwoProps> = ({
@@ -120,9 +122,9 @@ export const SectionTwo: React.FC<SectionTwoProps> = ({
       size={size}
       variant={variant}
     />
-  )
-}
+  );
+};
 
-SectionTwo.displayName = "SectionTwo"
+SectionTwo.displayName = "SectionTwo";
 
-export default SectionTwo
+export default SectionTwo;

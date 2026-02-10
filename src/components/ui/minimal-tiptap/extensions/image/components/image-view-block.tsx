@@ -1,14 +1,17 @@
-import { InfoCircledIcon, TrashIcon } from "@radix-ui/react-icons";
-import { Editor, NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
+import type { NodeViewProps } from "@tiptap/react";
 import * as React from "react";
+import { InfoCircledIcon, TrashIcon } from "@radix-ui/react-icons";
+import { Editor, NodeViewWrapper } from "@tiptap/react";
 import { Controlled as ControlledZoom } from "react-medium-image-zoom";
+
+import type { ElementDimensions } from "../hooks/use-drag-resize";
+import type { UploadReturnType } from "../image";
 import { cn } from "~/lib/utils";
+
 import { Spinner } from "../../../components/spinner";
 import { blobUrlToBase64, randomId } from "../../../utils";
-import type { ElementDimensions } from "../hooks/use-drag-resize";
 import { useDragResize } from "../hooks/use-drag-resize";
 import { useImageActions } from "../hooks/use-image-actions";
-import type { UploadReturnType } from "../image";
 import { ActionButton, ActionWrapper, ImageActions } from "./image-actions";
 import { ImageOverlay } from "./image-overlay";
 import { ResizeHandle } from "./resize-handle";

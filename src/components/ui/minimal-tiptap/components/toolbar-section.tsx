@@ -1,16 +1,18 @@
-import { CaretDownIcon } from "@radix-ui/react-icons";
 import type { Editor } from "@tiptap/react";
 import type { VariantProps } from "class-variance-authority";
 import * as React from "react";
+import { CaretDownIcon } from "@radix-ui/react-icons";
+
+import type { FormatAction } from "../types";
+import type { toggleVariants } from "~/components/ui/toggle";
+import { cn } from "~/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import type { toggleVariants } from "~/components/ui/toggle";
-import { cn } from "~/lib/utils";
-import type { FormatAction } from "../types";
+
 import { getShortcutKey } from "../utils";
 import { ShortcutKey } from "./shortcut-key";
 import { ToolbarButton } from "./toolbar-button";

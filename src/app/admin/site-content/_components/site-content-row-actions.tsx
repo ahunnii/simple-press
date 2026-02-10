@@ -1,12 +1,13 @@
 "use client";
 
 import type { SiteContent } from "generated/prisma";
-import { MoreHorizontal } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
+import Link from "next/link";
+import { MoreHorizontal } from "lucide-react";
+import { useRouter } from "nextjs-toploader/app";
 import { toast } from "sonner";
 
+import { api } from "~/trpc/react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +28,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { api } from "~/trpc/react";
 
 function encodeKeyForUrl(key: string): string {
   return encodeURIComponent(key);
@@ -102,8 +102,8 @@ export function SiteContentRowActions({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete site content</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the entry with key
-              &quot;{siteContent.key}&quot;? This action cannot be undone.
+              Are you sure you want to delete the entry with key &quot;
+              {siteContent.key}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

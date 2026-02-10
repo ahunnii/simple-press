@@ -1,11 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+
 import { checkBusiness } from "~/lib/check-business";
 import {
   productCreateSchema,
   productUpdateSchema,
 } from "~/lib/validators/product";
-
 import {
   createTRPCRouter,
   ownerAdminProcedure,

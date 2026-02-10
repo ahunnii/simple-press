@@ -1,15 +1,15 @@
 "use client";
 
-import { useRouter } from "nextjs-toploader/app";
 import { useRef, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { MoreVertical, Trash2 } from "lucide-react";
+import { useRouter } from "nextjs-toploader/app";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { MoreVertical, Trash2 } from "lucide-react";
-
-import { InputFormField } from "~/components/inputs/input-form-field";
-import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
+import type { PageEditFormSchema } from "../_validators/page";
+import { api } from "~/trpc/react";
+import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,13 +29,10 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Form } from "~/components/ui/form";
-import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
-import { api } from "~/trpc/react";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 
-import {
-  pageEditFormSchema,
-  type PageEditFormSchema,
-} from "../_validators/page";
+import { pageEditFormSchema } from "../_validators/page";
 
 export type PageFormDefaultValues = {
   slug: string;
@@ -118,11 +115,11 @@ export function PageForm({
           onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
           className="flex w-full flex-col gap-4"
         >
-          <div className="sticky top-0 z-10 -mx-4 -mt-4 flex w-[calc(100%+2rem)] justify-center border-b border-border/30 px-4 py-3 transition-all duration-300 md:-mx-6 md:w-[calc(100%+3rem)] md:px-6">
+          <div className="border-border/30 sticky top-0 z-10 -mx-4 -mt-4 flex w-[calc(100%+2rem)] justify-center border-b px-4 py-3 transition-all duration-300 md:-mx-6 md:w-[calc(100%+3rem)] md:px-6">
             <div
               className={`flex w-[90%] items-center justify-between gap-2 rounded-full border px-4 py-3 shadow-sm backdrop-blur transition-all duration-300 ${
                 isDirty
-                  ? "border-amber-200 bg-background/95 shadow-md supports-[backdrop-filter]:bg-background/80 dark:border-amber-800"
+                  ? "bg-background/95 supports-[backdrop-filter]:bg-background/80 border-amber-200 shadow-md dark:border-amber-800"
                   : "border-border/50 bg-background/60 supports-[backdrop-filter]:bg-background/50"
               }`}
             >

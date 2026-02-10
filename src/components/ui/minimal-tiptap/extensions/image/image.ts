@@ -1,15 +1,13 @@
 import type { ImageOptions } from "@tiptap/extension-image";
-import { Image as TiptapImage } from "@tiptap/extension-image";
 import type { Attrs } from "@tiptap/pm/model";
-import { ReplaceStep } from "@tiptap/pm/transform";
 import type { Editor } from "@tiptap/react";
+import { Image as TiptapImage } from "@tiptap/extension-image";
+import { ReplaceStep } from "@tiptap/pm/transform";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import {
-  filterFiles,
-  randomId,
-  type FileError,
-  type FileValidationOptions,
-} from "../../utils";
+
+import type { FileError, FileValidationOptions } from "../../utils";
+
+import { filterFiles, randomId } from "../../utils";
 import { ImageViewBlock } from "./components/image-view-block";
 
 type ImageAction = "download" | "copyImage" | "copyLink";

@@ -1,7 +1,4 @@
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 function escapeXml(unsafe: string): string {
   return unsafe

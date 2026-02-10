@@ -1,8 +1,9 @@
 "use client";
 
 import type { Order, OrderItem, ShippingAddress } from "generated/prisma";
-import { Eye } from "lucide-react";
 import Link from "next/link";
+import { Eye } from "lucide-react";
+
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";

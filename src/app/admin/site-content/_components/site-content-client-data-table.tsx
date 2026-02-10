@@ -1,5 +1,12 @@
 "use client";
 
+import type {
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+} from "@tanstack/react-table";
+import type { SiteContent } from "generated/prisma";
+import * as React from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -7,13 +14,9 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  type ColumnFiltersState,
-  type SortingState,
-  type VisibilityState,
 } from "@tanstack/react-table";
-import type { SiteContent } from "generated/prisma";
 import { ChevronDown } from "lucide-react";
-import * as React from "react";
+
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -31,6 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+
 import { NewSiteContentButton } from "./new-site-content-button";
 import { siteContentColumns } from "./site-content-columns";
 

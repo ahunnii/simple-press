@@ -1,5 +1,8 @@
 "use client";
 
+import * as React from "react";
+import Image from "next/image";
+import Link from "next/link";
 import {
   IconArticle,
   IconBuildingCommunity,
@@ -25,14 +28,8 @@ import {
   IconTerminal,
   IconUsers,
 } from "@tabler/icons-react";
-import Image from "next/image";
-import Link from "next/link";
-import * as React from "react";
 
-import { NavDocuments } from "~/app/admin/_components/nav-documents";
-import { NavMain } from "~/app/admin/_components/nav-main";
-import { NavSecondary } from "~/app/admin/_components/nav-secondary";
-import { NavUser } from "~/app/admin/_components/nav-user";
+import { env } from "~/env";
 import {
   Sidebar,
   SidebarContent,
@@ -42,7 +39,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
-import { env } from "~/env";
+import { NavDocuments } from "~/app/admin/_components/nav-documents";
+import { NavMain } from "~/app/admin/_components/nav-main";
+import { NavSecondary } from "~/app/admin/_components/nav-secondary";
+import { NavUser } from "~/app/admin/_components/nav-user";
+
+import WelcomeNotification from "./welcome-notification";
 
 const data = {
   user: {
@@ -72,6 +74,11 @@ const data = {
       title: "Discounts",
       url: "/admin/discounts",
       icon: IconDiscount,
+    },
+    {
+      title: "Collections",
+      url: "/admin/collections",
+      icon: IconFolder,
     },
     // {
     //   title: "Members",
@@ -138,11 +145,11 @@ const data = {
     // },
   ],
   navSecondary: [
-    // {
-    //   title: "Settings",
-    //   url: "#",
-    //   icon: IconSettings,
-    // },
+    {
+      title: "Settings",
+      url: "/admin/settings",
+      icon: IconSettings,
+    },
     {
       title: "Get Help",
       url: env.NEXT_PUBLIC_HELP_URL,
@@ -197,9 +204,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         {/* <NavDocuments items={data.documents} /> */}
+
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
+        <WelcomeNotification />
         <NavUser />
       </SidebarFooter>
     </Sidebar>

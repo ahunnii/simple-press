@@ -2,9 +2,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client";
 
-import { Check, ShoppingCart } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
+import Image from "next/image";
+import { Check, ShoppingCart } from "lucide-react";
+
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";

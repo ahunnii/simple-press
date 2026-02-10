@@ -1,5 +1,12 @@
 "use client";
 
+import type {
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+} from "@tanstack/react-table";
+import type { Page } from "generated/prisma";
+import * as React from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -7,15 +14,10 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  type ColumnFiltersState,
-  type SortingState,
-  type VisibilityState,
 } from "@tanstack/react-table";
-import type { Page } from "generated/prisma";
 import { ChevronDown } from "lucide-react";
-import * as React from "react";
-import { Button } from "~/components/ui/button";
 
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -32,21 +34,19 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { pageColumns } from "./page-columns";
+
 import { NewPageButton } from "./new-page-button";
+import { pageColumns } from "./page-columns";
 
 type PageWithClub = Page & {
   club: { id: string; name: string };
 };
 
-export function PageClientDataTable({
-  data,
-}: {
-  data: PageWithClub[];
-}) {
+export function PageClientDataTable({ data }: { data: PageWithClub[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] =
-    React.useState<ColumnFiltersState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});

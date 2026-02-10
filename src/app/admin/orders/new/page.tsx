@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 
 import { checkBusiness } from "~/lib/check-business";
-
 import { api } from "~/trpc/server";
+
 import { ManualOrderForm } from "../_components/manual-order-form";
 
 export default async function NewOrderPage() {

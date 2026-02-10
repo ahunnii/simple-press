@@ -1,9 +1,9 @@
-import { Home, SearchX } from "lucide-react";
 import Link from "next/link";
+import { Home, SearchX } from "lucide-react";
 
+import { Button } from "~/components/ui/button";
 import { Footer } from "~/components/layout/footer";
 import { Header } from "~/components/layout/header";
-import { Button } from "~/components/ui/button";
 
 export default function NotFound() {
   return (

@@ -1,22 +1,37 @@
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
+
 import "~/styles/globals.css";
 
-import { TooltipProvider } from "~/components/ui/tooltip";
-
 import Script from "next/script";
+
 import { env } from "~/env";
 import { TRPCReactProvider } from "~/trpc/react";
+import { api } from "~/trpc/server";
+import { TooltipProvider } from "~/components/ui/tooltip";
+
 import { Providers } from "../providers/providers";
 
-export const metadata: Metadata = {
-  title: {
-    template: "%s - Crossroads Community Association",
-    default: "Crossroads Community Association",
-  },
-  description: "GBuilding a Safer, Stronger Community Together.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
-};
+export async function generateMetadata() {
+  const business = await api.business.get();
+  if (!business) {
+    return {
+      title: "Simple Press",
+      description: "Building a Safer, Stronger Community Together.",
+      icons: [{ rel: "icon", url: "/favicon.ico" }],
+    };
+  }
+  return {
+    title: {
+      template: `%s - ${business.name}`,
+      default: business.name,
+    },
+    description: "Building a Safer, Stronger Community Together.",
+    icons: [
+      { rel: "icon", url: business.siteContent?.faviconUrl ?? "/favicon.ico" },
+    ],
+  };
+}
 
 const geist = Geist({
   subsets: ["latin"],

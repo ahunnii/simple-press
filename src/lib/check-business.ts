@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+
 import { db } from "~/server/db";
 
 export const checkBusiness = async () => {

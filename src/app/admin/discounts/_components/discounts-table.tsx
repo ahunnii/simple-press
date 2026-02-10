@@ -1,8 +1,9 @@
 "use client";
 
 import type { DiscountCode } from "generated/prisma";
-import { Edit, Trash } from "lucide-react";
 import Link from "next/link";
+import { Edit, Trash } from "lucide-react";
+
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";

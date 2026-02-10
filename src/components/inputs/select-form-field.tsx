@@ -1,5 +1,6 @@
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
+import { cn } from "~/lib/utils";
 import {
   FormControl,
   FormDescription,
@@ -15,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { cn } from "~/lib/utils";
 
 type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;

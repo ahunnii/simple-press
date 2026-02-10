@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { checkBusiness } from "~/lib/check-business";
 import { api } from "~/trpc/server";
+
 import { ProductForm } from "../_components/product-form";
 
 type Props = {

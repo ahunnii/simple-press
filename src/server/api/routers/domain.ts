@@ -1,9 +1,9 @@
-import { TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+
 import { checkBusiness } from "~/lib/check-business";
 import { isValidDomain } from "~/lib/utils";
-
 import {
   createTRPCRouter,
   ownerAdminProcedure,

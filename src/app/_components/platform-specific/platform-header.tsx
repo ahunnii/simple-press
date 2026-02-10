@@ -1,5 +1,6 @@
-import { Store } from "lucide-react";
 import Link from "next/link";
+import { Store } from "lucide-react";
+
 import { Button } from "~/components/ui/button";
 
 export function PlatformHeader() {

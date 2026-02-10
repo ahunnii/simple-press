@@ -6,6 +6,7 @@ import {
   Store,
   Zap,
 } from "lucide-react";
+
 import { Card, CardContent } from "~/components/ui/card";
 
 const features = [

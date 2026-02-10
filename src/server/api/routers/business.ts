@@ -1,8 +1,9 @@
-import { TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { checkBusiness } from "~/lib/check-business";
 
+import { checkBusiness } from "~/lib/check-business";
+import { updateBrandingSchema } from "~/lib/validators/branding";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
@@ -60,20 +61,7 @@ export const businessRouter = createTRPCRouter({
     }),
 
   updateBranding: ownerAdminProcedure
-    .input(
-      z.object({
-        templateId: z.string(),
-        siteContent: z.object({
-          heroTitle: z.string().optional(),
-          heroSubtitle: z.string().optional(),
-          aboutText: z.string().optional(),
-          primaryColor: z.string().optional(),
-          logoUrl: z.string().optional(),
-          faviconUrl: z.string().optional(),
-          footerText: z.string().optional(),
-        }),
-      }),
-    )
+    .input(updateBrandingSchema)
     .mutation(async ({ ctx, input }) => {
       const { templateId, siteContent } = input;
 
@@ -97,11 +85,13 @@ export const businessRouter = createTRPCRouter({
             },
           },
         },
-        include: {
-          siteContent: true,
-        },
+        include: { siteContent: true },
       });
-      return updatedBusiness;
+
+      return {
+        message: "Branding updated successfully",
+        businessId: updatedBusiness.id,
+      };
     }),
 
   updateGeneral: ownerAdminProcedure
@@ -130,7 +120,10 @@ export const businessRouter = createTRPCRouter({
         where: { id: business.id },
         data: { name, ownerEmail, supportEmail, businessAddress, taxId },
       });
-      return updatedBusiness;
+      return {
+        message: "General settings updated successfully",
+        businessId: updatedBusiness.id,
+      };
     }),
 
   updateIntegrations: ownerAdminProcedure

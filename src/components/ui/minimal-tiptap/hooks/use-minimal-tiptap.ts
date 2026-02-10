@@ -1,12 +1,14 @@
+import type { Content, Editor, UseEditorOptions } from "@tiptap/react";
+import * as React from "react";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Typography } from "@tiptap/extension-typography";
 import { Placeholder, Selection } from "@tiptap/extensions";
-import type { Content, Editor, UseEditorOptions } from "@tiptap/react";
 import { useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
-import * as React from "react";
 import { toast } from "sonner";
+
 import { cn } from "~/lib/utils";
+
 import {
   CodeBlockLowlight,
   Color,

@@ -1,4 +1,5 @@
 import { hash } from "bcrypt";
+
 import { db } from "~/server/db";
 
 async function main() {

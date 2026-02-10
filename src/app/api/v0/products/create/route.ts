@@ -1,6 +1,7 @@
 import type { ProductVariant } from "generated/prisma";
 import type { InputJsonValue } from "generated/prisma/runtime/library";
-import { type NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";

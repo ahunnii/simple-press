@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 "use client";
 
-import { AuthUIProvider } from "@daveyplate/better-auth-ui";
-
-import Link from "next/link";
-import { useRouter } from "nextjs-toploader/app";
 import type { ReactNode } from "react";
+import Link from "next/link";
+import { AuthUIProvider } from "@daveyplate/better-auth-ui";
+import { useRouter } from "nextjs-toploader/app";
 import { Toaster } from "sonner";
-import { CartProvider } from "~/providers/cart-context";
 
 import { authClient } from "~/server/better-auth/client";
+import { CartProvider } from "~/providers/cart-context";
 
 export function Providers({ children }: { children: ReactNode }) {
   const router = useRouter();

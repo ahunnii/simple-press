@@ -1,11 +1,13 @@
 "use client";
 
-import { Edit, Eye, MoreVertical, Trash } from "lucide-react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Edit, Eye, MoreVertical, Trash } from "lucide-react";
 import { toast } from "sonner";
+
+import { api } from "~/trpc/react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +27,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { api } from "~/trpc/react";
 
 type Product = {
   id: string;

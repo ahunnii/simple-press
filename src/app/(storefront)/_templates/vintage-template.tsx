@@ -1,5 +1,7 @@
 import Link from "next/link";
+
 import { Button } from "~/components/ui/button";
+
 import { ProductCard } from "../_components/product-card";
 import { StorefrontFooter } from "../_components/storefront-footer";
 import { StorefrontHeader } from "../_components/storefront-header";
@@ -68,7 +70,7 @@ export function VintageTemplate({ business }: VintageTemplateProps) {
       <div className="h-1 bg-gradient-to-r from-transparent via-gray-400 to-transparent" />
 
       {/* Featured Products */}
-      {business.products.length > 0 && (
+      {business.products?.length > 0 && (
         <section className="px-4 py-20">
           <div className="mx-auto max-w-7xl">
             <div className="mb-12 text-center">
@@ -80,7 +82,7 @@ export function VintageTemplate({ business }: VintageTemplateProps) {
               </p>
             </div>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {business.products.map((product) => (
+              {business.products?.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

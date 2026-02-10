@@ -1,4 +1,5 @@
 import { minio } from "@better-upload/server/clients";
+
 import { env } from "~/env";
 
 export const s3Client = minio({

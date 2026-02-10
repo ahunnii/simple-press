@@ -1,15 +1,13 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { Heart, LayoutDashboardIcon, Menu, X } from "lucide-react";
-import Image from "next/image";
-
-import Link from "next/link";
-import { useState } from "react";
-
-import { Button } from "~/components/ui/button";
 
 import { authClient } from "~/server/better-auth/client";
+import { Button } from "~/components/ui/button";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

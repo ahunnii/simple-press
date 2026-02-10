@@ -1,14 +1,29 @@
 "use client";
 
+import { useRef } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Sparkles } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
-import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-
+import type { PageFormData } from "~/lib/validators/page";
+import { EMPTY_TIPTAP_DOC, pageSchema } from "~/lib/validators/page";
+import { api } from "~/trpc/react";
+import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import {
+  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -23,25 +38,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
-import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
-import { Form } from "~/components/ui/form";
-import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
-import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
-import type { PageFormData } from "~/lib/validators/page";
-import { pageSchema } from "~/lib/validators/page";
-import { api } from "~/trpc/react";
+import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 
 export function NewPageButton() {
   const router = useRouter();

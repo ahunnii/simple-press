@@ -1,7 +1,9 @@
 "use client";
 
-import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { AlertCircle, Loader2 } from "lucide-react";
+
+import type { SignupFormData } from "../page";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -12,7 +14,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import type { SignupFormData } from "../page";
 
 type InvitationCodeStepProps = {
   formData: Partial<SignupFormData>;

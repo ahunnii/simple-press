@@ -1,8 +1,8 @@
 "use client";
 
 import type { Editor } from "@tiptap/react";
-import { useCurrentEditor, useEditorState } from "@tiptap/react";
 import { useMemo } from "react";
+import { useCurrentEditor, useEditorState } from "@tiptap/react";
 
 /**
  * Hook that provides access to a Tiptap editor instance.

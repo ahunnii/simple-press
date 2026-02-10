@@ -1,10 +1,11 @@
 "use client";
 
 import type { Order } from "generated/prisma";
-import { CheckCircle, Package } from "lucide-react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { CheckCircle, Package } from "lucide-react";
+
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 

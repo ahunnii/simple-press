@@ -1,7 +1,10 @@
 "use client";
 
-import { AlertCircle, ArrowLeft, Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AlertCircle, ArrowLeft, Check, X } from "lucide-react";
+
+import type { SignupFormData } from "../page";
+import { isSubdomainReserved, isValidDomain, slugify } from "~/lib/utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -12,8 +15,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { isSubdomainReserved, isValidDomain, slugify } from "~/lib/utils";
-import type { SignupFormData } from "../page";
 
 type BusinessInfoStepProps = {
   formData: Partial<SignupFormData>;

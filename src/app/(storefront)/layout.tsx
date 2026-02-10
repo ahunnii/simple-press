@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { CartProvider } from "~/providers/cart-context";
+
 import { api } from "~/trpc/server";
+import { CartProvider } from "~/providers/cart-context";
 
 type Props = {
   children: React.ReactNode;

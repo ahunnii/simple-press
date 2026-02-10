@@ -1,5 +1,7 @@
 import Link from "next/link";
+
 import { Button } from "~/components/ui/button";
+
 import { ProductCard } from "../_components/product-card";
 import { StorefrontFooter } from "../_components/storefront-footer";
 import { StorefrontHeader } from "../_components/storefront-header";
@@ -67,11 +69,11 @@ export function MinimalTemplate({ business }: MinimalTemplateProps) {
       </section>
 
       {/* Featured Products */}
-      {business.products.length > 0 && (
+      {business.products?.length > 0 && (
         <section className="px-4 py-24">
           <div className="mx-auto max-w-7xl">
             <div className="grid grid-cols-1 gap-px bg-gray-200 sm:grid-cols-2 md:grid-cols-3">
-              {business.products.map((product) => (
+              {business.products?.map((product) => (
                 <div key={product.id} className="bg-white">
                   <ProductCard product={product} />
                 </div>

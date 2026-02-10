@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { AccountDetailsStep } from "./account-details-step";
 import { BusinessInfoStep } from "./business-info-step";
 import { InvitationCodeStep } from "./invitation-code-step";

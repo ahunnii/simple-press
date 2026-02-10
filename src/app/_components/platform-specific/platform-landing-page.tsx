@@ -1,4 +1,5 @@
 "use client";
+
 import { CTASection } from "./cta-section";
 import { FeaturesSection } from "./features-section";
 import { HeroSection } from "./hero-section";

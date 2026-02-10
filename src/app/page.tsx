@@ -1,8 +1,9 @@
 import { api, HydrateClient } from "~/trpc/server";
+
+import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
 import { MinimalTemplate } from "./(storefront)/_templates/minimal-template";
 import { ModernTemplate } from "./(storefront)/_templates/modern-template";
 import { VintageTemplate } from "./(storefront)/_templates/vintage-template";
-import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
 
 export default async function PlatformLandingPage() {
   const business = await api.business.get();

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
+
 import { QuickActions } from "../_components/quick-actions";
 import { SetupChecklist } from "../_components/setup-checklist";
 import { WelcomeHeader } from "../_components/welcome-header";

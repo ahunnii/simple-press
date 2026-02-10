@@ -1,10 +1,11 @@
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
+
+import { OrderConfirmation } from "../_components/order-confirmation";
 import { StorefrontFooter } from "../../_components/storefront-footer";
 import { StorefrontHeader } from "../../_components/storefront-header";
-import { OrderConfirmation } from "../_components/order-confirmation";
 
 export default async function OrderSuccessPage() {
   // Find business

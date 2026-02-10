@@ -1,5 +1,6 @@
 "use client";
 
+import { UserButton } from "@daveyplate/better-auth-ui";
 import {
   IconCreditCard,
   IconDotsVertical,
@@ -24,8 +25,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "~/components/ui/sidebar";
-
-import { UserButton } from "@daveyplate/better-auth-ui";
 
 const initials = (
   name: string | null | undefined,

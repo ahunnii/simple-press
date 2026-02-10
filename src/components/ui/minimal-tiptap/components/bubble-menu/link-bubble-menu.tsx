@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import type { Editor } from "@tiptap/react";
-import { BubbleMenu } from "@tiptap/react/menus";
 import * as React from "react";
+import { BubbleMenu } from "@tiptap/react/menus";
+
 import type { ShouldShowProps } from "../../types";
+
 import { LinkEditBlock } from "../link/link-edit-block";
 import { LinkPopoverBlock } from "../link/link-popover-block";
 

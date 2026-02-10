@@ -1,11 +1,10 @@
+import { getSession } from "~/server/better-auth/server";
+import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { AppSidebar } from "~/app/admin/_components/app-sidebar";
 import { ChartAreaInteractive } from "~/app/admin/_components/chart-area-interactive";
 import { DataTable } from "~/app/admin/_components/data-table";
 import { SectionCards } from "~/app/admin/_components/section-cards";
 import { SiteHeader } from "~/app/admin/_components/site-header";
-import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
-
-import { getSession } from "~/server/better-auth/server";
 
 export default async function AdminDashboardPage() {
   const session = await getSession();

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   IconChartBar,
   IconChevronRight,
@@ -5,8 +6,8 @@ import {
   IconHelp,
   IconMail,
 } from "@tabler/icons-react";
-import Link from "next/link";
 
+import { env } from "~/env";
 import {
   Card,
   CardDescription,
@@ -14,7 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { env } from "~/env";
 
 const CONTACT_EMAIL = "test@gmail.com";
 

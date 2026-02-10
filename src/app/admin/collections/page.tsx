@@ -1,7 +1,9 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
+
 import { CollectionsPage } from "./_components/collections-page";
 
 export default async function AdminCollectionsPage() {

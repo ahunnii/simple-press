@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef } from "react";
 import type { UseFormReturn } from "react-hook-form";
+import { useEffect, useRef } from "react";
 
 export function useKeyboardEnter(
   form: UseFormReturn<any>,

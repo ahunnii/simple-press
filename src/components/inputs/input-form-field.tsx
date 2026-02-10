@@ -1,6 +1,7 @@
 import type { InputHTMLAttributes } from "react";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
+import { cn } from "~/lib/utils";
 import {
   FormControl,
   FormDescription,
@@ -10,7 +11,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { cn } from "~/lib/utils";
 
 type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;
@@ -22,12 +22,15 @@ type Props<CurrentForm extends FieldValues> = {
   placeholder?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
+  onChangeAdditional?: (value: string) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   inputId?: string;
   inputRef?: React.RefObject<HTMLInputElement | null>;
   type?: InputHTMLAttributes<HTMLInputElement>["type"];
+  required?: boolean;
+  autoFocus?: boolean;
 };
 
 export const InputFormField = <CurrentForm extends FieldValues>({
@@ -38,13 +41,15 @@ export const InputFormField = <CurrentForm extends FieldValues>({
   className,
   disabled,
   placeholder,
-
   onChange,
+  onChangeAdditional,
   onKeyDown,
   onFocus,
   onBlur,
   inputId,
   inputRef,
+  required,
+  autoFocus,
 }: Props<CurrentForm>) => {
   return (
     <FormField
@@ -69,10 +74,15 @@ export const InputFormField = <CurrentForm extends FieldValues>({
                   }
                 }}
                 onChange={(e) => {
+                  if (!!onChangeAdditional) {
+                    onChangeAdditional(e.target.value);
+                  }
+
                   if (!!onChange) {
                     onChange(e.target.value);
+                  } else {
+                    field.onChange(e.target.value);
                   }
-                  field.onChange(e.target.value);
                 }}
                 onKeyDown={onKeyDown}
                 onFocus={onFocus}
@@ -81,6 +91,8 @@ export const InputFormField = <CurrentForm extends FieldValues>({
                   onBlur?.(e);
                 }}
                 id={inputId}
+                required={required}
+                autoFocus={autoFocus}
               />
             </FormControl>
             {description && <FormDescription>{description}</FormDescription>}

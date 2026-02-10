@@ -1,10 +1,18 @@
 "use client";
 
 import type { Business, SiteContent } from "generated/prisma";
-import { Loader2, Save } from "lucide-react";
+import { useRef } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Alert, AlertDescription } from "~/components/ui/alert";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import type { GeneralBusinessFormSchema } from "~/lib/validators/general-business";
+import { generalBusinessFormSchema } from "~/lib/validators/general-business";
+import { api } from "~/trpc/react";
+import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -13,20 +21,9 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
-import { api } from "~/trpc/react";
-
-// type Business = {
-//   id: string;
-//   name: string;
-//   slug: string;
-//   ownerEmail: string;
-//   supportEmail: string | null;
-//   businessAddress: string | null;
-//   taxId: string | null;
-// };
+import { Form } from "~/components/ui/form";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type GeneralSettingsProps = {
   business: Business & { siteContent?: SiteContent | null };
@@ -34,216 +31,194 @@ type GeneralSettingsProps = {
 
 export function GeneralSettings({ business }: GeneralSettingsProps) {
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
-  // Form state
-  const [name, setName] = useState(business.name);
-  const [ownerEmail, setOwnerEmail] = useState(business.ownerEmail);
-  const [supportEmail, setSupportEmail] = useState(business.supportEmail ?? "");
-  const [businessAddress, setBusinessAddress] = useState(
-    business.businessAddress ?? "",
-  );
-  const [taxId, setTaxId] = useState(business.taxId ?? "");
+  // Form refs
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const form = useForm<GeneralBusinessFormSchema>({
+    resolver: zodResolver(generalBusinessFormSchema),
+    defaultValues: {
+      ...business,
+      supportEmail: business.supportEmail ?? undefined,
+      businessAddress: business.businessAddress ?? undefined,
+      taxId: business.taxId ?? undefined,
+    },
+  });
 
   const updateGeneralMutation = api.business.updateGeneral.useMutation({
-    onSuccess: () => {
-      router.refresh();
-      setSuccess(true);
+    onSuccess: (data) => {
+      toast.dismiss();
+      toast.success(data.message);
     },
     onError: (error) => {
-      setError(error.message ?? "Failed to update general settings");
+      toast.error(error.message ?? "Failed to update branding");
+    },
+    onMutate: () => {
+      toast.loading("Updating branding...");
     },
     onSettled: () => {
-      setIsSaving(false);
       router.refresh();
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
-    setIsSaving(true);
-
+  const handleSubmit = async (data: GeneralBusinessFormSchema) => {
     updateGeneralMutation.mutate({
-      name,
-      ownerEmail,
-      supportEmail: supportEmail ?? undefined,
-      businessAddress: businessAddress ?? undefined,
-      taxId: taxId ?? undefined,
+      name: data.name,
+      ownerEmail: data.ownerEmail,
+      supportEmail: data.supportEmail ?? undefined,
+      businessAddress: data.businessAddress ?? undefined,
+      taxId: data.taxId ?? undefined,
     });
-
-    // try {
-    //   const response = await fetch(`/api/business/${business.id}/general`, {
-    //     method: "PATCH",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({
-    //       name,
-    //       ownerEmail,
-    //       supportEmail: supportEmail || null,
-    //       businessAddress: businessAddress || null,
-    //       taxId: taxId || null,
-    //     }),
-    //   });
-
-    //   if (!response.ok) {
-    //     const data = await response.json();
-    //     throw new Error(data.error || "Failed to update settings");
-    //   }
-
-    //   setSuccess(true);
-    //   router.refresh();
-
-    //   // Clear success message after 3 seconds
-    //   setTimeout(() => setSuccess(false), 3000);
-    // } catch (err: any) {
-    //   setError(err.message);
-    // } finally {
-    //   setIsSaving(false);
-    // }
   };
 
+  const handleReset = () => {
+    form.reset({
+      ...business,
+      supportEmail: business.supportEmail ?? undefined,
+      businessAddress: business.businessAddress ?? undefined,
+      taxId: business.taxId ?? undefined,
+    });
+  };
+
+  // Checks
+  const isSubmitting = updateGeneralMutation.isPending;
+  const isDirty = form.formState.isDirty;
+
+  useKeyboardEnter(form, handleSubmit);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {success && (
-        <Alert>
-          <AlertDescription>Settings saved successfully!</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Business Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Business Information</CardTitle>
-          <CardDescription>
-            Basic information about your business
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="name">Business Name *</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+    <Form {...form}>
+      <form
+        ref={formRef}
+        onSubmit={(e) => void form.handleSubmit(handleSubmit)(e)}
+        className="space-y-6"
+      >
+        <div className="border-border/30 sticky top-0 z-10 -mx-4 -mt-4 flex w-[calc(100%+2rem)] justify-center border-b px-4 py-3 transition-all duration-300 md:-mx-6 md:w-[calc(100%+3rem)] md:px-6">
+          <div
+            className={`flex w-[90%] items-center justify-between gap-2 rounded-full border px-4 py-3 shadow-sm backdrop-blur transition-all duration-300 ${
+              isDirty
+                ? "bg-background/95 supports-backdrop-filter:bg-background/80 border-amber-200 shadow-md dark:border-amber-800"
+                : "border-border/50 bg-background/60 supports-backdrop-filter:bg-background/50"
+            }`}
+          >
+            <Button variant="ghost" size="sm" asChild className="shrink-0">
+              <Link href="/admin/dashboard">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Link>
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isSubmitting}
+                onClick={handleReset}
+              >
+                Reset
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <span className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2" />
+                    Saving...
+                  </>
+                ) : (
+                  "Update general settings"
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+        {/* Business Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Business Information</CardTitle>
+            <CardDescription>
+              Basic information about your business
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <InputFormField
+              form={form}
+              name="name"
+              label="Business Name"
+              description="The name of your business"
               required
             />
-          </div>
 
-          <div>
-            <Label htmlFor="slug">Store Slug</Label>
-            <Input
-              id="slug"
-              value={business.slug}
+            <InputFormField
+              form={form}
+              name="slug"
+              label="Store Slug"
+              description="Your unique store identifier (cannot be changed)"
+              required
               disabled
-              className="bg-gray-50"
             />
-            <p className="mt-1 text-sm text-gray-500">
-              Your unique store identifier (cannot be changed)
-            </p>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Contact Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Contact Information</CardTitle>
-          <CardDescription>Email addresses for your business</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="ownerEmail">Owner Email *</Label>
-            <Input
-              id="ownerEmail"
-              type="email"
-              value={ownerEmail}
-              onChange={(e) => setOwnerEmail(e.target.value)}
+            {/* <Label htmlFor="slug">Store Slug</Label>
+              <Input
+                id="slug"
+                value={business.slug}
+                disabled
+                className="bg-gray-50"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                Your unique store identifier (cannot be changed)
+              </p>
+            </div> */}
+          </CardContent>
+        </Card>
+
+        {/* Contact Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Contact Information</CardTitle>
+            <CardDescription>Email addresses for your business</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <InputFormField
+              form={form}
+              name="ownerEmail"
+              label="Owner Email"
+              description="Primary contact email for the business owner"
               required
             />
-            <p className="mt-1 text-sm text-gray-500">
-              Primary contact email for the business owner
-            </p>
-          </div>
 
-          <div>
-            <Label htmlFor="supportEmail">Support Email</Label>
-            <Input
-              id="supportEmail"
-              type="email"
-              value={supportEmail}
-              onChange={(e) => setSupportEmail(e.target.value)}
-              placeholder="support@example.com"
+            <InputFormField
+              form={form}
+              name="supportEmail"
+              label="Support Email"
+              description="Customer support email address"
             />
-            <p className="mt-1 text-sm text-gray-500">
-              Customer support email address
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Legal Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Legal Information</CardTitle>
-          <CardDescription>
-            Business address and tax information
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="businessAddress">Business Address</Label>
-            <Textarea
-              id="businessAddress"
-              value={businessAddress}
-              onChange={(e) => setBusinessAddress(e.target.value)}
-              placeholder="123 Main St&#10;New York, NY 10001&#10;United States"
-              rows={4}
+        {/* Legal Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Legal Information</CardTitle>
+            <CardDescription>
+              Business address and tax information
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <TextareaFormField
+              form={form}
+              name="businessAddress"
+              label="Business Address"
+              description="Full business address for legal purposes"
             />
-            <p className="mt-1 text-sm text-gray-500">
-              Full business address for legal purposes
-            </p>
-          </div>
 
-          <div>
-            <Label htmlFor="taxId">Tax ID / EIN</Label>
-            <Input
-              id="taxId"
-              value={taxId}
-              onChange={(e) => setTaxId(e.target.value)}
-              placeholder="12-3456789"
+            <InputFormField
+              form={form}
+              name="taxId"
+              label="Tax ID / EIN"
+              description="Your business tax identification number"
+              required
             />
-            <p className="mt-1 text-sm text-gray-500">
-              Your business tax identification number
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isSaving}>
-          {isSaving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <Save className="mr-2 h-4 w-4" />
-              Save Changes
-            </>
-          )}
-        </Button>
-      </div>
-    </form>
+          </CardContent>
+        </Card>
+      </form>
+    </Form>
   );
 }

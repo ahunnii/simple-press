@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
+
+import { ProductDetails } from "../_components/product-details";
 import { StorefrontFooter } from "../../_components/storefront-footer";
 import { StorefrontHeader } from "../../_components/storefront-header";
-import { ProductDetails } from "../_components/product-details";
 
 type PageProps = {
   params: Promise<{ slug: string }>;

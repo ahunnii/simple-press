@@ -1,9 +1,9 @@
 "use client";
 
+import type { Content } from "@tiptap/react";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
-import type { Content } from "@tiptap/react";
-
+import { cn } from "~/lib/utils";
 import {
   FormControl,
   FormDescription,
@@ -13,7 +13,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { MinimalTiptapEditor } from "~/components/ui/minimal-tiptap";
-import { cn } from "~/lib/utils";
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
 

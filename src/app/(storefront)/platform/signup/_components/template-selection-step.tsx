@@ -1,7 +1,11 @@
 "use client";
 
-import { ArrowLeft, Check } from "lucide-react";
 import { useState } from "react";
+import { ArrowLeft, Check } from "lucide-react";
+
+import type { SignupFormData } from "../page";
+import { TEMPLATES } from "~/lib/constraints";
+import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -10,9 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { TEMPLATES } from "~/lib/constraints";
-import { cn } from "~/lib/utils";
-import type { SignupFormData } from "../page";
 
 type TemplateSelectionStepProps = {
   formData: Partial<SignupFormData>;
