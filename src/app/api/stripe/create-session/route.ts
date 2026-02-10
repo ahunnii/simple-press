@@ -183,6 +183,7 @@ export async function POST(req: NextRequest) {
     // Initialize Stripe with platform account
 
     // Create line items for Stripe (metadata so webhook can store product/variant and deduct inventory)
+    // TODO: Fix so that the price is looked up serverside and not client side (variant?.price ?? product.price for unit amount)
     const lineItems = itemList.map((item) => ({
       price_data: {
         currency: "usd",

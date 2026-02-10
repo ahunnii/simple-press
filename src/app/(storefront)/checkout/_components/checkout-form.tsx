@@ -74,7 +74,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
       }
 
       // 🔑 KEY CHANGE: Don't send businessId - API derives it from domain
-      const response = await fetch("/api/checkout/create-session", {
+      const response = await fetch("/api/stripe/create-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -208,7 +208,7 @@ export const productRouter = createTRPCRouter({
 
     const products = await ctx.db.product.findMany({
       where: { businessId: business.id },
-      include: { variants: true },
+      include: { variants: true, images: true },
       orderBy: { name: "asc" },
     });
 
@@ -261,7 +261,63 @@ export const productRouter = createTRPCRouter({
         productId: product.id,
       };
     }),
-  // Add image to product
+
+  // Add images to product
+  addImages: protectedProcedure
+    .input(
+      z.object({
+        images: z.array(
+          z.object({
+            productId: z.string(),
+            url: z.string().url(),
+            altText: z.string().nullable(),
+            sortOrder: z.number().int(),
+          }),
+        ),
+        productId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify product ownership
+      const product = await ctx.db.product.findUnique({
+        where: { id: input.productId },
+        select: { businessId: true },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { businessId: true },
+      });
+
+      if (user?.businessId !== product.businessId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Not authorized",
+        });
+      }
+
+      await ctx.db.image.createMany({
+        data: input.images.map((image) => ({
+          productId: input.productId,
+          url: image.url,
+          altText: image.altText,
+          sortOrder: image.sortOrder,
+        })),
+      });
+
+      return {
+        message: "Images added successfully!",
+        productId: input.productId,
+      };
+    }),
+
   addImage: protectedProcedure
     .input(
       z.object({
@@ -433,6 +489,6 @@ export const productRouter = createTRPCRouter({
         }),
       );
 
-      return { success: true };
+      return { success: true, productId: input.productId };
     }),
 });

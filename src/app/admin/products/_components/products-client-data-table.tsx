@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Edit, Eye, MoreVertical, Trash } from "lucide-react";
 import { toast } from "sonner";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 import {
   AlertDialog,
@@ -28,21 +29,11 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
-type Product = {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  published: boolean;
-  images: Array<{ url: string; altText: string | null }>;
-  _count: { variants: number };
+type Props = {
+  products: RouterOutputs["product"]["secureListAll"];
 };
 
-type ProductsTableProps = {
-  products: Product[];
-};
-
-export function ProductsTable({ products }: ProductsTableProps) {
+export function ProductsTable({ products }: Props) {
   const apiUtils = api.useUtils();
   const router = useRouter();
 

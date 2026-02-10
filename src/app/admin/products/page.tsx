@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Plus } from "lucide-react";
 
-import { checkBusiness } from "~/lib/check-business";
 import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import {
@@ -16,12 +14,6 @@ import {
 import { ProductsTable } from "./_components/products-client-data-table";
 
 export default async function ProductsPage() {
-  const business = await checkBusiness();
-
-  if (!business) {
-    redirect("/admin/welcome");
-  }
-
   const products = await api.product.secureListAll();
 
   return (
@@ -61,19 +53,7 @@ export default async function ProductsPage() {
               </CardContent>
             </Card>
           ) : (
-            <ProductsTable
-              products={
-                products as {
-                  id: string;
-                  name: string;
-                  slug: string;
-                  price: number;
-                  published: boolean;
-                  images: Array<{ url: string; altText: string | null }>;
-                  _count: { variants: number };
-                }[]
-              }
-            />
+            <ProductsTable products={products} />
           )}
         </div>
       </div>

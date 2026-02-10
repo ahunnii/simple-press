@@ -18,28 +18,28 @@ function downloadXml(xml: string) {
   URL.revokeObjectURL(url);
 }
 
-export function ExportWordPressButton() {
-  const { refetch, isFetching } = api.export.wordpressCommunityWxr.useQuery(
-    undefined,
-    { enabled: false },
-  );
+// export function ExportWordPressButton() {
+//   const { refetch, isFetching } = api.export.wordpressCommunityWxr.useQuery(
+//     undefined,
+//     { enabled: false },
+//   );
 
-  const handleExport = useCallback(async () => {
-    const result = await refetch();
-    if (result.data?.xml) {
-      downloadXml(result.data.xml);
-    }
-  }, [refetch]);
+//   const handleExport = useCallback(async () => {
+//     const result = await refetch();
+//     if (result.data?.xml) {
+//       downloadXml(result.data.xml);
+//     }
+//   }, [refetch]);
 
-  return (
-    <Button
-      onClick={() => void handleExport()}
-      disabled={isFetching}
-      variant="outline"
-      className="gap-2"
-    >
-      <IconFileExport className="size-4" />
-      {isFetching ? "Generating…" : "Export for WordPress"}
-    </Button>
-  );
-}
+//   return (
+//     <Button
+//       onClick={() => void handleExport()}
+//       disabled={isFetching}
+//       variant="outline"
+//       className="gap-2"
+//     >
+//       <IconFileExport className="size-4" />
+//       {isFetching ? "Generating…" : "Export for WordPress"}
+//     </Button>
+//   );
+// }

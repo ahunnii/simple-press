@@ -43,10 +43,7 @@ export function CollectionForm({
     );
 
   // Get all products for selection
-  const { data: allProducts } = api.product.getByBusiness.useQuery(
-    { businessId, includeUnpublished: true },
-    { enabled: true },
-  );
+  const { data: allProducts } = api.product.secureGetAll.useQuery();
 
   // Form state
   const [name, setName] = useState("");
@@ -63,11 +60,11 @@ export function CollectionForm({
   useState(() => {
     if (collection) {
       setName(collection.name);
-      setDescription(collection.description || "");
-      setImageUrl(collection.imageUrl || "");
+      setDescription(collection.description ?? "");
+      setImageUrl(collection.imageUrl ?? "");
       setPublished(collection.published);
-      setMetaTitle(collection.metaTitle || "");
-      setMetaDescription(collection.metaDescription || "");
+      setMetaTitle(collection.metaTitle ?? "");
+      setMetaDescription(collection.metaDescription ?? "");
       setSelectedProductIds(
         new Set(collection.collectionProducts.map((cp) => cp.product.id)),
       );
@@ -85,7 +82,7 @@ export function CollectionForm({
       }
 
       setSuccess(true);
-      utils.collections.getByBusiness.invalidate();
+      void utils.collections.getByBusiness.invalidate();
       setTimeout(() => router.push("/admin/collections"), 1500);
     },
     onError: (err) => {
@@ -123,7 +120,7 @@ export function CollectionForm({
       }
 
       setSuccess(true);
-      utils.collections.getByBusiness.invalidate();
+      void utils.collections.getByBusiness.invalidate();
       setTimeout(() => router.push("/admin/collections"), 1500);
     },
     onError: (err) => {

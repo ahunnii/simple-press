@@ -24,7 +24,12 @@ type OrderConfirmationProps = {
 export function OrderConfirmation({ business }: OrderConfirmationProps) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
-  const [orderDetails, setOrderDetails] = useState<Order | null>(null);
+  const [orderDetails, setOrderDetails] = useState<{
+    customer_email: string;
+    amount_total: number;
+    currency: string;
+    payment_status: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const sessionId = searchParams.get("session_id");
@@ -43,10 +48,16 @@ export function OrderConfirmation({ business }: OrderConfirmationProps) {
     const fetchOrderDetails = async () => {
       try {
         const response = await fetch(
-          `/api/checkout/session?session_id=${sessionId}`,
+          `/api/stripe/session?session_id=${sessionId}`,
         );
         if (response.ok) {
-          const data = await response.json();
+          const data = (await response.json()) as {
+            customer_email: string;
+            amount_total: number;
+            currency: string;
+            payment_status: string;
+          };
+
           setOrderDetails(data);
         }
       } catch (error) {
@@ -57,7 +68,7 @@ export function OrderConfirmation({ business }: OrderConfirmationProps) {
     };
 
     void fetchOrderDetails();
-  }, [sessionId, clearCart]);
+  }, [sessionId]);
 
   if (loading) {
     return (
@@ -110,11 +121,11 @@ export function OrderConfirmation({ business }: OrderConfirmationProps) {
           </div>
         </div>
 
-        {orderDetails?.customerEmail && (
+        {orderDetails?.customer_email && (
           <div className="mt-4 border-t pt-4 text-sm text-gray-600">
             <p>
               Confirmation sent to:{" "}
-              <strong>{orderDetails.customerEmail}</strong>
+              <strong>{orderDetails.customer_email}</strong>
             </p>
           </div>
         )}

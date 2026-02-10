@@ -1,15 +1,6 @@
-import { redirect } from "next/navigation";
-
-import { checkBusiness } from "~/lib/check-business";
-
 import { ProductForm } from "../_components/product-form";
 
 export default async function NewProductPage() {
-  const business = await checkBusiness();
-
-  if (!business) {
-    redirect("/admin/welcome");
-  }
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -20,7 +11,7 @@ export default async function NewProductPage() {
           </p>
         </div>
 
-        <ProductForm businessId={business?.id} />
+        <ProductForm />
       </div>
     </div>
   );

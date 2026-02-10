@@ -62,13 +62,13 @@ ${listItems}
 }
 
 export const exportRouter = createTRPCRouter({
-  wordpressCommunityWxr: protectedProcedure.query(async ({ ctx }) => {
-    const clubs = await ctx.db.club.findMany({
-      orderBy: [{ isFeatured: "desc" }, { name: "asc" }],
-      select: { name: true },
-    });
-    const clubNames = clubs.map((c) => c.name);
-    const xml = buildWxr(clubNames);
-    return { xml };
-  }),
+  // wordpressCommunityWxr: protectedProcedure.query(async ({ ctx }) => {
+  //   const clubs = await ctx.db.club.findMany({
+  //     orderBy: [{ isFeatured: "desc" }, { name: "asc" }],
+  //     select: { name: true },
+  //   });
+  //   const clubNames = clubs.map((c) => c.name);
+  //   const xml = buildWxr(clubNames);
+  //   return { xml };
+  // }),
 });

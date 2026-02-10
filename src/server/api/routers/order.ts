@@ -222,7 +222,7 @@ export const orderRouter = createTRPCRouter({
                   },
                 });
 
-                if (!product || !product.trackInventory) continue;
+                if (!product?.trackInventory) continue;
 
                 const newQty = product.inventoryQty + item.quantity;
 

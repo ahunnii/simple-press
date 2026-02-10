@@ -1,32 +1,14 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
-  IconArticle,
-  IconBuildingCommunity,
-  IconCamera,
-  IconChartBar,
-  IconConfetti,
   IconDashboard,
-  IconDatabase,
-  IconDiscount,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
   IconHelp,
-  IconInnerShadowTop,
-  IconLanguage,
-  IconListDetails,
   IconPackage,
-  IconReport,
-  IconSearch,
   IconSettings,
   IconShoppingCart,
   IconTerminal,
-  IconUsers,
 } from "@tabler/icons-react";
 
 import { env } from "~/env";
@@ -39,7 +21,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
-import { NavDocuments } from "~/app/admin/_components/nav-documents";
 import { NavMain } from "~/app/admin/_components/nav-main";
 import { NavSecondary } from "~/app/admin/_components/nav-secondary";
 import { NavUser } from "~/app/admin/_components/nav-user";
@@ -47,15 +28,10 @@ import { NavUser } from "~/app/admin/_components/nav-user";
 import WelcomeNotification from "./welcome-notification";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
-      url: "/admin/dashboard",
+      url: "/admin",
       icon: IconDashboard,
     },
     {
@@ -70,80 +46,23 @@ const data = {
       icon: IconPackage,
     },
 
-    {
-      title: "Discounts",
-      url: "/admin/discounts",
-      icon: IconDiscount,
-    },
-    {
-      title: "Collections",
-      url: "/admin/collections",
-      icon: IconFolder,
-    },
     // {
-    //   title: "Members",
-    //   url: "/admin/members",
-    //   icon: IconUsers,
+    //   title: "Discounts",
+    //   url: "/admin/discounts",
+    //   icon: IconDiscount,
     // },
     // {
-    //   title: "Pages",
-    //   url: "/admin/pages",
-    //   icon: IconFileDescription,
-    // },
-    {
-      title: "Site content",
-      url: "/admin/site-content",
-      icon: IconLanguage,
-    },
-  ],
-  navClouds: [
-    // {
-    //   title: "Capture",
-    //   icon: IconCamera,
-    //   isActive: true,
-    //   url: "#",
-    //   items: [
-    //     {
-    //       title: "Active Proposals",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Archived",
-    //       url: "#",
-    //     },
-    //   ],
+    //   title: "Collections",
+    //   url: "/admin/collections",
+    //   icon: IconFolder,
     // },
     // {
-    //   title: "Proposal",
-    //   icon: IconFileDescription,
-    //   url: "#",
-    //   items: [
-    //     {
-    //       title: "Active Proposals",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Archived",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
-    // {
-    //   title: "Prompts",
-    //   icon: IconFileAi,
-    //   url: "#",
-    //   items: [
-    //     {
-    //       title: "Active Proposals",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Archived",
-    //       url: "#",
-    //     },
-    //   ],
+    //   title: "Site content",
+    //   url: "/admin/site-content",
+    //   icon: IconLanguage,
     // },
   ],
+  navClouds: [],
   navSecondary: [
     {
       title: "Settings",
@@ -155,29 +74,8 @@ const data = {
       url: env.NEXT_PUBLIC_HELP_URL,
       icon: IconHelp,
     },
-    // {
-    //   title: "Search",
-    //   url: "#",
-    //   icon: IconSearch,
-    // },
   ],
-  documents: [
-    // {
-    //   name: "Data Library",
-    //   url: "#",
-    //   icon: IconDatabase,
-    // },
-    // {
-    //   name: "Reports",
-    //   url: "#",
-    //   icon: IconReport,
-    // },
-    // {
-    //   name: "Word Assistant",
-    //   url: "#",
-    //   icon: IconFileWord,
-    // },
-  ],
+  documents: [],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -188,7 +86,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="h-20 w-full data-[slot=sidebar-menu-button]:!p-1.5"
+              className="h-20 w-full data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <Link href="/" className="flex flex-col items-start">
                 <span className="flex flex-row items-center gap-1 font-mono text-2xl font-bold">
@@ -203,8 +101,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        {/* <NavDocuments items={data.documents} /> */}
-
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import type { ProductVariant } from "generated/prisma";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,8 +8,9 @@ import { AlertCircle, ArrowLeft, MoreVertical, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { ProductImage } from "./image-uploader";
+import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
+import type { RouterOutputs } from "~/trpc/react";
 import { slugify } from "~/lib/utils";
 import { productFormSchema } from "~/lib/validators/product";
 import { api } from "~/trpc/react";
@@ -54,34 +53,11 @@ import { Switch } from "~/components/ui/switch";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
-import { FormHeader } from "../../_components/form-header";
 import { ImageUploader } from "./image-uploader";
 import { VariantManager } from "./variant-manager";
 
-type ProductFormProps = {
-  businessId: string;
-  product?: {
-    id: string;
-    name: string;
-    slug: string;
-    description: string | null;
-    price: number;
-    published: boolean;
-    variants?: Array<{
-      id: string;
-      name: string;
-      sku: string | null;
-      price: number | null;
-      inventoryQty: number;
-      options: any;
-    }>;
-    images?: Array<{
-      id: string;
-      url: string;
-      altText: string | null;
-      sortOrder: number;
-    }>;
-  };
+type Props = {
+  product?: RouterOutputs["product"]["secureGet"];
 };
 
 /** Derive option names and values from existing variants (e.g. Size → [S,M,L], Color → [Red]). */
@@ -111,26 +87,19 @@ function getExistingVariantOptions(
   });
 }
 
-export function ProductForm({ product }: ProductFormProps) {
+export function ProductForm({ product }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Images state (kept separate as they're uploaded independently via Better Upload)
-  const [images, setImages] = useState<ProductImage[]>([]);
-  const imagesToSyncRef = useRef<ProductImage[]>([]);
+  const [images, setImages] = useState<FormProductImage[]>([]);
+  const imagesToSyncRef = useRef<FormProductImage[]>([]);
 
   // Variants state (kept separate due to complex nested structure and VariantManager component)
-  const [variants, setVariants] = useState<any[]>(
-    product?.variants?.map((v) => ({
-      id: v.id,
-      name: v.name,
-      sku: v.sku,
-      price: v.price,
-      inventoryQty: v.inventoryQty,
-      options: v.options as Record<string, string>,
-    })) ?? [],
+  const [variants, setVariants] = useState<FormVariant[]>(
+    (product?.variants as FormVariant[]) ?? [],
   );
 
   // Initialize form with react-hook-form
@@ -168,51 +137,52 @@ export function ProductForm({ product }: ProductFormProps) {
   };
 
   // Mutations
-  const addImageMutation = api.product.addImage.useMutation({
+  const addImagesMutation = api.product.addImages.useMutation({
     onError: (error) => {
-      setError(error.message ?? "Failed to add image");
-      toast.error(error.message ?? "Failed to add image");
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to add images");
     },
-    onSuccess: () => {
-      toast.success("Image added successfully");
+    onSuccess: (data) => {
+      toast.dismiss();
+      toast.success(data.message);
+    },
+    onSettled: () => {
+      router.refresh();
+    },
+    onMutate: () => {
+      toast.loading("Adding images...");
+    },
+  });
+
+  const syncImagesMutation = api.product.syncImages.useMutation({
+    onError: (error) => {
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to sync images");
+    },
+    onSuccess: (data) => {
+      toast.dismiss();
+      toast.success("Images synced successfully");
+      router.push(`/admin/products/${data.productId}`);
+    },
+    onMutate: () => {
+      toast.loading("Syncing images...");
     },
     onSettled: () => {
       router.refresh();
     },
   });
 
-  const syncImagesMutation = api.product.syncImages.useMutation({
-    onError: (error) => {
-      setError(error.message ?? "Failed to sync images");
-      toast.error(error.message ?? "Failed to sync images");
-    },
-    onSuccess: () => {
-      toast.success("Images synced successfully");
-    },
-  });
-
   const createProductMutation = api.product.create.useMutation({
     onError: (error) => {
-      setError(error.message ?? "Failed to save product");
-      toast.error(error.message ?? "Failed to save product");
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to create product");
     },
-    onSuccess: async (data) => {
-      // Add images after product is created
-      if (images.length > 0) {
-        await Promise.all(
-          images.map((image) =>
-            addImageMutation.mutateAsync({
-              productId: data.productId,
-              url: image.url,
-              altText: image.altText,
-              sortOrder: image.sortOrder,
-            }),
-          ),
-        );
-      }
-
-      router.push(`/admin/products/${data.productId}`);
+    onSuccess: (data) => {
+      toast.dismiss();
       toast.success(data.message);
+    },
+    onMutate: () => {
+      toast.loading("Creating product...");
     },
     onSettled: () => {
       router.refresh();
@@ -221,17 +191,15 @@ export function ProductForm({ product }: ProductFormProps) {
 
   const updateProductMutation = api.product.update.useMutation({
     onError: (error) => {
-      setError(error.message ?? "Failed to save product");
-      toast.error(error.message ?? "Failed to save product");
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to update product");
     },
-    onSuccess: async (data) => {
-      // Sync images
-      await syncImagesMutation.mutateAsync({
-        productId: data.productId,
-        images: imagesToSyncRef.current,
-      });
-      router.push(`/admin/products/${data.productId}`);
+    onSuccess: (data) => {
+      toast.dismiss();
       toast.success(data.message);
+    },
+    onMutate: () => {
+      toast.loading("Updating product...");
     },
     onSettled: () => {
       router.refresh();
@@ -253,74 +221,77 @@ export function ProductForm({ product }: ProductFormProps) {
   });
 
   const onSubmit = async (data: ProductFormSchema) => {
-    setError(null);
+    // Convert price to cents
+    const priceInCents = Math.round(data.price * 100);
 
-    try {
-      // Validation
-      if (!data.name.trim()) {
-        throw new Error("Product name is required");
-      }
+    if (product) {
+      // Update existing product
+      imagesToSyncRef.current = images;
 
-      if (!data.slug.trim()) {
-        throw new Error("Product slug is required");
-      }
+      const response = await updateProductMutation.mutateAsync({
+        id: product.id,
+        name: data.name,
+        slug: data.slug,
+        description: data.description ?? undefined,
+        price: priceInCents,
+        published: data.published,
+        variants: variants?.map((v) => ({
+          id: v.id,
+          name: v.name,
+          sku: v.sku ?? undefined,
+          price: v.price ?? priceInCents,
+          inventoryQty: v.inventoryQty,
+          options: v.options,
+        })),
+      });
 
-      if (!data.price || data.price <= 0) {
-        throw new Error("Valid price is required");
-      }
-
-      // Convert price to cents
-      const priceInCents = Math.round(data.price * 100);
-
-      if (product) {
-        // Update existing product
-        imagesToSyncRef.current = images;
-        updateProductMutation.mutate({
-          id: product.id,
-          name: data.name,
-          slug: data.slug,
-          description: data.description ?? undefined,
-          price: priceInCents,
-          published: data.published,
-          variants: variants?.map((v: ProductVariant) => ({
-            id: v.id,
-            name: v.name,
-            sku: v.sku ?? undefined,
-            price: v.price ?? priceInCents,
-            inventoryQty: v.inventoryQty,
-            options: v.options as Record<string, string>,
-          })),
-        });
-      } else {
-        // Create new product
-        createProductMutation.mutate({
-          name: data.name,
-          slug: data.slug,
-          description: data.description ?? undefined,
-          price: priceInCents,
-          published: data.published,
-          variants: variants?.map((v: ProductVariant) => ({
-            name: v.name,
-            sku: v.sku ?? undefined,
-            price: v.price ?? priceInCents,
-            inventoryQty: v.inventoryQty,
-            options: v.options as Record<string, string>,
-          })),
+      if (response.productId) {
+        void syncImagesMutation.mutateAsync({
+          productId: response.productId,
+          images: imagesToSyncRef.current,
         });
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to save product");
+    } else {
+      // Create new product
+      const response = await createProductMutation.mutateAsync({
+        name: data.name,
+        slug: data.slug,
+        description: data.description ?? undefined,
+        price: priceInCents,
+        published: data.published,
+        variants: variants?.map((v) => ({
+          name: v.name,
+          sku: v.sku ?? undefined,
+          price: v.price ?? priceInCents,
+          inventoryQty: v.inventoryQty,
+          options: v.options,
+        })),
+      });
+
+      if (images.length > 0 && !!response.productId) {
+        await addImagesMutation.mutateAsync({
+          productId: response.productId,
+          images: images.map((image) => ({
+            productId: response.productId,
+            url: image.url,
+            altText: image.altText,
+            sortOrder: image.sortOrder,
+          })),
+        });
+
+        router.push(`/admin/products/${response.productId}`);
+      }
     }
   };
 
   const isSubmitting =
     updateProductMutation.isPending ||
-    addImageMutation.isPending ||
+    addImagesMutation.isPending ||
     createProductMutation.isPending ||
     syncImagesMutation.isPending;
 
   const isUploading =
-    addImageMutation.isPending || syncImagesMutation.isPending;
+    addImagesMutation.isPending || syncImagesMutation.isPending;
 
   const isDeleting = deleteProductMutation.isPending;
   const isDirty = form.formState.isDirty;
@@ -333,7 +304,6 @@ export function ProductForm({ product }: ProductFormProps) {
         <form
           ref={formRef}
           onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          onChange={() => console.log(form.formState.errors)}
           className="space-y-6"
         >
           {error && (
@@ -343,9 +313,9 @@ export function ProductForm({ product }: ProductFormProps) {
             </Alert>
           )}
 
-          <div className="border-border/30 sticky top-0 z-10 -mx-4 -mt-4 flex w-[calc(100%+2rem)] justify-center border-b px-4 py-3 transition-all duration-300 md:-mx-6 md:w-[calc(100%+3rem)] md:px-6">
+          <div className="border-border/30 sticky top-0 z-10 -mx-4 -mt-4 flex w-[calc(100%+2rem)] justify-center px-4 py-3 transition-all duration-300 md:-mx-6 md:w-[calc(100%+3rem)] md:px-6">
             <div
-              className={`flex w-[90%] items-center justify-between gap-2 rounded-full border px-4 py-3 shadow-sm backdrop-blur transition-all duration-300 ${
+              className={`flex w-[95%] items-center justify-between gap-2 rounded-full border px-4 py-3 shadow-sm backdrop-blur transition-all duration-300 ${
                 isDirty
                   ? "bg-background/95 supports-backdrop-filter:bg-background/80 border-amber-200 shadow-md dark:border-amber-800"
                   : "border-border/50 bg-background/60 supports-backdrop-filter:bg-background/50"

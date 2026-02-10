@@ -116,7 +116,7 @@ export function CollectionsPage({ businessId }: CollectionsPageProps) {
                         {collection.name}
                       </CardTitle>
                       <CardDescription className="mt-1 line-clamp-2">
-                        {collection.description || "No description"}
+                        {collection.description ?? "No description"}
                       </CardDescription>
                     </div>
                     {!collection.published && (
@@ -159,8 +159,8 @@ export function CollectionsPage({ businessId }: CollectionsPageProps) {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Collection?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will remove the collection but won't delete the products in
-                it. This action cannot be undone.
+                This will remove the collection but won&apos;t delete the
+                products in it. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

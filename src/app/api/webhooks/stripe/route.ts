@@ -64,6 +64,12 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ received: true });
         }
 
+        const stripeAccountId = event.account;
+
+        if (!stripeAccountId) {
+          throw new Error("Missing Stripe connected account on event");
+        }
+
         // 🔑 Retrieve full session using business's Stripe account
         const fullSession = await stripeClient.checkout.sessions.retrieve(
           session.id,
@@ -75,7 +81,7 @@ export async function POST(req: NextRequest) {
             ],
           },
           {
-            stripeAccount: business.stripeAccountId, // ← Fixed!
+            stripeAccount: stripeAccountId,
           },
         );
 
@@ -157,6 +163,21 @@ export async function POST(req: NextRequest) {
         });
         const orderNumber = (lastOrder?.orderNumber ?? 0) + 1;
 
+        const existing = await db.order.findUnique({
+          where: { stripeSessionId: session.id },
+        });
+
+        if (existing) {
+          return NextResponse.json({ received: true });
+        }
+
+        // TODO: Fix how we handle discount codes. DO NOT ADD THEM if they don't exist
+        // const discountCode = appliedDiscount?.code
+        //   ? await ctx.discountCode.findUnique({
+        //       where: { code: appliedDiscount.code },
+        //     })
+        //   : null;
+
         // Create order
         const order = await db.order.create({
           data: {
@@ -185,7 +206,11 @@ export async function POST(req: NextRequest) {
             stripePaymentIntentId: session.payment_intent as string,
 
             // Discount code
-            discountCodeId: discountCodeId ?? null,
+            // discountCodeId: discountCodeId ?? null,
+
+            // discountCode: !!discountCodeId
+            //   ? { connect: { id: discountCodeId } }
+            //   : undefined,
 
             // Order items
             items: {
@@ -353,7 +378,7 @@ export async function POST(req: NextRequest) {
                     reason: "sale",
                     note: `Order #${orderNumber}`,
                     orderId: order.id,
-                    variantId: "",
+                    variantId: null,
                   },
                 });
               }

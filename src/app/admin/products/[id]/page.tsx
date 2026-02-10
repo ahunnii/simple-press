@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { checkBusiness } from "~/lib/check-business";
 import { api } from "~/trpc/server";
 
 import { ProductForm } from "../_components/product-form";
@@ -13,13 +12,6 @@ type Props = {
 export default async function EditProductPage({ params }: Props) {
   const { id } = await params;
 
-  const business = await checkBusiness();
-
-  if (!business) {
-    redirect("/admin/welcome");
-  }
-
-  // Get product
   const product = await api.product.secureGet(id);
 
   if (!product) {
@@ -41,19 +33,7 @@ export default async function EditProductPage({ params }: Props) {
           <p className="mt-1 text-gray-600">Update product details</p>
         </div>
 
-        <ProductForm
-          businessId={product.businessId}
-          product={
-            product as unknown as {
-              id: string;
-              name: string;
-              slug: string;
-              description: string | null;
-              price: number;
-              published: boolean;
-            }
-          }
-        />
+        <ProductForm product={product} />
       </div>
     </div>
   );

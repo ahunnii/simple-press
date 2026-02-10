@@ -1,11 +1,9 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
+import { checkBusiness } from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
-import { api } from "~/trpc/server";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { AppSidebar } from "~/app/admin/_components/app-sidebar";
-
-import WelcomeNotification from "./_components/welcome-notification";
 
 type Props = {
   children: React.ReactNode;
@@ -19,6 +17,12 @@ export default async function AdminLayout({ children }: Props) {
 
   if (session.user.role !== "ADMIN" && session.user.role !== "OWNER") {
     redirect("/not-permitted");
+  }
+
+  const business = await checkBusiness();
+
+  if (!business) {
+    notFound();
   }
 
   return (

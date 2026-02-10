@@ -1,8 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { checkBusiness } from "~/lib/check-business";
 import {
   createTRPCRouter,
+  ownerAdminProcedure,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
@@ -15,6 +17,21 @@ function generateSlug(name: string): string {
 }
 
 export const collectionsRouter = createTRPCRouter({
+  secureListAll: ownerAdminProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+    if (!business) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You are not authorized to access this resource",
+      });
+    }
+
+    const collections = await ctx.db.collection.findMany({
+      where: { businessId: business.id },
+    });
+    return collections;
+  }),
+
   // Get all collections for a business (public)
   getByBusiness: publicProcedure
     .input(

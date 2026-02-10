@@ -123,7 +123,7 @@ export const inventoryRouter = createTRPCRouter({
             previousQty: variant.inventoryQty,
             newQty: input.quantity,
             changeQty: input.quantity - variant.inventoryQty,
-            reason: input.reason || "adjustment",
+            reason: input.reason ?? "adjustment",
             note: input.note,
             userId: ctx.session.user.id,
           },
@@ -229,10 +229,10 @@ export const inventoryRouter = createTRPCRouter({
       // Restore inventory in transaction
       await ctx.db.$transaction(async (tx) => {
         for (const item of order.items) {
-          if (!item.variantId) continue;
+          if (!item.productVariantId) continue;
 
           const variant = await tx.productVariant.findUnique({
-            where: { id: item.variantId },
+            where: { id: item.productVariantId },
             select: {
               id: true,
               inventoryQty: true,
@@ -249,7 +249,7 @@ export const inventoryRouter = createTRPCRouter({
 
           // Update inventory
           await tx.productVariant.update({
-            where: { id: item.variantId },
+            where: { id: item.productVariantId },
             data: {
               inventoryQty: newQty,
             },
@@ -258,7 +258,7 @@ export const inventoryRouter = createTRPCRouter({
           // Create history record
           await tx.inventoryHistory.create({
             data: {
-              variantId: item.variantId,
+              variantId: item.productVariantId,
               productId: variant.productId,
               businessId: variant.product.businessId,
               previousQty: variant.inventoryQty,
@@ -335,7 +335,7 @@ export const inventoryRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const where: any = {};
+      const where: Record<string, string> = {};
 
       if (input.variantId) {
         where.variantId = input.variantId;

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { GripVertical, Plus, X } from "lucide-react";
 
+import type { FormVariant, FormVariantOption } from "../_validators/schema";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -14,25 +15,11 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
-type VariantOption = {
-  name: string;
-  values: string[];
-};
-
-type Variant = {
-  id?: string;
-  name: string;
-  sku?: string;
-  price?: number; // in cents
-  inventoryQty: number;
-  options: Record<string, string>; // { size: "Small", color: "Red" }
-};
-
 type Props = {
-  variants: Variant[];
-  onChange: (variants: Variant[]) => void;
+  variants: FormVariant[];
+  onChange: (variants: FormVariant[]) => void;
   basePrice: number; // in cents
-  existingVariantOptions: VariantOption[];
+  existingVariantOptions: FormVariantOption[];
 };
 
 export function VariantManager({
@@ -41,7 +28,7 @@ export function VariantManager({
   basePrice,
   existingVariantOptions,
 }: Props) {
-  const [variantOptions, setVariantOptions] = useState<VariantOption[]>(
+  const [variantOptions, setVariantOptions] = useState<FormVariantOption[]>(
     existingVariantOptions ?? [{ name: "Size", values: [] }],
   );
   const [showOptionsEditor, setShowOptionsEditor] = useState(false);
@@ -58,7 +45,7 @@ export function VariantManager({
     if (activeOptions.length === 0) return [];
 
     // Generate all combinations
-    const combinations: Variant[] = [];
+    const combinations: FormVariant[] = [];
 
     const generate = (
       currentOptions: Record<string, string>,
@@ -106,10 +93,10 @@ export function VariantManager({
     setShowOptionsEditor(false);
   };
 
-  const updateVariant = <K extends keyof Variant>(
+  const updateVariant = <K extends keyof FormVariant>(
     index: number,
     field: K,
-    value: Variant[K],
+    value: FormVariant[K],
   ) => {
     const updated = [...variants];
     updated[index] = { ...updated[index]!, [field]: value };

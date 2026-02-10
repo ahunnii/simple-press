@@ -1,10 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// app/admin/products/_components/image-uploader.tsx
 "use client";
 
 import type { DragEndEvent } from "@dnd-kit/core";
-import { useState } from "react";
-import Image from "next/image";
 import { useUploadFiles } from "@better-upload/client";
 import {
   closestCenter,
@@ -18,122 +14,33 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Upload, X } from "lucide-react";
+import { Upload } from "lucide-react";
 
-import { env } from "~/env";
+import type { FormProductImage } from "../_validators/schema";
+import { getStoredPath } from "~/lib/uploads";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 
-export type ProductImage = {
-  id?: string; // For existing images
-  url: string;
-  altText: string | null;
-  sortOrder: number;
-};
+import { SortableImage } from "./sortable-image";
 
-type ImageUploaderProps = {
-  images: ProductImage[];
-  onImagesChange: (images: ProductImage[]) => void;
+type Props = {
+  images: FormProductImage[];
+  onImagesChange: (images: FormProductImage[]) => void;
   maxImages?: number;
 };
-
-function getStoredPath(file: {
-  objectInfo?: {
-    key?: string;
-    path?: string;
-    metadata?: { pathname?: string; pathName?: string };
-  };
-}): string {
-  const meta = file.objectInfo?.metadata as Record<string, string> | undefined;
-  return meta?.pathname ?? meta?.pathName ?? "";
-}
-
-function SortableImage({
-  image,
-  index,
-  onRemove,
-  onUpdateAlt,
-}: {
-  image: ProductImage;
-  index: number;
-  onRemove: () => void;
-  onUpdateAlt: (alt: string) => void;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: image.url });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="space-y-3 rounded-lg border bg-white p-4"
-    >
-      <div className="flex items-start gap-3">
-        {/* Drag Handle */}
-        <button
-          type="button"
-          className="mt-2 cursor-move"
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical className="h-5 w-5 text-gray-400" />
-        </button>
-
-        {/* Image Preview */}
-        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded bg-gray-100">
-          <Image
-            src={image.url}
-            alt={image.altText ?? "Product image"}
-            fill
-            className="object-cover"
-          />
-        </div>
-
-        {/* Alt Text Input */}
-        <div className="flex-1">
-          <Label className="text-xs">Alt Text</Label>
-          <Input
-            type="text"
-            value={image.altText ?? ""}
-            onChange={(e) => onUpdateAlt(e.target.value)}
-            placeholder="Describe this image..."
-            className="mt-1"
-          />
-          {index === 0 && (
-            <p className="mt-1 text-xs text-gray-500">Primary image</p>
-          )}
-        </div>
-
-        {/* Remove Button */}
-        <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
-          <X className="h-4 w-4 text-red-600" />
-        </Button>
-      </div>
-    </div>
-  );
-}
 
 export function ImageUploader({
   images,
   onImagesChange,
   maxImages = 10,
-}: ImageUploaderProps) {
+}: Props) {
   const uploadFiles = useUploadFiles({
     api: "/api/upload",
     route: "image",
     onUploadComplete: (data) => {
-      const newImages: ProductImage[] = data.files.map((file, i) => ({
+      const newImages: FormProductImage[] = data.files.map((file, i) => ({
         url: getStoredPath(file),
         altText: null,
         sortOrder: images.length + i,

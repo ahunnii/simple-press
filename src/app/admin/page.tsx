@@ -1,48 +1,213 @@
-import { getSession } from "~/server/better-auth/server";
-import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
-import { AppSidebar } from "~/app/admin/_components/app-sidebar";
-import { ChartAreaInteractive } from "~/app/admin/_components/chart-area-interactive";
-import { DataTable } from "~/app/admin/_components/data-table";
-import { SectionCards } from "~/app/admin/_components/section-cards";
-import { SiteHeader } from "~/app/admin/_components/site-header";
+// app/admin/dashboard/page.tsx
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+import { auth } from "~/server/better-auth";
+import { db } from "~/server/db";
+import { DashboardContent } from "~/app/admin/_components/dashboard-content";
 
 export default async function AdminDashboardPage() {
-  const session = await getSession();
-  return (
-    <>
-      <SiteHeader title="Dashboard" />
-      <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-2">
-          <div className="px-4 pt-12 lg:px-6">
-            <h1 className="text-foreground text-2xl font-semibold tracking-tight md:text-3xl">
-              Welcome back,{" "}
-              <span className="text-primary">
-                {session?.user?.name ?? "there"}
-              </span>
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Here are some quick links to get you started.
-            </p>
-          </div>
-          <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-            <SectionCards />
-            {/* <div className="px-4 lg:px-6">
-              <ChartAreaInteractive />
-            </div> */}
-            {/* <DataTable data={data} /> */}
-          </div>
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-          <div className="mt-4 px-4">
-            <h2 className="text-lg font-semibold">
-              Export Site to WordPress (WIP)
-            </h2>
-            <p className="text-muted-foreground">
-              Objective is to export the site data to a wordpress site. This is
-              currently a work in progress / demo.
-            </p>
-          </div>
-        </div>
-      </div>
-    </>
+  if (!session?.user) {
+    redirect("/auth/sign-in");
+  }
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    include: {
+      business: {
+        include: {
+          _count: {
+            select: {
+              products: true,
+              orders: true,
+              customers: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!user?.business) {
+    redirect("/admin/welcome");
+  }
+
+  // Get stats for the dashboard
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const [
+    totalRevenue,
+    totalOrders,
+    recentOrders,
+    lowStockProducts,
+    revenueByDay,
+    topProducts,
+  ] = await Promise.all([
+    // Total revenue (all time, paid orders)
+    db.order.aggregate({
+      where: {
+        businessId: user.business.id,
+        status: "paid",
+      },
+      _sum: {
+        total: true,
+      },
+    }),
+
+    // Total orders count
+    db.order.count({
+      where: {
+        businessId: user.business.id,
+      },
+    }),
+
+    // Recent orders (last 10)
+    db.order.findMany({
+      where: {
+        businessId: user.business.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 10,
+      select: {
+        id: true,
+        orderNumber: true,
+        customerName: true,
+        total: true,
+        status: true,
+        createdAt: true,
+      },
+    }),
+
+    // Low stock products
+    db.productVariant.findMany({
+      where: {
+        product: {
+          businessId: user.business.id,
+          published: true,
+        },
+        inventoryQty: {
+          lte: 10,
+          gte: 0,
+        },
+      },
+      orderBy: {
+        inventoryQty: "asc",
+      },
+      take: 5,
+      include: {
+        product: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    }),
+
+    // Revenue by day (last 30 days)
+    db.order.groupBy({
+      by: ["createdAt"],
+      where: {
+        businessId: user.business.id,
+        status: "paid",
+        createdAt: {
+          gte: thirtyDaysAgo,
+        },
+      },
+      _sum: {
+        total: true,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    }),
+
+    // Top products by revenue (last 30 days)
+    db.orderItem.groupBy({
+      by: ["productId"],
+      where: {
+        order: {
+          businessId: user.business.id,
+          status: "paid",
+          createdAt: {
+            gte: thirtyDaysAgo,
+          },
+        },
+        productId: {
+          not: null,
+        },
+      },
+      _sum: {
+        total: true,
+        quantity: true,
+      },
+      orderBy: {
+        _sum: {
+          total: "desc",
+        },
+      },
+      take: 5,
+    }),
+  ]);
+
+  // Get product details for top products
+  const topProductIds = topProducts
+    .map((item) => item.productId)
+    .filter((id): id is string => id !== null);
+
+  const productDetails = await db.product.findMany({
+    where: {
+      id: { in: topProductIds },
+    },
+    select: {
+      id: true,
+      name: true,
+      images: {
+        take: 1,
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  });
+
+  const topProductsWithDetails = topProducts.map((item) => {
+    const product = productDetails.find((p) => p.id === item.productId);
+    return {
+      productId: item.productId,
+      productName: product?.name ?? "Unknown Product",
+      imageUrl: product?.images[0]?.url ?? null,
+      revenue: item._sum.total ?? 0,
+      unitsSold: item._sum.quantity ?? 0,
+    };
+  });
+
+  return (
+    <DashboardContent
+      business={user.business}
+      stats={{
+        totalRevenue: totalRevenue._sum.total ?? 0,
+        totalOrders,
+        totalProducts: user.business._count.products,
+        totalCustomers: user.business._count.customers,
+      }}
+      recentOrders={
+        recentOrders as Array<{
+          id: string;
+          orderNumber: number;
+          customerName: string;
+          total: number;
+          status: string;
+          createdAt: Date;
+        }>
+      }
+      lowStockProducts={lowStockProducts}
+      revenueByDay={revenueByDay}
+      topProducts={topProductsWithDetails}
+    />
   );
 }
