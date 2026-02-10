@@ -24,6 +24,8 @@ export const env = createEnv({
 
     STRIPE_SECRET_KEY: z.string(),
 
+    STRIPE_WEBHOOK_SECRET: z.string(),
+
     INVITATION_CODE: z.string(),
   },
 
@@ -36,8 +38,14 @@ export const env = createEnv({
     NEXT_PUBLIC_STORAGE_URL: z.string(),
     NEXT_PUBLIC_STORAGE_BUCKET_NAME: z.string(),
     NEXT_PUBLIC_HELP_URL: z.string(),
-    NEXT_PUBLIC_ENABLE_UMAMI: z.coerce.boolean(),
+    NEXT_PUBLIC_ENABLE_UMAMI: z
+      .string()
+      .refine((s) => s === "true" || s === "false")
+      .transform((s) => s === "true"),
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string(),
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string(),
+    NEXT_PUBLIC_STRIPE_CONNECT_CLIENT_ID: z.string(),
+    NEXT_PUBLIC_PLATFORM_DOMAIN: z.string(),
   },
 
   /**
@@ -62,6 +70,12 @@ export const env = createEnv({
     UMAMI_BASE_URL: process.env.UMAMI_BASE_URL,
     INVITATION_CODE: process.env.INVITATION_CODE,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    NEXT_PUBLIC_STRIPE_CONNECT_CLIENT_ID:
+      process.env.NEXT_PUBLIC_STRIPE_CONNECT_CLIENT_ID,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_PLATFORM_DOMAIN: process.env.NEXT_PUBLIC_PLATFORM_DOMAIN,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -97,7 +97,11 @@ export function SetupChecklist({
           }
           action={
             !setupSteps.stripeConnected && (
-              <ConnectStripeButton businessId={business.id} />
+              <ConnectStripeButton
+                businessId={business.id}
+                stripeAccountId={business?.stripeAccountId ?? null}
+                // subdomain={business.subdomain}
+              />
             )
           }
         />
@@ -109,7 +113,7 @@ export function SetupChecklist({
           title="Configure Your Domain"
           description={
             setupSteps.domainConfigured
-              ? `Your store is accessible at ${business.customDomain || `${business.subdomain}.myapplication.com`}`
+              ? `Your store is accessible at ${business.customDomain ?? `${business.subdomain}.myapplication.com`}`
               : "Set up your custom domain or use your free subdomain"
           }
           action={<DomainSetup business={business} />}

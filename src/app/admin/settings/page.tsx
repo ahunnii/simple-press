@@ -33,9 +33,7 @@ export default async function SettingsPage() {
             <TabsList className="grid w-full max-w-3xl grid-cols-5">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="branding">Branding</TabsTrigger>
-              <TabsTrigger value="integrations" disabled>
-                Integrations
-              </TabsTrigger>
+              <TabsTrigger value="integrations">Integrations</TabsTrigger>
               <TabsTrigger value="domain" disabled>
                 Domain
               </TabsTrigger>
