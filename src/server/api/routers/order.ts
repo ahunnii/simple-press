@@ -152,13 +152,80 @@ export const orderRouter = createTRPCRouter({
         },
       );
 
+      // const isFullRefund = input.amount === order.total;
+      // const updatedOrder = await ctx.db.order.update({
+      //   where: { id: input.orderId },
+      //   data: {
+      //     status: isFullRefund ? "refunded" : "partial_refund",
+      //   },
+      // });
+
+      // Update order status
       const isFullRefund = input.amount === order.total;
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
         data: {
           status: isFullRefund ? "refunded" : "partial_refund",
         },
+        include: {
+          items: true,
+        },
       });
+
+      // Restore inventory for refunded items
+      if (isFullRefund) {
+        try {
+          await ctx.db.$transaction(async (tx) => {
+            for (const item of updatedOrder.items) {
+              if (!item.productVariantId) continue;
+
+              const variant = await tx.productVariant.findUnique({
+                where: { id: item.productVariantId },
+                select: {
+                  id: true,
+                  inventoryQty: true,
+                  productId: true,
+                  product: {
+                    select: { businessId: true },
+                  },
+                },
+              });
+
+              if (!variant) continue;
+
+              const newQty = variant.inventoryQty + item.quantity;
+
+              // Update inventory
+              await tx.productVariant.update({
+                where: { id: item.productVariantId },
+                data: {
+                  inventoryQty: newQty,
+                },
+              });
+
+              // Create history record
+              await tx.inventoryHistory.create({
+                data: {
+                  variantId: item.productVariantId,
+                  productId: variant.productId,
+                  businessId: variant.product.businessId,
+                  previousQty: variant.inventoryQty,
+                  newQty,
+                  changeQty: item.quantity,
+                  reason: "return",
+                  note: `Refund Order #${updatedOrder.id.slice(0, 8)}`,
+                  orderId: updatedOrder.id,
+                },
+              });
+            }
+          });
+        } catch (invError) {
+          console.error("Failed to restore inventory:", invError);
+          // Don't fail the refund if inventory restoration fails
+        }
+      }
+
+      // TODO: Send refund confirmation email to customer
 
       return {
         success: true,

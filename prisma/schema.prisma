@@ -41,6 +41,8 @@ model User {
 
   businessId String?
   business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  inventoryHistory InventoryHistory[]
   
   @@unique([email, businessId]) // Same email can exist across different businesses
   @@index([businessId])
@@ -148,7 +150,8 @@ model Business {
   siteContent SiteContent?
   images      Image[]
   discountCodes DiscountCode[]
-  
+  inventoryHistory InventoryHistory[]
+
   @@index([subdomain])
   @@index([customDomain])
 }
@@ -247,6 +250,7 @@ model Product {
   variants            ProductVariant[]
   collectionProducts  CollectionProduct[]
   orderItems          OrderItem[]
+  inventoryHistory InventoryHistory[]
   
   @@unique([businessId, slug])
   @@index([businessId, published])
@@ -279,8 +283,9 @@ model ProductVariant {
   // Relationships
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
+  inventoryHistory InventoryHistory[]
   orderItems OrderItem[]
+
   
   @@index([productId])
 }
@@ -458,6 +463,7 @@ model Order {
   discountCode   DiscountCode? @relation(fields: [discountCodeId], references: [id], onDelete: SetNull)
   
   items OrderItem[]
+  inventoryHistory InventoryHistory[]
   
   @@unique([businessId, orderNumber])
   @@index([businessId, status])
@@ -564,4 +570,46 @@ model DiscountCode {
   @@index([businessId])
   @@index([businessId, active])
   @@index([code])
+}
+
+
+// ============================================
+// INVENTORY MANAGEMENT
+// ============================================
+
+model InventoryHistory {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // What changed
+  variantId   String
+  variant     ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  
+  productId   String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Quantity changes
+  previousQty Int
+  newQty      Int
+  changeQty   Int // positive = increase, negative = decrease
+
+  // Why it changed
+  reason String // "sale", "return", "restock", "adjustment", "correction", "damage"
+  note   String? @db.Text
+
+  // References
+  orderId String?
+  order   Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  
+  userId  String?
+  user    User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([variantId])
+  @@index([productId])
+  @@index([businessId])
+  @@index([orderId])
+  @@index([createdAt])
 }

@@ -412,6 +412,21 @@ exports.Prisma.DiscountCodeScalarFieldEnum = {
   maxDiscount: 'maxDiscount'
 };
 
+exports.Prisma.InventoryHistoryScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  variantId: 'variantId',
+  productId: 'productId',
+  businessId: 'businessId',
+  previousQty: 'previousQty',
+  newQty: 'newQty',
+  changeQty: 'changeQty',
+  reason: 'reason',
+  note: 'note',
+  orderId: 'orderId',
+  userId: 'userId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -472,7 +487,8 @@ exports.Prisma.ModelName = {
   OrderItem: 'OrderItem',
   DomainQueue: 'DomainQueue',
   PageView: 'PageView',
-  DiscountCode: 'DiscountCode'
+  DiscountCode: 'DiscountCode',
+  InventoryHistory: 'InventoryHistory'
 };
 
 /**
