@@ -3,6 +3,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { businessRouter } from "./routers/business";
 import { collectionsRouter } from "./routers/collections";
 import { contentRouter } from "./routers/content";
+import { customerRouter } from "./routers/customer";
 import { discountRouter } from "./routers/discount";
 import { domainRouter } from "./routers/domain";
 import { exportRouter } from "./routers/export";
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   business: businessRouter,
   product: productRouter,
   order: orderRouter,
+  customer: customerRouter,
   inventory: inventoryRouter,
   collections: collectionsRouter,
   content: contentRouter,

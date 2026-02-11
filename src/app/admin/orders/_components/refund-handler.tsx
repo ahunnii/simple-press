@@ -34,7 +34,9 @@ export function RefundHandler({ order }: Props) {
   const [partialAmount, setPartialAmount] = useState("");
   const [reason, setReason] = useState("");
 
-  const canRefund = order.status === "paid" && order.stripePaymentIntentId;
+  const canRefund =
+    (order.status === "paid" || order.status === "fulfilled") &&
+    !!order.stripePaymentIntentId;
 
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {

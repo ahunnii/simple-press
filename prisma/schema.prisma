@@ -43,6 +43,7 @@ model User {
   business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   inventoryHistory InventoryHistory[]
+  customers        Customer[]
   
   @@unique([email, businessId]) // Same email can exist across different businesses
   @@index([businessId])
@@ -372,6 +373,10 @@ model Customer {
   totalSpent      Float @default(0)
   orderCount      Int     @default(0)
   
+  // Link to authenticated user (if they've signed in)
+  userId String?
+  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
   // Multi-tenancy (customer exists per business)
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -381,6 +386,7 @@ model Customer {
   
   @@unique([businessId, email])
   @@index([businessId])
+  @@index([userId])
 }
 
 model ShippingAddress {

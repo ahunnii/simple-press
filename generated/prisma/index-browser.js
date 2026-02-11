@@ -312,6 +312,7 @@ exports.Prisma.CustomerScalarFieldEnum = {
   acceptsMarketing: 'acceptsMarketing',
   totalSpent: 'totalSpent',
   orderCount: 'orderCount',
+  userId: 'userId',
   businessId: 'businessId'
 };
 

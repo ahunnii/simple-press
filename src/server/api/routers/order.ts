@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import { checkBusiness } from "~/lib/check-business";
 import { sendOrderShipped } from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
@@ -156,7 +157,7 @@ export const orderRouter = createTRPCRouter({
       }
       const order = await ctx.db.order.findFirst({
         where: { id, businessId: business.id },
-        include: { items: true, shippingAddress: true },
+        include: { items: true, shippingAddress: true, customer: true },
       });
 
       return order;
@@ -249,6 +250,7 @@ export const orderRouter = createTRPCRouter({
         where: { id: input.orderId },
         data: {
           status: isFullRefund ? "refunded" : "partial_refund",
+          ...(isFullRefund && { paymentStatus: "refunded" }),
         },
         include: {
           items: true,
@@ -362,10 +364,39 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
+      const wasUnpaid =
+        order.paymentStatus === "unpaid" || order.status === "pending";
+      const isPaid = input.status === "paid";
+
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
-        data: { status: input.status },
+        data: {
+          status: input.status,
+          // If marking as paid, also update payment status
+          paymentStatus: isPaid ? "paid" : order.paymentStatus,
+        },
       });
+
+      // Update customer metrics if transitioning from unpaid to paid
+      if (wasUnpaid && isPaid && order.customerId) {
+        try {
+          await ctx.db.customer.update({
+            where: { id: order.customerId },
+            data: {
+              totalSpent: { increment: order.total },
+              orderCount: { increment: 1 },
+            },
+          });
+          console.log(
+            `[Order Status] Updated customer metrics for order ${order.id}`,
+          );
+        } catch (error) {
+          console.error(
+            "[Order Status] Failed to update customer metrics:",
+            error,
+          );
+        }
+      }
 
       return updatedOrder;
     }),
@@ -411,51 +442,83 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      const shippingAddress = input.shippingAddress
-        ? await ctx.db.shippingAddress.create({
-            data: {
-              address1: input.shippingAddress.line1,
-              city: input.shippingAddress.city,
-              province: input.shippingAddress.state,
-              zip: input.shippingAddress.postal_code,
-              country: input.shippingAddress.country,
-              firstName: input.shippingName,
-              lastName: input.shippingName,
-              customer: {
-                connect: {
-                  businessId_email: {
-                    email: input.customerEmail,
-                    businessId: business.id,
-                  },
-                },
-              },
-            },
-          })
-        : await ctx.db.shippingAddress.findFirst({
-            where: {
-              customer: {
-                AND: {
-                  email: input.customerEmail,
-                  businessId: business.id,
-                },
-              },
-            },
-          });
+      // Parse customer name into first/last
+      const nameParts = input.customerName.trim().split(" ");
+      const firstName = nameParts[0] ?? "Guest";
+      const lastName = nameParts.slice(1).join(" ") || "";
 
-      if (!shippingAddress) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Shipping address not found",
+      // Upsert customer first to ensure it exists
+      const customer = await ctx.db.customer.upsert({
+        where: {
+          businessId_email: {
+            email: input.customerEmail,
+            businessId: business.id,
+          },
+        },
+        create: {
+          email: input.customerEmail,
+          firstName,
+          lastName,
+          businessId: business.id,
+        },
+        update: {
+          firstName,
+          lastName,
+        },
+      });
+
+      console.log(
+        `[Manual Order] Customer upserted: ${customer.id} (${customer.email})`,
+      );
+
+      // Parse shipping name into first/last
+      const shippingNameParts = input.shippingName.trim().split(" ");
+      const shippingFirstName = shippingNameParts[0] ?? firstName;
+      const shippingLastName = shippingNameParts.slice(1).join(" ") || lastName;
+
+      // Find or create shipping address with deduplication
+      let shippingAddressId: string;
+      if (input.shippingAddress) {
+        shippingAddressId = await findOrCreateShippingAddress({
+          customerId: customer.id,
+          firstName: shippingFirstName,
+          lastName: shippingLastName,
+          address1: input.shippingAddress.line1,
+          city: input.shippingAddress.city,
+          province: input.shippingAddress.state,
+          zip: input.shippingAddress.postal_code,
+          country: input.shippingAddress.country,
         });
+      } else {
+        // If no address provided, try to find default address
+        const defaultAddress = await ctx.db.shippingAddress.findFirst({
+          where: {
+            customerId: customer.id,
+            isDefault: true,
+          },
+        });
+
+        if (!defaultAddress) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "No shipping address provided and no default address found",
+          });
+        }
+
+        shippingAddressId = defaultAddress.id;
       }
+
+      // Generate order number
+      const orderCount = await ctx.db.order.count({
+        where: { businessId: business.id },
+      });
 
       const order = await ctx.db.order.create({
         data: {
-          orderNumber:
-            (await ctx.db.order.count({
-              where: { businessId: business.id },
-            })) + 1,
+          orderNumber: orderCount + 1,
           businessId: business.id,
+          customerId: customer.id,
           customerEmail: input.customerEmail,
           customerName: input.customerName,
 
@@ -465,13 +528,14 @@ export const orderRouter = createTRPCRouter({
           shipping: input.shipping || 0,
           total: input.total,
 
-          //   currency: "usd",
           status: "pending", // Manual orders start as pending
           paymentStatus: "unpaid",
 
           // Shipping
-          shippingAddressId: shippingAddress.id,
-          //   shippingName: input.shippingName || input.customerName,
+          shippingAddressId,
+
+          // Notes
+          internalNote: input.notes,
 
           // Items
           items: {
@@ -489,6 +553,11 @@ export const orderRouter = createTRPCRouter({
           items: true,
         },
       });
+
+      console.log(`[Manual Order] Order created: ${order.id}`);
+
+      // Note: Customer metrics are NOT updated for manual/pending orders
+      // They will be updated when the order is marked as paid
 
       return order;
     }),

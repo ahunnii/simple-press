@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
+import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import { sendOrderConfirmation } from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
@@ -104,6 +105,26 @@ export async function POST(req: NextRequest) {
           "unknown@example.com";
 
         if (customerEmail !== "unknown@example.com") {
+          console.log(
+            "[Webhook] customer_details:",
+            JSON.stringify(fullSession.customer_details, null, 2),
+          );
+
+          // Parse customer name from Stripe (use 'name' field, not 'individual_name')
+          const customerName = fullSession.customer_details?.name?.trim() ?? "";
+          const nameParts = customerName.split(" ").filter((p) => p.length > 0);
+          const firstName = nameParts[0] ?? "Guest";
+          const lastName = nameParts.slice(1).join(" ") || "";
+
+          // Check if there's a user with this email in the business
+          const existingUser = await db.user.findFirst({
+            where: {
+              email: customerEmail,
+              businessId: business.id,
+            },
+            select: { id: true },
+          });
+
           customer = await db.customer.upsert({
             where: {
               businessId_email: {
@@ -113,55 +134,59 @@ export async function POST(req: NextRequest) {
             },
             create: {
               email: customerEmail,
-              firstName:
-                fullSession.customer_details?.individual_name?.split(" ")[0] ??
-                "Guest",
-              lastName:
-                fullSession.customer_details?.individual_name?.split(" ")[1] ??
-                "",
+              firstName,
+              lastName,
+              phone: fullSession.customer_details?.phone ?? null,
               businessId: business.id,
+              userId: existingUser?.id ?? null, // Link to user if exists
             },
             update: {
-              firstName:
-                fullSession.customer_details?.individual_name?.split(" ")[0] ??
-                "Guest",
-              lastName:
-                fullSession.customer_details?.individual_name?.split(" ")[1] ??
-                "",
+              // firstName,
+              // lastName,
+              phone: fullSession.customer_details?.phone ?? null,
+              // Link to user if not already linked and user exists
+              userId: existingUser?.id ?? undefined,
             },
           });
+
+          console.log(
+            `[Webhook] Customer upserted: ${customer.id} (${customer.email})${existingUser ? " - linked to user" : ""}`,
+          );
         }
 
-        // Create shipping address if provided
+        if (!customer) {
+          console.error(
+            "[Webhook] Failed to create/find customer - will create order without customer link",
+          );
+        }
+
+        // Create or reuse shipping address if provided
         let shippingAddressId: string | null = null;
 
         const shippingDetails = fullSession.customer_details?.address;
-        let shippingAddress;
 
-        if (shippingDetails) {
-          const addr = shippingDetails;
-          shippingAddress = await db.shippingAddress.create({
-            data: {
-              firstName:
-                fullSession.customer_details?.individual_name?.split(" ")[0] ??
-                "Guest",
-              lastName:
-                fullSession.customer_details?.individual_name?.split(" ")[1] ??
-                "",
-              address1: addr.line1 ?? "",
-              address2: addr.line2 ?? null,
-              city: addr.city ?? "",
-              province: addr.state ?? "",
-              zip: addr.postal_code ?? "",
-              country: addr.country ?? "",
-              customer: {
-                connect: {
-                  id: customer?.id ?? "",
-                },
-              },
-            },
+        if (shippingDetails && customer) {
+          const customerName = fullSession.customer_details?.name ?? "";
+          const nameParts = customerName.split(" ");
+          const firstName = nameParts[0] ?? "Guest";
+          const lastName = nameParts.slice(1).join(" ") || "";
+
+          shippingAddressId = await findOrCreateShippingAddress({
+            customerId: customer.id,
+            firstName,
+            lastName,
+            address1: shippingDetails.line1 ?? "",
+            address2: shippingDetails.line2 ?? null,
+            city: shippingDetails.city ?? "",
+            province: shippingDetails.state ?? "",
+            zip: shippingDetails.postal_code ?? "",
+            country: shippingDetails.country ?? "",
+            phone: fullSession.customer_details?.phone ?? null,
           });
-          shippingAddressId = shippingAddress.id;
+        } else if (shippingDetails && !customer) {
+          console.warn(
+            "[Webhook] Shipping details provided but no customer - cannot create address",
+          );
         }
 
         // Generate order number
@@ -262,6 +287,27 @@ export async function POST(req: NextRequest) {
         console.log(
           `[Webhook] Order created: ${order.id} for business ${business.id}`,
         );
+
+        // Update customer metrics
+        if (customer) {
+          try {
+            await db.customer.update({
+              where: { id: customer.id },
+              data: {
+                totalSpent: { increment: order.total },
+                orderCount: { increment: 1 },
+              },
+            });
+            console.log(
+              `[Webhook] Updated customer metrics for ${customer.email}`,
+            );
+          } catch (customerError) {
+            console.error(
+              "[Webhook] Failed to update customer metrics:",
+              customerError,
+            );
+          }
+        }
 
         // Increment discount code usage
         if (discountCodeId) {
@@ -404,10 +450,27 @@ export async function POST(req: NextRequest) {
           // Don't fail webhook - order is still created
         }
 
-        // TODO: Send order confirmation email
-
         // Send order confirmation email
         try {
+          // Fetch shipping address for email if available
+          let shippingAddressForEmail = undefined;
+          if (shippingAddressId) {
+            const addr = await db.shippingAddress.findUnique({
+              where: { id: shippingAddressId },
+            });
+            if (addr) {
+              shippingAddressForEmail = {
+                name: `${addr.firstName} ${addr.lastName}`.trim(),
+                line1: addr.address1,
+                line2: addr.address2 ?? null,
+                city: addr.city,
+                state: addr.province ?? "",
+                postalCode: addr.zip,
+                country: addr.country,
+              };
+            }
+          }
+
           await sendOrderConfirmation({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
@@ -424,17 +487,7 @@ export async function POST(req: NextRequest) {
             tax: order.tax,
             discount: order.discount,
             total: order.total,
-            shippingAddress: shippingAddress
-              ? {
-                  name: shippingAddress.firstName ?? "Guest",
-                  line1: shippingAddress.address1,
-                  line2: shippingAddress.address2 ?? null,
-                  city: shippingAddress.city ?? "",
-                  state: shippingAddress.province ?? "",
-                  postalCode: shippingAddress.zip,
-                  country: shippingAddress.country,
-                }
-              : undefined,
+            shippingAddress: shippingAddressForEmail,
             business: {
               name: business.name,
               ownerEmail: business.ownerEmail,

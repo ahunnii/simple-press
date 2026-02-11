@@ -2715,12 +2715,14 @@ export namespace Prisma {
     sessions: number
     accounts: number
     inventoryHistory: number
+    customers: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | UserCountOutputTypeCountSessionsArgs
     accounts?: boolean | UserCountOutputTypeCountAccountsArgs
     inventoryHistory?: boolean | UserCountOutputTypeCountInventoryHistoryArgs
+    customers?: boolean | UserCountOutputTypeCountCustomersArgs
   }
 
   // Custom InputTypes
@@ -2753,6 +2755,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountInventoryHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: InventoryHistoryWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountCustomersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerWhereInput
   }
 
 
@@ -3343,6 +3352,7 @@ export namespace Prisma {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     business?: boolean | User$businessArgs<ExtArgs>
     inventoryHistory?: boolean | User$inventoryHistoryArgs<ExtArgs>
+    customers?: boolean | User$customersArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -3390,6 +3400,7 @@ export namespace Prisma {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     business?: boolean | User$businessArgs<ExtArgs>
     inventoryHistory?: boolean | User$inventoryHistoryArgs<ExtArgs>
+    customers?: boolean | User$customersArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3406,6 +3417,7 @@ export namespace Prisma {
       accounts: Prisma.$AccountPayload<ExtArgs>[]
       business: Prisma.$BusinessPayload<ExtArgs> | null
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
+      customers: Prisma.$CustomerPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3815,6 +3827,7 @@ export namespace Prisma {
     accounts<T extends User$accountsArgs<ExtArgs> = {}>(args?: Subset<T, User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     business<T extends User$businessArgs<ExtArgs> = {}>(args?: Subset<T, User$businessArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     inventoryHistory<T extends User$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, User$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    customers<T extends User$customersArgs<ExtArgs> = {}>(args?: Subset<T, User$customersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4337,6 +4350,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: InventoryHistoryScalarFieldEnum | InventoryHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * User.customers
+   */
+  export type User$customersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Customer
+     */
+    select?: CustomerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Customer
+     */
+    omit?: CustomerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerInclude<ExtArgs> | null
+    where?: CustomerWhereInput
+    orderBy?: CustomerOrderByWithRelationInput | CustomerOrderByWithRelationInput[]
+    cursor?: CustomerWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CustomerScalarFieldEnum | CustomerScalarFieldEnum[]
   }
 
   /**
@@ -17672,6 +17709,7 @@ export namespace Prisma {
     acceptsMarketing: boolean | null
     totalSpent: number | null
     orderCount: number | null
+    userId: string | null
     businessId: string | null
   }
 
@@ -17686,6 +17724,7 @@ export namespace Prisma {
     acceptsMarketing: boolean | null
     totalSpent: number | null
     orderCount: number | null
+    userId: string | null
     businessId: string | null
   }
 
@@ -17700,6 +17739,7 @@ export namespace Prisma {
     acceptsMarketing: number
     totalSpent: number
     orderCount: number
+    userId: number
     businessId: number
     _all: number
   }
@@ -17726,6 +17766,7 @@ export namespace Prisma {
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
+    userId?: true
     businessId?: true
   }
 
@@ -17740,6 +17781,7 @@ export namespace Prisma {
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
+    userId?: true
     businessId?: true
   }
 
@@ -17754,6 +17796,7 @@ export namespace Prisma {
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
+    userId?: true
     businessId?: true
     _all?: true
   }
@@ -17855,6 +17898,7 @@ export namespace Prisma {
     acceptsMarketing: boolean
     totalSpent: number
     orderCount: number
+    userId: string | null
     businessId: string
     _count: CustomerCountAggregateOutputType | null
     _avg: CustomerAvgAggregateOutputType | null
@@ -17888,7 +17932,9 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    userId?: boolean
     businessId?: boolean
+    user?: boolean | Customer$userArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     orders?: boolean | Customer$ordersArgs<ExtArgs>
     shippingAddresses?: boolean | Customer$shippingAddressesArgs<ExtArgs>
@@ -17906,7 +17952,9 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    userId?: boolean
     businessId?: boolean
+    user?: boolean | Customer$userArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customer"]>
 
@@ -17921,7 +17969,9 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    userId?: boolean
     businessId?: boolean
+    user?: boolean | Customer$userArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customer"]>
 
@@ -17936,26 +17986,31 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    userId?: boolean
     businessId?: boolean
   }
 
-  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "acceptsMarketing" | "totalSpent" | "orderCount" | "businessId", ExtArgs["result"]["customer"]>
+  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "acceptsMarketing" | "totalSpent" | "orderCount" | "userId" | "businessId", ExtArgs["result"]["customer"]>
   export type CustomerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | Customer$userArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     orders?: boolean | Customer$ordersArgs<ExtArgs>
     shippingAddresses?: boolean | Customer$shippingAddressesArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CustomerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | Customer$userArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
   export type CustomerIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | Customer$userArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
 
   export type $CustomerPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Customer"
     objects: {
+      user: Prisma.$UserPayload<ExtArgs> | null
       business: Prisma.$BusinessPayload<ExtArgs>
       orders: Prisma.$OrderPayload<ExtArgs>[]
       shippingAddresses: Prisma.$ShippingAddressPayload<ExtArgs>[]
@@ -17971,6 +18026,7 @@ export namespace Prisma {
       acceptsMarketing: boolean
       totalSpent: number
       orderCount: number
+      userId: string | null
       businessId: string
     }, ExtArgs["result"]["customer"]>
     composites: {}
@@ -18366,6 +18422,7 @@ export namespace Prisma {
    */
   export interface Prisma__CustomerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends Customer$userArgs<ExtArgs> = {}>(args?: Subset<T, Customer$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     orders<T extends Customer$ordersArgs<ExtArgs> = {}>(args?: Subset<T, Customer$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     shippingAddresses<T extends Customer$shippingAddressesArgs<ExtArgs> = {}>(args?: Subset<T, Customer$shippingAddressesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShippingAddressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -18408,6 +18465,7 @@ export namespace Prisma {
     readonly acceptsMarketing: FieldRef<"Customer", 'Boolean'>
     readonly totalSpent: FieldRef<"Customer", 'Float'>
     readonly orderCount: FieldRef<"Customer", 'Int'>
+    readonly userId: FieldRef<"Customer", 'String'>
     readonly businessId: FieldRef<"Customer", 'String'>
   }
     
@@ -18802,6 +18860,25 @@ export namespace Prisma {
      * Limit how many Customers to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Customer.user
+   */
+  export type Customer$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
   }
 
   /**
@@ -28941,6 +29018,7 @@ export namespace Prisma {
     acceptsMarketing: 'acceptsMarketing',
     totalSpent: 'totalSpent',
     orderCount: 'orderCount',
+    userId: 'userId',
     businessId: 'businessId'
   };
 
@@ -29282,6 +29360,7 @@ export namespace Prisma {
     accounts?: AccountListRelationFilter
     business?: XOR<BusinessNullableScalarRelationFilter, BusinessWhereInput> | null
     inventoryHistory?: InventoryHistoryListRelationFilter
+    customers?: CustomerListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -29298,6 +29377,7 @@ export namespace Prisma {
     accounts?: AccountOrderByRelationAggregateInput
     business?: BusinessOrderByWithRelationInput
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
+    customers?: CustomerOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -29318,6 +29398,7 @@ export namespace Prisma {
     accounts?: AccountListRelationFilter
     business?: XOR<BusinessNullableScalarRelationFilter, BusinessWhereInput> | null
     inventoryHistory?: InventoryHistoryListRelationFilter
+    customers?: CustomerListRelationFilter
   }, "id" | "email_businessId">
 
   export type UserOrderByWithAggregationInput = {
@@ -30433,7 +30514,9 @@ export namespace Prisma {
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
     totalSpent?: FloatFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
+    userId?: StringNullableFilter<"Customer"> | string | null
     businessId?: StringFilter<"Customer"> | string
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     orders?: OrderListRelationFilter
     shippingAddresses?: ShippingAddressListRelationFilter
@@ -30450,7 +30533,9 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    userId?: SortOrderInput | SortOrder
     businessId?: SortOrder
+    user?: UserOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
     orders?: OrderOrderByRelationAggregateInput
     shippingAddresses?: ShippingAddressOrderByRelationAggregateInput
@@ -30471,7 +30556,9 @@ export namespace Prisma {
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
     totalSpent?: FloatFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
+    userId?: StringNullableFilter<"Customer"> | string | null
     businessId?: StringFilter<"Customer"> | string
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     orders?: OrderListRelationFilter
     shippingAddresses?: ShippingAddressListRelationFilter
@@ -30488,6 +30575,7 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    userId?: SortOrderInput | SortOrder
     businessId?: SortOrder
     _count?: CustomerCountOrderByAggregateInput
     _avg?: CustomerAvgOrderByAggregateInput
@@ -30510,6 +30598,7 @@ export namespace Prisma {
     acceptsMarketing?: BoolWithAggregatesFilter<"Customer"> | boolean
     totalSpent?: FloatWithAggregatesFilter<"Customer"> | number
     orderCount?: IntWithAggregatesFilter<"Customer"> | number
+    userId?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     businessId?: StringWithAggregatesFilter<"Customer"> | string
   }
 
@@ -31359,6 +31448,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     business?: BusinessCreateNestedOneWithoutUsersInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    customers?: CustomerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -31374,6 +31464,7 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -31389,6 +31480,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     business?: BusinessUpdateOneWithoutUsersNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    customers?: CustomerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -31404,6 +31496,7 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -32690,6 +32783,7 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
@@ -32706,6 +32800,7 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
@@ -32722,6 +32817,7 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: FloatFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
@@ -32738,6 +32834,7 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: FloatFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
@@ -32754,6 +32851,7 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    userId?: string | null
     businessId: string
   }
 
@@ -32781,6 +32879,7 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: FloatFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -33792,6 +33891,12 @@ export namespace Prisma {
     none?: InventoryHistoryWhereInput
   }
 
+  export type CustomerListRelationFilter = {
+    every?: CustomerWhereInput
+    some?: CustomerWhereInput
+    none?: CustomerWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -33806,6 +33911,10 @@ export namespace Prisma {
   }
 
   export type InventoryHistoryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CustomerOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -34111,12 +34220,6 @@ export namespace Prisma {
     none?: OrderWhereInput
   }
 
-  export type CustomerListRelationFilter = {
-    every?: CustomerWhereInput
-    some?: CustomerWhereInput
-    none?: CustomerWhereInput
-  }
-
   export type SiteContentNullableScalarRelationFilter = {
     is?: SiteContentWhereInput | null
     isNot?: SiteContentWhereInput | null
@@ -34153,10 +34256,6 @@ export namespace Prisma {
   }
 
   export type OrderOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type CustomerOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -34873,6 +34972,11 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
+  export type UserNullableScalarRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
   export type ShippingAddressListRelationFilter = {
     every?: ShippingAddressWhereInput
     some?: ShippingAddressWhereInput
@@ -34899,6 +35003,7 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    userId?: SortOrder
     businessId?: SortOrder
   }
 
@@ -34918,6 +35023,7 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    userId?: SortOrder
     businessId?: SortOrder
   }
 
@@ -34932,6 +35038,7 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    userId?: SortOrder
     businessId?: SortOrder
   }
 
@@ -35336,11 +35443,6 @@ export namespace Prisma {
     isNot?: OrderWhereInput | null
   }
 
-  export type UserNullableScalarRelationFilter = {
-    is?: UserWhereInput | null
-    isNot?: UserWhereInput | null
-  }
-
   export type InventoryHistoryCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -35493,6 +35595,13 @@ export namespace Prisma {
     connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
   }
 
+  export type CustomerCreateNestedManyWithoutUserInput = {
+    create?: XOR<CustomerCreateWithoutUserInput, CustomerUncheckedCreateWithoutUserInput> | CustomerCreateWithoutUserInput[] | CustomerUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CustomerCreateOrConnectWithoutUserInput | CustomerCreateOrConnectWithoutUserInput[]
+    createMany?: CustomerCreateManyUserInputEnvelope
+    connect?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
+  }
+
   export type SessionUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -35512,6 +35621,13 @@ export namespace Prisma {
     connectOrCreate?: InventoryHistoryCreateOrConnectWithoutUserInput | InventoryHistoryCreateOrConnectWithoutUserInput[]
     createMany?: InventoryHistoryCreateManyUserInputEnvelope
     connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+  }
+
+  export type CustomerUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<CustomerCreateWithoutUserInput, CustomerUncheckedCreateWithoutUserInput> | CustomerCreateWithoutUserInput[] | CustomerUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CustomerCreateOrConnectWithoutUserInput | CustomerCreateOrConnectWithoutUserInput[]
+    createMany?: CustomerCreateManyUserInputEnvelope
+    connect?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -35586,6 +35702,20 @@ export namespace Prisma {
     deleteMany?: InventoryHistoryScalarWhereInput | InventoryHistoryScalarWhereInput[]
   }
 
+  export type CustomerUpdateManyWithoutUserNestedInput = {
+    create?: XOR<CustomerCreateWithoutUserInput, CustomerUncheckedCreateWithoutUserInput> | CustomerCreateWithoutUserInput[] | CustomerUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CustomerCreateOrConnectWithoutUserInput | CustomerCreateOrConnectWithoutUserInput[]
+    upsert?: CustomerUpsertWithWhereUniqueWithoutUserInput | CustomerUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: CustomerCreateManyUserInputEnvelope
+    set?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
+    disconnect?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
+    delete?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
+    connect?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
+    update?: CustomerUpdateWithWhereUniqueWithoutUserInput | CustomerUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: CustomerUpdateManyWithWhereWithoutUserInput | CustomerUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: CustomerScalarWhereInput | CustomerScalarWhereInput[]
+  }
+
   export type SessionUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -35626,6 +35756,20 @@ export namespace Prisma {
     update?: InventoryHistoryUpdateWithWhereUniqueWithoutUserInput | InventoryHistoryUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: InventoryHistoryUpdateManyWithWhereWithoutUserInput | InventoryHistoryUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: InventoryHistoryScalarWhereInput | InventoryHistoryScalarWhereInput[]
+  }
+
+  export type CustomerUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<CustomerCreateWithoutUserInput, CustomerUncheckedCreateWithoutUserInput> | CustomerCreateWithoutUserInput[] | CustomerUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CustomerCreateOrConnectWithoutUserInput | CustomerCreateOrConnectWithoutUserInput[]
+    upsert?: CustomerUpsertWithWhereUniqueWithoutUserInput | CustomerUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: CustomerCreateManyUserInputEnvelope
+    set?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
+    disconnect?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
+    delete?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
+    connect?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
+    update?: CustomerUpdateWithWhereUniqueWithoutUserInput | CustomerUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: CustomerUpdateManyWithWhereWithoutUserInput | CustomerUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: CustomerScalarWhereInput | CustomerScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutSessionsInput = {
@@ -36558,6 +36702,12 @@ export namespace Prisma {
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutImagesInput, BusinessUpdateWithoutImagesInput>, BusinessUncheckedUpdateWithoutImagesInput>
   }
 
+  export type UserCreateNestedOneWithoutCustomersInput = {
+    create?: XOR<UserCreateWithoutCustomersInput, UserUncheckedCreateWithoutCustomersInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCustomersInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type BusinessCreateNestedOneWithoutCustomersInput = {
     create?: XOR<BusinessCreateWithoutCustomersInput, BusinessUncheckedCreateWithoutCustomersInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutCustomersInput
@@ -36590,6 +36740,16 @@ export namespace Prisma {
     connectOrCreate?: ShippingAddressCreateOrConnectWithoutCustomerInput | ShippingAddressCreateOrConnectWithoutCustomerInput[]
     createMany?: ShippingAddressCreateManyCustomerInputEnvelope
     connect?: ShippingAddressWhereUniqueInput | ShippingAddressWhereUniqueInput[]
+  }
+
+  export type UserUpdateOneWithoutCustomersNestedInput = {
+    create?: XOR<UserCreateWithoutCustomersInput, UserUncheckedCreateWithoutCustomersInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCustomersInput
+    upsert?: UserUpsertWithoutCustomersInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCustomersInput, UserUpdateWithoutCustomersInput>, UserUncheckedUpdateWithoutCustomersInput>
   }
 
   export type BusinessUpdateOneRequiredWithoutCustomersNestedInput = {
@@ -37536,6 +37696,48 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type CustomerCreateWithoutUserInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    acceptsMarketing?: boolean
+    totalSpent?: number
+    orderCount?: number
+    business: BusinessCreateNestedOneWithoutCustomersInput
+    orders?: OrderCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerUncheckedCreateWithoutUserInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    acceptsMarketing?: boolean
+    totalSpent?: number
+    orderCount?: number
+    businessId: string
+    orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerCreateOrConnectWithoutUserInput = {
+    where: CustomerWhereUniqueInput
+    create: XOR<CustomerCreateWithoutUserInput, CustomerUncheckedCreateWithoutUserInput>
+  }
+
+  export type CustomerCreateManyUserInputEnvelope = {
+    data: CustomerCreateManyUserInput | CustomerCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type SessionUpsertWithWhereUniqueWithoutUserInput = {
     where: SessionWhereUniqueInput
     update: XOR<SessionUpdateWithoutUserInput, SessionUncheckedUpdateWithoutUserInput>
@@ -37706,6 +37908,40 @@ export namespace Prisma {
     userId?: StringNullableFilter<"InventoryHistory"> | string | null
   }
 
+  export type CustomerUpsertWithWhereUniqueWithoutUserInput = {
+    where: CustomerWhereUniqueInput
+    update: XOR<CustomerUpdateWithoutUserInput, CustomerUncheckedUpdateWithoutUserInput>
+    create: XOR<CustomerCreateWithoutUserInput, CustomerUncheckedCreateWithoutUserInput>
+  }
+
+  export type CustomerUpdateWithWhereUniqueWithoutUserInput = {
+    where: CustomerWhereUniqueInput
+    data: XOR<CustomerUpdateWithoutUserInput, CustomerUncheckedUpdateWithoutUserInput>
+  }
+
+  export type CustomerUpdateManyWithWhereWithoutUserInput = {
+    where: CustomerScalarWhereInput
+    data: XOR<CustomerUpdateManyMutationInput, CustomerUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type CustomerScalarWhereInput = {
+    AND?: CustomerScalarWhereInput | CustomerScalarWhereInput[]
+    OR?: CustomerScalarWhereInput[]
+    NOT?: CustomerScalarWhereInput | CustomerScalarWhereInput[]
+    id?: StringFilter<"Customer"> | string
+    createdAt?: DateTimeFilter<"Customer"> | Date | string
+    updatedAt?: DateTimeFilter<"Customer"> | Date | string
+    email?: StringFilter<"Customer"> | string
+    firstName?: StringNullableFilter<"Customer"> | string | null
+    lastName?: StringNullableFilter<"Customer"> | string | null
+    phone?: StringNullableFilter<"Customer"> | string | null
+    acceptsMarketing?: BoolFilter<"Customer"> | boolean
+    totalSpent?: FloatFilter<"Customer"> | number
+    orderCount?: IntFilter<"Customer"> | number
+    userId?: StringNullableFilter<"Customer"> | string | null
+    businessId?: StringFilter<"Customer"> | string
+  }
+
   export type UserCreateWithoutSessionsInput = {
     id?: string
     name: string
@@ -37718,6 +37954,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     business?: BusinessCreateNestedOneWithoutUsersInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    customers?: CustomerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -37732,6 +37969,7 @@ export namespace Prisma {
     businessId?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -37762,6 +38000,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     business?: BusinessUpdateOneWithoutUsersNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    customers?: CustomerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -37776,6 +38015,7 @@ export namespace Prisma {
     businessId?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAccountsInput = {
@@ -37790,6 +38030,7 @@ export namespace Prisma {
     sessions?: SessionCreateNestedManyWithoutUserInput
     business?: BusinessCreateNestedOneWithoutUsersInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    customers?: CustomerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -37804,6 +38045,7 @@ export namespace Prisma {
     businessId?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -37834,6 +38076,7 @@ export namespace Prisma {
     sessions?: SessionUpdateManyWithoutUserNestedInput
     business?: BusinessUpdateOneWithoutUsersNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    customers?: CustomerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -37848,6 +38091,7 @@ export namespace Prisma {
     businessId?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutBusinessInput = {
@@ -37862,6 +38106,7 @@ export namespace Prisma {
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    customers?: CustomerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutBusinessInput = {
@@ -37876,6 +38121,7 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutBusinessInput = {
@@ -38081,6 +38327,7 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    user?: UserCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
   }
@@ -38096,6 +38343,7 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    userId?: string | null
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
   }
@@ -38504,23 +38752,6 @@ export namespace Prisma {
   export type CustomerUpdateManyWithWhereWithoutBusinessInput = {
     where: CustomerScalarWhereInput
     data: XOR<CustomerUpdateManyMutationInput, CustomerUncheckedUpdateManyWithoutBusinessInput>
-  }
-
-  export type CustomerScalarWhereInput = {
-    AND?: CustomerScalarWhereInput | CustomerScalarWhereInput[]
-    OR?: CustomerScalarWhereInput[]
-    NOT?: CustomerScalarWhereInput | CustomerScalarWhereInput[]
-    id?: StringFilter<"Customer"> | string
-    createdAt?: DateTimeFilter<"Customer"> | Date | string
-    updatedAt?: DateTimeFilter<"Customer"> | Date | string
-    email?: StringFilter<"Customer"> | string
-    firstName?: StringNullableFilter<"Customer"> | string | null
-    lastName?: StringNullableFilter<"Customer"> | string | null
-    phone?: StringNullableFilter<"Customer"> | string | null
-    acceptsMarketing?: BoolFilter<"Customer"> | boolean
-    totalSpent?: FloatFilter<"Customer"> | number
-    orderCount?: IntFilter<"Customer"> | number
-    businessId?: StringFilter<"Customer"> | string
   }
 
   export type SiteContentUpsertWithoutBusinessInput = {
@@ -40161,6 +40392,41 @@ export namespace Prisma {
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
+  export type UserCreateWithoutCustomersInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.ROLE
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    business?: BusinessCreateNestedOneWithoutUsersInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutCustomersInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.ROLE
+    businessId?: string | null
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutCustomersInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutCustomersInput, UserUncheckedCreateWithoutCustomersInput>
+  }
+
   export type BusinessCreateWithoutCustomersInput = {
     id?: string
     createdAt?: Date | string
@@ -40346,6 +40612,47 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type UserUpsertWithoutCustomersInput = {
+    update: XOR<UserUpdateWithoutCustomersInput, UserUncheckedUpdateWithoutCustomersInput>
+    create: XOR<UserCreateWithoutCustomersInput, UserUncheckedCreateWithoutCustomersInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutCustomersInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutCustomersInput, UserUncheckedUpdateWithoutCustomersInput>
+  }
+
+  export type UserUpdateWithoutCustomersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumROLEFieldUpdateOperationsInput | $Enums.ROLE
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    business?: BusinessUpdateOneWithoutUsersNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutCustomersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumROLEFieldUpdateOperationsInput | $Enums.ROLE
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+  }
+
   export type BusinessUpsertWithoutCustomersInput = {
     update: XOR<BusinessUpdateWithoutCustomersInput, BusinessUncheckedUpdateWithoutCustomersInput>
     create: XOR<BusinessCreateWithoutCustomersInput, BusinessUncheckedCreateWithoutCustomersInput>
@@ -40481,6 +40788,7 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
   }
@@ -40496,6 +40804,7 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
   }
@@ -40601,6 +40910,7 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: FloatFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
   }
@@ -40616,6 +40926,7 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: FloatFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
   }
@@ -40712,6 +41023,7 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
   }
@@ -40727,6 +41039,7 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    userId?: string | null
     businessId: string
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
   }
@@ -40981,6 +41294,7 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: FloatFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
   }
@@ -40996,6 +41310,7 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: FloatFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
   }
@@ -41952,6 +42267,7 @@ export namespace Prisma {
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     business?: BusinessCreateNestedOneWithoutUsersInput
+    customers?: CustomerCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutInventoryHistoryInput = {
@@ -41966,6 +42282,7 @@ export namespace Prisma {
     businessId?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutInventoryHistoryInput = {
@@ -42254,6 +42571,7 @@ export namespace Prisma {
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     business?: BusinessUpdateOneWithoutUsersNestedInput
+    customers?: CustomerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -42268,6 +42586,7 @@ export namespace Prisma {
     businessId?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type BusinessCreateWithoutPagesInput = {
@@ -42445,6 +42764,20 @@ export namespace Prisma {
     orderId?: string | null
   }
 
+  export type CustomerCreateManyUserInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    acceptsMarketing?: boolean
+    totalSpent?: number
+    orderCount?: number
+    businessId: string
+  }
+
   export type SessionUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42562,6 +42895,52 @@ export namespace Prisma {
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type CustomerUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
+    orders?: OrderUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type CustomerUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
+    orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type CustomerUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
   export type UserCreateManyBusinessInput = {
     id?: string
     name: string
@@ -42652,6 +43031,7 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    userId?: string | null
   }
 
   export type ImageCreateManyBusinessInput = {
@@ -42725,6 +43105,7 @@ export namespace Prisma {
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    customers?: CustomerUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutBusinessInput = {
@@ -42739,6 +43120,7 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutBusinessInput = {
@@ -42983,6 +43365,7 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: FloatFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    user?: UserUpdateOneWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
   }
@@ -42998,6 +43381,7 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: FloatFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
   }
@@ -43013,6 +43397,7 @@ export namespace Prisma {
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
     totalSpent?: FloatFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ImageUpdateWithoutBusinessInput = {
