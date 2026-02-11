@@ -29,7 +29,7 @@ export function DomainSetup({ business }: DomainSetupProps) {
   const [error, setError] = useState<string | null>(null);
 
   const subdomainUrl = `${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
-  const vpsIp = process.env.NEXT_PUBLIC_VPS_IP ?? "YOUR_VPS_IP";
+  const vpsIp = process.env.NEXT_PUBLIC_VPS_IP ?? "127.0.0.1";
 
   const handleSubmit = async () => {
     setError(null);

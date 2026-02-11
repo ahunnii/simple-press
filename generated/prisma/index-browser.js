@@ -354,6 +354,8 @@ exports.Prisma.OrderScalarFieldEnum = {
   customerLastName: 'customerLastName',
   customerPhone: 'customerPhone',
   trackingNumber: 'trackingNumber',
+  trackingUrl: 'trackingUrl',
+  shippedAt: 'shippedAt',
   customerNote: 'customerNote',
   internalNote: 'internalNote',
   businessId: 'businessId',

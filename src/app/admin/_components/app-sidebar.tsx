@@ -6,6 +6,7 @@ import {
   IconDashboard,
   IconHelp,
   IconLanguage,
+  IconMail,
   IconPackage,
   IconSettings,
   IconShoppingCart,
@@ -69,6 +70,11 @@ const data = {
       title: "Settings",
       url: "/admin/settings",
       icon: IconSettings,
+    },
+    {
+      title: "Emails",
+      url: "/admin/emails",
+      icon: IconMail,
     },
     {
       title: "Get Help",

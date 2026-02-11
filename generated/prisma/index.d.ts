@@ -20140,6 +20140,8 @@ export namespace Prisma {
     customerLastName: string | null
     customerPhone: string | null
     trackingNumber: string | null
+    trackingUrl: string | null
+    shippedAt: Date | null
     customerNote: string | null
     internalNote: string | null
     businessId: string | null
@@ -20169,6 +20171,8 @@ export namespace Prisma {
     customerLastName: string | null
     customerPhone: string | null
     trackingNumber: string | null
+    trackingUrl: string | null
+    shippedAt: Date | null
     customerNote: string | null
     internalNote: string | null
     businessId: string | null
@@ -20198,6 +20202,8 @@ export namespace Prisma {
     customerLastName: number
     customerPhone: number
     trackingNumber: number
+    trackingUrl: number
+    shippedAt: number
     customerNote: number
     internalNote: number
     businessId: number
@@ -20247,6 +20253,8 @@ export namespace Prisma {
     customerLastName?: true
     customerPhone?: true
     trackingNumber?: true
+    trackingUrl?: true
+    shippedAt?: true
     customerNote?: true
     internalNote?: true
     businessId?: true
@@ -20276,6 +20284,8 @@ export namespace Prisma {
     customerLastName?: true
     customerPhone?: true
     trackingNumber?: true
+    trackingUrl?: true
+    shippedAt?: true
     customerNote?: true
     internalNote?: true
     businessId?: true
@@ -20305,6 +20315,8 @@ export namespace Prisma {
     customerLastName?: true
     customerPhone?: true
     trackingNumber?: true
+    trackingUrl?: true
+    shippedAt?: true
     customerNote?: true
     internalNote?: true
     businessId?: true
@@ -20421,6 +20433,8 @@ export namespace Prisma {
     customerLastName: string | null
     customerPhone: string | null
     trackingNumber: string | null
+    trackingUrl: string | null
+    shippedAt: Date | null
     customerNote: string | null
     internalNote: string | null
     businessId: string
@@ -20469,6 +20483,8 @@ export namespace Prisma {
     customerLastName?: boolean
     customerPhone?: boolean
     trackingNumber?: boolean
+    trackingUrl?: boolean
+    shippedAt?: boolean
     customerNote?: boolean
     internalNote?: boolean
     businessId?: boolean
@@ -20505,6 +20521,8 @@ export namespace Prisma {
     customerLastName?: boolean
     customerPhone?: boolean
     trackingNumber?: boolean
+    trackingUrl?: boolean
+    shippedAt?: boolean
     customerNote?: boolean
     internalNote?: boolean
     businessId?: boolean
@@ -20538,6 +20556,8 @@ export namespace Prisma {
     customerLastName?: boolean
     customerPhone?: boolean
     trackingNumber?: boolean
+    trackingUrl?: boolean
+    shippedAt?: boolean
     customerNote?: boolean
     internalNote?: boolean
     businessId?: boolean
@@ -20571,6 +20591,8 @@ export namespace Prisma {
     customerLastName?: boolean
     customerPhone?: boolean
     trackingNumber?: boolean
+    trackingUrl?: boolean
+    shippedAt?: boolean
     customerNote?: boolean
     internalNote?: boolean
     businessId?: boolean
@@ -20579,7 +20601,7 @@ export namespace Prisma {
     discountCodeId?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "trackingNumber" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "trackingNumber" | "trackingUrl" | "shippedAt" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Order$customerArgs<ExtArgs>
@@ -20633,6 +20655,8 @@ export namespace Prisma {
       customerLastName: string | null
       customerPhone: string | null
       trackingNumber: string | null
+      trackingUrl: string | null
+      shippedAt: Date | null
       customerNote: string | null
       internalNote: string | null
       businessId: string
@@ -21088,6 +21112,8 @@ export namespace Prisma {
     readonly customerLastName: FieldRef<"Order", 'String'>
     readonly customerPhone: FieldRef<"Order", 'String'>
     readonly trackingNumber: FieldRef<"Order", 'String'>
+    readonly trackingUrl: FieldRef<"Order", 'String'>
+    readonly shippedAt: FieldRef<"Order", 'DateTime'>
     readonly customerNote: FieldRef<"Order", 'String'>
     readonly internalNote: FieldRef<"Order", 'String'>
     readonly businessId: FieldRef<"Order", 'String'>
@@ -28963,6 +28989,8 @@ export namespace Prisma {
     customerLastName: 'customerLastName',
     customerPhone: 'customerPhone',
     trackingNumber: 'trackingNumber',
+    trackingUrl: 'trackingUrl',
+    shippedAt: 'shippedAt',
     customerNote: 'customerNote',
     internalNote: 'internalNote',
     businessId: 'businessId',
@@ -30617,6 +30645,8 @@ export namespace Prisma {
     customerLastName?: StringNullableFilter<"Order"> | string | null
     customerPhone?: StringNullableFilter<"Order"> | string | null
     trackingNumber?: StringNullableFilter<"Order"> | string | null
+    trackingUrl?: StringNullableFilter<"Order"> | string | null
+    shippedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     customerNote?: StringNullableFilter<"Order"> | string | null
     internalNote?: StringNullableFilter<"Order"> | string | null
     businessId?: StringFilter<"Order"> | string
@@ -30652,6 +30682,8 @@ export namespace Prisma {
     customerLastName?: SortOrderInput | SortOrder
     customerPhone?: SortOrderInput | SortOrder
     trackingNumber?: SortOrderInput | SortOrder
+    trackingUrl?: SortOrderInput | SortOrder
+    shippedAt?: SortOrderInput | SortOrder
     customerNote?: SortOrderInput | SortOrder
     internalNote?: SortOrderInput | SortOrder
     businessId?: SortOrder
@@ -30691,6 +30723,8 @@ export namespace Prisma {
     customerLastName?: StringNullableFilter<"Order"> | string | null
     customerPhone?: StringNullableFilter<"Order"> | string | null
     trackingNumber?: StringNullableFilter<"Order"> | string | null
+    trackingUrl?: StringNullableFilter<"Order"> | string | null
+    shippedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     customerNote?: StringNullableFilter<"Order"> | string | null
     internalNote?: StringNullableFilter<"Order"> | string | null
     businessId?: StringFilter<"Order"> | string
@@ -30726,6 +30760,8 @@ export namespace Prisma {
     customerLastName?: SortOrderInput | SortOrder
     customerPhone?: SortOrderInput | SortOrder
     trackingNumber?: SortOrderInput | SortOrder
+    trackingUrl?: SortOrderInput | SortOrder
+    shippedAt?: SortOrderInput | SortOrder
     customerNote?: SortOrderInput | SortOrder
     internalNote?: SortOrderInput | SortOrder
     businessId?: SortOrder
@@ -30763,6 +30799,8 @@ export namespace Prisma {
     customerLastName?: StringNullableWithAggregatesFilter<"Order"> | string | null
     customerPhone?: StringNullableWithAggregatesFilter<"Order"> | string | null
     trackingNumber?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    trackingUrl?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    shippedAt?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
     customerNote?: StringNullableWithAggregatesFilter<"Order"> | string | null
     internalNote?: StringNullableWithAggregatesFilter<"Order"> | string | null
     businessId?: StringWithAggregatesFilter<"Order"> | string
@@ -32896,6 +32934,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -32927,6 +32967,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -32958,6 +33000,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -32989,6 +33033,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -33020,6 +33066,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -33049,6 +33097,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -33074,6 +33124,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -34988,6 +35040,8 @@ export namespace Prisma {
     customerLastName?: SortOrder
     customerPhone?: SortOrder
     trackingNumber?: SortOrder
+    trackingUrl?: SortOrder
+    shippedAt?: SortOrder
     customerNote?: SortOrder
     internalNote?: SortOrder
     businessId?: SortOrder
@@ -35026,6 +35080,8 @@ export namespace Prisma {
     customerLastName?: SortOrder
     customerPhone?: SortOrder
     trackingNumber?: SortOrder
+    trackingUrl?: SortOrder
+    shippedAt?: SortOrder
     customerNote?: SortOrder
     internalNote?: SortOrder
     businessId?: SortOrder
@@ -35055,6 +35111,8 @@ export namespace Prisma {
     customerLastName?: SortOrder
     customerPhone?: SortOrder
     trackingNumber?: SortOrder
+    trackingUrl?: SortOrder
+    shippedAt?: SortOrder
     customerNote?: SortOrder
     internalNote?: SortOrder
     businessId?: SortOrder
@@ -37959,6 +38017,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     customer?: CustomerCreateNestedOneWithoutOrdersInput
@@ -37989,6 +38049,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     customerId?: string | null
@@ -38418,6 +38480,8 @@ export namespace Prisma {
     customerLastName?: StringNullableFilter<"Order"> | string | null
     customerPhone?: StringNullableFilter<"Order"> | string | null
     trackingNumber?: StringNullableFilter<"Order"> | string | null
+    trackingUrl?: StringNullableFilter<"Order"> | string | null
+    shippedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     customerNote?: StringNullableFilter<"Order"> | string | null
     internalNote?: StringNullableFilter<"Order"> | string | null
     businessId?: StringFilter<"Order"> | string
@@ -40183,6 +40247,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -40213,6 +40279,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -40458,6 +40526,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -40488,6 +40558,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -41173,6 +41245,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -41203,6 +41277,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -41361,6 +41437,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -41391,6 +41469,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -41486,6 +41566,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -41516,6 +41598,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -41808,6 +41892,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -41838,6 +41924,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -42100,6 +42188,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -42130,6 +42220,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -42540,6 +42632,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     customerId?: string | null
@@ -42805,6 +42899,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     customer?: CustomerUpdateOneWithoutOrdersNestedInput
@@ -42835,6 +42931,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42865,6 +42963,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -43475,6 +43575,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -43520,6 +43622,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -43550,6 +43654,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -43580,6 +43686,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -43661,6 +43769,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -43689,6 +43799,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -43719,6 +43831,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -43749,6 +43863,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -43881,6 +43997,8 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     trackingNumber?: string | null
+    trackingUrl?: string | null
+    shippedAt?: Date | string | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -43909,6 +44027,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -43939,6 +44059,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -43969,6 +44091,8 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string

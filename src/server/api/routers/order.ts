@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import { sendOrderShipped } from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
 import {
   createTRPCRouter,
@@ -12,6 +13,88 @@ import {
 } from "~/server/api/trpc";
 
 export const orderRouter = createTRPCRouter({
+  markAsFulfilled: ownerAdminProcedure
+    .input(
+      z.object({
+        orderId: z.string(),
+        carrier: z.string(),
+        trackingNumber: z.string(),
+        trackingUrl: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Get order with business info
+      const order = await ctx.db.order.findUnique({
+        where: { id: input.orderId },
+        include: {
+          business: {
+            include: {
+              siteContent: {
+                select: { logoUrl: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (!order) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Order not found",
+        });
+      }
+
+      // Verify ownership
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { businessId: true },
+      });
+
+      if (user?.businessId !== order.businessId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Not authorized",
+        });
+      }
+
+      // Update order
+      const updatedOrder = await ctx.db.order.update({
+        where: { id: input.orderId },
+        data: {
+          status: "fulfilled",
+          trackingNumber: input.trackingNumber,
+          trackingUrl: input.trackingUrl,
+          shippedAt: new Date(),
+        },
+      });
+
+      // Send shipping notification email
+      try {
+        await sendOrderShipped({
+          to: order.customerEmail,
+          orderNumber: order.orderNumber,
+          customerName: order.customerName ?? "Guest",
+          trackingNumber: input.trackingNumber,
+          trackingUrl: input.trackingUrl,
+          carrier: input.carrier,
+          business: {
+            name: order.business.name,
+            ownerEmail: order.business.ownerEmail,
+            siteContent: order.business.siteContent,
+            subdomain: order.business.subdomain,
+          },
+        });
+
+        console.log(
+          `[Orders] Shipping email sent for order #${order.orderNumber}`,
+        );
+      } catch (emailError) {
+        console.error("[Orders] Failed to send shipping email:", emailError);
+        // Don't fail the mutation if email fails
+      }
+
+      return updatedOrder;
+    }),
   getAll: ownerAdminProcedure
     .input(
       z

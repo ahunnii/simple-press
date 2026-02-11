@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
+import { sendOrderConfirmation } from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
 
@@ -54,6 +55,13 @@ export async function POST(req: NextRequest) {
             stripeAccountId: true,
             subdomain: true,
             customDomain: true,
+            name: true,
+            ownerEmail: true,
+            siteContent: {
+              select: {
+                logoUrl: true,
+              },
+            },
           },
         });
 
@@ -128,10 +136,11 @@ export async function POST(req: NextRequest) {
         let shippingAddressId: string | null = null;
 
         const shippingDetails = fullSession.customer_details?.address;
+        let shippingAddress;
 
         if (shippingDetails) {
           const addr = shippingDetails;
-          const shippingAddress = await db.shippingAddress.create({
+          shippingAddress = await db.shippingAddress.create({
             data: {
               firstName:
                 fullSession.customer_details?.individual_name?.split(" ")[0] ??
@@ -395,6 +404,56 @@ export async function POST(req: NextRequest) {
         }
 
         // TODO: Send order confirmation email
+
+        // Send order confirmation email
+        try {
+          await sendOrderConfirmation({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            items: order.items.map((item) => ({
+              productName: item.productName,
+              variantName: item.variantName,
+              quantity: item.quantity,
+              price: item.price,
+              total: item.total,
+            })),
+            subtotal: order.subtotal,
+            shipping: order.shipping,
+            tax: order.tax,
+            discount: order.discount,
+            total: order.total,
+            shippingAddress: shippingAddress
+              ? {
+                  name: shippingAddress.firstName ?? "Guest",
+                  line1: shippingAddress.address1,
+                  line2: shippingAddress.address2 ?? null,
+                  city: shippingAddress.city ?? "",
+                  state: shippingAddress.province ?? "",
+                  postalCode: shippingAddress.zip,
+                  country: shippingAddress.country,
+                }
+              : undefined,
+            business: {
+              name: business.name,
+              ownerEmail: business.ownerEmail,
+              siteContent: business.siteContent,
+              subdomain: business.subdomain,
+              customDomain: business.customDomain,
+            },
+          });
+
+          console.log(
+            `[Webhook] Order confirmation email sent to ${order.customerEmail}`,
+          );
+        } catch (emailError) {
+          console.error(
+            "[Webhook] Failed to send order confirmation email:",
+            emailError,
+          );
+          // Don't fail the webhook if email fails
+        }
+
         // TODO: Notify store owner
 
         return NextResponse.json({ received: true });
