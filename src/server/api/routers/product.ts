@@ -29,6 +29,7 @@ export const productRouter = createTRPCRouter({
           orderBy: { sortOrder: "asc" },
           take: 1,
         },
+        variants: true,
       },
       orderBy: { createdAt: "desc" },
       take: 4,

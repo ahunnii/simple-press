@@ -1,81 +1,112 @@
+import Image from "next/image";
 import Link from "next/link";
 
-import type { FooterBusiness } from "../../_components/storefront-footer";
+import type { RouterOutputs } from "~/trpc/react";
 
 type Props = {
-  business: FooterBusiness;
+  business: NonNullable<RouterOutputs["business"]["get"]>;
 };
-
 export function DefaultFooter({ business }: Props) {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="mt-auto bg-gray-900 px-4 py-12 text-white">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid gap-8 md:grid-cols-3">
-          <div>
-            <h3 className="mb-4 text-lg font-bold">{business.name}</h3>
-            {business.siteContent?.footerText && (
-              <p className="text-sm text-gray-400">
-                {business.siteContent.footerText}
-              </p>
-            )}
+    <footer className="bg-background mt-auto border-t">
+      <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
+          <div className="space-y-4">
+            <Link href="/" className="flex items-center gap-2">
+              {business.siteContent?.logoUrl ? (
+                <Image
+                  src={business.siteContent.logoUrl}
+                  alt={business.name}
+                  width={40}
+                  height={40}
+                  className="bg-primary rounded-full"
+                />
+              ) : (
+                <span className="text-xl font-bold">{business.name}</span>
+              )}
+            </Link>
+            <p className="text-muted-foreground text-sm">
+              {business.siteContent?.footerText}
+            </p>
+          </div>
+          <div className="space-y-4"></div>
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium">Shop</h3>
+            <nav className="flex flex-col space-y-2">
+              <Link
+                href="/products"
+                className="text-muted-foreground hover:text-primary text-sm"
+              >
+                All Products
+              </Link>
+              <Link
+                href="/about"
+                className="text-muted-foreground hover:text-primary text-sm"
+              >
+                About Us
+              </Link>
+            </nav>
           </div>
 
-          <div>
-            <h4 className="mb-4 font-semibold">Shop</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li>
-                <Link
-                  href="/products"
-                  className="transition-colors hover:text-white"
-                >
-                  All Products
-                </Link>
-              </li>
-              <li>
-                <a href="/about" className="transition-colors hover:text-white">
-                  About Us
-                </a>
-              </li>
-            </ul>
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium">Support</h3>
+            <nav className="flex flex-col space-y-2">
+              <Link
+                href="/contact"
+                className="text-muted-foreground hover:text-primary text-sm"
+              >
+                Contact Us
+              </Link>
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-primary text-sm"
+              >
+                Returns & Refunds
+              </Link>
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-primary text-sm"
+              >
+                Shipping Information
+              </Link>
+            </nav>
           </div>
-
-          <div>
-            <h4 className="mb-4 font-semibold">Support</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li>
-                <a
-                  href="/contact"
-                  className="transition-colors hover:text-white"
-                >
-                  Contact Us
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/shipping"
-                  className="transition-colors hover:text-white"
-                >
-                  Shipping Info
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/returns"
-                  className="transition-colors hover:text-white"
-                >
-                  Returns
-                </a>
-              </li>
-            </ul>
-          </div>
+          {business?.businessAddress && (
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Contact</h3>
+              <div className="text-muted-foreground flex flex-col space-y-2 text-sm">
+                <p>{business.businessAddress}</p>
+              </div>
+            </div>
+          )}
         </div>
-
-        <div className="mt-8 border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
-          <p>
-            © {currentYear} {business.name}. All rights reserved.
-          </p>
+        <div className="mt-8 border-t pt-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-muted-foreground text-xs">
+              &copy; {new Date().getFullYear()} {business.name}. All rights
+              reserved.
+            </p>
+            <div className="flex gap-4">
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-primary text-xs"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-primary text-xs"
+              >
+                Terms of Service
+              </Link>
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-primary text-xs"
+              >
+                Cookies Policy
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
+import { Menu, User, X } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
-import { useCart } from "~/providers/cart-context";
 
 import { DefaultCartBadge } from "./default-cart-badge";
 
@@ -15,69 +16,102 @@ type Business = {
   } | null;
 };
 
-type StorefrontHeaderProps = {
+type Props = {
   business: Business;
 };
 
-export function DefaultHeader({ business }: StorefrontHeaderProps) {
-  const { itemCount } = useCart();
+export function DefaultHeader({ business }: Props) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-white">
-      <div className="mx-auto max-w-7xl px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo / Brand */}
-          <Link href="/" className="flex items-center gap-2">
-            {business.siteContent?.logoUrl ? (
-              <img
-                src={business.siteContent.logoUrl}
-                alt={business.name}
-                className="h-8 w-auto"
-              />
-            ) : (
-              <span className="text-xl font-bold text-gray-900">
-                {business.name}
-              </span>
-            )}
-          </Link>
-
-          {/* Navigation */}
-          <nav className="hidden items-center gap-8 md:flex">
-            <Link
-              href="/"
-              className="text-gray-600 transition-colors hover:text-gray-900"
-            >
-              Home
-            </Link>
-            <Link
-              href="/products"
-              className="text-gray-600 transition-colors hover:text-gray-900"
-            >
-              Products
-            </Link>
-            <Link
-              href="/about"
-              className="text-gray-600 transition-colors hover:text-gray-900"
-            >
-              About
-            </Link>
-          </nav>
-
-          {/* Cart */}
-          {/* <Button variant="ghost" size="sm" asChild>
-            <Link href="/cart" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              <span className="ml-2">Cart</span>
-              {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs text-white">
-                  {itemCount}
-                </span>
+    <>
+      <header className="bg-background sticky top-0 z-50 w-full border-b">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+          <div className="flex items-center gap-6 md:gap-10">
+            <Link href="/" className="flex items-center gap-2">
+              {business.siteContent?.logoUrl ? (
+                <Image
+                  src={business.siteContent.logoUrl}
+                  alt={business.name}
+                  width={40}
+                  height={40}
+                  className="bg-primary rounded-full"
+                />
+              ) : (
+                <span className="text-xl font-bold">{business.name}</span>
               )}
             </Link>
-          </Button> */}
-          <DefaultCartBadge />
+            <nav className="hidden gap-6 md:flex">
+              <Link
+                href="/"
+                className="hover:text-primary text-sm font-medium transition-colors"
+              >
+                Home
+              </Link>
+              <Link
+                href="/products"
+                className="hover:text-primary text-sm font-medium transition-colors"
+              >
+                Shop
+              </Link>
+              <Link
+                href="/about"
+                className="hover:text-primary text-sm font-medium transition-colors"
+              >
+                About
+              </Link>
+            </nav>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="relative" asChild>
+              <Link href="/login">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Sign In</span>
+              </Link>
+            </Button>
+            <DefaultCartBadge />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+              <span className="sr-only">Menu</span>
+            </Button>
+          </div>
         </div>
-      </div>
-    </header>
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="bg-background space-y-4 border-t p-4 md:hidden">
+            <nav className="flex flex-col space-y-4">
+              <Link
+                href="/"
+                className="hover:text-primary text-sm font-medium transition-colors"
+              >
+                Home
+              </Link>
+              <Link
+                href="/products"
+                className="hover:text-primary text-sm font-medium transition-colors"
+              >
+                Shop
+              </Link>
+
+              <Link
+                href="/about"
+                className="hover:text-primary text-sm font-medium transition-colors"
+              >
+                About
+              </Link>
+            </nav>
+          </div>
+        )}
+      </header>
+    </>
   );
 }
