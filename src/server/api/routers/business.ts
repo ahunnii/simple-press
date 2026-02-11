@@ -37,6 +37,7 @@ export const businessRouter = createTRPCRouter({
         },
         include: {
           siteContent: true,
+          images: true,
 
           ...(input?.includeProducts
             ? {
@@ -47,6 +48,7 @@ export const businessRouter = createTRPCRouter({
                       orderBy: { sortOrder: "asc" },
                       take: 1,
                     },
+                    variants: true,
                   },
                   orderBy: { createdAt: "desc" },
                   ...(input?.productNumber

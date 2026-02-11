@@ -1,31 +1,14 @@
 import Link from "next/link";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 
 import { ProductCard } from "../_components/product-card";
 import { StorefrontFooter } from "../_components/storefront-footer";
 import { StorefrontHeader } from "../_components/storefront-header";
 
-type Business = {
-  id: string;
-  name: string;
-  siteContent: {
-    aboutTitle: string | null;
-    heroTitle: string | null;
-    heroSubtitle: string | null;
-    aboutText: string | null;
-    primaryColor: string | null;
-  } | null;
-  products: Array<{
-    id: string;
-    name: string;
-    slug: string;
-    price: number;
-    images: Array<{ url: string; altText: string | null }>;
-  }>;
-};
 type VintageTemplateProps = {
-  business: Business;
+  business: NonNullable<RouterOutputs["business"]["get"]>;
 };
 
 export function VintageTemplate({ business }: VintageTemplateProps) {
@@ -33,16 +16,7 @@ export function VintageTemplate({ business }: VintageTemplateProps) {
 
   return (
     <div className="flex min-h-screen flex-col bg-amber-50 font-serif">
-      <StorefrontHeader
-        business={
-          business as {
-            name: string;
-            siteContent: {
-              logoUrl: string | null;
-            } | null;
-          }
-        }
-      />
+      <StorefrontHeader business={business} />
 
       {/* Hero Section - Vintage Style */}
       <section className="relative bg-gradient-to-b from-amber-100 to-amber-50 px-4 py-32">
@@ -102,16 +76,7 @@ export function VintageTemplate({ business }: VintageTemplateProps) {
         </section>
       )}
 
-      <StorefrontFooter
-        business={
-          business as {
-            name: string;
-            siteContent: {
-              footerText: string | null;
-            } | null;
-          }
-        }
-      />
+      <StorefrontFooter business={business} />
     </div>
   );
 }

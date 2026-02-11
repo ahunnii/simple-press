@@ -1,32 +1,14 @@
 import Link from "next/link";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 
 import { ProductCard } from "../_components/product-card";
 import { StorefrontFooter } from "../_components/storefront-footer";
 import { StorefrontHeader } from "../_components/storefront-header";
 
-type Business = {
-  id: string;
-  name: string;
-  siteContent: {
-    aboutTitle: string | null;
-    heroTitle: string | null;
-    heroSubtitle: string | null;
-    aboutText: string | null;
-    primaryColor: string | null;
-  } | null;
-  products: Array<{
-    id: string;
-    name: string;
-    slug: string;
-    price: number;
-    images: Array<{ url: string; altText: string | null }>;
-  }>;
-};
-
 type MinimalTemplateProps = {
-  business: Business;
+  business: NonNullable<RouterOutputs["business"]["get"]>;
 };
 
 export function MinimalTemplate({ business }: MinimalTemplateProps) {
@@ -34,16 +16,7 @@ export function MinimalTemplate({ business }: MinimalTemplateProps) {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <StorefrontHeader
-        business={
-          business as {
-            name: string;
-            siteContent: {
-              logoUrl: string | null;
-            } | null;
-          }
-        }
-      />
+      <StorefrontHeader business={business} />
 
       {/* Hero Section - Minimal Style */}
       <section className="relative border-b px-4 py-40">
@@ -95,16 +68,7 @@ export function MinimalTemplate({ business }: MinimalTemplateProps) {
         </section>
       )}
 
-      <StorefrontFooter
-        business={
-          business as {
-            name: string;
-            siteContent: {
-              footerText: string | null;
-            } | null;
-          }
-        }
-      />
+      <StorefrontFooter business={business} />
     </div>
   );
 }

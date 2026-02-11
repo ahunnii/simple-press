@@ -14,6 +14,27 @@ import {
 } from "~/server/api/trpc";
 
 export const productRouter = createTRPCRouter({
+  getFeatured: publicProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+    const products = await ctx.db.product.findMany({
+      where: { businessId: business.id },
+      include: {
+        images: {
+          orderBy: { sortOrder: "asc" },
+          take: 1,
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 4,
+    });
+    return products;
+  }),
   create: ownerAdminProcedure
     .input(productCreateSchema)
     .mutation(async ({ ctx, input }) => {

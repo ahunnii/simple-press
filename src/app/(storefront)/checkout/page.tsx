@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { api } from "~/trpc/server";
 
 import { StorefrontHeader } from "../_components/storefront-header";
-import { CheckoutForm } from "./_components/checkout-form";
+import { DefaultCheckoutPage } from "../_templates/default/default-checkout-page";
+import { ModernCheckoutPage } from "../_templates/modern/modern-checkout-page";
 
 export default async function CheckoutPage() {
   // Find business
@@ -33,16 +34,9 @@ export default async function CheckoutPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <StorefrontHeader business={business} />
+  if (business.templateId === "modern") {
+    return <ModernCheckoutPage business={business} />;
+  }
 
-      <main className="px-4 py-12">
-        <div className="mx-auto max-w-6xl">
-          <h1 className="mb-8 text-3xl font-bold text-gray-900">Checkout</h1>
-          <CheckoutForm business={business} />
-        </div>
-      </main>
-    </div>
-  );
+  return <DefaultCheckoutPage business={business} />;
 }

@@ -118,22 +118,22 @@ export async function middleware(req: NextRequest) {
   }
 
   // Storefront routes need to be rewritten to (storefront) group
-  const url = req.nextUrl.clone();
+  // const url = req.nextUrl.clone();
 
-  if (pathname === "/") {
-    url.pathname = "/(storefront)";
-    return NextResponse.rewrite(url);
-  }
+  // if (pathname === "/") {
+  //   url.pathname = "/(storefront)";
+  //   return NextResponse.rewrite(url);
+  // }
 
-  if (pathname.startsWith("/products")) {
-    url.pathname = `/(storefront)${pathname}`;
-    return NextResponse.rewrite(url);
-  }
+  // if (pathname.startsWith("/products")) {
+  //   url.pathname = `/(storefront)${pathname}`;
+  //   return NextResponse.rewrite(url);
+  // }
 
-  if (pathname.startsWith("/cart") || pathname.startsWith("/checkout")) {
-    url.pathname = `/(storefront)${pathname}`;
-    return NextResponse.rewrite(url);
-  }
+  // if (pathname.startsWith("/cart") || pathname.startsWith("/checkout")) {
+  //   url.pathname = `/(storefront)${pathname}`;
+  //   return NextResponse.rewrite(url);
+  // }
 
   // For any other paths on tenant domains, just pass through
   return NextResponse.next();
