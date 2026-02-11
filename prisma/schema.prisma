@@ -151,6 +151,8 @@ model Business {
   images      Image[]
   discountCodes DiscountCode[]
   inventoryHistory InventoryHistory[]
+  pages         Page[]
+
 
   @@index([subdomain])
   @@index([customDomain])
@@ -612,4 +614,38 @@ model InventoryHistory {
   @@index([businessId])
   @@index([orderId])
   @@index([createdAt])
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Page identity
+  title       String
+  slug        String // about, contact, privacy, terms, etc.
+  content     Json 
+  excerpt     String?  @db.Text
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  ogImage         String?
+  
+  // Status
+  published Boolean @default(true)
+  sortOrder Int     @default(0)
+  
+  // Page type
+  type     String @default("page") // page | policy | custom
+  template String @default("default") // default | sidebar | full-width
+  
+  // Relationships
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@unique([businessId, slug])
+  @@index([businessId, published])
+  @@index([businessId, type])
 }

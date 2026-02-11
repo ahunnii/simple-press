@@ -62,6 +62,31 @@ export const businessRouter = createTRPCRouter({
       return business;
     }),
 
+  secureGetContent: ownerAdminProcedure.query(async ({ ctx }) => {
+    const headersList = await headers();
+    const hostname = headersList.get("host") ?? "";
+
+    // Extract subdomain or custom domain
+    const domain = hostname.split(":")[0]; // Remove port
+
+    const business = await ctx.db.business.findFirst({
+      where: {
+        OR: [
+          { customDomain: domain },
+          { subdomain: domain?.split(".")[0] }, // Extract subdomain
+        ],
+        status: "active",
+      },
+      include: {
+        siteContent: true,
+        pages: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    });
+    return business;
+  }),
+
   updateBranding: ownerAdminProcedure
     .input(updateBrandingSchema)
     .mutation(async ({ ctx, input }) => {

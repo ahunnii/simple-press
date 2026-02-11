@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   IconDashboard,
   IconHelp,
+  IconLanguage,
   IconPackage,
   IconSettings,
   IconShoppingCart,
@@ -56,11 +57,11 @@ const data = {
     //   url: "/admin/collections",
     //   icon: IconFolder,
     // },
-    // {
-    //   title: "Site content",
-    //   url: "/admin/site-content",
-    //   icon: IconLanguage,
-    // },
+    {
+      title: "Site content",
+      url: "/admin/content",
+      icon: IconLanguage,
+    },
   ],
   navClouds: [],
   navSecondary: [

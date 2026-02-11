@@ -427,6 +427,25 @@ exports.Prisma.InventoryHistoryScalarFieldEnum = {
   userId: 'userId'
 };
 
+exports.Prisma.PageScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  title: 'title',
+  slug: 'slug',
+  content: 'content',
+  excerpt: 'excerpt',
+  metaTitle: 'metaTitle',
+  metaDescription: 'metaDescription',
+  metaKeywords: 'metaKeywords',
+  ogImage: 'ogImage',
+  published: 'published',
+  sortOrder: 'sortOrder',
+  type: 'type',
+  template: 'template',
+  businessId: 'businessId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -488,7 +507,8 @@ exports.Prisma.ModelName = {
   DomainQueue: 'DomainQueue',
   PageView: 'PageView',
   DiscountCode: 'DiscountCode',
-  InventoryHistory: 'InventoryHistory'
+  InventoryHistory: 'InventoryHistory',
+  Page: 'Page'
 };
 
 /**
