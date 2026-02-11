@@ -1,27 +1,24 @@
-import { redirect } from "next/navigation";
-
-import { auth } from "~/server/better-auth";
+import { checkBusiness } from "~/lib/check-business";
+import { getSession } from "~/server/better-auth/server";
 import { db } from "~/server/db";
+import { HydrateClient } from "~/trpc/server";
 
-import { QuickActions } from "../_components/quick-actions";
-import { SetupChecklist } from "../_components/setup-checklist";
-import { WelcomeHeader } from "../_components/welcome-header";
+import { SiteHeader } from "../_components/site-header";
+import { QuickActions } from "./_components/quick-actions";
+import { SetupChecklist } from "./_components/setup-checklist";
+import { WelcomeHeader } from "./_components/welcome-header";
 
 export default async function AdminWelcomePage() {
   // Get current session
-  const session = await auth.api.getSession({
-    headers: await import("next/headers").then((mod) => mod.headers()),
-  });
-
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
+  const businessId = await checkBusiness();
+  const session = await getSession();
 
   // Get user with business info
   const user = await db.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: session?.user?.id },
     include: {
       business: {
+        where: { id: businessId?.id },
         include: {
           siteContent: true,
           _count: {
@@ -64,7 +61,8 @@ export default async function AdminWelcomePage() {
   const isComplete = completedSteps === totalSteps;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <HydrateClient>
+      <SiteHeader title="Welcome to your store" />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <WelcomeHeader
           businessName={business.name}
@@ -89,6 +87,6 @@ export default async function AdminWelcomePage() {
           </div>
         </div>
       </div>
-    </div>
+    </HydrateClient>
   );
 }

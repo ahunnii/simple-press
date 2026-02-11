@@ -1,14 +1,7 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Circle,
-  CreditCard,
-  Globe,
-  Package,
-  Store,
-} from "lucide-react";
+import { ArrowRight, CreditCard, Globe, Package, Store } from "lucide-react";
 
+import { env } from "~/env";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -18,8 +11,9 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
-import { ConnectStripeButton } from "./connect-stripe-button";
-import { DomainSetup } from "./domain-setup";
+import { DomainSetup } from "../../_components/domain/domain-setup";
+import { ConnectStripeButton } from "../../_components/payment/connect-stripe-button";
+import { SetupStep } from "./setup-step";
 
 type Business = {
   id: string;
@@ -33,7 +27,7 @@ type Business = {
   };
 };
 
-type SetupChecklistProps = {
+type Props = {
   business: Business;
   setupSteps: {
     businessCreated: boolean;
@@ -50,7 +44,7 @@ export function SetupChecklist({
   setupSteps,
   completedSteps,
   totalSteps,
-}: SetupChecklistProps) {
+}: Props) {
   const progress = (completedSteps / totalSteps) * 100;
 
   return (
@@ -113,7 +107,7 @@ export function SetupChecklist({
           title="Configure Your Domain"
           description={
             setupSteps.domainConfigured
-              ? `Your store is accessible at ${business.customDomain ?? `${business.subdomain}.myapplication.com`}`
+              ? `Your store is accessible at ${business.customDomain ?? `${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`}`
               : "Set up your custom domain or use your free subdomain"
           }
           action={<DomainSetup business={business} />}
@@ -142,47 +136,5 @@ export function SetupChecklist({
         />
       </CardContent>
     </Card>
-  );
-}
-
-type SetupStepProps = {
-  completed: boolean;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  action?: React.ReactNode;
-};
-
-function SetupStep({
-  completed,
-  icon,
-  title,
-  description,
-  action,
-}: SetupStepProps) {
-  return (
-    <div className="flex items-start gap-4 rounded-lg border bg-white p-4">
-      <div
-        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
-          completed
-            ? "bg-green-100 text-green-600"
-            : "bg-gray-100 text-gray-400"
-        }`}
-      >
-        {completed ? <CheckCircle2 className="h-6 w-6" /> : icon}
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <h3 className="font-semibold text-gray-900">{title}</h3>
-        <p className="mt-1 text-sm text-gray-600">{description}</p>
-        {action && <div className="mt-3">{action}</div>}
-      </div>
-
-      {completed && (
-        <div className="flex-shrink-0">
-          <CheckCircle2 className="h-6 w-6 text-green-600" />
-        </div>
-      )}
-    </div>
   );
 }

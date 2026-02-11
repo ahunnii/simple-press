@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
-import { api } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
+import { SiteHeader } from "../_components/site-header";
 import { OrderFilters } from "./_components/order-filters";
 import { OrdersTable } from "./_components/orders-table";
 
@@ -35,7 +36,8 @@ export default async function OrdersPage({ searchParams }: Props) {
   const paidOrders = orders.filter((o) => o.status === "paid").length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <HydrateClient>
+      <SiteHeader title="Orders" />
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -94,6 +96,6 @@ export default async function OrdersPage({ searchParams }: Props) {
           <OrdersTable orders={orders} />
         )}
       </div>
-    </div>
+    </HydrateClient>
   );
 }

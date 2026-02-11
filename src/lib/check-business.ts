@@ -19,7 +19,7 @@ export const checkBusiness = async () => {
       ],
       status: "active",
     },
-    select: { id: true },
+    select: { id: true, customDomain: true },
   });
   return business;
 };

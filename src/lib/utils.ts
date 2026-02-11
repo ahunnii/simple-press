@@ -2,13 +2,6 @@ import type { ClassValue } from "clsx";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-// import { clsx, type ClassValue } from "clsx"
-// import { twMerge } from "tailwind-merge"
-
-// export function cn(...inputs: ClassValue[]) {
-//   return twMerge(clsx(inputs))
-// }
-
 /**
  * Merge Tailwind CSS classes with proper precedence
  */
@@ -32,10 +25,7 @@ export function slugify(text: string): string {
  * Format currency for display
  * Example: 1999 -> "$19.99"
  */
-export function formatCurrency(
-  cents: number,
-  currency: string = "USD",
-): string {
+export function formatCurrency(cents: number, currency = "USD"): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
@@ -78,7 +68,7 @@ export function isValidDomain(domain: string): boolean {
 export function extractSubdomain(hostname: string): string | null {
   const parts = hostname.split(".");
   if (parts.length > 2) {
-    return parts[0];
+    return parts[0] ?? null;
   }
   return null;
 }
@@ -113,7 +103,7 @@ export function isSubdomainReserved(subdomain: string): boolean {
 /**
  * Generate a random code
  */
-export function generateCode(length: number = 6): string {
+export function generateCode(length = 6): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let result = "";
   for (let i = 0; i < length; i++) {

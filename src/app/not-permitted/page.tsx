@@ -1,51 +1,72 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Home, ShieldX } from "lucide-react";
+import { notFound } from "next/navigation";
+import { ShieldX, Store } from "lucide-react";
 
+import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
-import { Footer } from "~/components/layout/footer";
-import { Header } from "~/components/layout/header";
 
 export const metadata = {
   title: "Not permitted",
   description: "You don't have permission to access this page.",
 };
 
-export default function NotPermittedPage() {
+export default async function NotPermittedPage() {
+  const business = await api.business.get();
+  if (!business) {
+    notFound();
+  }
   return (
-    <div className="bg-background min-h-screen">
-      <Header />
-      <div className="bg-primary/5 flex min-h-[calc(100vh-7rem)] items-center justify-center pt-28">
-        <main className="flex flex-1 flex-col items-center justify-center">
-          <section className="w-full py-16 md:py-24">
-            <div className="mx-auto flex max-w-2xl flex-col items-center px-4 text-center sm:px-6 lg:px-8">
-              <div className="bg-primary/10 text-primary mb-6 flex size-20 items-center justify-center rounded-full">
-                <ShieldX className="size-10" aria-hidden />
-              </div>
-              <p className="text-primary mb-2 text-sm font-medium">Error 403</p>
-              <h1 className="text-foreground mb-4 text-4xl font-bold text-balance md:text-5xl">
-                You are not permitted
-              </h1>
-              <p className="text-muted-foreground mb-8 max-w-lg text-lg leading-relaxed">
-                You don&apos;t have permission to access this page. If you
-                believe this is an error, try signing in with a different
-                account or contact support.
-              </p>
-              <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-                <Button size="lg" asChild>
-                  <Link href="/">
-                    <Home className="size-4" />
-                    Back to Home
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link href="/auth/sign-in">Sign in</Link>
-                </Button>
-              </div>
-            </div>
-          </section>
-        </main>
-      </div>
-      <Footer />
+    <div className="bg-background relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4">
+      {/* Subtle grid texture */}
+      <div
+        className="not-found-pattern pointer-events-none absolute inset-0"
+        aria-hidden
+      />
+      <main className="relative z-10 flex max-w-lg flex-col items-center text-center">
+        {business?.siteContent?.logoUrl && (
+          <Link
+            href="/"
+            className="text-foreground focus:ring-primary mb-8 block rounded-lg focus:ring-2 focus:ring-offset-2 focus:outline-none"
+          >
+            <Image
+              src={business.siteContent.logoUrl}
+              alt={business.name}
+              width={120}
+              height={48}
+              className="h-12 w-auto object-contain"
+              unoptimized
+            />
+          </Link>
+        )}
+        <div className="bg-destructive/10 mb-4 flex items-center justify-center rounded-full p-4">
+          <ShieldX className="text-destructive size-8" aria-hidden />
+        </div>
+        <p className="text-destructive mb-3 text-xs font-semibold tracking-widest uppercase">
+          Error 403
+        </p>
+        <h1 className="text-foreground mb-3 text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+          Access Denied
+        </h1>
+        <p className="text-muted-foreground mb-10 max-w-md text-base leading-relaxed sm:text-lg">
+          You do not have permission to view this page.
+        </p>
+        <Button size="lg" className="gap-2" asChild>
+          <Link href="/">
+            <Store className="size-4 shrink-0" aria-hidden />
+            Back to {business.name}
+          </Link>
+        </Button>
+        <p className="text-muted-foreground/80 mt-12 text-sm">
+          Think you should have access?{" "}
+          <a
+            href="mailto:support@simplepress.com"
+            className="text-primary underline-offset-2 hover:underline"
+          >
+            Contact Support
+          </a>
+        </p>
+      </main>
     </div>
   );
 }

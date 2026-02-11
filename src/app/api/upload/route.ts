@@ -4,7 +4,7 @@ import { toRouteHandler } from "@better-upload/server/adapters/next";
 
 import { env } from "~/env";
 import { checkBusiness } from "~/lib/check-business";
-import { s3Client } from "~/lib/s3/s3-client";
+import { s3Client } from "~/lib/s3/client";
 import { auth } from "~/server/better-auth";
 
 const router: Router = {
@@ -55,7 +55,7 @@ const router: Router = {
           },
         };
       },
-      onAfterSignedUrl: async ({ req, file, metadata, clientMetadata }) => {
+      onAfterSignedUrl: async ({ metadata }) => {
         // the files now have the objectInfo property
         return {
           metadata: {
@@ -69,7 +69,7 @@ const router: Router = {
 
       multipleFiles: true,
       maxFiles: 10,
-      onBeforeUpload: async ({ req, files, clientMetadata }) => {
+      onBeforeUpload: async ({ req }) => {
         const user = await auth.api.getSession({ headers: req.headers });
         if (!user) {
           throw new RejectUpload("Not logged in!");

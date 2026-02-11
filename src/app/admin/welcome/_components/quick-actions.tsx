@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ExternalLink, Eye, FileText, Package, Settings } from "lucide-react";
 
+import { env } from "~/env";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -24,7 +25,7 @@ export function QuickActions({ business }: QuickActionsProps) {
   const storefrontUrl =
     business.customDomain && business.domainStatus === "active"
       ? `https://${business.customDomain}`
-      : `https://${business.subdomain}.myapplication.com`;
+      : `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
 
   const isDev = process.env.NODE_ENV === "development";
   const devUrl = `http://${business.subdomain}.localhost:3000`;
@@ -99,7 +100,7 @@ export function QuickActions({ business }: QuickActionsProps) {
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <a
-            href="https://docs.example.com"
+            href={env.NEXT_PUBLIC_HELP_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-blue-600 hover:underline"

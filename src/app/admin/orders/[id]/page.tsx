@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
-import { api } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { FulfillmentTracker } from "../_components/fulfillment-tracker";
 import { OrderStatusUpdater } from "../_components/order-status-updater";
 import { RefundHandler } from "../_components/refund-handler";
+import { SiteHeader } from "../../_components/site-header";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -45,7 +46,8 @@ export default async function OrderDetailPage({ params }: PageProps) {
   const shippingAddress = order?.shippingAddress ?? null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <HydrateClient>
+      <SiteHeader title={`Order #${order.id.slice(0, 8)}`} />
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
@@ -208,6 +210,6 @@ export default async function OrderDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-    </div>
+    </HydrateClient>
   );
 }

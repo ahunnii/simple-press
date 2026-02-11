@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import { api } from "~/trpc/react";
 import {
@@ -19,15 +20,15 @@ export default function WelcomeNotification() {
   }
   return (
     <Alert variant="default" className="mx-auto my-6 w-full max-w-3xl">
-      <AlertTitle>Welcome to your store!</AlertTitle>
+      <AlertTitle>Almost there!</AlertTitle>
       <AlertDescription>
-        <p>
-          You are almost finished! Complete the setup to get started selling.
-        </p>{" "}
+        <p>Complete setup to start selling.</p>{" "}
       </AlertDescription>
       <AlertAction>
         <Button variant="outline" asChild size="xs">
-          <Link href="/admin/welcome">Finish setup</Link>
+          <Link href="/admin/welcome">
+            Finish setup <ArrowRight className="h-4 w-4" />
+          </Link>
         </Button>
       </AlertAction>
     </Alert>

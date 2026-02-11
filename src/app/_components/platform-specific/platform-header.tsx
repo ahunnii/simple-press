@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconTerminal } from "@tabler/icons-react";
 import { Store } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -10,8 +11,10 @@ export function PlatformHeader() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <Store className="h-6 w-6" />
-            <span className="text-xl font-bold">Shop Platform</span>
+            <span className="flex flex-row items-center gap-1 font-mono text-2xl font-bold">
+              <IconTerminal className="size-8" />
+              simple_press
+            </span>
           </Link>
 
           {/* Navigation */}

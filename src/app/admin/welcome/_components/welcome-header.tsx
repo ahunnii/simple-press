@@ -1,16 +1,12 @@
 import { CheckCircle2 } from "lucide-react";
 
-type WelcomeHeaderProps = {
+type Props = {
   businessName: string;
   userName: string;
   isComplete: boolean;
 };
 
-export function WelcomeHeader({
-  businessName,
-  userName,
-  isComplete,
-}: WelcomeHeaderProps) {
+export function WelcomeHeader({ businessName, userName, isComplete }: Props) {
   return (
     <div className="rounded-lg border bg-white p-8 shadow-sm">
       <div className="flex items-start justify-between">

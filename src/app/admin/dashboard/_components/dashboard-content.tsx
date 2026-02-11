@@ -8,8 +8,6 @@ import {
   DollarSign,
   Package,
   ShoppingCart,
-  TrendingDown,
-  TrendingUp,
   Users,
 } from "lucide-react";
 import {

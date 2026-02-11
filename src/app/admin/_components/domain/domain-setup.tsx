@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Copy, ExternalLink, Globe, Loader2, X } from "lucide-react";
 
+import { env } from "~/env";
 import { isValidDomain } from "~/lib/utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -22,13 +23,13 @@ type DomainSetupProps = {
 
 export function DomainSetup({ business }: DomainSetupProps) {
   const [isEditing, setIsEditing] = useState(!business.customDomain);
-  const [domain, setDomain] = useState(business.customDomain || "");
+  const [domain, setDomain] = useState(business.customDomain ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const subdomainUrl = `${business.subdomain}.myapplication.com`;
-  const vpsIp = process.env.NEXT_PUBLIC_VPS_IP || "YOUR_VPS_IP";
+  const subdomainUrl = `${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  const vpsIp = process.env.NEXT_PUBLIC_VPS_IP ?? "YOUR_VPS_IP";
 
   const handleSubmit = async () => {
     setError(null);
@@ -48,13 +49,13 @@ export function DomainSetup({ business }: DomainSetupProps) {
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to add domain");
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data.error ?? "Failed to add domain");
       }
 
       setIsEditing(false);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to add domain");
     } finally {
       setIsSubmitting(false);
     }
@@ -71,10 +72,14 @@ export function DomainSetup({ business }: DomainSetupProps) {
         body: JSON.stringify({ domain: business.customDomain }),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as {
+        error?: string;
+        verified?: boolean;
+        message?: string;
+      };
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to verify domain");
+        throw new Error(data.error ?? "Failed to verify domain");
       }
 
       if (data.verified) {
@@ -85,15 +90,15 @@ export function DomainSetup({ business }: DomainSetupProps) {
           "DNS not configured correctly yet. Please wait a few minutes and try again.",
         );
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to verify domain");
     } finally {
       setIsVerifying(false);
     }
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+    void navigator.clipboard.writeText(text);
   };
 
   // Already has active custom domain
@@ -125,7 +130,7 @@ export function DomainSetup({ business }: DomainSetupProps) {
           <AlertDescription>
             <strong>Domain added:</strong> {business.customDomain}
             <br />
-            Configure your DNS records below, then click "Verify DNS".
+            Configure your DNS records below, then click &quot;Verify DNS&quot;.
           </AlertDescription>
         </Alert>
 
@@ -229,7 +234,7 @@ export function DomainSetup({ business }: DomainSetupProps) {
 
 function DNSInstructions({ domain, vpsIp }: { domain: string; vpsIp: string }) {
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+    void navigator.clipboard.writeText(text);
   };
 
   return (

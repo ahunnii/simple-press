@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
 
-import type { SignupFormData } from "../page";
-import { TEMPLATES } from "~/lib/constraints";
+import type { SignupFormData } from "./wizard-client";
+import { TEMPLATES } from "~/lib/constants";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {

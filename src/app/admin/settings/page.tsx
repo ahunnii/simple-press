@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { api, HydrateClient } from "~/trpc/server";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -13,7 +13,7 @@ export default async function SettingsPage() {
   const business = await api.business.get();
 
   if (!business) {
-    redirect("/admin/welcome");
+    notFound();
   }
 
   return (
