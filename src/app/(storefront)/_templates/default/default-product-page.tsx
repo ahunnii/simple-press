@@ -20,12 +20,16 @@ export async function DefaultProductPage({ business, product }: Props) {
               name: string;
               description: string | null;
               price: number;
+              trackInventory: boolean;
+              allowBackorders?: boolean;
+              inventoryQty: number;
               images: Array<{ url: string; altText: string | null }>;
               variants: Array<{
                 id: string;
                 name: string;
                 price: number | null;
                 inventoryQty: number;
+                sku: string | null;
                 options: Record<string, string>;
               }>;
             }

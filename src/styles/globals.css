@@ -125,6 +125,53 @@
   }
 }
 
+@layer admin {
+  .admin-header {
+    @apply mb-8 flex items-center justify-between;
+  }
+  .admin-header h1 {
+    @apply text-3xl font-bold text-gray-900;
+  }
+  .admin-header p {
+    @apply mt-1 text-gray-600;
+  }
+  .admin-container {
+    @apply mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8;
+  }
+
+  .admin-form-header {
+    @apply border-border/30 sticky top-0 z-10 -mx-4 -mt-4 flex w-[calc(100%+2rem)] justify-center px-4 py-3 transition-all duration-300 md:-mx-6 md:w-[calc(100%+3rem)] md:px-6;
+  }
+
+  .admin-form-header > div:first-child {
+    @apply flex w-[95%] items-center justify-between gap-2 rounded-full border px-4 py-3 shadow-sm backdrop-blur transition-all duration-300;
+  }
+
+  .admin-form-header > div.isDirty {
+    @apply bg-background/95 supports-backdrop-filter:bg-background/80 border-amber-200 shadow-md dark:border-amber-800;
+  }
+
+  .admin-form-header > div.isNotDirty {
+    @apply border-border/50 bg-background/60 supports-backdrop-filter:bg-background/50;
+  }
+
+  .admin-form-header > h1 {
+    @apply truncate text-lg font-semibold;
+  }
+
+  .admin-status-badge {
+    @apply inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+
+  .admin-status-badge.isPublished {
+    @apply bg-green-50 text-green-700 ring-1 ring-green-600/20 ring-inset dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20;
+  }
+
+  .admin-status-badge.isDraft {
+    @apply bg-gray-50 text-gray-600 ring-1 ring-gray-500/20 ring-inset dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20;
+  }
+}
+
 .not-found-pattern {
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   opacity: 0.02;

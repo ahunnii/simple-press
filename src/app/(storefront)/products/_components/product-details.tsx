@@ -309,11 +309,16 @@ import { useCart } from "~/providers/cart-context";
 
 import { DefaultVariantSelector } from "../../_templates/default/default-variant-selector";
 
+const UNLIMITED_STOCK = 999;
+
 type Product = {
   id: string;
   name: string;
   description: string | null;
   price: number;
+  trackInventory: boolean;
+  allowBackorders?: boolean;
+  inventoryQty: number;
   images: Array<{ url: string; altText: string | null }>;
   variants: Array<{
     id: string;
@@ -360,8 +365,13 @@ export function ProductDetails({ product, business }: ProductDetailsProps) {
   // Get current cart quantity for this variant
   const cartQuantity = getItemQuantity(product.id, selectedVariantId);
 
-  // Calculate remaining stock
-  const maxInventory = selectedVariant?.inventoryQty ?? 999;
+  // Calculate remaining stock and max inventory
+  const hasVariants = product.variants.length > 0;
+  const maxInventory = hasVariants
+    ? (selectedVariant?.inventoryQty ?? 0)
+    : product.trackInventory && !product.allowBackorders
+      ? (product.inventoryQty ?? 0)
+      : UNLIMITED_STOCK;
   const remainingStock = maxInventory - cartQuantity;
   const canAddMore = remainingStock > 0;
 
@@ -467,7 +477,11 @@ export function ProductDetails({ product, business }: ProductDetailsProps) {
     setQuantity(1);
   };
 
-  const inStock = selectedVariant ? selectedVariant.inventoryQty > 0 : true;
+  const inStock = hasVariants
+    ? (selectedVariant ? selectedVariant.inventoryQty > 0 : false)
+    : !product.trackInventory ||
+      (product.allowBackorders ?? false) ||
+      (product.inventoryQty ?? 0) > 0;
   const showLowStockWarning = remainingStock > 0 && remainingStock < 10;
 
   // Don't show interactive elements until cart is hydrated
@@ -630,6 +644,24 @@ export function ProductDetails({ product, business }: ProductDetailsProps) {
           <div className="mb-4">
             <p className="text-sm text-gray-600">
               {selectedVariant.inventoryQty} in stock
+              {cartQuantity > 0 && (
+                <span className="ml-2 text-gray-500">
+                  ({cartQuantity} in cart)
+                </span>
+              )}
+            </p>
+            {showLowStockWarning && (
+              <p className="mt-1 text-sm text-amber-600">
+                ⚠ Only {remainingStock} left!
+              </p>
+            )}
+          </div>
+        )}
+
+        {Object.keys(variantOptions).length === 0 && product.trackInventory && (
+          <div className="mb-4">
+            <p className="text-sm text-gray-600">
+              {product.inventoryQty ?? 0} in stock
               {cartQuantity > 0 && (
                 <span className="ml-2 text-gray-500">
                   ({cartQuantity} in cart)

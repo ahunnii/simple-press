@@ -6,6 +6,9 @@ export const productCreateSchema = z.object({
   description: z.string().optional(),
   price: z.number(),
   published: z.boolean(),
+  trackInventory: z.boolean(),
+  allowBackorders: z.boolean().default(false),
+  inventoryQty: z.number().optional(),
   variants: z.array(
     z.object({
       name: z.string(),
@@ -24,6 +27,9 @@ export const productUpdateSchema = z.object({
   description: z.string().optional(),
   price: z.number(),
   published: z.boolean(),
+  trackInventory: z.boolean(),
+  allowBackorders: z.boolean().default(false),
+  inventoryQty: z.number().optional(),
   variants: z.array(
     z.object({
       id: z.string().optional(),
@@ -43,6 +49,9 @@ export const productFormSchema = z.object({
   description: z.string().optional(),
   price: z.number(),
   published: z.boolean(),
+  trackInventory: z.boolean(),
+  allowBackorders: z.boolean(),
+  inventoryQty: z.number().optional(),
   variants: z
     .array(
       z.object({

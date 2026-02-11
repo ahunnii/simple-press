@@ -39,7 +39,17 @@ export const productRouter = createTRPCRouter({
   create: ownerAdminProcedure
     .input(productCreateSchema)
     .mutation(async ({ ctx, input }) => {
-      const { name, slug, description, price, published, variants } = input;
+      const {
+        name,
+        slug,
+        description,
+        price,
+        published,
+        trackInventory,
+        allowBackorders,
+        inventoryQty,
+        variants,
+      } = input;
 
       const business = await checkBusiness();
 
@@ -72,6 +82,9 @@ export const productRouter = createTRPCRouter({
           description,
           price,
           published,
+          trackInventory,
+          allowBackorders,
+          inventoryQty,
           businessId: business.id,
           variants: {
             create: variants.map((v) => ({
@@ -102,7 +115,18 @@ export const productRouter = createTRPCRouter({
         });
       }
 
-      const { id, name, slug, description, price, published, variants } = input;
+      const {
+        id,
+        name,
+        slug,
+        description,
+        price,
+        published,
+        trackInventory,
+        allowBackorders,
+        inventoryQty,
+        variants,
+      } = input;
 
       // Check if slug is already taken for this business
       const existingProduct = await ctx.db.product.findFirst({
@@ -122,7 +146,16 @@ export const productRouter = createTRPCRouter({
 
       const product = await ctx.db.product.update({
         where: { id, businessId: business.id },
-        data: { name, slug, description, price, published },
+        data: {
+          name,
+          slug,
+          description,
+          price,
+          published,
+          trackInventory,
+          allowBackorders,
+          inventoryQty,
+        },
       });
       if (variants) {
         await ctx.db.$transaction(async (tx) => {

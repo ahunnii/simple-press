@@ -347,6 +347,7 @@ export async function POST(req: NextRequest) {
                     inventoryQty: true,
                     businessId: true,
                     trackInventory: true,
+                    allowBackorders: true,
                   },
                 });
 
@@ -362,8 +363,8 @@ export async function POST(req: NextRequest) {
 
                 const newQty = product.inventoryQty - qty;
 
-                // Prevent negative inventory
-                if (newQty < 0) {
+                // Prevent negative inventory unless backorders are allowed
+                if (newQty < 0 && !product.allowBackorders) {
                   console.warn(
                     `[Webhook] Insufficient inventory for product ${product.id}`,
                   );

@@ -122,6 +122,7 @@ export async function POST(req: NextRequest) {
           name: true,
           published: true,
           trackInventory: true,
+          allowBackorders: true,
           inventoryQty: true,
           _count: { select: { variants: true } },
         },
@@ -162,7 +163,11 @@ export async function POST(req: NextRequest) {
           unavailableItems.push(name);
           continue;
         }
-        if (product.trackInventory && product.inventoryQty < qty) {
+        if (
+          product.trackInventory &&
+          !product.allowBackorders &&
+          product.inventoryQty < qty
+        ) {
           unavailableItems.push(name);
         }
       }

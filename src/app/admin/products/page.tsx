@@ -20,12 +20,11 @@ export default async function ProductsPage() {
   return (
     <HydrateClient>
       <SiteHeader title="Products" />
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+      <div className="admin-container">
+        <div className="admin-header">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-            <p className="mt-1 text-gray-600">Manage your product catalog</p>
+            <h1>Products</h1>
+            <p>Manage your product catalog</p>
           </div>
           <Button asChild>
             <Link href="/admin/products/new">
@@ -35,7 +34,6 @@ export default async function ProductsPage() {
           </Button>
         </div>
 
-        {/* Products List */}
         {products.length === 0 ? (
           <Card>
             <CardHeader>

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, ArrowLeft, MoreVertical, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { slugify } from "~/lib/utils";
 import { productFormSchema } from "~/lib/validators/product";
 import { api } from "~/trpc/react";
+import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import {
@@ -35,12 +36,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import {
   Form,
   FormControl,
   FormDescription,
@@ -51,6 +46,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
 import { InputFormField } from "~/components/inputs/input-form-field";
+import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 import { ImageUploader } from "./image-uploader";
@@ -112,6 +108,9 @@ export function ProductForm({ product }: Props) {
       description: product?.description ?? undefined,
       price: product?.price ? product.price / 100 : 0, // Convert cents to dollars
       published: product?.published ?? false,
+      trackInventory: product?.trackInventory ?? false,
+      inventoryQty: product?.inventoryQty ?? 0,
+      allowBackorders: product?.allowBackorders ?? false,
     },
   });
 
@@ -235,6 +234,9 @@ export function ProductForm({ product }: Props) {
         description: data.description ?? undefined,
         price: priceInCents,
         published: data.published,
+        trackInventory: data.trackInventory,
+        allowBackorders: data.allowBackorders,
+        inventoryQty: data.inventoryQty ?? 0,
         variants: variants?.map((v) => ({
           id: v.id,
           name: v.name,
@@ -259,6 +261,9 @@ export function ProductForm({ product }: Props) {
         description: data.description ?? undefined,
         price: priceInCents,
         published: data.published,
+        trackInventory: data.trackInventory,
+        allowBackorders: data.allowBackorders,
+        inventoryQty: data.inventoryQty ?? 0,
         variants: variants?.map((v) => ({
           name: v.name,
           sku: v.sku ?? undefined,
@@ -297,6 +302,7 @@ export function ProductForm({ product }: Props) {
   const isDirty = form.formState.isDirty;
 
   useKeyboardEnter(form, onSubmit);
+  useDirtyForm(isDirty);
 
   return (
     <>
@@ -313,62 +319,75 @@ export function ProductForm({ product }: Props) {
             </Alert>
           )}
 
-          <div className="border-border/30 sticky top-0 z-10 -mx-4 -mt-4 flex w-[calc(100%+2rem)] justify-center px-4 py-3 transition-all duration-300 md:-mx-6 md:w-[calc(100%+3rem)] md:px-6">
-            <div
-              className={`flex w-[95%] items-center justify-between gap-2 rounded-full border px-4 py-3 shadow-sm backdrop-blur transition-all duration-300 ${
-                isDirty
-                  ? "bg-background/95 supports-backdrop-filter:bg-background/80 border-amber-200 shadow-md dark:border-amber-800"
-                  : "border-border/50 bg-background/60 supports-backdrop-filter:bg-background/50"
-              }`}
-            >
-              <Button variant="ghost" size="sm" asChild className="shrink-0">
-                <Link href="/admin/products">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back
-                </Link>
-              </Button>
-              <div className="flex gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      disabled={isSubmitting}
-                      className="text-muted-foreground hover:text-destructive"
-                      aria-label="More options"
+          <div className="admin-form-header">
+            <div className={`${isDirty ? "isDirty" : "isNotDirty"}`}>
+              <div className="flex min-w-0 items-center gap-3">
+                <Button variant="ghost" size="sm" asChild className="shrink-0">
+                  <Link href="/admin/products">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back
+                  </Link>
+                </Button>
+
+                <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
+
+                <div className="hidden min-w-0 items-center gap-2 sm:flex">
+                  <h1>
+                    {product
+                      ? form.watch("name") || "Edit Product"
+                      : "New Product"}
+                  </h1>
+
+                  {product && (
+                    <span
+                      className={`admin-status-badge ${
+                        form.watch("published") ? "isPublished" : "isDraft"
+                      }`}
                     >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem
-                      onClick={() => setShowDeleteDialog(true)}
-                      className="text-destructive focus:text-destructive"
-                      disabled={isSubmitting}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete product
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                      {form.watch("published") ? "Published" : "Draft"}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">
+                {/* Delete button - only show for existing products */}
+                {product && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={isSubmitting}
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Delete</span>
+                  </Button>
+                )}
 
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={isSubmitting}
+                  size="sm"
+                  disabled={isSubmitting || !isDirty}
                   onClick={() => form.reset()}
+                  className="hidden md:inline-flex"
                 >
                   Reset
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+
+                <Button type="submit" size="sm" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <span className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2" />
                       {isUploading ? "Uploading..." : "Saving..."}
                     </>
                   ) : (
-                    "Save product"
+                    <>
+                      <span className="hidden sm:inline">Save product</span>
+                      <span className="sm:hidden">Save</span>
+                    </>
                   )}
                 </Button>
               </div>
@@ -453,6 +472,62 @@ export function ProductForm({ product }: Props) {
                     </FormControl>
                     <FormDescription>
                       Base price in USD (variant prices can override this)
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Base Inventory */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Inventory</CardTitle>
+              <CardDescription>Set your product inventory</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SwitchFormField
+                form={form}
+                name="trackInventory"
+                label="Track Inventory"
+                description="Enable inventory tracking for this product"
+              />
+
+              {form.watch("trackInventory") && (
+                <SwitchFormField
+                  form={form}
+                  name="allowBackorders"
+                  label="Allow Backorders"
+                  description="Allow customers to order when out of stock"
+                />
+              )}
+
+              <FormField
+                control={form.control}
+                name="inventoryQty"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Inventory Quantity</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="19.99"
+                          className="pl-7"
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) => {
+                            const value = parseFloat(e.target.value);
+                            field.onChange(isNaN(value) ? 0 : value);
+                          }}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Set the inventory quantity for this product (ignored if
+                      inventory tracking is disabled or if variants are used)
                     </FormDescription>
                   </FormItem>
                 )}
