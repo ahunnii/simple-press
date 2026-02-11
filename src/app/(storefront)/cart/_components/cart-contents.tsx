@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import { useCart } from "~/providers/cart-context";
 
 type Business = {
@@ -21,7 +22,16 @@ type CartContentsProps = {
 
 export function CartContents({ business }: CartContentsProps) {
   const router = useRouter();
-  const { items, removeItem, updateQuantity, total, clearCart } = useCart();
+  const {
+    items,
+    incrementItem,
+    decrementItem,
+    removeItem,
+    updateQuantity,
+    total,
+    clearCart,
+  } = useCart();
+
   const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
 
   const formatPrice = (cents: number) => {
@@ -57,9 +67,9 @@ export function CartContents({ business }: CartContentsProps) {
         {items.map((item) => (
           <div
             key={`${item.productId}-${item.variantId}`}
-            className="flex gap-4 rounded-lg border p-4"
+            className="flex gap-4 rounded-lg border bg-white p-4"
           >
-            {/* Product Image */}
+            {/* Image */}
             <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded bg-gray-100">
               {item.imageUrl ? (
                 <Image
@@ -76,62 +86,67 @@ export function CartContents({ business }: CartContentsProps) {
               )}
             </div>
 
-            {/* Product Info */}
-            <div className="flex-1">
-              <h3 className="font-semibold text-gray-900">
+            {/* Details */}
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate font-semibold text-gray-900">
                 {item.productName}
               </h3>
               {item.variantName && (
                 <p className="text-sm text-gray-600">{item.variantName}</p>
               )}
-              <p
-                className="mt-2 text-lg font-bold"
-                style={{ color: primaryColor }}
-              >
+              {item.sku && (
+                <p className="text-xs text-gray-500">SKU: {item.sku}</p>
+              )}
+              <p className="mt-2 text-lg font-semibold text-gray-900">
                 {formatPrice(item.price)}
               </p>
             </div>
 
             {/* Quantity Controls */}
-            <div className="flex flex-col items-end justify-between">
-              <button
-                onClick={() => removeItem(item.productId, item.variantId)}
-                className="text-gray-400 transition-colors hover:text-red-600"
-              >
-                <Trash2 className="h-5 w-5" />
-              </button>
-
-              <div className="flex items-center gap-2 rounded border">
-                <button
-                  onClick={() =>
-                    updateQuantity(
-                      item.productId,
-                      item.variantId,
-                      item.quantity - 1,
-                    )
-                  }
-                  className="p-2 hover:bg-gray-50"
+            <div className="flex flex-col items-end gap-2">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => decrementItem(item.productId, item.variantId)}
                 >
                   <Minus className="h-4 w-4" />
-                </button>
-                <span className="w-8 text-center font-medium">
-                  {item.quantity}
-                </span>
-                <button
-                  onClick={() =>
-                    updateQuantity(
-                      item.productId,
-                      item.variantId,
-                      item.quantity + 1,
-                    )
-                  }
-                  className="p-2 hover:bg-gray-50"
+                </Button>
+
+                <Input
+                  type="number"
+                  min="1"
+                  max={item.maxInventory ?? 999}
+                  value={item.quantity}
+                  onChange={(e) => {
+                    const qty = parseInt(e.target.value);
+                    if (!isNaN(qty)) {
+                      updateQuantity(item.productId, item.variantId, qty);
+                    }
+                  }}
+                  className="w-16 text-center"
+                />
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => incrementItem(item.productId, item.variantId)}
                 >
                   <Plus className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
 
-              <p className="text-sm text-gray-600">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => removeItem(item.productId, item.variantId)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="mr-1 h-4 w-4" />
+                Remove
+              </Button>
+
+              <p className="text-sm font-semibold text-gray-900">
                 {formatPrice(item.price * item.quantity)}
               </p>
             </div>
@@ -168,7 +183,11 @@ export function CartContents({ business }: CartContentsProps) {
             Proceed to Checkout
           </Button>
 
-          <Button onClick={clearCart} variant="outline" className="w-full">
+          <Button
+            onClick={() => clearCart()}
+            variant="outline"
+            className="w-full"
+          >
             Clear Cart
           </Button>
         </div>

@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import type { CardProduct } from "../_templates/modern/modern-product-card";
 import { api } from "~/trpc/server";
 
-import { ProductCard } from "../_components/product-card";
 import { StorefrontFooter } from "../_components/storefront-footer";
 import { StorefrontHeader } from "../_components/storefront-header";
+import { DefaultProductCard } from "../_templates/default/default-product-card";
 import { DefaultProductsPage } from "../_templates/default/default-products-page";
 import { ModernProductsPage } from "../_templates/modern/modern-products-page";
 

@@ -212,6 +212,7 @@ export function BrandingSettings({ business }: BrandingSettingsProps) {
               label="Template"
               description="Choose the design template for your storefront"
               values={[
+                { value: "default", label: "Default" },
                 { value: "modern", label: "Modern" },
                 { value: "vintage", label: "Vintage" },
                 { value: "minimal", label: "Minimal" },

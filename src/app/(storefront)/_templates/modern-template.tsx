@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "~/components/ui/button";
-import { ProductCard } from "~/app/(storefront)/_components/product-card";
 import { StorefrontFooter } from "~/app/(storefront)/_components/storefront-footer";
 import { StorefrontHeader } from "~/app/(storefront)/_components/storefront-header";
+import { DefaultProductCard } from "~/app/(storefront)/_templates/default/default-product-card";
 
 type Business = {
   id: string;
@@ -86,7 +86,7 @@ export function ModernTemplate({ business }: ModernTemplateProps) {
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {business?.products?.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <DefaultProductCard key={product.id} product={product} />
               ))}
             </div>
           </div>

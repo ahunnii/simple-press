@@ -3,9 +3,9 @@ import Link from "next/link";
 import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 
-import { ProductCard } from "../_components/product-card";
 import { StorefrontFooter } from "../_components/storefront-footer";
 import { StorefrontHeader } from "../_components/storefront-header";
+import { DefaultProductCard } from "./default/default-product-card";
 
 type VintageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["get"]>;
@@ -57,7 +57,7 @@ export function VintageTemplate({ business }: VintageTemplateProps) {
             </div>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {business.products?.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <DefaultProductCard key={product.id} product={product} />
               ))}
             </div>
           </div>

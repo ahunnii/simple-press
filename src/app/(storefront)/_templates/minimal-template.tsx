@@ -3,9 +3,9 @@ import Link from "next/link";
 import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 
-import { ProductCard } from "../_components/product-card";
 import { StorefrontFooter } from "../_components/storefront-footer";
 import { StorefrontHeader } from "../_components/storefront-header";
+import { DefaultProductCard } from "./default/default-product-card";
 
 type MinimalTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["get"]>;
@@ -48,7 +48,7 @@ export function MinimalTemplate({ business }: MinimalTemplateProps) {
             <div className="grid grid-cols-1 gap-px bg-gray-200 sm:grid-cols-2 md:grid-cols-3">
               {business.products?.map((product) => (
                 <div key={product.id} className="bg-white">
-                  <ProductCard product={product} />
+                  <DefaultProductCard product={product} />
                 </div>
               ))}
             </div>

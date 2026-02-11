@@ -15,7 +15,7 @@ type ProductCardProps = {
   product: Product;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function DefaultProductCard({ product }: ProductCardProps) {
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -47,6 +47,8 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="text-lg font-bold" style={{ color: "#3b82f6" }}>
             {formatPrice(product.price)}
           </p>
+
+          {/* <QuickAddButton product={product} /> */}
         </CardContent>
       </Card>
     </Link>

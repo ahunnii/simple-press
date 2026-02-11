@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/server";
 
-import { ProductCard } from "../../_components/product-card";
 import { StorefrontFooter } from "../../_components/storefront-footer";
 import { StorefrontHeader } from "../../_components/storefront-header";
+import { DefaultProductCard } from "./default-product-card";
 
 export function DefaultProductsPage({
   business,
@@ -37,7 +37,7 @@ export function DefaultProductsPage({
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {business.products?.map((product) => (
-                <ProductCard
+                <DefaultProductCard
                   key={product.id}
                   product={
                     product as unknown as {

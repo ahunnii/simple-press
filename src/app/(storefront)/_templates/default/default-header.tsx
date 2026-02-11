@@ -6,6 +6,8 @@ import { ShoppingCart } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
+import { DefaultCartBadge } from "./default-cart-badge";
+
 type Business = {
   name: string;
   siteContent: {
@@ -62,7 +64,7 @@ export function DefaultHeader({ business }: StorefrontHeaderProps) {
           </nav>
 
           {/* Cart */}
-          <Button variant="ghost" size="sm" asChild>
+          {/* <Button variant="ghost" size="sm" asChild>
             <Link href="/cart" className="relative">
               <ShoppingCart className="h-5 w-5" />
               <span className="ml-2">Cart</span>
@@ -72,7 +74,8 @@ export function DefaultHeader({ business }: StorefrontHeaderProps) {
                 </span>
               )}
             </Link>
-          </Button>
+          </Button> */}
+          <DefaultCartBadge />
         </div>
       </div>
     </header>

@@ -1,0 +1,130 @@
+"use client";
+
+import { useState } from "react";
+
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { useCart } from "~/providers/cart-context";
+
+type VariantSelectorProps = {
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    images: Array<{ url: string }>;
+    variants: Array<{
+      id: string;
+      name: string;
+      price: number | null;
+      inventoryQty: number;
+      sku: string | null;
+      options: Record<string, string>;
+    }>;
+  };
+};
+
+export function DefaultVariantSelector({ product }: VariantSelectorProps) {
+  const { addItem } = useCart();
+  const [selectedVariant, setSelectedVariant] = useState(
+    product.variants[0] ?? null,
+  );
+  const [quantity, setQuantity] = useState(1);
+
+  const handleAddToCart = () => {
+    if (!selectedVariant) return;
+
+    addItem(
+      {
+        productId: product.id,
+        variantId: selectedVariant.id,
+        productName: product.name,
+        variantName: selectedVariant.name,
+        price: selectedVariant.price ?? product.price,
+        imageUrl: product.images[0]?.url ?? null,
+        sku: selectedVariant.sku,
+        maxInventory: selectedVariant.inventoryQty,
+      },
+      quantity, // ← Add specified quantity
+    );
+
+    // Reset quantity after adding
+    setQuantity(1);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Variant Selection */}
+      <div>
+        <Label>Select Variant</Label>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          {product.variants.map((variant) => (
+            <Button
+              key={variant.id}
+              variant={
+                selectedVariant?.id === variant.id ? "default" : "outline"
+              }
+              onClick={() => setSelectedVariant(variant)}
+              disabled={variant.inventoryQty === 0}
+            >
+              {variant.name}
+              {variant.inventoryQty === 0 && " (Out of Stock)"}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Quantity Selection */}
+      {selectedVariant && (
+        <div>
+          <Label>Quantity</Label>
+          <div className="mt-2 flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            >
+              -
+            </Button>
+            <Input
+              type="number"
+              min="1"
+              max={selectedVariant.inventoryQty}
+              value={quantity}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                if (!isNaN(val)) {
+                  setQuantity(
+                    Math.min(selectedVariant.inventoryQty, Math.max(1, val)),
+                  );
+                }
+              }}
+              className="w-20 rounded border px-2 py-1 text-center"
+            />
+            <Button
+              variant="outline"
+              onClick={() =>
+                setQuantity(
+                  Math.min(selectedVariant.inventoryQty, quantity + 1),
+                )
+              }
+            >
+              +
+            </Button>
+            <span className="text-sm text-gray-600">
+              {selectedVariant.inventoryQty} available
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Add to Cart */}
+      <Button
+        onClick={handleAddToCart}
+        disabled={!selectedVariant || selectedVariant.inventoryQty === 0}
+        className="w-full"
+      >
+        Add {quantity} to Cart
+      </Button>
+    </div>
+  );
+}
