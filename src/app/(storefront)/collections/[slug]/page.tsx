@@ -11,7 +11,7 @@ type PageProps = {
 async function getBusinessFromHost() {
   const { headers: getHeaders } = await import("next/headers");
   const headers = await getHeaders();
-  const host = headers.get("host") || "";
+  const host = headers.get("host") ?? "";
 
   const subdomain = host.split(".")[0];
 
@@ -51,9 +51,6 @@ export default async function CollectionPage({ params }: PageProps) {
       collectionProducts: {
         include: {
           product: {
-            where: {
-              published: true,
-            },
             include: {
               images: {
                 orderBy: { sortOrder: "asc" },
@@ -78,7 +75,7 @@ export default async function CollectionPage({ params }: PageProps) {
     .map((cp) => cp.product)
     .filter((p) => p !== null);
 
-  const primaryColor = business.siteContent?.primaryColor || "#3b82f6";
+  const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
 
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -138,7 +135,7 @@ export default async function CollectionPage({ params }: PageProps) {
               const image = product.images[0];
               const hasVariants = product.variants.length > 0;
               const basePrice = hasVariants
-                ? product.variants[0]?.price || product.price
+                ? (product.variants[0]?.price ?? product.price)
                 : product.price;
 
               return (
@@ -153,7 +150,7 @@ export default async function CollectionPage({ params }: PageProps) {
                       {image ? (
                         <Image
                           src={image.url}
-                          alt={image.altText || product.name}
+                          alt={image.altText ?? product.name}
                           fill
                           className="object-cover transition-transform group-hover:scale-105"
                         />
@@ -235,10 +232,10 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   return {
-    title: collection.metaTitle || `${collection.name} | ${business.name}`,
+    title: collection.metaTitle ?? `${collection.name} | ${business.name}`,
     description:
-      collection.metaDescription ||
-      collection.description ||
+      collection.metaDescription ??
+      collection.description ??
       `Shop ${collection.name} at ${business.name}`,
   };
 }

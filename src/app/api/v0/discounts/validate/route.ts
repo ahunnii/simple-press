@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { prisma } from "~/server/db";
+import { db } from "~/server/db";
 
 export async function POST(req: NextRequest) {
   try {
-    const { code, businessId, cartTotal } = await req.json();
+    const { code, businessId, cartTotal } = (await req.json()) as {
+      code: string;
+      businessId: string;
+      cartTotal: number;
+    };
 
     if (!code || !businessId) {
       return NextResponse.json(
@@ -14,7 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Find discount code
-    const discount = await prisma.discountCode.findFirst({
+    const discount = await db.discountCode.findFirst({
       where: {
         businessId,
         code: code.toUpperCase(),
@@ -104,7 +108,7 @@ export async function POST(req: NextRequest) {
         discountAmount,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Validate discount error:", error);
     return NextResponse.json(
       { error: "Failed to validate discount code", valid: false },

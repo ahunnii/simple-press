@@ -55,6 +55,7 @@ export function ModernProductCard({ product }: { product: CardProduct }) {
                 variantName: null,
                 price: product.price,
                 imageUrl: product.images[0]?.url ?? null,
+                sku: product.sku ?? null,
               });
             }
           }}

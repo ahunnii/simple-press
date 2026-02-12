@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AlertCircle, ArrowLeft, Check, X } from "lucide-react";
 
-import type { SignupFormData } from "../page";
+import type { SignupFormData } from "./wizard-client";
 import { isSubdomainReserved, isValidDomain, slugify } from "~/lib/utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";

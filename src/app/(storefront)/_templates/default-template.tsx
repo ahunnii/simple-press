@@ -8,7 +8,7 @@ import { StorefrontHeader } from "~/app/(storefront)/_components/storefront-head
 import { DefaultProductCard } from "~/app/(storefront)/_templates/default/default-product-card";
 
 type DefaultTemplateProps = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["getWithProducts"]>;
 };
 
 export function DefaultTemplate({ business }: DefaultTemplateProps) {

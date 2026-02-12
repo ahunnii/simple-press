@@ -77,33 +77,6 @@ export function SeoSettings({ business }: SeoSettingsProps) {
       metaKeywords: metaKeywords ?? undefined,
       ogImage: ogImage ?? undefined,
     });
-
-    // try {
-    //   const response = await fetch(`/api/business/${business.id}/seo`, {
-    //     method: "PATCH",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({
-    //       metaTitle: metaTitle || null,
-    //       metaDescription: metaDescription || null,
-    //       metaKeywords: metaKeywords || null,
-    //       ogImage: ogImage || null,
-    //     }),
-    //   });
-
-    //   if (!response.ok) {
-    //     const data = await response.json();
-    //     throw new Error(data.error || "Failed to update SEO settings");
-    //   }
-
-    //   setSuccess(true);
-    //   router.refresh();
-
-    //   setTimeout(() => setSuccess(false), 3000);
-    // } catch (err: any) {
-    //   setError(err.message);
-    // } finally {
-    //   setIsSaving(false);
-    // }
   };
 
   return (

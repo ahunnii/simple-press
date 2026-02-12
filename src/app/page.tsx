@@ -9,7 +9,7 @@ import { ModernHomePage } from "./(storefront)/_templates/modern/modern-home-pag
 import { VintageTemplate } from "./(storefront)/_templates/vintage-template";
 
 export default async function PlatformLandingPage() {
-  const business = await api.business.get();
+  const business = await api.business.getWithProducts();
 
   if (!business) {
     return <PlatformLandingPageComponent />;

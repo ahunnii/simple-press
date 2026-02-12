@@ -1,8 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useMemo } from "react";
@@ -13,8 +8,11 @@ import Underline from "@tiptap/extension-underline";
 import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 
+/** TipTap document JSON — matches first parameter of generateHTML */
+export type TiptapJSON = Parameters<typeof generateHTML>[0];
+
 type TiptapRendererProps = {
-  content: any; // TipTap JSON
+  content: TiptapJSON | null | undefined;
   className?: string;
 };
 

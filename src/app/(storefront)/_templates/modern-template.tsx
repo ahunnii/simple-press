@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { StorefrontFooter } from "~/app/(storefront)/_components/storefront-footer";
 import { StorefrontHeader } from "~/app/(storefront)/_components/storefront-header";
@@ -26,7 +27,7 @@ type Business = {
 };
 
 type ModernTemplateProps = {
-  business: Business;
+  business: NonNullable<RouterOutputs["business"]["getWithProducts"]>;
 };
 
 export function ModernTemplate({ business }: ModernTemplateProps) {
@@ -34,16 +35,7 @@ export function ModernTemplate({ business }: ModernTemplateProps) {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <StorefrontHeader
-        business={
-          business as {
-            name: string;
-            siteContent: {
-              logoUrl: string | null;
-            } | null;
-          }
-        }
-      />
+      <StorefrontHeader business={business} />
 
       {/* Hero Section */}
       <section
@@ -107,16 +99,7 @@ export function ModernTemplate({ business }: ModernTemplateProps) {
         </section>
       )}
 
-      <StorefrontFooter
-        business={
-          business as {
-            name: string;
-            siteContent: {
-              footerText: string | null;
-            } | null;
-          }
-        }
-      />
+      <StorefrontFooter business={business} />
     </div>
   );
 }

@@ -11,8 +11,9 @@ import { PageEditor } from "../../_components/page-editor";
 export default async function EditPagePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/auth/sign-in");
 
@@ -27,7 +28,7 @@ export default async function EditPagePage({
   if (!user?.business) redirect("/admin/welcome");
 
   const page = await db.page.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!page || page?.businessId !== user.business.id) {

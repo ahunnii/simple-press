@@ -10,7 +10,6 @@ import { exportRouter } from "./routers/export";
 import { inventoryRouter } from "./routers/inventory";
 import { orderRouter } from "./routers/order";
 import { productRouter } from "./routers/product";
-import { siteContentRouter } from "./routers/site-content";
 
 /**
  * This is the primary router for your server.
@@ -21,7 +20,7 @@ export const appRouter = createTRPCRouter({
   domain: domainRouter,
   discount: discountRouter,
   export: exportRouter,
-  siteContent: siteContentRouter,
+
   business: businessRouter,
   product: productRouter,
   order: orderRouter,

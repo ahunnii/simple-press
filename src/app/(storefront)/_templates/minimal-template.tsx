@@ -8,7 +8,7 @@ import { StorefrontHeader } from "../_components/storefront-header";
 import { DefaultProductCard } from "./default/default-product-card";
 
 type MinimalTemplateProps = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["getWithProducts"]>;
 };
 
 export function MinimalTemplate({ business }: MinimalTemplateProps) {

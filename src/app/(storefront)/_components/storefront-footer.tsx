@@ -1,3 +1,5 @@
+import type { RouterOutputs } from "~/trpc/react";
+
 import { DefaultFooter } from "../_templates/default/default-footer";
 import { ModernFooter } from "../_templates/modern/modern-footer";
 
@@ -10,7 +12,7 @@ export type FooterBusiness = {
 };
 
 type Props = {
-  business: FooterBusiness;
+  business: NonNullable<RouterOutputs["business"]["get"]>;
 };
 
 export async function StorefrontFooter({ business }: Props) {

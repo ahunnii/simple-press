@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { auth } from "~/lib/auth";
-import { prisma } from "~/server/db";
+import { auth } from "~/server/better-auth";
+import { db } from "~/server/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,7 +13,15 @@ export async function POST(req: NextRequest) {
     }
 
     const { businessId, code, type, value, active, usageLimit, expiresAt } =
-      await req.json();
+      (await req.json()) as {
+        businessId: string;
+        code: string;
+        type: "percentage" | "fixed";
+        value: number;
+        active: boolean;
+        usageLimit: number;
+        expiresAt: string;
+      };
 
     // Validation
     if (!code || !type || !value) {
@@ -24,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify user has access to this business
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { id: session.user.id },
       select: { businessId: true },
     });
@@ -34,7 +42,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if code already exists for this business
-    const existingCode = await prisma.discountCode.findFirst({
+    const existingCode = await db.discountCode.findFirst({
       where: {
         businessId,
         code: code.toUpperCase(),
@@ -49,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create discount code
-    const discount = await prisma.discountCode.create({
+    const discount = await db.discountCode.create({
       data: {
         businessId,
         code: code.toUpperCase(),
@@ -62,10 +70,13 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, discount });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Create discount error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to create discount" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to create discount",
+      },
       { status: 500 },
     );
   }

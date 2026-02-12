@@ -1,16 +1,18 @@
 import { notFound } from "next/navigation";
 
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { db } from "~/server/db";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 export default async function PageView({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const page = await db.page.findFirst({
     where: {
-      slug: params.slug,
+      slug,
       published: true,
     },
   });
@@ -28,7 +30,7 @@ export default async function PageView({
       )}
 
       <TiptapRenderer
-        content={page.content}
+        content={page.content as TiptapJSON}
         className="prose prose-lg max-w-none"
       />
     </div>

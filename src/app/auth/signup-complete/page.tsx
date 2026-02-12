@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 
@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
-export default function SignupCompletePage() {
+function SignupCompleteContent() {
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const searchParams = useSearchParams();
@@ -22,8 +22,6 @@ export default function SignupCompletePage() {
     "loading",
   );
   const [error, setError] = useState<string | null>(null);
-
-  console.log(session);
 
   useEffect(() => {
     const completeSignup = async () => {
@@ -77,7 +75,7 @@ export default function SignupCompletePage() {
     };
 
     void completeSignup();
-  }, [searchParams, router]);
+  }, [searchParams, router, session]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
@@ -138,5 +136,33 @@ export default function SignupCompletePage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function SignupCompleteFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Verifying your account...</CardTitle>
+          <CardDescription>
+            Please wait while we set up your dashboard
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export default function SignupCompletePage() {
+  return (
+    <Suspense fallback={<SignupCompleteFallback />}>
+      <SignupCompleteContent />
+    </Suspense>
   );
 }
