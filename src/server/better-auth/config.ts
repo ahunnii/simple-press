@@ -1,15 +1,11 @@
-import { headers } from "next/headers";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 
 import { env } from "~/env";
-import { getCurrentDomain, getMainDomain } from "~/lib/domain";
 import { db } from "~/server/db";
 
-const domain = getCurrentDomain(await headers());
-
 export const auth = betterAuth({
-  // baseURL: env.BETTER_AUTH_BASE_URL,
+  baseURL: env.BETTER_AUTH_BASE_URL,
 
   database: prismaAdapter(db, {
     provider: "postgresql", // or "sqlite" or "mysql"
@@ -41,11 +37,14 @@ export const auth = betterAuth({
     },
   },
 
-  trustedOrigins: [
-    env.BETTER_AUTH_BASE_URL,
-    `https://*.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
-    domain,
-  ],
+  trustedOrigins: ["*"],
+
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    },
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;
