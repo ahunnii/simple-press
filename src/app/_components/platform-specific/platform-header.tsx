@@ -41,11 +41,11 @@ export function PlatformHeader() {
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-3">
-            <Button variant="ghost" asChild>
+            {/* <Button variant="ghost" asChild>
               <Link href="/login">Login</Link>
-            </Button>
+            </Button> */}
             <Button asChild>
-              <Link href="/signup">Get Started</Link>
+              <Link href="/platform/signup">Get Started</Link>
             </Button>
           </div>
         </div>
