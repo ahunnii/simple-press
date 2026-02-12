@@ -1,11 +1,15 @@
+import { headers } from "next/headers";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 
 import { env } from "~/env";
+import { getCurrentDomain, getMainDomain } from "~/lib/domain";
 import { db } from "~/server/db";
 
+const domain = getCurrentDomain(await headers());
+
 export const auth = betterAuth({
-  // baseURL: `http://mystore.localhost:3000`,
+  // baseURL: env.BETTER_AUTH_BASE_URL,
 
   database: prismaAdapter(db, {
     provider: "postgresql", // or "sqlite" or "mysql"
@@ -37,53 +41,11 @@ export const auth = betterAuth({
     },
   },
 
-  // advanced: {
-  //   cookiePrefix: "someprefix",
-  //   useSecureCookies: true,
-  //   crossSubdomainCookies: {
-  //     enabled: true,
-  //     domain: ".localhost",
-  //   },
-  //   cookies: {
-  //     session_token: {
-  //       attributes: {
-  //         domain: ".localhost",
-  //         secure: true,
-  //         httpOnly: true,
-  //         sameSite: "lax",
-  //         path: "/",
-  //       },
-  //     },
-  //     session_data: {
-  //       attributes: {
-  //         domain: ".localhost",
-  //         secure: true,
-  //         httpOnly: true,
-  //         sameSite: "lax",
-  //         path: "/",
-  //       },
-  //     },
-  //   },
-  //   defaultCookieAttributes: {
-  //     sameSite: "lax",
-  //     secure: true,
-  //     domain: ".localhost",
-  //   },
-  // },
-
-  // advanced: {
-  //   crossSubDomainCookies: {
-  //     enabled: true,
-  //     domain: "localhost",
-  //   },
-  //   defaultCookieAttributes: {
-  //     secure: true,
-  //     httpOnly: true,
-  //     sameSite: "none",
-  //     domain: "localhost",
-  //   },
-  // },
-  trustedOrigins: ["http://localhost:3000", "http://*.localhost:3000"],
+  trustedOrigins: [
+    env.BETTER_AUTH_BASE_URL,
+    `https://*.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
+    domain,
+  ],
 });
 
 export type Session = typeof auth.$Infer.Session;
