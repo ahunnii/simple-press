@@ -38,7 +38,7 @@ export function ImageUploader({
 }: Props) {
   const uploadFiles = useUploadFiles({
     api: "/api/upload",
-    route: "image",
+    route: "images",
     onUploadComplete: (data) => {
       const newImages: FormProductImage[] = data.files.map((file, i) => ({
         url: getStoredPath(file),

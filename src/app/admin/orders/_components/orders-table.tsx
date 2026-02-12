@@ -76,14 +76,16 @@ export function OrdersTable({ orders }: Props) {
             {orders.map((order) => (
               <tr key={order.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">
-                      #{order.id.slice(0, 8)}
+                  <Link href={`/admin/orders/${order.id}`}>
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        #{order.id.slice(0, 8)}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {formatDate(order.createdAt)}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {formatDate(order.createdAt)}
-                    </div>
-                  </div>
+                  </Link>
                 </td>
                 <td className="px-6 py-4">
                   <div>

@@ -14,6 +14,10 @@ import {
 import { SiteHeader } from "../_components/site-header";
 import { ProductsTable } from "./_components/products-client-data-table";
 
+export const metadata = {
+  title: "Products Admin",
+};
+
 export default async function ProductsPage() {
   const products = await api.product.secureListAll();
 

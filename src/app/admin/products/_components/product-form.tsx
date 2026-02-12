@@ -49,6 +49,7 @@ import { InputFormField } from "~/components/inputs/input-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
+import { getExistingVariantOptions } from "../_utils/existing-variant-options";
 import { ImageUploader } from "./image-uploader";
 import { VariantManager } from "./variant-manager";
 
@@ -56,38 +57,10 @@ type Props = {
   product?: RouterOutputs["product"]["secureGet"];
 };
 
-/** Derive option names and values from existing variants (e.g. Size → [S,M,L], Color → [Red]). */
-function getExistingVariantOptions(
-  variants: Array<{ options: Record<string, string> }> | undefined,
-): Array<{ name: string; values: string[] }> {
-  if (!variants?.length) return [];
-  const keys: string[] = [];
-  const seen = new Set<string>();
-  for (const v of variants) {
-    const opts = v.options ?? {};
-    for (const k of Object.keys(opts)) {
-      if (!seen.has(k)) {
-        seen.add(k);
-        keys.push(k);
-      }
-    }
-  }
-  return keys.map((name) => {
-    const valueSet = new Set<string>();
-    for (const v of variants) {
-      const opts = v.options ?? {};
-      const val = opts[name];
-      if (val != null && val !== "") valueSet.add(val);
-    }
-    return { name, values: Array.from(valueSet) };
-  });
-}
-
 export function ProductForm({ product }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Images state (kept separate as they're uploaded independently via Better Upload)
   const [images, setImages] = useState<FormProductImage[]>([]);
@@ -207,7 +180,6 @@ export function ProductForm({ product }: Props) {
 
   const deleteProductMutation = api.product.delete.useMutation({
     onError: (error) => {
-      setError(error.message ?? "Failed to delete product");
       toast.error(error.message ?? "Failed to delete product");
     },
     onSuccess: () => {
@@ -312,13 +284,6 @@ export function ProductForm({ product }: Props) {
           onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
           className="space-y-6"
         >
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
           <div className="admin-form-header">
             <div className={`${isDirty ? "isDirty" : "isNotDirty"}`}>
               <div className="flex min-w-0 items-center gap-3">
@@ -394,146 +359,189 @@ export function ProductForm({ product }: Props) {
             </div>
           </div>
 
-          {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-              <CardDescription>
-                Essential details about your product
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <InputFormField
-                form={form}
-                name="name"
-                label="Product Name *"
-                onChangeAdditional={handleNameChange}
-                placeholder="e.g., Classic White T-Shirt"
-                required
-                autoFocus
-              />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="col-span-1 space-y-4">
+              {/* Basic Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Basic Information</CardTitle>
+                  <CardDescription>
+                    Essential details about your product
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <InputFormField
+                    form={form}
+                    name="name"
+                    label="Product Name *"
+                    onChangeAdditional={handleNameChange}
+                    placeholder="e.g., Classic White T-Shirt"
+                    required
+                    autoFocus
+                  />
 
-              <InputFormField
-                form={form}
-                name="slug"
-                label="URL Slug *"
-                placeholder="classic-white-t-shirt"
-                onChange={(value) =>
-                  form.setValue("slug", slugify(value), {
-                    shouldValidate: true,
-                  })
-                }
-                required
-                description={`Used in product URL: /products/${form.watch("slug") || "your-product"}`}
-              />
+                  <InputFormField
+                    form={form}
+                    name="slug"
+                    label="URL Slug *"
+                    placeholder="classic-white-t-shirt"
+                    onChange={(value) =>
+                      form.setValue("slug", slugify(value), {
+                        shouldValidate: true,
+                      })
+                    }
+                    required
+                    description={`Used in product URL: /products/${form.watch("slug") || "your-product"}`}
+                  />
 
-              <TextareaFormField
-                form={form}
-                name="description"
-                label="Description"
-                placeholder="Describe your product..."
-                rows={4}
-              />
-            </CardContent>
-          </Card>
+                  <TextareaFormField
+                    form={form}
+                    name="description"
+                    label="Description"
+                    placeholder="Describe your product..."
+                    rows={4}
+                  />
+                </CardContent>
+              </Card>
 
-          {/* Pricing */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Pricing</CardTitle>
-              <CardDescription>Set your product pricing</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price (USD) *</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
-                          $
-                        </span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="19.99"
-                          className="pl-7"
-                          {...field}
-                          value={field.value || ""}
-                          onChange={(e) => {
-                            const value = parseFloat(e.target.value);
-                            field.onChange(isNaN(value) ? 0 : value);
-                          }}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormDescription>
-                      Base price in USD (variant prices can override this)
-                    </FormDescription>
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
+              {/* Pricing */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pricing</CardTitle>
+                  <CardDescription>Set your product pricing</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Price (USD) *</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                              $
+                            </span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="19.99"
+                              className="pl-7"
+                              {...field}
+                              value={field.value || ""}
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value);
+                                field.onChange(isNaN(value) ? 0 : value);
+                              }}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Base price in USD (variant prices can override this)
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
 
-          {/* Base Inventory */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Inventory</CardTitle>
-              <CardDescription>Set your product inventory</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <SwitchFormField
-                form={form}
-                name="trackInventory"
-                label="Track Inventory"
-                description="Enable inventory tracking for this product"
-              />
+              {/* Base Inventory */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Inventory</CardTitle>
+                  <CardDescription>Set your product inventory</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <SwitchFormField
+                    form={form}
+                    name="trackInventory"
+                    label="Track Inventory"
+                    description="Enable inventory tracking for this product"
+                  />
 
-              {form.watch("trackInventory") && (
-                <SwitchFormField
-                  form={form}
-                  name="allowBackorders"
-                  label="Allow Backorders"
-                  description="Allow customers to order when out of stock"
-                />
-              )}
+                  {form.watch("trackInventory") && (
+                    <SwitchFormField
+                      form={form}
+                      name="allowBackorders"
+                      label="Allow Backorders"
+                      description="Allow customers to order when out of stock"
+                    />
+                  )}
 
-              <FormField
-                control={form.control}
-                name="inventoryQty"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Inventory Quantity</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="19.99"
-                          className="pl-7"
-                          {...field}
-                          value={field.value ?? ""}
-                          onChange={(e) => {
-                            const value = parseFloat(e.target.value);
-                            field.onChange(isNaN(value) ? 0 : value);
-                          }}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormDescription>
-                      Set the inventory quantity for this product (ignored if
-                      inventory tracking is disabled or if variants are used)
-                    </FormDescription>
-                  </FormItem>
-                )}
+                  <FormField
+                    control={form.control}
+                    name="inventoryQty"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Inventory Quantity</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="19.99"
+                              className="pl-7"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value);
+                                field.onChange(isNaN(value) ? 0 : value);
+                              }}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Set the inventory quantity for this product (ignored
+                          if inventory tracking is disabled or if variants are
+                          used)
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            <div className="col-span-1 space-y-4">
+              {/* Publishing */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Publishing</CardTitle>
+                  <CardDescription>Control product visibility</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="published"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between space-y-0">
+                        <div className="space-y-1">
+                          <FormLabel>Publish Product</FormLabel>
+                          <FormDescription>
+                            Make this product visible to customers
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Images */}
+              <ImageUploader
+                images={images}
+                onImagesChange={setImages}
+                maxImages={10}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Variants */}
           <VariantManager
@@ -546,43 +554,6 @@ export function ProductForm({ product }: Props) {
                 | undefined,
             )}
           />
-
-          {/* Images */}
-          <ImageUploader
-            images={images}
-            onImagesChange={setImages}
-            maxImages={10}
-          />
-
-          {/* Publishing */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Publishing</CardTitle>
-              <CardDescription>Control product visibility</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                control={form.control}
-                name="published"
-                render={({ field }) => (
-                  <FormItem className="flex items-center justify-between space-y-0">
-                    <div className="space-y-1">
-                      <FormLabel>Publish Product</FormLabel>
-                      <FormDescription>
-                        Make this product visible to customers
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
         </form>
       </Form>
 

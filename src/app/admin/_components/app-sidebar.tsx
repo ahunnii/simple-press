@@ -100,7 +100,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <IconTerminal className="size-8" />
                   simple_press
                 </span>
-                <span className="text-sm text-gray-500">Artisanal Futures</span>
+                {/* <span className="text-sm text-gray-500">Artisanal Futures</span> */}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

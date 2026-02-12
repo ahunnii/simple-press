@@ -11,6 +11,38 @@ const router: Router = {
   client: s3Client,
   bucketName: env.NEXT_PUBLIC_STORAGE_BUCKET_NAME,
   routes: {
+    image: route({
+      fileTypes: ["image/*"],
+      multipleFiles: false,
+      onBeforeUpload: async ({ req, file }) => {
+        const user = await auth.api.getSession({ headers: req.headers });
+        if (!user) {
+          throw new RejectUpload("Not logged in!");
+        }
+        const business = await checkBusiness();
+        if (!business) {
+          throw new RejectUpload("Business not found!");
+        }
+
+        return {
+          objectInfo: {
+            key: `${business.id}/${file.name}`,
+            metadata: {
+              pathname: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${business.id}/${file.name}`,
+            },
+          },
+        };
+      },
+      onAfterSignedUrl: async ({ metadata }) => {
+        // the files now have the objectInfo property
+
+        return {
+          metadata: {
+            ...metadata,
+          },
+        };
+      },
+    }),
     logo: route({
       fileTypes: ["image/*"],
       multipleFiles: false,
@@ -30,6 +62,14 @@ const router: Router = {
             metadata: {
               pathName: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${business.id}/logo.${file.name.split(".")[1]}`,
             },
+          },
+        };
+      },
+      onAfterSignedUrl: async ({ metadata }) => {
+        // the files now have the objectInfo property
+        return {
+          metadata: {
+            ...metadata,
           },
         };
       },
@@ -64,7 +104,7 @@ const router: Router = {
         };
       },
     }),
-    image: route({
+    images: route({
       fileTypes: ["image/*"],
 
       multipleFiles: true,

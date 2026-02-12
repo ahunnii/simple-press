@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, User, X } from "lucide-react";
+import { UserButton } from "@daveyplate/better-auth-ui";
+import { LayoutDashboardIcon, Menu, User, X } from "lucide-react";
 
+import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 
 import { DefaultCartBadge } from "./default-cart-badge";
@@ -22,6 +24,45 @@ type Props = {
 
 export function DefaultHeader({ business }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user;
+
+  const authActions = (
+    <>
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/auth/sign-in">Log in</Link>
+      </Button>
+      <Button size="sm" asChild>
+        <Link href="/join">Join Us</Link>
+      </Button>
+    </>
+  );
+
+  const userMenu = user && (
+    <UserButton
+      size="icon"
+      classNames={{
+        trigger: {
+          base: "border-primary border",
+          avatar: {
+            base: "size-10",
+          },
+        },
+      }}
+      additionalLinks={[
+        ...(user.role === "ADMIN"
+          ? [
+              {
+                icon: <LayoutDashboardIcon className="h-4 w-4" />,
+                label: "Admin",
+                href: "/admin",
+              },
+            ]
+          : []),
+      ]}
+    />
+  );
 
   return (
     <>
@@ -63,12 +104,13 @@ export function DefaultHeader({ business }: Props) {
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="relative" asChild>
-              <Link href="/login">
-                <User className="h-5 w-5" />
-                <span className="sr-only">Sign In</span>
-              </Link>
-            </Button>
+            {isPending ? (
+              <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+            ) : user ? (
+              userMenu
+            ) : (
+              authActions
+            )}
             <DefaultCartBadge />
             <Button
               variant="ghost"

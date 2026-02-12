@@ -21,6 +21,10 @@ type Props = {
   }>;
 };
 
+export const metadata = {
+  title: "Orders Admin",
+};
+
 export default async function OrdersPage({ searchParams }: Props) {
   const params = await searchParams;
 
@@ -38,17 +42,16 @@ export default async function OrdersPage({ searchParams }: Props) {
   return (
     <HydrateClient>
       <SiteHeader title="Orders" />
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+      <div className="admin-container">
+        <div className="admin-header">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
-            <p className="mt-1 text-gray-600">Manage your customer orders</p>
+            <h1>Orders</h1>
+            <p>Manage your customer orders</p>
           </div>
           <Button asChild>
             <Link href="/admin/orders/new">
               <Plus className="mr-2 h-4 w-4" />
-              Create Order
+              Create Manual Order
             </Link>
           </Button>
         </div>

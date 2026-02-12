@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { api, HydrateClient } from "~/trpc/server";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
+import { SiteHeader } from "../_components/site-header";
 import { BrandingSettings } from "./_components/branding-settings";
 import { DomainSettings } from "./_components/domain-settings";
 import { GeneralSettings } from "./_components/general-settings";
@@ -18,15 +19,15 @@ export default async function SettingsPage() {
 
   return (
     <HydrateClient>
-      <div className="min-h-screen bg-gray-50">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-8">
+      <SiteHeader title="Settings" />
+      <div className="admin-container">
+        <>
+          {/* <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
             <p className="mt-1 text-gray-600">
               Manage your store settings and integrations
             </p>
-          </div>
+          </div> */}
 
           {/* Tabs */}
           <Tabs defaultValue="general" className="space-y-6">
@@ -62,7 +63,7 @@ export default async function SettingsPage() {
               <SeoSettings business={business} />
             </TabsContent>
           </Tabs>
-        </div>
+        </>
       </div>
     </HydrateClient>
   );

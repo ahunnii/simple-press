@@ -17,16 +17,7 @@ export default async function NewOrderPage() {
   return (
     <HydrateClient>
       <SiteHeader title="Create Manual Order" />
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Create Manual Order
-          </h1>
-          <p className="mt-1 text-gray-600">
-            Create an order manually (phone, in-person, etc.)
-          </p>
-        </div>
-
+      <div className="admin-container">
         <ManualOrderForm businessId={business?.id} products={products} />
       </div>
     </HydrateClient>

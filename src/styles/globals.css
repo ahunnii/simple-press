@@ -155,7 +155,7 @@
     @apply border-border/50 bg-background/60 supports-backdrop-filter:bg-background/50;
   }
 
-  .admin-form-header > h1 {
+  .admin-form-header h1 {
     @apply truncate text-lg font-semibold;
   }
 

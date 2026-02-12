@@ -17,15 +17,6 @@ export default async function SignUpPage() {
             href="/"
             className="text-primary-foreground flex w-fit items-center gap-2 transition-opacity hover:opacity-80"
           >
-            {/* <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-full">
-              <span className="text-primary-foreground text-sm font-bold">
-                CCA
-              </span>
-            </div>
-
-            <span className="text-xl font-bold">
-              Crossroads Community Association
-            </span> */}{" "}
             <Image
               src="/logo-transparent.png"
               alt="Crossroads Community Association"

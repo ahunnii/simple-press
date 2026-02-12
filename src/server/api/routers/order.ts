@@ -157,7 +157,12 @@ export const orderRouter = createTRPCRouter({
       }
       const order = await ctx.db.order.findFirst({
         where: { id, businessId: business.id },
-        include: { items: true, shippingAddress: true, customer: true },
+        include: {
+          discountCode: true,
+          items: true,
+          shippingAddress: true,
+          customer: true,
+        },
       });
 
       return order;

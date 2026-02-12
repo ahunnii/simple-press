@@ -19,6 +19,13 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 
 type Props = {
@@ -109,7 +116,6 @@ export function RefundHandler({ order }: Props) {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-
           {/* Refund Type */}
           <div>
             <Label>Refund Type</Label>
@@ -133,12 +139,12 @@ export function RefundHandler({ order }: Props) {
                   checked={refundType === "partial"}
                   onChange={() => setRefundType("partial")}
                   className="h-4 w-4"
+                  disabled
                 />
                 <span>Partial Refund</span>
               </label>
             </div>
           </div>
-
           {/* Partial Amount */}
           {refundType === "partial" && (
             <div>
@@ -166,23 +172,35 @@ export function RefundHandler({ order }: Props) {
           )}
 
           {/* Reason */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="reason">Reason (Optional)</Label>
-            <Textarea
+            <Select value={reason} onValueChange={setReason}>
+              <SelectTrigger className="w-full bg-white">
+                <SelectValue placeholder="Select a reason" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="requested_by_customer">
+                  Customer requested refund
+                </SelectItem>
+                <SelectItem value="duplicate">Duplicate order</SelectItem>
+                <SelectItem value="fraudulent">Fraudulent order</SelectItem>
+              </SelectContent>
+            </Select>
+            {/* <Textarea
               id="reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Customer requested refund..."
               rows={3}
-            />
+            /> */}
           </div>
-
           {/* Warning */}
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               This will process a refund through Stripe. This action cannot be
-              undone.
+              undone. Also, this will not update inventory. Be sure to update
+              inventory manually.
             </AlertDescription>
           </Alert>
         </div>
