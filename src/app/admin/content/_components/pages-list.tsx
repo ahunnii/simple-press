@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { env } from "~/env";
 import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -78,7 +79,7 @@ export function PagesList({ business }: PagesListProps) {
 
   const storefrontUrl = business.customDomain
     ? `https://${business.customDomain}`
-    : `https://${business.subdomain}.myapplication.com`;
+    : `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
 
   return (
     <div className="min-h-screen bg-gray-50">

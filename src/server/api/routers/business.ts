@@ -11,6 +11,89 @@ import {
 } from "~/server/api/trpc";
 
 export const businessRouter = createTRPCRouter({
+  simplifiedGet: publicProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
+    const businessData = await ctx.db.business.findFirst({
+      where: {
+        id: business.id,
+        status: "active",
+      },
+      select: {
+        name: true,
+        templateId: true,
+        businessAddress: true,
+
+        siteContent: {
+          select: {
+            logoUrl: true,
+            logoAltText: true,
+            footerText: true,
+            navigationItems: true,
+            socialLinks: true,
+          },
+        },
+      },
+    });
+    return businessData;
+  }),
+
+  getHomepage: publicProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+    const homepage = await ctx.db.business.findFirst({
+      where: {
+        id: business.id,
+        status: "active",
+      },
+      select: {
+        name: true,
+        templateId: true,
+        siteContent: {
+          select: {
+            heroTitle: true,
+            heroSubtitle: true,
+            heroImageUrl: true,
+            heroButtonText: true,
+            heroButtonLink: true,
+            aboutTitle: true,
+            aboutText: true,
+            aboutImageUrl: true,
+            features: true,
+            customFields: true,
+          },
+        },
+        products: {
+          where: { published: true },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            price: true,
+            description: true,
+            images: {
+              take: 1,
+              orderBy: { sortOrder: "asc" },
+            },
+          },
+        },
+      },
+    });
+    return homepage;
+  }),
+
   get: publicProcedure
     .input(
       z
@@ -62,7 +145,7 @@ export const businessRouter = createTRPCRouter({
       return business;
     }),
 
-  getWithProducts: publicProcedure.query(async ({ ctx, input }) => {
+  getWithProducts: publicProcedure.query(async ({ ctx }) => {
     const headersList = await headers();
     const hostname = headersList.get("host") ?? "";
 

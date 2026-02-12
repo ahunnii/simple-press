@@ -1,29 +1,35 @@
 import { notFound } from "next/navigation";
 
-import { api } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
 import { CartProvider } from "~/providers/cart-context";
 
 import { DefaultLayout } from "./_templates/default/default-layout";
+import { ElegantLayout } from "./_templates/elegant/elegant-layout";
+import { ModernLayout } from "./_templates/modern/modern-layout";
 
 type Props = {
   children: React.ReactNode;
 };
 
 export default async function StorefrontLayout({ children }: Props) {
-  const business = await api.business.get();
+  const business = await api.business.simplifiedGet();
 
   if (!business) {
     notFound();
   }
-  const templateId = business.templateId;
 
-  if (templateId === "default") {
-    return (
-      <DefaultLayout business={business}>
-        <CartProvider>{children}</CartProvider>
-      </DefaultLayout>
-    );
-  }
+  const TemplateLayout =
+    {
+      default: DefaultLayout,
+      elegant: ElegantLayout,
+      modern: ModernLayout,
+    }[business.templateId] ?? DefaultLayout;
 
-  return <CartProvider>{children}</CartProvider>;
+  return (
+    <HydrateClient>
+      <TemplateLayout business={business}>
+        <>{children}</>
+      </TemplateLayout>
+    </HydrateClient>
+  );
 }

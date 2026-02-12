@@ -4,8 +4,11 @@ import { PlatformLandingPageComponent } from "./_components/platform-specific/pl
 import { DefaultTemplate } from "./(storefront)/_templates/default-template";
 import { DefaultHomePage } from "./(storefront)/_templates/default/default-homepage";
 import { DefaultLayout } from "./(storefront)/_templates/default/default-layout";
+import { ElegantHomePage } from "./(storefront)/_templates/elegant/elegant-homepage";
+import { ElegantLayout } from "./(storefront)/_templates/elegant/elegant-layout";
 import { MinimalTemplate } from "./(storefront)/_templates/minimal-template";
 import { ModernHomePage } from "./(storefront)/_templates/modern/modern-home-page";
+import { ModernLayout } from "./(storefront)/_templates/modern/modern-layout";
 import { VintageTemplate } from "./(storefront)/_templates/vintage-template";
 
 export default async function PlatformLandingPage() {
@@ -20,11 +23,14 @@ export default async function PlatformLandingPage() {
       modern: ModernHomePage,
       vintage: VintageTemplate,
       minimal: MinimalTemplate,
+      elegant: ElegantHomePage,
     }[business.templateId] ?? DefaultHomePage;
 
   const TemplateLayout =
     {
       default: DefaultLayout,
+      elegant: ElegantLayout,
+      modern: ModernLayout,
     }[business.templateId] ?? DefaultLayout;
 
   return (

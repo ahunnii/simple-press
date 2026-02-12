@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { api, HydrateClient } from "~/trpc/server";
 
 import { DefaultProductPage } from "../../_templates/default/default-product-page";
+import { ElegantProductPage } from "../../_templates/elegant/elegant-product-page";
 import { ModernProductPage } from "../../_templates/modern/modern-product-page";
 
 type PageProps = {
@@ -49,16 +50,23 @@ export default async function ProductDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  if (business.templateId === "modern") {
-    return (
-      <HydrateClient>
-        <ModernProductPage business={business} product={product} />
-      </HydrateClient>
-    );
-  }
+  // if (business.templateId === "modern") {
+  //   return (
+  //     <HydrateClient>
+  //       <ModernProductPage business={business} product={product} />
+  //     </HydrateClient>
+  //   );
+  // }
+
+  const TemplateComponent =
+    {
+      modern: ModernProductPage,
+      elegant: ElegantProductPage,
+    }[business.templateId] ?? DefaultProductPage;
+
   return (
     <HydrateClient>
-      <DefaultProductPage business={business} product={product} />
+      <TemplateComponent business={business} product={product} />
     </HydrateClient>
   );
 }

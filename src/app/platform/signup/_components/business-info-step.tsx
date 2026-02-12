@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AlertCircle, ArrowLeft, Check, X } from "lucide-react";
 
 import type { SignupFormData } from "./wizard-client";
+import { env } from "~/env";
 import { isSubdomainReserved, isValidDomain, slugify } from "~/lib/utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -161,7 +162,7 @@ export function BusinessInfoStep({
                 className="flex-1"
               />
               <span className="text-sm whitespace-nowrap text-gray-500">
-                .myapplication.com
+                .{env.NEXT_PUBLIC_PLATFORM_DOMAIN}
               </span>
             </div>
 
@@ -190,7 +191,9 @@ export function BusinessInfoStep({
 
             <p className="mt-2 text-sm text-gray-500">
               Your store will be available at:{" "}
-              <strong>{subdomain || "yourstore"}.myapplication.com</strong>
+              <strong>
+                {subdomain || "yourstore"}.{env.NEXT_PUBLIC_PLATFORM_DOMAIN}
+              </strong>
             </p>
           </div>
 

@@ -47,7 +47,7 @@ export function ModernHeader({ business }: { business: Business }) {
             Home
           </Link>
           <Link
-            href="/products"
+            href="/shop"
             className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
           >
             Shop

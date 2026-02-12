@@ -216,6 +216,7 @@ export function BrandingSettings({ business }: BrandingSettingsProps) {
                 { value: "modern", label: "Modern" },
                 { value: "vintage", label: "Vintage" },
                 { value: "minimal", label: "Minimal" },
+                { value: "elegant", label: "Elegant" },
               ]}
             />
           </CardContent>

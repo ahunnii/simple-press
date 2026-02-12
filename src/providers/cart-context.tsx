@@ -176,6 +176,11 @@ type CartContextType = {
   getItemQuantity: (productId: string, variantId: string | null) => number;
   total: number;
   itemCount: number;
+
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+
+  subtotal: number;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -185,6 +190,7 @@ const CART_STORAGE_KEY = "shopping-cart";
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Load cart from localStorage on mount (client-side only)
   useEffect(() => {
@@ -280,6 +286,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
 
         toast.success(`Added to cart`);
+        setIsOpen(true);
         return [...currentItems, { ...newItem, quantity }];
       });
     },
@@ -391,6 +398,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Calculate item count
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
   return (
     <CartContext.Provider
@@ -407,6 +418,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         getItemQuantity,
         total,
         itemCount,
+        isOpen,
+        setIsOpen,
+        subtotal,
       }}
     >
       {children}

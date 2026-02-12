@@ -7,8 +7,11 @@ import { StorefrontFooter } from "~/app/(storefront)/_components/storefront-foot
 import { StorefrontHeader } from "~/app/(storefront)/_components/storefront-header";
 import { DefaultProductCard } from "~/app/(storefront)/_templates/default/default-product-card";
 
+import { DefaultFooter } from "./default-footer";
+import { DefaultHeader } from "./default-header";
+
 type DefaultTemplateProps = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   children: React.ReactNode;
 };
 
@@ -18,9 +21,9 @@ export async function DefaultLayout({
 }: DefaultTemplateProps) {
   return (
     <div className="flex min-h-screen flex-col">
-      <StorefrontHeader business={business} />
+      <DefaultHeader business={business} />
       <main className="flex-1">{children}</main>
-      <StorefrontFooter business={business} />
+      <DefaultFooter business={business} />
     </div>
   );
 }

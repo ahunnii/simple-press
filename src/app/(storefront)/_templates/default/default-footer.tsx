@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { RouterOutputs } from "~/trpc/react";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 export function DefaultFooter({ business }: Props) {
   return (

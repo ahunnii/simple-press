@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
+import { env } from "~/env";
 import { isSubdomainReserved, slugify } from "~/lib/utils";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
@@ -163,7 +164,7 @@ export async function POST(req: NextRequest) {
     const isDev = process.env.NODE_ENV === "development";
     const subdomainUrl = isDev
       ? `http://${subdomain}.localhost:3000`
-      : `https://${subdomain}.myapplication.com`;
+      : `https://${subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
 
     const redirectUrl = `${subdomainUrl}/auth/signup-complete?token=${token}`;
 
