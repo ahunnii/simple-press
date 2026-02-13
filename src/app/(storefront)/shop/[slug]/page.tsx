@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api, HydrateClient } from "~/trpc/server";
 
+import { DarkTrendProductPage } from "../../_templates/dark-trend/dark-trend-product-page";
 import { DefaultProductPage } from "../../_templates/default/default-product-page";
 import { ElegantProductPage } from "../../_templates/elegant/elegant-product-page";
 import { ModernProductPage } from "../../_templates/modern/modern-product-page";
@@ -62,6 +63,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     {
       modern: ModernProductPage,
       elegant: ElegantProductPage,
+      "dark-trend": DarkTrendProductPage,
     }[business.templateId] ?? DefaultProductPage;
 
   return (

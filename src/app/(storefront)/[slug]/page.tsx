@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 
-import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { db } from "~/server/db";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { api } from "~/trpc/server";
+
+import { DarkTrendGenericPage } from "../_templates/dark-trend/dark-trend-generic-page";
+import { DefaultGenericPage } from "../_templates/default/default-generic-page";
 
 export default async function PageView({
   params,
@@ -10,29 +11,25 @@ export default async function PageView({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const page = await db.page.findFirst({
-    where: {
-      slug,
-      published: true,
-    },
+  const business = await api.business.get();
+
+  if (!business) {
+    notFound();
+  }
+
+  const page = await api.content.getPageBySlug({
+    businessId: business.id,
+    slug,
   });
 
   if (!page) {
     notFound();
   }
 
-  return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="mb-6 text-4xl font-bold">{page.title}</h1>
+  const TemplateComponent =
+    {
+      "dark-trend": DarkTrendGenericPage,
+    }[business.templateId] ?? DefaultGenericPage;
 
-      {page.excerpt && (
-        <p className="mb-8 text-xl text-gray-600">{page.excerpt}</p>
-      )}
-
-      <TiptapRenderer
-        content={page.content as TiptapJSON}
-        className="prose prose-lg max-w-none"
-      />
-    </div>
-  );
+  return <TemplateComponent page={page} />;
 }

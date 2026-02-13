@@ -4,7 +4,7 @@ import type { Business, SiteContent } from "generated/prisma";
 import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useUploadFiles } from "@better-upload/client";
+import { useUploadFile, useUploadFiles } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -58,9 +58,9 @@ export function BrandingSettings({ business }: BrandingSettingsProps) {
   });
 
   // Image uploads
-  const logoUploader = useUploadFiles({
+  const logoUploader = useUploadFile({
     api: "/api/upload",
-    route: "logo",
+    route: "image",
     onError: (error) => {
       toast.error(error.message ?? "Logo upload failed.");
     },
@@ -110,8 +110,11 @@ export function BrandingSettings({ business }: BrandingSettingsProps) {
     const logoFile = data.logoFile;
     if (logoFile instanceof File) {
       try {
-        const { metadata } = await logoUploader.upload([logoFile]);
-        const fileLocation = (metadata?.pathName as string | undefined) ?? "";
+        const response = await logoUploader.upload(logoFile);
+        const fileLocation =
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          "";
+
         if (fileLocation) logoUrl = fileLocation;
       } catch {
         toast.error("Failed to upload logo.");
@@ -217,6 +220,7 @@ export function BrandingSettings({ business }: BrandingSettingsProps) {
                 { value: "vintage", label: "Vintage" },
                 { value: "minimal", label: "Minimal" },
                 { value: "elegant", label: "Elegant" },
+                { value: "dark-trend", label: "Dark Trend" },
               ]}
             />
           </CardContent>

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { api } from "~/trpc/server";
 
 import { StorefrontHeader } from "../_components/storefront-header";
+import { DarkTrendCheckoutPage } from "../_templates/dark-trend/dark-trend-checkout-page";
 import { DefaultCheckoutPage } from "../_templates/default/default-checkout-page";
 import { ModernCheckoutPage } from "../_templates/modern/modern-checkout-page";
 
@@ -34,9 +35,11 @@ export default async function CheckoutPage() {
     );
   }
 
-  if (business.templateId === "modern") {
-    return <ModernCheckoutPage business={business} />;
-  }
+  const TemplateComponent =
+    {
+      "dark-trend": DarkTrendCheckoutPage,
+      modern: ModernCheckoutPage,
+    }[business.templateId] ?? DefaultCheckoutPage;
 
-  return <DefaultCheckoutPage business={business} />;
+  return <TemplateComponent business={business} />;
 }

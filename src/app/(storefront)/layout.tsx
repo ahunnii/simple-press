@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { api, HydrateClient } from "~/trpc/server";
 import { CartProvider } from "~/providers/cart-context";
 
+import { DarkTrendLayout } from "./_templates/dark-trend/dark-trend-layout";
 import { DefaultLayout } from "./_templates/default/default-layout";
 import { ElegantLayout } from "./_templates/elegant/elegant-layout";
 import { ModernLayout } from "./_templates/modern/modern-layout";
@@ -20,6 +21,7 @@ export default async function StorefrontLayout({ children }: Props) {
 
   const TemplateLayout =
     {
+      "dark-trend": DarkTrendLayout,
       default: DefaultLayout,
       elegant: ElegantLayout,
       modern: ModernLayout,

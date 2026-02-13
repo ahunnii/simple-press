@@ -1,5 +1,6 @@
 import type { RouterOutputs } from "~/trpc/react";
 
+import { DarkTrendFooter } from "../_templates/dark-trend/dark-trend-footer";
 import { DefaultFooter } from "../_templates/default/default-footer";
 import { ModernFooter } from "../_templates/modern/modern-footer";
 
@@ -18,6 +19,9 @@ type Props = {
 export async function StorefrontFooter({ business }: Props) {
   const templateId = business.templateId;
 
+  if (templateId === "dark-trend") {
+    return <DarkTrendFooter business={business} />;
+  }
   if (templateId === "modern") {
     return <ModernFooter business={business} />;
   }

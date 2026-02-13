@@ -123,6 +123,93 @@ export const TEMPLATE_FIELDS: Record<
       type: "textarea",
     },
   ],
+  "dark-trend": [
+    {
+      key: "dark-trend.first-section-title",
+      label: "First Section Title",
+      description: "Title for the first section",
+      type: "text",
+    },
+    {
+      key: "dark-trend.first-section-image",
+      label: "First Section Image",
+      description: "Image for the first section",
+      type: "url",
+    },
+    {
+      key: "dark-trend.first-section-button-text",
+      label: "First Section Button Text",
+      description: "Button text for the first section",
+      type: "text",
+    },
+    {
+      key: "dark-trend.first-section-button-link",
+      label: "First Section Button Link",
+      description: "Button link for the first section",
+      type: "url",
+    },
+    {
+      key: "dark-trend.first-section-description",
+      label: "First Section Description",
+      description: "Description for the first section",
+      type: "textarea",
+    },
+
+    {
+      key: "dark-trend.first-section-subheader",
+      label: "First Section Subheader",
+      description: "Subheader for the first section",
+      type: "text",
+    },
+    {
+      key: "dark-trend.second-section-title",
+      label: "Second Section Title",
+      description: "Title for the second section",
+      type: "text",
+    },
+    {
+      key: "dark-trend.second-section-description",
+      label: "Second Section Description",
+      description: "Description for the second section",
+      type: "textarea",
+    },
+    {
+      key: "dark-trend.second-section-image",
+      label: "Second Section Image",
+      description: "Image for the second section",
+      type: "url",
+    },
+    {
+      key: "dark-trend.cta-header",
+      label: "CTA Header",
+      description: "Header for the CTA section",
+      type: "text",
+    },
+    {
+      key: "dark-trend.cta-description",
+      label: "CTA Description",
+      description: "Description for the CTA section",
+      type: "textarea",
+    },
+    {
+      key: "dark-trend.cta-button-text",
+      label: "CTA Button Text",
+      description: "Button text for the CTA section",
+      type: "text",
+    },
+    {
+      key: "dark-trend.cta-button-link",
+      label: "CTA Button Link",
+      description: "Button link for the CTA section",
+      type: "url",
+    },
+    {
+      key: "dark-trend.cta-image",
+      label: "CTA Image",
+      description: "Image for the CTA section",
+      type: "url",
+    },
+  ],
 };
 
 /**

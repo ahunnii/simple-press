@@ -30,7 +30,7 @@ export const businessRouter = createTRPCRouter({
         name: true,
         templateId: true,
         businessAddress: true,
-
+        supportEmail: true,
         siteContent: {
           select: {
             logoUrl: true,
