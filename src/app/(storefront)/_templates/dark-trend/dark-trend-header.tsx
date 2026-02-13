@@ -80,7 +80,7 @@ export function DarkTrendHeader({ business }: Props) {
         },
       }}
       additionalLinks={[
-        ...(session?.user?.role === "ADMIN"
+        ...(session?.user?.role === "ADMIN" || session?.user?.role === "OWNER"
           ? [
               {
                 icon: <IconLayoutDashboard className="h-4 w-4" />,

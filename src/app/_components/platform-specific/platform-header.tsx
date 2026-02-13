@@ -1,10 +1,47 @@
 import Link from "next/link";
-import { IconTerminal } from "@tabler/icons-react";
+import { UserButton } from "@daveyplate/better-auth-ui";
+import { IconLayoutDashboard, IconTerminal } from "@tabler/icons-react";
 import { Store } from "lucide-react";
 
+import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 
 export function PlatformHeader() {
+  const { data: session, isPending } = authClient.useSession();
+
+  const authActions = (
+    <>
+      <Button asChild>
+        <Link href="/platform/signup">Get Started</Link>
+      </Button>
+    </>
+  );
+
+  const userMenu = session?.user && (
+    <UserButton
+      size="icon"
+      classNames={{
+        trigger: {
+          base: "border-primary border",
+          avatar: {
+            base: "size-10",
+          },
+        },
+      }}
+      additionalLinks={[
+        ...(session?.user?.role === "ADMIN" || session?.user?.role === "OWNER"
+          ? [
+              {
+                icon: <IconLayoutDashboard className="h-4 w-4" />,
+                label: "Admin",
+                href: "/admin",
+              },
+            ]
+          : []),
+      ]}
+    />
+  );
+
   return (
     <header className="sticky top-0 z-50 border-b bg-white">
       <div className="container mx-auto px-4">
@@ -41,12 +78,13 @@ export function PlatformHeader() {
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-3">
-            {/* <Button variant="ghost" asChild>
-              <Link href="/login">Login</Link>
-            </Button> */}
-            <Button asChild>
-              <Link href="/platform/signup">Get Started</Link>
-            </Button>
+            {isPending ? (
+              <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+            ) : session?.user ? (
+              userMenu
+            ) : (
+              authActions
+            )}
           </div>
         </div>
       </div>
