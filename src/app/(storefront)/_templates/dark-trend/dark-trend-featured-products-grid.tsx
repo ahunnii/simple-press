@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 
+import { formatPrice } from "~/lib/prices";
 import { api } from "~/trpc/react";
 
 const cardTransition = {
@@ -25,10 +26,7 @@ export function DarkTrendFeaturedProductsGrid() {
           viewport={{ once: true, margin: "-40px" }}
           transition={{ ...cardTransition, delay: index * 0.1 }}
         >
-          <Link
-            href={`/shop/${product.slug}`}
-            className="group block"
-          >
+          <Link href={`/shop/${product.slug}`} className="group block">
             <motion.div
               className="relative aspect-square overflow-hidden rounded-sm bg-zinc-800"
               whileHover={{ scale: 1.02 }}
@@ -46,7 +44,7 @@ export function DarkTrendFeaturedProductsGrid() {
               {product.name}
             </h3>
             <p className="mt-1 text-sm text-white/80">
-              ${Number(product.price).toFixed(2)}
+              {formatPrice(product.price)}
             </p>
           </Link>
         </motion.div>

@@ -152,7 +152,8 @@ model Business {
   images      Image[]
   discountCodes DiscountCode[]
   inventoryHistory InventoryHistory[]
-  pages         Page[]
+  pages         Page[] 
+  productImports ProductImport[]
 
 
   @@index([subdomain])
@@ -656,4 +657,34 @@ model Page {
   @@unique([businessId, slug])
   @@index([businessId, published])
   @@index([businessId, type])
+}
+
+model ProductImport {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Import metadata
+  filename    String
+  totalRows   Int
+  status      String   @default("pending") // pending | processing | completed | failed
+  
+  // Mapping & validation
+  mappedData  Json     // Parsed and mapped products
+  errors      Json?    // Validation errors
+  warnings    Json?    // Non-critical issues
+  
+  // Results
+  importedCount   Int @default(0)
+  skippedCount    Int @default(0)
+  errorCount      Int @default(0)
+  
+  // Business
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdById String
+  
+  @@index([businessId])
+  @@index([status])
 }

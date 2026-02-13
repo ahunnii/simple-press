@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, SlidersHorizontal, X } from "lucide-react";
+import { Eye, ShoppingBag, SlidersHorizontal, X } from "lucide-react";
+
+import { formatPrice } from "~/lib/prices";
 
 // const products = [
 //   // Serums
@@ -220,17 +222,17 @@ export function DarkTrendProductCard({
             }}
             aria-label="Add to cart"
           >
-            <ShoppingBag className="h-5 w-5 text-white" />
+            <Eye className="h-5 w-5 text-white" />
           </button>
         </div>
 
         {/* Info */}
         <div className="p-6">
           <h3 className="mb-1 text-xl text-white">{product.name}</h3>
-          <p className="mb-4 text-sm text-white/80">{product.description}</p>
+          {/* <p className="mb-4 text-sm text-white/80">{product.description}</p> */}
           <div className="flex items-center gap-2">
             <span className="text-lg font-medium text-white">
-              ${product.price}
+              {formatPrice(product.price)}
             </span>
             {product.originalPrice && (
               <span className="text-muted-foreground text-sm line-through">

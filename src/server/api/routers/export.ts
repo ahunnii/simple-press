@@ -1,3 +1,10 @@
+import { TRPCError } from "@trpc/server";
+import z from "zod";
+
+import {
+  exportToWooCommerceCSV,
+  generateExportFilename,
+} from "~/lib/wordpress/csv-exporter";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 function escapeXml(unsafe: string): string {
@@ -71,4 +78,124 @@ export const exportRouter = createTRPCRouter({
   //   const xml = buildWxr(clubNames);
   //   return { xml };
   // }),
+
+  // Get products available for export
+  getProductsForExport: protectedProcedure
+    .input(
+      z.object({
+        businessId: z.string(),
+        search: z.string().optional(),
+        publishedOnly: z.boolean().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Verify ownership
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { businessId: true },
+      });
+
+      if (user?.businessId !== input.businessId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Not authorized",
+        });
+      }
+
+      const products = await ctx.db.product.findMany({
+        where: {
+          businessId: input.businessId,
+          ...(input.search && {
+            OR: [
+              { name: { contains: input.search, mode: "insensitive" } },
+              { sku: { contains: input.search, mode: "insensitive" } },
+            ],
+          }),
+          ...(input.publishedOnly && { published: true }),
+        },
+        select: {
+          id: true,
+          name: true,
+          sku: true,
+          price: true,
+          published: true,
+          featured: true,
+          inventoryQty: true,
+          images: {
+            take: 1,
+            orderBy: { sortOrder: "asc" },
+          },
+          variants: {
+            select: { id: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return products.map((p) => ({
+        ...p,
+        variantCount: p.variants.length,
+      }));
+    }),
+
+  // Export selected products
+  exportProducts: protectedProcedure
+    .input(
+      z.object({
+        businessId: z.string(),
+        productIds: z.array(z.string()).min(1, "Select at least one product"),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify ownership
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { businessId: true },
+      });
+
+      if (user?.businessId !== input.businessId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Not authorized",
+        });
+      }
+
+      // Get products with all relations
+      const products = await ctx.db.product.findMany({
+        where: {
+          id: { in: input.productIds },
+          businessId: input.businessId,
+        },
+        include: {
+          images: {
+            orderBy: { sortOrder: "asc" },
+          },
+          variants: true,
+        },
+      });
+
+      if (products.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No products found",
+        });
+      }
+
+      // Generate CSV
+      const csv = exportToWooCommerceCSV(products);
+
+      // Get business name for filename
+      const business = await ctx.db.business.findUnique({
+        where: { id: input.businessId },
+        select: { name: true },
+      });
+
+      const filename = generateExportFilename(business?.name ?? "products");
+
+      return {
+        csv,
+        filename,
+        productCount: products.length,
+      };
+    }),
 });

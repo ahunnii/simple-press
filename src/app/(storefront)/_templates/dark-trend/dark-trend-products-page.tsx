@@ -61,7 +61,10 @@ export function DarkTrendProductsPage({
                   name: product.name,
                   description:
                     product.description ?? "No description available",
-                  price: product.variants[0]?.price ?? 0,
+                  price:
+                    product?.variants?.length > 0
+                      ? (product.variants[0]?.price ?? 0)
+                      : product.price,
                   originalPrice: null,
                   image: product.images[0]?.url ?? "",
                   badge: null,

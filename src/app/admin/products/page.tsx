@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Download, Plus, Upload } from "lucide-react";
 
 import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
@@ -30,12 +30,44 @@ export default async function ProductsPage() {
             <h1>Products</h1>
             <p>Manage your product catalog</p>
           </div>
+          {/* <Button variant="outline" asChild>
+            <Link href="/admin/products/import">
+              <Upload className="mr-2 h-4 w-4" />
+              Import from WooCommerce
+            </Link>
+          </Button>
           <Button asChild>
             <Link href="/admin/products/new">
               <Plus className="mr-2 h-4 w-4" />
               Add Product
             </Link>
-          </Button>
+          </Button> */}
+
+          <div className="flex gap-3">
+            {/* Export button */}
+            <Button variant="outline" asChild>
+              <Link href="/admin/products/export">
+                <Download className="mr-2 h-4 w-4" />
+                Export to WordPress
+              </Link>
+            </Button>
+
+            {/* Import button */}
+            <Button variant="outline" asChild>
+              <Link href="/admin/products/import">
+                <Upload className="mr-2 h-4 w-4" />
+                Import from WooCommerce
+              </Link>
+            </Button>
+
+            {/* Add product button */}
+            <Button asChild>
+              <Link href="/admin/products/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Product
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {products.length === 0 ? (

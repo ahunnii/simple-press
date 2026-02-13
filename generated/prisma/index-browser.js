@@ -449,6 +449,23 @@ exports.Prisma.PageScalarFieldEnum = {
   businessId: 'businessId'
 };
 
+exports.Prisma.ProductImportScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  filename: 'filename',
+  totalRows: 'totalRows',
+  status: 'status',
+  mappedData: 'mappedData',
+  errors: 'errors',
+  warnings: 'warnings',
+  importedCount: 'importedCount',
+  skippedCount: 'skippedCount',
+  errorCount: 'errorCount',
+  businessId: 'businessId',
+  createdById: 'createdById'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -511,7 +528,8 @@ exports.Prisma.ModelName = {
   PageView: 'PageView',
   DiscountCode: 'DiscountCode',
   InventoryHistory: 'InventoryHistory',
-  Page: 'Page'
+  Page: 'Page',
+  ProductImport: 'ProductImport'
 };
 
 /**

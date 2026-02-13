@@ -18,6 +18,10 @@ const config = {
         protocol: "https",
         hostname: "*.unsplash.com",
       },
+      {
+        protocol: "https",
+        hostname: "trendanomaly.com",
+      },
     ],
   },
 
