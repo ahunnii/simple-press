@@ -66,7 +66,7 @@ export function BrandingSettings({ business }: BrandingSettingsProps) {
     },
   });
 
-  const faviconUploader = useUploadFiles({
+  const faviconUploader = useUploadFile({
     api: "/api/upload",
     route: "favicon",
     onError: (error) => {
@@ -99,8 +99,10 @@ export function BrandingSettings({ business }: BrandingSettingsProps) {
     const faviconFile = data.faviconFile;
     if (faviconFile instanceof File) {
       try {
-        const { metadata } = await faviconUploader.upload([faviconFile]);
-        const fileLocation = (metadata?.pathName as string | undefined) ?? "";
+        const response = await faviconUploader.upload(faviconFile);
+        const fileLocation =
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          "";
         if (fileLocation) faviconUrl = fileLocation;
       } catch {
         toast.error("Failed to upload favicon.");
@@ -289,55 +291,6 @@ export function BrandingSettings({ business }: BrandingSettingsProps) {
                 inputRef={faviconFileInputRef}
               />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Homepage Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Homepage Content</CardTitle>
-            <CardDescription>
-              Hero section and about text for your homepage
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <InputFormField
-              form={form}
-              name="siteContent.heroTitle"
-              label="Hero Title"
-              placeholder="Welcome to Our Store"
-            />
-
-            <InputFormField
-              form={form}
-              name="siteContent.heroSubtitle"
-              label="Hero Subtitle"
-              placeholder="Discover amazing products"
-            />
-
-            <TextareaFormField
-              form={form}
-              name="siteContent.aboutText"
-              label="About Text"
-              placeholder="Tell customers about your business..."
-            />
-          </CardContent>
-        </Card>
-
-        {/* Footer */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Footer</CardTitle>
-            <CardDescription>Footer text for your store</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TextareaFormField
-              form={form}
-              name="siteContent.footerText"
-              label="Footer Text"
-              placeholder="© 2024 Your Store. All rights reserved."
-              rows={3}
-            />
           </CardContent>
         </Card>
       </form>

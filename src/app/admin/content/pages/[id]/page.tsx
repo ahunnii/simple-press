@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
+import { api } from "~/trpc/server";
 
 import { PageEditor } from "../../_components/page-editor";
 
@@ -14,26 +15,19 @@ export default async function EditPagePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) redirect("/auth/sign-in");
+  const business = await api.business.get();
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      businessId: true,
-      business: { select: { id: true, name: true } },
-    },
-  });
-
-  if (!user?.business) redirect("/admin/welcome");
-
-  const page = await db.page.findUnique({
-    where: { id },
-  });
-
-  if (!page || page?.businessId !== user.business.id) {
+  if (!business) {
     notFound();
   }
 
-  return <PageEditor business={user.business} page={page as any} />;
+  const page = await api.content.getPage({
+    id,
+  });
+
+  if (!page) {
+    notFound();
+  }
+
+  return <PageEditor business={business} page={page} />;
 }

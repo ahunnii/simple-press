@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 // Validation schemas
 const siteContentSchema = z.object({
@@ -206,7 +206,7 @@ export const contentRouter = createTRPCRouter({
     }),
 
   // Get page by slug (for storefront)
-  getPageBySlug: protectedProcedure
+  getPageBySlug: publicProcedure
     .input(
       z.object({
         businessId: z.string(),

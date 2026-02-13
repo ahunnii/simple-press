@@ -54,6 +54,12 @@ export function DarkTrendHeader({ business }: Props) {
   const { itemCount, total } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const links =
+    (business?.siteContent?.navigationItems as {
+      label: string;
+      href: string;
+    }[]) ?? NAV_LINKS;
+
   const authActions = (
     <>
       <Button variant="ghost" size="sm" asChild>
@@ -114,7 +120,7 @@ export function DarkTrendHeader({ business }: Props) {
         {/* Center nav - hidden on small screens */}
         <div className="hidden flex-1 justify-center md:flex">
           <ul className="flex items-center gap-8">
-            {NAV_LINKS.map(({ href, label }) => {
+            {links.map(({ href, label }) => {
               const isActive =
                 href === "/"
                   ? pathname === "/"

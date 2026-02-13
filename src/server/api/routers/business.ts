@@ -28,6 +28,7 @@ export const businessRouter = createTRPCRouter({
       },
       select: {
         name: true,
+
         templateId: true,
         businessAddress: true,
         supportEmail: true,
