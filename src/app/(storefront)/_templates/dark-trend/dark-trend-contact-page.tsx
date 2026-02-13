@@ -5,6 +5,7 @@ import { Mail, MapPin } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { getThemeFields } from "~/lib/template-fields";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,10 +23,23 @@ export function DarkTrendContactPage({
   business: NonNullable<RouterOutputs["business"]["get"]>;
 }) {
   // Default values - can be customized in theme settings later
-  const contactImage = "/placeholder.svg";
-  const physicalAddress = "Detroit, MI";
-  const contactEmail = "support@trendanomaly.com";
 
+  const physicalAddress = "Detroit, MI";
+  const contactEmail = business?.supportEmail ?? "";
+
+  const themeSpecificFields = getThemeFields(
+    "dark-trend",
+    business?.siteContent?.customFields as unknown,
+  );
+
+  const contactHeader =
+    themeSpecificFields["dark-trend.contact.header"] ?? "Contact Us";
+  const contactSubheader =
+    themeSpecificFields["dark-trend.contact.subheader"] ?? "Contact Us";
+  const contactDescription =
+    themeSpecificFields["dark-trend.contact.description"] ?? "Contact Us";
+  const contactImage =
+    themeSpecificFields["dark-trend.contact.image"] ?? "/placeholder.svg";
   return (
     <main className="flex-1 bg-[#1A1A1A] px-4 py-12">
       <div className="mx-auto max-w-7xl">
@@ -58,7 +72,7 @@ export function DarkTrendContactPage({
         {/* Info Cards */}
         <div className="mb-20 grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Physical Address */}
-          <div className="flex flex-col items-center rounded-sm bg-zinc-900/30 p-12 text-center">
+          <div className="flex flex-col items-center rounded-sm bg-[#1f1f1f] p-12 text-center">
             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/20">
               <MapPin className="h-8 w-8 text-white" />
             </div>
@@ -69,7 +83,7 @@ export function DarkTrendContactPage({
           </div>
 
           {/* Email Address */}
-          <div className="flex flex-col items-center rounded-sm bg-zinc-900/30 p-12 text-center">
+          <div className="flex flex-col items-center rounded-sm bg-[#1f1f1f] p-12 text-center">
             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/20">
               <Mail className="h-8 w-8 text-white" />
             </div>
@@ -98,16 +112,12 @@ export function DarkTrendContactPage({
             <div className="space-y-6">
               <div>
                 <span className="text-sm font-semibold tracking-wider text-purple-500 uppercase">
-                  Get In Touch
+                  {contactSubheader}
                 </span>
                 <h2 className="mt-2 text-3xl font-bold text-white md:text-5xl">
-                  Heya, let&apos;s talk
+                  {contactHeader}
                 </h2>
-                <p className="mt-4 text-white/70">
-                  Have any questions about products? Want to see what we are
-                  working on now? Hit us up and we will respond as soon as we
-                  can!
-                </p>
+                <p className="mt-4 text-white/70">{contactDescription}</p>
               </div>
 
               <DarkTrendContactForm businessName={business.name} />

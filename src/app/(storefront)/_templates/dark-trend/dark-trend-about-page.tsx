@@ -1,5 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+
+import type { RouterOutputs } from "~/trpc/react";
+import { getThemeFields } from "~/lib/template-fields";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,9 +12,6 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 import { Button } from "~/components/ui/button";
-
-import type { RouterOutputs } from "~/trpc/react";
-import { getThemeFields } from "~/lib/template-fields";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["get"]>;
@@ -24,9 +24,42 @@ export async function DarkTrendAboutPage({ business }: Props) {
   );
 
   const aboutImage1 =
-    themeSpecificFields["dark-trend.about-image-1"] ?? "/placeholder.svg";
+    themeSpecificFields["dark-trend.about.first-image"] ?? "/placeholder.svg";
   const aboutImage2 =
-    themeSpecificFields["dark-trend.about-image-2"] ?? "/placeholder.svg";
+    themeSpecificFields["dark-trend.about.second-image"] ?? "/placeholder.svg";
+
+  const aboutHeader =
+    themeSpecificFields["dark-trend.about.header"] ?? "About Us";
+  const aboutSubheader =
+    themeSpecificFields["dark-trend.about.subheader"] ?? "About Us";
+  const aboutButton =
+    themeSpecificFields["dark-trend.about.button"] ?? "Contact Us";
+  const aboutButtonLink =
+    themeSpecificFields["dark-trend.about.button-link"] ?? "/contact";
+  const aboutCtaHeader =
+    themeSpecificFields["dark-trend.about.cta-header"] ?? "Contact Us";
+  const aboutCtaDescription =
+    themeSpecificFields["dark-trend.about.cta-description"] ?? "Contact Us";
+  const aboutCtaButtonText =
+    themeSpecificFields["dark-trend.about.cta-button-text"] ?? "Contact Us";
+  const aboutCtaButtonLink =
+    themeSpecificFields["dark-trend.about.cta-button-link"] ?? "/contact";
+
+  const aboutFeature1Header =
+    themeSpecificFields["dark-trend.about.feature-1-header"] ?? "Feature 1";
+  const aboutFeature1Description =
+    themeSpecificFields["dark-trend.about.feature-1-description"] ??
+    "Feature 1 Description";
+  const aboutFeature2Header =
+    themeSpecificFields["dark-trend.about.feature-2-header"] ?? "Feature 2";
+  const aboutFeature2Description =
+    themeSpecificFields["dark-trend.about.feature-2-description"] ??
+    "Feature 2 Description";
+  const aboutFeature3Header =
+    themeSpecificFields["dark-trend.about.feature-3-header"] ?? "Feature 3";
+  const aboutFeature3Description =
+    themeSpecificFields["dark-trend.about.feature-3-description"] ??
+    "Feature 3 Description";
 
   return (
     <main className="flex-1 bg-[#1A1A1A] px-4 py-12">
@@ -36,7 +69,10 @@ export async function DarkTrendAboutPage({ business }: Props) {
           <Breadcrumb className="mx-auto w-full">
             <BreadcrumbList className="mx-auto w-full justify-center text-center">
               <BreadcrumbItem>
-                <BreadcrumbLink href="/" className="text-white/80 hover:text-white">
+                <BreadcrumbLink
+                  href="/"
+                  className="text-white/80 hover:text-white"
+                >
                   Home
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -72,10 +108,10 @@ export async function DarkTrendAboutPage({ business }: Props) {
             <div className="space-y-8">
               <div>
                 <span className="text-sm font-semibold tracking-wider text-purple-500 uppercase">
-                  Our Key Features
+                  {aboutSubheader}
                 </span>
                 <h2 className="mt-2 text-3xl font-bold text-white md:text-5xl">
-                  What Are We About? Let&apos;s Break It Down
+                  {aboutHeader}
                 </h2>
               </div>
 
@@ -83,43 +119,43 @@ export async function DarkTrendAboutPage({ business }: Props) {
               <div className="space-y-6">
                 <div className="flex gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-purple-500/20">
-                    <span className="text-xl font-bold text-purple-500">#1</span>
+                    <span className="text-xl font-bold text-purple-500">
+                      #1
+                    </span>
                   </div>
                   <div>
                     <h3 className="mb-2 text-xl font-semibold text-white">
-                      Our Mission
+                      {aboutFeature1Header}
                     </h3>
-                    <p className="text-white/70">
-                      Creating alternative clothing that celebrates individuality and empowers Black, LGBTQ+, and POC communities to express their unique identities.
-                    </p>
+                    <p className="text-white/70">{aboutFeature1Description}</p>
                   </div>
                 </div>
 
                 <div className="flex gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-purple-500/20">
-                    <span className="text-xl font-bold text-purple-500">#2</span>
+                    <span className="text-xl font-bold text-purple-500">
+                      #2
+                    </span>
                   </div>
                   <div>
                     <h3 className="mb-2 text-xl font-semibold text-white">
-                      Our Values
+                      {aboutFeature2Header}
                     </h3>
-                    <p className="text-white/70">
-                      We value diversity, creativity, and community, ensuring our designs resonate with underrepresented voices and foster a safe, inclusive shopping environment for everyone.
-                    </p>
+                    <p className="text-white/70">{aboutFeature2Description}</p>
                   </div>
                 </div>
 
                 <div className="flex gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-purple-500/20">
-                    <span className="text-xl font-bold text-purple-500">#3</span>
+                    <span className="text-xl font-bold text-purple-500">
+                      #3
+                    </span>
                   </div>
                   <div>
                     <h3 className="mb-2 text-xl font-semibold text-white">
-                      Why Us?
+                      {aboutFeature3Header}
                     </h3>
-                    <p className="text-white/70">
-                      We don&apos;t just make you look beautiful, handsome, and gear to show off, we&apos;ll make you feel like the coolest!
-                    </p>
+                    <p className="text-white/70">{aboutFeature3Description}</p>
                   </div>
                 </div>
               </div>
@@ -128,7 +164,7 @@ export async function DarkTrendAboutPage({ business }: Props) {
                 asChild
                 className="bg-violet-500 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-600"
               >
-                <Link href="/contact">Contact Us</Link>
+                <Link href={aboutButtonLink}>{aboutButton}</Link>
               </Button>
             </div>
           </div>
@@ -140,16 +176,14 @@ export async function DarkTrendAboutPage({ business }: Props) {
             {/* Content */}
             <div className="space-y-6">
               <h2 className="text-4xl font-bold text-white md:text-6xl">
-                NEED CUSTOM?
+                {aboutCtaHeader}
               </h2>
-              <p className="text-lg text-white/70">
-                Have something you want embroidered? Maybe you need some alterations done? We can help!
-              </p>
+              <p className="text-lg text-white/70">{aboutCtaDescription}</p>
               <Button
                 asChild
                 className="bg-violet-500 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-600"
               >
-                <Link href="/contact">Learn More</Link>
+                <Link href={aboutCtaButtonLink}>{aboutCtaButtonText}</Link>
               </Button>
             </div>
 
