@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 
 import { api, HydrateClient } from "~/trpc/server";
-import { CartProvider } from "~/providers/cart-context";
 
 import { DarkTrendLayout } from "./_templates/dark-trend/dark-trend-layout";
 import { DefaultLayout } from "./_templates/default/default-layout";
@@ -15,9 +14,7 @@ type Props = {
 export default async function StorefrontLayout({ children }: Props) {
   const business = await api.business.simplifiedGet();
 
-  if (!business) {
-    notFound();
-  }
+  if (!business) notFound();
 
   const TemplateLayout =
     {

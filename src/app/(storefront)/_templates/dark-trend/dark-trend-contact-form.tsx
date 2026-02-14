@@ -21,11 +21,11 @@ const contactSchema = z.object({
 
 type ContactFormValues = z.infer<typeof contactSchema>;
 
-export function DarkTrendContactForm({
-  businessName: _businessName,
-}: {
+type Props = {
   businessName: string;
-}) {
+};
+
+export function DarkTrendContactForm({ businessName: _businessName }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);

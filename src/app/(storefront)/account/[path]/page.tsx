@@ -1,11 +1,9 @@
 import { notFound } from "next/navigation";
-import { AccountView, UpdateAvatarCard } from "@daveyplate/better-auth-ui";
+import { AccountView } from "@daveyplate/better-auth-ui";
 import { accountViewPaths } from "@daveyplate/better-auth-ui/server";
 
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
-
-import { StorefrontFooter } from "../../_components/storefront-footer";
-import { StorefrontHeader } from "../../_components/storefront-header";
 
 export const dynamicParams = false;
 
@@ -13,23 +11,24 @@ export function generateStaticParams() {
   return Object.values(accountViewPaths).map((path) => ({ path }));
 }
 
-export default async function AccountPage({
-  params,
-}: {
+type Props = {
   params: Promise<{ path: string }>;
-}) {
+};
+
+export default async function AccountPage({ params }: Props) {
   const { path } = await params;
   const business = await api.business.get();
 
-  if (!business) {
-    notFound();
-  }
+  if (!business) notFound();
+
+  const templateStyle =
+    {
+      "dark-trend": "bg-[#424242]",
+    }[business.templateId] ?? "";
 
   return (
-    <main className="container p-4 md:p-6">
-      <StorefrontHeader business={business} />
-      <AccountView path={path} className="pt-36" />
-      <StorefrontFooter business={business} />
-    </main>
+    <div className={cn("py-20", templateStyle)}>
+      <AccountView path={path} className="mx-auto max-w-7xl" classNames={{}} />
+    </div>
   );
 }

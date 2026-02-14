@@ -20,7 +20,7 @@ type CartContentsProps = {
   business: Business;
 };
 
-export function CartContents({ business }: CartContentsProps) {
+export function DefaultCartContents({ business }: CartContentsProps) {
   const router = useRouter();
   const {
     items,

@@ -1,4 +1,3 @@
-// app/(storefront)/checkout/_components/checkout-form.tsx
 "use client";
 
 import { useState } from "react";
@@ -6,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CreditCard, Loader2 } from "lucide-react";
 
+import { formatPrice } from "~/lib/prices";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -23,11 +23,11 @@ type Business = {
   } | null;
 };
 
-type CheckoutFormProps = {
+type Props = {
   business: Business;
 };
 
-export function DarkTrendCheckoutForm({ business }: CheckoutFormProps) {
+export function DarkTrendCheckoutForm({ business }: Props) {
   const { items, total } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,13 +46,6 @@ export function DarkTrendCheckoutForm({ business }: CheckoutFormProps) {
   const subtotal = total;
   const discountAmount = appliedDiscount?.discountAmount ?? 0;
   const finalTotal = subtotal - discountAmount;
-
-  const formatPrice = (cents: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(cents / 100);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +66,6 @@ export function DarkTrendCheckoutForm({ business }: CheckoutFormProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // businessId: business.id, ← REMOVED!
           items,
           customerInfo: {
             email,
@@ -121,7 +113,10 @@ export function DarkTrendCheckoutForm({ business }: CheckoutFormProps) {
     return (
       <div className="py-16 text-center">
         <p className="mb-4 text-white/70">Your cart is empty</p>
-        <Button asChild className="bg-violet-500 text-white hover:bg-violet-600">
+        <Button
+          asChild
+          className="bg-violet-500 text-white hover:bg-violet-600"
+        >
           <Link href="/shop">Continue Shopping</Link>
         </Button>
       </div>
@@ -265,8 +260,13 @@ export function DarkTrendCheckoutForm({ business }: CheckoutFormProps) {
               </div>
 
               {error && (
-                <Alert variant="destructive" className="border-red-500/50 bg-red-500/10">
-                  <AlertDescription className="text-red-400">{error}</AlertDescription>
+                <Alert
+                  variant="destructive"
+                  className="border-red-500/50 bg-red-500/10"
+                >
+                  <AlertDescription className="text-red-400">
+                    {error}
+                  </AlertDescription>
                 </Alert>
               )}
 

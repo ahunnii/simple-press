@@ -11,7 +11,7 @@ export function DarkTrendLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen bg-zinc-950 font-sans antialiased text-white">
+    <main className="min-h-screen bg-[#1A1A1A] font-sans text-white antialiased">
       <DarkTrendHeader business={business} />
       {children}
       <DarkTrendFooter business={business} />

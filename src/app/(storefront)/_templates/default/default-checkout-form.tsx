@@ -14,7 +14,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
 
-import { DiscountInput } from "./discount-input";
+import { DiscountDiscountInput } from "./default-discount-input";
 
 type Business = {
   id: string;
@@ -28,7 +28,7 @@ type CheckoutFormProps = {
   business: Business;
 };
 
-export function CheckoutForm({ business }: CheckoutFormProps) {
+export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
   const router = useRouter();
   const { items, total, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -235,7 +235,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
 
               {/* Discount Code Input */}
               <div className="pt-4">
-                <DiscountInput
+                <DiscountDiscountInput
                   businessId={business.id}
                   cartTotal={subtotal}
                   onDiscountApplied={setAppliedDiscount}

@@ -1,22 +1,72 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { UserButton } from "@daveyplate/better-auth-ui";
+import { IconLayoutDashboard } from "@tabler/icons-react";
 import { Menu, ShoppingBag, X } from "lucide-react";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
+import { authClient } from "~/server/better-auth/client";
+import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
-type Business = {
-  name: string;
-  siteContent: {
-    logoUrl: string | null;
-  } | null;
+type Props = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 
-export function ModernHeader({ business }: { business: Business }) {
+const NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/shop", label: "Shop" },
+  { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact" },
+] as const;
+
+export function ModernHeader({ business }: Props) {
   const { itemCount } = useCart();
+  const { data: session, isPending } = authClient.useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const links =
+    (business?.siteContent?.navigationItems as {
+      label: string;
+      href: string;
+    }[]) ?? NAV_LINKS;
+
+  const authActions = (
+    <>
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/auth/sign-in">Log in</Link>
+      </Button>
+    </>
+  );
+
+  const userMenu = session?.user && (
+    <UserButton
+      size="icon"
+      classNames={{
+        trigger: {
+          base: "border-primary border",
+          avatar: {
+            base: "size-10",
+          },
+        },
+      }}
+      additionalLinks={[
+        ...(session?.user?.role === "ADMIN" || session?.user?.role === "OWNER"
+          ? [
+              {
+                icon: <IconLayoutDashboard className="h-4 w-4" />,
+                label: "Admin",
+                href: "/admin",
+              },
+            ]
+          : []),
+      ]}
+    />
+  );
 
   return (
     <header className="bg-background/95 supports-backdrop-filter:bg-background/80 border-border sticky top-0 z-50 border-b backdrop-blur">
@@ -26,10 +76,12 @@ export function ModernHeader({ business }: { business: Business }) {
           className="text-foreground text-xl font-semibold tracking-tight"
         >
           {business.siteContent?.logoUrl ? (
-            <img
+            <Image
               src={business.siteContent.logoUrl}
               alt={business.name}
-              className="h-8 w-auto"
+              width={50}
+              height={50}
+              className="bg-primary rounded-full"
             />
           ) : (
             <span className="text-xl font-bold text-gray-900">
@@ -40,24 +92,17 @@ export function ModernHeader({ business }: { business: Business }) {
 
         {/* Desktop navigation */}
         <div className="hidden items-center gap-8 md:flex">
-          <Link
-            href="/"
-            className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
-          >
-            Home
-          </Link>
-          <Link
-            href="/shop"
-            className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
-          >
-            Shop
-          </Link>
-          <Link
-            href="/about"
-            className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
-          >
-            About
-          </Link>
+          {links.map(({ href, label }) => {
+            return (
+              <Link
+                key={href + label}
+                href={href}
+                className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
+              >
+                {label}
+              </Link>
+            );
+          })}
         </div>
 
         <div className="flex items-center gap-4">
@@ -73,6 +118,14 @@ export function ModernHeader({ business }: { business: Business }) {
               </span>
             )}
           </Link>
+
+          {isPending ? (
+            <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+          ) : session?.user ? (
+            userMenu
+          ) : (
+            authActions
+          )}
 
           {/* Mobile menu toggle */}
           <button
@@ -98,27 +151,18 @@ export function ModernHeader({ business }: { business: Business }) {
         )}
       >
         <div className="flex flex-col gap-4 px-6 py-4">
-          <Link
-            href="/"
-            className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            href="/products"
-            className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Shop
-          </Link>
-          <Link
-            href="/about"
-            className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            About
-          </Link>
+          {links.map(({ href, label }) => {
+            return (
+              <Link
+                key={href + label}
+                href={href}
+                className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {label}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </header>

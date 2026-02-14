@@ -7,16 +7,10 @@ import { DefaultProductsPage } from "../_templates/default/default-products-page
 import { ElegantShopPage } from "../_templates/elegant/elegant-shop-page";
 import { ModernProductsPage } from "../_templates/modern/modern-products-page";
 
-export const metadata = {
-  title: "Shop",
-};
-
 export default async function ProductsPage() {
   const business = await api.business.getWithProducts();
 
-  if (!business) {
-    notFound();
-  }
+  if (!business) notFound();
 
   const TemplateComponent =
     {
@@ -27,3 +21,7 @@ export default async function ProductsPage() {
 
   return <TemplateComponent business={business} />;
 }
+
+export const metadata = {
+  title: "Shop",
+};

@@ -9,20 +9,16 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useCart } from "~/providers/cart-context";
 
-type Business = {
-  id: string;
-  siteContent: {
-    primaryColor: string | null;
-  } | null;
+type Props = {
+  business: {
+    id: string;
+    siteContent: {
+      primaryColor: string | null;
+    } | null;
+  };
 };
 
-type CartContentsProps = {
-  business: Business;
-};
-
-export function DarkTrendCartContents({
-  business: _business,
-}: CartContentsProps) {
+export function DarkTrendCartContents({ business: _business }: Props) {
   const router = useRouter();
   const {
     items,
@@ -31,7 +27,6 @@ export function DarkTrendCartContents({
     removeItem,
     updateQuantity,
     total,
-    clearCart,
   } = useCart();
 
   const formatPrice = (cents: number) => {

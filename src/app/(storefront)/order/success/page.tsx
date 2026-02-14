@@ -6,12 +6,9 @@ import { DarkTrendOrderSuccessPage } from "../../_templates/dark-trend/dark-tren
 import { DefaultOrderSuccessPage } from "../../_templates/default/default-order-success-page";
 
 export default async function OrderSuccessPage() {
-  // Find business
   const business = await api.business.get();
 
-  if (!business) {
-    notFound();
-  }
+  if (!business) notFound();
 
   const TemplateComponent =
     {
@@ -20,3 +17,7 @@ export default async function OrderSuccessPage() {
 
   return <TemplateComponent business={business} />;
 }
+
+export const metadata = {
+  title: "Order Details",
+};

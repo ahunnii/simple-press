@@ -20,7 +20,7 @@ type DiscountInputProps = {
   ) => void;
 };
 
-export function DiscountInput({
+export function DiscountDiscountInput({
   businessId,
   cartTotal,
   onDiscountApplied,

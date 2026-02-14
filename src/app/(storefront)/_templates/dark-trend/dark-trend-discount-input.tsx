@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 
-type DiscountInputProps = {
+type Props = {
   businessId: string;
   cartTotal: number;
   onDiscountApplied: (
@@ -24,7 +24,7 @@ export function DarkTrendDiscountInput({
   businessId,
   cartTotal,
   onDiscountApplied,
-}: DiscountInputProps) {
+}: Props) {
   const [code, setCode] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,40 +67,6 @@ export function DarkTrendDiscountInput({
       businessId,
       cartTotal,
     });
-
-    // try {
-    //   const response = await fetch("/api/discounts/validate", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({
-    //       code: code.trim().toUpperCase(),
-    //       businessId,
-    //       cartTotal,
-    //     }),
-    //   });
-
-    //   const data = await response.json();
-
-    //   if (!data.valid) {
-    //     setError(data.error || "Invalid discount code");
-    //     return;
-    //   }
-
-    //   // Apply discount
-    //   const discount = {
-    //     id: data.discount.id,
-    //     code: data.discount.code,
-    //     discountAmount: data.discount.discountAmount,
-    //   };
-
-    //   setAppliedDiscount(discount);
-    //   onDiscountApplied(discount);
-    //   setCode("");
-    // } catch (err: any) {
-    //   setError("Failed to validate discount code");
-    // } finally {
-    //   setIsValidating(false);
-    // }
   };
 
   const handleRemove = () => {
@@ -174,8 +140,13 @@ export function DarkTrendDiscountInput({
       </div>
 
       {error && (
-        <Alert variant="destructive" className="border-red-500/50 bg-red-500/10">
-          <AlertDescription className="text-sm text-red-400">{error}</AlertDescription>
+        <Alert
+          variant="destructive"
+          className="border-red-500/50 bg-red-500/10"
+        >
+          <AlertDescription className="text-sm text-red-400">
+            {error}
+          </AlertDescription>
         </Alert>
       )}
     </div>

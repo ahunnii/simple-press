@@ -6,13 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard } from "@tabler/icons-react";
-import {
-  LayoutDashboardIcon,
-  Menu,
-  Search,
-  ShoppingBag,
-  X,
-} from "lucide-react";
+import { Menu, ShoppingBag, X } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { formatPrice } from "~/lib/prices";

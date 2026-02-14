@@ -309,7 +309,7 @@ import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import { useCart } from "~/providers/cart-context";
 
-import { DefaultVariantSelector } from "../../_templates/default/default-variant-selector";
+import { DefaultVariantSelector } from "./default-variant-selector";
 
 const UNLIMITED_STOCK = 999;
 
@@ -343,7 +343,10 @@ type ProductDetailsProps = {
   business: Business;
 };
 
-export function ProductDetails({ product, business }: ProductDetailsProps) {
+export function DefaultProductDetails({
+  product,
+  business,
+}: ProductDetailsProps) {
   // const { addItem, getItemQuantity, isHydrated } = useCart();
   // const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
   //   product.variants[0]?.id ?? null,

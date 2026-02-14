@@ -2,7 +2,7 @@ import type { RouterOutputs } from "~/trpc/react";
 
 import { StorefrontFooter } from "../../_components/storefront-footer";
 import { StorefrontHeader } from "../../_components/storefront-header";
-import { CheckoutForm } from "../../checkout/_components/checkout-form";
+import { DefaultCheckoutForm } from "./default-checkout-form";
 
 export async function DefaultCheckoutPage({
   business,
@@ -30,7 +30,7 @@ export async function DefaultCheckoutPage({
     <main className="px-4 py-12">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-8 text-3xl font-bold text-gray-900">Checkout</h1>
-        <CheckoutForm business={business} />
+        <DefaultCheckoutForm business={business} />
       </div>
     </main>
   );

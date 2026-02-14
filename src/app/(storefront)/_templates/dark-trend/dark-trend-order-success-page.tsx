@@ -10,7 +10,7 @@ export function DarkTrendOrderSuccessPage({
   business: NonNullable<RouterOutputs["business"]["get"]>;
 }) {
   return (
-    <main className="flex-1 bg-[#1A1A1A] px-4 py-12">
+    <div className="flex min-h-[75vh] flex-1 items-center justify-center bg-[#1A1A1A] px-4 py-12">
       <Suspense
         fallback={
           <div className="mx-auto max-w-2xl text-center">
@@ -20,6 +20,6 @@ export function DarkTrendOrderSuccessPage({
       >
         <DarkTrendOrderConfirmation business={business} />
       </Suspense>
-    </main>
+    </div>
   );
 }

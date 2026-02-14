@@ -2,6 +2,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { checkBusiness } from "~/lib/check-business";
 import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
@@ -167,6 +168,40 @@ export const contentRouter = createTRPCRouter({
         where: {
           businessId: input.businessId,
           ...(input.type && input.type !== "all" ? { type: input.type } : {}),
+        },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      });
+
+      return pages;
+    }),
+
+  getSimplifiedPages: publicProcedure
+    .input(
+      z.object({
+        businessId: z.string(),
+        type: z.enum(["page", "policy", "custom", "all"]).optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      const pages = await ctx.db.page.findMany({
+        where: {
+          businessId: input.businessId,
+          ...(input.type && input.type !== "all" ? { type: input.type } : {}),
+          published: true,
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
         },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       });

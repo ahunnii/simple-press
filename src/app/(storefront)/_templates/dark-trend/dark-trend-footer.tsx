@@ -1,16 +1,20 @@
+import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import type { FooterBusiness } from "../../_components/storefront-footer";
 import type { RouterOutputs } from "~/trpc/react";
-import { Separator } from "~/components/ui/separator";
+import { api } from "~/trpc/server";
 
-export function DarkTrendFooter({
-  business,
-}: {
+type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-}) {
+};
+export async function DarkTrendFooter({ business }: Props) {
   const currentYear = new Date().getFullYear();
+
+  const policies = await api.content.getSimplifiedPages({
+    businessId: business.id,
+    type: "policy",
+  });
 
   const socialLinks = business?.siteContent?.socialLinks as
     | {
@@ -66,7 +70,7 @@ export function DarkTrendFooter({
               </li>
               <li>
                 <Link
-                  href="/about"
+                  href="/contact"
                   className="text-sm text-white/70 transition-colors hover:text-white"
                 >
                   Contact
@@ -225,23 +229,19 @@ export function DarkTrendFooter({
         </p>
 
         <div className="flex items-center gap-4">
-          <p className="text-sm text-white/60">
-            <Link
-              href="/terms"
-              className="underline transition-colors hover:text-white"
-            >
-              Terms & Conditions
-            </Link>
-          </p>
-          <span className="text-white/60"> | </span>
-          <p className="text-sm text-white/60">
-            <Link
-              href="/privacy"
-              className="underline transition-colors hover:text-white"
-            >
-              Privacy Policy
-            </Link>
-          </p>
+          {policies?.map((policy, idx) => (
+            <Fragment key={policy.id || idx}>
+              {!!idx && <span className="text-white/60"> | </span>}
+              <p className="inline text-sm text-white/60">
+                <Link
+                  href={policy.slug}
+                  className="underline transition-colors hover:text-white"
+                >
+                  {policy.title}
+                </Link>
+              </p>
+            </Fragment>
+          ))}
         </div>
       </div>
     </footer>

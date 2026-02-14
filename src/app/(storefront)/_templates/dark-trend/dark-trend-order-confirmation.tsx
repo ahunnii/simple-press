@@ -8,21 +8,17 @@ import { CheckCircle, Package } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
-type Business = {
-  id: string;
-  name: string;
-  siteContent: {
-    primaryColor: string | null;
-  } | null;
+type Props = {
+  business: {
+    id: string;
+    name: string;
+    siteContent: {
+      primaryColor: string | null;
+    } | null;
+  };
 };
 
-type OrderConfirmationProps = {
-  business: Business;
-};
-
-export function DarkTrendOrderConfirmation({
-  business,
-}: OrderConfirmationProps) {
+export function DarkTrendOrderConfirmation({ business }: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const [orderDetails, setOrderDetails] = useState<{
@@ -82,7 +78,10 @@ export function DarkTrendOrderConfirmation({
     return (
       <div className="mx-auto max-w-2xl text-center">
         <p className="mb-4 text-white/70">No order found</p>
-        <Button asChild className="bg-violet-500 text-white hover:bg-violet-600">
+        <Button
+          asChild
+          className="bg-violet-500 text-white hover:bg-violet-600"
+        >
           <Link href="/shop">Continue Shopping</Link>
         </Button>
       </div>

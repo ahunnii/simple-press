@@ -9,9 +9,7 @@ import { ModernAboutPage } from "../_templates/modern/modern-about-page";
 export default async function AboutPage() {
   const business = await api.business.get({ includeProducts: true });
 
-  if (!business) {
-    notFound();
-  }
+  if (!business) notFound();
 
   const TemplateComponent =
     {
@@ -21,3 +19,7 @@ export default async function AboutPage() {
 
   return <TemplateComponent business={business} />;
 }
+
+export const metadata = {
+  title: "About",
+};

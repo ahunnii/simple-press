@@ -7,12 +7,9 @@ import { DefaultCartPage } from "../_templates/default/default-cart-page";
 import ModernCartPage from "../_templates/modern/modern-cart-page";
 
 export default async function CartPage() {
-  // Find business
   const business = await api.business.get();
 
-  if (!business) {
-    notFound();
-  }
+  if (!business) notFound();
 
   const TemplateComponent =
     {
@@ -22,3 +19,7 @@ export default async function CartPage() {
 
   return <TemplateComponent business={business} />;
 }
+
+export const metadata = {
+  title: "Cart",
+};

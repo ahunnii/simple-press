@@ -8,30 +8,15 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
 
-type VariantSelectorProps = {
-  // product: {
-  //   id: string;
-  //   name: string;
-  //   price: number;
-  //   images: Array<{ url: string }>;
-  //   variants: Array<{
-  //     id: string;
-  //     name: string;
-  //     price: number | null;
-  //     inventoryQty: number;
-  //     sku: string | null;
-  //     options: Record<string, string>;
-  //   }>;
-  // };
+type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
-
   setSelectedVariantId: (variantId: string | null) => void;
 };
 
 export function DarkTrendVariantSelector({
   product,
   setSelectedVariantId,
-}: VariantSelectorProps) {
+}: Props) {
   const { addItem } = useCart();
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
@@ -115,21 +100,6 @@ export function DarkTrendVariantSelector({
               {quantity}
             </span>
 
-            {/* <Input
-              type="number"
-              min="1"
-              max={selectedVariant.inventoryQty}
-              value={quantity}
-              onChange={(e) => {
-                const val = parseInt(e.target.value);
-                if (!isNaN(val)) {
-                  setQuantity(
-                    Math.min(selectedVariant.inventoryQty, Math.max(1, val)),
-                  );
-                }
-              }}
-              className="w-20 rounded border px-2 py-1 text-center"
-            /> */}
             <Button
               variant="outline"
               onClick={() =>
@@ -150,16 +120,13 @@ export function DarkTrendVariantSelector({
       )}
 
       {/* Add to Cart */}
-
       <div className="mb-10 flex flex-col gap-4 sm:flex-row">
         <button
           type="button"
           onClick={handleAddToCart}
           disabled={!selectedVariant || selectedVariant.inventoryQty === 0}
           className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
-            isAdded
-              ? "bg-violet-600"
-              : "bg-violet-500 hover:bg-violet-600"
+            isAdded ? "bg-violet-600" : "bg-violet-500 hover:bg-violet-600"
           } ${!selectedVariant || selectedVariant.inventoryQty === 0 ? "cursor-not-allowed opacity-50" : ""}`}
         >
           {isAdded ? (
@@ -171,21 +138,7 @@ export function DarkTrendVariantSelector({
             `Add ${quantity} to Cart`
           )}
         </button>
-        {/* <button
-          type="button"
-          className="border-foreground/20 text-foreground boty-transition hover:bg-foreground/5 inline-flex flex-1 items-center justify-center gap-2 rounded-full border bg-transparent px-8 py-4 text-sm tracking-wide"
-        >
-          Buy Now
-        </button> */}
       </div>
-
-      {/* <Button
-        onClick={handleAddToCart}
-        disabled={!selectedVariant || selectedVariant.inventoryQty === 0}
-        className="w-full"
-      >
-        Add {quantity} to Cart
-      </Button> */}
     </div>
   );
 }

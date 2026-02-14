@@ -27,6 +27,7 @@ export const businessRouter = createTRPCRouter({
         status: "active",
       },
       select: {
+        id: true,
         name: true,
 
         templateId: true,
