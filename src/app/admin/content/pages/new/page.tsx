@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
+import { HydrateClient } from "~/trpc/server";
 
 import { PageEditor } from "../../_components/page-editor";
 
@@ -17,5 +18,9 @@ export default async function NewPagePage() {
 
   if (!user?.business) redirect("/admin/welcome");
 
-  return <PageEditor business={user.business} />;
+  return (
+    <HydrateClient>
+      <PageEditor business={user.business} />
+    </HydrateClient>
+  );
 }

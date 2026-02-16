@@ -4,6 +4,7 @@ import { api } from "~/trpc/server";
 
 import { DarkTrendGenericPage } from "../_templates/dark-trend/dark-trend-generic-page";
 import { DefaultGenericPage } from "../_templates/default/default-generic-page";
+import { PollenGenericPage } from "../_templates/pollen/pollen-generic-page";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -25,9 +26,10 @@ export default async function PageView({ params }: Props) {
   const TemplateComponent =
     {
       "dark-trend": DarkTrendGenericPage,
+      pollen: PollenGenericPage,
     }[business.templateId] ?? DefaultGenericPage;
 
-  return <TemplateComponent page={page} />;
+  return <TemplateComponent business={business} page={page} />;
 }
 
 export async function generateMetadata({ params }: Props) {

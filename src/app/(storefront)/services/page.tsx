@@ -6,26 +6,25 @@ import { DarkTrendProductsPage } from "../_templates/dark-trend/dark-trend-produ
 import { DefaultProductsPage } from "../_templates/default/default-products-page";
 import { ElegantShopPage } from "../_templates/elegant/elegant-shop-page";
 import { ModernProductsPage } from "../_templates/modern/modern-products-page";
+import { PollenServicesPage } from "../_templates/pollen/pollen-services-page";
 
-export default async function ProductsPage() {
-  const business = await api.business.getWithProducts();
+export default async function ServicesPage() {
+  const business = await api.business.get();
 
   if (!business) notFound();
 
-  if (business.templateId === "pollen") {
+  if (business.templateId !== "pollen") {
     notFound();
   }
 
   const TemplateComponent =
     {
-      "dark-trend": DarkTrendProductsPage,
-      modern: ModernProductsPage,
-      elegant: ElegantShopPage,
-    }[business.templateId] ?? DefaultProductsPage;
+      pollen: PollenServicesPage,
+    }[business.templateId] ?? PollenServicesPage;
 
   return <TemplateComponent business={business} />;
 }
 
 export const metadata = {
-  title: "Shop",
+  title: "Services",
 };

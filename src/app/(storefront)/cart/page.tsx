@@ -11,6 +11,10 @@ export default async function CartPage() {
 
   if (!business) notFound();
 
+  if (business.templateId === "pollen") {
+    notFound();
+  }
+
   const TemplateComponent =
     {
       "dark-trend": DarkTrendCartPage,

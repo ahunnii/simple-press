@@ -10,6 +10,10 @@ export default async function OrderSuccessPage() {
 
   if (!business) notFound();
 
+  if (business.templateId === "pollen") {
+    notFound();
+  }
+
   const TemplateComponent =
     {
       "dark-trend": DarkTrendOrderSuccessPage,

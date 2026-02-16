@@ -12,6 +12,10 @@ export default async function CheckoutPage() {
 
   if (!business) notFound();
 
+  if (business.templateId === "pollen") {
+    notFound();
+  }
+
   const TemplateUnavailableComponent =
     {
       modern: DefaultCheckoutUnavailable,

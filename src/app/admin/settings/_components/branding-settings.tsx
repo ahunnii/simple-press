@@ -223,6 +223,7 @@ export function BrandingSettings({ business }: BrandingSettingsProps) {
                 { value: "minimal", label: "Minimal" },
                 { value: "elegant", label: "Elegant" },
                 { value: "dark-trend", label: "Dark Trend" },
+                { value: "pollen", label: "Pollen" },
               ]}
             />
           </CardContent>
