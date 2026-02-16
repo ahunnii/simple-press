@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+import type { AnyExtension, Extension } from "@tiptap/core";
 import type { Content, Editor, UseEditorOptions } from "@tiptap/react";
 import * as React from "react";
 import { TextStyle } from "@tiptap/extension-text-style";
@@ -13,6 +16,7 @@ import {
   CodeBlockLowlight,
   Color,
   FileHandler,
+  Gallery,
   HorizontalRule,
   Image,
   ResetMarksOnEnter,
@@ -30,6 +34,7 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   onUpdate?: (content: Content) => void;
   onBlur?: (content: Content) => void;
   uploader?: (file: File) => Promise<string>;
+  businessId?: string;
 }
 
 async function fakeuploader(file: File): Promise<string> {
@@ -47,9 +52,11 @@ async function fakeuploader(file: File): Promise<string> {
 const createExtensions = ({
   placeholder,
   uploader,
+  businessId,
 }: {
   placeholder: string;
   uploader?: (file: File) => Promise<string>;
+  businessId?: string;
 }) => [
   StarterKit.configure({
     blockquote: { HTMLAttributes: { class: "block-node" } },
@@ -186,6 +193,7 @@ const createExtensions = ({
   ResetMarksOnEnter,
   CodeBlockLowlight,
   Placeholder.configure({ placeholder: () => placeholder }),
+  Gallery.configure({ businessId }), // ADD THIS
 ];
 
 export const useMinimalTiptapEditor = ({
@@ -197,6 +205,7 @@ export const useMinimalTiptapEditor = ({
   onUpdate,
   onBlur,
   uploader,
+  businessId,
   ...props
 }: UseMinimalTiptapEditorProps) => {
   const throttledSetValue = useThrottle(
@@ -225,7 +234,13 @@ export const useMinimalTiptapEditor = ({
 
   const editor = useEditor({
     immediatelyRender: false,
-    extensions: createExtensions({ placeholder, uploader }),
+
+    extensions: createExtensions({
+      placeholder,
+      uploader,
+      businessId,
+    }) as unknown as Extension[],
+
     editorProps: {
       attributes: {
         autocomplete: "off",

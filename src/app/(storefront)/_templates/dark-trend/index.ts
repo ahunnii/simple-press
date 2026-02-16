@@ -217,6 +217,13 @@ const homepageData: TemplateField[] = [
     type: "url",
     page: "homepage",
   },
+  {
+    key: "dark-trend.homepage.gallery",
+    label: "Homepage Gallery",
+    description: "Gallery to display on homepage",
+    type: "gallery",
+    page: "homepage",
+  },
 ];
 
 const contactPageData: TemplateField[] = [

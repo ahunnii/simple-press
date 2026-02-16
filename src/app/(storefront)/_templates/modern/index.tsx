@@ -8,4 +8,11 @@ export const globalData: TemplateField[] = [
     type: "url",
     page: "global",
   },
+  {
+    key: "homepage.portfolio.gallery",
+    label: "Portfolio Gallery",
+    description: "Gallery to display on homepage",
+    type: "gallery",
+    page: "homepage",
+  },
 ];

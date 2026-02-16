@@ -466,6 +466,34 @@ exports.Prisma.ProductImportScalarFieldEnum = {
   createdById: 'createdById'
 };
 
+exports.Prisma.GalleryScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  name: 'name',
+  slug: 'slug',
+  description: 'description',
+  layout: 'layout',
+  columns: 'columns',
+  gap: 'gap',
+  aspectRatio: 'aspectRatio',
+  showCaptions: 'showCaptions',
+  enableLightbox: 'enableLightbox',
+  businessId: 'businessId'
+};
+
+exports.Prisma.GalleryImageScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  url: 'url',
+  altText: 'altText',
+  caption: 'caption',
+  width: 'width',
+  height: 'height',
+  sortOrder: 'sortOrder',
+  galleryId: 'galleryId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -529,7 +557,9 @@ exports.Prisma.ModelName = {
   DiscountCode: 'DiscountCode',
   InventoryHistory: 'InventoryHistory',
   Page: 'Page',
-  ProductImport: 'ProductImport'
+  ProductImport: 'ProductImport',
+  Gallery: 'Gallery',
+  GalleryImage: 'GalleryImage'
 };
 
 /**

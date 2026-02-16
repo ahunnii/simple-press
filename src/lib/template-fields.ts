@@ -4,7 +4,7 @@ export type TemplateField = {
   key: string;
   label: string;
   description: string;
-  type: "text" | "textarea" | "url" | "color" | "number";
+  type: "text" | "textarea" | "url" | "color" | "number" | "gallery";
   page:
     | "homepage"
     | "contact"
@@ -25,6 +25,13 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
       description: "Text shown in the top banner",
       type: "text",
       page: "global",
+    },
+    {
+      key: "modern.homepage.gallery",
+      label: "Homepage Gallery",
+      description: "Gallery to display on homepage",
+      type: "gallery",
+      page: "homepage",
     },
     {
       key: "modern.cta.primary",

@@ -8,15 +8,21 @@ import {
   PlusIcon,
   QuoteIcon,
 } from "@radix-ui/react-icons";
+import { Images } from "lucide-react";
 
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "~/components/ui/toggle";
 
+import { GalleryInsertDialog } from "../gallery/gallery-insert-dialog";
 import { ImageEditDialog } from "../image/image-edit-dialog";
 import { LinkEditPopover } from "../link/link-edit-popover";
 import { ToolbarSection } from "../toolbar-section";
 
-type InsertElementAction = "codeBlock" | "blockquote" | "horizontalRule";
+type InsertElementAction =
+  | "codeBlock"
+  | "blockquote"
+  | "horizontalRule"
+  | "gallery";
 interface InsertElement extends FormatAction {
   value: InsertElementAction;
 }
@@ -52,6 +58,15 @@ const formatActions: InsertElement[] = [
       editor.can().chain().focus().setHorizontalRule().run(),
     shortcuts: ["mod", "alt", "-"],
   },
+  {
+    value: "gallery",
+    label: "Gallery",
+    icon: <Images className="size-5" />,
+    action: (editor) => editor.chain().focus().insertGallery().run(),
+    isActive: () => false, // ✅ Always false - it's an insert action
+    canExecute: (editor) => editor.can().chain().focus().insertGallery().run(),
+    shortcuts: ["mod", "alt", "G"],
+  },
 ];
 
 interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
@@ -71,6 +86,11 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
     <>
       <LinkEditPopover editor={editor} size={size} variant={variant} />
       <ImageEditDialog editor={editor} size={size} variant={variant} />
+      <GalleryInsertDialog
+        editor={editor}
+        size={size ?? "default"}
+        variant={variant ?? "default"}
+      />
       <ToolbarSection
         editor={editor}
         actions={formatActions}

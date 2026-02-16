@@ -2,9 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { formatPrice } from "~/lib/prices";
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import { Spotlight } from "~/components/ui/spotlight-new";
+import { GalleryRenderer } from "~/components/gallery-renderer";
 
 import { DarkTrendFeaturedProductsGrid } from "./dark-trend-featured-products-grid";
 import { DarkTrendHeroContent } from "./dark-trend-hero-content";
@@ -19,6 +21,17 @@ export async function DarkTrendHomepage() {
   >;
 
   const firstProduct = homepage?.products?.[0];
+
+  // Get gallery ID from template field
+  const portfolioGalleryId = themeSpecificFields["dark-trend.homepage.gallery"];
+
+  // Fetch gallery if set
+  const gallery = portfolioGalleryId
+    ? await db.gallery.findUnique({
+        where: { id: portfolioGalleryId },
+        include: { images: { orderBy: { sortOrder: "asc" } } },
+      })
+    : null;
 
   return (
     <div className="min-h-screen bg-[#1A1A1A] pb-20 text-white">
@@ -47,6 +60,8 @@ export async function DarkTrendHomepage() {
           </div>
         </div>
       </section>
+
+      {gallery && <GalleryRenderer gallery={gallery} />}
 
       {/* Custom Embroidery Section */}
       <section className="bg-zinc-900/80 py-20">

@@ -63,7 +63,7 @@ const Toolbar = ({ editor }: { editor: Editor }) => (
 
       <SectionFive
         editor={editor}
-        activeActions={["codeBlock", "blockquote", "horizontalRule"]}
+        activeActions={["codeBlock", "blockquote", "horizontalRule", "gallery"]}
         mainActionCount={0}
       />
     </div>

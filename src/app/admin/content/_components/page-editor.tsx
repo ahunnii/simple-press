@@ -6,7 +6,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Eye, Loader2, Save } from "lucide-react";
+import { ArrowLeft, Eye, Images, Loader2, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -272,6 +272,7 @@ export function PageEditor({ business, page }: PageEditorProps) {
                       placeholder="Start writing your page content..."
                       output="json"
                       editorContentClassName="min-h-[400px] p-4"
+                      businessId={business.id}
                     />
                   </CardContent>
                 </Card>

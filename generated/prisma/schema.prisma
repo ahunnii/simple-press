@@ -150,6 +150,7 @@ model Business {
   inventoryHistory InventoryHistory[]
   pages            Page[]
   productImports   ProductImport[]
+  galleries        Gallery[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -676,4 +677,58 @@ model ProductImport {
 
   @@index([businessId])
   @@index([status])
+}
+
+model Gallery {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Identity
+  name        String
+  slug        String
+  description String?
+
+  // Layout
+  layout String @default("grid") // grid | masonry | carousel | collage | justified
+
+  // Grid settings
+  columns     Int     @default(3) // 2, 3, 4, 5
+  gap         Int     @default(16) // Gap between images in px
+  aspectRatio String? @default("1:1") // 1:1, 4:3, 16:9, auto
+
+  // Display settings
+  showCaptions   Boolean @default(true)
+  enableLightbox Boolean @default(true)
+
+  // Multi-tenancy
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  images GalleryImage[]
+
+  @@unique([businessId, slug])
+  @@index([businessId])
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Image data
+  url     String
+  altText String?
+  caption String?
+  width   Int?
+  height  Int?
+
+  // Ordering
+  sortOrder Int @default(0)
+
+  // Relationships
+  galleryId String
+  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+
+  @@index([galleryId, sortOrder])
 }

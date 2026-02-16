@@ -12,6 +12,7 @@ import {
   IconShoppingCart,
   IconTerminal,
 } from "@tabler/icons-react";
+import { Images } from "lucide-react";
 
 import { env } from "~/env";
 import {
@@ -62,6 +63,11 @@ const data = {
       title: "Site content",
       url: "/admin/content",
       icon: IconLanguage,
+    },
+    {
+      title: "Galleries",
+      url: "/admin/galleries",
+      icon: Images,
     },
   ],
   navClouds: [],

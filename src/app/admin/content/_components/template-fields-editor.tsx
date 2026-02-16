@@ -726,6 +726,13 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
@@ -1027,7 +1034,15 @@ export function TemplateFieldsEditor({
                                   )}
                                 </Label>
 
-                                {field.type === "textarea" ? (
+                                {field.type === "gallery" ? (
+                                  <GalleryFieldSelect
+                                    value={customFields[field.key] ?? undefined}
+                                    onChange={(value) =>
+                                      handleFieldChange(field.key, value)
+                                    }
+                                    businessId={business.id}
+                                  />
+                                ) : field.type === "textarea" ? (
                                   <Textarea
                                     id={field.key}
                                     value={customFields[field.key] ?? ""}
@@ -1213,5 +1228,34 @@ export function TemplateFieldsEditor({
         </Card>
       </div>
     </div>
+  );
+}
+
+// Gallery Field Select Component
+function GalleryFieldSelect({
+  value,
+  onChange,
+  businessId,
+}: {
+  value: string | undefined;
+  onChange: (value: string) => void;
+  businessId: string;
+}) {
+  const { data: galleries } = api.gallery.list.useQuery({ businessId });
+
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="mt-2">
+        <SelectValue placeholder="Select a gallery..." />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="none">None</SelectItem>
+        {galleries?.map((gallery) => (
+          <SelectItem key={gallery.id} value={gallery.id}>
+            {gallery.name} ({gallery._count.images} images)
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
