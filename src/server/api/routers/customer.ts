@@ -4,6 +4,7 @@ import { z } from "zod";
 import { checkBusiness } from "~/lib/check-business";
 import {
   createTRPCRouter,
+  ownerAdminProcedure,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
@@ -115,17 +116,29 @@ export const customerRouter = createTRPCRouter({
       update: {
         userId: user.id,
         // Optionally update name if not set
-        firstName:
-          user.name.split(" ")[0] ?? undefined,
-        lastName:
-          user.name.split(" ").slice(1).join(" ") || undefined,
+        firstName: user.name.split(" ")[0] ?? undefined,
+        lastName: user.name.split(" ").slice(1).join(" ") || undefined,
       },
     });
 
-    console.log(
-      `[Customer] Linked customer ${customer.id} to user ${user.id}`,
-    );
+    console.log(`[Customer] Linked customer ${customer.id} to user ${user.id}`);
 
     return customer;
+  }),
+
+  list: ownerAdminProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+    const customers = await ctx.db.customer.findMany({
+      where: {
+        businessId: business.id,
+      },
+    });
+    return customers;
   }),
 });

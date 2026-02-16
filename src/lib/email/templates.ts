@@ -3,6 +3,7 @@
 import ContactFormEmail from "~/emails/contact-form";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderShippedEmail from "~/emails/order-shipped";
+import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import WelcomeEmail from "~/emails/welcome";
 
 import { env } from "~/env";
@@ -164,5 +165,23 @@ export async function sendWelcomeEmail(params: {
       { name: "category", value: "welcome" },
       { name: "business", value: params.business.subdomain },
     ],
+  });
+}
+
+export async function sendTestimonialInviteEmail({
+  to,
+  businessName,
+  inviteUrl,
+}: {
+  to: string;
+  businessName: string;
+  inviteUrl: string;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: businessName,
+    to,
+    subject: `Share your experience with ${businessName}`,
+    react: TestimonialInviteEmail({ businessName, inviteUrl }),
   });
 }

@@ -139,18 +139,20 @@ model Business {
   onboardingComplete Boolean @default(false)
 
   // Relationships
-  users            User[]
-  products         Product[]
-  collections      Collection[]
-  orders           Order[]
-  customers        Customer[]
-  siteContent      SiteContent?
-  images           Image[]
-  discountCodes    DiscountCode[]
-  inventoryHistory InventoryHistory[]
-  pages            Page[]
-  productImports   ProductImport[]
-  galleries        Gallery[]
+  users              User[]
+  products           Product[]
+  collections        Collection[]
+  orders             Order[]
+  customers          Customer[]
+  siteContent        SiteContent?
+  images             Image[]
+  discountCodes      DiscountCode[]
+  inventoryHistory   InventoryHistory[]
+  pages              Page[]
+  productImports     ProductImport[]
+  galleries          Gallery[]
+  testimonials       Testimonial[]
+  testimonialInvites TestimonialInvite[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -377,8 +379,10 @@ model Customer {
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-  orders            Order[]
-  shippingAddresses ShippingAddress[]
+  orders             Order[]
+  shippingAddresses  ShippingAddress[]
+  testimonials       Testimonial[]
+  testimonialInvites TestimonialInvite[]
 
   @@unique([businessId, email])
   @@index([businessId])
@@ -731,4 +735,57 @@ model GalleryImage {
   gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
 
   @@index([galleryId, sortOrder])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Content
+  rating   Int // 1-5 stars
+  text     String  @db.Text
+  videoUrl String? // Optional video URL
+  photoUrl String? // Optional photo URL
+
+  // Status
+  isPublic Boolean @default(false) // Owner approval
+
+  // Customer info (captured at submission)
+  customerName  String
+  customerEmail String
+
+  // Relationships
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@unique([businessId, customerEmail]) // One testimonial per customer per business
+  @@index([businessId, isPublic])
+  @@index([customerId])
+}
+
+model TestimonialInvite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  // Invite details
+  email  String
+  code   String    @unique // Unique code for URL
+  used   Boolean   @default(false)
+  usedAt DateTime?
+
+  // Relationships
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  customerId String? // If inviting existing customer
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([businessId])
+  @@index([code])
+  @@index([email])
 }

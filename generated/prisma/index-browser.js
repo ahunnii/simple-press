@@ -494,6 +494,33 @@ exports.Prisma.GalleryImageScalarFieldEnum = {
   galleryId: 'galleryId'
 };
 
+exports.Prisma.TestimonialScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  rating: 'rating',
+  text: 'text',
+  videoUrl: 'videoUrl',
+  photoUrl: 'photoUrl',
+  isPublic: 'isPublic',
+  customerName: 'customerName',
+  customerEmail: 'customerEmail',
+  businessId: 'businessId',
+  customerId: 'customerId'
+};
+
+exports.Prisma.TestimonialInviteScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  email: 'email',
+  code: 'code',
+  used: 'used',
+  usedAt: 'usedAt',
+  businessId: 'businessId',
+  customerId: 'customerId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -559,7 +586,9 @@ exports.Prisma.ModelName = {
   Page: 'Page',
   ProductImport: 'ProductImport',
   Gallery: 'Gallery',
-  GalleryImage: 'GalleryImage'
+  GalleryImage: 'GalleryImage',
+  Testimonial: 'Testimonial',
+  TestimonialInvite: 'TestimonialInvite'
 };
 
 /**

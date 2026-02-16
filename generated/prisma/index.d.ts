@@ -133,6 +133,16 @@ export type Gallery = $Result.DefaultSelection<Prisma.$GalleryPayload>
  * 
  */
 export type GalleryImage = $Result.DefaultSelection<Prisma.$GalleryImagePayload>
+/**
+ * Model Testimonial
+ * 
+ */
+export type Testimonial = $Result.DefaultSelection<Prisma.$TestimonialPayload>
+/**
+ * Model TestimonialInvite
+ * 
+ */
+export type TestimonialInvite = $Result.DefaultSelection<Prisma.$TestimonialInvitePayload>
 
 /**
  * Enums
@@ -522,6 +532,26 @@ export class PrismaClient<
     * ```
     */
   get galleryImage(): Prisma.GalleryImageDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.testimonial`: Exposes CRUD operations for the **Testimonial** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Testimonials
+    * const testimonials = await prisma.testimonial.findMany()
+    * ```
+    */
+  get testimonial(): Prisma.TestimonialDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.testimonialInvite`: Exposes CRUD operations for the **TestimonialInvite** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TestimonialInvites
+    * const testimonialInvites = await prisma.testimonialInvite.findMany()
+    * ```
+    */
+  get testimonialInvite(): Prisma.TestimonialInviteDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -986,7 +1016,9 @@ export namespace Prisma {
     Page: 'Page',
     ProductImport: 'ProductImport',
     Gallery: 'Gallery',
-    GalleryImage: 'GalleryImage'
+    GalleryImage: 'GalleryImage',
+    Testimonial: 'Testimonial',
+    TestimonialInvite: 'TestimonialInvite'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1005,7 +1037,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "signupToken" | "session" | "account" | "verification" | "business" | "siteContent" | "product" | "productVariant" | "collection" | "collectionProduct" | "image" | "customer" | "shippingAddress" | "order" | "orderItem" | "domainQueue" | "pageView" | "discountCode" | "inventoryHistory" | "page" | "productImport" | "gallery" | "galleryImage"
+      modelProps: "user" | "signupToken" | "session" | "account" | "verification" | "business" | "siteContent" | "product" | "productVariant" | "collection" | "collectionProduct" | "image" | "customer" | "shippingAddress" | "order" | "orderItem" | "domainQueue" | "pageView" | "discountCode" | "inventoryHistory" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2785,6 +2817,154 @@ export namespace Prisma {
           }
         }
       }
+      Testimonial: {
+        payload: Prisma.$TestimonialPayload<ExtArgs>
+        fields: Prisma.TestimonialFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TestimonialFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TestimonialFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          findFirst: {
+            args: Prisma.TestimonialFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TestimonialFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          findMany: {
+            args: Prisma.TestimonialFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>[]
+          }
+          create: {
+            args: Prisma.TestimonialCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          createMany: {
+            args: Prisma.TestimonialCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TestimonialCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>[]
+          }
+          delete: {
+            args: Prisma.TestimonialDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          update: {
+            args: Prisma.TestimonialUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          deleteMany: {
+            args: Prisma.TestimonialDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TestimonialUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TestimonialUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>[]
+          }
+          upsert: {
+            args: Prisma.TestimonialUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          aggregate: {
+            args: Prisma.TestimonialAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTestimonial>
+          }
+          groupBy: {
+            args: Prisma.TestimonialGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TestimonialGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TestimonialCountArgs<ExtArgs>
+            result: $Utils.Optional<TestimonialCountAggregateOutputType> | number
+          }
+        }
+      }
+      TestimonialInvite: {
+        payload: Prisma.$TestimonialInvitePayload<ExtArgs>
+        fields: Prisma.TestimonialInviteFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TestimonialInviteFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialInvitePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TestimonialInviteFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialInvitePayload>
+          }
+          findFirst: {
+            args: Prisma.TestimonialInviteFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialInvitePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TestimonialInviteFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialInvitePayload>
+          }
+          findMany: {
+            args: Prisma.TestimonialInviteFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialInvitePayload>[]
+          }
+          create: {
+            args: Prisma.TestimonialInviteCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialInvitePayload>
+          }
+          createMany: {
+            args: Prisma.TestimonialInviteCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TestimonialInviteCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialInvitePayload>[]
+          }
+          delete: {
+            args: Prisma.TestimonialInviteDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialInvitePayload>
+          }
+          update: {
+            args: Prisma.TestimonialInviteUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialInvitePayload>
+          }
+          deleteMany: {
+            args: Prisma.TestimonialInviteDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TestimonialInviteUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TestimonialInviteUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialInvitePayload>[]
+          }
+          upsert: {
+            args: Prisma.TestimonialInviteUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialInvitePayload>
+          }
+          aggregate: {
+            args: Prisma.TestimonialInviteAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTestimonialInvite>
+          }
+          groupBy: {
+            args: Prisma.TestimonialInviteGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TestimonialInviteGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TestimonialInviteCountArgs<ExtArgs>
+            result: $Utils.Optional<TestimonialInviteCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2905,6 +3085,8 @@ export namespace Prisma {
     productImport?: ProductImportOmit
     gallery?: GalleryOmit
     galleryImage?: GalleryImageOmit
+    testimonial?: TestimonialOmit
+    testimonialInvite?: TestimonialInviteOmit
   }
 
   /* Types for Logging */
@@ -3054,6 +3236,8 @@ export namespace Prisma {
     pages: number
     productImports: number
     galleries: number
+    testimonials: number
+    testimonialInvites: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3068,6 +3252,8 @@ export namespace Prisma {
     pages?: boolean | BusinessCountOutputTypeCountPagesArgs
     productImports?: boolean | BusinessCountOutputTypeCountProductImportsArgs
     galleries?: boolean | BusinessCountOutputTypeCountGalleriesArgs
+    testimonials?: boolean | BusinessCountOutputTypeCountTestimonialsArgs
+    testimonialInvites?: boolean | BusinessCountOutputTypeCountTestimonialInvitesArgs
   }
 
   // Custom InputTypes
@@ -3156,6 +3342,20 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountGalleriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: GalleryWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountTestimonialsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TestimonialWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountTestimonialInvitesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TestimonialInviteWhereInput
   }
 
 
@@ -3304,11 +3504,15 @@ export namespace Prisma {
   export type CustomerCountOutputType = {
     orders: number
     shippingAddresses: number
+    testimonials: number
+    testimonialInvites: number
   }
 
   export type CustomerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     orders?: boolean | CustomerCountOutputTypeCountOrdersArgs
     shippingAddresses?: boolean | CustomerCountOutputTypeCountShippingAddressesArgs
+    testimonials?: boolean | CustomerCountOutputTypeCountTestimonialsArgs
+    testimonialInvites?: boolean | CustomerCountOutputTypeCountTestimonialInvitesArgs
   }
 
   // Custom InputTypes
@@ -3334,6 +3538,20 @@ export namespace Prisma {
    */
   export type CustomerCountOutputTypeCountShippingAddressesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ShippingAddressWhereInput
+  }
+
+  /**
+   * CustomerCountOutputType without action
+   */
+  export type CustomerCountOutputTypeCountTestimonialsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TestimonialWhereInput
+  }
+
+  /**
+   * CustomerCountOutputType without action
+   */
+  export type CustomerCountOutputTypeCountTestimonialInvitesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TestimonialInviteWhereInput
   }
 
 
@@ -9259,6 +9477,8 @@ export namespace Prisma {
     pages?: boolean | Business$pagesArgs<ExtArgs>
     productImports?: boolean | Business$productImportsArgs<ExtArgs>
     galleries?: boolean | Business$galleriesArgs<ExtArgs>
+    testimonials?: boolean | Business$testimonialsArgs<ExtArgs>
+    testimonialInvites?: boolean | Business$testimonialInvitesArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -9339,6 +9559,8 @@ export namespace Prisma {
     pages?: boolean | Business$pagesArgs<ExtArgs>
     productImports?: boolean | Business$productImportsArgs<ExtArgs>
     galleries?: boolean | Business$galleriesArgs<ExtArgs>
+    testimonials?: boolean | Business$testimonialsArgs<ExtArgs>
+    testimonialInvites?: boolean | Business$testimonialInvitesArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -9359,6 +9581,8 @@ export namespace Prisma {
       pages: Prisma.$PagePayload<ExtArgs>[]
       productImports: Prisma.$ProductImportPayload<ExtArgs>[]
       galleries: Prisma.$GalleryPayload<ExtArgs>[]
+      testimonials: Prisma.$TestimonialPayload<ExtArgs>[]
+      testimonialInvites: Prisma.$TestimonialInvitePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9785,6 +10009,8 @@ export namespace Prisma {
     pages<T extends Business$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Business$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     productImports<T extends Business$productImportsArgs<ExtArgs> = {}>(args?: Subset<T, Business$productImportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     galleries<T extends Business$galleriesArgs<ExtArgs> = {}>(args?: Subset<T, Business$galleriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GalleryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    testimonials<T extends Business$testimonialsArgs<ExtArgs> = {}>(args?: Subset<T, Business$testimonialsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    testimonialInvites<T extends Business$testimonialInvitesArgs<ExtArgs> = {}>(args?: Subset<T, Business$testimonialInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10500,6 +10726,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: GalleryScalarFieldEnum | GalleryScalarFieldEnum[]
+  }
+
+  /**
+   * Business.testimonials
+   */
+  export type Business$testimonialsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+    where?: TestimonialWhereInput
+    orderBy?: TestimonialOrderByWithRelationInput | TestimonialOrderByWithRelationInput[]
+    cursor?: TestimonialWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TestimonialScalarFieldEnum | TestimonialScalarFieldEnum[]
+  }
+
+  /**
+   * Business.testimonialInvites
+   */
+  export type Business$testimonialInvitesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+    where?: TestimonialInviteWhereInput
+    orderBy?: TestimonialInviteOrderByWithRelationInput | TestimonialInviteOrderByWithRelationInput[]
+    cursor?: TestimonialInviteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TestimonialInviteScalarFieldEnum | TestimonialInviteScalarFieldEnum[]
   }
 
   /**
@@ -18316,6 +18590,8 @@ export namespace Prisma {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     orders?: boolean | Customer$ordersArgs<ExtArgs>
     shippingAddresses?: boolean | Customer$shippingAddressesArgs<ExtArgs>
+    testimonials?: boolean | Customer$testimonialsArgs<ExtArgs>
+    testimonialInvites?: boolean | Customer$testimonialInvitesArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customer"]>
 
@@ -18374,6 +18650,8 @@ export namespace Prisma {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     orders?: boolean | Customer$ordersArgs<ExtArgs>
     shippingAddresses?: boolean | Customer$shippingAddressesArgs<ExtArgs>
+    testimonials?: boolean | Customer$testimonialsArgs<ExtArgs>
+    testimonialInvites?: boolean | Customer$testimonialInvitesArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CustomerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -18392,6 +18670,8 @@ export namespace Prisma {
       business: Prisma.$BusinessPayload<ExtArgs>
       orders: Prisma.$OrderPayload<ExtArgs>[]
       shippingAddresses: Prisma.$ShippingAddressPayload<ExtArgs>[]
+      testimonials: Prisma.$TestimonialPayload<ExtArgs>[]
+      testimonialInvites: Prisma.$TestimonialInvitePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -18804,6 +19084,8 @@ export namespace Prisma {
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     orders<T extends Customer$ordersArgs<ExtArgs> = {}>(args?: Subset<T, Customer$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     shippingAddresses<T extends Customer$shippingAddressesArgs<ExtArgs> = {}>(args?: Subset<T, Customer$shippingAddressesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShippingAddressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    testimonials<T extends Customer$testimonialsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$testimonialsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    testimonialInvites<T extends Customer$testimonialInvitesArgs<ExtArgs> = {}>(args?: Subset<T, Customer$testimonialInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -19305,6 +19587,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ShippingAddressScalarFieldEnum | ShippingAddressScalarFieldEnum[]
+  }
+
+  /**
+   * Customer.testimonials
+   */
+  export type Customer$testimonialsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+    where?: TestimonialWhereInput
+    orderBy?: TestimonialOrderByWithRelationInput | TestimonialOrderByWithRelationInput[]
+    cursor?: TestimonialWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TestimonialScalarFieldEnum | TestimonialScalarFieldEnum[]
+  }
+
+  /**
+   * Customer.testimonialInvites
+   */
+  export type Customer$testimonialInvitesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+    where?: TestimonialInviteWhereInput
+    orderBy?: TestimonialInviteOrderByWithRelationInput | TestimonialInviteOrderByWithRelationInput[]
+    cursor?: TestimonialInviteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TestimonialInviteScalarFieldEnum | TestimonialInviteScalarFieldEnum[]
   }
 
   /**
@@ -32747,6 +33077,2353 @@ export namespace Prisma {
 
 
   /**
+   * Model Testimonial
+   */
+
+  export type AggregateTestimonial = {
+    _count: TestimonialCountAggregateOutputType | null
+    _avg: TestimonialAvgAggregateOutputType | null
+    _sum: TestimonialSumAggregateOutputType | null
+    _min: TestimonialMinAggregateOutputType | null
+    _max: TestimonialMaxAggregateOutputType | null
+  }
+
+  export type TestimonialAvgAggregateOutputType = {
+    rating: number | null
+  }
+
+  export type TestimonialSumAggregateOutputType = {
+    rating: number | null
+  }
+
+  export type TestimonialMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    rating: number | null
+    text: string | null
+    videoUrl: string | null
+    photoUrl: string | null
+    isPublic: boolean | null
+    customerName: string | null
+    customerEmail: string | null
+    businessId: string | null
+    customerId: string | null
+  }
+
+  export type TestimonialMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    rating: number | null
+    text: string | null
+    videoUrl: string | null
+    photoUrl: string | null
+    isPublic: boolean | null
+    customerName: string | null
+    customerEmail: string | null
+    businessId: string | null
+    customerId: string | null
+  }
+
+  export type TestimonialCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    rating: number
+    text: number
+    videoUrl: number
+    photoUrl: number
+    isPublic: number
+    customerName: number
+    customerEmail: number
+    businessId: number
+    customerId: number
+    _all: number
+  }
+
+
+  export type TestimonialAvgAggregateInputType = {
+    rating?: true
+  }
+
+  export type TestimonialSumAggregateInputType = {
+    rating?: true
+  }
+
+  export type TestimonialMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    rating?: true
+    text?: true
+    videoUrl?: true
+    photoUrl?: true
+    isPublic?: true
+    customerName?: true
+    customerEmail?: true
+    businessId?: true
+    customerId?: true
+  }
+
+  export type TestimonialMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    rating?: true
+    text?: true
+    videoUrl?: true
+    photoUrl?: true
+    isPublic?: true
+    customerName?: true
+    customerEmail?: true
+    businessId?: true
+    customerId?: true
+  }
+
+  export type TestimonialCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    rating?: true
+    text?: true
+    videoUrl?: true
+    photoUrl?: true
+    isPublic?: true
+    customerName?: true
+    customerEmail?: true
+    businessId?: true
+    customerId?: true
+    _all?: true
+  }
+
+  export type TestimonialAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Testimonial to aggregate.
+     */
+    where?: TestimonialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Testimonials to fetch.
+     */
+    orderBy?: TestimonialOrderByWithRelationInput | TestimonialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TestimonialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Testimonials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Testimonials.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Testimonials
+    **/
+    _count?: true | TestimonialCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TestimonialAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TestimonialSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TestimonialMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TestimonialMaxAggregateInputType
+  }
+
+  export type GetTestimonialAggregateType<T extends TestimonialAggregateArgs> = {
+        [P in keyof T & keyof AggregateTestimonial]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTestimonial[P]>
+      : GetScalarType<T[P], AggregateTestimonial[P]>
+  }
+
+
+
+
+  export type TestimonialGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TestimonialWhereInput
+    orderBy?: TestimonialOrderByWithAggregationInput | TestimonialOrderByWithAggregationInput[]
+    by: TestimonialScalarFieldEnum[] | TestimonialScalarFieldEnum
+    having?: TestimonialScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TestimonialCountAggregateInputType | true
+    _avg?: TestimonialAvgAggregateInputType
+    _sum?: TestimonialSumAggregateInputType
+    _min?: TestimonialMinAggregateInputType
+    _max?: TestimonialMaxAggregateInputType
+  }
+
+  export type TestimonialGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    rating: number
+    text: string
+    videoUrl: string | null
+    photoUrl: string | null
+    isPublic: boolean
+    customerName: string
+    customerEmail: string
+    businessId: string
+    customerId: string | null
+    _count: TestimonialCountAggregateOutputType | null
+    _avg: TestimonialAvgAggregateOutputType | null
+    _sum: TestimonialSumAggregateOutputType | null
+    _min: TestimonialMinAggregateOutputType | null
+    _max: TestimonialMaxAggregateOutputType | null
+  }
+
+  type GetTestimonialGroupByPayload<T extends TestimonialGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TestimonialGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TestimonialGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TestimonialGroupByOutputType[P]>
+            : GetScalarType<T[P], TestimonialGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TestimonialSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    rating?: boolean
+    text?: boolean
+    videoUrl?: boolean
+    photoUrl?: boolean
+    isPublic?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Testimonial$customerArgs<ExtArgs>
+  }, ExtArgs["result"]["testimonial"]>
+
+  export type TestimonialSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    rating?: boolean
+    text?: boolean
+    videoUrl?: boolean
+    photoUrl?: boolean
+    isPublic?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Testimonial$customerArgs<ExtArgs>
+  }, ExtArgs["result"]["testimonial"]>
+
+  export type TestimonialSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    rating?: boolean
+    text?: boolean
+    videoUrl?: boolean
+    photoUrl?: boolean
+    isPublic?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Testimonial$customerArgs<ExtArgs>
+  }, ExtArgs["result"]["testimonial"]>
+
+  export type TestimonialSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    rating?: boolean
+    text?: boolean
+    videoUrl?: boolean
+    photoUrl?: boolean
+    isPublic?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    businessId?: boolean
+    customerId?: boolean
+  }
+
+  export type TestimonialOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "rating" | "text" | "videoUrl" | "photoUrl" | "isPublic" | "customerName" | "customerEmail" | "businessId" | "customerId", ExtArgs["result"]["testimonial"]>
+  export type TestimonialInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Testimonial$customerArgs<ExtArgs>
+  }
+  export type TestimonialIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Testimonial$customerArgs<ExtArgs>
+  }
+  export type TestimonialIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | Testimonial$customerArgs<ExtArgs>
+  }
+
+  export type $TestimonialPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Testimonial"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      customer: Prisma.$CustomerPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      rating: number
+      text: string
+      videoUrl: string | null
+      photoUrl: string | null
+      isPublic: boolean
+      customerName: string
+      customerEmail: string
+      businessId: string
+      customerId: string | null
+    }, ExtArgs["result"]["testimonial"]>
+    composites: {}
+  }
+
+  type TestimonialGetPayload<S extends boolean | null | undefined | TestimonialDefaultArgs> = $Result.GetResult<Prisma.$TestimonialPayload, S>
+
+  type TestimonialCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TestimonialFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TestimonialCountAggregateInputType | true
+    }
+
+  export interface TestimonialDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Testimonial'], meta: { name: 'Testimonial' } }
+    /**
+     * Find zero or one Testimonial that matches the filter.
+     * @param {TestimonialFindUniqueArgs} args - Arguments to find a Testimonial
+     * @example
+     * // Get one Testimonial
+     * const testimonial = await prisma.testimonial.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TestimonialFindUniqueArgs>(args: SelectSubset<T, TestimonialFindUniqueArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Testimonial that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TestimonialFindUniqueOrThrowArgs} args - Arguments to find a Testimonial
+     * @example
+     * // Get one Testimonial
+     * const testimonial = await prisma.testimonial.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TestimonialFindUniqueOrThrowArgs>(args: SelectSubset<T, TestimonialFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Testimonial that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialFindFirstArgs} args - Arguments to find a Testimonial
+     * @example
+     * // Get one Testimonial
+     * const testimonial = await prisma.testimonial.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TestimonialFindFirstArgs>(args?: SelectSubset<T, TestimonialFindFirstArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Testimonial that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialFindFirstOrThrowArgs} args - Arguments to find a Testimonial
+     * @example
+     * // Get one Testimonial
+     * const testimonial = await prisma.testimonial.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TestimonialFindFirstOrThrowArgs>(args?: SelectSubset<T, TestimonialFindFirstOrThrowArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Testimonials that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Testimonials
+     * const testimonials = await prisma.testimonial.findMany()
+     * 
+     * // Get first 10 Testimonials
+     * const testimonials = await prisma.testimonial.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const testimonialWithIdOnly = await prisma.testimonial.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TestimonialFindManyArgs>(args?: SelectSubset<T, TestimonialFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Testimonial.
+     * @param {TestimonialCreateArgs} args - Arguments to create a Testimonial.
+     * @example
+     * // Create one Testimonial
+     * const Testimonial = await prisma.testimonial.create({
+     *   data: {
+     *     // ... data to create a Testimonial
+     *   }
+     * })
+     * 
+     */
+    create<T extends TestimonialCreateArgs>(args: SelectSubset<T, TestimonialCreateArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Testimonials.
+     * @param {TestimonialCreateManyArgs} args - Arguments to create many Testimonials.
+     * @example
+     * // Create many Testimonials
+     * const testimonial = await prisma.testimonial.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TestimonialCreateManyArgs>(args?: SelectSubset<T, TestimonialCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Testimonials and returns the data saved in the database.
+     * @param {TestimonialCreateManyAndReturnArgs} args - Arguments to create many Testimonials.
+     * @example
+     * // Create many Testimonials
+     * const testimonial = await prisma.testimonial.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Testimonials and only return the `id`
+     * const testimonialWithIdOnly = await prisma.testimonial.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TestimonialCreateManyAndReturnArgs>(args?: SelectSubset<T, TestimonialCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Testimonial.
+     * @param {TestimonialDeleteArgs} args - Arguments to delete one Testimonial.
+     * @example
+     * // Delete one Testimonial
+     * const Testimonial = await prisma.testimonial.delete({
+     *   where: {
+     *     // ... filter to delete one Testimonial
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TestimonialDeleteArgs>(args: SelectSubset<T, TestimonialDeleteArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Testimonial.
+     * @param {TestimonialUpdateArgs} args - Arguments to update one Testimonial.
+     * @example
+     * // Update one Testimonial
+     * const testimonial = await prisma.testimonial.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TestimonialUpdateArgs>(args: SelectSubset<T, TestimonialUpdateArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Testimonials.
+     * @param {TestimonialDeleteManyArgs} args - Arguments to filter Testimonials to delete.
+     * @example
+     * // Delete a few Testimonials
+     * const { count } = await prisma.testimonial.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TestimonialDeleteManyArgs>(args?: SelectSubset<T, TestimonialDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Testimonials.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Testimonials
+     * const testimonial = await prisma.testimonial.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TestimonialUpdateManyArgs>(args: SelectSubset<T, TestimonialUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Testimonials and returns the data updated in the database.
+     * @param {TestimonialUpdateManyAndReturnArgs} args - Arguments to update many Testimonials.
+     * @example
+     * // Update many Testimonials
+     * const testimonial = await prisma.testimonial.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Testimonials and only return the `id`
+     * const testimonialWithIdOnly = await prisma.testimonial.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TestimonialUpdateManyAndReturnArgs>(args: SelectSubset<T, TestimonialUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Testimonial.
+     * @param {TestimonialUpsertArgs} args - Arguments to update or create a Testimonial.
+     * @example
+     * // Update or create a Testimonial
+     * const testimonial = await prisma.testimonial.upsert({
+     *   create: {
+     *     // ... data to create a Testimonial
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Testimonial we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TestimonialUpsertArgs>(args: SelectSubset<T, TestimonialUpsertArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Testimonials.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialCountArgs} args - Arguments to filter Testimonials to count.
+     * @example
+     * // Count the number of Testimonials
+     * const count = await prisma.testimonial.count({
+     *   where: {
+     *     // ... the filter for the Testimonials we want to count
+     *   }
+     * })
+    **/
+    count<T extends TestimonialCountArgs>(
+      args?: Subset<T, TestimonialCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TestimonialCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Testimonial.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TestimonialAggregateArgs>(args: Subset<T, TestimonialAggregateArgs>): Prisma.PrismaPromise<GetTestimonialAggregateType<T>>
+
+    /**
+     * Group by Testimonial.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TestimonialGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TestimonialGroupByArgs['orderBy'] }
+        : { orderBy?: TestimonialGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TestimonialGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTestimonialGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Testimonial model
+   */
+  readonly fields: TestimonialFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Testimonial.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TestimonialClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    customer<T extends Testimonial$customerArgs<ExtArgs> = {}>(args?: Subset<T, Testimonial$customerArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Testimonial model
+   */
+  interface TestimonialFieldRefs {
+    readonly id: FieldRef<"Testimonial", 'String'>
+    readonly createdAt: FieldRef<"Testimonial", 'DateTime'>
+    readonly updatedAt: FieldRef<"Testimonial", 'DateTime'>
+    readonly rating: FieldRef<"Testimonial", 'Int'>
+    readonly text: FieldRef<"Testimonial", 'String'>
+    readonly videoUrl: FieldRef<"Testimonial", 'String'>
+    readonly photoUrl: FieldRef<"Testimonial", 'String'>
+    readonly isPublic: FieldRef<"Testimonial", 'Boolean'>
+    readonly customerName: FieldRef<"Testimonial", 'String'>
+    readonly customerEmail: FieldRef<"Testimonial", 'String'>
+    readonly businessId: FieldRef<"Testimonial", 'String'>
+    readonly customerId: FieldRef<"Testimonial", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Testimonial findUnique
+   */
+  export type TestimonialFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+    /**
+     * Filter, which Testimonial to fetch.
+     */
+    where: TestimonialWhereUniqueInput
+  }
+
+  /**
+   * Testimonial findUniqueOrThrow
+   */
+  export type TestimonialFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+    /**
+     * Filter, which Testimonial to fetch.
+     */
+    where: TestimonialWhereUniqueInput
+  }
+
+  /**
+   * Testimonial findFirst
+   */
+  export type TestimonialFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+    /**
+     * Filter, which Testimonial to fetch.
+     */
+    where?: TestimonialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Testimonials to fetch.
+     */
+    orderBy?: TestimonialOrderByWithRelationInput | TestimonialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Testimonials.
+     */
+    cursor?: TestimonialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Testimonials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Testimonials.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Testimonials.
+     */
+    distinct?: TestimonialScalarFieldEnum | TestimonialScalarFieldEnum[]
+  }
+
+  /**
+   * Testimonial findFirstOrThrow
+   */
+  export type TestimonialFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+    /**
+     * Filter, which Testimonial to fetch.
+     */
+    where?: TestimonialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Testimonials to fetch.
+     */
+    orderBy?: TestimonialOrderByWithRelationInput | TestimonialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Testimonials.
+     */
+    cursor?: TestimonialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Testimonials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Testimonials.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Testimonials.
+     */
+    distinct?: TestimonialScalarFieldEnum | TestimonialScalarFieldEnum[]
+  }
+
+  /**
+   * Testimonial findMany
+   */
+  export type TestimonialFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+    /**
+     * Filter, which Testimonials to fetch.
+     */
+    where?: TestimonialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Testimonials to fetch.
+     */
+    orderBy?: TestimonialOrderByWithRelationInput | TestimonialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Testimonials.
+     */
+    cursor?: TestimonialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Testimonials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Testimonials.
+     */
+    skip?: number
+    distinct?: TestimonialScalarFieldEnum | TestimonialScalarFieldEnum[]
+  }
+
+  /**
+   * Testimonial create
+   */
+  export type TestimonialCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Testimonial.
+     */
+    data: XOR<TestimonialCreateInput, TestimonialUncheckedCreateInput>
+  }
+
+  /**
+   * Testimonial createMany
+   */
+  export type TestimonialCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Testimonials.
+     */
+    data: TestimonialCreateManyInput | TestimonialCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Testimonial createManyAndReturn
+   */
+  export type TestimonialCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * The data used to create many Testimonials.
+     */
+    data: TestimonialCreateManyInput | TestimonialCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Testimonial update
+   */
+  export type TestimonialUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Testimonial.
+     */
+    data: XOR<TestimonialUpdateInput, TestimonialUncheckedUpdateInput>
+    /**
+     * Choose, which Testimonial to update.
+     */
+    where: TestimonialWhereUniqueInput
+  }
+
+  /**
+   * Testimonial updateMany
+   */
+  export type TestimonialUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Testimonials.
+     */
+    data: XOR<TestimonialUpdateManyMutationInput, TestimonialUncheckedUpdateManyInput>
+    /**
+     * Filter which Testimonials to update
+     */
+    where?: TestimonialWhereInput
+    /**
+     * Limit how many Testimonials to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Testimonial updateManyAndReturn
+   */
+  export type TestimonialUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * The data used to update Testimonials.
+     */
+    data: XOR<TestimonialUpdateManyMutationInput, TestimonialUncheckedUpdateManyInput>
+    /**
+     * Filter which Testimonials to update
+     */
+    where?: TestimonialWhereInput
+    /**
+     * Limit how many Testimonials to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Testimonial upsert
+   */
+  export type TestimonialUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Testimonial to update in case it exists.
+     */
+    where: TestimonialWhereUniqueInput
+    /**
+     * In case the Testimonial found by the `where` argument doesn't exist, create a new Testimonial with this data.
+     */
+    create: XOR<TestimonialCreateInput, TestimonialUncheckedCreateInput>
+    /**
+     * In case the Testimonial was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TestimonialUpdateInput, TestimonialUncheckedUpdateInput>
+  }
+
+  /**
+   * Testimonial delete
+   */
+  export type TestimonialDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+    /**
+     * Filter which Testimonial to delete.
+     */
+    where: TestimonialWhereUniqueInput
+  }
+
+  /**
+   * Testimonial deleteMany
+   */
+  export type TestimonialDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Testimonials to delete
+     */
+    where?: TestimonialWhereInput
+    /**
+     * Limit how many Testimonials to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Testimonial.customer
+   */
+  export type Testimonial$customerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Customer
+     */
+    select?: CustomerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Customer
+     */
+    omit?: CustomerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerInclude<ExtArgs> | null
+    where?: CustomerWhereInput
+  }
+
+  /**
+   * Testimonial without action
+   */
+  export type TestimonialDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TestimonialInvite
+   */
+
+  export type AggregateTestimonialInvite = {
+    _count: TestimonialInviteCountAggregateOutputType | null
+    _min: TestimonialInviteMinAggregateOutputType | null
+    _max: TestimonialInviteMaxAggregateOutputType | null
+  }
+
+  export type TestimonialInviteMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    expiresAt: Date | null
+    email: string | null
+    code: string | null
+    used: boolean | null
+    usedAt: Date | null
+    businessId: string | null
+    customerId: string | null
+  }
+
+  export type TestimonialInviteMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    expiresAt: Date | null
+    email: string | null
+    code: string | null
+    used: boolean | null
+    usedAt: Date | null
+    businessId: string | null
+    customerId: string | null
+  }
+
+  export type TestimonialInviteCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    expiresAt: number
+    email: number
+    code: number
+    used: number
+    usedAt: number
+    businessId: number
+    customerId: number
+    _all: number
+  }
+
+
+  export type TestimonialInviteMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    expiresAt?: true
+    email?: true
+    code?: true
+    used?: true
+    usedAt?: true
+    businessId?: true
+    customerId?: true
+  }
+
+  export type TestimonialInviteMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    expiresAt?: true
+    email?: true
+    code?: true
+    used?: true
+    usedAt?: true
+    businessId?: true
+    customerId?: true
+  }
+
+  export type TestimonialInviteCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    expiresAt?: true
+    email?: true
+    code?: true
+    used?: true
+    usedAt?: true
+    businessId?: true
+    customerId?: true
+    _all?: true
+  }
+
+  export type TestimonialInviteAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TestimonialInvite to aggregate.
+     */
+    where?: TestimonialInviteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TestimonialInvites to fetch.
+     */
+    orderBy?: TestimonialInviteOrderByWithRelationInput | TestimonialInviteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TestimonialInviteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TestimonialInvites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TestimonialInvites.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TestimonialInvites
+    **/
+    _count?: true | TestimonialInviteCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TestimonialInviteMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TestimonialInviteMaxAggregateInputType
+  }
+
+  export type GetTestimonialInviteAggregateType<T extends TestimonialInviteAggregateArgs> = {
+        [P in keyof T & keyof AggregateTestimonialInvite]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTestimonialInvite[P]>
+      : GetScalarType<T[P], AggregateTestimonialInvite[P]>
+  }
+
+
+
+
+  export type TestimonialInviteGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TestimonialInviteWhereInput
+    orderBy?: TestimonialInviteOrderByWithAggregationInput | TestimonialInviteOrderByWithAggregationInput[]
+    by: TestimonialInviteScalarFieldEnum[] | TestimonialInviteScalarFieldEnum
+    having?: TestimonialInviteScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TestimonialInviteCountAggregateInputType | true
+    _min?: TestimonialInviteMinAggregateInputType
+    _max?: TestimonialInviteMaxAggregateInputType
+  }
+
+  export type TestimonialInviteGroupByOutputType = {
+    id: string
+    createdAt: Date
+    expiresAt: Date
+    email: string
+    code: string
+    used: boolean
+    usedAt: Date | null
+    businessId: string
+    customerId: string | null
+    _count: TestimonialInviteCountAggregateOutputType | null
+    _min: TestimonialInviteMinAggregateOutputType | null
+    _max: TestimonialInviteMaxAggregateOutputType | null
+  }
+
+  type GetTestimonialInviteGroupByPayload<T extends TestimonialInviteGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TestimonialInviteGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TestimonialInviteGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TestimonialInviteGroupByOutputType[P]>
+            : GetScalarType<T[P], TestimonialInviteGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TestimonialInviteSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    email?: boolean
+    code?: boolean
+    used?: boolean
+    usedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | TestimonialInvite$customerArgs<ExtArgs>
+  }, ExtArgs["result"]["testimonialInvite"]>
+
+  export type TestimonialInviteSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    email?: boolean
+    code?: boolean
+    used?: boolean
+    usedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | TestimonialInvite$customerArgs<ExtArgs>
+  }, ExtArgs["result"]["testimonialInvite"]>
+
+  export type TestimonialInviteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    email?: boolean
+    code?: boolean
+    used?: boolean
+    usedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | TestimonialInvite$customerArgs<ExtArgs>
+  }, ExtArgs["result"]["testimonialInvite"]>
+
+  export type TestimonialInviteSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    email?: boolean
+    code?: boolean
+    used?: boolean
+    usedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+  }
+
+  export type TestimonialInviteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "expiresAt" | "email" | "code" | "used" | "usedAt" | "businessId" | "customerId", ExtArgs["result"]["testimonialInvite"]>
+  export type TestimonialInviteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | TestimonialInvite$customerArgs<ExtArgs>
+  }
+  export type TestimonialInviteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | TestimonialInvite$customerArgs<ExtArgs>
+  }
+  export type TestimonialInviteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | TestimonialInvite$customerArgs<ExtArgs>
+  }
+
+  export type $TestimonialInvitePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TestimonialInvite"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      customer: Prisma.$CustomerPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      expiresAt: Date
+      email: string
+      code: string
+      used: boolean
+      usedAt: Date | null
+      businessId: string
+      customerId: string | null
+    }, ExtArgs["result"]["testimonialInvite"]>
+    composites: {}
+  }
+
+  type TestimonialInviteGetPayload<S extends boolean | null | undefined | TestimonialInviteDefaultArgs> = $Result.GetResult<Prisma.$TestimonialInvitePayload, S>
+
+  type TestimonialInviteCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TestimonialInviteFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TestimonialInviteCountAggregateInputType | true
+    }
+
+  export interface TestimonialInviteDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TestimonialInvite'], meta: { name: 'TestimonialInvite' } }
+    /**
+     * Find zero or one TestimonialInvite that matches the filter.
+     * @param {TestimonialInviteFindUniqueArgs} args - Arguments to find a TestimonialInvite
+     * @example
+     * // Get one TestimonialInvite
+     * const testimonialInvite = await prisma.testimonialInvite.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TestimonialInviteFindUniqueArgs>(args: SelectSubset<T, TestimonialInviteFindUniqueArgs<ExtArgs>>): Prisma__TestimonialInviteClient<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TestimonialInvite that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TestimonialInviteFindUniqueOrThrowArgs} args - Arguments to find a TestimonialInvite
+     * @example
+     * // Get one TestimonialInvite
+     * const testimonialInvite = await prisma.testimonialInvite.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TestimonialInviteFindUniqueOrThrowArgs>(args: SelectSubset<T, TestimonialInviteFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TestimonialInviteClient<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TestimonialInvite that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialInviteFindFirstArgs} args - Arguments to find a TestimonialInvite
+     * @example
+     * // Get one TestimonialInvite
+     * const testimonialInvite = await prisma.testimonialInvite.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TestimonialInviteFindFirstArgs>(args?: SelectSubset<T, TestimonialInviteFindFirstArgs<ExtArgs>>): Prisma__TestimonialInviteClient<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TestimonialInvite that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialInviteFindFirstOrThrowArgs} args - Arguments to find a TestimonialInvite
+     * @example
+     * // Get one TestimonialInvite
+     * const testimonialInvite = await prisma.testimonialInvite.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TestimonialInviteFindFirstOrThrowArgs>(args?: SelectSubset<T, TestimonialInviteFindFirstOrThrowArgs<ExtArgs>>): Prisma__TestimonialInviteClient<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TestimonialInvites that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialInviteFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TestimonialInvites
+     * const testimonialInvites = await prisma.testimonialInvite.findMany()
+     * 
+     * // Get first 10 TestimonialInvites
+     * const testimonialInvites = await prisma.testimonialInvite.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const testimonialInviteWithIdOnly = await prisma.testimonialInvite.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TestimonialInviteFindManyArgs>(args?: SelectSubset<T, TestimonialInviteFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TestimonialInvite.
+     * @param {TestimonialInviteCreateArgs} args - Arguments to create a TestimonialInvite.
+     * @example
+     * // Create one TestimonialInvite
+     * const TestimonialInvite = await prisma.testimonialInvite.create({
+     *   data: {
+     *     // ... data to create a TestimonialInvite
+     *   }
+     * })
+     * 
+     */
+    create<T extends TestimonialInviteCreateArgs>(args: SelectSubset<T, TestimonialInviteCreateArgs<ExtArgs>>): Prisma__TestimonialInviteClient<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TestimonialInvites.
+     * @param {TestimonialInviteCreateManyArgs} args - Arguments to create many TestimonialInvites.
+     * @example
+     * // Create many TestimonialInvites
+     * const testimonialInvite = await prisma.testimonialInvite.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TestimonialInviteCreateManyArgs>(args?: SelectSubset<T, TestimonialInviteCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TestimonialInvites and returns the data saved in the database.
+     * @param {TestimonialInviteCreateManyAndReturnArgs} args - Arguments to create many TestimonialInvites.
+     * @example
+     * // Create many TestimonialInvites
+     * const testimonialInvite = await prisma.testimonialInvite.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TestimonialInvites and only return the `id`
+     * const testimonialInviteWithIdOnly = await prisma.testimonialInvite.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TestimonialInviteCreateManyAndReturnArgs>(args?: SelectSubset<T, TestimonialInviteCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TestimonialInvite.
+     * @param {TestimonialInviteDeleteArgs} args - Arguments to delete one TestimonialInvite.
+     * @example
+     * // Delete one TestimonialInvite
+     * const TestimonialInvite = await prisma.testimonialInvite.delete({
+     *   where: {
+     *     // ... filter to delete one TestimonialInvite
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TestimonialInviteDeleteArgs>(args: SelectSubset<T, TestimonialInviteDeleteArgs<ExtArgs>>): Prisma__TestimonialInviteClient<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TestimonialInvite.
+     * @param {TestimonialInviteUpdateArgs} args - Arguments to update one TestimonialInvite.
+     * @example
+     * // Update one TestimonialInvite
+     * const testimonialInvite = await prisma.testimonialInvite.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TestimonialInviteUpdateArgs>(args: SelectSubset<T, TestimonialInviteUpdateArgs<ExtArgs>>): Prisma__TestimonialInviteClient<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TestimonialInvites.
+     * @param {TestimonialInviteDeleteManyArgs} args - Arguments to filter TestimonialInvites to delete.
+     * @example
+     * // Delete a few TestimonialInvites
+     * const { count } = await prisma.testimonialInvite.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TestimonialInviteDeleteManyArgs>(args?: SelectSubset<T, TestimonialInviteDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TestimonialInvites.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialInviteUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TestimonialInvites
+     * const testimonialInvite = await prisma.testimonialInvite.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TestimonialInviteUpdateManyArgs>(args: SelectSubset<T, TestimonialInviteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TestimonialInvites and returns the data updated in the database.
+     * @param {TestimonialInviteUpdateManyAndReturnArgs} args - Arguments to update many TestimonialInvites.
+     * @example
+     * // Update many TestimonialInvites
+     * const testimonialInvite = await prisma.testimonialInvite.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TestimonialInvites and only return the `id`
+     * const testimonialInviteWithIdOnly = await prisma.testimonialInvite.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TestimonialInviteUpdateManyAndReturnArgs>(args: SelectSubset<T, TestimonialInviteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TestimonialInvite.
+     * @param {TestimonialInviteUpsertArgs} args - Arguments to update or create a TestimonialInvite.
+     * @example
+     * // Update or create a TestimonialInvite
+     * const testimonialInvite = await prisma.testimonialInvite.upsert({
+     *   create: {
+     *     // ... data to create a TestimonialInvite
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TestimonialInvite we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TestimonialInviteUpsertArgs>(args: SelectSubset<T, TestimonialInviteUpsertArgs<ExtArgs>>): Prisma__TestimonialInviteClient<$Result.GetResult<Prisma.$TestimonialInvitePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TestimonialInvites.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialInviteCountArgs} args - Arguments to filter TestimonialInvites to count.
+     * @example
+     * // Count the number of TestimonialInvites
+     * const count = await prisma.testimonialInvite.count({
+     *   where: {
+     *     // ... the filter for the TestimonialInvites we want to count
+     *   }
+     * })
+    **/
+    count<T extends TestimonialInviteCountArgs>(
+      args?: Subset<T, TestimonialInviteCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TestimonialInviteCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TestimonialInvite.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialInviteAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TestimonialInviteAggregateArgs>(args: Subset<T, TestimonialInviteAggregateArgs>): Prisma.PrismaPromise<GetTestimonialInviteAggregateType<T>>
+
+    /**
+     * Group by TestimonialInvite.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialInviteGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TestimonialInviteGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TestimonialInviteGroupByArgs['orderBy'] }
+        : { orderBy?: TestimonialInviteGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TestimonialInviteGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTestimonialInviteGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TestimonialInvite model
+   */
+  readonly fields: TestimonialInviteFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TestimonialInvite.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TestimonialInviteClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    customer<T extends TestimonialInvite$customerArgs<ExtArgs> = {}>(args?: Subset<T, TestimonialInvite$customerArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TestimonialInvite model
+   */
+  interface TestimonialInviteFieldRefs {
+    readonly id: FieldRef<"TestimonialInvite", 'String'>
+    readonly createdAt: FieldRef<"TestimonialInvite", 'DateTime'>
+    readonly expiresAt: FieldRef<"TestimonialInvite", 'DateTime'>
+    readonly email: FieldRef<"TestimonialInvite", 'String'>
+    readonly code: FieldRef<"TestimonialInvite", 'String'>
+    readonly used: FieldRef<"TestimonialInvite", 'Boolean'>
+    readonly usedAt: FieldRef<"TestimonialInvite", 'DateTime'>
+    readonly businessId: FieldRef<"TestimonialInvite", 'String'>
+    readonly customerId: FieldRef<"TestimonialInvite", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TestimonialInvite findUnique
+   */
+  export type TestimonialInviteFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+    /**
+     * Filter, which TestimonialInvite to fetch.
+     */
+    where: TestimonialInviteWhereUniqueInput
+  }
+
+  /**
+   * TestimonialInvite findUniqueOrThrow
+   */
+  export type TestimonialInviteFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+    /**
+     * Filter, which TestimonialInvite to fetch.
+     */
+    where: TestimonialInviteWhereUniqueInput
+  }
+
+  /**
+   * TestimonialInvite findFirst
+   */
+  export type TestimonialInviteFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+    /**
+     * Filter, which TestimonialInvite to fetch.
+     */
+    where?: TestimonialInviteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TestimonialInvites to fetch.
+     */
+    orderBy?: TestimonialInviteOrderByWithRelationInput | TestimonialInviteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TestimonialInvites.
+     */
+    cursor?: TestimonialInviteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TestimonialInvites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TestimonialInvites.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TestimonialInvites.
+     */
+    distinct?: TestimonialInviteScalarFieldEnum | TestimonialInviteScalarFieldEnum[]
+  }
+
+  /**
+   * TestimonialInvite findFirstOrThrow
+   */
+  export type TestimonialInviteFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+    /**
+     * Filter, which TestimonialInvite to fetch.
+     */
+    where?: TestimonialInviteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TestimonialInvites to fetch.
+     */
+    orderBy?: TestimonialInviteOrderByWithRelationInput | TestimonialInviteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TestimonialInvites.
+     */
+    cursor?: TestimonialInviteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TestimonialInvites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TestimonialInvites.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TestimonialInvites.
+     */
+    distinct?: TestimonialInviteScalarFieldEnum | TestimonialInviteScalarFieldEnum[]
+  }
+
+  /**
+   * TestimonialInvite findMany
+   */
+  export type TestimonialInviteFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+    /**
+     * Filter, which TestimonialInvites to fetch.
+     */
+    where?: TestimonialInviteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TestimonialInvites to fetch.
+     */
+    orderBy?: TestimonialInviteOrderByWithRelationInput | TestimonialInviteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TestimonialInvites.
+     */
+    cursor?: TestimonialInviteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TestimonialInvites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TestimonialInvites.
+     */
+    skip?: number
+    distinct?: TestimonialInviteScalarFieldEnum | TestimonialInviteScalarFieldEnum[]
+  }
+
+  /**
+   * TestimonialInvite create
+   */
+  export type TestimonialInviteCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TestimonialInvite.
+     */
+    data: XOR<TestimonialInviteCreateInput, TestimonialInviteUncheckedCreateInput>
+  }
+
+  /**
+   * TestimonialInvite createMany
+   */
+  export type TestimonialInviteCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TestimonialInvites.
+     */
+    data: TestimonialInviteCreateManyInput | TestimonialInviteCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TestimonialInvite createManyAndReturn
+   */
+  export type TestimonialInviteCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * The data used to create many TestimonialInvites.
+     */
+    data: TestimonialInviteCreateManyInput | TestimonialInviteCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TestimonialInvite update
+   */
+  export type TestimonialInviteUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TestimonialInvite.
+     */
+    data: XOR<TestimonialInviteUpdateInput, TestimonialInviteUncheckedUpdateInput>
+    /**
+     * Choose, which TestimonialInvite to update.
+     */
+    where: TestimonialInviteWhereUniqueInput
+  }
+
+  /**
+   * TestimonialInvite updateMany
+   */
+  export type TestimonialInviteUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TestimonialInvites.
+     */
+    data: XOR<TestimonialInviteUpdateManyMutationInput, TestimonialInviteUncheckedUpdateManyInput>
+    /**
+     * Filter which TestimonialInvites to update
+     */
+    where?: TestimonialInviteWhereInput
+    /**
+     * Limit how many TestimonialInvites to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TestimonialInvite updateManyAndReturn
+   */
+  export type TestimonialInviteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * The data used to update TestimonialInvites.
+     */
+    data: XOR<TestimonialInviteUpdateManyMutationInput, TestimonialInviteUncheckedUpdateManyInput>
+    /**
+     * Filter which TestimonialInvites to update
+     */
+    where?: TestimonialInviteWhereInput
+    /**
+     * Limit how many TestimonialInvites to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TestimonialInvite upsert
+   */
+  export type TestimonialInviteUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TestimonialInvite to update in case it exists.
+     */
+    where: TestimonialInviteWhereUniqueInput
+    /**
+     * In case the TestimonialInvite found by the `where` argument doesn't exist, create a new TestimonialInvite with this data.
+     */
+    create: XOR<TestimonialInviteCreateInput, TestimonialInviteUncheckedCreateInput>
+    /**
+     * In case the TestimonialInvite was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TestimonialInviteUpdateInput, TestimonialInviteUncheckedUpdateInput>
+  }
+
+  /**
+   * TestimonialInvite delete
+   */
+  export type TestimonialInviteDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+    /**
+     * Filter which TestimonialInvite to delete.
+     */
+    where: TestimonialInviteWhereUniqueInput
+  }
+
+  /**
+   * TestimonialInvite deleteMany
+   */
+  export type TestimonialInviteDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TestimonialInvites to delete
+     */
+    where?: TestimonialInviteWhereInput
+    /**
+     * Limit how many TestimonialInvites to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TestimonialInvite.customer
+   */
+  export type TestimonialInvite$customerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Customer
+     */
+    select?: CustomerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Customer
+     */
+    omit?: CustomerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerInclude<ExtArgs> | null
+    where?: CustomerWhereInput
+  }
+
+  /**
+   * TestimonialInvite without action
+   */
+  export type TestimonialInviteDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestimonialInvite
+     */
+    select?: TestimonialInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestimonialInvite
+     */
+    omit?: TestimonialInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestimonialInviteInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -33203,6 +35880,39 @@ export namespace Prisma {
   };
 
   export type GalleryImageScalarFieldEnum = (typeof GalleryImageScalarFieldEnum)[keyof typeof GalleryImageScalarFieldEnum]
+
+
+  export const TestimonialScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    rating: 'rating',
+    text: 'text',
+    videoUrl: 'videoUrl',
+    photoUrl: 'photoUrl',
+    isPublic: 'isPublic',
+    customerName: 'customerName',
+    customerEmail: 'customerEmail',
+    businessId: 'businessId',
+    customerId: 'customerId'
+  };
+
+  export type TestimonialScalarFieldEnum = (typeof TestimonialScalarFieldEnum)[keyof typeof TestimonialScalarFieldEnum]
+
+
+  export const TestimonialInviteScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    expiresAt: 'expiresAt',
+    email: 'email',
+    code: 'code',
+    used: 'used',
+    usedAt: 'usedAt',
+    businessId: 'businessId',
+    customerId: 'customerId'
+  };
+
+  export type TestimonialInviteScalarFieldEnum = (typeof TestimonialInviteScalarFieldEnum)[keyof typeof TestimonialInviteScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -33762,6 +36472,8 @@ export namespace Prisma {
     pages?: PageListRelationFilter
     productImports?: ProductImportListRelationFilter
     galleries?: GalleryListRelationFilter
+    testimonials?: TestimonialListRelationFilter
+    testimonialInvites?: TestimonialInviteListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -33795,6 +36507,8 @@ export namespace Prisma {
     pages?: PageOrderByRelationAggregateInput
     productImports?: ProductImportOrderByRelationAggregateInput
     galleries?: GalleryOrderByRelationAggregateInput
+    testimonials?: TestimonialOrderByRelationAggregateInput
+    testimonialInvites?: TestimonialInviteOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -33831,6 +36545,8 @@ export namespace Prisma {
     pages?: PageListRelationFilter
     productImports?: ProductImportListRelationFilter
     galleries?: GalleryListRelationFilter
+    testimonials?: TestimonialListRelationFilter
+    testimonialInvites?: TestimonialInviteListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "stripeAccountId">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -34549,6 +37265,8 @@ export namespace Prisma {
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     orders?: OrderListRelationFilter
     shippingAddresses?: ShippingAddressListRelationFilter
+    testimonials?: TestimonialListRelationFilter
+    testimonialInvites?: TestimonialInviteListRelationFilter
   }
 
   export type CustomerOrderByWithRelationInput = {
@@ -34568,6 +37286,8 @@ export namespace Prisma {
     business?: BusinessOrderByWithRelationInput
     orders?: OrderOrderByRelationAggregateInput
     shippingAddresses?: ShippingAddressOrderByRelationAggregateInput
+    testimonials?: TestimonialOrderByRelationAggregateInput
+    testimonialInvites?: TestimonialInviteOrderByRelationAggregateInput
   }
 
   export type CustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -34591,6 +37311,8 @@ export namespace Prisma {
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     orders?: OrderListRelationFilter
     shippingAddresses?: ShippingAddressListRelationFilter
+    testimonials?: TestimonialListRelationFilter
+    testimonialInvites?: TestimonialInviteListRelationFilter
   }, "id" | "businessId_email">
 
   export type CustomerOrderByWithAggregationInput = {
@@ -35744,6 +38466,180 @@ export namespace Prisma {
     galleryId?: StringWithAggregatesFilter<"GalleryImage"> | string
   }
 
+  export type TestimonialWhereInput = {
+    AND?: TestimonialWhereInput | TestimonialWhereInput[]
+    OR?: TestimonialWhereInput[]
+    NOT?: TestimonialWhereInput | TestimonialWhereInput[]
+    id?: StringFilter<"Testimonial"> | string
+    createdAt?: DateTimeFilter<"Testimonial"> | Date | string
+    updatedAt?: DateTimeFilter<"Testimonial"> | Date | string
+    rating?: IntFilter<"Testimonial"> | number
+    text?: StringFilter<"Testimonial"> | string
+    videoUrl?: StringNullableFilter<"Testimonial"> | string | null
+    photoUrl?: StringNullableFilter<"Testimonial"> | string | null
+    isPublic?: BoolFilter<"Testimonial"> | boolean
+    customerName?: StringFilter<"Testimonial"> | string
+    customerEmail?: StringFilter<"Testimonial"> | string
+    businessId?: StringFilter<"Testimonial"> | string
+    customerId?: StringNullableFilter<"Testimonial"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
+  }
+
+  export type TestimonialOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    rating?: SortOrder
+    text?: SortOrder
+    videoUrl?: SortOrderInput | SortOrder
+    photoUrl?: SortOrderInput | SortOrder
+    isPublic?: SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+    customer?: CustomerOrderByWithRelationInput
+  }
+
+  export type TestimonialWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    businessId_customerEmail?: TestimonialBusinessIdCustomerEmailCompoundUniqueInput
+    AND?: TestimonialWhereInput | TestimonialWhereInput[]
+    OR?: TestimonialWhereInput[]
+    NOT?: TestimonialWhereInput | TestimonialWhereInput[]
+    createdAt?: DateTimeFilter<"Testimonial"> | Date | string
+    updatedAt?: DateTimeFilter<"Testimonial"> | Date | string
+    rating?: IntFilter<"Testimonial"> | number
+    text?: StringFilter<"Testimonial"> | string
+    videoUrl?: StringNullableFilter<"Testimonial"> | string | null
+    photoUrl?: StringNullableFilter<"Testimonial"> | string | null
+    isPublic?: BoolFilter<"Testimonial"> | boolean
+    customerName?: StringFilter<"Testimonial"> | string
+    customerEmail?: StringFilter<"Testimonial"> | string
+    businessId?: StringFilter<"Testimonial"> | string
+    customerId?: StringNullableFilter<"Testimonial"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
+  }, "id" | "businessId_customerEmail">
+
+  export type TestimonialOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    rating?: SortOrder
+    text?: SortOrder
+    videoUrl?: SortOrderInput | SortOrder
+    photoUrl?: SortOrderInput | SortOrder
+    isPublic?: SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    _count?: TestimonialCountOrderByAggregateInput
+    _avg?: TestimonialAvgOrderByAggregateInput
+    _max?: TestimonialMaxOrderByAggregateInput
+    _min?: TestimonialMinOrderByAggregateInput
+    _sum?: TestimonialSumOrderByAggregateInput
+  }
+
+  export type TestimonialScalarWhereWithAggregatesInput = {
+    AND?: TestimonialScalarWhereWithAggregatesInput | TestimonialScalarWhereWithAggregatesInput[]
+    OR?: TestimonialScalarWhereWithAggregatesInput[]
+    NOT?: TestimonialScalarWhereWithAggregatesInput | TestimonialScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Testimonial"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Testimonial"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Testimonial"> | Date | string
+    rating?: IntWithAggregatesFilter<"Testimonial"> | number
+    text?: StringWithAggregatesFilter<"Testimonial"> | string
+    videoUrl?: StringNullableWithAggregatesFilter<"Testimonial"> | string | null
+    photoUrl?: StringNullableWithAggregatesFilter<"Testimonial"> | string | null
+    isPublic?: BoolWithAggregatesFilter<"Testimonial"> | boolean
+    customerName?: StringWithAggregatesFilter<"Testimonial"> | string
+    customerEmail?: StringWithAggregatesFilter<"Testimonial"> | string
+    businessId?: StringWithAggregatesFilter<"Testimonial"> | string
+    customerId?: StringNullableWithAggregatesFilter<"Testimonial"> | string | null
+  }
+
+  export type TestimonialInviteWhereInput = {
+    AND?: TestimonialInviteWhereInput | TestimonialInviteWhereInput[]
+    OR?: TestimonialInviteWhereInput[]
+    NOT?: TestimonialInviteWhereInput | TestimonialInviteWhereInput[]
+    id?: StringFilter<"TestimonialInvite"> | string
+    createdAt?: DateTimeFilter<"TestimonialInvite"> | Date | string
+    expiresAt?: DateTimeFilter<"TestimonialInvite"> | Date | string
+    email?: StringFilter<"TestimonialInvite"> | string
+    code?: StringFilter<"TestimonialInvite"> | string
+    used?: BoolFilter<"TestimonialInvite"> | boolean
+    usedAt?: DateTimeNullableFilter<"TestimonialInvite"> | Date | string | null
+    businessId?: StringFilter<"TestimonialInvite"> | string
+    customerId?: StringNullableFilter<"TestimonialInvite"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
+  }
+
+  export type TestimonialInviteOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    email?: SortOrder
+    code?: SortOrder
+    used?: SortOrder
+    usedAt?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+    customer?: CustomerOrderByWithRelationInput
+  }
+
+  export type TestimonialInviteWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    code?: string
+    AND?: TestimonialInviteWhereInput | TestimonialInviteWhereInput[]
+    OR?: TestimonialInviteWhereInput[]
+    NOT?: TestimonialInviteWhereInput | TestimonialInviteWhereInput[]
+    createdAt?: DateTimeFilter<"TestimonialInvite"> | Date | string
+    expiresAt?: DateTimeFilter<"TestimonialInvite"> | Date | string
+    email?: StringFilter<"TestimonialInvite"> | string
+    used?: BoolFilter<"TestimonialInvite"> | boolean
+    usedAt?: DateTimeNullableFilter<"TestimonialInvite"> | Date | string | null
+    businessId?: StringFilter<"TestimonialInvite"> | string
+    customerId?: StringNullableFilter<"TestimonialInvite"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
+  }, "id" | "code">
+
+  export type TestimonialInviteOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    email?: SortOrder
+    code?: SortOrder
+    used?: SortOrder
+    usedAt?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    _count?: TestimonialInviteCountOrderByAggregateInput
+    _max?: TestimonialInviteMaxOrderByAggregateInput
+    _min?: TestimonialInviteMinOrderByAggregateInput
+  }
+
+  export type TestimonialInviteScalarWhereWithAggregatesInput = {
+    AND?: TestimonialInviteScalarWhereWithAggregatesInput | TestimonialInviteScalarWhereWithAggregatesInput[]
+    OR?: TestimonialInviteScalarWhereWithAggregatesInput[]
+    NOT?: TestimonialInviteScalarWhereWithAggregatesInput | TestimonialInviteScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TestimonialInvite"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"TestimonialInvite"> | Date | string
+    expiresAt?: DateTimeWithAggregatesFilter<"TestimonialInvite"> | Date | string
+    email?: StringWithAggregatesFilter<"TestimonialInvite"> | string
+    code?: StringWithAggregatesFilter<"TestimonialInvite"> | string
+    used?: BoolWithAggregatesFilter<"TestimonialInvite"> | boolean
+    usedAt?: DateTimeNullableWithAggregatesFilter<"TestimonialInvite"> | Date | string | null
+    businessId?: StringWithAggregatesFilter<"TestimonialInvite"> | string
+    customerId?: StringNullableWithAggregatesFilter<"TestimonialInvite"> | string | null
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
@@ -36180,6 +39076,8 @@ export namespace Prisma {
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -36213,6 +39111,8 @@ export namespace Prisma {
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -36246,6 +39146,8 @@ export namespace Prisma {
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -36279,6 +39181,8 @@ export namespace Prisma {
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -37104,6 +40008,8 @@ export namespace Prisma {
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateInput = {
@@ -37121,6 +40027,8 @@ export namespace Prisma {
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUpdateInput = {
@@ -37138,6 +40046,8 @@ export namespace Prisma {
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateInput = {
@@ -37155,6 +40065,8 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerCreateManyInput = {
@@ -38448,6 +41360,191 @@ export namespace Prisma {
     galleryId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type TestimonialCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rating: number
+    text: string
+    videoUrl?: string | null
+    photoUrl?: string | null
+    isPublic?: boolean
+    customerName: string
+    customerEmail: string
+    business: BusinessCreateNestedOneWithoutTestimonialsInput
+    customer?: CustomerCreateNestedOneWithoutTestimonialsInput
+  }
+
+  export type TestimonialUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rating: number
+    text: string
+    videoUrl?: string | null
+    photoUrl?: string | null
+    isPublic?: boolean
+    customerName: string
+    customerEmail: string
+    businessId: string
+    customerId?: string | null
+  }
+
+  export type TestimonialUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rating?: IntFieldUpdateOperationsInput | number
+    text?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    business?: BusinessUpdateOneRequiredWithoutTestimonialsNestedInput
+    customer?: CustomerUpdateOneWithoutTestimonialsNestedInput
+  }
+
+  export type TestimonialUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rating?: IntFieldUpdateOperationsInput | number
+    text?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type TestimonialCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rating: number
+    text: string
+    videoUrl?: string | null
+    photoUrl?: string | null
+    isPublic?: boolean
+    customerName: string
+    customerEmail: string
+    businessId: string
+    customerId?: string | null
+  }
+
+  export type TestimonialUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rating?: IntFieldUpdateOperationsInput | number
+    text?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type TestimonialUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rating?: IntFieldUpdateOperationsInput | number
+    text?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type TestimonialInviteCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    email: string
+    code: string
+    used?: boolean
+    usedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutTestimonialInvitesInput
+    customer?: CustomerCreateNestedOneWithoutTestimonialInvitesInput
+  }
+
+  export type TestimonialInviteUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    email: string
+    code: string
+    used?: boolean
+    usedAt?: Date | string | null
+    businessId: string
+    customerId?: string | null
+  }
+
+  export type TestimonialInviteUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutTestimonialInvitesNestedInput
+    customer?: CustomerUpdateOneWithoutTestimonialInvitesNestedInput
+  }
+
+  export type TestimonialInviteUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type TestimonialInviteCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    email: string
+    code: string
+    used?: boolean
+    usedAt?: Date | string | null
+    businessId: string
+    customerId?: string | null
+  }
+
+  export type TestimonialInviteUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type TestimonialInviteUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -38888,6 +41985,18 @@ export namespace Prisma {
     none?: GalleryWhereInput
   }
 
+  export type TestimonialListRelationFilter = {
+    every?: TestimonialWhereInput
+    some?: TestimonialWhereInput
+    none?: TestimonialWhereInput
+  }
+
+  export type TestimonialInviteListRelationFilter = {
+    every?: TestimonialInviteWhereInput
+    some?: TestimonialInviteWhereInput
+    none?: TestimonialInviteWhereInput
+  }
+
   export type UserOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -38921,6 +42030,14 @@ export namespace Prisma {
   }
 
   export type GalleryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TestimonialOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TestimonialInviteOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -40406,6 +43523,100 @@ export namespace Prisma {
     sortOrder?: SortOrder
   }
 
+  export type TestimonialBusinessIdCustomerEmailCompoundUniqueInput = {
+    businessId: string
+    customerEmail: string
+  }
+
+  export type TestimonialCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    rating?: SortOrder
+    text?: SortOrder
+    videoUrl?: SortOrder
+    photoUrl?: SortOrder
+    isPublic?: SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+  }
+
+  export type TestimonialAvgOrderByAggregateInput = {
+    rating?: SortOrder
+  }
+
+  export type TestimonialMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    rating?: SortOrder
+    text?: SortOrder
+    videoUrl?: SortOrder
+    photoUrl?: SortOrder
+    isPublic?: SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+  }
+
+  export type TestimonialMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    rating?: SortOrder
+    text?: SortOrder
+    videoUrl?: SortOrder
+    photoUrl?: SortOrder
+    isPublic?: SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+  }
+
+  export type TestimonialSumOrderByAggregateInput = {
+    rating?: SortOrder
+  }
+
+  export type TestimonialInviteCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    email?: SortOrder
+    code?: SortOrder
+    used?: SortOrder
+    usedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+  }
+
+  export type TestimonialInviteMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    email?: SortOrder
+    code?: SortOrder
+    used?: SortOrder
+    usedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+  }
+
+  export type TestimonialInviteMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    email?: SortOrder
+    code?: SortOrder
+    used?: SortOrder
+    usedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+  }
+
   export type SessionCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -40725,6 +43936,20 @@ export namespace Prisma {
     connect?: GalleryWhereUniqueInput | GalleryWhereUniqueInput[]
   }
 
+  export type TestimonialCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<TestimonialCreateWithoutBusinessInput, TestimonialUncheckedCreateWithoutBusinessInput> | TestimonialCreateWithoutBusinessInput[] | TestimonialUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: TestimonialCreateOrConnectWithoutBusinessInput | TestimonialCreateOrConnectWithoutBusinessInput[]
+    createMany?: TestimonialCreateManyBusinessInputEnvelope
+    connect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+  }
+
+  export type TestimonialInviteCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<TestimonialInviteCreateWithoutBusinessInput, TestimonialInviteUncheckedCreateWithoutBusinessInput> | TestimonialInviteCreateWithoutBusinessInput[] | TestimonialInviteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: TestimonialInviteCreateOrConnectWithoutBusinessInput | TestimonialInviteCreateOrConnectWithoutBusinessInput[]
+    createMany?: TestimonialInviteCreateManyBusinessInputEnvelope
+    connect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+  }
+
   export type UserUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<UserCreateWithoutBusinessInput, UserUncheckedCreateWithoutBusinessInput> | UserCreateWithoutBusinessInput[] | UserUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: UserCreateOrConnectWithoutBusinessInput | UserCreateOrConnectWithoutBusinessInput[]
@@ -40806,6 +44031,20 @@ export namespace Prisma {
     connectOrCreate?: GalleryCreateOrConnectWithoutBusinessInput | GalleryCreateOrConnectWithoutBusinessInput[]
     createMany?: GalleryCreateManyBusinessInputEnvelope
     connect?: GalleryWhereUniqueInput | GalleryWhereUniqueInput[]
+  }
+
+  export type TestimonialUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<TestimonialCreateWithoutBusinessInput, TestimonialUncheckedCreateWithoutBusinessInput> | TestimonialCreateWithoutBusinessInput[] | TestimonialUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: TestimonialCreateOrConnectWithoutBusinessInput | TestimonialCreateOrConnectWithoutBusinessInput[]
+    createMany?: TestimonialCreateManyBusinessInputEnvelope
+    connect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+  }
+
+  export type TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<TestimonialInviteCreateWithoutBusinessInput, TestimonialInviteUncheckedCreateWithoutBusinessInput> | TestimonialInviteCreateWithoutBusinessInput[] | TestimonialInviteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: TestimonialInviteCreateOrConnectWithoutBusinessInput | TestimonialInviteCreateOrConnectWithoutBusinessInput[]
+    createMany?: TestimonialInviteCreateManyBusinessInputEnvelope
+    connect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
   }
 
   export type EnumBusinessDomainStatusFieldUpdateOperationsInput = {
@@ -40976,6 +44215,34 @@ export namespace Prisma {
     deleteMany?: GalleryScalarWhereInput | GalleryScalarWhereInput[]
   }
 
+  export type TestimonialUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<TestimonialCreateWithoutBusinessInput, TestimonialUncheckedCreateWithoutBusinessInput> | TestimonialCreateWithoutBusinessInput[] | TestimonialUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: TestimonialCreateOrConnectWithoutBusinessInput | TestimonialCreateOrConnectWithoutBusinessInput[]
+    upsert?: TestimonialUpsertWithWhereUniqueWithoutBusinessInput | TestimonialUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: TestimonialCreateManyBusinessInputEnvelope
+    set?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    disconnect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    delete?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    connect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    update?: TestimonialUpdateWithWhereUniqueWithoutBusinessInput | TestimonialUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: TestimonialUpdateManyWithWhereWithoutBusinessInput | TestimonialUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: TestimonialScalarWhereInput | TestimonialScalarWhereInput[]
+  }
+
+  export type TestimonialInviteUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<TestimonialInviteCreateWithoutBusinessInput, TestimonialInviteUncheckedCreateWithoutBusinessInput> | TestimonialInviteCreateWithoutBusinessInput[] | TestimonialInviteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: TestimonialInviteCreateOrConnectWithoutBusinessInput | TestimonialInviteCreateOrConnectWithoutBusinessInput[]
+    upsert?: TestimonialInviteUpsertWithWhereUniqueWithoutBusinessInput | TestimonialInviteUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: TestimonialInviteCreateManyBusinessInputEnvelope
+    set?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    disconnect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    delete?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    connect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    update?: TestimonialInviteUpdateWithWhereUniqueWithoutBusinessInput | TestimonialInviteUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: TestimonialInviteUpdateManyWithWhereWithoutBusinessInput | TestimonialInviteUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: TestimonialInviteScalarWhereInput | TestimonialInviteScalarWhereInput[]
+  }
+
   export type UserUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<UserCreateWithoutBusinessInput, UserUncheckedCreateWithoutBusinessInput> | UserCreateWithoutBusinessInput[] | UserUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: UserCreateOrConnectWithoutBusinessInput | UserCreateOrConnectWithoutBusinessInput[]
@@ -41138,6 +44405,34 @@ export namespace Prisma {
     update?: GalleryUpdateWithWhereUniqueWithoutBusinessInput | GalleryUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: GalleryUpdateManyWithWhereWithoutBusinessInput | GalleryUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: GalleryScalarWhereInput | GalleryScalarWhereInput[]
+  }
+
+  export type TestimonialUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<TestimonialCreateWithoutBusinessInput, TestimonialUncheckedCreateWithoutBusinessInput> | TestimonialCreateWithoutBusinessInput[] | TestimonialUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: TestimonialCreateOrConnectWithoutBusinessInput | TestimonialCreateOrConnectWithoutBusinessInput[]
+    upsert?: TestimonialUpsertWithWhereUniqueWithoutBusinessInput | TestimonialUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: TestimonialCreateManyBusinessInputEnvelope
+    set?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    disconnect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    delete?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    connect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    update?: TestimonialUpdateWithWhereUniqueWithoutBusinessInput | TestimonialUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: TestimonialUpdateManyWithWhereWithoutBusinessInput | TestimonialUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: TestimonialScalarWhereInput | TestimonialScalarWhereInput[]
+  }
+
+  export type TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<TestimonialInviteCreateWithoutBusinessInput, TestimonialInviteUncheckedCreateWithoutBusinessInput> | TestimonialInviteCreateWithoutBusinessInput[] | TestimonialInviteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: TestimonialInviteCreateOrConnectWithoutBusinessInput | TestimonialInviteCreateOrConnectWithoutBusinessInput[]
+    upsert?: TestimonialInviteUpsertWithWhereUniqueWithoutBusinessInput | TestimonialInviteUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: TestimonialInviteCreateManyBusinessInputEnvelope
+    set?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    disconnect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    delete?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    connect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    update?: TestimonialInviteUpdateWithWhereUniqueWithoutBusinessInput | TestimonialInviteUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: TestimonialInviteUpdateManyWithWhereWithoutBusinessInput | TestimonialInviteUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: TestimonialInviteScalarWhereInput | TestimonialInviteScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutSiteContentInput = {
@@ -41650,6 +44945,20 @@ export namespace Prisma {
     connect?: ShippingAddressWhereUniqueInput | ShippingAddressWhereUniqueInput[]
   }
 
+  export type TestimonialCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<TestimonialCreateWithoutCustomerInput, TestimonialUncheckedCreateWithoutCustomerInput> | TestimonialCreateWithoutCustomerInput[] | TestimonialUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: TestimonialCreateOrConnectWithoutCustomerInput | TestimonialCreateOrConnectWithoutCustomerInput[]
+    createMany?: TestimonialCreateManyCustomerInputEnvelope
+    connect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+  }
+
+  export type TestimonialInviteCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<TestimonialInviteCreateWithoutCustomerInput, TestimonialInviteUncheckedCreateWithoutCustomerInput> | TestimonialInviteCreateWithoutCustomerInput[] | TestimonialInviteUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: TestimonialInviteCreateOrConnectWithoutCustomerInput | TestimonialInviteCreateOrConnectWithoutCustomerInput[]
+    createMany?: TestimonialInviteCreateManyCustomerInputEnvelope
+    connect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+  }
+
   export type OrderUncheckedCreateNestedManyWithoutCustomerInput = {
     create?: XOR<OrderCreateWithoutCustomerInput, OrderUncheckedCreateWithoutCustomerInput> | OrderCreateWithoutCustomerInput[] | OrderUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutCustomerInput | OrderCreateOrConnectWithoutCustomerInput[]
@@ -41662,6 +44971,20 @@ export namespace Prisma {
     connectOrCreate?: ShippingAddressCreateOrConnectWithoutCustomerInput | ShippingAddressCreateOrConnectWithoutCustomerInput[]
     createMany?: ShippingAddressCreateManyCustomerInputEnvelope
     connect?: ShippingAddressWhereUniqueInput | ShippingAddressWhereUniqueInput[]
+  }
+
+  export type TestimonialUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<TestimonialCreateWithoutCustomerInput, TestimonialUncheckedCreateWithoutCustomerInput> | TestimonialCreateWithoutCustomerInput[] | TestimonialUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: TestimonialCreateOrConnectWithoutCustomerInput | TestimonialCreateOrConnectWithoutCustomerInput[]
+    createMany?: TestimonialCreateManyCustomerInputEnvelope
+    connect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+  }
+
+  export type TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<TestimonialInviteCreateWithoutCustomerInput, TestimonialInviteUncheckedCreateWithoutCustomerInput> | TestimonialInviteCreateWithoutCustomerInput[] | TestimonialInviteUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: TestimonialInviteCreateOrConnectWithoutCustomerInput | TestimonialInviteCreateOrConnectWithoutCustomerInput[]
+    createMany?: TestimonialInviteCreateManyCustomerInputEnvelope
+    connect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
   }
 
   export type UserUpdateOneWithoutCustomersNestedInput = {
@@ -41710,6 +45033,34 @@ export namespace Prisma {
     deleteMany?: ShippingAddressScalarWhereInput | ShippingAddressScalarWhereInput[]
   }
 
+  export type TestimonialUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<TestimonialCreateWithoutCustomerInput, TestimonialUncheckedCreateWithoutCustomerInput> | TestimonialCreateWithoutCustomerInput[] | TestimonialUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: TestimonialCreateOrConnectWithoutCustomerInput | TestimonialCreateOrConnectWithoutCustomerInput[]
+    upsert?: TestimonialUpsertWithWhereUniqueWithoutCustomerInput | TestimonialUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: TestimonialCreateManyCustomerInputEnvelope
+    set?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    disconnect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    delete?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    connect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    update?: TestimonialUpdateWithWhereUniqueWithoutCustomerInput | TestimonialUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: TestimonialUpdateManyWithWhereWithoutCustomerInput | TestimonialUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: TestimonialScalarWhereInput | TestimonialScalarWhereInput[]
+  }
+
+  export type TestimonialInviteUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<TestimonialInviteCreateWithoutCustomerInput, TestimonialInviteUncheckedCreateWithoutCustomerInput> | TestimonialInviteCreateWithoutCustomerInput[] | TestimonialInviteUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: TestimonialInviteCreateOrConnectWithoutCustomerInput | TestimonialInviteCreateOrConnectWithoutCustomerInput[]
+    upsert?: TestimonialInviteUpsertWithWhereUniqueWithoutCustomerInput | TestimonialInviteUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: TestimonialInviteCreateManyCustomerInputEnvelope
+    set?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    disconnect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    delete?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    connect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    update?: TestimonialInviteUpdateWithWhereUniqueWithoutCustomerInput | TestimonialInviteUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: TestimonialInviteUpdateManyWithWhereWithoutCustomerInput | TestimonialInviteUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: TestimonialInviteScalarWhereInput | TestimonialInviteScalarWhereInput[]
+  }
+
   export type OrderUncheckedUpdateManyWithoutCustomerNestedInput = {
     create?: XOR<OrderCreateWithoutCustomerInput, OrderUncheckedCreateWithoutCustomerInput> | OrderCreateWithoutCustomerInput[] | OrderUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutCustomerInput | OrderCreateOrConnectWithoutCustomerInput[]
@@ -41736,6 +45087,34 @@ export namespace Prisma {
     update?: ShippingAddressUpdateWithWhereUniqueWithoutCustomerInput | ShippingAddressUpdateWithWhereUniqueWithoutCustomerInput[]
     updateMany?: ShippingAddressUpdateManyWithWhereWithoutCustomerInput | ShippingAddressUpdateManyWithWhereWithoutCustomerInput[]
     deleteMany?: ShippingAddressScalarWhereInput | ShippingAddressScalarWhereInput[]
+  }
+
+  export type TestimonialUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<TestimonialCreateWithoutCustomerInput, TestimonialUncheckedCreateWithoutCustomerInput> | TestimonialCreateWithoutCustomerInput[] | TestimonialUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: TestimonialCreateOrConnectWithoutCustomerInput | TestimonialCreateOrConnectWithoutCustomerInput[]
+    upsert?: TestimonialUpsertWithWhereUniqueWithoutCustomerInput | TestimonialUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: TestimonialCreateManyCustomerInputEnvelope
+    set?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    disconnect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    delete?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    connect?: TestimonialWhereUniqueInput | TestimonialWhereUniqueInput[]
+    update?: TestimonialUpdateWithWhereUniqueWithoutCustomerInput | TestimonialUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: TestimonialUpdateManyWithWhereWithoutCustomerInput | TestimonialUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: TestimonialScalarWhereInput | TestimonialScalarWhereInput[]
+  }
+
+  export type TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<TestimonialInviteCreateWithoutCustomerInput, TestimonialInviteUncheckedCreateWithoutCustomerInput> | TestimonialInviteCreateWithoutCustomerInput[] | TestimonialInviteUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: TestimonialInviteCreateOrConnectWithoutCustomerInput | TestimonialInviteCreateOrConnectWithoutCustomerInput[]
+    upsert?: TestimonialInviteUpsertWithWhereUniqueWithoutCustomerInput | TestimonialInviteUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: TestimonialInviteCreateManyCustomerInputEnvelope
+    set?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    disconnect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    delete?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    connect?: TestimonialInviteWhereUniqueInput | TestimonialInviteWhereUniqueInput[]
+    update?: TestimonialInviteUpdateWithWhereUniqueWithoutCustomerInput | TestimonialInviteUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: TestimonialInviteUpdateManyWithWhereWithoutCustomerInput | TestimonialInviteUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: TestimonialInviteScalarWhereInput | TestimonialInviteScalarWhereInput[]
   }
 
   export type CustomerCreateNestedOneWithoutShippingAddressesInput = {
@@ -42216,6 +45595,66 @@ export namespace Prisma {
     update?: XOR<XOR<GalleryUpdateToOneWithWhereWithoutImagesInput, GalleryUpdateWithoutImagesInput>, GalleryUncheckedUpdateWithoutImagesInput>
   }
 
+  export type BusinessCreateNestedOneWithoutTestimonialsInput = {
+    create?: XOR<BusinessCreateWithoutTestimonialsInput, BusinessUncheckedCreateWithoutTestimonialsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutTestimonialsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type CustomerCreateNestedOneWithoutTestimonialsInput = {
+    create?: XOR<CustomerCreateWithoutTestimonialsInput, CustomerUncheckedCreateWithoutTestimonialsInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutTestimonialsInput
+    connect?: CustomerWhereUniqueInput
+  }
+
+  export type BusinessUpdateOneRequiredWithoutTestimonialsNestedInput = {
+    create?: XOR<BusinessCreateWithoutTestimonialsInput, BusinessUncheckedCreateWithoutTestimonialsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutTestimonialsInput
+    upsert?: BusinessUpsertWithoutTestimonialsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutTestimonialsInput, BusinessUpdateWithoutTestimonialsInput>, BusinessUncheckedUpdateWithoutTestimonialsInput>
+  }
+
+  export type CustomerUpdateOneWithoutTestimonialsNestedInput = {
+    create?: XOR<CustomerCreateWithoutTestimonialsInput, CustomerUncheckedCreateWithoutTestimonialsInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutTestimonialsInput
+    upsert?: CustomerUpsertWithoutTestimonialsInput
+    disconnect?: CustomerWhereInput | boolean
+    delete?: CustomerWhereInput | boolean
+    connect?: CustomerWhereUniqueInput
+    update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutTestimonialsInput, CustomerUpdateWithoutTestimonialsInput>, CustomerUncheckedUpdateWithoutTestimonialsInput>
+  }
+
+  export type BusinessCreateNestedOneWithoutTestimonialInvitesInput = {
+    create?: XOR<BusinessCreateWithoutTestimonialInvitesInput, BusinessUncheckedCreateWithoutTestimonialInvitesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutTestimonialInvitesInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type CustomerCreateNestedOneWithoutTestimonialInvitesInput = {
+    create?: XOR<CustomerCreateWithoutTestimonialInvitesInput, CustomerUncheckedCreateWithoutTestimonialInvitesInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutTestimonialInvitesInput
+    connect?: CustomerWhereUniqueInput
+  }
+
+  export type BusinessUpdateOneRequiredWithoutTestimonialInvitesNestedInput = {
+    create?: XOR<BusinessCreateWithoutTestimonialInvitesInput, BusinessUncheckedCreateWithoutTestimonialInvitesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutTestimonialInvitesInput
+    upsert?: BusinessUpsertWithoutTestimonialInvitesInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutTestimonialInvitesInput, BusinessUpdateWithoutTestimonialInvitesInput>, BusinessUncheckedUpdateWithoutTestimonialInvitesInput>
+  }
+
+  export type CustomerUpdateOneWithoutTestimonialInvitesNestedInput = {
+    create?: XOR<CustomerCreateWithoutTestimonialInvitesInput, CustomerUncheckedCreateWithoutTestimonialInvitesInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutTestimonialInvitesInput
+    upsert?: CustomerUpsertWithoutTestimonialInvitesInput
+    disconnect?: CustomerWhereInput | boolean
+    delete?: CustomerWhereInput | boolean
+    connect?: CustomerWhereUniqueInput
+    update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutTestimonialInvitesInput, CustomerUpdateWithoutTestimonialInvitesInput>, CustomerUncheckedUpdateWithoutTestimonialInvitesInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -42629,6 +46068,8 @@ export namespace Prisma {
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutUsersInput = {
@@ -42661,6 +46102,8 @@ export namespace Prisma {
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutUsersInput = {
@@ -42720,6 +46163,8 @@ export namespace Prisma {
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutUserInput = {
@@ -42736,6 +46181,8 @@ export namespace Prisma {
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutUserInput = {
@@ -42854,6 +46301,8 @@ export namespace Prisma {
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutUsersInput = {
@@ -42886,6 +46335,8 @@ export namespace Prisma {
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type InventoryHistoryUpsertWithWhereUniqueWithoutUserInput = {
@@ -43344,6 +46795,8 @@ export namespace Prisma {
     user?: UserCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutBusinessInput = {
@@ -43360,6 +46813,8 @@ export namespace Prisma {
     userId?: string | null
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutBusinessInput = {
@@ -43674,6 +47129,76 @@ export namespace Prisma {
 
   export type GalleryCreateManyBusinessInputEnvelope = {
     data: GalleryCreateManyBusinessInput | GalleryCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TestimonialCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rating: number
+    text: string
+    videoUrl?: string | null
+    photoUrl?: string | null
+    isPublic?: boolean
+    customerName: string
+    customerEmail: string
+    customer?: CustomerCreateNestedOneWithoutTestimonialsInput
+  }
+
+  export type TestimonialUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rating: number
+    text: string
+    videoUrl?: string | null
+    photoUrl?: string | null
+    isPublic?: boolean
+    customerName: string
+    customerEmail: string
+    customerId?: string | null
+  }
+
+  export type TestimonialCreateOrConnectWithoutBusinessInput = {
+    where: TestimonialWhereUniqueInput
+    create: XOR<TestimonialCreateWithoutBusinessInput, TestimonialUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type TestimonialCreateManyBusinessInputEnvelope = {
+    data: TestimonialCreateManyBusinessInput | TestimonialCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TestimonialInviteCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    email: string
+    code: string
+    used?: boolean
+    usedAt?: Date | string | null
+    customer?: CustomerCreateNestedOneWithoutTestimonialInvitesInput
+  }
+
+  export type TestimonialInviteUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    email: string
+    code: string
+    used?: boolean
+    usedAt?: Date | string | null
+    customerId?: string | null
+  }
+
+  export type TestimonialInviteCreateOrConnectWithoutBusinessInput = {
+    where: TestimonialInviteWhereUniqueInput
+    create: XOR<TestimonialInviteCreateWithoutBusinessInput, TestimonialInviteUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type TestimonialInviteCreateManyBusinessInputEnvelope = {
+    data: TestimonialInviteCreateManyBusinessInput | TestimonialInviteCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
@@ -44111,6 +47636,71 @@ export namespace Prisma {
     businessId?: StringFilter<"Gallery"> | string
   }
 
+  export type TestimonialUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: TestimonialWhereUniqueInput
+    update: XOR<TestimonialUpdateWithoutBusinessInput, TestimonialUncheckedUpdateWithoutBusinessInput>
+    create: XOR<TestimonialCreateWithoutBusinessInput, TestimonialUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type TestimonialUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: TestimonialWhereUniqueInput
+    data: XOR<TestimonialUpdateWithoutBusinessInput, TestimonialUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type TestimonialUpdateManyWithWhereWithoutBusinessInput = {
+    where: TestimonialScalarWhereInput
+    data: XOR<TestimonialUpdateManyMutationInput, TestimonialUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type TestimonialScalarWhereInput = {
+    AND?: TestimonialScalarWhereInput | TestimonialScalarWhereInput[]
+    OR?: TestimonialScalarWhereInput[]
+    NOT?: TestimonialScalarWhereInput | TestimonialScalarWhereInput[]
+    id?: StringFilter<"Testimonial"> | string
+    createdAt?: DateTimeFilter<"Testimonial"> | Date | string
+    updatedAt?: DateTimeFilter<"Testimonial"> | Date | string
+    rating?: IntFilter<"Testimonial"> | number
+    text?: StringFilter<"Testimonial"> | string
+    videoUrl?: StringNullableFilter<"Testimonial"> | string | null
+    photoUrl?: StringNullableFilter<"Testimonial"> | string | null
+    isPublic?: BoolFilter<"Testimonial"> | boolean
+    customerName?: StringFilter<"Testimonial"> | string
+    customerEmail?: StringFilter<"Testimonial"> | string
+    businessId?: StringFilter<"Testimonial"> | string
+    customerId?: StringNullableFilter<"Testimonial"> | string | null
+  }
+
+  export type TestimonialInviteUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: TestimonialInviteWhereUniqueInput
+    update: XOR<TestimonialInviteUpdateWithoutBusinessInput, TestimonialInviteUncheckedUpdateWithoutBusinessInput>
+    create: XOR<TestimonialInviteCreateWithoutBusinessInput, TestimonialInviteUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type TestimonialInviteUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: TestimonialInviteWhereUniqueInput
+    data: XOR<TestimonialInviteUpdateWithoutBusinessInput, TestimonialInviteUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type TestimonialInviteUpdateManyWithWhereWithoutBusinessInput = {
+    where: TestimonialInviteScalarWhereInput
+    data: XOR<TestimonialInviteUpdateManyMutationInput, TestimonialInviteUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type TestimonialInviteScalarWhereInput = {
+    AND?: TestimonialInviteScalarWhereInput | TestimonialInviteScalarWhereInput[]
+    OR?: TestimonialInviteScalarWhereInput[]
+    NOT?: TestimonialInviteScalarWhereInput | TestimonialInviteScalarWhereInput[]
+    id?: StringFilter<"TestimonialInvite"> | string
+    createdAt?: DateTimeFilter<"TestimonialInvite"> | Date | string
+    expiresAt?: DateTimeFilter<"TestimonialInvite"> | Date | string
+    email?: StringFilter<"TestimonialInvite"> | string
+    code?: StringFilter<"TestimonialInvite"> | string
+    used?: BoolFilter<"TestimonialInvite"> | boolean
+    usedAt?: DateTimeNullableFilter<"TestimonialInvite"> | Date | string | null
+    businessId?: StringFilter<"TestimonialInvite"> | string
+    customerId?: StringNullableFilter<"TestimonialInvite"> | string | null
+  }
+
   export type BusinessCreateWithoutSiteContentInput = {
     id?: string
     createdAt?: Date | string
@@ -44141,6 +47731,8 @@ export namespace Prisma {
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSiteContentInput = {
@@ -44173,6 +47765,8 @@ export namespace Prisma {
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSiteContentInput = {
@@ -44221,6 +47815,8 @@ export namespace Prisma {
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSiteContentInput = {
@@ -44253,6 +47849,8 @@ export namespace Prisma {
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutProductsInput = {
@@ -44285,6 +47883,8 @@ export namespace Prisma {
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductsInput = {
@@ -44317,6 +47917,8 @@ export namespace Prisma {
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductsInput = {
@@ -44533,6 +48135,8 @@ export namespace Prisma {
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductsInput = {
@@ -44565,6 +48169,8 @@ export namespace Prisma {
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ImageUpsertWithWhereUniqueWithoutProductInput = {
@@ -44957,6 +48563,8 @@ export namespace Prisma {
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCollectionsInput = {
@@ -44989,6 +48597,8 @@ export namespace Prisma {
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCollectionsInput = {
@@ -45059,6 +48669,8 @@ export namespace Prisma {
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCollectionsInput = {
@@ -45091,6 +48703,8 @@ export namespace Prisma {
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CollectionProductUpsertWithWhereUniqueWithoutCollectionInput = {
@@ -45410,6 +49024,8 @@ export namespace Prisma {
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutImagesInput = {
@@ -45442,6 +49058,8 @@ export namespace Prisma {
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutImagesInput = {
@@ -45559,6 +49177,8 @@ export namespace Prisma {
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutImagesInput = {
@@ -45591,6 +49211,8 @@ export namespace Prisma {
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutCustomersInput = {
@@ -45658,6 +49280,8 @@ export namespace Prisma {
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomersInput = {
@@ -45690,6 +49314,8 @@ export namespace Prisma {
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomersInput = {
@@ -45817,6 +49443,76 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type TestimonialCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rating: number
+    text: string
+    videoUrl?: string | null
+    photoUrl?: string | null
+    isPublic?: boolean
+    customerName: string
+    customerEmail: string
+    business: BusinessCreateNestedOneWithoutTestimonialsInput
+  }
+
+  export type TestimonialUncheckedCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rating: number
+    text: string
+    videoUrl?: string | null
+    photoUrl?: string | null
+    isPublic?: boolean
+    customerName: string
+    customerEmail: string
+    businessId: string
+  }
+
+  export type TestimonialCreateOrConnectWithoutCustomerInput = {
+    where: TestimonialWhereUniqueInput
+    create: XOR<TestimonialCreateWithoutCustomerInput, TestimonialUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type TestimonialCreateManyCustomerInputEnvelope = {
+    data: TestimonialCreateManyCustomerInput | TestimonialCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TestimonialInviteCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    email: string
+    code: string
+    used?: boolean
+    usedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutTestimonialInvitesInput
+  }
+
+  export type TestimonialInviteUncheckedCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    email: string
+    code: string
+    used?: boolean
+    usedAt?: Date | string | null
+    businessId: string
+  }
+
+  export type TestimonialInviteCreateOrConnectWithoutCustomerInput = {
+    where: TestimonialInviteWhereUniqueInput
+    create: XOR<TestimonialInviteCreateWithoutCustomerInput, TestimonialInviteUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type TestimonialInviteCreateManyCustomerInputEnvelope = {
+    data: TestimonialInviteCreateManyCustomerInput | TestimonialInviteCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutCustomersInput = {
     update: XOR<UserUpdateWithoutCustomersInput, UserUncheckedUpdateWithoutCustomersInput>
     create: XOR<UserCreateWithoutCustomersInput, UserUncheckedCreateWithoutCustomersInput>
@@ -45899,6 +49595,8 @@ export namespace Prisma {
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -45931,6 +49629,8 @@ export namespace Prisma {
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -45986,6 +49686,38 @@ export namespace Prisma {
     customerId?: StringFilter<"ShippingAddress"> | string
   }
 
+  export type TestimonialUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: TestimonialWhereUniqueInput
+    update: XOR<TestimonialUpdateWithoutCustomerInput, TestimonialUncheckedUpdateWithoutCustomerInput>
+    create: XOR<TestimonialCreateWithoutCustomerInput, TestimonialUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type TestimonialUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: TestimonialWhereUniqueInput
+    data: XOR<TestimonialUpdateWithoutCustomerInput, TestimonialUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type TestimonialUpdateManyWithWhereWithoutCustomerInput = {
+    where: TestimonialScalarWhereInput
+    data: XOR<TestimonialUpdateManyMutationInput, TestimonialUncheckedUpdateManyWithoutCustomerInput>
+  }
+
+  export type TestimonialInviteUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: TestimonialInviteWhereUniqueInput
+    update: XOR<TestimonialInviteUpdateWithoutCustomerInput, TestimonialInviteUncheckedUpdateWithoutCustomerInput>
+    create: XOR<TestimonialInviteCreateWithoutCustomerInput, TestimonialInviteUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type TestimonialInviteUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: TestimonialInviteWhereUniqueInput
+    data: XOR<TestimonialInviteUpdateWithoutCustomerInput, TestimonialInviteUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type TestimonialInviteUpdateManyWithWhereWithoutCustomerInput = {
+    where: TestimonialInviteScalarWhereInput
+    data: XOR<TestimonialInviteUpdateManyMutationInput, TestimonialInviteUncheckedUpdateManyWithoutCustomerInput>
+  }
+
   export type CustomerCreateWithoutShippingAddressesInput = {
     id?: string
     createdAt?: Date | string
@@ -46000,6 +49732,8 @@ export namespace Prisma {
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutShippingAddressesInput = {
@@ -46016,6 +49750,8 @@ export namespace Prisma {
     userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutShippingAddressesInput = {
@@ -46122,6 +49858,8 @@ export namespace Prisma {
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutShippingAddressesInput = {
@@ -46138,6 +49876,8 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutShippingAddressInput = {
@@ -46186,6 +49926,8 @@ export namespace Prisma {
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrdersInput = {
@@ -46218,6 +49960,8 @@ export namespace Prisma {
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrdersInput = {
@@ -46239,6 +49983,8 @@ export namespace Prisma {
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutOrdersInput = {
@@ -46255,6 +50001,8 @@ export namespace Prisma {
     userId?: string | null
     businessId: string
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutOrdersInput = {
@@ -46455,6 +50203,8 @@ export namespace Prisma {
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrdersInput = {
@@ -46487,6 +50237,8 @@ export namespace Prisma {
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutOrdersInput = {
@@ -46514,6 +50266,8 @@ export namespace Prisma {
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutOrdersInput = {
@@ -46530,6 +50284,8 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type ShippingAddressUpsertWithoutOrdersInput = {
@@ -47042,6 +50798,8 @@ export namespace Prisma {
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDiscountCodesInput = {
@@ -47074,6 +50832,8 @@ export namespace Prisma {
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDiscountCodesInput = {
@@ -47196,6 +50956,8 @@ export namespace Prisma {
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDiscountCodesInput = {
@@ -47228,6 +50990,8 @@ export namespace Prisma {
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutDiscountCodeInput = {
@@ -47376,6 +51140,8 @@ export namespace Prisma {
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryHistoryInput = {
@@ -47408,6 +51174,8 @@ export namespace Prisma {
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryHistoryInput = {
@@ -47672,6 +51440,8 @@ export namespace Prisma {
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -47704,6 +51474,8 @@ export namespace Prisma {
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithoutInventoryHistoryInput = {
@@ -47852,6 +51624,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPagesInput = {
@@ -47884,6 +51658,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPagesInput = {
@@ -47932,6 +51708,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPagesInput = {
@@ -47964,6 +51742,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutProductImportsInput = {
@@ -47996,6 +51776,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductImportsInput = {
@@ -48028,6 +51810,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductImportsInput = {
@@ -48076,6 +51860,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductImportsInput = {
@@ -48108,6 +51894,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutGalleriesInput = {
@@ -48140,6 +51928,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutGalleriesInput = {
@@ -48172,6 +51962,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutGalleriesInput = {
@@ -48252,6 +52044,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutGalleriesInput = {
@@ -48284,6 +52078,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type GalleryImageUpsertWithWhereUniqueWithoutGalleryInput = {
@@ -48395,6 +52191,486 @@ export namespace Prisma {
     showCaptions?: BoolFieldUpdateOperationsInput | boolean
     enableLightbox?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type BusinessCreateWithoutTestimonialsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    businessAddress?: string | null
+    taxId?: string | null
+    stripeAccountId?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    users?: UserCreateNestedManyWithoutBusinessInput
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutTestimonialsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    businessAddress?: string | null
+    taxId?: string | null
+    stripeAccountId?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    users?: UserUncheckedCreateNestedManyWithoutBusinessInput
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutTestimonialsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutTestimonialsInput, BusinessUncheckedCreateWithoutTestimonialsInput>
+  }
+
+  export type CustomerCreateWithoutTestimonialsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    acceptsMarketing?: boolean
+    totalSpent?: number
+    orderCount?: number
+    user?: UserCreateNestedOneWithoutCustomersInput
+    business: BusinessCreateNestedOneWithoutCustomersInput
+    orders?: OrderCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerUncheckedCreateWithoutTestimonialsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    acceptsMarketing?: boolean
+    totalSpent?: number
+    orderCount?: number
+    userId?: string | null
+    businessId: string
+    orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerCreateOrConnectWithoutTestimonialsInput = {
+    where: CustomerWhereUniqueInput
+    create: XOR<CustomerCreateWithoutTestimonialsInput, CustomerUncheckedCreateWithoutTestimonialsInput>
+  }
+
+  export type BusinessUpsertWithoutTestimonialsInput = {
+    update: XOR<BusinessUpdateWithoutTestimonialsInput, BusinessUncheckedUpdateWithoutTestimonialsInput>
+    create: XOR<BusinessCreateWithoutTestimonialsInput, BusinessUncheckedCreateWithoutTestimonialsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutTestimonialsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutTestimonialsInput, BusinessUncheckedUpdateWithoutTestimonialsInput>
+  }
+
+  export type BusinessUpdateWithoutTestimonialsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    users?: UserUpdateManyWithoutBusinessNestedInput
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutTestimonialsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type CustomerUpsertWithoutTestimonialsInput = {
+    update: XOR<CustomerUpdateWithoutTestimonialsInput, CustomerUncheckedUpdateWithoutTestimonialsInput>
+    create: XOR<CustomerCreateWithoutTestimonialsInput, CustomerUncheckedCreateWithoutTestimonialsInput>
+    where?: CustomerWhereInput
+  }
+
+  export type CustomerUpdateToOneWithWhereWithoutTestimonialsInput = {
+    where?: CustomerWhereInput
+    data: XOR<CustomerUpdateWithoutTestimonialsInput, CustomerUncheckedUpdateWithoutTestimonialsInput>
+  }
+
+  export type CustomerUpdateWithoutTestimonialsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    user?: UserUpdateOneWithoutCustomersNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
+    orders?: OrderUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type CustomerUncheckedUpdateWithoutTestimonialsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type BusinessCreateWithoutTestimonialInvitesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    businessAddress?: string | null
+    taxId?: string | null
+    stripeAccountId?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    users?: UserCreateNestedManyWithoutBusinessInput
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutTestimonialInvitesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    businessAddress?: string | null
+    taxId?: string | null
+    stripeAccountId?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    users?: UserUncheckedCreateNestedManyWithoutBusinessInput
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutTestimonialInvitesInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutTestimonialInvitesInput, BusinessUncheckedCreateWithoutTestimonialInvitesInput>
+  }
+
+  export type CustomerCreateWithoutTestimonialInvitesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    acceptsMarketing?: boolean
+    totalSpent?: number
+    orderCount?: number
+    user?: UserCreateNestedOneWithoutCustomersInput
+    business: BusinessCreateNestedOneWithoutCustomersInput
+    orders?: OrderCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerUncheckedCreateWithoutTestimonialInvitesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    acceptsMarketing?: boolean
+    totalSpent?: number
+    orderCount?: number
+    userId?: string | null
+    businessId: string
+    orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerCreateOrConnectWithoutTestimonialInvitesInput = {
+    where: CustomerWhereUniqueInput
+    create: XOR<CustomerCreateWithoutTestimonialInvitesInput, CustomerUncheckedCreateWithoutTestimonialInvitesInput>
+  }
+
+  export type BusinessUpsertWithoutTestimonialInvitesInput = {
+    update: XOR<BusinessUpdateWithoutTestimonialInvitesInput, BusinessUncheckedUpdateWithoutTestimonialInvitesInput>
+    create: XOR<BusinessCreateWithoutTestimonialInvitesInput, BusinessUncheckedCreateWithoutTestimonialInvitesInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutTestimonialInvitesInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutTestimonialInvitesInput, BusinessUncheckedUpdateWithoutTestimonialInvitesInput>
+  }
+
+  export type BusinessUpdateWithoutTestimonialInvitesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    users?: UserUpdateManyWithoutBusinessNestedInput
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutTestimonialInvitesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type CustomerUpsertWithoutTestimonialInvitesInput = {
+    update: XOR<CustomerUpdateWithoutTestimonialInvitesInput, CustomerUncheckedUpdateWithoutTestimonialInvitesInput>
+    create: XOR<CustomerCreateWithoutTestimonialInvitesInput, CustomerUncheckedCreateWithoutTestimonialInvitesInput>
+    where?: CustomerWhereInput
+  }
+
+  export type CustomerUpdateToOneWithWhereWithoutTestimonialInvitesInput = {
+    where?: CustomerWhereInput
+    data: XOR<CustomerUpdateWithoutTestimonialInvitesInput, CustomerUncheckedUpdateWithoutTestimonialInvitesInput>
+  }
+
+  export type CustomerUpdateWithoutTestimonialInvitesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    user?: UserUpdateOneWithoutCustomersNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
+    orders?: OrderUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type CustomerUncheckedUpdateWithoutTestimonialInvitesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type SessionCreateManyUserInput = {
@@ -48581,6 +52857,8 @@ export namespace Prisma {
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutUserInput = {
@@ -48597,6 +52875,8 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateManyWithoutUserInput = {
@@ -48794,6 +53074,31 @@ export namespace Prisma {
     aspectRatio?: string | null
     showCaptions?: boolean
     enableLightbox?: boolean
+  }
+
+  export type TestimonialCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rating: number
+    text: string
+    videoUrl?: string | null
+    photoUrl?: string | null
+    isPublic?: boolean
+    customerName: string
+    customerEmail: string
+    customerId?: string | null
+  }
+
+  export type TestimonialInviteCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    email: string
+    code: string
+    used?: boolean
+    usedAt?: Date | string | null
+    customerId?: string | null
   }
 
   export type UserUpdateWithoutBusinessInput = {
@@ -49071,6 +53376,8 @@ export namespace Prisma {
     user?: UserUpdateOneWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutBusinessInput = {
@@ -49087,6 +53394,8 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateManyWithoutBusinessInput = {
@@ -49375,6 +53684,81 @@ export namespace Prisma {
     aspectRatio?: NullableStringFieldUpdateOperationsInput | string | null
     showCaptions?: BoolFieldUpdateOperationsInput | boolean
     enableLightbox?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type TestimonialUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rating?: IntFieldUpdateOperationsInput | number
+    text?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customer?: CustomerUpdateOneWithoutTestimonialsNestedInput
+  }
+
+  export type TestimonialUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rating?: IntFieldUpdateOperationsInput | number
+    text?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type TestimonialUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rating?: IntFieldUpdateOperationsInput | number
+    text?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type TestimonialInviteUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customer?: CustomerUpdateOneWithoutTestimonialInvitesNestedInput
+  }
+
+  export type TestimonialInviteUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type TestimonialInviteUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ImageCreateManyProductInput = {
@@ -49784,6 +54168,31 @@ export namespace Prisma {
     isDefault?: boolean
   }
 
+  export type TestimonialCreateManyCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rating: number
+    text: string
+    videoUrl?: string | null
+    photoUrl?: string | null
+    isPublic?: boolean
+    customerName: string
+    customerEmail: string
+    businessId: string
+  }
+
+  export type TestimonialInviteCreateManyCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    email: string
+    code: string
+    used?: boolean
+    usedAt?: Date | string | null
+    businessId: string
+  }
+
   export type OrderUpdateWithoutCustomerInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -49929,6 +54338,81 @@ export namespace Prisma {
     zip?: StringFieldUpdateOperationsInput | string
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type TestimonialUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rating?: IntFieldUpdateOperationsInput | number
+    text?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    business?: BusinessUpdateOneRequiredWithoutTestimonialsNestedInput
+  }
+
+  export type TestimonialUncheckedUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rating?: IntFieldUpdateOperationsInput | number
+    text?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type TestimonialUncheckedUpdateManyWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rating?: IntFieldUpdateOperationsInput | number
+    text?: StringFieldUpdateOperationsInput | string
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type TestimonialInviteUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutTestimonialInvitesNestedInput
+  }
+
+  export type TestimonialInviteUncheckedUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type TestimonialInviteUncheckedUpdateManyWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type OrderCreateManyShippingAddressInput = {
