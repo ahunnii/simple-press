@@ -1,6 +1,8 @@
 import { BookOpen, Flower2, HandHelping, MapIcon } from "lucide-react";
 
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
+import { GalleryRenderer } from "~/components/gallery-renderer";
 
 import { PollenCallToAction } from "./pollen-cta";
 import { PollenHomepageAbout } from "./pollen-homepage-about";
@@ -53,6 +55,15 @@ export async function PollenHomepage() {
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     },
   ];
+  const portfolioGalleryId = themeSpecificFields["pollen.global.gallery"];
+
+  // Fetch gallery if set
+  const gallery = portfolioGalleryId
+    ? await db.gallery.findUnique({
+        where: { id: portfolioGalleryId },
+        include: { images: { orderBy: { sortOrder: "asc" } } },
+      })
+    : null;
 
   return (
     <>
@@ -79,6 +90,9 @@ export async function PollenHomepage() {
         }
       />
       <PollenHomepageAbout services={services} />
+
+      {gallery && <GalleryRenderer gallery={gallery} />}
+
       <PollenHomepageGallery />
       <PollenCallToAction
         title={

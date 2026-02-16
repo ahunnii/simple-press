@@ -2,6 +2,13 @@ import type { TemplateField } from "~/lib/template-fields";
 
 const globalData: TemplateField[] = [
   {
+    key: "pollen.global.gallery",
+    label: "Gallery",
+    description: "Gallery for the global section",
+    type: "gallery",
+    page: "global",
+  },
+  {
     key: "pollen.global.cta-title",
     label: "CTA Title",
     description: "Title for the CTA section",

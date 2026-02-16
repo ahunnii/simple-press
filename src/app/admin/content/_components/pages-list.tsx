@@ -183,9 +183,7 @@ export function PagesList({ business }: PagesListProps) {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem asChild>
-                              <Link
-                                href={`/admin/content/pages/${page.id}/edit`}
-                              >
+                              <Link href={`/admin/content/pages/${page.id}`}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                               </Link>

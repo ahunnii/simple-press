@@ -195,7 +195,8 @@ exports.Prisma.BusinessScalarFieldEnum = {
   umamiWebsiteId: 'umamiWebsiteId',
   umamiEnabled: 'umamiEnabled',
   status: 'status',
-  onboardingComplete: 'onboardingComplete'
+  onboardingComplete: 'onboardingComplete',
+  siteFeatures: 'siteFeatures'
 };
 
 exports.Prisma.SiteContentScalarFieldEnum = {

@@ -141,7 +141,10 @@ model Business {
   // Status
   status          String  @default("active") // active | suspended | closed
   onboardingComplete Boolean @default(false)
-  
+
+  // Features
+  siteFeatures Json? // { key: value }
+
   // Relationships
   users       User[]
   products    Product[]

@@ -218,37 +218,50 @@ export const useMinimalTiptapEditor = ({
     [output, throttledSetValue],
   );
 
-  const handleCreate = React.useCallback(
-    (editor: Editor) => {
-      if (value && editor.isEmpty) {
-        editor.commands.setContent(value);
-      }
-    },
-    [value],
-  );
+  // Keep initial value in a ref so handleCreate can be stable. Avoids useEditor
+  // seeing a new onCreate every time form value (new ref) triggers a re-render.
+  const initialValueRef = React.useRef(value);
+  initialValueRef.current = value;
+  const handleCreate = React.useCallback((editor: Editor) => {
+    const initial = initialValueRef.current;
+    if (initial && editor.isEmpty) {
+      editor.commands.setContent(initial);
+    }
+  }, []);
 
   const handleBlur = React.useCallback(
     (editor: Editor) => onBlur?.(getOutput(editor, output)),
     [output, onBlur],
   );
 
-  const editor = useEditor({
-    immediatelyRender: false,
+  // Memoize extensions so useEditor doesn't recreate the editor on every render.
+  // Unstable extension array is a common cause of "Maximum update depth" with Tiptap.
+  const extensions = React.useMemo(
+    () =>
+      createExtensions({
+        placeholder,
+        uploader,
+        businessId,
+      }) as unknown as Extension[],
+    [placeholder, uploader, businessId],
+  );
 
-    extensions: createExtensions({
-      placeholder,
-      uploader,
-      businessId,
-    }) as unknown as Extension[],
-
-    editorProps: {
+  const editorProps = React.useMemo(
+    () => ({
       attributes: {
         autocomplete: "off",
         autocorrect: "off",
         autocapitalize: "off",
         class: cn("focus:outline-hidden", editorClassName),
       },
-    },
+    }),
+    [editorClassName],
+  );
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions,
+    editorProps,
     onUpdate: ({ editor }) => handleUpdate(editor),
     onCreate: ({ editor }) => handleCreate(editor),
     onBlur: ({ editor }) => handleBlur(editor),

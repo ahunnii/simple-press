@@ -15,7 +15,6 @@ import { SectionOne } from "./components/section/one";
 import { SectionThree } from "./components/section/three";
 import { SectionTwo } from "./components/section/two";
 import { useMinimalTiptapEditor } from "./hooks/use-minimal-tiptap";
-import { useTiptapEditor } from "./hooks/use-tiptap-editor";
 
 export interface MinimalTiptapProps extends Omit<
   UseMinimalTiptapEditorProps,
@@ -107,9 +106,11 @@ export const MainMinimalTiptapEditor = ({
   className,
   editorContentClassName,
 }: MinimalTiptapProps & { editor: Editor }) => {
-  const { editor } = useTiptapEditor(providedEditor);
-
-  if (!editor) {
+  // Use provided editor directly. Do not subscribe to full editor state here,
+  // or every transaction (e.g. from gallery) re-renders the whole toolbar and
+  // can cause "Maximum update depth exceeded". Each section subscribes narrowly
+  // via useEditorState where it needs to reflect selection/active state.
+  if (!providedEditor) {
     return null;
   }
 
@@ -123,12 +124,12 @@ export const MainMinimalTiptapEditor = ({
         className,
       )}
     >
-      <Toolbar editor={editor} />
+      <Toolbar editor={providedEditor} />
       <EditorContent
-        editor={editor}
+        editor={providedEditor}
         className={cn("minimal-tiptap-editor", editorContentClassName)}
       />
-      <LinkBubbleMenu editor={editor} />
+      <LinkBubbleMenu editor={providedEditor} />
     </MeasuredContainer>
   );
 };

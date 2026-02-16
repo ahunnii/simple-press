@@ -1,4 +1,5 @@
 import type { Editor } from "@tiptap/react";
+import { useEditorState } from "@tiptap/react";
 import type { VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { CaretDownIcon, LetterCaseCapitalizeIcon } from "@radix-ui/react-icons";
@@ -88,6 +89,16 @@ export const SectionOne: React.FC<SectionOneProps> = ({
   size,
   variant,
 }) => {
+  // Narrow subscription so we only re-render when heading/codeBlock active state
+  // changes (avoids re-rendering on every transaction and breaking the toolbar).
+  const activeState = useEditorState({
+    editor,
+    selector: (ctx) => ({
+      isHeading: ctx.editor.isActive("heading"),
+      isCodeBlock: ctx.editor.isActive("codeBlock"),
+    }),
+  });
+
   const filteredActions = React.useMemo(
     () =>
       formatActions.filter(
@@ -130,11 +141,10 @@ export const SectionOne: React.FC<SectionOneProps> = ({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <ToolbarButton
-          isActive={editor.isActive("heading")}
+          isActive={activeState?.isHeading ?? false}
           tooltip="Text styles"
           aria-label="Text styles"
-          pressed={editor.isActive("heading")}
-          disabled={editor.isActive("codeBlock")}
+          disabled={activeState?.isCodeBlock ?? false}
           size={size}
           variant={variant}
           className="gap-0"

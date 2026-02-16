@@ -36,7 +36,7 @@ export function PollenGenericPage({ business, page }: Props) {
       <div className="mx-auto max-w-7xl">
         <TiptapRenderer
           content={page.content as TiptapJSON}
-          className="prose prose-lg prose-invert prose-headings:text-white prose-p:text-white/80 prose-a:text-purple-400 prose-a:no-underline hover:prose-a:text-purple-300 prose-strong:text-white prose-code:text-purple-400 prose-pre:bg-zinc-900/50 prose-pre:border prose-pre:border-white/20 max-w-none"
+          className="prose prose-lg prose-invert prose-headings:text-black prose-p:text-black/80 prose-a:text-[#1f1f1f] prose-a:no-underline hover:prose-a:text-green-600 prose-strong:text-black prose-code:text-green-400 prose-pre:bg-zinc-900/50 prose-pre:border prose-pre:border-black/20 max-w-none"
         />
       </div>
     </PollenGeneralLayout>

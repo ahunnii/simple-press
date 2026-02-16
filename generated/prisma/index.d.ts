@@ -9268,6 +9268,7 @@ export namespace Prisma {
     umamiEnabled: number
     status: number
     onboardingComplete: number
+    siteFeatures: number
     _all: number
   }
 
@@ -9333,6 +9334,7 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    siteFeatures?: true
     _all?: true
   }
 
@@ -9427,6 +9429,7 @@ export namespace Prisma {
     umamiEnabled: boolean
     status: string
     onboardingComplete: boolean
+    siteFeatures: JsonValue | null
     _count: BusinessCountAggregateOutputType | null
     _min: BusinessMinAggregateOutputType | null
     _max: BusinessMaxAggregateOutputType | null
@@ -9465,6 +9468,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    siteFeatures?: boolean
     users?: boolean | Business$usersArgs<ExtArgs>
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -9501,6 +9505,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    siteFeatures?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -9522,6 +9527,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    siteFeatures?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectScalar = {
@@ -9543,9 +9549,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    siteFeatures?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "businessAddress" | "taxId" | "stripeAccountId" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "businessAddress" | "taxId" | "stripeAccountId" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "siteFeatures", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     users?: boolean | Business$usersArgs<ExtArgs>
     products?: boolean | Business$productsArgs<ExtArgs>
@@ -9603,6 +9610,7 @@ export namespace Prisma {
       umamiEnabled: boolean
       status: string
       onboardingComplete: boolean
+      siteFeatures: Prisma.JsonValue | null
     }, ExtArgs["result"]["business"]>
     composites: {}
   }
@@ -10058,6 +10066,7 @@ export namespace Prisma {
     readonly umamiEnabled: FieldRef<"Business", 'Boolean'>
     readonly status: FieldRef<"Business", 'String'>
     readonly onboardingComplete: FieldRef<"Business", 'Boolean'>
+    readonly siteFeatures: FieldRef<"Business", 'Json'>
   }
     
 
@@ -35526,7 +35535,8 @@ export namespace Prisma {
     umamiWebsiteId: 'umamiWebsiteId',
     umamiEnabled: 'umamiEnabled',
     status: 'status',
-    onboardingComplete: 'onboardingComplete'
+    onboardingComplete: 'onboardingComplete',
+    siteFeatures: 'siteFeatures'
   };
 
   export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
@@ -36460,6 +36470,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
+    siteFeatures?: JsonNullableFilter<"Business">
     users?: UserListRelationFilter
     products?: ProductListRelationFilter
     collections?: CollectionListRelationFilter
@@ -36495,6 +36506,7 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    siteFeatures?: SortOrderInput | SortOrder
     users?: UserOrderByRelationAggregateInput
     products?: ProductOrderByRelationAggregateInput
     collections?: CollectionOrderByRelationAggregateInput
@@ -36533,6 +36545,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
+    siteFeatures?: JsonNullableFilter<"Business">
     users?: UserListRelationFilter
     products?: ProductListRelationFilter
     collections?: CollectionListRelationFilter
@@ -36568,6 +36581,7 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    siteFeatures?: SortOrderInput | SortOrder
     _count?: BusinessCountOrderByAggregateInput
     _max?: BusinessMaxOrderByAggregateInput
     _min?: BusinessMinOrderByAggregateInput
@@ -36595,6 +36609,7 @@ export namespace Prisma {
     umamiEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     status?: StringWithAggregatesFilter<"Business"> | string
     onboardingComplete?: BoolWithAggregatesFilter<"Business"> | boolean
+    siteFeatures?: JsonNullableWithAggregatesFilter<"Business">
   }
 
   export type SiteContentWhereInput = {
@@ -39064,6 +39079,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -39099,6 +39115,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -39134,6 +39151,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -39169,6 +39187,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -39204,6 +39223,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessUpdateManyMutationInput = {
@@ -39225,6 +39245,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessUncheckedUpdateManyInput = {
@@ -39246,6 +39267,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SiteContentCreateInput = {
@@ -41925,6 +41947,29 @@ export namespace Prisma {
     notIn?: $Enums.BusinessDomainStatus[] | ListEnumBusinessDomainStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumBusinessDomainStatusFilter<$PrismaModel> | $Enums.BusinessDomainStatus
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type UserListRelationFilter = {
     every?: UserWhereInput
@@ -42060,6 +42105,7 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    siteFeatures?: SortOrder
   }
 
   export type BusinessMaxOrderByAggregateInput = {
@@ -42113,14 +42159,14 @@ export namespace Prisma {
     _min?: NestedEnumBusinessDomainStatusFilter<$PrismaModel>
     _max?: NestedEnumBusinessDomainStatusFilter<$PrismaModel>
   }
-  export type JsonNullableFilter<$PrismaModel = never> =
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
       >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
 
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
     mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
@@ -42135,6 +42181,9 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type BusinessScalarRelationFilter = {
@@ -42219,32 +42268,6 @@ export namespace Prisma {
     secondaryColor?: SortOrder
     accentColor?: SortOrder
     businessId?: SortOrder
-  }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -46057,6 +46080,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -46091,6 +46115,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -46290,6 +46315,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -46324,6 +46350,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -47720,6 +47747,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -47754,6 +47782,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -47804,6 +47833,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -47838,6 +47868,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -47872,6 +47903,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -47906,6 +47938,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -48124,6 +48157,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -48158,6 +48192,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -48552,6 +48587,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -48586,6 +48622,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -48658,6 +48695,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -48692,6 +48730,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -49013,6 +49052,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -49047,6 +49087,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -49166,6 +49207,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -49200,6 +49242,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -49269,6 +49312,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -49303,6 +49347,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -49584,6 +49629,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -49618,6 +49664,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -49915,6 +49962,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -49949,6 +49997,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -50192,6 +50241,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -50226,6 +50276,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -50787,6 +50838,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -50821,6 +50873,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -50945,6 +50998,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -50979,6 +51033,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -51129,6 +51184,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -51163,6 +51219,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -51429,6 +51486,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -51463,6 +51521,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -51613,6 +51672,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -51647,6 +51707,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -51697,6 +51758,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -51731,6 +51793,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -51765,6 +51828,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -51799,6 +51863,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -51849,6 +51914,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -51883,6 +51949,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -51917,6 +51984,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -51951,6 +52019,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -52033,6 +52102,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -52067,6 +52137,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -52212,6 +52283,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -52246,6 +52318,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -52337,6 +52410,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -52371,6 +52445,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
@@ -52452,6 +52527,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserCreateNestedManyWithoutBusinessInput
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
@@ -52486,6 +52562,7 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
@@ -52577,6 +52654,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUpdateManyWithoutBusinessNestedInput
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
@@ -52611,6 +52689,7 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    siteFeatures?: NullableJsonNullValueInput | InputJsonValue
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const galleryRouter = createTRPCRouter({
   // List galleries
@@ -29,6 +29,29 @@ export const galleryRouter = createTRPCRouter({
 
   // Get single gallery
   getById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const gallery = await ctx.db.gallery.findUnique({
+        where: { id: input.id },
+        include: {
+          images: {
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      });
+
+      if (!gallery) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Gallery not found",
+        });
+      }
+
+      return gallery;
+    }),
+
+  // Get single gallery by id (public, for storefront page content)
+  getByIdPublic: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const gallery = await ctx.db.gallery.findUnique({
