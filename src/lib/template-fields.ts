@@ -1,4 +1,5 @@
 import { darkTrendData } from "~/app/(storefront)/_templates/dark-trend";
+import { pollenData } from "~/app/(storefront)/_templates/pollen";
 
 export type TemplateField = {
   key: string;
@@ -161,6 +162,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ],
 
   ...darkTrendData,
+  ...pollenData,
 };
 
 /**
