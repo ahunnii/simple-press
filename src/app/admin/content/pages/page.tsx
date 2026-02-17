@@ -1,37 +1,28 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
+import { api } from "~/trpc/server";
 
 import { PagesList } from "../_components/pages-list";
+import { TrailHeader } from "../../_components/trail-header";
 
 export default async function PagesListPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const business = await api.business.get({ includePages: true });
+  if (!business) notFound();
+  if (!business.siteContent) notFound();
 
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      business: {
-        include: {
-          pages: {
-            where: { type: "page" },
-            orderBy: { sortOrder: "asc" },
-          },
-        },
-      },
-    },
-  });
-
-  if (!user?.business) {
-    redirect("/admin/welcome");
-  }
-
-  return <PagesList business={user.business} />;
+  return (
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Content", href: "/admin/content" },
+          { label: "Custom Pages" },
+        ]}
+      />
+      <PagesList business={business} />
+    </>
+  );
 }
+
+export const metadata = {
+  title: "Custom Pages",
+};

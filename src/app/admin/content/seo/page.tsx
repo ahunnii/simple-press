@@ -1,32 +1,29 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
+import { api } from "~/trpc/server";
 
 import { SEOEditor } from "../_components/seo-editor";
+import { TrailHeader } from "../../_components/trail-header";
 
 export default async function SEOPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) redirect("/auth/sign-in");
+  const business = await api.business.get();
+  if (!business) notFound();
+  if (!business.siteContent) notFound();
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      business: {
-        include: {
-          siteContent: true,
-        },
-      },
-    },
-  });
+  return (
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Content", href: "/admin/content" },
+          { label: "SEO & Meta" },
+        ]}
+      />
 
-  if (!user?.business) redirect("/admin/welcome");
-
-  let siteContent = user.business.siteContent;
-  siteContent ??= await db.siteContent.create({
-    data: { businessId: user.business.id },
-  });
-
-  return <SEOEditor business={user.business} siteContent={siteContent} />;
+      <SEOEditor business={business} siteContent={business.siteContent} />
+    </>
+  );
 }
+
+export const metadata = {
+  title: "SEO & Meta Settings",
+};

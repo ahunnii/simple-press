@@ -22,7 +22,7 @@ export default async function ProductsPage() {
   const products = await api.product.secureListAll();
 
   return (
-    <HydrateClient>
+    <>
       <SiteHeader title="Products" />
       <div className="admin-container">
         <div className="admin-header">
@@ -91,6 +91,6 @@ export default async function ProductsPage() {
           <ProductsTable products={products} />
         )}
       </div>
-    </HydrateClient>
+    </>
   );
 }

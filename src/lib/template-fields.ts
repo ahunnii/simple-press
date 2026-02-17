@@ -1,11 +1,14 @@
 import { darkTrendData } from "~/app/(storefront)/_templates/dark-trend";
-import { pollenData } from "~/app/(storefront)/_templates/pollen";
+import {
+  pollenData,
+  pollenFieldGroups,
+} from "~/app/(storefront)/_templates/pollen";
 
 export type TemplateField = {
   key: string;
   label: string;
   description: string;
-  type: "text" | "textarea" | "url" | "color" | "number" | "gallery";
+  type: "text" | "textarea" | "url" | "color" | "number" | "gallery" | "image";
   page:
     | "homepage"
     | "contact"
@@ -16,6 +19,103 @@ export type TemplateField = {
     | "checkout"
     | "global";
   defaultValue?: string;
+
+  // NEW: Grouping and layout
+  group?: string; // Fields with same group render together
+  gridColumn?: string; // Tailwind grid column classes (e.g., "col-span-2")
+  placeholder?: string; // Override description as placeholder
+};
+
+export type TemplateFieldGroup = {
+  id: string;
+  title: string;
+  description?: string;
+  icon?: string; // Emoji or icon identifier
+  columns?: number; // Grid columns (1-3, default 1)
+};
+
+// Define groups for each template
+export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
+  modern: [
+    // Global groups
+    {
+      id: "global.announcement",
+      title: "Announcement Banner",
+      description: "Top banner that appears across all pages",
+      icon: "📢",
+      columns: 2,
+    },
+    {
+      id: "global.branding",
+      title: "Branding",
+      description: "Brand colors and styling",
+      icon: "🎨",
+      columns: 2,
+    },
+
+    // Homepage groups
+    {
+      id: "homepage.hero",
+      title: "Hero Section",
+      description: "Main banner area at the top of homepage",
+      icon: "🎯",
+      columns: 1,
+    },
+    {
+      id: "homepage.cta",
+      title: "Call-to-Action Buttons",
+      description: "Primary and secondary action buttons",
+      icon: "🔘",
+      columns: 2,
+    },
+    {
+      id: "homepage.featured",
+      title: "Featured Section",
+      description: "Highlighted products or content area",
+      icon: "⭐",
+      columns: 1,
+    },
+    {
+      id: "homepage.social",
+      title: "Social Proof",
+      description: "Customer count, ratings, testimonials",
+      icon: "👥",
+      columns: 3,
+    },
+
+    // Product groups
+    {
+      id: "product.badges",
+      title: "Product Badges",
+      description: "Labels for new, sale, featured products",
+      icon: "🏷️",
+      columns: 3,
+    },
+    {
+      id: "product.details",
+      title: "Product Details",
+      description: "Additional product information",
+      icon: "📋",
+      columns: 1,
+    },
+
+    // Cart groups
+    {
+      id: "cart.empty",
+      title: "Empty Cart State",
+      description: "Messages when cart is empty",
+      icon: "🛒",
+      columns: 1,
+    },
+    {
+      id: "cart.incentives",
+      title: "Cart Incentives",
+      description: "Free shipping, discounts, etc.",
+      icon: "🎁",
+      columns: 2,
+    },
+  ],
+  ...pollenFieldGroups,
 };
 
 export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
@@ -187,6 +287,30 @@ export function getThemeFields(
     result[field.key] = typeof value === "string" ? value : "";
   }
   return result;
+}
+
+export function groupFieldsByGroup(
+  fields: TemplateField[],
+): Record<string, TemplateField[]> {
+  const grouped: Record<string, TemplateField[]> = {
+    ungrouped: [], // Fields without a group
+  };
+
+  fields.forEach((field) => {
+    const groupId = field.group ?? "ungrouped";
+    grouped[groupId] ??= [];
+    grouped[groupId].push(field);
+  });
+
+  return grouped;
+}
+
+// Helper to get group metadata
+export function getGroupMetadata(
+  templateId: string,
+  groupId: string,
+): TemplateFieldGroup | undefined {
+  return TEMPLATE_FIELD_GROUPS[templateId]?.find((g) => g.id === groupId);
 }
 
 // Helper to group fields by page

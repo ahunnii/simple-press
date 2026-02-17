@@ -1,38 +1,21 @@
-import { headers } from "next/headers";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Plus } from "lucide-react";
 
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
+import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 
-import { SiteHeader } from "../_components/site-header";
+import { TrailHeader } from "../_components/trail-header";
 import { GalleriesList } from "./_components/galleries-list";
 
 export default async function GalleriesPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      business: { select: { id: true, name: true } },
-    },
-  });
-
-  if (!user?.business) {
-    redirect("/admin/welcome");
-  }
+  const business = await api.business.get();
+  if (!business) notFound();
 
   return (
     <>
-      <SiteHeader title="Galleries" />
+      <TrailHeader breadcrumbs={[{ label: "Galleries" }]} />
+
       <div className="admin-container">
         <div className="admin-header">
           <div>
@@ -47,8 +30,12 @@ export default async function GalleriesPage() {
           </Button>
         </div>
 
-        <GalleriesList businessId={user.business.id} />
+        <GalleriesList businessId={business.id} />
       </div>
     </>
   );
 }
+
+export const metadata = {
+  title: "Galleries",
+};

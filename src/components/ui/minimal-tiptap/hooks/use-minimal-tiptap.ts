@@ -208,10 +208,17 @@ export const useMinimalTiptapEditor = ({
   businessId,
   ...props
 }: UseMinimalTiptapEditorProps) => {
-  const throttledSetValue = useThrottle(
-    (value: Content) => onUpdate?.(value),
-    throttleDelay,
-  );
+  const lastExternalValueRef = React.useRef<Content | undefined>(value);
+  const lastEmittedContentRef = React.useRef<Content | undefined>(undefined);
+
+  // const throttledSetValue = useThrottle(
+  //   (value: Content) => onUpdate?.(value),
+  //   throttleDelay,
+  // );
+  const throttledSetValue = useThrottle((content: Content) => {
+    onUpdate?.(content);
+    lastEmittedContentRef.current = content;
+  }, throttleDelay);
 
   const handleUpdate = React.useCallback(
     (editor: Editor) => throttledSetValue(getOutput(editor, output)),
@@ -262,11 +269,31 @@ export const useMinimalTiptapEditor = ({
     immediatelyRender: false,
     extensions,
     editorProps,
+    content: value,
     onUpdate: ({ editor }) => handleUpdate(editor),
-    onCreate: ({ editor }) => handleCreate(editor),
+    // onCreate: ({ editor }) => handleCreate(editor),
     onBlur: ({ editor }) => handleBlur(editor),
     ...props,
   });
+
+  // React.useEffect(() => {
+  //   if (!editor || value == null) return;
+  //   const last = lastExternalValueRef.current;
+  //   if (last === value) return;
+  //   if (JSON.stringify(last) === JSON.stringify(value)) return;
+
+  //   lastExternalValueRef.current = value;
+  //   editor.commands.setContent(value);
+  // }, [editor, value]);
+
+  React.useEffect(() => {
+    if (!editor || value == null) return;
+    const lastEmitted = lastEmittedContentRef.current;
+    if (JSON.stringify(lastEmitted) === JSON.stringify(value)) return;
+
+    lastEmittedContentRef.current = value;
+    editor.commands.setContent(value);
+  }, [editor, value]);
 
   return editor;
 };

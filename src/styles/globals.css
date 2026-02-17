@@ -237,6 +237,29 @@
   .admin-status-badge.isDraft {
     @apply bg-gray-50 text-gray-600 ring-1 ring-gray-500/20 ring-inset dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20;
   }
+
+  .admin-status-badge.isDirty {
+    @apply bg-amber-50 text-amber-700 ring-1 ring-amber-600/20 ring-inset dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20;
+  }
+
+  .admin-form-toolbar {
+    @apply bg-background/75 sticky top-0 z-10 flex h-16 justify-between border-b px-4;
+  }
+
+  .admin-form-toolbar .toolbar-info {
+    @apply flex min-w-0 items-center gap-3;
+  }
+
+  .admin-form-toolbar .toolbar-actions {
+    @apply flex shrink-0 items-center gap-2;
+  }
+  .admin-form-toolbar.dirty {
+    @apply shadow-sm shadow-amber-200;
+  }
+
+  .saving-indicator {
+    @apply border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2;
+  }
 }
 
 .not-found-pattern {

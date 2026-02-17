@@ -1,34 +1,31 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
+import { api } from "~/trpc/server";
 
 import { TemplateFieldsEditor } from "../_components/template-fields-editor";
+import { TrailHeader } from "../../_components/trail-header";
 
 export default async function TemplateFieldsPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) redirect("/auth/sign-in");
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      business: {
-        include: {
-          siteContent: true,
-        },
-      },
-    },
-  });
-
-  if (!user?.business) redirect("/admin/welcome");
-
-  let siteContent = user.business.siteContent;
-  siteContent ??= await db.siteContent.create({
-    data: { businessId: user.business.id },
-  });
+  const business = await api.business.get();
+  if (!business) notFound();
+  if (!business.siteContent) notFound();
 
   return (
-    <TemplateFieldsEditor business={user.business} siteContent={siteContent} />
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Content", href: "/admin/content" },
+          { label: "Template Fields" },
+        ]}
+      />
+      <TemplateFieldsEditor
+        business={business}
+        siteContent={business.siteContent}
+      />
+    </>
   );
 }
+
+export const metadata = {
+  title: "Template Fields",
+};

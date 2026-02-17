@@ -83,32 +83,31 @@ export function PagesList({ business }: PagesListProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="mb-4 flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/admin/content">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Link>
-            </Button>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Pages</h1>
-              <p className="mt-2 text-gray-600">Manage your static pages</p>
-            </div>
-            <Button asChild>
-              <Link href="/admin/content/pages/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Page
-              </Link>
-            </Button>
+      <div className="admin-form-toolbar">
+        <div className="toolbar-info">
+          <Button variant="ghost" size="sm" asChild className="shrink-0">
+            <Link href="/admin/content">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Link>
+          </Button>
+          <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
+          <div className="hidden min-w-0 items-center gap-2 sm:flex">
+            <h1 className="text-base font-medium">Custom Pages</h1>
           </div>
         </div>
 
+        <div className="toolbar-actions">
+          <Button asChild>
+            <Link href="/admin/content/pages/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Page
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      <div className="admin-container">
         {/* Search */}
         <div className="mb-6">
           <div className="relative">

@@ -63,8 +63,12 @@ export const homepageFormSchema = z.object({
       linkedin: z.string().optional(),
     })
     .optional(),
+  logoUrl: z.string().url().optional().or(z.literal("")),
   heroImageFile: z.instanceof(File).optional().nullable(),
   aboutImageFile: z.instanceof(File).optional().nullable(),
+  logoFile: z.instanceof(File).optional().nullable(),
+  primaryColor: z.string().nullable(),
+  templateId: z.string(),
 });
 
 export type HomepageFormSchema = z.infer<typeof homepageFormSchema>;

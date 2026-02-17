@@ -1,39 +1,21 @@
-import { headers } from "next/headers";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { Mail, Plus } from "lucide-react";
+import { notFound } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
-import { Button } from "~/components/ui/button";
+import { api } from "~/trpc/server";
 
-import { SiteHeader } from "../_components/site-header";
+import { TrailHeader } from "../_components/trail-header";
 import { SendInviteDialog } from "./_components/send-invite-dialog";
 import { TestimonialsList } from "./_components/testimonials-list";
 
 export default async function TestimonialsPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const business = await api.business.get();
 
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      business: { select: { id: true, name: true } },
-    },
-  });
-
-  if (!user?.business) {
-    redirect("/admin/welcome");
+  if (!business) {
+    notFound();
   }
 
   return (
     <>
-      <SiteHeader title="Testimonials" />
+      <TrailHeader breadcrumbs={[{ label: "Testimonials" }]} />
       <div className="admin-container">
         <div className="admin-header">
           <div>
@@ -41,12 +23,16 @@ export default async function TestimonialsPage() {
             <p>Manage customer testimonials and reviews</p>
           </div>
           <div className="flex gap-3">
-            <SendInviteDialog businessId={user.business.id} />
+            <SendInviteDialog businessId={business.id} />
           </div>
         </div>
 
-        <TestimonialsList businessId={user.business.id} />
+        <TestimonialsList businessId={business.id} />
       </div>
     </>
   );
 }
+
+export const metadata = {
+  title: "Testimonials",
+};

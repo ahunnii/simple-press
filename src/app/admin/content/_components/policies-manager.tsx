@@ -4,13 +4,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, FileText, Loader2, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import z from "zod";
 
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -25,7 +27,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] };
+const pageFormSchema = z.object({
+  content: z.any(), // TipTap JSON
+});
 
+type PageFormValues = z.infer<typeof pageFormSchema>;
 // Helper to convert markdown to TipTap JSON
 const markdownToTiptap = (markdown: string) => {
   // Simple conversion - you might want to use a proper markdown parser
@@ -246,7 +252,7 @@ Shipping questions? Contact us at [your email].`),
   },
 };
 
-type PoliciesManagerProps = {
+type Props = {
   business: {
     id: string;
     name: string;
@@ -260,9 +266,10 @@ type PoliciesManagerProps = {
   };
 };
 
-export function PoliciesManager({ business }: PoliciesManagerProps) {
+export function PoliciesManager({ business }: Props) {
   const router = useRouter();
   const [activePolicy, setActivePolicy] = useState<string>("privacy");
+  const formRef = useRef<HTMLFormElement>(null);
 
   // Get existing policies
   const existingPolicies = new Map(business.pages.map((p) => [p.slug, p]));
@@ -313,12 +320,16 @@ export function PoliciesManager({ business }: PoliciesManagerProps) {
     onSuccess: () => {
       router.refresh();
     },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update page");
+    },
   });
 
   const handleUseTemplate = (policyKey: keyof typeof POLICY_TEMPLATES) => {
     const template = POLICY_TEMPLATES[policyKey];
     const form = forms[policyKey];
     form.setValue("content", template.getContent());
+
     toast.success("Template loaded");
   };
 
@@ -353,8 +364,10 @@ export function PoliciesManager({ business }: PoliciesManagerProps) {
 
           if (existing) {
             await updatePage.mutateAsync({ id: existing.id, data });
+            form.reset({ content: data.content });
           } else {
             await createPage.mutateAsync({ businessId: business.id, data });
+            form.reset({ content: data.content });
           }
         }
         router.refresh();
@@ -367,33 +380,99 @@ export function PoliciesManager({ business }: PoliciesManagerProps) {
     );
   };
 
+  // // Check if any policy form has unsaved changes (different from fetched policy pages)
+  // const isDirty = Object.entries(forms).some(([key, form]) => {
+  //   const template = POLICY_TEMPLATES[key as keyof typeof POLICY_TEMPLATES];
+  //   const existing = existingPolicies.get(template.slug);
+  //   const formContent = form.getValues().content;
+
+  //   // If no existing, consider dirty if form is not empty
+  //   if (!existing) {
+  //     return (
+  //       !!formContent &&
+  //       formContent.type === "doc" &&
+  //       formContent.content &&
+  //       formContent.content.length > 0
+  //     );
+  //   }
+
+  //   // Compare form content with existing policy content (TipTap JSON)
+  //   // Basic deep comparison using JSON.stringify - adjust for edge cases if needed
+  //   return JSON.stringify(formContent) !== JSON.stringify(existing.content);
+  // });
+
+  const isSaving = createPage.isPending || updatePage.isPending;
+
+  const handleReset = () => {
+    Object.entries(POLICY_TEMPLATES).forEach(([key, template]) => {
+      const form = forms[key as keyof typeof forms];
+      const existing = existingPolicies.get(template.slug);
+      form.reset({
+        content: existing?.content ?? EMPTY_TIPTAP_DOC,
+      });
+    });
+  };
+
+  const allForms = Object.entries(POLICY_TEMPLATES).map(([key]) => {
+    return forms[key as keyof typeof forms];
+  });
+
+  const isDirty = allForms.some((form) => form.formState.isDirty);
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="mb-4 flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/admin/content">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Link>
-            </Button>
-          </div>
+      <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
+        <div className="toolbar-info">
+          <Button variant="ghost" size="sm" asChild className="shrink-0">
+            <Link href="/admin/content">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Link>
+          </Button>
+          <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
+          <div className="hidden min-w-0 items-center gap-2 sm:flex">
+            <h1 className="text-base font-medium">Update Policies</h1>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Policy Pages</h1>
-              <p className="mt-2 text-gray-600">
-                Create and manage your legal policy pages
-              </p>
-            </div>
-            <Button onClick={handleSaveAll}>
-              <Save className="mr-2 h-4 w-4" />
-              Save All
-            </Button>
+            <span
+              className={`admin-status-badge ${
+                isDirty ? "isDirty" : "isPublished"
+              }`}
+            >
+              {isDirty ? "Unsaved Changes" : "Saved"}
+            </span>
           </div>
         </div>
 
+        <div className="toolbar-actions">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isSaving || !isDirty}
+            onClick={handleReset}
+            className="hidden md:inline-flex"
+          >
+            Reset
+          </Button>
+
+          <Button size="sm" disabled={isSaving} onClick={handleSaveAll}>
+            {isSaving ? (
+              <>
+                <span className="saving-indicator" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Save content</span>
+                <span className="sm:hidden">Save</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      <div className="admin-container">
         <Tabs
           value={activePolicy}
           onValueChange={setActivePolicy}

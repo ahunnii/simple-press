@@ -9,6 +9,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 // Validation schemas
 const siteContentSchema = z.object({
+  templateId: z.string().optional(),
   // Hero Section
   heroTitle: z.string().optional(),
   heroSubtitle: z.string().optional(),
@@ -126,15 +127,24 @@ export const contentRouter = createTRPCRouter({
           message: "Not authorized",
         });
       }
+      const { templateId, ...data } = input.data;
 
       const siteContent = await ctx.db.siteContent.upsert({
         where: { businessId: input.businessId },
         create: {
           businessId: input.businessId,
-          ...input.data,
+
+          ...data,
         },
         update: input.data,
       });
+
+      if (templateId) {
+        await ctx.db.business.update({
+          where: { id: input.businessId },
+          data: { templateId },
+        });
+      }
 
       return siteContent;
     }),

@@ -1,19 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
 import { api } from "~/trpc/server";
+import { TrailHeader } from "~/app/admin/_components/trail-header";
 
 import { PageEditor } from "../../_components/page-editor";
 
-export default async function EditPagePage({
-  params,
-}: {
+type Props = {
   params: Promise<{ id: string }>;
-}) {
+};
+export default async function EditPagePage({ params }: Props) {
   const { id } = await params;
   const business = await api.business.get();
 
@@ -29,5 +24,27 @@ export default async function EditPagePage({
     notFound();
   }
 
-  return <PageEditor business={business} page={page} />;
+  return (
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Content", href: "/admin/content" },
+          { label: "Custom Pages", href: "/admin/content/pages" },
+          { label: page.title },
+        ]}
+      />
+
+      <PageEditor business={business} page={page} />
+    </>
+  );
 }
+
+export const generateMetadata = async ({ params }: Props) => {
+  const { id } = await params;
+  const page = await api.content.getPage({
+    id,
+  });
+  return {
+    title: page?.title ?? "Edit Page",
+  };
+};

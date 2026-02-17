@@ -5,11 +5,13 @@ import Link from "next/link";
 import {
   IconDashboard,
   IconHelp,
+  IconImageInPicture,
   IconLanguage,
   IconMail,
   IconPackage,
   IconSettings,
   IconShoppingCart,
+  IconStar,
   IconTerminal,
 } from "@tabler/icons-react";
 import { Images } from "lucide-react";
@@ -67,7 +69,12 @@ const data = {
     {
       title: "Galleries",
       url: "/admin/galleries",
-      icon: Images,
+      icon: IconImageInPicture,
+    },
+    {
+      title: "Testimonials",
+      url: "/admin/testimonials",
+      icon: IconStar,
     },
   ],
   navClouds: [],

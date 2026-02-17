@@ -33,23 +33,19 @@ export default async function SettingsPage() {
           <Tabs defaultValue="general" className="space-y-6">
             <TabsList className="grid w-full max-w-3xl grid-cols-5">
               <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="branding">Branding</TabsTrigger>
+
               <TabsTrigger value="integrations">Integrations</TabsTrigger>
-              <TabsTrigger value="domain" disabled>
-                Domain
-              </TabsTrigger>
-              <TabsTrigger value="seo" disabled>
-                SEO
-              </TabsTrigger>
+              <TabsTrigger value="domain">Domain</TabsTrigger>
+              <TabsTrigger value="seo">SEO</TabsTrigger>
             </TabsList>
 
             <TabsContent value="general">
               <GeneralSettings business={business} />
             </TabsContent>
-
+            {/* 
             <TabsContent value="branding">
               <BrandingSettings business={business} />
-            </TabsContent>
+            </TabsContent> */}
 
             <TabsContent value="integrations">
               <IntegrationsSettings business={business} />

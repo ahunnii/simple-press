@@ -1,26 +1,28 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
-import { HydrateClient } from "~/trpc/server";
+import { api } from "~/trpc/server";
+import { TrailHeader } from "~/app/admin/_components/trail-header";
 
 import { PageEditor } from "../../_components/page-editor";
 
 export default async function NewPagePage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) redirect("/auth/sign-in");
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { business: { select: { id: true, name: true } } },
-  });
-
-  if (!user?.business) redirect("/admin/welcome");
+  const business = await api.business.get();
+  if (!business) notFound();
 
   return (
-    <HydrateClient>
-      <PageEditor business={user.business} />
-    </HydrateClient>
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Content", href: "/admin/content" },
+          { label: "Custom Pages", href: "/admin/content/pages" },
+          { label: "New Page" },
+        ]}
+      />
+      <PageEditor business={business} />
+    </>
   );
 }
+
+export const metadata = {
+  title: "New Page",
+};

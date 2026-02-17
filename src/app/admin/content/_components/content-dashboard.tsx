@@ -69,14 +69,14 @@ export function ContentDashboard({ business }: ContentDashboardProps) {
                     <Home className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <CardTitle>Homepage</CardTitle>
-                    <CardDescription>Hero, about, features</CardDescription>
+                    <CardTitle>Branding</CardTitle>
+                    <CardDescription>Logo, colors, fonts</CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600">
-                  Edit your homepage content and layout
+                  Edit your branding and layout
                 </p>
               </CardContent>
             </Card>
@@ -104,10 +104,10 @@ export function ContentDashboard({ business }: ContentDashboardProps) {
                 <p className="mb-3 text-sm text-gray-600">
                   About, Contact, FAQ, and custom pages
                 </p>
-                <Button variant="outline" size="sm" className="w-full">
+                {/* <Button variant="outline" size="sm" className="w-full">
                   <Plus className="mr-2 h-4 w-4" />
                   Create Page
-                </Button>
+                </Button> */}
               </CardContent>
             </Card>
           </Link>
@@ -292,7 +292,7 @@ export function ContentDashboard({ business }: ContentDashboardProps) {
                     </div>
                     <div className="flex items-center gap-2">
                       <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/admin/content/pages/${page.id}/edit`}>
+                        <Link href={`/admin/content/pages/${page.id}`}>
                           <Edit className="h-4 w-4" />
                         </Link>
                       </Button>

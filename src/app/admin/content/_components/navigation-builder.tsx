@@ -1,33 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  GripVertical,
-  Loader2,
-  Plus,
-  Save,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, GripVertical, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 
 type NavItem = {
   label: string;
@@ -35,22 +19,18 @@ type NavItem = {
   external?: boolean;
 };
 
-type NavigationBuilderProps = {
+type Props = {
   business: {
     id: string;
     pages: Array<{ title: string; slug: string }>;
   };
   siteContent: {
-    navigationItems: any;
+    navigationItems: NavItem[];
   };
 };
 
-export function NavigationBuilder({
-  business,
-  siteContent,
-}: NavigationBuilderProps) {
+export function NavigationBuilder({ business, siteContent }: Props) {
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
 
   const [navItems, setNavItems] = useState<NavItem[]>(
     siteContent.navigationItems ?? [
@@ -61,18 +41,24 @@ export function NavigationBuilder({
 
   const updateSiteContent = api.content.updateSiteContent.useMutation({
     onSuccess: () => {
+      toast.dismiss();
       toast.success("Navigation updated");
-      router.refresh();
-      setIsSaving(false);
     },
     onError: (error) => {
+      toast.dismiss();
       toast.error(error.message || "Failed to update navigation");
-      setIsSaving(false);
+    },
+    onSettled: () => {
+      router.refresh();
+    },
+    onMutate: () => {
+      toast.loading("Updating navigation...");
     },
   });
 
+  const isSaving = updateSiteContent.isPending;
+
   const handleSave = () => {
-    setIsSaving(true);
     updateSiteContent.mutate({
       businessId: business.id,
       data: { navigationItems: navItems },
@@ -122,42 +108,73 @@ export function NavigationBuilder({
     toast.success(`Added "${title}" to navigation`);
   };
 
+  // Determine if navItems in state are different from original navItems prop (from siteContent)
+  const initialNavItems = siteContent.navigationItems ?? [];
+  const isSameOrder = navItems.every((item, i) => {
+    const original = initialNavItems[i];
+    return (
+      item.label === original?.label &&
+      item.href === original.href &&
+      item.external === original.external
+    );
+  });
+
+  const isDirty = navItems.length !== initialNavItems.length || !isSameOrder;
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="mb-4 flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/admin/content">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Link>
-            </Button>
-          </div>
+      <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
+        <div className="toolbar-info">
+          <Button variant="ghost" size="sm" asChild className="shrink-0">
+            <Link href="/admin/content">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Link>
+          </Button>
+          <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
+          <div className="hidden min-w-0 items-center gap-2 sm:flex">
+            <h1 className="text-base font-medium">{"Update Navigation"}</h1>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Navigation</h1>
-              <p className="mt-2 text-gray-600">
-                Configure your site&apos;s main menu
-              </p>
-            </div>
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </>
-              )}
-            </Button>
+            <span
+              className={`admin-status-badge ${
+                isDirty ? "isDirty" : "isPublished"
+              }`}
+            >
+              {isDirty ? "Unsaved Changes" : "Saved"}
+            </span>
           </div>
         </div>
 
+        <div className="toolbar-actions">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isSaving || !isDirty}
+            onClick={() => setNavItems(initialNavItems)}
+            className="hidden md:inline-flex"
+          >
+            Reset
+          </Button>
+
+          <Button size="sm" disabled={isSaving} onClick={handleSave}>
+            {isSaving ? (
+              <>
+                <span className="saving-indicator" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Save navigation</span>
+                <span className="sm:hidden">Save</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      <div className="admin-container">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Menu Items */}
           <div className="lg:col-span-2">
@@ -181,7 +198,7 @@ export function NavigationBuilder({
                 ) : (
                   navItems.map((item, index) => (
                     <Card key={index}>
-                      <CardContent className="pt-6">
+                      <CardContent className="">
                         <div className="flex items-start gap-4">
                           <div className="flex flex-col gap-2 pt-2">
                             <button

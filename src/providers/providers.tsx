@@ -8,6 +8,7 @@ import { useRouter } from "nextjs-toploader/app";
 import { Toaster } from "sonner";
 
 import { authClient } from "~/server/better-auth/client";
+import { TooltipProvider } from "~/components/ui/tooltip";
 import { CartProvider } from "~/providers/cart-context";
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -35,7 +36,7 @@ export function Providers({ children }: { children: ReactNode }) {
         }}
         Link={Link}
       >
-        {children}
+        <TooltipProvider>{children}</TooltipProvider>
 
         <Toaster />
       </AuthUIProvider>{" "}

@@ -47,6 +47,20 @@ export const businessRouter = createTRPCRouter({
     return businessData;
   }),
 
+  getWithPolicies: ownerAdminProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+    const policies = await ctx.db.business.findFirst({
+      where: { id: business.id },
+      include: { pages: { where: { type: "policy" } } },
+    });
+    return policies;
+  }),
   getHomepage: publicProcedure.query(async ({ ctx }) => {
     const business = await checkBusiness();
     if (!business) {
@@ -102,6 +116,7 @@ export const businessRouter = createTRPCRouter({
         .object({
           productNumber: z.number().optional(),
           includeProducts: z.boolean().optional(),
+          includePages: z.boolean().optional(),
         })
         .optional(),
     )
@@ -123,7 +138,7 @@ export const businessRouter = createTRPCRouter({
         include: {
           siteContent: true,
           images: true,
-
+          ...(input?.includePages ? { pages: true } : {}),
           ...(input?.includeProducts
             ? {
                 products: {

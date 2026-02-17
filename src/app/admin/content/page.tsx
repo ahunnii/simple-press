@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 
-import { api, HydrateClient } from "~/trpc/server";
+import { api } from "~/trpc/server";
 import { ContentDashboard } from "~/app/admin/content/_components/content-dashboard";
 
-import { SiteHeader } from "../_components/site-header";
+import { TrailHeader } from "../_components/trail-header";
 
 export default async function ContentPage() {
   const business = await api.business.secureGetContent();
@@ -13,8 +13,8 @@ export default async function ContentPage() {
   }
 
   return (
-    <HydrateClient>
-      <SiteHeader title="Site Content" />
+    <>
+      <TrailHeader breadcrumbs={[{ label: "Content" }]} />
       <div className="admin-container">
         <div className="admin-header">
           <div>
@@ -25,6 +25,10 @@ export default async function ContentPage() {
 
         <ContentDashboard business={business} />
       </div>
-    </HydrateClient>
+    </>
   );
 }
+
+export const metadata = {
+  title: "Content",
+};
