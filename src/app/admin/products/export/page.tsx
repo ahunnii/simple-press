@@ -1,30 +1,28 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
+import { api } from "~/trpc/server";
 
 import { ProductExporter } from "../_components/product-exporter";
+import { TrailHeader } from "../../_components/trail-header";
 
 export default async function ProductExportPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const business = await api.business.get();
 
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
+  if (!business) notFound();
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      business: { select: { id: true, name: true } },
-    },
-  });
-
-  if (!user?.business) {
-    redirect("/admin/welcome");
-  }
-
-  return <ProductExporter business={user.business} />;
+  return (
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Products", href: "/admin/products" },
+          { label: "Export Products" },
+        ]}
+      />
+      <ProductExporter business={business} />
+    </>
+  );
 }
+
+export const metadata = {
+  title: "Export Products",
+};

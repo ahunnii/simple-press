@@ -11,6 +11,7 @@ import {
 } from "~/components/ui/card";
 
 import { SiteHeader } from "../_components/site-header";
+import { TrailHeader } from "../_components/trail-header";
 import { OrderFilters } from "./_components/order-filters";
 import { OrdersTable } from "./_components/orders-table";
 
@@ -40,8 +41,8 @@ export default async function OrdersPage({ searchParams }: Props) {
   const paidOrders = orders.filter((o) => o.status === "paid").length;
 
   return (
-    <HydrateClient>
-      <SiteHeader title="Orders" />
+    <>
+      <TrailHeader breadcrumbs={[{ label: "Orders" }]} />
       <div className="admin-container">
         <div className="admin-header">
           <div>
@@ -99,6 +100,6 @@ export default async function OrdersPage({ searchParams }: Props) {
           <OrdersTable orders={orders} />
         )}
       </div>
-    </HydrateClient>
+    </>
   );
 }

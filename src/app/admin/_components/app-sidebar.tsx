@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import {
   IconDashboard,
+  IconFolder,
   IconHelp,
   IconImageInPicture,
   IconLanguage,
@@ -56,11 +57,11 @@ const data = {
     //   url: "/admin/discounts",
     //   icon: IconDiscount,
     // },
-    // {
-    //   title: "Collections",
-    //   url: "/admin/collections",
-    //   icon: IconFolder,
-    // },
+    {
+      title: "Collections",
+      url: "/admin/collections",
+      icon: IconFolder,
+    },
     {
       title: "Site content",
       url: "/admin/content",
@@ -74,6 +75,11 @@ const data = {
     {
       title: "Testimonials",
       url: "/admin/testimonials",
+      icon: IconStar,
+    },
+    {
+      title: "Reviews",
+      url: "/admin/reviews",
       icon: IconStar,
     },
   ],

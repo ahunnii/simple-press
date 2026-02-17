@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -99,277 +100,307 @@ export function NewGalleryForm({ businessId }: NewGalleryFormProps) {
     });
   };
 
+  const isDirty = true;
   return (
-    <div className="admin-container">
-      <div className="mb-8">
-        <div className="mb-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin/galleries">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Galleries
-            </Link>
-          </Button>
-        </div>
+    <>
+      <form onSubmit={handleSubmit} className="min-h-screen bg-gray-50">
+        <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
+          <div className="toolbar-info">
+            <Button variant="ghost" size="sm" asChild className="shrink-0">
+              <Link href="/admin/galleries">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Link>
+            </Button>
+            <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
+            <div className="hidden min-w-0 items-center gap-2 sm:flex">
+              <h1 className="text-base font-medium">New Gallery</h1>
 
-        <div>
-          <h1 className="text-3xl font-bold">Create Gallery</h1>
-          <p className="mt-2 text-gray-600">
-            Set up a new image gallery for your site
-          </p>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="max-w-3xl space-y-6">
-        {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-            <CardDescription>
-              Give your gallery a name and description
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="name">
-                Gallery Name <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="My Gallery"
-                className="mt-2"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="slug">
-                Slug <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="slug"
-                value={slug}
-                onChange={(e) => setSlug(slugify(e.target.value))}
-                placeholder="my-gallery"
-                className="mt-2"
-                required
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                URL: /galleries/{slug || "my-gallery"}
-              </p>
-            </div>
-
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe what this gallery is about..."
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Layout Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Layout Settings</CardTitle>
-            <CardDescription>
-              Choose how your gallery will be displayed
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <Label htmlFor="layout">Layout Style</Label>
-              <Select
-                value={layout}
-                onValueChange={(
-                  value:
-                    | "grid"
-                    | "masonry"
-                    | "carousel"
-                    | "collage"
-                    | "justified",
-                ) => setLayout(value)}
+              <span
+                className={`admin-status-badge ${
+                  isDirty ? "isDirty" : "isPublished"
+                }`}
               >
-                <SelectTrigger className="mt-2">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="grid">
-                    <div className="flex items-center gap-2">
-                      <span>⊞</span>
-                      <div>
-                        <div className="font-medium">Grid</div>
-                        <div className="text-xs text-gray-500">
-                          Equal-sized images in rows and columns
-                        </div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="masonry">
-                    <div className="flex items-center gap-2">
-                      <span>▦</span>
-                      <div>
-                        <div className="font-medium">Masonry</div>
-                        <div className="text-xs text-gray-500">
-                          Pinterest-style cascading layout
-                        </div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="carousel">
-                    <div className="flex items-center gap-2">
-                      <span>⊏</span>
-                      <div>
-                        <div className="font-medium">Carousel</div>
-                        <div className="text-xs text-gray-500">
-                          Slideshow with navigation
-                        </div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="collage">
-                    <div className="flex items-center gap-2">
-                      <span>▤</span>
-                      <div>
-                        <div className="font-medium">Collage</div>
-                        <div className="text-xs text-gray-500">
-                          Mixed sizes arrangement
-                        </div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="justified">
-                    <div className="flex items-center gap-2">
-                      <span>▬</span>
-                      <div>
-                        <div className="font-medium">Justified</div>
-                        <div className="text-xs text-gray-500">
-                          Flickr-style justified rows
-                        </div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                {isDirty ? "Unsaved Changes" : "Saved"}
+              </span>
             </div>
+          </div>
 
-            {layout === "grid" && (
-              <>
-                <div>
-                  <Label htmlFor="columns">Columns</Label>
-                  <Select
-                    value={columns.toString()}
-                    onValueChange={(v) => setColumns(parseInt(v))}
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2">2 columns</SelectItem>
-                      <SelectItem value="3">3 columns</SelectItem>
-                      <SelectItem value="4">4 columns</SelectItem>
-                      <SelectItem value="5">5 columns</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+          <div className="toolbar-actions">
+            <Button type="button" variant="outline" asChild>
+              <Link href="/admin/galleries">Cancel</Link>
+            </Button>
 
-                <div>
-                  <Label htmlFor="gap">Gap between images (px)</Label>
-                  <Input
-                    id="gap"
-                    type="number"
-                    value={gap}
-                    onChange={(e) => setGap(parseInt(e.target.value) || 16)}
-                    min={0}
-                    max={64}
-                    className="mt-2"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Recommended: 8-24px
+            <Button type="submit" size="sm" disabled={createMutation.isPending}>
+              {createMutation.isPending ? (
+                <>
+                  <span className="saving-indicator" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Save changes</span>
+                  <span className="sm:hidden">Save</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+        <div className="admin-container space-y-6">
+          {/* Basic Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Basic Information</CardTitle>
+              <CardDescription>
+                Give your gallery a name and description
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="name">
+                  Gallery Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  placeholder="My Gallery"
+                  className="mt-2"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="slug">
+                  Slug <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="slug"
+                  value={slug}
+                  onChange={(e) => setSlug(slugify(e.target.value))}
+                  placeholder="my-gallery"
+                  className="mt-2"
+                  required
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  URL: /galleries/{slug || "my-gallery"}
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe what this gallery is about..."
+                  rows={3}
+                  className="mt-2"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Layout Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Layout Settings</CardTitle>
+              <CardDescription>
+                Choose how your gallery will be displayed
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label htmlFor="layout">Layout Style</Label>
+                <Select
+                  value={layout}
+                  onValueChange={(
+                    value:
+                      | "grid"
+                      | "masonry"
+                      | "carousel"
+                      | "collage"
+                      | "justified",
+                  ) => setLayout(value)}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="grid">
+                      <div className="flex items-center gap-2">
+                        <span>⊞</span>
+                        <div>
+                          <div className="font-medium">Grid</div>
+                          <div className="text-xs text-gray-500">
+                            Equal-sized images in rows and columns
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="masonry">
+                      <div className="flex items-center gap-2">
+                        <span>▦</span>
+                        <div>
+                          <div className="font-medium">Masonry</div>
+                          <div className="text-xs text-gray-500">
+                            Pinterest-style cascading layout
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="carousel">
+                      <div className="flex items-center gap-2">
+                        <span>⊏</span>
+                        <div>
+                          <div className="font-medium">Carousel</div>
+                          <div className="text-xs text-gray-500">
+                            Slideshow with navigation
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="collage">
+                      <div className="flex items-center gap-2">
+                        <span>▤</span>
+                        <div>
+                          <div className="font-medium">Collage</div>
+                          <div className="text-xs text-gray-500">
+                            Mixed sizes arrangement
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="justified">
+                      <div className="flex items-center gap-2">
+                        <span>▬</span>
+                        <div>
+                          <div className="font-medium">Justified</div>
+                          <div className="text-xs text-gray-500">
+                            Flickr-style justified rows
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {layout === "grid" && (
+                <>
+                  <div>
+                    <Label htmlFor="columns">Columns</Label>
+                    <Select
+                      value={columns.toString()}
+                      onValueChange={(v) => setColumns(parseInt(v))}
+                    >
+                      <SelectTrigger className="mt-2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2">2 columns</SelectItem>
+                        <SelectItem value="3">3 columns</SelectItem>
+                        <SelectItem value="4">4 columns</SelectItem>
+                        <SelectItem value="5">5 columns</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="gap">Gap between images (px)</Label>
+                    <Input
+                      id="gap"
+                      type="number"
+                      value={gap}
+                      onChange={(e) => setGap(parseInt(e.target.value) || 16)}
+                      min={0}
+                      max={64}
+                      className="mt-2"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Recommended: 8-24px
+                    </p>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Display Options */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Display Options</CardTitle>
+              <CardDescription>
+                Configure how images are displayed
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="captions">Show Image Captions</Label>
+                  <p className="text-sm text-gray-500">
+                    Display captions below or over images
                   </p>
                 </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Display Options */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Display Options</CardTitle>
-            <CardDescription>
-              Configure how images are displayed
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="captions">Show Image Captions</Label>
-                <p className="text-sm text-gray-500">
-                  Display captions below or over images
-                </p>
+                <Switch
+                  id="captions"
+                  checked={showCaptions}
+                  onCheckedChange={setShowCaptions}
+                />
               </div>
-              <Switch
-                id="captions"
-                checked={showCaptions}
-                onCheckedChange={setShowCaptions}
-              />
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="lightbox">Enable Lightbox</Label>
-                <p className="text-sm text-gray-500">
-                  Allow users to view full-size images
-                </p>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="lightbox">Enable Lightbox</Label>
+                  <p className="text-sm text-gray-500">
+                    Allow users to view full-size images
+                  </p>
+                </div>
+                <Switch
+                  id="lightbox"
+                  checked={enableLightbox}
+                  onCheckedChange={setEnableLightbox}
+                />
               </div>
-              <Switch
-                id="lightbox"
-                checked={enableLightbox}
-                onCheckedChange={setEnableLightbox}
-              />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Preview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Layout Preview</CardTitle>
-            <CardDescription>How your gallery layout will look</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <LayoutPreview layout={layout} columns={columns} gap={gap} />
-          </CardContent>
-        </Card>
+          {/* Preview */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Layout Preview</CardTitle>
+              <CardDescription>
+                How your gallery layout will look
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LayoutPreview layout={layout} columns={columns} gap={gap} />
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 border-t pt-6">
-          <Button type="button" variant="outline" asChild>
-            <Link href="/admin/galleries">Cancel</Link>
-          </Button>
-          <Button type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              <>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Gallery
-              </>
-            )}
-          </Button>
-        </div>
+        {/* <div className="flex items-center justify-end gap-3 border-t pt-6">
+            <Button type="button" variant="outline" asChild>
+              <Link href="/admin/galleries">Cancel</Link>
+            </Button>
+            <Button type="submit" disabled={createMutation.isPending}>
+              {createMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Gallery
+                </>
+              )}
+            </Button>
+          </div> */}
       </form>
-    </div>
+    </>
   );
 }
 

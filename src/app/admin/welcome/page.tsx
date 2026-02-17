@@ -1,7 +1,6 @@
 import { checkBusiness } from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
 import { db } from "~/server/db";
-import { HydrateClient } from "~/trpc/server";
 
 import { SiteHeader } from "../_components/site-header";
 import { QuickActions } from "./_components/quick-actions";
@@ -61,8 +60,8 @@ export default async function AdminWelcomePage() {
   const isComplete = completedSteps === totalSteps;
 
   return (
-    <HydrateClient>
-      <SiteHeader title="Welcome to your store" />
+    <>
+      <SiteHeader title="Welcome!" />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <WelcomeHeader
           businessName={business.name}
@@ -87,6 +86,6 @@ export default async function AdminWelcomePage() {
           </div>
         </div>
       </div>
-    </HydrateClient>
+    </>
   );
 }

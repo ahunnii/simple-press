@@ -1,37 +1,26 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
-import { HydrateClient } from "~/trpc/server";
+import { api } from "~/trpc/server";
 
 import { NewGalleryForm } from "../_components/new-gallery-form";
-import { SiteHeader } from "../../_components/site-header";
+import { TrailHeader } from "../../_components/trail-header";
 
 export default async function NewGalleryPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      business: { select: { id: true, name: true } },
-    },
-  });
-
-  if (!user?.business) {
-    redirect("/admin/welcome");
-  }
+  const business = await api.business.get();
+  if (!business) notFound();
 
   return (
-    <HydrateClient>
-      <SiteHeader title="New Gallery" />
-      <NewGalleryForm businessId={user.business.id} />
-    </HydrateClient>
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Galleries", href: "/admin/galleries" },
+          { label: "New Gallery" },
+        ]}
+      />
+      <NewGalleryForm businessId={business.id} />
+    </>
   );
 }
+export const metadata = {
+  title: "New Gallery",
+};

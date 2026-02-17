@@ -1,211 +1,3 @@
-// import Link from "next/link";
-// import { notFound } from "next/navigation";
-// import { ArrowLeft } from "lucide-react";
-
-// import { formatDate } from "~/lib/format-date";
-// import { formatPrice } from "~/lib/prices";
-// import { api, HydrateClient } from "~/trpc/server";
-// import { Badge } from "~/components/ui/badge";
-// import { Button } from "~/components/ui/button";
-// import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-
-// import { FulfillmentTracker } from "../_components/fulfillment-tracker";
-// import { OrderStatusUpdater } from "../_components/order-status-updater";
-// import { RefundHandler } from "../_components/refund-handler";
-// import { SiteHeader } from "../../_components/site-header";
-
-// type PageProps = {
-//   params: Promise<{ id: string }>;
-// };
-
-// export async function generateMetadata({ params }: PageProps) {
-//   const { id } = await params;
-//   const order = await api.order.getById(id);
-//   return {
-//     title: `Order #${order?.id.slice(0, 8)}`,
-//   };
-// }
-
-// export default async function OrderDetailPage({ params }: PageProps) {
-//   const { id } = await params;
-
-//   const order = await api.order.getById(id);
-
-//   if (!order) {
-//     notFound();
-//   }
-
-//   const shippingAddress = order?.shippingAddress ?? null;
-
-//   return (
-//     <HydrateClient>
-//       <SiteHeader title={`Order #${order.id.slice(0, 8)}`} />
-//       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-//         {/* Header */}
-//         <div className="mb-8">
-//           <Button variant="ghost" asChild className="mb-4">
-//             <Link href="/admin/orders">
-//               <ArrowLeft className="mr-2 h-4 w-4" />
-//               Back to Orders
-//             </Link>
-//           </Button>
-//           <div className="flex items-center justify-between">
-//             <div>
-//               <h1 className="text-3xl font-bold text-gray-900">
-//                 Order #{order.id.slice(0, 8)}
-//               </h1>
-//               <p className="mt-1 text-gray-600">
-//                 {formatDate(order.createdAt)}
-//               </p>
-//             </div>
-//             <Badge variant={order.status === "paid" ? "default" : "secondary"}>
-//               {order.status}
-//             </Badge>
-//           </div>
-//         </div>
-
-//         <div className="grid gap-6 lg:grid-cols-3">
-//           {/* Order Items */}
-//           <div className="space-y-6 lg:col-span-2">
-//             {/* Status & Fulfillment */}
-//             <div className="grid gap-6 md:grid-cols-2">
-//               <OrderStatusUpdater order={order} />
-//               <FulfillmentTracker order={order} />
-//             </div>
-
-//             <Card>
-//               <CardHeader>
-//                 <CardTitle>Order Items</CardTitle>
-//               </CardHeader>
-//               <CardContent>
-//                 <div className="space-y-4">
-//                   {order.items.map((item) => (
-//                     <div
-//                       key={item.id}
-//                       className="flex items-start justify-between border-b pb-4 last:border-0 last:pb-0"
-//                     >
-//                       <div>
-//                         <p className="font-medium text-gray-900">
-//                           {item.productName}
-//                         </p>
-//                         <p className="text-sm text-gray-500">
-//                           Quantity: {item.quantity}
-//                         </p>
-//                       </div>
-//                       <div className="text-right">
-//                         <p className="font-medium">{formatPrice(item.price)}</p>
-//                         <p className="text-sm text-gray-500">
-//                           Total: {formatPrice(item.total)}
-//                         </p>
-//                       </div>
-//                     </div>
-//                   ))}
-//                 </div>
-
-//                 <div className="mt-6 space-y-2 border-t pt-6">
-//                   <div className="flex justify-between text-sm">
-//                     <span className="text-gray-600">Subtotal</span>
-//                     <span>{formatPrice(order.subtotal)}</span>
-//                   </div>
-//                   {order.tax > 0 && (
-//                     <div className="flex justify-between text-sm">
-//                       <span className="text-gray-600">Tax</span>
-//                       <span>{formatPrice(order.tax)}</span>
-//                     </div>
-//                   )}
-//                   {order.shipping > 0 && (
-//                     <div className="flex justify-between text-sm">
-//                       <span className="text-gray-600">Shipping</span>
-//                       <span>{formatPrice(order.shipping)}</span>
-//                     </div>
-//                   )}
-//                   <div className="flex justify-between border-t pt-2 text-lg font-bold">
-//                     <span>Total</span>
-//                     <span>{formatPrice(order.total)}</span>
-//                   </div>
-//                 </div>
-//               </CardContent>
-//             </Card>
-//           </div>
-
-//           {/* Customer & Shipping Info */}
-//           <div className="space-y-6">
-//             <Card>
-//               <CardHeader>
-//                 <CardTitle>Customer</CardTitle>
-//               </CardHeader>
-//               <CardContent className="space-y-2">
-//                 <div>
-//                   <p className="text-sm text-gray-500">Name</p>
-//                   <p className="font-medium">{order.customerName}</p>
-//                 </div>
-//                 <div>
-//                   <p className="text-sm text-gray-500">Email</p>
-//                   <p className="font-medium">{order.customerEmail}</p>
-//                 </div>
-//               </CardContent>
-//             </Card>
-
-//             {shippingAddress && (
-//               <Card>
-//                 <CardHeader>
-//                   <CardTitle>Shipping Address</CardTitle>
-//                 </CardHeader>
-//                 <CardContent>
-//                   <div className="text-sm">
-//                     <p>
-//                       {shippingAddress.firstName} {shippingAddress.lastName}
-//                     </p>
-//                     <p>{shippingAddress.address1}</p>
-//                     {shippingAddress.address2 && (
-//                       <p>{shippingAddress.address2}</p>
-//                     )}
-//                     <p>
-//                       {shippingAddress.city}, {shippingAddress.province}{" "}
-//                       {shippingAddress.zip}
-//                     </p>
-//                     <p>{shippingAddress.country}</p>
-//                   </div>
-//                 </CardContent>
-//               </Card>
-//             )}
-
-//             <Card>
-//               <CardHeader>
-//                 <CardTitle>Payment</CardTitle>
-//               </CardHeader>
-//               <CardContent className="space-y-3">
-//                 <div>
-//                   <p className="text-sm text-gray-500">Status</p>
-//                   <p className="font-medium capitalize">
-//                     {order.paymentStatus}
-//                   </p>
-//                 </div>
-//                 <div>
-//                   <p className="text-sm text-gray-500">Method</p>
-//                   <p className="font-medium">Card</p>
-//                 </div>
-//                 {order.stripePaymentIntentId && (
-//                   <div>
-//                     <p className="text-sm text-gray-500">Payment ID</p>
-//                     <p className="font-mono text-xs">
-//                       {order.stripePaymentIntentId}
-//                     </p>
-//                   </div>
-//                 )}
-
-//                 <div className="border-t pt-2">
-//                   <RefundHandler order={order} />
-//                 </div>
-//               </CardContent>
-//             </Card>
-//           </div>
-//         </div>
-//       </div>
-//     </HydrateClient>
-//   );
-// }
-
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
@@ -213,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { cn } from "~/lib/utils";
 import { api, HydrateClient } from "~/trpc/server";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -221,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { FulfillmentForm } from "../_components/fulfillment-form";
 import { RefundHandler } from "../_components/refund-handler";
 import { SiteHeader } from "../../_components/site-header";
+import { TrailHeader } from "../../_components/trail-header";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -261,10 +55,65 @@ export default async function OrderDetailPage({ params }: Props) {
   };
 
   return (
-    <HydrateClient>
-      <SiteHeader title={`Order #${order.id.slice(0, 8)}`} />
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Orders", href: "/admin/orders" },
+          { label: `Order #${order.id.slice(0, 8)}` },
+        ]}
+      />
+
+      <div className={cn("admin-form-toolbar")}>
+        <div className="toolbar-info">
+          <Button variant="ghost" size="sm" asChild className="shrink-0">
+            <Link href="/admin/orders">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Link>
+          </Button>
+          <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
+          <div className="hidden min-w-0 items-center gap-2 sm:flex">
+            <h1 className="text-base font-medium">
+              Order #{order.id.slice(0, 8)}
+            </h1>
+
+            <Badge variant="outline">{formatDate(order.createdAt)}</Badge>
+
+            <Badge variant={order.status === "paid" ? "default" : "secondary"}>
+              Status: {order.status}
+            </Badge>
+
+            <Badge
+              variant={order.paymentStatus === "paid" ? "default" : "secondary"}
+            >
+              Payment: {order.paymentStatus}
+            </Badge>
+
+            <Badge
+              variant={
+                order.fulfillmentStatus === "fulfilled"
+                  ? "default"
+                  : "secondary"
+              }
+            >
+              Fulfillment: {order.fulfillmentStatus}
+            </Badge>
+
+            {/* <span
+              className={`admin-status-badge ${
+                isDirty ? "isDirty" : "isPublished"
+              }`}
+            >
+              {isDirty ? "Unsaved Changes" : "Saved"}
+            </span> */}
+          </div>
+        </div>
+
+        <div className="toolbar-actions"></div>
+      </div>
+
       <div className="admin-container">
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <Button variant="ghost" asChild className="mb-4">
             <Link href="/admin/orders">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -284,7 +133,7 @@ export default async function OrderDetailPage({ params }: Props) {
               {order.status}
             </Badge>
           </div>
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Left Column - Order Details */}
@@ -555,6 +404,6 @@ export default async function OrderDetailPage({ params }: Props) {
           </div>
         </div>
       </div>
-    </HydrateClient>
+    </>
   );
 }

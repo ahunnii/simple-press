@@ -4,19 +4,18 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
-import { slugify } from "~/lib/utils";
+import { cn, slugify } from "~/lib/utils";
 import { productFormSchema } from "~/lib/validators/product";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
-import { Alert, AlertDescription } from "~/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +43,7 @@ import {
   FormLabel,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
@@ -267,9 +267,6 @@ export function ProductForm({ product }: Props) {
     createProductMutation.isPending ||
     syncImagesMutation.isPending;
 
-  const isUploading =
-    addImagesMutation.isPending || syncImagesMutation.isPending;
-
   const isDeleting = deleteProductMutation.isPending;
   const isDirty = form.formState.isDirty;
 
@@ -282,230 +279,182 @@ export function ProductForm({ product }: Props) {
         <form
           ref={formRef}
           onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          className="space-y-6"
+          className="min-h-screen bg-gray-50"
         >
-          <div className="admin-form-header">
-            <div className={`${isDirty ? "isDirty" : "isNotDirty"}`}>
-              <div className="flex min-w-0 items-center gap-3">
-                <Button variant="ghost" size="sm" asChild className="shrink-0">
-                  <Link href="/admin/products">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back
-                  </Link>
-                </Button>
+          <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
+            <div className="toolbar-info">
+              <Button variant="ghost" size="sm" asChild className="shrink-0">
+                <Link href="/admin/products">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back
+                </Link>
+              </Button>
+              <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
+              <div className="hidden min-w-0 items-center gap-2 sm:flex">
+                <h1 className="text-base font-medium">
+                  {product
+                    ? form.watch("name") || "Edit Product"
+                    : "New Product"}
+                </h1>
 
-                <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
-
-                <div className="hidden min-w-0 items-center gap-2 sm:flex">
-                  <h1>
-                    {product
-                      ? form.watch("name") || "Edit Product"
-                      : "New Product"}
-                  </h1>
-
-                  {product && (
-                    <span
-                      className={`admin-status-badge ${
-                        form.watch("published") ? "isPublished" : "isDraft"
-                      }`}
-                    >
-                      {form.watch("published") ? "Published" : "Draft"}
-                    </span>
-                  )}
-                </div>
+                <span
+                  className={`admin-status-badge ${
+                    isDirty ? "isDirty" : "isPublished"
+                  }`}
+                >
+                  {isDirty ? "Unsaved Changes" : "Saved"}
+                </span>
               </div>
+            </div>
 
-              <div className="flex shrink-0 items-center gap-2">
-                {/* Delete button - only show for existing products */}
-                {product && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    disabled={isSubmitting}
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Delete</span>
-                  </Button>
+            <div className="toolbar-actions">
+              <FormField
+                control={form.control}
+                name="published"
+                render={({ field }) => (
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="published">Published</Label>
+                    <Switch
+                      id="published"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </div>
                 )}
-
+              />
+              {product && (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  disabled={isSubmitting || !isDirty}
-                  onClick={() => form.reset()}
-                  className="hidden md:inline-flex"
+                  disabled={isSubmitting}
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 >
-                  Reset
+                  <Trash2 className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Delete</span>
                 </Button>
+              )}
 
-                <Button type="submit" size="sm" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <span className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2" />
-                      {isUploading ? "Uploading..." : "Saving..."}
-                    </>
-                  ) : (
-                    <>
-                      <span className="hidden sm:inline">Save product</span>
-                      <span className="sm:hidden">Save</span>
-                    </>
-                  )}
-                </Button>
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isSubmitting || !isDirty}
+                onClick={() => form.reset()}
+                className="hidden md:inline-flex"
+              >
+                Reset
+              </Button>
+
+              <Button type="submit" size="sm" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <span className="saving-indicator" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    <span className="hidden sm:inline">Save changes</span>
+                    <span className="sm:hidden">Save</span>
+                  </>
+                )}
+              </Button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="col-span-1 space-y-4">
-              {/* Basic Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Basic Information</CardTitle>
-                  <CardDescription>
-                    Essential details about your product
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <InputFormField
-                    form={form}
-                    name="name"
-                    label="Product Name *"
-                    onChangeAdditional={handleNameChange}
-                    placeholder="e.g., Classic White T-Shirt"
-                    required
-                    autoFocus
-                  />
-
-                  <InputFormField
-                    form={form}
-                    name="slug"
-                    label="URL Slug *"
-                    placeholder="classic-white-t-shirt"
-                    onChange={(value) =>
-                      form.setValue("slug", slugify(value), {
-                        shouldValidate: true,
-                      })
-                    }
-                    required
-                    description={`Used in product URL: /products/${form.watch("slug") || "your-product"}`}
-                  />
-
-                  <TextareaFormField
-                    form={form}
-                    name="description"
-                    label="Description"
-                    placeholder="Describe your product..."
-                    rows={4}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Pricing */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pricing</CardTitle>
-                  <CardDescription>Set your product pricing</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Price (USD) *</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
-                              $
-                            </span>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="19.99"
-                              className="pl-7"
-                              {...field}
-                              value={field.value || ""}
-                              onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                field.onChange(isNaN(value) ? 0 : value);
-                              }}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          Base price in USD (variant prices can override this)
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Base Inventory */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Inventory</CardTitle>
-                  <CardDescription>Set your product inventory</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <SwitchFormField
-                    form={form}
-                    name="trackInventory"
-                    label="Track Inventory"
-                    description="Enable inventory tracking for this product"
-                  />
-
-                  {form.watch("trackInventory") && (
-                    <SwitchFormField
+          <div className="admin-container space-y-6">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="col-span-1 space-y-4">
+                {/* Basic Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Basic Information</CardTitle>
+                    <CardDescription>
+                      Essential details about your product
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <InputFormField
                       form={form}
-                      name="allowBackorders"
-                      label="Allow Backorders"
-                      description="Allow customers to order when out of stock"
+                      name="name"
+                      label="Product Name *"
+                      onChangeAdditional={handleNameChange}
+                      placeholder="e.g., Classic White T-Shirt"
+                      required
+                      autoFocus
                     />
-                  )}
 
-                  <FormField
-                    control={form.control}
-                    name="inventoryQty"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Inventory Quantity</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="19.99"
-                              className="pl-7"
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                field.onChange(isNaN(value) ? 0 : value);
-                              }}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          Set the inventory quantity for this product (ignored
-                          if inventory tracking is disabled or if variants are
-                          used)
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-            <div className="col-span-1 space-y-4">
-              {/* Publishing */}
-              <Card>
+                    <InputFormField
+                      form={form}
+                      name="slug"
+                      label="URL Slug *"
+                      placeholder="classic-white-t-shirt"
+                      onChange={(value) =>
+                        form.setValue("slug", slugify(value), {
+                          shouldValidate: true,
+                        })
+                      }
+                      required
+                      description={`Used in product URL: /products/${form.watch("slug") || "your-product"}`}
+                    />
+
+                    <TextareaFormField
+                      form={form}
+                      name="description"
+                      label="Description"
+                      placeholder="Describe your product..."
+                      rows={4}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Pricing */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pricing</CardTitle>
+                    <CardDescription>Set your product pricing</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Price (USD) *</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                                $
+                              </span>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                placeholder="19.99"
+                                className="pl-7"
+                                {...field}
+                                value={field.value || ""}
+                                onChange={(e) => {
+                                  const value = parseFloat(e.target.value);
+                                  field.onChange(isNaN(value) ? 0 : value);
+                                }}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            Base price in USD (variant prices can override this)
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="col-span-1 space-y-4">
+                {/* Publishing */}
+                {/* <Card>
                 <CardHeader>
                   <CardTitle>Publishing</CardTitle>
                   <CardDescription>Control product visibility</CardDescription>
@@ -532,28 +481,88 @@ export function ProductForm({ product }: Props) {
                     )}
                   />
                 </CardContent>
-              </Card>
+              </Card> */}
 
-              {/* Images */}
-              <ImageUploader
-                images={images}
-                onImagesChange={setImages}
-                maxImages={10}
-              />
+                {/* Images */}
+                <ImageUploader
+                  images={images}
+                  onImagesChange={setImages}
+                  maxImages={10}
+                />
+
+                {/* Base Inventory */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Inventory</CardTitle>
+                    <CardDescription>
+                      Set your product inventory
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <SwitchFormField
+                      form={form}
+                      name="trackInventory"
+                      label="Track Inventory"
+                      description="Enable inventory tracking for this product"
+                    />
+
+                    {form.watch("trackInventory") && (
+                      <SwitchFormField
+                        form={form}
+                        name="allowBackorders"
+                        label="Allow Backorders"
+                        description="Allow customers to order when out of stock"
+                      />
+                    )}
+
+                    <FormField
+                      control={form.control}
+                      name="inventoryQty"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Inventory Quantity</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                placeholder="19.99"
+                                className="pl-7"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) => {
+                                  const value = parseFloat(e.target.value);
+                                  field.onChange(isNaN(value) ? 0 : value);
+                                }}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            Set the inventory quantity for this product (ignored
+                            if inventory tracking is disabled or if variants are
+                            used)
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
 
-          {/* Variants */}
-          <VariantManager
-            variants={variants}
-            onChange={setVariants}
-            basePrice={Math.round((form.watch("price") || 0) * 100)}
-            existingVariantOptions={getExistingVariantOptions(
-              product?.variants as
-                | Array<{ options: Record<string, string> }>
-                | undefined,
-            )}
-          />
+            {/* Variants */}
+            <VariantManager
+              variants={variants}
+              onChange={setVariants}
+              basePrice={Math.round((form.watch("price") || 0) * 100)}
+              existingVariantOptions={getExistingVariantOptions(
+                product?.variants as
+                  | Array<{ options: Record<string, string> }>
+                  | undefined,
+              )}
+            />
+          </div>
         </form>
       </Form>
 

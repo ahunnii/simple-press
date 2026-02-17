@@ -35,7 +35,9 @@ import {
 import { toast } from "sonner";
 
 import { getStoredPath } from "~/lib/uploads";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -199,250 +201,312 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
     }
   };
 
+  const isDirty =
+    name !== gallery.name ||
+    description !== gallery.description ||
+    layout !== gallery.layout ||
+    columns !== gallery.columns ||
+    gap !== gallery.gap ||
+    showCaptions !== gallery.showCaptions ||
+    enableLightbox !== gallery.enableLightbox;
+
   return (
-    <div className="admin-container">
-      <div className="mb-8">
-        <div className="mb-4">
-          <Button variant="ghost" size="sm" asChild>
+    <>
+      <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
+        <div className="toolbar-info">
+          <Button variant="ghost" size="sm" asChild className="shrink-0">
             <Link href="/admin/galleries">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Galleries
+              Back
             </Link>
           </Button>
+          <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
+          <div className="hidden min-w-0 items-center gap-2 sm:flex">
+            <h1 className="text-base font-medium">{gallery.name} Gallery</h1>
+
+            <Badge variant="outline">{images.length} images</Badge>
+            <span
+              className={`admin-status-badge ${
+                isDirty ? "isDirty" : "isPublished"
+              }`}
+            >
+              {isDirty ? "Unsaved Changes" : "Saved"}
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">{gallery.name}</h1>
-            <p className="mt-2 text-gray-600">{images.length} images</p>
-          </div>
+        <div className="toolbar-actions">
+          {/* <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isSaving || !isDirty}
+            onClick={() => form.reset()}
+            className="hidden md:inline-flex"
+          >
+            Reset
+          </Button> */}
 
-          <div className="flex gap-3">
-            <Button variant="outline" asChild>
-              <a href={`/galleries/${gallery.slug}`} target="_blank">
-                <Eye className="mr-2 h-4 w-4" />
-                Preview
-              </a>
-            </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-          </div>
+          <Button onClick={handleSave} size="sm" disabled={isSaving}>
+            {isSaving ? (
+              <>
+                <span className="saving-indicator" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Save changes</span>
+                <span className="sm:hidden">Save</span>
+              </>
+            )}
+          </Button>
         </div>
       </div>
+      <div className="admin-container">
+        {/* <div className="mb-8">
+          <div className="mb-4">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/admin/galleries">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Galleries
+              </Link>
+            </Button>
+          </div>
 
-      <Tabs defaultValue="images" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="images">Images</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">{gallery.name}</h1>
+              <p className="mt-2 text-gray-600">{images.length} images</p>
+            </div>
 
-        {/* Images Tab */}
-        <TabsContent value="images" className="space-y-6">
-          {/* Upload */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Add Images</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4">
-                <Input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="max-w-sm"
-                />
-                <Button variant="outline" asChild>
-                  <label htmlFor="image-upload" className="cursor-pointer">
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload Images
-                  </label>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="flex gap-3">
+              <Button variant="outline" asChild>
+                <a href={`/galleries/${gallery.slug}`} target="_blank">
+                  <Eye className="mr-2 h-4 w-4" />
+                  Preview
+                </a>
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div> */}
 
-          {/* Image Grid with Drag-and-Drop */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Images ({images.length})</CardTitle>
-              <p className="text-sm text-gray-600">
-                Drag and drop to reorder images
-              </p>
-            </CardHeader>
-            <CardContent>
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={images.map((img) => img.id)}
-                  strategy={rectSortingStrategy}
-                >
-                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
-                    {images.map((image) => (
-                      <SortableImage
-                        key={image.id}
-                        image={image}
-                        onDelete={handleDeleteImage}
-                        onEdit={setEditingImage} // ADD THIS
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
+        <Tabs defaultValue="images" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="images">Images</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
 
-              {images.length === 0 && (
-                <div className="py-12 text-center text-gray-500">
-                  <p>No images yet. Upload some to get started.</p>
+          {/* Images Tab */}
+          <TabsContent value="images" className="space-y-6">
+            {/* Upload */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Add Images</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <Input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="max-w-sm"
+                  />
+                  <Button variant="outline" asChild>
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Images
+                    </label>
+                  </Button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </CardContent>
+            </Card>
 
-        {/* Settings Tab */}
-        <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gallery Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="mt-2"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  className="mt-2"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Layout Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="layout">Layout Style</Label>
-                <Select
-                  value={layout}
-                  onValueChange={(v) =>
-                    setLayout(
-                      v as
-                        | "grid"
-                        | "masonry"
-                        | "carousel"
-                        | "collage"
-                        | "justified",
-                    )
-                  }
+            {/* Image Grid with Drag-and-Drop */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Images ({images.length})</CardTitle>
+                <p className="text-sm text-gray-600">
+                  Drag and drop to reorder images
+                </p>
+              </CardHeader>
+              <CardContent>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
                 >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="grid">Grid</SelectItem>
-                    <SelectItem value="masonry">Masonry</SelectItem>
-                    <SelectItem value="carousel">Carousel</SelectItem>
-                    <SelectItem value="collage">Collage</SelectItem>
-                    <SelectItem value="justified">Justified</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <SortableContext
+                    items={images.map((img) => img.id)}
+                    strategy={rectSortingStrategy}
+                  >
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+                      {images.map((image) => (
+                        <SortableImage
+                          key={image.id}
+                          image={image}
+                          onDelete={handleDeleteImage}
+                          onEdit={setEditingImage} // ADD THIS
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
 
-              {layout === "grid" && (
-                <>
-                  <div>
-                    <Label htmlFor="columns">Columns</Label>
-                    <Select
-                      value={columns.toString()}
-                      onValueChange={(v) => setColumns(parseInt(v))}
-                    >
-                      <SelectTrigger className="mt-2">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="2">2 columns</SelectItem>
-                        <SelectItem value="3">3 columns</SelectItem>
-                        <SelectItem value="4">4 columns</SelectItem>
-                        <SelectItem value="5">5 columns</SelectItem>
-                      </SelectContent>
-                    </Select>
+                {images.length === 0 && (
+                  <div className="py-12 text-center text-gray-500">
+                    <p>No images yet. Upload some to get started.</p>
                   </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                  <div>
-                    <Label htmlFor="gap">Gap (px)</Label>
-                    <Input
-                      id="gap"
-                      type="number"
-                      value={gap}
-                      onChange={(e) => setGap(parseInt(e.target.value))}
-                      min={0}
-                      max={64}
-                      className="mt-2"
-                    />
-                  </div>
-                </>
-              )}
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Gallery Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="captions">Show Captions</Label>
-                <Switch
-                  id="captions"
-                  checked={showCaptions}
-                  onCheckedChange={setShowCaptions}
-                />
-              </div>
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                    className="mt-2"
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="lightbox">Enable Lightbox</Label>
-                <Switch
-                  id="lightbox"
-                  checked={enableLightbox}
-                  onCheckedChange={setEnableLightbox}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            <Card>
+              <CardHeader>
+                <CardTitle>Layout Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="layout">Layout Style</Label>
+                  <Select
+                    value={layout}
+                    onValueChange={(v) =>
+                      setLayout(
+                        v as
+                          | "grid"
+                          | "masonry"
+                          | "carousel"
+                          | "collage"
+                          | "justified",
+                      )
+                    }
+                  >
+                    <SelectTrigger className="mt-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="grid">Grid</SelectItem>
+                      <SelectItem value="masonry">Masonry</SelectItem>
+                      <SelectItem value="carousel">Carousel</SelectItem>
+                      <SelectItem value="collage">Collage</SelectItem>
+                      <SelectItem value="justified">Justified</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-      {/* ADD: Edit Modal */}
-      {editingImage && (
-        <ImageEditModal
-          image={editingImage}
-          isOpen={true}
-          onClose={() => setEditingImage(null)}
-          onSuccess={() => router.refresh()}
-        />
-      )}
-    </div>
+                {layout === "grid" && (
+                  <>
+                    <div>
+                      <Label htmlFor="columns">Columns</Label>
+                      <Select
+                        value={columns.toString()}
+                        onValueChange={(v) => setColumns(parseInt(v))}
+                      >
+                        <SelectTrigger className="mt-2">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="2">2 columns</SelectItem>
+                          <SelectItem value="3">3 columns</SelectItem>
+                          <SelectItem value="4">4 columns</SelectItem>
+                          <SelectItem value="5">5 columns</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="gap">Gap (px)</Label>
+                      <Input
+                        id="gap"
+                        type="number"
+                        value={gap}
+                        onChange={(e) => setGap(parseInt(e.target.value))}
+                        min={0}
+                        max={64}
+                        className="mt-2"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="captions">Show Captions</Label>
+                  <Switch
+                    id="captions"
+                    checked={showCaptions}
+                    onCheckedChange={setShowCaptions}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="lightbox">Enable Lightbox</Label>
+                  <Switch
+                    id="lightbox"
+                    checked={enableLightbox}
+                    onCheckedChange={setEnableLightbox}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* ADD: Edit Modal */}
+        {editingImage && (
+          <ImageEditModal
+            image={editingImage}
+            isOpen={true}
+            onClose={() => setEditingImage(null)}
+            onSuccess={() => router.refresh()}
+          />
+        )}
+      </div>
+    </>
   );
 }
 

@@ -1,43 +1,32 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
+import { api } from "~/trpc/server";
 
+import { TrailHeader } from "../_components/trail-header";
 import { EmailPreview } from "./_components/email-preview";
 
 export default async function EmailPreviewPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      business: {
-        include: {
-          siteContent: true,
-        },
-      },
-    },
-  });
-
-  if (!user?.business) {
-    redirect("/admin/welcome");
-  }
+  const business = await api.business.get();
+  if (!business) notFound();
 
   // Get a sample order for preview
   const sampleOrder = await db.order.findFirst({
-    where: { businessId: user.business.id },
+    where: { businessId: business.id },
     include: {
       items: true,
       shippingAddress: true,
     },
   });
 
-  return <EmailPreview business={user.business} sampleOrder={sampleOrder} />;
+  return (
+    <>
+      <TrailHeader breadcrumbs={[{ label: "Email Previews" }]} />
+      <EmailPreview business={business} sampleOrder={sampleOrder} />
+    </>
+  );
 }
+
+export const metadata = {
+  title: "Email Previews",
+};

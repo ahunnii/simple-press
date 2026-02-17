@@ -133,7 +133,7 @@ export function CollectionsPage({ businessId }: CollectionsPageProps) {
 
                     <div className="flex items-center gap-2">
                       <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/admin/collections/${collection.id}/edit`}>
+                        <Link href={`/admin/collections/${collection.id}`}>
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>

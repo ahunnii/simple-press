@@ -118,8 +118,16 @@ export const collectionsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to access this resource",
+        });
+      }
+
       const collection = await ctx.db.collection.findUnique({
-        where: { id: input.id },
+        where: { id: input.id, businessId: business.id },
         include: {
           business: {
             select: { id: true },

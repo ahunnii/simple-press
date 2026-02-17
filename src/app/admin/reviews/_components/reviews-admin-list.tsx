@@ -294,8 +294,46 @@ export function ReviewsAdminList({ businessId }: { businessId: string }) {
 
   return (
     <div className="admin-container space-y-6">
+      <div className="admin-header">
+        <div>
+          <h1>Product Reviews</h1>
+          <p>Manage your product reviews</p>
+          <div className="mt-4 flex items-center gap-3">
+            <h2 className="text-sm font-medium text-gray-600">
+              Filter by source:
+            </h2>
+            <Select
+              value={source}
+              onValueChange={(v) =>
+                setSource(v as "customer" | "owner" | "all")
+              }
+            >
+              <SelectTrigger className="w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All ({all.length})</SelectItem>
+                <SelectItem value="customer">
+                  Customer ({customerSub.length})
+                </SelectItem>
+                <SelectItem value="owner">
+                  Owner Added ({ownerAdded.length})
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Review
+          </Button>
+        </div>
+      </div>
+
       {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-medium text-gray-600">
             Filter by source:
@@ -323,7 +361,7 @@ export function ReviewsAdminList({ businessId }: { businessId: string }) {
           <Plus className="mr-2 h-4 w-4" />
           Add Review
         </Button>
-      </div>
+      </div> */}
 
       {/* Tabs */}
       <Tabs defaultValue="pending">

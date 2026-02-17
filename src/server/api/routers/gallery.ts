@@ -1,6 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { checkBusiness } from "~/lib/check-business";
+
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const galleryRouter = createTRPCRouter({
@@ -31,8 +33,15 @@ export const galleryRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
       const gallery = await ctx.db.gallery.findUnique({
-        where: { id: input.id },
+        where: { id: input.id, businessId: business.id },
         include: {
           images: {
             orderBy: { sortOrder: "asc" },

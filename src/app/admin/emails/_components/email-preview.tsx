@@ -103,8 +103,13 @@ export function EmailPreview({ business, sampleOrder }: any) {
   };
 
   return (
-    <div className="mx-auto max-w-7xl p-8">
-      <h1 className="mb-8 text-3xl font-bold">Email Previews</h1>
+    <div className="admin-container">
+      <div className="admin-header">
+        <div>
+          <h1>Email Previews</h1>
+          <p>See how your emails will look to your customers</p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card>
