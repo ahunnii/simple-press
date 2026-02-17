@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import { api } from "~/trpc/react";
 import {
@@ -27,20 +27,11 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
-type CollectionsPageProps = {
-  businessId: string;
-};
-
-export function CollectionsPage({ businessId }: CollectionsPageProps) {
-  const router = useRouter();
+export function CollectionsPage() {
   const utils = api.useUtils();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const { data: collections, isLoading } =
-    api.collections.getByBusiness.useQuery({
-      businessId,
-      includeUnpublished: true,
-    });
+  const { data: collections, isLoading } = api.collections.getAll.useQuery();
 
   const deleteMutation = api.collections.delete.useMutation({
     onSuccess: () => {
@@ -51,7 +42,7 @@ export function CollectionsPage({ businessId }: CollectionsPageProps) {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    deleteMutation.mutate({ id: deleteId });
+    deleteMutation.mutate(deleteId);
   };
 
   if (isLoading) {

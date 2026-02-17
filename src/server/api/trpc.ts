@@ -166,17 +166,25 @@ export const ownerAdminProcedure = t.procedure
       select: { id: true },
     });
 
+    if (!business) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+    }
+
     if (
       ctx.session.user.businessId !== business?.id &&
       ctx.session.user.role !== "ADMIN"
     ) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You are not authorized to access this resource",
+      });
     }
 
     return next({
       ctx: {
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
+        businessId: business.id,
       },
     });
   });

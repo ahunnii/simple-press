@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { api } from "~/trpc/server";
 
 import { CollectionForm } from "../_components/collection-form";
@@ -10,11 +12,14 @@ type PageProps = {
 export default async function EditCollectionPage({ params }: PageProps) {
   const { id } = await params;
 
-  const collection = await api.collections.getById({ id });
+  const collection = await api.collections.getById(id);
+
+  if (!collection) notFound();
+
   const products = await api.product.secureGetAll();
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <TrailHeader
         breadcrumbs={[
           { label: "Collections", href: "/admin/collections" },
@@ -25,8 +30,9 @@ export default async function EditCollectionPage({ params }: PageProps) {
         businessId={collection.businessId}
         collectionId={id}
         allProducts={products}
+        collection={collection}
       />
-    </>
+    </div>
   );
 }
 
