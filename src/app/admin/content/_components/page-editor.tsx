@@ -47,7 +47,6 @@ const pageFormSchema = z.object({
 type PageFormValues = z.infer<typeof pageFormSchema>;
 
 type PageEditorProps = {
-  business: { id: string; name: string };
   page?: {
     id: string;
     title: string;
@@ -60,7 +59,7 @@ type PageEditorProps = {
   };
 };
 
-export function PageEditor({ business, page }: PageEditorProps) {
+export function PageEditor({ page }: PageEditorProps) {
   const router = useRouter();
   const isEditing = !!page;
   const formRef = useRef<HTMLFormElement>(null);
@@ -157,7 +156,7 @@ export function PageEditor({ business, page }: PageEditorProps) {
     if (isEditing) {
       updatePage.mutate({ id: page.id, data: pageData });
     } else {
-      createPage.mutate({ businessId: business.id, data: pageData });
+      createPage.mutate({ data: pageData });
     }
   };
 
@@ -309,7 +308,6 @@ export function PageEditor({ business, page }: PageEditorProps) {
                     placeholder="Start writing your page content..."
                     output="json"
                     editorContentClassName="min-h-[400px] p-4"
-                    businessId={business.id}
                   />
                 </CardContent>
               </Card>

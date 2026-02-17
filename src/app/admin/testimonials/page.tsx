@@ -1,18 +1,8 @@
-import { notFound } from "next/navigation";
-
-import { api } from "~/trpc/server";
-
 import { TrailHeader } from "../_components/trail-header";
 import { TestimonialsActions } from "./_components/testimonials-actions";
 import { TestimonialsList } from "./_components/testimonials-list";
 
 export default async function TestimonialsPage() {
-  const business = await api.business.get();
-
-  if (!business) {
-    notFound();
-  }
-
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Testimonials" }]} />
@@ -22,10 +12,10 @@ export default async function TestimonialsPage() {
             <h1>Testimonials</h1>
             <p>Manage customer testimonials and reviews</p>
           </div>
-          <TestimonialsActions businessId={business.id} />
+          <TestimonialsActions />
         </div>
 
-        <TestimonialsList businessId={business.id} />
+        <TestimonialsList />
       </div>
     </>
   );

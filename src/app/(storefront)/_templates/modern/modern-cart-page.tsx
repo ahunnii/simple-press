@@ -1,17 +1,17 @@
 import type { RouterOutputs } from "~/trpc/react";
 
-import { StorefrontFooter } from "../../_components/storefront-footer";
-import { StorefrontHeader } from "../../_components/storefront-header";
 import { ModernCartContent } from "./modern-cart-content";
+import { ModernFooter } from "./modern-footer";
+import { ModernHeader } from "./modern-header";
 
 export default function ModernCartPage({
   business,
 }: {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 }) {
   return (
     <div className="font-sans antialiased">
-      <StorefrontHeader business={business} />
+      <ModernHeader business={business} />
 
       <div className="bg-background">
         <div className="border-border border-b">
@@ -25,7 +25,7 @@ export default function ModernCartPage({
           <ModernCartContent />
         </div>
       </div>
-      <StorefrontFooter business={business} />
+      <ModernFooter business={business} />
     </div>
   );
 }

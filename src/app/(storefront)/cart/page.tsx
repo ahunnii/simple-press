@@ -7,9 +7,7 @@ import { DefaultCartPage } from "../_templates/default/default-cart-page";
 import ModernCartPage from "../_templates/modern/modern-cart-page";
 
 export default async function CartPage() {
-  const business = await api.business.get();
-
-  if (!business) notFound();
+  const business = await api.business.simplifiedGet();
 
   if (business.templateId === "pollen") {
     notFound();

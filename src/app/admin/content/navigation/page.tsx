@@ -7,8 +7,11 @@ import { NavigationBuilder } from "../_components/navigation-builder";
 import { TrailHeader } from "../../_components/trail-header";
 
 export default async function NavigationPage() {
-  const business = await api.business.get({ includePages: true });
-  if (!business) notFound();
+  const business = await api.business.getWith({
+    includeSiteContent: true,
+    includePages: true,
+  });
+  if (!business || !business.siteContent || !business.pages) notFound();
 
   let siteContent = business?.siteContent;
   siteContent ??= await db.siteContent.create({
@@ -24,7 +27,18 @@ export default async function NavigationPage() {
         ]}
       />
 
-      <NavigationBuilder business={business} siteContent={siteContent} />
+      <NavigationBuilder
+        business={business}
+        siteContent={
+          siteContent as unknown as {
+            navigationItems: {
+              label: string;
+              href: string;
+              external?: boolean;
+            }[];
+          }
+        }
+      />
     </>
   );
 }

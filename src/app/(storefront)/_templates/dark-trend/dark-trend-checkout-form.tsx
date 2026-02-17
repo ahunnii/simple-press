@@ -17,7 +17,6 @@ import { DarkTrendDiscountInput } from "./dark-trend-discount-input";
 
 type Business = {
   id: string;
-  stripeAccountId: string | null;
   siteContent: {
     primaryColor: string | null;
   } | null;
@@ -272,7 +271,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
 
               <Button
                 type="submit"
-                disabled={isProcessing || !business.stripeAccountId}
+                disabled={isProcessing}
                 className="w-full bg-violet-500 py-6 text-base font-semibold text-white hover:bg-violet-600"
                 size="lg"
               >
@@ -288,14 +287,6 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   </>
                 )}
               </Button>
-
-              {!business.stripeAccountId && (
-                <Alert className="border-amber-500/50 bg-amber-500/10">
-                  <AlertDescription className="text-amber-400">
-                    Payment processing is not yet configured for this store.
-                  </AlertDescription>
-                </Alert>
-              )}
 
               <p className="text-center text-xs text-white/60">
                 Secure checkout powered by Stripe

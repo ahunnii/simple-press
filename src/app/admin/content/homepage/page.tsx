@@ -2,11 +2,12 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { HomepageEditor } from "../_components/homepage-editor";
+import { BrandingEditor } from "../_components/homepage-editor";
 import { TrailHeader } from "../../_components/trail-header";
 
-export default async function HomepagePage() {
-  const business = await api.business.secureGetContent();
+export default async function BrandingPage() {
+  const business = await api.business.getWith({ includeSiteContent: true });
+
   if (!business || !business.siteContent) {
     notFound();
   }
@@ -20,7 +21,7 @@ export default async function HomepagePage() {
         ]}
       />
 
-      <HomepageEditor business={business} siteContent={business.siteContent} />
+      <BrandingEditor business={business} siteContent={business.siteContent} />
     </>
   );
 }

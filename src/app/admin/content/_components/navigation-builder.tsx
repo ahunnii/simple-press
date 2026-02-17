@@ -60,8 +60,7 @@ export function NavigationBuilder({ business, siteContent }: Props) {
 
   const handleSave = () => {
     updateSiteContent.mutate({
-      businessId: business.id,
-      data: { navigationItems: navItems },
+      navigationItems: navItems,
     });
   };
 

@@ -1,14 +1,10 @@
-import { notFound } from "next/navigation";
-
-import { api, HydrateClient } from "~/trpc/server";
+import { api } from "~/trpc/server";
 
 import { DomainSettings } from "../_components/domain-settings";
 import { TrailHeader } from "../../_components/trail-header";
 
 export default async function DomainSettingsPage() {
-  const business = await api.business.get();
-
-  if (!business) notFound();
+  const business = await api.business.getWith({});
 
   return (
     <>

@@ -1,16 +1,13 @@
 import type { RouterOutputs } from "~/trpc/react";
 
-import { StorefrontFooter } from "../../_components/storefront-footer";
-import { StorefrontHeader } from "../../_components/storefront-header";
 import { DefaultCheckoutForm } from "./default-checkout-form";
 
-export async function DefaultCheckoutPage({
-  business,
-}: {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
-}) {
+type Props = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+};
+export async function DefaultCheckoutPage({ business }: Props) {
   // Check if Stripe is connected
-  if (!business.stripeAccountId) {
+  if (!business.isStripeConnected) {
     return (
       <main className="flex flex-1 items-center justify-center p-4">
         <div className="max-w-md text-center">

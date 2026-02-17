@@ -1,14 +1,10 @@
-import { notFound } from "next/navigation";
-
 import { api } from "~/trpc/server";
 
 import { IntegrationsSettings } from "../_components/integrations-settings";
 import { TrailHeader } from "../../_components/trail-header";
 
 export default async function IntegrationsSettingsPage() {
-  const business = await api.business.get();
-
-  if (!business) notFound();
+  const business = await api.business.getWithIntegrations();
 
   return (
     <>

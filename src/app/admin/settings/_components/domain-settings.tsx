@@ -14,6 +14,7 @@ import {
   XCircle,
 } from "lucide-react";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -30,7 +31,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
 type DomainSettingsProps = {
-  business: Business & { siteContent?: SiteContent | null };
+  business: NonNullable<RouterOutputs["business"]["getWith"]>;
 };
 
 export function DomainSettings({ business }: DomainSettingsProps) {

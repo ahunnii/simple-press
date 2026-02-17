@@ -15,11 +15,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params;
 
   // Find business
-  const business = await api.business.get();
-
-  if (!business) {
-    notFound();
-  }
+  const business = await api.business.simplifiedGet();
 
   // Find product
   const product = await api.product.get(slug);

@@ -13,6 +13,7 @@ import z from "zod";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
+import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -38,25 +39,26 @@ type Props = {
 };
 
 const seoFormSchema = z.object({
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  metaKeywords: z.string().optional(),
-  ogImage: z.string().optional(),
-  faviconUrl: z.string().optional(),
+  metaTitle: z.string().nullable().optional(),
+  metaDescription: z.string().nullable().optional(),
+  metaKeywords: z.string().nullable().optional(),
+  ogImage: z.string().nullable().optional(),
+  faviconUrl: z.string().nullable().optional(),
   ogImageFile: z.instanceof(File).optional().nullable(),
   faviconFile: z.instanceof(File).optional().nullable(),
 });
 
 type SeoFormValues = z.infer<typeof seoFormSchema>;
 
-export function SEOEditor({ business, siteContent }: Props) {
+export function SEOEditor({ siteContent }: Props) {
   const router = useRouter();
 
-  // Form refs
+  // Refs
   const formRef = useRef<HTMLFormElement>(null);
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
   const faviconFileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Form Setup
   const form = useForm<SeoFormValues>({
     resolver: zodResolver(seoFormSchema),
     defaultValues: {
@@ -70,6 +72,7 @@ export function SEOEditor({ business, siteContent }: Props) {
     },
   });
 
+  //Image Uploads
   const ogImageUploader = useUploadFile({
     api: "/api/upload",
     route: "image",
@@ -78,27 +81,15 @@ export function SEOEditor({ business, siteContent }: Props) {
     },
   });
 
-  const faviconUploader = useUploadFile({
-    api: "/api/upload",
-    route: "favicon",
-    onError: (error) => {
-      toast.error(error.message ?? "Favicon upload failed.");
-    },
-  });
-
-  const updateSiteContent = api.content.updateSiteContent.useMutation({
+  //Mutations
+  const updateSiteContent = api.business.updateSeo.useMutation({
     onSuccess: (data) => {
       toast.dismiss();
       toast.success("SEO settings updated");
       form.reset({
-        ...data,
+        ...data.siteContent,
         ogImageFile: null,
         faviconFile: null,
-        metaTitle: data.metaTitle ?? undefined,
-        metaDescription: data.metaDescription ?? undefined,
-        metaKeywords: data.metaKeywords ?? undefined,
-        ogImage: data.ogImage ?? undefined,
-        faviconUrl: data.faviconUrl ?? undefined,
       });
     },
     onError: (error) => {
@@ -113,8 +104,7 @@ export function SEOEditor({ business, siteContent }: Props) {
     },
   });
 
-  const isSaving = updateSiteContent.isPending;
-
+  //Handlers
   const handleReset = () => {
     form.reset({
       metaTitle: siteContent.metaTitle ?? "",
@@ -131,7 +121,6 @@ export function SEOEditor({ business, siteContent }: Props) {
 
   const handleSubmit = async (data: SeoFormValues) => {
     let ogImageUrl: string | undefined = siteContent.ogImage ?? undefined;
-    let faviconUrl: string | undefined = siteContent.faviconUrl ?? undefined;
 
     const tempOgImageFile = data.ogImageFile;
     if (tempOgImageFile instanceof File) {
@@ -146,34 +135,20 @@ export function SEOEditor({ business, siteContent }: Props) {
         return;
       }
     }
-    const tempFaviconFile = data.faviconFile;
-    if (tempFaviconFile instanceof File) {
-      try {
-        const response = await faviconUploader.upload(tempFaviconFile);
-        const fileLocation =
-          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
-          "";
-
-        if (fileLocation) faviconUrl = fileLocation;
-      } catch {
-        toast.error("Failed to upload logo.");
-        return;
-      }
-    }
 
     updateSiteContent.mutate({
-      businessId: business.id,
-      data: {
-        metaTitle: data.metaTitle ?? undefined,
-        metaDescription: data.metaDescription ?? undefined,
-        metaKeywords: data.metaKeywords ?? undefined,
-        ogImage: ogImageUrl,
-        faviconUrl,
-      },
+      metaTitle: data.metaTitle ?? undefined,
+      metaDescription: data.metaDescription ?? undefined,
+      metaKeywords: data.metaKeywords ?? undefined,
+      ogImage: ogImageUrl,
     });
   };
-  const isDirty = form.formState.isDirty;
 
+  // Checks and Hooks
+  const isDirty = form.formState.isDirty;
+  const isSaving = updateSiteContent.isPending;
+
+  useKeyboardEnter(form, handleSubmit);
   useDirtyForm(isDirty);
 
   return (
@@ -284,87 +259,38 @@ export function SEOEditor({ business, siteContent }: Props) {
                   form={form}
                   name="ogImageFile"
                   label="Open Graph Image"
-                  // placeholder="https://example.com/og-image.jpg"
                   description="Recommended: 1200x630px"
                   existingPreviewUrl={siteContent.ogImage ?? undefined}
                   inputRef={ogImageFileInputRef}
                 />
-                {/* <div>
-                  <Label htmlFor="ogImage">Open Graph Image</Label>
-                  <div className="mt-2 flex gap-2">
-                    <Input
-                      id="ogImage"
-                      value={ogImage}
-                      onChange={(e) => setOgImage(e.target.value)}
-                      placeholder="https://example.com/og-image.jpg"
-                    />
-                    <Button variant="outline">
-                      <ImageIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Recommended: 1200x630px
-                  </p>
-                  {ogImage && (
-                    <div className="mt-4">
-                      <img
-                        src={ogImage}
-                        alt="OG Image preview"
-                        className="max-h-48 rounded-lg object-cover"
-                      />
-                    </div>
-                  )}
-                </div> */}
               </CardContent>
             </Card>
 
-            {/* Favicon */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Favicon</CardTitle>
-                <CardDescription>
-                  The small icon shown in browser tabs
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ImageUploadFormField
-                  form={form}
-                  name="faviconFile"
-                  label="Favicon Image"
-                  // placeholder="https://example.com/favicon.ico"
-                  description="Recommended: 32x32px or 16x16px .ico or .png"
-                  existingPreviewUrl={siteContent.faviconUrl ?? undefined}
-                  inputRef={faviconFileInputRef}
-                />
-                {/* <div>
-                  <Label htmlFor="faviconUrl">Favicon URL</Label>
-                  <div className="mt-2 flex gap-2">
-                    <Input
-                      id="faviconUrl"
-                      value={faviconUrl}
-                      onChange={(e) => setFaviconUrl(e.target.value)}
-                      placeholder="https://example.com/favicon.ico"
-                    />
-                    <Button variant="outline">
-                      <ImageIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Recommended: 32x32px or 16x16px .ico or .png
-                  </p>
-                  {faviconUrl && (
-                    <div className="mt-4 flex items-center gap-3">
-                      <img
-                        src={faviconUrl}
-                        alt="Favicon preview"
-                        className="h-8 w-8"
-                      />
-                      <span className="text-sm text-gray-600">Preview</span>
+            {/* Preview */}
+            {(form.watch("metaTitle") ?? form.watch("metaDescription")) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Search Result Preview</CardTitle>
+                  <CardDescription>
+                    How your store might appear in Google
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-lg border bg-white p-4">
+                    <div className="mb-1 text-sm text-blue-600">
+                      {form.watch("metaTitle") ?? "Your Store Name"}
                     </div>
-                  )}
-                </div> */}
-              </CardContent>
-            </Card>
+                    <div className="mb-2 text-xs text-green-700">
+                      https://yourstore.com
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {form.watch("metaDescription") ??
+                        "Your store description will appear here..."}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </form>

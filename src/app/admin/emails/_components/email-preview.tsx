@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -9,11 +6,21 @@ import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderShippedEmail from "~/emails/order-shipped";
 import WelcomeEmail from "~/emails/welcome";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { renderEmail } from "~/lib/email/render";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
-export function EmailPreview({ business, sampleOrder }: any) {
+type Props = {
+  business: NonNullable<
+    RouterOutputs["business"]["getForEmailPreview"]
+  >["business"];
+  sampleOrder: NonNullable<
+    RouterOutputs["business"]["getForEmailPreview"]
+  >["sampleOrder"];
+};
+
+export function EmailPreview({ business, sampleOrder }: Props) {
   const [html, setHtml] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -47,7 +54,7 @@ export function EmailPreview({ business, sampleOrder }: any) {
           country: "US",
         },
         businessName: business.name,
-        businessLogoUrl: business.siteContent?.logoUrl,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
         businessUrl: `https://${business.subdomain}.yourdomain.com`,
       }),
     );
@@ -66,7 +73,7 @@ export function EmailPreview({ business, sampleOrder }: any) {
         carrier: "UPS",
         estimatedDelivery: "Monday, March 15",
         businessName: business.name,
-        businessLogoUrl: business.siteContent?.logoUrl,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
       }),
     );
     setHtml(rendered);
@@ -80,7 +87,7 @@ export function EmailPreview({ business, sampleOrder }: any) {
         name: "John Doe",
         businessName: business.name,
         businessUrl: `https://${business.subdomain}.yourdomain.com`,
-        logoUrl: business.siteContent?.logoUrl,
+        logoUrl: business.siteContent?.logoUrl ?? "",
       }),
     );
     setHtml(rendered);

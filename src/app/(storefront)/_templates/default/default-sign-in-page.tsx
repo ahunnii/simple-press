@@ -6,13 +6,11 @@ import { ArrowLeft } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 
-export function DefaultSignInPage({
-  redirectTo,
-  business,
-}: {
+type Props = {
   redirectTo: string;
-  business: NonNullable<RouterOutputs["business"]["get"]>;
-}) {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+};
+export function DefaultSignInPage({ redirectTo, business }: Props) {
   return (
     <div className="bg-background flex min-h-screen">
       <div className="bg-primary relative hidden overflow-hidden lg:flex lg:w-1/2">

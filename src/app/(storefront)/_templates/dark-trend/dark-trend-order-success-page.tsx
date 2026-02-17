@@ -7,7 +7,7 @@ import { DarkTrendOrderConfirmation } from "./dark-trend-order-confirmation";
 export function DarkTrendOrderSuccessPage({
   business,
 }: {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 }) {
   return (
     <div className="flex min-h-[75vh] flex-1 items-center justify-center bg-[#1A1A1A] px-4 py-12">

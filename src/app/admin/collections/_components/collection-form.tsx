@@ -35,8 +35,6 @@ import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
-  businessId: string;
-  collectionId?: string;
   collection?: RouterOutputs["collections"]["getById"];
   allProducts: RouterOutputs["product"]["secureGetAll"];
 };

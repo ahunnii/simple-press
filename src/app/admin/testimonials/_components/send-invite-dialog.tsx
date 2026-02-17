@@ -25,11 +25,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
-type SendInviteDialogProps = {
-  businessId: string;
-};
-
-export function SendInviteDialog({ businessId }: SendInviteDialogProps) {
+export function SendInviteDialog() {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [customerId, setCustomerId] = useState<string | undefined>(undefined);
@@ -60,7 +56,6 @@ export function SendInviteDialog({ businessId }: SendInviteDialogProps) {
     }
 
     sendInviteMutation.mutate({
-      businessId,
       email: email.trim(),
       customerId,
     });
@@ -87,7 +82,7 @@ export function SendInviteDialog({ businessId }: SendInviteDialogProps) {
           <DialogHeader>
             <DialogTitle>Send Testimonial Invite</DialogTitle>
             <DialogDescription>
-              Invite a customer to submit a testimonial. They'll receive an
+              Invite a customer to submit a testimonial. They&apos;ll receive an
               email with a unique link.
             </DialogDescription>
           </DialogHeader>
@@ -126,7 +121,8 @@ export function SendInviteDialog({ businessId }: SendInviteDialogProps) {
                 required
               />
               <p className="mt-1 text-xs text-gray-500">
-                If this email isn't a customer, we'll create one automatically
+                If this email isn&apos;t a customer, we&apos;ll create one
+                automatically
               </p>
             </div>
           </div>

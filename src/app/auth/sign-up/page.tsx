@@ -7,7 +7,7 @@ export const metadata = {
   title: "Sign Up",
 };
 export default async function SignUpPage() {
-  const business = await api.business.get();
+  const business = await api.business.simplifiedGet();
 
   if (!business) {
     notFound();

@@ -7,7 +7,7 @@ import { Button } from "~/components/ui/button";
 import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 
 export function DarkTrendAboutPage({ business }: Props) {

@@ -1,4 +1,3 @@
-// app/admin/settings/_components/stripe-settings.tsx
 "use client";
 
 import { useState } from "react";
@@ -11,9 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { env } from "~/env";
 import { encodeOAuthState, getCallbackUrl } from "~/lib/domain";
-import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -24,15 +21,12 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
-type StripeSettingsProps = {
+type Props = {
   businessId: string;
   stripeAccountId: string | null;
 };
 
-export function StripeSettings({
-  businessId,
-  stripeAccountId,
-}: StripeSettingsProps) {
+export function StripeSettings({ businessId, stripeAccountId }: Props) {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   const handleConnect = () => {
@@ -88,6 +82,7 @@ export function StripeSettings({
       window.location.reload();
     } catch (error) {
       toast.error("Failed to disconnect Stripe account");
+      console.error(error);
     } finally {
       setIsDisconnecting(false);
     }

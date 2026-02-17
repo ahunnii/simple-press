@@ -13,7 +13,7 @@ export const metadata = {
 export function DefaultSignUpPage({
   business,
 }: {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 }) {
   return (
     <div className="bg-background flex min-h-screen">

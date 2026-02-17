@@ -1,27 +1,11 @@
 import Image from "next/image";
-import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpen,
-  Flower2,
-  HandHelping,
-  MapIcon,
-  Users,
-} from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "~/components/ui/accordion";
-import { buttonVariants } from "~/components/ui/button";
 
 import { PollenCallToAction } from "./pollen-cta";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   children: React.ReactNode;
   title: string;
   subtitle: string;

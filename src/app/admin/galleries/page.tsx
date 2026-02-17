@@ -1,17 +1,12 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { Plus } from "lucide-react";
 
-import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 
 import { TrailHeader } from "../_components/trail-header";
 import { GalleriesList } from "./_components/galleries-list";
 
 export default async function GalleriesPage() {
-  const business = await api.business.get();
-  if (!business) notFound();
-
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Galleries" }]} />
@@ -30,7 +25,7 @@ export default async function GalleriesPage() {
           </Button>
         </div>
 
-        <GalleriesList businessId={business.id} />
+        <GalleriesList />
       </div>
     </>
   );

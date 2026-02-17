@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useRef } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
@@ -9,9 +9,10 @@ import { ArrowLeft, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { HomepageFormSchema } from "~/lib/validators/homepage";
+import type { BrandingFormSchema } from "~/lib/validators/homepage";
+import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
-import { homepageFormSchema } from "~/lib/validators/homepage";
+import { brandingFormSchema } from "~/lib/validators/homepage";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
@@ -34,34 +35,20 @@ import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 type Props = {
   business: {
     id: string;
-    name: string;
-    subdomain: string;
-    customDomain: string | null;
     templateId: string;
   };
   siteContent: {
     id: string;
     logoUrl: string | null;
-    heroTitle: string | null;
-    heroSubtitle: string | null;
-    heroImageUrl: string | null;
-    heroButtonText: string | null;
-    heroButtonLink: string | null;
-    aboutTitle: string | null;
-    aboutText: string | null;
-    aboutImageUrl: string | null;
-    features: unknown;
+    faviconUrl: string | null;
     footerText: string | null;
     socialLinks: unknown;
     primaryColor: string | null;
   };
 };
 
-export function HomepageEditor({ business, siteContent }: Props) {
+export function BrandingEditor({ business, siteContent }: Props) {
   const router = useRouter();
-  const formRef = useRef<HTMLFormElement>(null);
-  const logoFileInputRef = useRef<HTMLInputElement | null>(null);
-
   const socialLinks = (siteContent.socialLinks as
     | {
         instagram?: string;
@@ -76,8 +63,14 @@ export function HomepageEditor({ business, siteContent }: Props) {
     linkedin: "",
   };
 
-  const form = useForm<HomepageFormSchema>({
-    resolver: zodResolver(homepageFormSchema),
+  // Refs
+  const formRef = useRef<HTMLFormElement>(null);
+  const logoFileInputRef = useRef<HTMLInputElement | null>(null);
+  const faviconFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Form Setup
+  const form = useForm<BrandingFormSchema>({
+    resolver: zodResolver(brandingFormSchema),
     defaultValues: {
       footerText: siteContent.footerText ?? "",
       socialLinks: {
@@ -90,17 +83,47 @@ export function HomepageEditor({ business, siteContent }: Props) {
       logoFile: null,
       primaryColor: siteContent?.primaryColor ?? "",
       templateId: business?.templateId ?? "",
+      faviconUrl: siteContent.faviconUrl ?? "",
+      faviconFile: null,
     },
   });
 
+  // Mutations
   const updateSiteContent = api.content.updateSiteContent.useMutation({
-    onSuccess: () => {
+    onSuccess: ({ data, templateId }) => {
       toast.dismiss();
-      toast.success("General settings updated successfully");
-      handleReset();
+      toast.success("Branding updated successfully");
+
+      const newSocialLinks = (data.socialLinks as
+        | {
+            instagram?: string;
+            facebook?: string;
+            twitter?: string;
+            linkedin?: string;
+          }
+        | undefined) ?? {
+        instagram: "",
+        facebook: "",
+        twitter: "",
+        linkedin: "",
+      };
+
+      form.reset({
+        footerText: data.footerText ?? "",
+        socialLinks: newSocialLinks,
+        logoUrl: data.logoUrl ?? "",
+        logoFile: null,
+        primaryColor: data?.primaryColor ?? "",
+        templateId: templateId ?? "",
+        faviconUrl: data.faviconUrl ?? "",
+        faviconFile: null,
+      });
+
+      if (logoFileInputRef.current) logoFileInputRef.current.value = "";
+      if (faviconFileInputRef.current) faviconFileInputRef.current.value = "";
     },
     onError: (error) => {
-      handleReset();
+      toast.dismiss();
       toast.error(error.message ?? "Failed to update general settings");
     },
     onMutate: () => {
@@ -111,6 +134,7 @@ export function HomepageEditor({ business, siteContent }: Props) {
     },
   });
 
+  // Image Uploads
   const logoUploader = useUploadFile({
     api: "/api/upload",
     route: "image",
@@ -119,8 +143,34 @@ export function HomepageEditor({ business, siteContent }: Props) {
     },
   });
 
-  const onSubmit = async (data: HomepageFormSchema) => {
+  const faviconUploader = useUploadFile({
+    api: "/api/upload",
+    route: "favicon",
+    onError: (error) => {
+      toast.error(error.message ?? "Favicon upload failed.");
+    },
+  });
+
+  // Handlers
+  const handleReset = () => {
+    form.reset({
+      footerText: siteContent.footerText ?? "",
+      socialLinks: socialLinks,
+      logoUrl: siteContent.logoUrl ?? "",
+      primaryColor: siteContent?.primaryColor ?? "",
+      templateId: business?.templateId ?? "",
+      faviconUrl: siteContent.faviconUrl ?? "",
+      faviconFile: null,
+      logoFile: null,
+    });
+
+    if (logoFileInputRef.current) logoFileInputRef.current.value = "";
+    if (faviconFileInputRef.current) faviconFileInputRef.current.value = "";
+  };
+
+  const handleSubmit = async (data: BrandingFormSchema) => {
     let logoUrl: string | undefined = data.logoUrl ?? undefined;
+    let faviconUrl: string | undefined = data.faviconUrl ?? undefined;
 
     const logoFile = data.logoFile;
     if (logoFile instanceof File) {
@@ -136,40 +186,43 @@ export function HomepageEditor({ business, siteContent }: Props) {
       }
     }
 
+    const tempFaviconFile = data.faviconFile;
+    if (tempFaviconFile instanceof File) {
+      try {
+        const response = await faviconUploader.upload(tempFaviconFile);
+        const fileLocation =
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          "";
+
+        if (fileLocation) faviconUrl = fileLocation;
+      } catch {
+        toast.error("Failed to upload logo.");
+        return;
+      }
+    }
+
     updateSiteContent.mutate({
-      businessId: business.id,
-      data: {
-        templateId: data.templateId,
-        footerText: data.footerText ?? "",
-        socialLinks: data.socialLinks ?? {},
-        logoUrl,
-        primaryColor: data.primaryColor ?? "",
-      },
+      templateId: data.templateId,
+      footerText: data.footerText ?? "",
+      socialLinks: data.socialLinks ?? {},
+      logoUrl,
+      primaryColor: data.primaryColor ?? "",
+      faviconUrl,
     });
   };
 
+  // Checks and Hooks
   const isSubmitting = updateSiteContent.isPending || logoUploader.isPending;
   const isDirty = form.formState.isDirty;
 
-  useKeyboardEnter(form, onSubmit);
+  useKeyboardEnter(form, handleSubmit);
   useDirtyForm(isDirty);
-
-  const handleReset = () => {
-    if (logoFileInputRef.current) logoFileInputRef.current.value = "";
-
-    form.reset({
-      footerText: siteContent.footerText ?? "",
-      socialLinks: socialLinks,
-      logoUrl: siteContent.logoUrl ?? "",
-      primaryColor: siteContent?.primaryColor ?? "",
-    });
-  };
 
   return (
     <Form {...form}>
       <form
         ref={formRef}
-        onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+        onSubmit={(e) => void form.handleSubmit(handleSubmit)(e)}
         className="min-h-screen bg-gray-50"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
@@ -289,6 +342,53 @@ export function HomepageEditor({ business, siteContent }: Props) {
                     </>
                   )}
                 />
+              </CardContent>
+            </Card>
+            {/* Favicon */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Favicon</CardTitle>
+                <CardDescription>
+                  The small icon shown in browser tabs
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ImageUploadFormField
+                  form={form}
+                  name="faviconFile"
+                  label="Favicon Image"
+                  // placeholder="https://example.com/favicon.ico"
+                  description="Recommended: 32x32px or 16x16px .ico or .png"
+                  existingPreviewUrl={siteContent.faviconUrl ?? undefined}
+                  inputRef={faviconFileInputRef}
+                />
+                {/* <div>
+                  <Label htmlFor="faviconUrl">Favicon URL</Label>
+                  <div className="mt-2 flex gap-2">
+                    <Input
+                      id="faviconUrl"
+                      value={faviconUrl}
+                      onChange={(e) => setFaviconUrl(e.target.value)}
+                      placeholder="https://example.com/favicon.ico"
+                    />
+                    <Button variant="outline">
+                      <ImageIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Recommended: 32x32px or 16x16px .ico or .png
+                  </p>
+                  {faviconUrl && (
+                    <div className="mt-4 flex items-center gap-3">
+                      <img
+                        src={faviconUrl}
+                        alt="Favicon preview"
+                        className="h-8 w-8"
+                      />
+                      <span className="text-sm text-gray-600">Preview</span>
+                    </div>
+                  )}
+                </div> */}
               </CardContent>
             </Card>
             <Card>

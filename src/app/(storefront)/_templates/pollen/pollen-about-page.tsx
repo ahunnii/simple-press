@@ -1,13 +1,11 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { buttonVariants } from "~/components/ui/button";
 
 import { PollenGeneralLayout } from "./pollen-general-layout";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 
 export function PollenAboutPage({ business }: Props) {

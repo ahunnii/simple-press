@@ -1,4 +1,3 @@
-import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
 import "~/styles/globals.css";
@@ -13,20 +12,22 @@ import { TooltipProvider } from "~/components/ui/tooltip";
 import { Providers } from "../providers/providers";
 
 export async function generateMetadata() {
-  const business = await api.business.get();
+  const business = await api.business.simplifiedGet();
   if (!business) {
     return {
       title: "Simple Press",
-      description: "Building a Safer, Stronger Community Together.",
+      description: "The simplest way to get started with your online business.",
       icons: [{ rel: "icon", url: "/favicon.ico" }],
     };
   }
   return {
     title: {
       template: `%s - ${business.name}`,
-      default: business.name,
+      default: business.name ?? business.siteContent?.metaTitle,
     },
-    description: "Building a Safer, Stronger Community Together.",
+    description:
+      business.siteContent?.metaDescription ??
+      "The simplest way to get started with your online business.",
     icons: [
       { rel: "icon", url: business.siteContent?.faviconUrl ?? "/favicon.ico" },
     ],

@@ -5,7 +5,7 @@ import { DefaultCartContents } from "./default-cart-contents";
 export async function DefaultCartPage({
   business,
 }: {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 }) {
   return (
     <main className="flex-1 px-4 py-12">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, Images, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Images, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
@@ -26,16 +26,10 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
-type GalleriesListProps = {
-  businessId: string;
-};
-
-export function GalleriesList({ businessId }: GalleriesListProps) {
+export function GalleriesList() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const { data: galleries, isLoading } = api.gallery.list.useQuery({
-    businessId,
-  });
+  const { data: galleries, isLoading } = api.gallery.list.useQuery();
 
   const deleteMutation = api.gallery.delete.useMutation({
     onSuccess: () => {

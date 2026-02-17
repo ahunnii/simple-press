@@ -6,7 +6,7 @@ import { SEOEditor } from "../_components/seo-editor";
 import { TrailHeader } from "../../_components/trail-header";
 
 export default async function SEOPage() {
-  const business = await api.business.get();
+  const business = await api.business.getWith({ includeSiteContent: true });
   if (!business) notFound();
   if (!business.siteContent) notFound();
 

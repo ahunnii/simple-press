@@ -36,39 +36,23 @@ import z from "zod";
 //     };
 //   };
 
-export const homepageFormSchema = z.object({
-  heroTitle: z.string().optional(),
-  heroSubtitle: z.string().optional(),
-  heroImageUrl: z.string().url().optional().or(z.literal("")),
-  heroButtonText: z.string().optional(),
-  heroButtonLink: z.string().optional(),
-  aboutTitle: z.string().optional(),
-  aboutText: z.string().optional(),
-  aboutImageUrl: z.string().url().optional().or(z.literal("")),
-  features: z
-    .array(
-      z.object({
-        title: z.string(),
-        description: z.string(),
-        icon: z.string(),
-      }),
-    )
-    .optional(),
-  footerText: z.string().optional(),
+export const brandingFormSchema = z.object({
+  footerText: z.string().optional().nullable(),
   socialLinks: z
     .object({
-      instagram: z.string().optional(),
-      facebook: z.string().optional(),
-      twitter: z.string().optional(),
-      linkedin: z.string().optional(),
+      instagram: z.string().optional().nullable(),
+      facebook: z.string().optional().nullable(),
+      twitter: z.string().optional().nullable(),
+      linkedin: z.string().optional().nullable(),
     })
-    .optional(),
-  logoUrl: z.string().url().optional().or(z.literal("")),
-  heroImageFile: z.instanceof(File).optional().nullable(),
-  aboutImageFile: z.instanceof(File).optional().nullable(),
+    .optional()
+    .nullable(),
+  logoUrl: z.string().url().optional().nullable(),
   logoFile: z.instanceof(File).optional().nullable(),
   primaryColor: z.string().nullable(),
   templateId: z.string(),
+  faviconUrl: z.string().url().optional().nullable(),
+  faviconFile: z.instanceof(File).optional().nullable(),
 });
 
-export type HomepageFormSchema = z.infer<typeof homepageFormSchema>;
+export type BrandingFormSchema = z.infer<typeof brandingFormSchema>;

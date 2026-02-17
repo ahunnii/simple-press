@@ -1,16 +1,10 @@
-import { notFound } from "next/navigation";
-
 import { api } from "~/trpc/server";
 import { ContentDashboard } from "~/app/admin/content/_components/content-dashboard";
 
 import { TrailHeader } from "../_components/trail-header";
 
 export default async function ContentPage() {
-  const business = await api.business.secureGetContent();
-
-  if (!business) {
-    notFound();
-  }
+  const pages = await api.content.getPages();
 
   return (
     <>
@@ -23,7 +17,7 @@ export default async function ContentPage() {
           </div>
         </div>
 
-        <ContentDashboard business={business} />
+        <ContentDashboard pages={pages} />
       </div>
     </>
   );

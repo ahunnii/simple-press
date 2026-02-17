@@ -5,7 +5,11 @@ import {
   exportToWooCommerceCSV,
   generateExportFilename,
 } from "~/lib/wordpress/csv-exporter";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  ownerAdminProcedure,
+  protectedProcedure,
+} from "~/server/api/trpc";
 
 function escapeXml(unsafe: string): string {
   return unsafe
@@ -80,31 +84,19 @@ export const exportRouter = createTRPCRouter({
   // }),
 
   // Get products available for export
-  getProductsForExport: protectedProcedure
+  getProductsForExport: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         search: z.string().optional(),
         publishedOnly: z.boolean().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      const { businessId } = ctx;
 
       const products = await ctx.db.product.findMany({
         where: {
-          businessId: input.businessId,
+          businessId,
           ...(input.search && {
             OR: [
               { name: { contains: input.search, mode: "insensitive" } },
@@ -139,32 +131,20 @@ export const exportRouter = createTRPCRouter({
     }),
 
   // Export selected products
-  exportProducts: protectedProcedure
+  exportProducts: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         productIds: z.array(z.string()).min(1, "Select at least one product"),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      const { businessId } = ctx;
 
       // Get products with all relations
       const products = await ctx.db.product.findMany({
         where: {
           id: { in: input.productIds },
-          businessId: input.businessId,
+          businessId,
         },
         include: {
           images: {
@@ -186,7 +166,7 @@ export const exportRouter = createTRPCRouter({
 
       // Get business name for filename
       const business = await ctx.db.business.findUnique({
-        where: { id: input.businessId },
+        where: { id: businessId },
         select: { name: true },
       });
 

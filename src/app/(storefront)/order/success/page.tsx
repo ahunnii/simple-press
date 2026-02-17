@@ -6,9 +6,7 @@ import { DarkTrendOrderSuccessPage } from "../../_templates/dark-trend/dark-tren
 import { DefaultOrderSuccessPage } from "../../_templates/default/default-order-success-page";
 
 export default async function OrderSuccessPage() {
-  const business = await api.business.get();
-
-  if (!business) notFound();
+  const business = await api.business.simplifiedGet();
 
   if (business.templateId === "pollen") {
     notFound();

@@ -3,7 +3,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { DefaultProductDetails } from "./default-product-details";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   product: NonNullable<RouterOutputs["product"]["get"]>;
 };
 

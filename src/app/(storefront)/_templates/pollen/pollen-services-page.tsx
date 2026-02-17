@@ -6,7 +6,6 @@ import {
   Flower2,
   HandHelping,
   MapIcon,
-  Users,
 } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -21,7 +20,7 @@ import { buttonVariants } from "~/components/ui/button";
 import { PollenGeneralLayout } from "./pollen-general-layout";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 export function PollenServicesPage({ business }: Props) {
   const themeSpecificFields = business?.siteContent?.customFields as Record<

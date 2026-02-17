@@ -313,40 +313,12 @@ import { DefaultVariantSelector } from "./default-variant-selector";
 
 const UNLIMITED_STOCK = 999;
 
-type Product = {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  trackInventory: boolean;
-  allowBackorders?: boolean;
-  inventoryQty: number;
-  images: Array<{ url: string; altText: string | null }>;
-  variants: Array<{
-    id: string;
-    name: string;
-    price: number | null;
-    inventoryQty: number;
-    sku: string | null;
-    options: Record<string, string>;
-  }>;
-};
-
-type Business = {
-  siteContent: {
-    primaryColor: string | null;
-  } | null;
-};
-
-type ProductDetailsProps = {
+type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
-  business: Business;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 
-export function DefaultProductDetails({
-  product,
-  business,
-}: ProductDetailsProps) {
+export function DefaultProductDetails({ product, business }: Props) {
   // const { addItem, getItemQuantity, isHydrated } = useCart();
   // const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
   //   product.variants[0]?.id ?? null,

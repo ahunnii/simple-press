@@ -6,7 +6,7 @@ import { GeneralSettings } from "../_components/general-settings";
 import { TrailHeader } from "../../_components/trail-header";
 
 export default async function GeneralSettingsPage() {
-  const business = await api.business.get();
+  const business = await api.business.getWith({ includeSiteContent: true });
 
   if (!business) notFound();
 

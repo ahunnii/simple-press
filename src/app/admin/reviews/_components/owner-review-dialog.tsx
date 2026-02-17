@@ -29,7 +29,6 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 
 type Props = {
-  businessId: string;
   review?: ProductReview & { product: Product }; // If provided → edit mode
   isOpen: boolean;
   onClose: () => void;
@@ -37,7 +36,6 @@ type Props = {
 };
 
 export function OwnerReviewDialog({
-  businessId,
   review,
   isOpen,
   onClose,

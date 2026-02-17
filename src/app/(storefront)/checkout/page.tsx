@@ -8,7 +8,7 @@ import { DefaultCheckoutUnavailable } from "../_templates/default/default-checko
 import { ModernCheckoutPage } from "../_templates/modern/modern-checkout-page";
 
 export default async function CheckoutPage() {
-  const business = await api.business.get();
+  const business = await api.business.simplifiedGet();
 
   if (!business) notFound();
 
@@ -21,7 +21,7 @@ export default async function CheckoutPage() {
       modern: DefaultCheckoutUnavailable,
     }[business.templateId] ?? DefaultCheckoutUnavailable;
 
-  if (!business.stripeAccountId)
+  if (!business.isStripeConnected)
     return <TemplateUnavailableComponent business={business} />;
 
   const TemplateComponent =

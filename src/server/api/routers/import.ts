@@ -7,42 +7,34 @@ import { parseWooCommerceCSV } from "~/lib/woocommerce/csv-parser";
 import { validateImport } from "~/lib/woocommerce/import-validator";
 import { importProducts } from "~/lib/woocommerce/product-importer";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  ownerAdminProcedure,
+  protectedProcedure,
+} from "../trpc";
 
 export const importRouter = createTRPCRouter({
   // Step 1: Parse and validate CSV
-  parseCSV: protectedProcedure
+  parseCSV: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         csvContent: z.string(),
         filename: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      const { businessId } = ctx;
 
       // Parse CSV
       const products = await parseWooCommerceCSV(input.csvContent);
 
       // Validate
-      const validation = await validateImport(input.businessId, products);
+      const validation = await validateImport(businessId, products);
 
       // Save to database for review
       const importRecord = await ctx.db.productImport.create({
         data: {
-          businessId: input.businessId,
+          businessId: businessId,
           filename: input.filename,
           totalRows: products.length,
           status: "pending",

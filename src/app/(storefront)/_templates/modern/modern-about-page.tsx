@@ -4,12 +4,10 @@ import { ArrowRight } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 
-import { StorefrontFooter } from "../../_components/storefront-footer";
-import { StorefrontHeader } from "../../_components/storefront-header";
 import { ModernGeneralLayout } from "./modern-general-layout";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 
 export function ModernAboutPage({ business }: Props) {

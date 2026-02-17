@@ -1,17 +1,16 @@
 import type { RouterOutputs } from "~/trpc/react";
 
-import { StorefrontFooter } from "../../_components/storefront-footer";
-import { StorefrontHeader } from "../../_components/storefront-header";
 import { ModernCheckoutForm } from "./modern-checkout-form";
+import { ModernFooter } from "./modern-footer";
+import { ModernHeader } from "./modern-header";
 
-export function ModernCheckoutPage({
-  business,
-}: {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
-}) {
+type Props = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+};
+export function ModernCheckoutPage({ business }: Props) {
   return (
     <div className="font-sans antialiased">
-      <StorefrontHeader business={business} />
+      <ModernHeader business={business} />
       <div className="bg-background">
         <div className="border-border border-b">
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
@@ -24,7 +23,7 @@ export function ModernCheckoutPage({
           <ModernCheckoutForm />
         </div>
       </div>
-      <StorefrontFooter business={business} />
+      <ModernFooter business={business} />
     </div>
   );
 }

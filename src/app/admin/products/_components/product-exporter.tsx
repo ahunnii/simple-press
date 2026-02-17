@@ -33,14 +33,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 
-type ProductExporterProps = {
-  business: {
-    id: string;
-    name: string;
-  };
-};
-
-export function ProductExporter({ business }: ProductExporterProps) {
+export function ProductExporter() {
   const [search, setSearch] = useState("");
   const [publishedOnly, setPublishedOnly] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
@@ -49,7 +42,6 @@ export function ProductExporter({ business }: ProductExporterProps) {
 
   const { data: products, isLoading } =
     api.export.getProductsForExport.useQuery({
-      businessId: business.id,
       search: search || undefined,
       publishedOnly,
     });
@@ -103,7 +95,6 @@ export function ProductExporter({ business }: ProductExporterProps) {
     }
 
     exportMutation.mutate({
-      businessId: business.id,
       productIds: Array.from(selectedProducts),
     });
   };

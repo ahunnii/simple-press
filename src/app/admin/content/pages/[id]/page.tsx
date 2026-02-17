@@ -10,11 +10,6 @@ type Props = {
 };
 export default async function EditPagePage({ params }: Props) {
   const { id } = await params;
-  const business = await api.business.get();
-
-  if (!business) {
-    notFound();
-  }
 
   const page = await api.content.getPage({
     id,
@@ -34,7 +29,7 @@ export default async function EditPagePage({ params }: Props) {
         ]}
       />
 
-      <PageEditor business={business} page={page} />
+      <PageEditor page={page} />
     </>
   );
 }

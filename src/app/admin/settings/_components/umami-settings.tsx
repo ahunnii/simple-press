@@ -1,11 +1,8 @@
 "use client";
 
-import type { Business, SiteContent } from "generated/prisma";
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   CheckCircle,
   ExternalLink,
   Loader2,
@@ -14,10 +11,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { env } from "~/env";
-import { cn } from "~/lib/utils";
+import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
-import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -32,7 +27,7 @@ import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 
 type Props = {
-  business: Business & { siteContent?: SiteContent | null };
+  business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
 };
 
 export function UmamiSettings({ business }: Props) {

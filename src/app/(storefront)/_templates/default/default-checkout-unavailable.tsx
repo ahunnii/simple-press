@@ -5,7 +5,7 @@ import { DefaultHeader } from "./default-header";
 export function DefaultCheckoutUnavailable({
   business,
 }: {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 }) {
   return (
     <div className="flex min-h-screen flex-col bg-white">

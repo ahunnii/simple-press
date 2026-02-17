@@ -1,8 +1,6 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 import { TestimonialForm } from "./_components/testimonial-form";
@@ -14,11 +12,7 @@ export default async function SubmitTestimonialPage({
   searchParams: { code?: string };
 }) {
   // Get business from subdomain
-  const business = await api.business.get();
-
-  if (!business) {
-    redirect("/");
-  }
+  const business = await api.business.simplifiedGet();
 
   // Check if using invite code
   if (searchParams.code) {

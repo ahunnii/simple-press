@@ -50,7 +50,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import { OwnerReviewDialog } from "./owner-review-dialog";
 
-export function ReviewsAdminList({ businessId }: { businessId: string }) {
+export function ReviewsAdminList() {
   const [source, setSource] = useState<"customer" | "owner" | "all">("all");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editingReview, setEditingReview] = useState<
@@ -59,7 +59,6 @@ export function ReviewsAdminList({ businessId }: { businessId: string }) {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const { data: reviews, refetch } = api.review.listAll.useQuery({
-    businessId,
     status: "all",
     source,
   });
@@ -436,7 +435,6 @@ export function ReviewsAdminList({ businessId }: { businessId: string }) {
 
       {/* Create dialog */}
       <OwnerReviewDialog
-        businessId={businessId}
         isOpen={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
         onSuccess={() => {
@@ -448,7 +446,6 @@ export function ReviewsAdminList({ businessId }: { businessId: string }) {
       {/* Edit dialog */}
       {editingReview && (
         <OwnerReviewDialog
-          businessId={businessId}
           review={editingReview}
           isOpen={true}
           onClose={() => setEditingReview(null)}

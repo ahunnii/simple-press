@@ -3,31 +3,31 @@ import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  ownerAdminProcedure,
+  protectedProcedure,
+  publicProcedure,
+} from "../trpc";
 
 export const galleryRouter = createTRPCRouter({
   // List galleries
-  list: protectedProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      return ctx.db.gallery.findMany({
-        where: { businessId: input.businessId },
-        include: {
-          images: {
-            orderBy: { sortOrder: "asc" },
-            take: 4, // Preview images
-          },
-          _count: {
-            select: { images: true },
-          },
+  list: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+    return ctx.db.gallery.findMany({
+      where: { businessId },
+      include: {
+        images: {
+          orderBy: { sortOrder: "asc" },
+          take: 4, // Preview images
         },
-        orderBy: { updatedAt: "desc" },
-      });
-    }),
+        _count: {
+          select: { images: true },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+  }),
 
   // Get single gallery
   getById: protectedProcedure
@@ -107,10 +107,9 @@ export const galleryRouter = createTRPCRouter({
     }),
 
   // Create gallery
-  create: protectedProcedure
+  create: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         name: z.string().min(1),
         slug: z.string().min(1),
         description: z.string().optional(),
@@ -123,8 +122,12 @@ export const galleryRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       return ctx.db.gallery.create({
-        data: input,
+        data: {
+          ...input,
+          businessId,
+        },
       });
     }),
 

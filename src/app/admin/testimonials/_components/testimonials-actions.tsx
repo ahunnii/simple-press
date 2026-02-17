@@ -9,7 +9,7 @@ import { Button } from "~/components/ui/button";
 import { OwnerTestimonialDialog } from "./owner-testimonial-dialog";
 import { SendInviteDialog } from "./send-invite-dialog";
 
-export function TestimonialsActions({ businessId }: { businessId: string }) {
+export function TestimonialsActions() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const router = useRouter();
   return (
@@ -19,11 +19,10 @@ export function TestimonialsActions({ businessId }: { businessId: string }) {
           <Plus className="mr-2 h-4 w-4" />
           Add Testimonial
         </Button>
-        <SendInviteDialog businessId={businessId} />
+        <SendInviteDialog />
       </div>
 
       <OwnerTestimonialDialog
-        businessId={businessId}
         isOpen={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
         onSuccess={() => {

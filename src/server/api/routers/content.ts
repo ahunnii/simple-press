@@ -5,7 +5,12 @@ import { z } from "zod";
 import { checkBusiness } from "~/lib/check-business";
 import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  ownerAdminProcedure,
+  protectedProcedure,
+  publicProcedure,
+} from "../trpc";
 
 // Validation schemas
 const siteContentSchema = z.object({
@@ -76,77 +81,51 @@ export const contentRouter = createTRPCRouter({
   // ==========================================
 
   // Get site content
-  getSiteContent: protectedProcedure
-    .input(z.object({ businessId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
+  getSiteContent: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
 
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+    let siteContent = await ctx.db.siteContent.findUnique({
+      where: { businessId: businessId },
+    });
 
-      let siteContent = await ctx.db.siteContent.findUnique({
-        where: { businessId: input.businessId },
-      });
+    // Create if doesn't exist
+    siteContent ??= await ctx.db.siteContent.create({
+      data: {
+        businessId,
+      },
+    });
 
-      // Create if doesn't exist
-      siteContent ??= await ctx.db.siteContent.create({
-        data: {
-          businessId: input.businessId,
-        },
-      });
-
-      return siteContent;
-    }),
+    return siteContent;
+  }),
 
   // Update site content
-  updateSiteContent: protectedProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        data: siteContentSchema,
-      }),
-    )
+  updateSiteContent: ownerAdminProcedure
+    .input(siteContentSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
+      const { businessId } = ctx;
 
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-      const { templateId, ...data } = input.data;
+      const { templateId, ...data } = input;
 
       const siteContent = await ctx.db.siteContent.upsert({
-        where: { businessId: input.businessId },
+        where: { businessId },
         create: {
-          businessId: input.businessId,
-
+          businessId,
           ...data,
         },
-        update: input.data,
+        update: data,
       });
 
       if (templateId) {
         await ctx.db.business.update({
-          where: { id: input.businessId },
+          where: { id: businessId },
           data: { templateId },
         });
       }
 
-      return siteContent;
+      return {
+        data: siteContent,
+        templateId,
+      };
     }),
 
   // ==========================================
@@ -154,30 +133,23 @@ export const contentRouter = createTRPCRouter({
   // ==========================================
 
   // Get all pages
-  getPages: protectedProcedure
+  getPages: ownerAdminProcedure
     .input(
-      z.object({
-        businessId: z.string(),
-        type: z.enum(["page", "policy", "custom", "all"]).optional(),
-      }),
+      z
+        .object({
+          type: z.enum(["page", "policy", "custom", "all"]).optional(),
+        })
+        .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      const { businessId } = ctx;
 
       const pages = await ctx.db.page.findMany({
         where: {
-          businessId: input.businessId,
-          ...(input.type && input.type !== "all" ? { type: input.type } : {}),
+          businessId,
+          ...(input?.type && input?.type !== "all"
+            ? { type: input?.type }
+            : {}),
         },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       });
@@ -254,15 +226,23 @@ export const contentRouter = createTRPCRouter({
   getPageBySlug: publicProcedure
     .input(
       z.object({
-        businessId: z.string(),
         slug: z.string(),
       }),
     )
     .query(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       const page = await ctx.db.page.findUnique({
         where: {
           businessId_slug: {
-            businessId: input.businessId,
+            businessId: business.id,
             slug: input.slug,
           },
         },
@@ -272,31 +252,20 @@ export const contentRouter = createTRPCRouter({
     }),
 
   // Create page
-  createPage: protectedProcedure
+  createPage: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         data: pageSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      const { businessId } = ctx;
 
       // Check if slug already exists
       const existing = await ctx.db.page.findUnique({
         where: {
           businessId_slug: {
-            businessId: input.businessId,
+            businessId,
             slug: input.data.slug,
           },
         },
@@ -312,7 +281,7 @@ export const contentRouter = createTRPCRouter({
       const page = await ctx.db.page.create({
         data: {
           ...input.data,
-          businessId: input.businessId,
+          businessId,
           content: input.data.content ?? EMPTY_TIPTAP_DOC,
         },
       });

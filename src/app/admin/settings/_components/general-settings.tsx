@@ -1,6 +1,6 @@
 "use client";
 
-import type { Business, SiteContent } from "generated/prisma";
+import type { SiteContent } from "generated/prisma";
 import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { GeneralBusinessFormSchema } from "~/lib/validators/general-business";
+import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { generalBusinessFormSchema } from "~/lib/validators/general-business";
 import { api } from "~/trpc/react";
@@ -26,16 +27,19 @@ import { Form } from "~/components/ui/form";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
-type GeneralSettingsProps = {
-  business: Business & { siteContent?: SiteContent | null };
+type Props = {
+  business: NonNullable<RouterOutputs["business"]["getWith"]> & {
+    siteContent?: SiteContent | null;
+  };
 };
 
-export function GeneralSettings({ business }: GeneralSettingsProps) {
+export function GeneralSettings({ business }: Props) {
   const router = useRouter();
 
-  // Form refs
+  // Refs
   const formRef = useRef<HTMLFormElement>(null);
 
+  // Form Setup
   const form = useForm<GeneralBusinessFormSchema>({
     resolver: zodResolver(generalBusinessFormSchema),
     defaultValues: {
@@ -46,6 +50,7 @@ export function GeneralSettings({ business }: GeneralSettingsProps) {
     },
   });
 
+  //Mutations
   const updateGeneralMutation = api.business.updateGeneral.useMutation({
     onSuccess: (data) => {
       toast.dismiss();
@@ -59,16 +64,17 @@ export function GeneralSettings({ business }: GeneralSettingsProps) {
     },
     onError: (error) => {
       toast.dismiss();
-      toast.error(error.message ?? "Failed to update branding");
+      toast.error(error.message ?? "Failed to update general settings");
     },
     onMutate: () => {
-      toast.loading("Updating branding...");
+      toast.loading("Updating general settings...");
     },
     onSettled: () => {
       router.refresh();
     },
   });
 
+  //Handlers
   const handleSubmit = async (data: GeneralBusinessFormSchema) => {
     updateGeneralMutation.mutate({
       name: data.name,
@@ -88,7 +94,7 @@ export function GeneralSettings({ business }: GeneralSettingsProps) {
     });
   };
 
-  // Checks
+  // Checks and Hooks
   const isSaving = updateGeneralMutation.isPending;
   const isDirty = form.formState.isDirty;
 
@@ -178,18 +184,6 @@ export function GeneralSettings({ business }: GeneralSettingsProps) {
                   required
                   disabled
                 />
-
-                {/* <Label htmlFor="slug">Store Slug</Label>
-              <Input
-                id="slug"
-                value={business.slug}
-                disabled
-                className="bg-gray-50"
-              />
-              <p className="mt-1 text-sm text-gray-500">
-                Your unique store identifier (cannot be changed)
-              </p>
-            </div> */}
               </CardContent>
             </Card>
 

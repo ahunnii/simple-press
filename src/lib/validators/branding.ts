@@ -1,7 +1,6 @@
 import z from "zod";
 
 export const businessBrandingFormSchema = z.object({
-  id: z.string(),
   templateId: z.string(),
   siteContent: z
     .object({

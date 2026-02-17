@@ -1,15 +1,7 @@
-import { notFound } from "next/navigation";
-
-import { api } from "~/trpc/server";
-
 import { ProductExporter } from "../_components/product-exporter";
 import { TrailHeader } from "../../_components/trail-header";
 
 export default async function ProductExportPage() {
-  const business = await api.business.get();
-
-  if (!business) notFound();
-
   return (
     <>
       <TrailHeader
@@ -18,7 +10,7 @@ export default async function ProductExportPage() {
           { label: "Export Products" },
         ]}
       />
-      <ProductExporter business={business} />
+      <ProductExporter />
     </>
   );
 }

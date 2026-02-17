@@ -3,7 +3,7 @@
 import type { Testimonial } from "generated/prisma";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { Loader2, Plus, Star } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
 import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
@@ -15,28 +15,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 
-type OwnerTestimonialDialogProps = {
-  businessId: string;
-  testimonial?: Testimonial; // If provided, we're editing
+type Props = {
+  testimonial?: Testimonial;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 };
 
 export function OwnerTestimonialDialog({
-  businessId,
   testimonial,
   isOpen,
   onClose,
   onSuccess,
-}: OwnerTestimonialDialogProps) {
+}: Props) {
   const isEditing = !!testimonial;
 
   // Form state
@@ -137,7 +134,7 @@ export function OwnerTestimonialDialog({
     if (isEditing) {
       updateMutation.mutate({ id: testimonial.id, ...payload });
     } else {
-      createMutation.mutate({ businessId, ...payload });
+      createMutation.mutate({ ...payload });
     }
   };
 

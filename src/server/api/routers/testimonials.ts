@@ -3,9 +3,15 @@ import type { PrismaClient } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { checkBusiness } from "~/lib/check-business";
 import { sendTestimonialInviteEmail } from "~/lib/email/templates";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  ownerAdminProcedure,
+  protectedProcedure,
+  publicProcedure,
+} from "../trpc";
 
 // Shared ownership check helper
 async function assertOwner(
@@ -62,14 +68,21 @@ export const testimonialRouter = createTRPCRouter({
   list: publicProcedure
     .input(
       z.object({
-        businessId: z.string(),
         publicOnly: z.boolean().default(true),
       }),
     )
     .query(async ({ ctx, input }) => {
+      const businessId = await checkBusiness();
+      if (!businessId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       return ctx.db.testimonial.findMany({
         where: {
-          businessId: input.businessId,
+          businessId: businessId.id,
           ...(input.publicOnly && { isPublic: true }),
         },
         orderBy: { testimonialDate: "desc" },
@@ -288,10 +301,9 @@ export const testimonialRouter = createTRPCRouter({
   // ─── OWNER CREATED ────────────────────────────────────────────────────────
 
   // Create a testimonial manually
-  ownerCreate: protectedProcedure
+  ownerCreate: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         customerName: z.string().min(1),
         customerEmail: z.string().email().optional(),
         customerTitle: z.string().optional(),
@@ -301,17 +313,19 @@ export const testimonialRouter = createTRPCRouter({
         text: z.string().min(1),
         videoUrl: z.string().url().optional(),
         photoUrl: z.string().url().optional(),
-        isPublic: z.boolean().default(true), // Owner-created are public by default
-        testimonialDate: z.string().optional(), // ISO string for backdating
+        isPublic: z.boolean().default(true),
+        testimonialDate: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await assertOwner(ctx.db, ctx.session.user.id, input.businessId);
+      const { businessId } = ctx;
+
+      await assertOwner(ctx.db, ctx.session.user.id, businessId);
 
       return ctx.db.testimonial.create({
         data: {
           source: "owner",
-          businessId: input.businessId,
+          businessId,
           customerName: input.customerName,
           customerEmail: input.customerEmail,
           customerTitle: input.customerTitle,
@@ -392,19 +406,20 @@ export const testimonialRouter = createTRPCRouter({
       return ctx.db.testimonial.delete({ where: { id: input.id } });
     }),
 
-  sendInvite: protectedProcedure
+  sendInvite: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         email: z.string().email(),
         customerId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await assertOwner(ctx.db, ctx.session.user.id, input.businessId);
+      const { businessId } = ctx;
+
+      await assertOwner(ctx.db, ctx.session.user.id, businessId);
 
       const business = await ctx.db.business.findUnique({
-        where: { id: input.businessId },
+        where: { id: businessId },
         select: { name: true, subdomain: true },
       });
 
@@ -420,7 +435,7 @@ export const testimonialRouter = createTRPCRouter({
 
       const invite = await ctx.db.testimonialInvite.create({
         data: {
-          businessId: input.businessId,
+          businessId,
           email: input.email,
           code,
           expiresAt,

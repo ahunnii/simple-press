@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 import {
   AlertCircle,
   CheckCircle,
-  Download,
   FileText,
   Loader2,
   Upload,
@@ -30,19 +29,11 @@ import {
 } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
-import { Progress } from "~/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
 type ImportStep = "upload" | "review" | "options" | "importing" | "complete";
 
-type ProductImportWizardProps = {
-  business: {
-    id: string;
-    name: string;
-  };
-};
-
-export function ProductImportWizard({ business }: ProductImportWizardProps) {
+export function ProductImportWizard() {
   const router = useRouter();
   const [step, setStep] = useState<ImportStep>("upload");
   const [file, setFile] = useState<File | null>(null);
@@ -96,7 +87,6 @@ export function ProductImportWizard({ business }: ProductImportWizardProps) {
 
     const content = await file.text();
     parseCSV.mutate({
-      businessId: business.id,
       csvContent: content,
       filename: file.name,
     });

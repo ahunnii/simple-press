@@ -1,29 +1,11 @@
-import Image from "next/image";
-import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpen,
-  Flower2,
-  HandHelping,
-  MapIcon,
-  Users,
-} from "lucide-react";
-
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "~/components/ui/accordion";
-import { buttonVariants } from "~/components/ui/button";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { PollenGeneralLayout } from "./pollen-general-layout";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 };
 export function PollenGenericPage({ business, page }: Props) {

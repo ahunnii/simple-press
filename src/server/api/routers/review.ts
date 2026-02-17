@@ -2,7 +2,14 @@ import type { Prisma, PrismaClient } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { checkBusiness } from "~/lib/check-business";
+
+import {
+  createTRPCRouter,
+  ownerAdminProcedure,
+  protectedProcedure,
+  publicProcedure,
+} from "../trpc";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -419,19 +426,20 @@ export const reviewRouter = createTRPCRouter({
   // ── Admin (both types) ───────────────────────────────────────────────────
 
   // List all reviews for a business across all products
-  listAll: protectedProcedure
+  listAll: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         status: z.enum(["pending", "approved", "hidden", "all"]).default("all"),
         source: z.enum(["customer", "owner", "all"]).default("all"),
       }),
     )
     .query(async ({ ctx, input }) => {
-      await assertBusinessOwner(ctx.db, ctx.session.user.id, input.businessId);
+      const { businessId } = ctx;
+
+      await assertBusinessOwner(ctx.db, ctx.session.user.id, businessId);
 
       const where: Prisma.ProductReviewWhereInput = {
-        product: { businessId: input.businessId },
+        product: { businessId },
       };
 
       if (input.status === "pending") {

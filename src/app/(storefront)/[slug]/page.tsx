@@ -12,12 +12,9 @@ type Props = {
 
 export default async function PageView({ params }: Props) {
   const { slug } = await params;
-  const business = await api.business.get();
-
-  if (!business) notFound();
+  const business = await api.business.simplifiedGet();
 
   const page = await api.content.getPageBySlug({
-    businessId: business.id,
     slug,
   });
 
@@ -34,12 +31,8 @@ export default async function PageView({ params }: Props) {
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const business = await api.business.get();
-
-  if (!business) return { title: "Page Not Found" };
 
   const page = await api.content.getPageBySlug({
-    businessId: business.id,
     slug,
   });
 

@@ -6,8 +6,8 @@ import { TemplateFieldsEditor } from "../_components/template-fields-editor";
 import { TrailHeader } from "../../_components/trail-header";
 
 export default async function TemplateFieldsPage() {
-  const business = await api.business.get();
-  if (!business) notFound();
+  const business = await api.business.getWith({ includeSiteContent: true });
+
   if (!business.siteContent) notFound();
 
   return (

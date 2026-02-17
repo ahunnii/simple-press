@@ -1,9 +1,8 @@
-import { headers } from "next/headers";
+import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
-import { updateBrandingSchema } from "~/lib/validators/branding";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
@@ -28,22 +27,89 @@ export const businessRouter = createTRPCRouter({
       },
       select: {
         id: true,
+        stripeAccountId: true,
         name: true,
-
         templateId: true,
         businessAddress: true,
         supportEmail: true,
+        customDomain: true,
+        domainStatus: true,
         siteContent: {
           select: {
             logoUrl: true,
+            faviconUrl: true,
             logoAltText: true,
             footerText: true,
+            primaryColor: true,
             navigationItems: true,
             socialLinks: true,
+            customFields: true,
+            metaTitle: true,
+            metaDescription: true,
+            metaKeywords: true,
+            ogImage: true,
           },
         },
       },
     });
+
+    if (!businessData) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
+    const { stripeAccountId, ...rest } = businessData;
+
+    return { ...rest, isStripeConnected: !!stripeAccountId };
+  }),
+
+  simplifiedGetWithProducts: publicProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
+    const businessData = await ctx.db.business.findFirst({
+      where: {
+        id: business.id,
+        status: "active",
+      },
+      select: {
+        id: true,
+        name: true,
+        templateId: true,
+        businessAddress: true,
+        supportEmail: true,
+        products: {
+          where: { published: true },
+        },
+        siteContent: {
+          select: {
+            logoUrl: true,
+            logoAltText: true,
+            primaryColor: true,
+            footerText: true,
+            navigationItems: true,
+            socialLinks: true,
+            customFields: true,
+          },
+        },
+      },
+    });
+
+    if (!businessData) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
     return businessData;
   }),
 
@@ -61,6 +127,7 @@ export const businessRouter = createTRPCRouter({
     });
     return policies;
   }),
+
   getHomepage: publicProcedure.query(async ({ ctx }) => {
     const business = await checkBusiness();
     if (!business) {
@@ -110,7 +177,43 @@ export const businessRouter = createTRPCRouter({
     return homepage;
   }),
 
-  get: publicProcedure
+  getForEmailPreview: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    const business = await ctx.db.business.findFirst({
+      where: {
+        id: businessId,
+      },
+      select: {
+        id: true,
+        name: true,
+        subdomain: true,
+        customDomain: true,
+        siteContent: {
+          select: {
+            logoUrl: true,
+          },
+        },
+      },
+    });
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
+    const sampleOrder = await ctx.db.order.findFirst({
+      where: { businessId },
+      include: {
+        items: true,
+        shippingAddress: true,
+      },
+    });
+    return { business, sampleOrder };
+  }),
+
+  get: ownerAdminProcedure
     .input(
       z
         .object({
@@ -121,18 +224,18 @@ export const businessRouter = createTRPCRouter({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const headersList = await headers();
-      const hostname = headersList.get("host") ?? "";
+      const businessId = await checkBusiness();
 
-      // Extract subdomain or custom domain
-      const domain = hostname.split(":")[0]; // Remove port
+      if (!businessId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
 
       const business = await ctx.db.business.findFirst({
         where: {
-          OR: [
-            { customDomain: domain },
-            { subdomain: domain?.split(".")[0] }, // Extract subdomain
-          ],
+          id: businessId.id,
           status: "active",
         },
         include: {
@@ -163,18 +266,17 @@ export const businessRouter = createTRPCRouter({
     }),
 
   getWithProducts: publicProcedure.query(async ({ ctx }) => {
-    const headersList = await headers();
-    const hostname = headersList.get("host") ?? "";
-
-    // Extract subdomain or custom domain
-    const domain = hostname.split(":")[0]; // Remove port
+    const businessId = await checkBusiness();
+    if (!businessId) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
 
     const business = await ctx.db.business.findFirst({
       where: {
-        OR: [
-          { customDomain: domain },
-          { subdomain: domain?.split(".")[0] }, // Extract subdomain
-        ],
+        id: businessId.id,
         status: "active",
       },
       include: {
@@ -197,37 +299,55 @@ export const businessRouter = createTRPCRouter({
     return business;
   }),
 
-  secureGetContent: ownerAdminProcedure.query(async ({ ctx }) => {
-    const headersList = await headers();
-    const hostname = headersList.get("host") ?? "";
-
-    // Extract subdomain or custom domain
-    const domain = hostname.split(":")[0]; // Remove port
-
+  getWithIntegrations: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
     const business = await ctx.db.business.findFirst({
-      where: {
-        OR: [
-          { customDomain: domain },
-          { subdomain: domain?.split(".")[0] }, // Extract subdomain
-        ],
-        status: "active",
-      },
-      include: {
-        siteContent: true,
-        pages: {
-          orderBy: { sortOrder: "asc" },
-        },
+      where: { id: businessId },
+      select: {
+        id: true,
+        stripeAccountId: true,
+        umamiWebsiteId: true,
+        umamiEnabled: true,
       },
     });
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
     return business;
   }),
 
-  updateBranding: ownerAdminProcedure
-    .input(updateBrandingSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { templateId, siteContent } = input;
+  getWith: ownerAdminProcedure
+    .input(
+      z.object({
+        includePages: z.boolean().optional(),
+        includeSiteContent: z.boolean().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
 
-      const business = await checkBusiness();
+      const include = {
+        ...(input?.includePages
+          ? { pages: { orderBy: { sortOrder: "asc" } } }
+          : {}),
+        ...(input?.includeSiteContent
+          ? {
+              siteContent: {
+                include: {
+                  navigationItems: true,
+                },
+              },
+            }
+          : {}),
+      };
+
+      const business = await ctx.db.business.findFirst({
+        where: { id: businessId },
+        include: include as Prisma.BusinessInclude,
+      });
 
       if (!business) {
         throw new TRPCError({
@@ -236,24 +356,7 @@ export const businessRouter = createTRPCRouter({
         });
       }
 
-      const updatedBusiness = await ctx.db.business.update({
-        where: { id: business.id },
-        data: {
-          templateId,
-          siteContent: {
-            upsert: {
-              create: siteContent,
-              update: siteContent,
-            },
-          },
-        },
-        include: { siteContent: true },
-      });
-
-      return {
-        message: "Branding updated successfully",
-        businessId: updatedBusiness.id,
-      };
+      return business;
     }),
 
   updateGeneral: ownerAdminProcedure
@@ -267,19 +370,11 @@ export const businessRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const { name, ownerEmail, supportEmail, businessAddress, taxId } = input;
 
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
       const updatedBusiness = await ctx.db.business.update({
-        where: { id: business.id },
+        where: { id: businessId },
         data: { name, ownerEmail, supportEmail, businessAddress, taxId },
       });
       return {
@@ -297,19 +392,11 @@ export const businessRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const { umamiWebsiteId, umamiEnabled } = input;
 
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
       const updatedBusiness = await ctx.db.business.update({
-        where: { id: business.id },
+        where: { id: businessId },
         data: { umamiWebsiteId, umamiEnabled },
       });
       return updatedBusiness;
@@ -325,19 +412,11 @@ export const businessRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const { metaTitle, metaDescription, metaKeywords, ogImage } = input;
 
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
       const updatedBusiness = await ctx.db.business.update({
-        where: { id: business.id },
+        where: { id: businessId },
         data: {
           siteContent: {
             upsert: {
@@ -356,9 +435,7 @@ export const businessRouter = createTRPCRouter({
             },
           },
         },
-        include: {
-          siteContent: true,
-        },
+        include: { siteContent: true },
       });
       return updatedBusiness;
     }),

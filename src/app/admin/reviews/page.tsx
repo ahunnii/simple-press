@@ -1,18 +1,11 @@
-import { notFound } from "next/navigation";
-
-import { api } from "~/trpc/server";
-
 import { TrailHeader } from "../_components/trail-header";
 import { ReviewsAdminList } from "./_components/reviews-admin-list";
 
 export default async function ReviewsPage() {
-  const business = await api.business.get();
-  if (!business) notFound();
-
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Product Reviews" }]} />
-      <ReviewsAdminList businessId={business.id} />
+      <ReviewsAdminList />
     </>
   );
 }

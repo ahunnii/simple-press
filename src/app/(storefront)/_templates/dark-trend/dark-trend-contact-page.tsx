@@ -7,7 +7,7 @@ import { DarkTrendContactForm } from "./dark-trend-contact-form";
 import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 export function DarkTrendContactPage({ business }: Props) {
   const physicalAddress = "Detroit, MI";

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, Plus, Save } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "~/lib/utils";
@@ -28,11 +28,7 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 
-type NewGalleryFormProps = {
-  businessId: string;
-};
-
-export function NewGalleryForm({ businessId }: NewGalleryFormProps) {
+export function NewGalleryForm() {
   const router = useRouter();
 
   // Form state
@@ -88,7 +84,6 @@ export function NewGalleryForm({ businessId }: NewGalleryFormProps) {
     }
 
     createMutation.mutate({
-      businessId,
       name: name.trim(),
       slug: slug.trim(),
       description: description.trim() || undefined,

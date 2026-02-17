@@ -4,16 +4,12 @@ import { ArrowLeft } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 
-import { StorefrontFooter } from "../../_components/storefront-footer";
-import { StorefrontHeader } from "../../_components/storefront-header";
 import { ModernProductActions } from "./modern-product-actions";
 
 export async function ModernProductPage({
   product,
-  business,
 }: {
   product: NonNullable<RouterOutputs["product"]["get"]>;
-  business: NonNullable<RouterOutputs["business"]["get"]>;
 }) {
   //   const related = products
   //     .filter((p) => p.category === product.category && p.id !== product.id)

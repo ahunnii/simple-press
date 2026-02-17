@@ -1,9 +1,9 @@
 "use client";
 
-import type { Business, SiteContent } from "generated/prisma";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { env } from "~/env";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
@@ -12,7 +12,7 @@ import { StripeSettings } from "./stripe-settings";
 import { UmamiSettings } from "./umami-settings";
 
 type Props = {
-  business: Business & { siteContent?: SiteContent | null };
+  business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
 };
 
 export function IntegrationsSettings({ business }: Props) {

@@ -4,11 +4,11 @@ import { DarkTrendCheckoutForm } from "./dark-trend-checkout-form";
 import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 export async function DarkTrendCheckoutPage({ business }: Props) {
   // Check if Stripe is connected
-  if (!business.stripeAccountId) {
+  if (!business.isStripeConnected) {
     return (
       <div className="flex min-h-[50vh] flex-1 items-center justify-center bg-[#1A1A1A] p-4">
         <div className="max-w-md text-center">

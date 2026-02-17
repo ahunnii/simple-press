@@ -1,10 +1,8 @@
-// app/(storefront)/checkout/_components/checkout-form.tsx
 "use client";
 
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { CreditCard, Loader2 } from "lucide-react";
 
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -18,7 +16,7 @@ import { DiscountDiscountInput } from "./default-discount-input";
 
 type Business = {
   id: string;
-  stripeAccountId: string | null;
+  isStripeConnected: boolean;
   siteContent: {
     primaryColor: string | null;
   } | null;
@@ -29,8 +27,7 @@ type CheckoutFormProps = {
 };
 
 export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
-  const router = useRouter();
-  const { items, total, clearCart } = useCart();
+  const { items, total } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -271,7 +268,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
 
               <Button
                 type="submit"
-                disabled={isProcessing || !business.stripeAccountId}
+                disabled={isProcessing}
                 className="w-full text-white"
                 size="lg"
                 style={{ backgroundColor: primaryColor }}
@@ -288,14 +285,6 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   </>
                 )}
               </Button>
-
-              {!business.stripeAccountId && (
-                <Alert>
-                  <AlertDescription>
-                    Payment processing is not yet configured for this store.
-                  </AlertDescription>
-                </Alert>
-              )}
 
               <p className="text-center text-xs text-gray-500">
                 Secure checkout powered by Stripe
