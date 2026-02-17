@@ -285,6 +285,7 @@ export const businessRouter = createTRPCRouter({
       return {
         message: "General settings updated successfully",
         businessId: updatedBusiness.id,
+        business: updatedBusiness,
       };
     }),
 

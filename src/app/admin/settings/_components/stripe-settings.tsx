@@ -2,7 +2,13 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle, ExternalLink, Loader2, XCircle } from "lucide-react";
+import {
+  CheckCircle,
+  CreditCard,
+  ExternalLink,
+  Loader2,
+  XCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { env } from "~/env";
@@ -92,7 +98,9 @@ export function StripeSettings({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Stripe Connect</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" /> Stripe Connect
+            </CardTitle>
             <CardDescription>
               Accept payments from your customers
             </CardDescription>

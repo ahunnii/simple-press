@@ -7,11 +7,13 @@ import { customerRouter } from "./routers/customer";
 import { discountRouter } from "./routers/discount";
 import { domainRouter } from "./routers/domain";
 import { exportRouter } from "./routers/export";
+import { featuresRouter } from "./routers/featues";
 import { galleryRouter } from "./routers/gallery";
 import { importRouter } from "./routers/import";
 import { inventoryRouter } from "./routers/inventory";
 import { orderRouter } from "./routers/order";
 import { productRouter } from "./routers/product";
+import { reviewRouter } from "./routers/review";
 import { testimonialRouter } from "./routers/testimonials";
 
 /**
@@ -35,6 +37,9 @@ export const appRouter = createTRPCRouter({
   import: importRouter,
   gallery: galleryRouter,
   testimonial: testimonialRouter,
+
+  features: featuresRouter,
+  review: reviewRouter,
 });
 
 // export type definition of API

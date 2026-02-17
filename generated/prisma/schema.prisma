@@ -139,7 +139,7 @@ model Business {
   onboardingComplete Boolean @default(false)
 
   // Features
-  siteFeatures Json? // { key: value }
+  featureFlags Json @default("{}") // Record<string, boolean>
 
   // Relationships
   users              User[]
@@ -256,6 +256,12 @@ model Product {
   collectionProducts CollectionProduct[]
   orderItems         OrderItem[]
   inventoryHistory   InventoryHistory[]
+
+  // Computed fields (can be calculated on demand)
+  averageRating Float?
+  reviewCount   Int    @default(0)
+
+  reviews ProductReview[]
 
   @@unique([businessId, slug])
   @@index([businessId, published])
@@ -386,6 +392,7 @@ model Customer {
   shippingAddresses  ShippingAddress[]
   testimonials       Testimonial[]
   testimonialInvites TestimonialInvite[]
+  reviews            ProductReview[]
 
   @@unique([businessId, email])
   @@index([businessId])
@@ -475,6 +482,8 @@ model Order {
 
   items            OrderItem[]
   inventoryHistory InventoryHistory[]
+
+  reviews ProductReview[]
 
   @@unique([businessId, orderNumber])
   @@index([businessId, status])
@@ -745,18 +754,27 @@ model Testimonial {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Who created this
+  source String @default("customer") // "customer" | "owner"
+
   // Content
   rating   Int // 1-5 stars
+  title    String? // Optional title (owner-created often has one)
   text     String  @db.Text
-  videoUrl String? // Optional video URL
-  photoUrl String? // Optional photo URL
+  videoUrl String?
+  photoUrl String?
 
-  // Status
-  isPublic Boolean @default(false) // Owner approval
+  // Status — owner-created are public by default, customer-submitted need approval
+  isPublic Boolean @default(false)
 
-  // Customer info (captured at submission)
-  customerName  String
-  customerEmail String
+  // Attribution (used by both types)
+  customerName    String
+  customerEmail   String? // Optional for owner-created (may not have email)
+  customerTitle   String? // e.g. "CEO at Acme" — for owner-created context
+  customerCompany String? // e.g. "Acme Corp" — for owner-created context
+
+  // Dates — owner can backdate testimonials from another system
+  testimonialDate DateTime @default(now())
 
   // Relationships
   businessId String
@@ -765,8 +783,8 @@ model Testimonial {
   customerId String?
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
-  @@unique([businessId, customerEmail]) // One testimonial per customer per business
   @@index([businessId, isPublic])
+  @@index([businessId, source])
   @@index([customerId])
 }
 
@@ -791,4 +809,76 @@ model TestimonialInvite {
   @@index([businessId])
   @@index([code])
   @@index([email])
+}
+
+model ProductReview {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Origin
+  source String @default("customer") // "customer" | "owner"
+
+  // Content
+  rating   Int
+  title    String? // Optional — owner-created often has one; customer required
+  comment  String   @db.Text
+  images   String[]
+  videoUrl String?
+
+  // Verification (customer only)
+  verifiedPurchase Boolean @default(false)
+
+  // Moderation
+  // customer-submitted: starts false, owner approves
+  // owner-created: starts true by default
+  isApproved Boolean @default(false)
+  isHidden   Boolean @default(false)
+
+  // Attribution
+  customerName  String
+  customerEmail String? // Optional for owner-created
+  customerTitle String? // e.g. "Verified Buyer" or "Professional Chef"
+
+  // Dates — owner can backdate
+  reviewDate DateTime @default(now())
+
+  // Helpful votes (customer reviews only)
+  helpfulCount    Int @default(0)
+  notHelpfulCount Int @default(0)
+
+  // Relationships
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  orderId String?
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  votes ReviewVote[]
+
+  @@index([productId, isApproved, isHidden])
+  @@index([productId, source])
+  @@index([customerId])
+}
+
+model ReviewVote {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  isHelpful Boolean // true = helpful, false = not helpful
+
+  // Relationships
+  reviewId String
+  review   ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  // Voter identification (either authenticated or by IP)
+  userId    String?
+  ipAddress String?
+
+  @@unique([reviewId, userId])
+  @@unique([reviewId, ipAddress])
+  @@index([reviewId])
 }

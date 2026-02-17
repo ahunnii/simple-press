@@ -196,7 +196,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   umamiEnabled: 'umamiEnabled',
   status: 'status',
   onboardingComplete: 'onboardingComplete',
-  siteFeatures: 'siteFeatures'
+  featureFlags: 'featureFlags'
 };
 
 exports.Prisma.SiteContentScalarFieldEnum = {
@@ -250,7 +250,9 @@ exports.Prisma.ProductScalarFieldEnum = {
   sortOrder: 'sortOrder',
   metaTitle: 'metaTitle',
   metaDescription: 'metaDescription',
-  businessId: 'businessId'
+  businessId: 'businessId',
+  averageRating: 'averageRating',
+  reviewCount: 'reviewCount'
 };
 
 exports.Prisma.ProductVariantScalarFieldEnum = {
@@ -499,13 +501,18 @@ exports.Prisma.TestimonialScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  source: 'source',
   rating: 'rating',
+  title: 'title',
   text: 'text',
   videoUrl: 'videoUrl',
   photoUrl: 'photoUrl',
   isPublic: 'isPublic',
   customerName: 'customerName',
   customerEmail: 'customerEmail',
+  customerTitle: 'customerTitle',
+  customerCompany: 'customerCompany',
+  testimonialDate: 'testimonialDate',
   businessId: 'businessId',
   customerId: 'customerId'
 };
@@ -522,17 +529,50 @@ exports.Prisma.TestimonialInviteScalarFieldEnum = {
   customerId: 'customerId'
 };
 
+exports.Prisma.ProductReviewScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  source: 'source',
+  rating: 'rating',
+  title: 'title',
+  comment: 'comment',
+  images: 'images',
+  videoUrl: 'videoUrl',
+  verifiedPurchase: 'verifiedPurchase',
+  isApproved: 'isApproved',
+  isHidden: 'isHidden',
+  customerName: 'customerName',
+  customerEmail: 'customerEmail',
+  customerTitle: 'customerTitle',
+  reviewDate: 'reviewDate',
+  helpfulCount: 'helpfulCount',
+  notHelpfulCount: 'notHelpfulCount',
+  productId: 'productId',
+  customerId: 'customerId',
+  orderId: 'orderId'
+};
+
+exports.Prisma.ReviewVoteScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  isHelpful: 'isHelpful',
+  reviewId: 'reviewId',
+  userId: 'userId',
+  ipAddress: 'ipAddress'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
 };
 
-exports.Prisma.NullableJsonNullValueInput = {
-  DbNull: Prisma.DbNull,
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
-exports.Prisma.JsonNullValueInput = {
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
@@ -589,7 +629,9 @@ exports.Prisma.ModelName = {
   Gallery: 'Gallery',
   GalleryImage: 'GalleryImage',
   Testimonial: 'Testimonial',
-  TestimonialInvite: 'TestimonialInvite'
+  TestimonialInvite: 'TestimonialInvite',
+  ProductReview: 'ProductReview',
+  ReviewVote: 'ReviewVote'
 };
 
 /**

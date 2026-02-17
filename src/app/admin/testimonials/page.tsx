@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../_components/trail-header";
-import { SendInviteDialog } from "./_components/send-invite-dialog";
+import { TestimonialsActions } from "./_components/testimonials-actions";
 import { TestimonialsList } from "./_components/testimonials-list";
 
 export default async function TestimonialsPage() {
@@ -22,9 +22,7 @@ export default async function TestimonialsPage() {
             <h1>Testimonials</h1>
             <p>Manage customer testimonials and reviews</p>
           </div>
-          <div className="flex gap-3">
-            <SendInviteDialog businessId={business.id} />
-          </div>
+          <TestimonialsActions businessId={business.id} />
         </div>
 
         <TestimonialsList businessId={business.id} />
