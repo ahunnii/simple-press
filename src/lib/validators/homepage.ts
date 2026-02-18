@@ -47,13 +47,13 @@ export const brandingFormSchema = z.object({
     })
     .optional()
     .nullable(),
-  logoUrl: z.string().url().optional().nullable(),
+  logoUrl: z.string().url().optional().nullable().or(z.literal("")),
   logoFile: z.instanceof(File).optional().nullable(),
   primaryColor: z.string().nullable(),
   secondaryColor: z.string().nullable(),
   accentColor: z.string().nullable(),
   templateId: z.string(),
-  faviconUrl: z.string().url().optional().nullable(),
+  faviconUrl: z.string().url().optional().nullable().or(z.literal("")),
   faviconFile: z.instanceof(File).optional().nullable(),
 });
 

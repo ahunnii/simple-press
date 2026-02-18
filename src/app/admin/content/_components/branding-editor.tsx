@@ -80,13 +80,13 @@ export function BrandingEditor({ business, siteContent }: Props) {
         twitter: socialLinks.twitter ?? "",
         linkedin: socialLinks.linkedin ?? "",
       },
-      logoUrl: siteContent.logoUrl ?? "",
+      logoUrl: siteContent.logoUrl ?? undefined,
       logoFile: null,
       primaryColor: siteContent?.primaryColor ?? "",
       secondaryColor: siteContent?.secondaryColor ?? "",
       accentColor: siteContent?.accentColor ?? "",
       templateId: business?.templateId ?? "",
-      faviconUrl: siteContent.faviconUrl ?? "",
+      faviconUrl: siteContent.faviconUrl ?? undefined,
       faviconFile: null,
     },
   });
@@ -114,18 +114,18 @@ export function BrandingEditor({ business, siteContent }: Props) {
       form.reset({
         footerText: data.footerText ?? "",
         socialLinks: newSocialLinks,
-        logoUrl: data.logoUrl ?? "",
+        logoUrl: data.logoUrl ?? null,
         logoFile: null,
         primaryColor: data?.primaryColor ?? "",
         secondaryColor: data?.secondaryColor ?? "",
         accentColor: data?.accentColor ?? "",
         templateId: templateId ?? "",
-        faviconUrl: data.faviconUrl ?? "",
+        faviconUrl: data.faviconUrl ?? null,
         faviconFile: null,
       });
 
-      if (logoFileInputRef.current) logoFileInputRef.current.value = "";
-      if (faviconFileInputRef.current) faviconFileInputRef.current.value = "";
+      // if (logoFileInputRef.current) logoFileInputRef.current.value = "";
+      // if (faviconFileInputRef.current) faviconFileInputRef.current.value = "";
     },
     onError: (error) => {
       toast.dismiss();
@@ -233,6 +233,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(handleSubmit)(e)}
         className="min-h-screen bg-gray-50"
+        onChange={() => console.log(form.formState.errors)}
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">
