@@ -1,76 +1,77 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { checkBusiness } from "~/lib/check-business";
 import {
   FEATURE_REGISTRY,
   getDefaultFlags,
-  getDisabledDueToDepency,
+  getDisabledDueToDependency,
 } from "~/lib/features/registry";
 
 import {
   createTRPCRouter,
   ownerAdminProcedure,
-  protectedProcedure,
+  publicProcedure,
 } from "../trpc";
 
 export const featuresRouter = createTRPCRouter({
   // Get resolved flags for a business (merges defaults + overrides)
-  getFlags: protectedProcedure
-    .input(z.object({ businessId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const business = await ctx.db.business.findUnique({
-        where: { id: input.businessId },
-        select: { featureFlags: true },
+  getFlags: publicProcedure.query(async ({ ctx }) => {
+    const businessId = await checkBusiness();
+
+    if (!businessId) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
       });
+    }
 
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+    const business = await ctx.db.business.findUnique({
+      where: { id: businessId.id },
+      select: { featureFlags: true },
+    });
 
-      // Merge defaults with stored overrides
-      const defaults = getDefaultFlags();
-      const stored = (business.featureFlags as Record<string, boolean>) ?? {};
-      const merged = { ...defaults, ...stored };
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
 
-      // Compute which flags are disabled due to dependency
-      const disabledByDependency = getDisabledDueToDepency(merged);
+    // Merge defaults with stored overrides
+    const defaults = getDefaultFlags();
+    const stored = (business.featureFlags as Record<string, boolean>) ?? {};
+    const merged = { ...defaults, ...stored };
 
-      return {
-        flags: merged,
-        disabledByDependency,
-      };
-    }),
+    // Compute which flags are disabled due to dependency
+    const disabledByDependency = getDisabledDueToDependency(merged);
+
+    return {
+      flags: merged,
+      disabledByDependency,
+    };
+  }),
 
   // Owner toggles a single flag (if ownerCanToggle)
-  toggle: protectedProcedure
+  toggle: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         key: z.string(),
         enabled: z.boolean(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
-      }
+      const { businessId } = ctx;
 
       const feature = FEATURE_REGISTRY[input.key];
+
       if (!feature) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Unknown feature flag",
         });
       }
-      if (!feature.ownerCanToggle) {
+      if (!feature.ownerCanToggle && ctx.session.user.role !== "ADMIN") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "This feature can only be toggled by platform admins",
@@ -78,7 +79,7 @@ export const featuresRouter = createTRPCRouter({
       }
 
       const business = await ctx.db.business.findUnique({
-        where: { id: input.businessId },
+        where: { id: businessId },
         select: { featureFlags: true },
       });
 
@@ -86,7 +87,7 @@ export const featuresRouter = createTRPCRouter({
       const updated = { ...current, [input.key]: input.enabled };
 
       await ctx.db.business.update({
-        where: { id: input.businessId },
+        where: { id: businessId },
         data: { featureFlags: updated },
       });
 
@@ -95,16 +96,19 @@ export const featuresRouter = createTRPCRouter({
 
   // Platform admin: set flags for any business
   adminSetFlags: ownerAdminProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        flags: z.record(z.string(), z.boolean()),
-      }),
-    )
+    .input(z.object({ flags: z.record(z.string(), z.boolean()) }))
     .mutation(async ({ ctx, input }) => {
-      // TODO: Check platform admin role
+      const { businessId } = ctx;
+
+      if (ctx.session.user.role !== "ADMIN") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This feature can only be set by platform admins",
+        });
+      }
+
       const business = await ctx.db.business.findUnique({
-        where: { id: input.businessId },
+        where: { id: businessId },
         select: { featureFlags: true },
       });
 
@@ -112,7 +116,7 @@ export const featuresRouter = createTRPCRouter({
       const updated = { ...current, ...input.flags };
 
       await ctx.db.business.update({
-        where: { id: input.businessId },
+        where: { id: businessId },
         data: { featureFlags: updated },
       });
 

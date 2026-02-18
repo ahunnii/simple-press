@@ -1,13 +1,12 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultCheckoutPageTemplateProps } from "../types";
 
 import { ModernCheckoutForm } from "./modern-checkout-form";
 import { ModernFooter } from "./modern-footer";
 import { ModernHeader } from "./modern-header";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-export function ModernCheckoutPage({ business }: Props) {
+export function ModernCheckoutPage({
+  business,
+}: DefaultCheckoutPageTemplateProps) {
   return (
     <div className="font-sans antialiased">
       <ModernHeader business={business} />

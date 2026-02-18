@@ -4,25 +4,15 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { UserButton } from "@daveyplate/better-auth-ui";
-import { LayoutDashboardIcon, Menu, User, X } from "lucide-react";
+import { LayoutDashboardIcon, Menu, X } from "lucide-react";
 
+import type { DefaultHeaderTemplateProps } from "../types";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 
 import { DefaultCartBadge } from "./default-cart-badge";
 
-type Business = {
-  name: string;
-  siteContent: {
-    logoUrl: string | null;
-  } | null;
-};
-
-type Props = {
-  business: Business;
-};
-
-export function DefaultHeader({ business }: Props) {
+export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: session, isPending } = authClient.useSession();

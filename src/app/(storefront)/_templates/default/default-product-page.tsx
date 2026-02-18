@@ -1,17 +1,14 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultProductPageTemplateProps } from "../types";
 
 import { DefaultProductDetails } from "./default-product-details";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-  product: NonNullable<RouterOutputs["product"]["get"]>;
-};
-
-export async function DefaultProductPage({ business, product }: Props) {
+export async function DefaultProductPage({
+  product,
+}: DefaultProductPageTemplateProps) {
   return (
     <main className="flex-1 px-4 py-12">
       <div className="mx-auto max-w-7xl">
-        <DefaultProductDetails product={product} business={business} />
+        <DefaultProductDetails product={product} />
       </div>
     </main>
   );

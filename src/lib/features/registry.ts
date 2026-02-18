@@ -178,7 +178,7 @@ export const CATEGORY_META: Record<
 };
 
 // Get all features disabled because a dependency is off
-export function getDisabledDueToDepency(
+export function getDisabledDueToDependency(
   flags: Record<string, boolean>,
 ): Set<string> {
   const disabled = new Set<string>();

@@ -44,5 +44,5 @@ export default async function NavigationPage() {
 }
 
 export const metadata = {
-  title: "Update Navigation",
+  title: "Navigation",
 };

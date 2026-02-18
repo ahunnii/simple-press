@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     // Code is valid
     return NextResponse.json({ valid: true });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 },

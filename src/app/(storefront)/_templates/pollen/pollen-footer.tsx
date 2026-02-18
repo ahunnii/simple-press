@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Instagram } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultFooterTemplateProps } from "../types";
 
 const mainMenuLinks = [
   { label: "Home", href: "/" },
@@ -18,11 +18,7 @@ const accountLinks = [
   { label: "Submit a Testimonial", href: "/submit-testimonial" },
 ];
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-
-export async function PollenFooter({ business }: Props) {
+export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
   return (
     <footer className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

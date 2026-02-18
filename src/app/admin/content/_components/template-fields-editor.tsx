@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -10,7 +11,6 @@ import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import {
   ArrowLeft,
-  Loader2,
   Plus,
   Save,
   Search,
@@ -156,19 +156,19 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
     setCustomPairs([...customPairs, { key: "", value: "", page }]);
   };
 
-  const updateCustomPair = (
-    index: number,
-    field: "key" | "value" | "page",
-    value: string,
-  ) => {
-    const updated = [...customPairs];
-    updated[index]![field] = value;
-    setCustomPairs(updated);
-  };
+  // const updateCustomPair = (
+  //   index: number,
+  //   field: "key" | "value" | "page",
+  //   value: string,
+  // ) => {
+  //   const updated = [...customPairs];
+  //   updated[index]![field] = value;
+  //   setCustomPairs(updated);
+  // };
 
-  const deleteCustomPair = (index: number) => {
-    setCustomPairs(customPairs.filter((_, i) => i !== index));
-  };
+  // const deleteCustomPair = (index: number) => {
+  //   setCustomPairs(customPairs.filter((_, i) => i !== index));
+  // };
 
   // Filter fields by search
   const filterFields = (fields: TemplateField[]) => {
@@ -540,7 +540,6 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
 
 // Field Group Component
 function FieldGroup({
-  groupId,
   groupMeta,
   fields,
   customFields,
@@ -599,7 +598,6 @@ function FieldGroup({
                 value={customFields[field.key] ?? ""}
                 isModified={modifiedFields.has(field.key)}
                 onChange={(value) => onFieldChange(field.key, value)}
-                businessId={businessId}
               />
             </div>
           ))}
@@ -615,13 +613,11 @@ function FieldInput({
   value,
   isModified,
   onChange,
-  businessId,
 }: {
   field: TemplateField;
   value: string;
   isModified: boolean;
   onChange: (value: string) => void;
-  businessId: string;
 }) {
   return (
     <div className="space-y-2">
@@ -704,107 +700,107 @@ function GalleryFieldSelect({
   );
 }
 
-// Custom Fields Section Component (unchanged from before)
-function CustomFieldsSection({
-  page,
-  customPairs,
-  allCustomPairs,
-  onAdd,
-  onUpdate,
-  onDelete,
-}: {
-  page: string;
-  customPairs: { key: string; value: string; page: string }[];
-  allCustomPairs: { key: string; value: string; page: string }[];
-  onAdd: () => void;
-  onUpdate: (
-    index: number,
-    field: "key" | "value" | "page",
-    value: string,
-  ) => void;
-  onDelete: (index: number) => void;
-}) {
-  return (
-    <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-          Custom Fields
-          {customPairs.length > 0 && (
-            <Badge variant="outline">{customPairs.length}</Badge>
-          )}
-        </h3>
-        <Button onClick={onAdd} size="sm" variant="outline">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Custom Field
-        </Button>
-      </div>
+// Custom Fields Section Component
+// function CustomFieldsSection({
+//   page,
+//   customPairs,
+//   allCustomPairs,
+//   onAdd,
+//   onUpdate,
+//   onDelete,
+// }: {
+//   page: string;
+//   customPairs: { key: string; value: string; page: string }[];
+//   allCustomPairs: { key: string; value: string; page: string }[];
+//   onAdd: () => void;
+//   onUpdate: (
+//     index: number,
+//     field: "key" | "value" | "page",
+//     value: string,
+//   ) => void;
+//   onDelete: (index: number) => void;
+// }) {
+//   return (
+//     <div>
+//       <div className="mb-4 flex items-center justify-between">
+//         <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+//           Custom Fields
+//           {customPairs.length > 0 && (
+//             <Badge variant="outline">{customPairs.length}</Badge>
+//           )}
+//         </h3>
+//         <Button onClick={onAdd} size="sm" variant="outline">
+//           <Plus className="mr-2 h-4 w-4" />
+//           Add Custom Field
+//         </Button>
+//       </div>
 
-      {customPairs.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
-          <p className="mb-3 text-sm text-gray-500">
-            No custom fields for this page yet
-          </p>
-          <Button onClick={onAdd} size="sm" variant="outline">
-            <Plus className="mr-2 h-4 w-4" />
-            Add First Custom Field
-          </Button>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {customPairs.map((pair, index) => {
-            const globalIndex = allCustomPairs.indexOf(pair);
-            return (
-              <Card key={index}>
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-4">
-                    <div className="grid flex-1 grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-xs text-gray-500 uppercase">
-                          Key
-                        </Label>
-                        <Input
-                          value={pair.key}
-                          onChange={(e) =>
-                            onUpdate(globalIndex, "key", e.target.value)
-                          }
-                          placeholder={`${page}.custom.field`}
-                          className="mt-1 font-mono text-sm"
-                        />
-                      </div>
+//       {customPairs.length === 0 ? (
+//         <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
+//           <p className="mb-3 text-sm text-gray-500">
+//             No custom fields for this page yet
+//           </p>
+//           <Button onClick={onAdd} size="sm" variant="outline">
+//             <Plus className="mr-2 h-4 w-4" />
+//             Add First Custom Field
+//           </Button>
+//         </div>
+//       ) : (
+//         <div className="space-y-4">
+//           {customPairs.map((pair, index) => {
+//             const globalIndex = allCustomPairs.indexOf(pair);
+//             return (
+//               <Card key={index}>
+//                 <CardContent className="pt-6">
+//                   <div className="flex items-start gap-4">
+//                     <div className="grid flex-1 grid-cols-2 gap-4">
+//                       <div>
+//                         <Label className="text-xs text-gray-500 uppercase">
+//                           Key
+//                         </Label>
+//                         <Input
+//                           value={pair.key}
+//                           onChange={(e) =>
+//                             onUpdate(globalIndex, "key", e.target.value)
+//                           }
+//                           placeholder={`${page}.custom.field`}
+//                           className="mt-1 font-mono text-sm"
+//                         />
+//                       </div>
 
-                      <div>
-                        <Label className="text-xs text-gray-500 uppercase">
-                          Value
-                        </Label>
-                        <Input
-                          value={pair.value}
-                          onChange={(e) =>
-                            onUpdate(globalIndex, "value", e.target.value)
-                          }
-                          placeholder="Field value"
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
+//                       <div>
+//                         <Label className="text-xs text-gray-500 uppercase">
+//                           Value
+//                         </Label>
+//                         <Input
+//                           value={pair.value}
+//                           onChange={(e) =>
+//                             onUpdate(globalIndex, "value", e.target.value)
+//                           }
+//                           placeholder="Field value"
+//                           className="mt-1"
+//                         />
+//                       </div>
+//                     </div>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDelete(globalIndex)}
-                      className="mt-6"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-600" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
+//                     <Button
+//                       variant="ghost"
+//                       size="sm"
+//                       onClick={() => onDelete(globalIndex)}
+//                       className="mt-6"
+//                     >
+//                       <Trash2 className="h-4 w-4 text-red-600" />
+//                     </Button>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//             );
+//           })}
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
 
 type TemplateImageUploadFieldProps = {
   value: string; // Current image URL from customFields

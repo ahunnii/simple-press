@@ -70,7 +70,7 @@ export function DefaultCartContents({ business }: CartContentsProps) {
             className="flex gap-4 rounded-lg border bg-white p-4"
           >
             {/* Image */}
-            <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+            <div className="h-24 w-24 shrink-0 overflow-hidden rounded bg-gray-100">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}

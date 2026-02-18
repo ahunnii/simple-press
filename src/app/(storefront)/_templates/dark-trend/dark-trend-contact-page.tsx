@@ -1,15 +1,14 @@
 import Image from "next/image";
 import { Mail, MapPin } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultContactPageTemplateProps } from "../types";
 
 import { DarkTrendContactForm } from "./dark-trend-contact-form";
 import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-export function DarkTrendContactPage({ business }: Props) {
+export function DarkTrendContactPage({
+  business,
+}: DefaultContactPageTemplateProps) {
   const physicalAddress = "Detroit, MI";
   const contactEmail = business?.supportEmail ?? "";
 

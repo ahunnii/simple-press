@@ -7,15 +7,12 @@ import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard } from "@tabler/icons-react";
 import { Menu, ShoppingBag, X } from "lucide-react";
 
+import type { DefaultHeaderTemplateProps } from "../types";
 import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
-
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -24,7 +21,7 @@ const NAV_LINKS = [
   { href: "/contact", label: "Contact" },
 ] as const;
 
-export function ModernHeader({ business }: Props) {
+export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const { data: session, isPending } = authClient.useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

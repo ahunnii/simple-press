@@ -6,14 +6,13 @@ import { ArrowLeft } from "lucide-react";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
-import { api, HydrateClient } from "~/trpc/server";
+import { api } from "~/trpc/server";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 import { FulfillmentForm } from "../_components/fulfillment-form";
 import { RefundHandler } from "../_components/refund-handler";
-import { SiteHeader } from "../../_components/site-header";
 import { TrailHeader } from "../../_components/trail-header";
 
 type Props = {

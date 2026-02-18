@@ -8,14 +8,10 @@ import { UserButton } from "@daveyplate/better-auth-ui";
 import { LayoutDashboardIcon, MessageSquare, X } from "lucide-react";
 import { motion } from "motion/react";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultHeaderTemplateProps } from "../types";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import { HamburgerIcon } from "~/components/layout/hamburger-icon";
-
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -24,7 +20,7 @@ const NAV_LINKS = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function PollenHeader({ business }: Props) {
+export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();

@@ -3,7 +3,7 @@ import { db } from "~/server/db";
 import {
   FEATURE_REGISTRY,
   getDefaultFlags,
-  getDisabledDueToDepency,
+  getDisabledDueToDependency,
 } from "./registry";
 
 export async function getBusinessFlags(businessId: string) {
@@ -15,7 +15,7 @@ export async function getBusinessFlags(businessId: string) {
   const defaults = getDefaultFlags();
   const stored = (business?.featureFlags as Record<string, boolean>) ?? {};
   const merged = { ...defaults, ...stored };
-  const disabledByDependency = getDisabledDueToDepency(merged);
+  const disabledByDependency = getDisabledDueToDependency(merged);
 
   const isEnabled = (key: string): boolean => {
     if (disabledByDependency.has(key)) return false;

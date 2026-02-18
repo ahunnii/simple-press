@@ -3,59 +3,42 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import {
-  Award,
-  Check,
-  ChevronDown,
-  ChevronLeft,
-  Heart,
-  Leaf,
-  Minus,
-  Plus,
-  Recycle,
-  Star,
-} from "lucide-react";
+import { Check, ChevronLeft, Minus, Plus } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultProductPageTemplateProps } from "../types";
 import { useProduct } from "~/hooks/use-product";
 
 import { ElegantVariantSelector } from "./elegant-variant-selector";
 
-const benefits = [
-  { icon: Leaf, label: "100% Natural" },
-  { icon: Heart, label: "Cruelty-Free" },
-  { icon: Recycle, label: "Eco-Friendly" },
-  { icon: Award, label: "Expert Approved" },
-];
+// const benefits = [
+//   { icon: Leaf, label: "100% Natural" },
+//   { icon: Heart, label: "Cruelty-Free" },
+//   { icon: Recycle, label: "Eco-Friendly" },
+//   { icon: Award, label: "Expert Approved" },
+// ];
 
-type AccordionSection = "details" | "howToUse" | "ingredients" | "delivery";
+// type AccordionSection = "details" | "howToUse" | "ingredients" | "delivery";
 
 export function ElegantProductPage({
   product,
-}: {
-  product: NonNullable<RouterOutputs["product"]["get"]>;
-}) {
+}: DefaultProductPageTemplateProps) {
   const {
-    isHydrated,
     formatPrice,
     inStock,
-    selectedVariant,
+
     variantOptions,
-    cartQuantity,
-    showLowStockWarning,
+
     displayPrice,
     handleAddToCart,
     remainingStock,
     canAddMore,
     handleDecrement,
-    handleQuantityChange,
+
     handleIncrement,
     quantity,
-    justAdded,
+
     selectedVariantId,
     setSelectedVariantId,
-    setQuantity,
   } = useProduct(product);
 
   //   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);

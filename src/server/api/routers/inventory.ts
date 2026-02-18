@@ -1,24 +1,24 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { checkBusiness } from "~/lib/check-business";
+import {
+  createTRPCRouter,
+  ownerAdminProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 
 export const inventoryRouter = createTRPCRouter({
   // Get inventory levels for a product
-  getProductInventory: protectedProcedure
-    .input(
-      z.object({
-        productId: z.string(),
-      }),
-    )
+  getProductInventory: ownerAdminProcedure
+    .input(z.object({ productId: z.string() }))
     .query(async ({ ctx, input }) => {
-      // Verify user owns this product's business
+      const { businessId } = ctx;
+
       const product = await ctx.db.product.findUnique({
-        where: { id: input.productId },
+        where: { id: input.productId, businessId },
         include: {
-          business: {
-            select: { id: true },
-          },
+          business: { select: { id: true } },
           variants: {
             select: {
               id: true,
@@ -37,19 +37,6 @@ export const inventoryRouter = createTRPCRouter({
         });
       }
 
-      // Check user owns this business
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== product.business.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-
       return {
         productId: product.id,
         productName: product.name,
@@ -58,7 +45,7 @@ export const inventoryRouter = createTRPCRouter({
     }),
 
   // Update inventory for a variant
-  updateVariantInventory: protectedProcedure
+  updateVariantInventory: ownerAdminProcedure
     .input(
       z.object({
         variantId: z.string(),
@@ -70,9 +57,10 @@ export const inventoryRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       // Get variant with product and business
       const variant = await ctx.db.productVariant.findUnique({
-        where: { id: input.variantId },
+        where: { id: input.variantId, product: { businessId } },
         include: {
           product: {
             include: {
@@ -91,24 +79,11 @@ export const inventoryRouter = createTRPCRouter({
         });
       }
 
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== variant.product.business.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-
       // Update inventory in transaction with history
       const result = await ctx.db.$transaction(async (tx) => {
         // Update variant inventory
         const updated = await tx.productVariant.update({
-          where: { id: input.variantId },
+          where: { id: input.variantId, product: { businessId } },
           data: {
             inventoryQty: input.quantity,
           },
@@ -119,7 +94,7 @@ export const inventoryRouter = createTRPCRouter({
           data: {
             variantId: input.variantId,
             productId: variant.productId,
-            businessId: variant.product.business.id,
+            businessId,
             previousQty: variant.inventoryQty,
             newQty: input.quantity,
             changeQty: input.quantity - variant.inventoryQty,
@@ -136,7 +111,7 @@ export const inventoryRouter = createTRPCRouter({
     }),
 
   // Deduct inventory (called when order is placed)
-  deductInventory: protectedProcedure
+  deductInventory: publicProcedure
     .input(
       z.object({
         items: z.array(
@@ -150,6 +125,14 @@ export const inventoryRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       // Process inventory deduction in transaction
       await ctx.db.$transaction(async (tx) => {
         for (const item of input.items) {
@@ -157,7 +140,7 @@ export const inventoryRouter = createTRPCRouter({
 
           // Get current inventory
           const variant = await tx.productVariant.findUnique({
-            where: { id: item.variantId },
+            where: { id: item.variantId, product: { businessId: business.id } },
             select: {
               id: true,
               inventoryQty: true,
@@ -177,7 +160,7 @@ export const inventoryRouter = createTRPCRouter({
 
           // Update inventory
           await tx.productVariant.update({
-            where: { id: item.variantId },
+            where: { id: item.variantId, product: { businessId: business.id } },
             data: {
               inventoryQty: newQty,
             },
@@ -188,7 +171,7 @@ export const inventoryRouter = createTRPCRouter({
             data: {
               variantId: item.variantId,
               productId: variant.productId,
-              businessId: variant.product.businessId,
+              businessId: business.id,
               previousQty: variant.inventoryQty,
               newQty,
               changeQty: -item.quantity,
@@ -204,19 +187,14 @@ export const inventoryRouter = createTRPCRouter({
     }),
 
   // Restore inventory (called when order is refunded/cancelled)
-  restoreInventory: protectedProcedure
-    .input(
-      z.object({
-        orderId: z.string(),
-      }),
-    )
+  restoreInventory: ownerAdminProcedure
+    .input(z.object({ orderId: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       // Get order with items
       const order = await ctx.db.order.findUnique({
-        where: { id: input.orderId },
-        include: {
-          items: true,
-        },
+        where: { id: input.orderId, businessId },
+        include: { items: true },
       });
 
       if (!order) {
@@ -232,7 +210,7 @@ export const inventoryRouter = createTRPCRouter({
           if (!item.productVariantId) continue;
 
           const variant = await tx.productVariant.findUnique({
-            where: { id: item.productVariantId },
+            where: { id: item.productVariantId, product: { businessId } },
             select: {
               id: true,
               inventoryQty: true,
@@ -249,7 +227,7 @@ export const inventoryRouter = createTRPCRouter({
 
           // Update inventory
           await tx.productVariant.update({
-            where: { id: item.productVariantId },
+            where: { id: item.productVariantId, product: { businessId } },
             data: {
               inventoryQty: newQty,
             },
@@ -260,7 +238,7 @@ export const inventoryRouter = createTRPCRouter({
             data: {
               variantId: item.productVariantId,
               productId: variant.productId,
-              businessId: variant.product.businessId,
+              businessId,
               previousQty: variant.inventoryQty,
               newQty,
               changeQty: item.quantity,
@@ -276,32 +254,15 @@ export const inventoryRouter = createTRPCRouter({
     }),
 
   // Get low stock alerts
-  getLowStockAlerts: protectedProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        threshold: z.number().int().default(10),
-      }),
-    )
+  getLowStockAlerts: ownerAdminProcedure
+    .input(z.object({ threshold: z.number().int().default(10) }))
     .query(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-
+      const { businessId } = ctx;
       // Get variants with low stock
       const lowStockVariants = await ctx.db.productVariant.findMany({
         where: {
           product: {
-            businessId: input.businessId,
+            businessId,
           },
           inventoryQty: {
             lte: input.threshold,
@@ -326,7 +287,7 @@ export const inventoryRouter = createTRPCRouter({
     }),
 
   // Get inventory history
-  getInventoryHistory: protectedProcedure
+  getInventoryHistory: ownerAdminProcedure
     .input(
       z.object({
         variantId: z.string().optional(),
@@ -377,10 +338,9 @@ export const inventoryRouter = createTRPCRouter({
     }),
 
   // Bulk update inventory from CSV
-  bulkUpdateInventory: protectedProcedure
+  bulkUpdateInventory: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         updates: z.array(
           z.object({
             sku: z.string(),
@@ -390,18 +350,7 @@ export const inventoryRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      const { businessId } = ctx;
 
       const results = {
         success: 0,
@@ -416,9 +365,7 @@ export const inventoryRouter = createTRPCRouter({
           const variant = await ctx.db.productVariant.findFirst({
             where: {
               sku: update.sku,
-              product: {
-                businessId: input.businessId,
-              },
+              product: { businessId },
             },
             include: {
               product: {
@@ -438,7 +385,7 @@ export const inventoryRouter = createTRPCRouter({
           await ctx.db.$transaction(async (tx) => {
             // Update inventory
             await tx.productVariant.update({
-              where: { id: variant.id },
+              where: { id: variant.id, product: { businessId } },
               data: {
                 inventoryQty: update.quantity,
               },
@@ -449,7 +396,7 @@ export const inventoryRouter = createTRPCRouter({
               data: {
                 variantId: variant.id,
                 productId: variant.productId,
-                businessId: variant.product.businessId,
+                businessId,
                 previousQty: variant.inventoryQty,
                 newQty: update.quantity,
                 changeQty: update.quantity - variant.inventoryQty,

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { BrandingEditor } from "../_components/homepage-editor";
+import { BrandingEditor } from "../_components/branding-editor";
 import { TrailHeader } from "../../_components/trail-header";
 
 export default async function BrandingPage() {
@@ -27,5 +27,5 @@ export default async function BrandingPage() {
 }
 
 export const metadata = {
-  title: "Edit Branding",
+  title: "Branding",
 };

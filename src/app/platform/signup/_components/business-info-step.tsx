@@ -68,6 +68,7 @@ export function BusinessInfoStep({
 
         setSubdomainStatus(data.available ? "available" : "taken");
       } catch (err) {
+        console.error(err);
         setSubdomainStatus("idle");
       }
     };

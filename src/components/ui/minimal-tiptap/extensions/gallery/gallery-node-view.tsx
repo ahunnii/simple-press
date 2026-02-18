@@ -26,11 +26,11 @@ export function GalleryNodeView({
   deleteNode,
 }: NodeViewProps) {
   const [isEditing, setIsEditing] = useState(!node.attrs.galleryId);
-  const businessId = node.attrs.businessId;
+  // const businessId = node.attrs.businessId;
 
   // Get available galleries
   const { data: galleries, isLoading: loadingGalleries } =
-    api.gallery.list.useQuery({ businessId }, { enabled: !!businessId });
+    api.gallery.list.useQuery(undefined);
 
   // Get selected gallery
   const { data: gallery, isLoading: loadingGallery } =

@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import {
   FEATURE_REGISTRY,
   getDefaultFlags,
-  getDisabledDueToDepency,
+  getDisabledDueToDependency,
 } from "~/lib/features/registry";
 
 type UseFeatureFlagsOptions = {
@@ -17,7 +17,7 @@ export function useFeatureFlags({ flags }: UseFeatureFlagsOptions) {
   const resolved = useMemo(() => {
     const defaults = getDefaultFlags();
     const merged = { ...defaults, ...flags };
-    const disabledByDependency = getDisabledDueToDepency(merged);
+    const disabledByDependency = getDisabledDueToDependency(merged);
 
     return {
       flags: merged,

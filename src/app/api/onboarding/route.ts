@@ -1,9 +1,8 @@
-import { headers } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 import { env } from "~/env";
 import { isSubdomainReserved, slugify } from "~/lib/utils";
-import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
 
 export async function POST(req: NextRequest) {

@@ -44,7 +44,7 @@ export function ContentDashboard({ pages }: Props) {
       {/* Main Content Sections */}
       <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Homepage */}
-        <Link href="/admin/content/homepage">
+        <Link href="/admin/content/branding">
           <Card className="h-full cursor-pointer transition-all hover:border-blue-500 hover:shadow-lg">
             <CardHeader>
               <div className="flex items-center gap-3">

@@ -1,12 +1,10 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultCartPageTemplateProps } from "../types";
 
 import { DefaultCartContents } from "./default-cart-contents";
 
 export async function DefaultCartPage({
   business,
-}: {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-}) {
+}: DefaultCartPageTemplateProps) {
   return (
     <main className="flex-1 px-4 py-12">
       <div className="mx-auto max-w-6xl">

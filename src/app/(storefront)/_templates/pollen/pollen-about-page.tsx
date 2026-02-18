@@ -1,14 +1,10 @@
 import Image from "next/image";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultAboutPageTemplateProps } from "../types";
 
 import { PollenGeneralLayout } from "./pollen-general-layout";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-
-export function PollenAboutPage({ business }: Props) {
+export function PollenAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const themeSpecificFields = business?.siteContent?.customFields as Record<
     string,
     string

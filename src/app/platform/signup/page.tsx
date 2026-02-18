@@ -13,3 +13,7 @@ export default async function PlatformSignupPage() {
 
   return <WizardClient />;
 }
+
+export const metadata = {
+  title: "Create Your Store",
+};

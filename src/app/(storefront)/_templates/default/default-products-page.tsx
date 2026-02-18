@@ -1,17 +1,10 @@
-import { notFound } from "next/navigation";
+import type { DefaultProductsPageTemplateProps } from "../types";
 
-import type { RouterOutputs } from "~/trpc/react";
-import { api } from "~/trpc/server";
-
-import { StorefrontFooter } from "../../_components/storefront-footer";
-import { StorefrontHeader } from "../../_components/storefront-header";
 import { DefaultProductCard } from "./default-product-card";
 
 export function DefaultProductsPage({
   business,
-}: {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
-}) {
+}: DefaultProductsPageTemplateProps) {
   return (
     <main className="flex-1 px-4 py-12">
       <div className="mx-auto max-w-7xl">

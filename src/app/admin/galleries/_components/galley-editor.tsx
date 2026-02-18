@@ -24,9 +24,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   ArrowLeft,
-  Eye,
   GripVertical,
-  Loader2,
   Pencil,
   Save,
   Trash2,

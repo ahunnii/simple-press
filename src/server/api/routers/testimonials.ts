@@ -344,7 +344,7 @@ export const testimonialRouter = createTRPCRouter({
     }),
 
   // Update a testimonial (owner-created only)
-  ownerUpdate: protectedProcedure
+  ownerUpdate: ownerAdminProcedure
     .input(
       z.object({
         id: z.string(),
@@ -362,6 +362,7 @@ export const testimonialRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const { id, testimonialDate, ...rest } = input;
       const testimonial = await assertTestimonialOwner(
         ctx.db,
@@ -377,7 +378,7 @@ export const testimonialRouter = createTRPCRouter({
       }
 
       return ctx.db.testimonial.update({
-        where: { id },
+        where: { id, businessId },
         data: {
           ...rest,
           ...(testimonialDate && {
@@ -389,21 +390,23 @@ export const testimonialRouter = createTRPCRouter({
 
   // ─── ADMIN (BOTH TYPES) ───────────────────────────────────────────────────
 
-  togglePublic: protectedProcedure
+  togglePublic: ownerAdminProcedure
     .input(z.object({ id: z.string(), isPublic: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       await assertTestimonialOwner(ctx.db, ctx.session.user.id, input.id);
       return ctx.db.testimonial.update({
-        where: { id: input.id },
+        where: { id: input.id, businessId },
         data: { isPublic: input.isPublic },
       });
     }),
 
-  delete: protectedProcedure
+  delete: ownerAdminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       await assertTestimonialOwner(ctx.db, ctx.session.user.id, input.id);
-      return ctx.db.testimonial.delete({ where: { id: input.id } });
+      return ctx.db.testimonial.delete({ where: { id: input.id, businessId } });
     }),
 
   sendInvite: ownerAdminProcedure

@@ -1,12 +1,11 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultCheckoutPageTemplateProps } from "../types";
 
 import { DarkTrendCheckoutForm } from "./dark-trend-checkout-form";
 import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-export async function DarkTrendCheckoutPage({ business }: Props) {
+export async function DarkTrendCheckoutPage({
+  business,
+}: DefaultCheckoutPageTemplateProps) {
   // Check if Stripe is connected
   if (!business.isStripeConnected) {
     return (

@@ -5,17 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
-import { HydrateClient } from "~/trpc/server";
+import type { DefaultHeaderTemplateProps } from "../types";
 import { useCart } from "~/providers/cart-context";
 
 import { ElegantCartDrawer } from "./elegant-cart-drawer";
 
-export function ElegantHeader({
-  business,
-}: {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-}) {
+export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { setIsOpen, itemCount } = useCart();
 

@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { sendContactFormSubmission } from "~/lib/email/templates";
-import { db } from "~/server/db";
 
 const contactSchema = z.object({
   name: z.string().min(1, "Name is required"),

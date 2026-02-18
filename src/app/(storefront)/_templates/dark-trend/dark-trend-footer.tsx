@@ -2,17 +2,15 @@ import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultFooterTemplateProps } from "../types";
 import { api } from "~/trpc/server";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-export async function DarkTrendFooter({ business }: Props) {
+export async function DarkTrendFooter({
+  business,
+}: DefaultFooterTemplateProps) {
   const currentYear = new Date().getFullYear();
 
   const policies = await api.content.getSimplifiedPages({
-    businessId: business.id,
     type: "policy",
   });
 

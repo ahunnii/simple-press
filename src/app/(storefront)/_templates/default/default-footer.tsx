@@ -1,12 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultFooterTemplateProps } from "../types";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-export function DefaultFooter({ business }: Props) {
+export function DefaultFooter({ business }: DefaultFooterTemplateProps) {
   return (
     <footer className="bg-background mt-auto border-t">
       <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">

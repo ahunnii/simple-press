@@ -5,18 +5,13 @@ import Link from "next/link";
 import { api } from "~/trpc/react";
 
 type CollectionsNavProps = {
-  businessId: string;
   primaryColor?: string;
 };
 
 export function CollectionsNav({
-  businessId,
   primaryColor = "#3b82f6",
 }: CollectionsNavProps) {
-  const { data: collections } = api.collections.getByBusiness.useQuery({
-    businessId,
-    includeUnpublished: false,
-  });
+  const { data: collections } = api.collections.getByBusiness.useQuery();
 
   if (!collections || collections.length === 0) {
     return null;

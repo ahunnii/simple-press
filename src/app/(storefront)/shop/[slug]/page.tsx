@@ -24,14 +24,6 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
-  // if (business.templateId === "modern") {
-  //   return (
-  //     <HydrateClient>
-  //       <ModernProductPage business={business} product={product} />
-  //     </HydrateClient>
-  //   );
-  // }
-
   const TemplateComponent =
     {
       modern: ModernProductPage,
@@ -39,7 +31,7 @@ export default async function ProductDetailPage({ params }: Props) {
       "dark-trend": DarkTrendProductPage,
     }[business.templateId] ?? DefaultProductPage;
 
-  return <TemplateComponent business={business} product={product} />;
+  return <TemplateComponent product={product} />;
 }
 
 export async function generateMetadata({ params }: Props) {

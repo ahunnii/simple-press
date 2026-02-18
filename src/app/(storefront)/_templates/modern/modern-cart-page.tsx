@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultCartPageTemplateProps } from "../types";
 
 import { ModernCartContent } from "./modern-cart-content";
 import { ModernFooter } from "./modern-footer";
@@ -6,9 +6,7 @@ import { ModernHeader } from "./modern-header";
 
 export default function ModernCartPage({
   business,
-}: {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-}) {
+}: DefaultCartPageTemplateProps) {
   return (
     <div className="font-sans antialiased">
       <ModernHeader business={business} />

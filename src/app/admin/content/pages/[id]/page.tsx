@@ -11,13 +11,9 @@ type Props = {
 export default async function EditPagePage({ params }: Props) {
   const { id } = await params;
 
-  const page = await api.content.getPage({
-    id,
-  });
+  const page = await api.content.getPageById({ id });
 
-  if (!page) {
-    notFound();
-  }
+  if (!page) notFound();
 
   return (
     <>
@@ -36,7 +32,7 @@ export default async function EditPagePage({ params }: Props) {
 
 export const generateMetadata = async ({ params }: Props) => {
   const { id } = await params;
-  const page = await api.content.getPage({
+  const page = await api.content.getPageById({
     id,
   });
   return {

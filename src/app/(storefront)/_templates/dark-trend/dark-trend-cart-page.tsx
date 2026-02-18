@@ -1,12 +1,11 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultCartPageTemplateProps } from "../types";
 
 import { DarkTrendCartContents } from "./dark-trend-cart-contents";
 import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-export async function DarkTrendCartPage({ business }: Props) {
+export async function DarkTrendCartPage({
+  business,
+}: DefaultCartPageTemplateProps) {
   return (
     <DarkTrendGeneralLayout title="Cart">
       <DarkTrendCartContents business={business} />

@@ -1,6 +1,5 @@
 "use client";
 
-import type { Business, SiteContent } from "generated/prisma";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -229,13 +228,13 @@ export function DomainSettings({ business }: DomainSettingsProps) {
                   className="bg-gray-50 font-mono"
                 />
                 <Button variant="outline" size="sm" asChild>
-                  <a
+                  <Link
                     href={subdomainUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <ExternalLink className="h-4 w-4" />
-                  </a>
+                  </Link>
                 </Button>
               </div>
               <p className="mt-2 text-sm text-gray-500">

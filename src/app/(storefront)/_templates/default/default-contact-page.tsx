@@ -1,16 +1,10 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-
-import type { RouterOutputs } from "~/trpc/react";
-import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import type { DefaultContactPageTemplateProps } from "../types";
 
 import { DefaultContactForm } from "./default-contact-form";
 
 export function DefaultContactPage({
   business,
-}: {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
-}) {
+}: DefaultContactPageTemplateProps) {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">

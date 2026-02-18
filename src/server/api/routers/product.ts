@@ -9,7 +9,6 @@ import {
 import {
   createTRPCRouter,
   ownerAdminProcedure,
-  protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
@@ -51,19 +50,12 @@ export const productRouter = createTRPCRouter({
         variants,
       } = input;
 
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
 
       // Check if slug is already taken for this business
       const existingProduct = await ctx.db.product.findFirst({
         where: {
-          businessId: business.id,
+          businessId,
           slug,
         },
       });
@@ -85,7 +77,7 @@ export const productRouter = createTRPCRouter({
           trackInventory,
           allowBackorders,
           inventoryQty,
-          businessId: business.id,
+          businessId,
           variants: {
             create: variants.map((v) => ({
               name: v.name,
@@ -106,14 +98,7 @@ export const productRouter = createTRPCRouter({
   update: ownerAdminProcedure
     .input(productUpdateSchema)
     .mutation(async ({ ctx, input }) => {
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
 
       const {
         id,
@@ -131,7 +116,7 @@ export const productRouter = createTRPCRouter({
       // Check if slug is already taken for this business
       const existingProduct = await ctx.db.product.findFirst({
         where: {
-          businessId: business.id,
+          businessId,
           slug,
           id: { not: id },
         },
@@ -145,7 +130,7 @@ export const productRouter = createTRPCRouter({
       }
 
       const product = await ctx.db.product.update({
-        where: { id, businessId: business.id },
+        where: { id, businessId },
         data: {
           name,
           slug,
@@ -204,17 +189,10 @@ export const productRouter = createTRPCRouter({
   secureGet: ownerAdminProcedure
     .input(z.string())
     .query(async ({ ctx, input: id }) => {
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
 
       const product = await ctx.db.product.findUnique({
-        where: { id, businessId: business.id },
+        where: { id, businessId },
         include: {
           variants: {
             orderBy: { createdAt: "asc" },
@@ -228,16 +206,10 @@ export const productRouter = createTRPCRouter({
     }),
 
   secureListAll: ownerAdminProcedure.query(async ({ ctx }) => {
-    const business = await checkBusiness();
+    const { businessId } = ctx;
 
-    if (!business) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
-      });
-    }
     const products = await ctx.db.product.findMany({
-      where: { businessId: business.id },
+      where: { businessId },
       include: {
         images: {
           orderBy: { sortOrder: "asc" },
@@ -253,16 +225,9 @@ export const productRouter = createTRPCRouter({
   }),
 
   secureGetAll: ownerAdminProcedure.query(async ({ ctx }) => {
-    const business = await checkBusiness();
-    if (!business) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
-      });
-    }
-
+    const { businessId } = ctx;
     const products = await ctx.db.product.findMany({
-      where: { businessId: business.id },
+      where: { businessId },
       include: { variants: true, images: true },
       orderBy: { name: "asc" },
     });
@@ -291,6 +256,15 @@ export const productRouter = createTRPCRouter({
         variants: {
           orderBy: { createdAt: "asc" },
         },
+        business: {
+          select: {
+            siteContent: {
+              select: {
+                primaryColor: true,
+              },
+            },
+          },
+        },
       },
     });
     return product;
@@ -299,16 +273,9 @@ export const productRouter = createTRPCRouter({
   delete: ownerAdminProcedure
     .input(z.string())
     .mutation(async ({ ctx, input: id }) => {
-      const business = await checkBusiness();
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
+      const { businessId } = ctx;
       const product = await ctx.db.product.delete({
-        where: { id, businessId: business.id },
+        where: { id, businessId },
       });
 
       return {
@@ -318,7 +285,7 @@ export const productRouter = createTRPCRouter({
     }),
 
   // Add images to product
-  addImages: protectedProcedure
+  addImages: ownerAdminProcedure
     .input(
       z.object({
         images: z.array(
@@ -333,9 +300,10 @@ export const productRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       // Verify product ownership
       const product = await ctx.db.product.findUnique({
-        where: { id: input.productId },
+        where: { id: input.productId, businessId },
         select: { businessId: true },
       });
 
@@ -343,18 +311,6 @@ export const productRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Product not found",
-        });
-      }
-
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== product.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
         });
       }
 
@@ -373,7 +329,7 @@ export const productRouter = createTRPCRouter({
       };
     }),
 
-  addImage: protectedProcedure
+  addImage: ownerAdminProcedure
     .input(
       z.object({
         productId: z.string(),
@@ -383,9 +339,10 @@ export const productRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       // Verify product ownership
       const product = await ctx.db.product.findUnique({
-        where: { id: input.productId },
+        where: { id: input.productId, businessId },
         select: { businessId: true },
       });
 
@@ -393,18 +350,6 @@ export const productRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Product not found",
-        });
-      }
-
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== product.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
         });
       }
 
@@ -421,7 +366,7 @@ export const productRouter = createTRPCRouter({
     }),
 
   // Update image
-  updateImage: protectedProcedure
+  updateImage: ownerAdminProcedure
     .input(
       z.object({
         imageId: z.string(),
@@ -430,8 +375,9 @@ export const productRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const image = await ctx.db.image.update({
-        where: { id: input.imageId },
+        where: { id: input.imageId, businessId },
         data: {
           altText: input.altText,
           sortOrder: input.sortOrder,
@@ -442,15 +388,12 @@ export const productRouter = createTRPCRouter({
     }),
 
   // Delete image
-  deleteImage: protectedProcedure
-    .input(
-      z.object({
-        imageId: z.string(),
-      }),
-    )
+  deleteImage: ownerAdminProcedure
+    .input(z.object({ imageId: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       await ctx.db.image.delete({
-        where: { id: input.imageId },
+        where: { id: input.imageId, businessId },
       });
 
       return { success: true };
@@ -472,16 +415,10 @@ export const productRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const business = await checkBusiness();
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
       // Verify ownership
       const product = await ctx.db.product.findUnique({
-        where: { id: input.productId, businessId: business.id },
+        where: { id: input.productId, businessId },
         include: { images: true },
       });
 
@@ -489,18 +426,6 @@ export const productRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Product not found",
-        });
-      }
-
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== product.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
         });
       }
 

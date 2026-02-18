@@ -4,10 +4,12 @@ import { GalleryEditor } from "../_components/galley-editor";
 import { TrailHeader } from "../../_components/trail-header";
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 export default async function GalleryEditPage({ params }: Props) {
-  const gallery = await api.gallery.getById({ id: params.id });
+  const { id } = await params;
+
+  const gallery = await api.gallery.getById({ id });
 
   return (
     <>

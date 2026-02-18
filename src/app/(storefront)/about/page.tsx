@@ -6,7 +6,7 @@ import { ModernAboutPage } from "../_templates/modern/modern-about-page";
 import { PollenAboutPage } from "../_templates/pollen/pollen-about-page";
 
 export default async function AboutPage() {
-  const business = await api.business.simplifiedGetWithProducts();
+  const business = await api.business.simplifiedGet();
 
   const TemplateComponent =
     {

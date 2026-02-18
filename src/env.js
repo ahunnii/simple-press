@@ -28,6 +28,9 @@ export const env = createEnv({
 
     INVITATION_CODE: z.string(),
     RESEND_API_KEY: z.string(),
+
+    SLACK_WEBHOOK_URL: z.string().url(),
+    VPS_IP: z.string(),
   },
 
   /**
@@ -84,6 +87,8 @@ export const env = createEnv({
     NEXT_PUBLIC_EMAIL_FROM_NOREPLY: process.env.NEXT_PUBLIC_EMAIL_FROM_NOREPLY,
     NEXT_PUBLIC_EMAIL_FROM_ORDERS: process.env.NEXT_PUBLIC_EMAIL_FROM_ORDERS,
     NEXT_PUBLIC_EMAIL_FROM_SUPPORT: process.env.NEXT_PUBLIC_EMAIL_FROM_SUPPORT,
+    SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
+    VPS_IP: process.env.VPS_IP,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

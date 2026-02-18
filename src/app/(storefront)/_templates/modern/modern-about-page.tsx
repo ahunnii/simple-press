@@ -2,15 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import type { DefaultAboutPageTemplateProps } from "../types";
 import type { RouterOutputs } from "~/trpc/react";
 
 import { ModernGeneralLayout } from "./modern-general-layout";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-
-export function ModernAboutPage({ business }: Props) {
+export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const themeSpecificFields = business?.siteContent?.customFields as Record<
     string,
     string

@@ -5,16 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check, ChevronLeft, Minus, Plus } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultProductPageTemplateProps } from "../types";
 import { useProduct } from "~/hooks/use-product";
 import { Spotlight } from "~/components/ui/spotlight-new";
 
 import { DarkTrendVariantSelector } from "./dark-trend-variant-selector";
 
-type Props = {
-  product: NonNullable<RouterOutputs["product"]["get"]>;
-};
-export function DarkTrendProductPage({ product }: Props) {
+export function DarkTrendProductPage({
+  product,
+}: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
     inStock,

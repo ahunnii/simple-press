@@ -8,7 +8,7 @@ import { DefaultCheckoutUnavailable } from "../_templates/default/default-checko
 import { ModernCheckoutPage } from "../_templates/modern/modern-checkout-page";
 
 export default async function CheckoutPage() {
-  const business = await api.business.simplifiedGet();
+  const business = await api.business.simplifiedGetWithProducts();
 
   if (!business) notFound();
 

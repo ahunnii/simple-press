@@ -1,13 +1,11 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultProductsPageTemplateProps } from "../types";
 
 import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
 import { DarkTrendProductCard } from "./dark-trend-product-card";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["getWithProducts"]>;
-};
-
-export function DarkTrendProductsPage({ business }: Props) {
+export function DarkTrendProductsPage({
+  business,
+}: DefaultProductsPageTemplateProps) {
   return (
     <DarkTrendGeneralLayout title="All Products">
       {business.products?.length === 0 ? (

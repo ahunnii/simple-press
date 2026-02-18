@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultFooterTemplateProps } from "../types";
 
 const footerLinks = {
   shop: [{ name: "All Products", href: "/shop" }],
@@ -22,11 +22,7 @@ const footerLinks = {
   ],
 };
 
-export function ElegantFooter({
-  business,
-}: {
-  business: NonNullable<RouterOutputs>["business"]["simplifiedGet"];
-}) {
+export function ElegantFooter({ business }: DefaultFooterTemplateProps) {
   const socialLinks = business?.siteContent?.socialLinks as
     | {
         instagram?: string;

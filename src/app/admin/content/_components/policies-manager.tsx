@@ -4,13 +4,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, FileText, Loader2, Save } from "lucide-react";
+import { ArrowLeft, FileText, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import z from "zod";
 
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -27,11 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] };
-const pageFormSchema = z.object({
-  content: z.any(), // TipTap JSON
-});
 
-type PageFormValues = z.infer<typeof pageFormSchema>;
 // Helper to convert markdown to TipTap JSON
 const markdownToTiptap = (markdown: string) => {
   // Simple conversion - you might want to use a proper markdown parser
@@ -269,7 +264,6 @@ type Props = {
 export function PoliciesManager({ business }: Props) {
   const router = useRouter();
   const [activePolicy, setActivePolicy] = useState<string>("privacy");
-  const formRef = useRef<HTMLFormElement>(null);
 
   // Get existing policies
   const existingPolicies = new Map(business.pages.map((p) => [p.slug, p]));
@@ -366,7 +360,7 @@ export function PoliciesManager({ business }: Props) {
             await updatePage.mutateAsync({ id: existing.id, data });
             form.reset({ content: data.content });
           } else {
-            await createPage.mutateAsync({ businessId: business.id, data });
+            await createPage.mutateAsync({ data });
             form.reset({ content: data.content });
           }
         }

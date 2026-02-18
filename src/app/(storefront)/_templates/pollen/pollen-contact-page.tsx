@@ -1,15 +1,13 @@
 import { Mail, MapPin } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultContactPageTemplateProps } from "../types";
 
 import { PollenContactForm } from "./pollen-contact-form";
 import { PollenGeneralLayout } from "./pollen-general-layout";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-
-export function PollenContactPage({ business }: Props) {
+export function PollenContactPage({
+  business,
+}: DefaultContactPageTemplateProps) {
   const physicalAddress = "Detroit, MI";
   const contactEmail = business?.supportEmail ?? "";
 

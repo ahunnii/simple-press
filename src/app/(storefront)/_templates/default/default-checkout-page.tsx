@@ -1,11 +1,11 @@
+import type { DefaultCheckoutPageTemplateProps } from "../types";
 import type { RouterOutputs } from "~/trpc/react";
 
 import { DefaultCheckoutForm } from "./default-checkout-form";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-export async function DefaultCheckoutPage({ business }: Props) {
+export async function DefaultCheckoutPage({
+  business,
+}: DefaultCheckoutPageTemplateProps) {
   // Check if Stripe is connected
   if (!business.isStripeConnected) {
     return (

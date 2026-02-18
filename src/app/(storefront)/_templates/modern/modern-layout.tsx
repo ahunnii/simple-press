@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultLayoutTemplateProps } from "../types";
 
 import { ModernFooter } from "./modern-footer";
 import { ModernHeader } from "./modern-header";
@@ -6,10 +6,7 @@ import { ModernHeader } from "./modern-header";
 export function ModernLayout({
   business,
   children,
-}: {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-  children: React.ReactNode;
-}) {
+}: DefaultLayoutTemplateProps) {
   return (
     <main className="min-h-screen font-sans antialiased">
       <ModernHeader business={business} />

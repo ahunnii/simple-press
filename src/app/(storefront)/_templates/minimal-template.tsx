@@ -1,34 +1,30 @@
 import Link from "next/link";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultHomepageTemplateProps } from "./types";
 import { Button } from "~/components/ui/button";
 
-import { StorefrontFooter } from "../_components/storefront-footer";
-import { StorefrontHeader } from "../_components/storefront-header";
+import { DefaultFooter } from "./default/default-footer";
+import { DefaultHeader } from "./default/default-header";
 import { DefaultProductCard } from "./default/default-product-card";
 
-type MinimalTemplateProps = {
-  business: NonNullable<RouterOutputs["business"]["getWithProducts"]>;
-};
-
-export function MinimalTemplate({ business }: MinimalTemplateProps) {
+export function MinimalTemplate({ business }: DefaultHomepageTemplateProps) {
   const primaryColor = business.siteContent?.primaryColor ?? "#000000";
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <StorefrontHeader business={business} />
+      <DefaultHeader business={business} />
 
       {/* Hero Section - Minimal Style */}
       <section className="relative border-b px-4 py-40">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="mb-8 text-7xl font-light tracking-tight text-gray-900 md:text-8xl">
-            {business.siteContent?.heroTitle ?? business.name}
+            {business.name}
           </h1>
-          {business.siteContent?.heroSubtitle && (
-            <p className="mb-12 text-xl font-light text-gray-500">
-              {business.siteContent.heroSubtitle}
-            </p>
-          )}
+
+          <p className="mb-12 text-xl font-light text-gray-500">
+            Subtitle here
+          </p>
+
           <Button
             asChild
             variant="outline"
@@ -57,18 +53,17 @@ export function MinimalTemplate({ business }: MinimalTemplateProps) {
       )}
 
       {/* About Section */}
-      {business.siteContent?.aboutText && (
-        <section className="border-t px-4 py-24">
-          <div className="mx-auto max-w-2xl">
-            <h2 className="mb-8 text-4xl font-light text-gray-900">About</h2>
-            <p className="text-lg leading-relaxed font-light whitespace-pre-line text-gray-600">
-              {business.siteContent.aboutText}
-            </p>
-          </div>
-        </section>
-      )}
 
-      <StorefrontFooter business={business} />
+      <section className="border-t px-4 py-24">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="mb-8 text-4xl font-light text-gray-900">About</h2>
+          <p className="text-lg leading-relaxed font-light whitespace-pre-line text-gray-600">
+            Something about the business
+          </p>
+        </div>
+      </section>
+
+      <DefaultFooter business={business} />
     </div>
   );
 }

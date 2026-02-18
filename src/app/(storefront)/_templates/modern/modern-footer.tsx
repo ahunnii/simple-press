@@ -1,21 +1,15 @@
 import Link from "next/link";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultFooterTemplateProps } from "../types";
 import { api } from "~/trpc/server";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-
-export async function ModernFooter({ business }: Props) {
+export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
   const currentYear = new Date().getFullYear();
 
   const policies = await api.content.getSimplifiedPages({
-    businessId: business.id,
     type: "policy",
   });
   const pages = await api.content.getSimplifiedPages({
-    businessId: business.id,
     type: "page",
   });
 

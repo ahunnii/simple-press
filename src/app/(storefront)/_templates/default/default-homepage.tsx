@@ -1,92 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Badge, Eye, ShoppingCart } from "lucide-react";
+import { Eye } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultHomepageTemplateProps } from "../types";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
-import { DefaultProductCard } from "~/app/(storefront)/_templates/default/default-product-card";
 
 import { QuickAddButton } from "./default-quick-add-product";
 
-type DefaultTemplateProps = {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
-};
-
-export function DefaultHomePage({ business }: DefaultTemplateProps) {
-  const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
-
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+export function DefaultHomePage({ business }: DefaultHomepageTemplateProps) {
   const { data: featuredProducts } = api.product.getFeatured.useQuery();
 
   return (
     <>
-      {/* Hero Section
-      <section
-        className="relative px-4 py-24"
-        style={{ backgroundColor: `${primaryColor}15` }}
-      >
-        <div className="mx-auto max-w-7xl">
-          <div className="max-w-3xl">
-            <h1 className="mb-6 text-5xl font-bold text-gray-900 md:text-6xl">
-              {business.siteContent?.heroTitle ?? `Welcome to ${business.name}`}
-            </h1>
-            {business.siteContent?.heroSubtitle && (
-              <p className="mb-8 text-xl text-gray-600">
-                {business.siteContent.heroSubtitle}
-              </p>
-            )}
-            <Button
-              asChild
-              size="lg"
-              style={{ backgroundColor: primaryColor }}
-              className="text-white hover:opacity-90"
-            >
-              <Link href="/products">Shop Now</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      {/* {business?.products?.length > 0 && (
-        <section className="px-4 py-16">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-8 flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-900">
-                Featured Products
-              </h2>
-              <Button asChild variant="outline">
-                <Link href="/products">View All</Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {business?.products?.map((product) => (
-                <DefaultProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )} */}
-
-      {/* About Section */}
-      {/* {business.siteContent?.aboutText && (
-        <section className="bg-gray-50 px-4 py-16">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="mb-6 text-3xl font-bold text-gray-900">
-              {business.siteContent.aboutTitle ?? "About Us"}
-            </h2>
-            <p className="text-lg whitespace-pre-line text-gray-600">
-              {business.siteContent.aboutText}
-            </p>
-          </div>
-        </section>
-      )} */}
-
       <>
         {/* Hero Banner */}
         <section className="relative">
@@ -94,11 +22,10 @@ export function DefaultHomePage({ business }: DefaultTemplateProps) {
             <div className="grid items-center gap-6 lg:grid-cols-2 lg:gap-12">
               <div className="space-y-4">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
-                  {business.siteContent?.heroTitle ??
-                    `Welcome to ${business.name}`}
+                  {business.name}
                 </h1>
                 <p className="text-muted-foreground max-w-[600px] md:text-xl">
-                  {business.siteContent?.heroSubtitle ?? "Take a look around!"}
+                  Take a look around!
                 </p>
                 <div className="flex flex-col gap-4 sm:flex-row">
                   <Button size="lg" className="font-medium" asChild>
@@ -111,7 +38,7 @@ export function DefaultHomePage({ business }: DefaultTemplateProps) {
               </div>
               <div className="relative h-[300px] overflow-hidden rounded-xl sm:h-[400px] lg:h-[500px]">
                 <Image
-                  src={business.siteContent?.heroImageUrl ?? "/placeholder.svg"}
+                  src={"/placeholder.svg"}
                   alt={business.name ?? "Hero Image"}
                   fill
                   className="object-cover"
@@ -189,7 +116,7 @@ export function DefaultHomePage({ business }: DefaultTemplateProps) {
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center md:space-y-6">
               <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                {business.siteContent?.aboutTitle ?? "About Us"}
+                About Us
               </h2>
               <p className="text-primary-foreground/90 max-w-[600px] md:text-lg">
                 {

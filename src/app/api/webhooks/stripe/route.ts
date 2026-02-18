@@ -1,6 +1,7 @@
 // app/api/webhooks/stripe/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
+import type { NextRequest } from "next/server";
+import type Stripe from "stripe";
+import { NextResponse } from "next/server";
 
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import { sendOrderConfirmation } from "~/lib/email/templates";

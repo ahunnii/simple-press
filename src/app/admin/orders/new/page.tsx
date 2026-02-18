@@ -1,16 +1,9 @@
-import { redirect } from "next/navigation";
-
-import { checkBusiness } from "~/lib/check-business";
 import { api } from "~/trpc/server";
 
 import { ManualOrderForm } from "../_components/manual-order-form";
 import { TrailHeader } from "../../_components/trail-header";
 
 export default async function NewOrderPage() {
-  const business = await checkBusiness();
-
-  if (!business) redirect("/admin/welcome");
-
   const products = await api.product.secureGetAll();
 
   return (
@@ -22,7 +15,7 @@ export default async function NewOrderPage() {
         ]}
       />
 
-      <ManualOrderForm businessId={business?.id} products={products} />
+      <ManualOrderForm products={products} />
     </>
   );
 }

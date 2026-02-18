@@ -38,11 +38,10 @@ import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
-  businessId: string;
   products: (Product & { variants: ProductVariant[] })[];
 };
 
-export function ManualOrderForm({ businessId, products }: Props) {
+export function ManualOrderForm({ products }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -175,7 +174,6 @@ export function ManualOrderForm({ businessId, products }: Props) {
     const total = subtotal + shipping + taxAmount;
 
     createManualOrderMutation.mutate({
-      businessId,
       customerName: data.customerName,
       customerEmail: data.customerEmail,
       shippingName: data.shippingName || data.customerName,

@@ -67,7 +67,7 @@ export function TemplateSelectionStep({
                 )}
 
                 {/* Template Preview */}
-                <div className="mb-3 flex aspect-video items-center justify-center rounded bg-gradient-to-br from-gray-100 to-gray-200">
+                <div className="mb-3 flex aspect-video items-center justify-center rounded bg-linear-to-br from-gray-100 to-gray-200">
                   <span className="text-xs font-medium text-gray-500">
                     {template.name}
                   </span>

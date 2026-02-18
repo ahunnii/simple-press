@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 
 import type { SignupFormData } from "./wizard-client";
@@ -27,7 +26,6 @@ export function StoreCustomizationStep({
   formData,
   onBack,
 }: StoreCustomizationStepProps) {
-  const router = useRouter();
   const [heroTitle, setHeroTitle] = useState(
     formData.heroTitle ?? `Welcome to ${formData.businessName ?? "Our Store"}`,
   );

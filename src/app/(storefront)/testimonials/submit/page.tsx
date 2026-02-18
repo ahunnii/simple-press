@@ -9,16 +9,15 @@ import { TestimonialFormUnauthenticated } from "./_components/testimonial-form-u
 export default async function SubmitTestimonialPage({
   searchParams,
 }: {
-  searchParams: { code?: string };
+  searchParams: Promise<{ code?: string }>;
 }) {
+  const { code } = await searchParams;
   // Get business from subdomain
   const business = await api.business.simplifiedGet();
 
   // Check if using invite code
-  if (searchParams.code) {
-    return (
-      <TestimonialFormWithCode code={searchParams.code} business={business} />
-    );
+  if (code) {
+    return <TestimonialFormWithCode code={code} business={business} />;
   }
 
   // Otherwise require authentication

@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import type { AnyExtension, Extension } from "@tiptap/core";
+import type { Extension } from "@tiptap/core";
 import type { Content, Editor, UseEditorOptions } from "@tiptap/react";
 import * as React from "react";
 import { TextStyle } from "@tiptap/extension-text-style";
@@ -208,7 +206,7 @@ export const useMinimalTiptapEditor = ({
   businessId,
   ...props
 }: UseMinimalTiptapEditorProps) => {
-  const lastExternalValueRef = React.useRef<Content | undefined>(value);
+  // const lastExternalValueRef = React.useRef<Content | undefined>(value);
   const lastEmittedContentRef = React.useRef<Content | undefined>(undefined);
 
   // const throttledSetValue = useThrottle(
@@ -229,12 +227,12 @@ export const useMinimalTiptapEditor = ({
   // seeing a new onCreate every time form value (new ref) triggers a re-render.
   const initialValueRef = React.useRef(value);
   initialValueRef.current = value;
-  const handleCreate = React.useCallback((editor: Editor) => {
-    const initial = initialValueRef.current;
-    if (initial && editor.isEmpty) {
-      editor.commands.setContent(initial);
-    }
-  }, []);
+  // const handleCreate = React.useCallback((editor: Editor) => {
+  //   const initial = initialValueRef.current;
+  //   if (initial && editor.isEmpty) {
+  //     editor.commands.setContent(initial);
+  //   }
+  // }, []);
 
   const handleBlur = React.useCallback(
     (editor: Editor) => onBlur?.(getOutput(editor, output)),

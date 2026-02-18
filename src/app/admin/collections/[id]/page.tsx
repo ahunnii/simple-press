@@ -26,16 +26,16 @@ export default async function EditCollectionPage({ params }: PageProps) {
           { label: collection.name },
         ]}
       />
-      <CollectionForm
-        businessId={collection.businessId}
-        collectionId={id}
-        allProducts={products}
-        collection={collection}
-      />
+      <CollectionForm allProducts={products} collection={collection} />
     </div>
   );
 }
 
-export const metadata = {
-  title: "Edit Collection",
+export const generateMetadata = async ({ params }: PageProps) => {
+  const { id } = await params;
+  const collection = await api.collections.getById(id);
+  if (!collection) notFound();
+  return {
+    title: collection.name ?? "Edit Collection",
+  };
 };

@@ -66,9 +66,7 @@ type FulfillmentFormProps = {
 
 export function FulfillmentForm({
   orderId,
-  orderNumber,
   customerEmail,
-  customerName,
 }: FulfillmentFormProps) {
   const router = useRouter();
   const [selectedCarrier, setSelectedCarrier] = useState<string>("");

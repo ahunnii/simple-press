@@ -13,7 +13,7 @@ type Props = {
 };
 
 export default async function StorefrontLayout({ children }: Props) {
-  const business = await api.business.simplifiedGet();
+  const business = await api.business.simplifiedGetWithProducts();
 
   if (!business) notFound();
 

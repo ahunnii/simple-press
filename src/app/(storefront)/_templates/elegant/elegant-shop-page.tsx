@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ShoppingBag, SlidersHorizontal, X } from "lucide-react";
 
+import type { DefaultProductsPageTemplateProps } from "../types";
 import type { RouterOutputs } from "~/trpc/react";
 
 import { ElegantProductCard } from "./elegant-product-card";
@@ -166,9 +167,7 @@ import { ElegantProductCard } from "./elegant-product-card";
 
 export function ElegantShopPage({
   business,
-}: {
-  business: NonNullable<RouterOutputs["business"]["getWithProducts"]>;
-}) {
+}: DefaultProductsPageTemplateProps) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
   const [isVisible, setIsVisible] = useState(false);

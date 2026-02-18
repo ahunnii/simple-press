@@ -73,11 +73,7 @@ async function updateVoteCounts(db: PrismaClient, reviewId: string) {
   });
 }
 
-// ─── Router ────────────────────────────────────────────────────────────────
-
 export const reviewRouter = createTRPCRouter({
-  // ── Public ──────────────────────────────────────────────────────────────
-
   listByProduct: publicProcedure
     .input(
       z.object({
@@ -90,6 +86,14 @@ export const reviewRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       const orderBy: Record<
         string,
         Prisma.ProductReviewOrderByWithRelationInput
@@ -103,6 +107,7 @@ export const reviewRouter = createTRPCRouter({
       return ctx.db.productReview.findMany({
         where: {
           productId: input.productId,
+          product: { businessId: business.id },
           ...(input.approvedOnly && { isApproved: true, isHidden: false }),
           ...(input.rating && { rating: input.rating }),
         },
@@ -116,9 +121,18 @@ export const reviewRouter = createTRPCRouter({
   getProductStats: publicProcedure
     .input(z.object({ productId: z.string() }))
     .query(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       const reviews = await ctx.db.productReview.findMany({
         where: {
           productId: input.productId,
+          product: { businessId: business.id },
           isApproved: true,
           isHidden: false,
         },
@@ -154,6 +168,14 @@ export const reviewRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       if (!input.userId && !input.ipAddress) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -164,6 +186,7 @@ export const reviewRouter = createTRPCRouter({
       const existing = await ctx.db.reviewVote.findFirst({
         where: {
           reviewId: input.reviewId,
+          review: { product: { businessId: business.id } },
           OR: [
             ...(input.userId ? [{ userId: input.userId }] : []),
             ...(input.ipAddress ? [{ ipAddress: input.ipAddress }] : []),

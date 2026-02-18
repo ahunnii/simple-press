@@ -8,15 +8,11 @@ import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard } from "@tabler/icons-react";
 import { Menu, ShoppingBag, X } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultHeaderTemplateProps } from "../types";
 import { formatPrice } from "~/lib/prices";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
-
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -42,7 +38,7 @@ function LogoTwoLine({ name }: { name: string }) {
   );
 }
 
-export function DarkTrendHeader({ business }: Props) {
+export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
   const { itemCount, total } = useCart();

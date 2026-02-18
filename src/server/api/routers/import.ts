@@ -7,14 +7,9 @@ import { parseWooCommerceCSV } from "~/lib/woocommerce/csv-parser";
 import { validateImport } from "~/lib/woocommerce/import-validator";
 import { importProducts } from "~/lib/woocommerce/product-importer";
 
-import {
-  createTRPCRouter,
-  ownerAdminProcedure,
-  protectedProcedure,
-} from "../trpc";
+import { createTRPCRouter, ownerAdminProcedure } from "../trpc";
 
 export const importRouter = createTRPCRouter({
-  // Step 1: Parse and validate CSV
   parseCSV: ownerAdminProcedure
     .input(
       z.object({
@@ -53,8 +48,7 @@ export const importRouter = createTRPCRouter({
       };
     }),
 
-  // Step 2: Get import details for review
-  getImport: protectedProcedure
+  getImport: ownerAdminProcedure
     .input(z.object({ importId: z.string() }))
     .query(async ({ ctx, input }) => {
       const importRecord = await ctx.db.productImport.findUnique({
@@ -87,8 +81,7 @@ export const importRouter = createTRPCRouter({
       return importRecord;
     }),
 
-  // Step 3: Execute import
-  executeImport: protectedProcedure
+  executeImport: ownerAdminProcedure
     .input(
       z.object({
         importId: z.string(),
@@ -176,8 +169,7 @@ export const importRouter = createTRPCRouter({
       }
     }),
 
-  // Get import history
-  getImportHistory: protectedProcedure
+  getImportHistory: ownerAdminProcedure
     .input(z.object({ businessId: z.string() }))
     .query(async ({ ctx, input }) => {
       const user = await ctx.db.user.findUnique({

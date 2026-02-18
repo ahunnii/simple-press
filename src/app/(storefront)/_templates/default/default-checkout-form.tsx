@@ -195,7 +195,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                     key={`${item.productId}-${item.variantId}`}
                     className="flex gap-3"
                   >
-                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded bg-gray-100">
                       {item.imageUrl ? (
                         <Image
                           src={item.imageUrl}

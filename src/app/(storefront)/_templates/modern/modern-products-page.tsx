@@ -1,15 +1,11 @@
+import type { DefaultProductsPageTemplateProps } from "../types";
 import type { CardProduct } from "./modern-product-card";
-import type { RouterOutputs } from "~/trpc/react";
 
-import { StorefrontFooter } from "../../_components/storefront-footer";
-import { StorefrontHeader } from "../../_components/storefront-header";
 import { ModernProductsGrid } from "./modern-products-grid";
 
 export function ModernProductsPage({
   business,
-}: {
-  business: NonNullable<RouterOutputs["business"]["get"]>;
-}) {
+}: DefaultProductsPageTemplateProps) {
   const products = business.products as CardProduct[];
 
   return (

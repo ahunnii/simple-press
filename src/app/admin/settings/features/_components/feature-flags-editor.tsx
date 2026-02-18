@@ -24,15 +24,11 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
-type FeatureFlagsEditorProps = {
-  businessId: string;
+type Props = {
   initialFlags: Record<string, boolean>;
 };
 
-export function FeatureFlagsEditor({
-  businessId,
-  initialFlags,
-}: FeatureFlagsEditorProps) {
+export function FeatureFlagsEditor({ initialFlags }: Props) {
   const router = useRouter();
   const { isEnabled, isDisabledByDependency, getDependencyLabel } =
     useFeatureFlags({
@@ -50,7 +46,7 @@ export function FeatureFlagsEditor({
 
   const handleToggle = (key: string, enabled: boolean) => {
     // Optimistic feedback
-    toast.promise(toggleMutation.mutateAsync({ businessId, key, enabled }), {
+    toast.promise(toggleMutation.mutateAsync({ key, enabled }), {
       loading: `${enabled ? "Enabling" : "Disabling"} ${FEATURE_REGISTRY[key]?.label}...`,
       success: `${FEATURE_REGISTRY[key]?.label} ${enabled ? "enabled" : "disabled"}`,
       error: "Failed to update",

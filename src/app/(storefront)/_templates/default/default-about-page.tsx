@@ -1,13 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultAboutPageTemplateProps } from "../types";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-
-export async function DefaultAboutPage({ business }: Props) {
+export async function DefaultAboutPage({
+  business,
+}: DefaultAboutPageTemplateProps) {
   return (
     <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
       <div className="mb-8">

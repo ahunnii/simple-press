@@ -2,14 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/server";
 
-import { StorefrontFooter } from "../../_components/storefront-footer";
-import { StorefrontHeader } from "../../_components/storefront-header";
 import { FeaturedProductsGrid } from "./modern-featured-products-grid";
-import { ModernFooter } from "./modern-footer";
-import { ModernHeader } from "./modern-header";
 
 export async function ModernHomePage() {
   const homepage = await api.business.getHomepage();

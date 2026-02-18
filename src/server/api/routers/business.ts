@@ -85,9 +85,13 @@ export const businessRouter = createTRPCRouter({
         name: true,
         templateId: true,
         businessAddress: true,
+        stripeAccountId: true,
         supportEmail: true,
         products: {
           where: { published: true },
+          include: {
+            images: true,
+          },
         },
         siteContent: {
           select: {
@@ -109,8 +113,8 @@ export const businessRouter = createTRPCRouter({
         message: "Business not found",
       });
     }
-
-    return businessData;
+    const { stripeAccountId, ...rest } = businessData;
+    return { ...rest, isStripeConnected: !!stripeAccountId };
   }),
 
   getWithPolicies: ownerAdminProcedure.query(async ({ ctx }) => {

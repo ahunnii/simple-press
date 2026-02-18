@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { stripeClient } from "~/lib/stripe/client";

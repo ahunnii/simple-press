@@ -4,14 +4,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
-import { checkBusiness } from "~/lib/check-business";
 import { sendOrderShipped } from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
-import {
-  createTRPCRouter,
-  ownerAdminProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
 
 export const orderRouter = createTRPCRouter({
   markAsFulfilled: ownerAdminProcedure
@@ -24,9 +19,10 @@ export const orderRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       // Get order with business info
       const order = await ctx.db.order.findUnique({
-        where: { id: input.orderId },
+        where: { id: input.orderId, businessId },
         include: {
           business: {
             include: {
@@ -45,24 +41,12 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== order.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-
       // Update order
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
         data: {
           status: "fulfilled",
+          fulfillmentStatus: "fulfilled",
           trackingNumber: input.trackingNumber,
           trackingUrl: input.trackingUrl,
           shippedAt: new Date(),
@@ -106,20 +90,13 @@ export const orderRouter = createTRPCRouter({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
 
       const statusFilter = input?.status;
       const searchQuery = input?.search;
 
       const where: Prisma.OrderWhereInput = {
-        businessId: business.id,
+        businessId,
       };
 
       if (statusFilter && statusFilter !== "all") {
@@ -148,15 +125,9 @@ export const orderRouter = createTRPCRouter({
   getById: ownerAdminProcedure
     .input(z.string())
     .query(async ({ ctx, input: id }) => {
-      const business = await checkBusiness();
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
       const order = await ctx.db.order.findFirst({
-        where: { id, businessId: business.id },
+        where: { id, businessId },
         include: {
           discountCode: true,
           items: true,
@@ -178,19 +149,12 @@ export const orderRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
 
       const order = await ctx.db.order.findFirst({
         where: {
           id: input.orderId,
-          businessId: business.id,
+          businessId,
         },
         include: {
           business: {
@@ -350,16 +314,10 @@ export const orderRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const business = await checkBusiness();
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
 
       const order = await ctx.db.order.findFirst({
-        where: { id: input.orderId, businessId: business.id },
+        where: { id: input.orderId, businessId },
       });
 
       if (!order) {
@@ -410,7 +368,6 @@ export const orderRouter = createTRPCRouter({
   createManual: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         customerName: z.string(),
         customerEmail: z.string(),
         shippingName: z.string(),
@@ -439,13 +396,7 @@ export const orderRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const business = await checkBusiness();
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
 
       // Parse customer name into first/last
       const nameParts = input.customerName.trim().split(" ");
@@ -457,14 +408,14 @@ export const orderRouter = createTRPCRouter({
         where: {
           businessId_email: {
             email: input.customerEmail,
-            businessId: business.id,
+            businessId,
           },
         },
         create: {
           email: input.customerEmail,
           firstName,
           lastName,
-          businessId: business.id,
+          businessId,
         },
         update: {
           firstName,
@@ -516,13 +467,13 @@ export const orderRouter = createTRPCRouter({
 
       // Generate order number
       const orderCount = await ctx.db.order.count({
-        where: { businessId: business.id },
+        where: { businessId },
       });
 
       const order = await ctx.db.order.create({
         data: {
           orderNumber: orderCount + 1,
-          businessId: business.id,
+          businessId,
           customerId: customer.id,
           customerEmail: input.customerEmail,
           customerName: input.customerName,
@@ -576,17 +527,10 @@ export const orderRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
 
       const updatedOrder = await ctx.db.order.update({
-        where: { id: input.orderId },
+        where: { id: input.orderId, businessId },
         data: {
           fulfillmentStatus: input.fulfillmentStatus,
           trackingNumber: input.trackingNumber ?? null,

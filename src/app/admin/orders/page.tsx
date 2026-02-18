@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
-import { api, HydrateClient } from "~/trpc/server";
+import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
-import { SiteHeader } from "../_components/site-header";
 import { TrailHeader } from "../_components/trail-header";
 import { OrderFilters } from "./_components/order-filters";
 import { OrdersTable } from "./_components/orders-table";

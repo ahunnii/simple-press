@@ -1,19 +1,17 @@
-import { headers } from "next/headers";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { checkBusiness } from "~/lib/check-business";
+import { env } from "~/env";
+import { notifySlackNewDomain } from "~/lib/slack/notification";
 import { isValidDomain } from "~/lib/utils";
-import {
-  createTRPCRouter,
-  ownerAdminProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
 
 export const domainRouter = createTRPCRouter({
   add: ownerAdminProcedure
     .input(z.string())
     .mutation(async ({ ctx, input: domain }) => {
+      const { businessId } = ctx;
+
       if (!isValidDomain(domain)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -21,19 +19,11 @@ export const domainRouter = createTRPCRouter({
         });
       }
 
-      const business = await checkBusiness();
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
       // Check if domain is already taken
       const existingDomain = await ctx.db.business.findFirst({
         where: {
           customDomain: domain,
-          id: { not: business.id },
+          id: { not: businessId },
         },
       });
 
@@ -46,7 +36,7 @@ export const domainRouter = createTRPCRouter({
 
       // Update business with custom domain
       await ctx.db.business.update({
-        where: { id: business.id },
+        where: { id: businessId },
         data: {
           customDomain: domain,
           domainStatus: "PENDING_DNS",
@@ -57,13 +47,13 @@ export const domainRouter = createTRPCRouter({
       await ctx.db.domainQueue.create({
         data: {
           domain,
-          businessId: business.id,
+          businessId,
           status: "pending",
         },
       });
 
-      // TODO: Send notification to admin to add domain to Coolify
-      // This could be an email, Slack message, or webhook
+      // Message to slack notifying of new domain to add to Coolify (NEED TO ADD AUTOMATIC PROCESSING TO ADD TO COOLIFY)
+      await notifySlackNewDomain(domain, businessId);
 
       return {
         success: true,
@@ -75,31 +65,10 @@ export const domainRouter = createTRPCRouter({
   verify: ownerAdminProcedure
     .input(z.string())
     .mutation(async ({ ctx, input: domain }) => {
-      const currentBusiness = await checkBusiness();
-      if (!currentBusiness) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
-      // Verify this domain belongs to this business
-      const business = await ctx.db.business.findFirst({
-        where: {
-          id: currentBusiness.id,
-          customDomain: domain,
-        },
-      });
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Domain not found for your business",
-        });
-      }
+      const { businessId } = ctx;
 
       // Check DNS records
-      const vpsIp = process.env.VPS_IP;
+      const vpsIp = env.VPS_IP;
 
       if (!vpsIp) {
         throw new TRPCError({
@@ -119,7 +88,7 @@ export const domainRouter = createTRPCRouter({
           // DNS is configured correctly!
           // Update business status
           await ctx.db.business.update({
-            where: { id: currentBusiness.id },
+            where: { id: businessId },
             data: { domainStatus: "ACTIVE" },
           });
 
@@ -127,7 +96,7 @@ export const domainRouter = createTRPCRouter({
           await ctx.db.domainQueue.updateMany({
             where: {
               domain,
-              businessId: currentBusiness.id,
+              businessId,
             },
             data: { status: "completed" },
           });

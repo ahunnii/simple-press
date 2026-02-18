@@ -2,15 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultProductPageTemplateProps } from "../types";
 
 import { ModernProductActions } from "./modern-product-actions";
 
 export async function ModernProductPage({
   product,
-}: {
-  product: NonNullable<RouterOutputs["product"]["get"]>;
-}) {
+}: DefaultProductPageTemplateProps) {
   //   const related = products
   //     .filter((p) => p.category === product.category && p.id !== product.id)
   //     .slice(0, 4);

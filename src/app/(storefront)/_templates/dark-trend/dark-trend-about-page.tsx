@@ -1,16 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import type { RouterOutputs } from "~/trpc/react";
+import type { DefaultAboutPageTemplateProps } from "../types";
 import { Button } from "~/components/ui/button";
 
 import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
 
-type Props = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-};
-
-export function DarkTrendAboutPage({ business }: Props) {
+export function DarkTrendAboutPage({
+  business,
+}: DefaultAboutPageTemplateProps) {
   const themeSpecificFields = business?.siteContent?.customFields as Record<
     string,
     string

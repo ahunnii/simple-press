@@ -1,13 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 
 type GalleryRendererProps = {
   gallery: {
@@ -119,9 +116,9 @@ export function GalleryRenderer({
         <Dialog open={true} onOpenChange={closeLightbox}>
           <DialogContent className="max-w-7xl p-0">
             <DialogTitle className="sr-only">
-              {gallery.images[lightboxIndex]!.altText ||
-                gallery.images[lightboxIndex]!.caption ||
-                gallery.name ||
+              {gallery.images[lightboxIndex]!.altText ??
+                gallery.images[lightboxIndex]!.caption ??
+                gallery.name ??
                 "Image lightbox"}
             </DialogTitle>
             <div className="relative">

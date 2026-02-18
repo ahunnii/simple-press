@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -6,7 +5,6 @@ import { checkBusiness } from "~/lib/check-business";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
-  protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
@@ -71,7 +69,7 @@ export const discountRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { code, businessId, cartTotal } = input;
+      const { cartTotal } = input;
       const currentBusiness = await checkBusiness();
       if (!currentBusiness) {
         throw new TRPCError({

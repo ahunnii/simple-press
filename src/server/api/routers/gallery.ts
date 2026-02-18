@@ -6,7 +6,6 @@ import { checkBusiness } from "~/lib/check-business";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
-  protectedProcedure,
   publicProcedure,
 } from "../trpc";
 
@@ -30,23 +29,14 @@ export const galleryRouter = createTRPCRouter({
   }),
 
   // Get single gallery
-  getById: protectedProcedure
+  getById: ownerAdminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const business = await checkBusiness();
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
+
       const gallery = await ctx.db.gallery.findUnique({
-        where: { id: input.id, businessId: business.id },
-        include: {
-          images: {
-            orderBy: { sortOrder: "asc" },
-          },
-        },
+        where: { id: input.id, businessId },
+        include: { images: { orderBy: { sortOrder: "asc" } } },
       });
 
       if (!gallery) {
@@ -59,17 +49,21 @@ export const galleryRouter = createTRPCRouter({
       return gallery;
     }),
 
-  // Get single gallery by id (public, for storefront page content)
+  // Get single gallery by id (public, for storefront page content) Not really sure if this is needed yet... maybe public / private galleries?
   getByIdPublic: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
+      const businessId = await checkBusiness();
+      if (!businessId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       const gallery = await ctx.db.gallery.findUnique({
-        where: { id: input.id },
-        include: {
-          images: {
-            orderBy: { sortOrder: "asc" },
-          },
-        },
+        where: { id: input.id, businessId: businessId.id },
+        include: { images: { orderBy: { sortOrder: "asc" } } },
       });
 
       if (!gallery) {
@@ -83,26 +77,25 @@ export const galleryRouter = createTRPCRouter({
     }),
 
   // Get by slug (for public display)
-  getBySlug: protectedProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        slug: z.string(),
-      }),
-    )
+  getBySlug: publicProcedure
+    .input(z.object({ slug: z.string() }))
     .query(async ({ ctx, input }) => {
+      const businessId = await checkBusiness();
+      if (!businessId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       return ctx.db.gallery.findUnique({
         where: {
           businessId_slug: {
-            businessId: input.businessId,
+            businessId: businessId.id,
             slug: input.slug,
           },
         },
-        include: {
-          images: {
-            orderBy: { sortOrder: "asc" },
-          },
-        },
+        include: { images: { orderBy: { sortOrder: "asc" } } },
       });
     }),
 
@@ -132,7 +125,7 @@ export const galleryRouter = createTRPCRouter({
     }),
 
   // Update gallery
-  update: protectedProcedure
+  update: ownerAdminProcedure
     .input(
       z.object({
         id: z.string(),
@@ -149,24 +142,27 @@ export const galleryRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const { id, ...data } = input;
+
       return ctx.db.gallery.update({
-        where: { id },
+        where: { id, businessId },
         data,
       });
     }),
 
   // Delete gallery
-  delete: protectedProcedure
+  delete: ownerAdminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       return ctx.db.gallery.delete({
-        where: { id: input.id },
+        where: { id: input.id, businessId },
       });
     }),
 
   // Add images to gallery
-  addImages: protectedProcedure
+  addImages: ownerAdminProcedure
     .input(
       z.object({
         galleryId: z.string(),
@@ -205,7 +201,7 @@ export const galleryRouter = createTRPCRouter({
     }),
 
   // Update image order
-  reorderImages: protectedProcedure
+  reorderImages: ownerAdminProcedure
     .input(
       z.object({
         galleryId: z.string(),
@@ -226,7 +222,7 @@ export const galleryRouter = createTRPCRouter({
     }),
 
   // Update single image
-  updateImage: protectedProcedure
+  updateImage: ownerAdminProcedure
     .input(
       z.object({
         id: z.string(),
@@ -243,7 +239,7 @@ export const galleryRouter = createTRPCRouter({
     }),
 
   // Delete image
-  deleteImage: protectedProcedure
+  deleteImage: ownerAdminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       return ctx.db.galleryImage.delete({

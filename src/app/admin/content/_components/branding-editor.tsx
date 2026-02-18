@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { BrandingFormSchema } from "~/lib/validators/homepage";
-import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { brandingFormSchema } from "~/lib/validators/homepage";
 import { api } from "~/trpc/react";
