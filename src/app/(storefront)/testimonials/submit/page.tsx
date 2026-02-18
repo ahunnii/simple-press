@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
@@ -14,7 +14,7 @@ export default async function SubmitTestimonialPage({
   const { code } = await searchParams;
   // Get business from subdomain
   const business = await api.business.simplifiedGet();
-
+  if (!business) notFound();
   // Check if using invite code
   if (code) {
     return <TestimonialFormUnauthenticated code={code} business={business} />;

@@ -9,7 +9,6 @@ import { ModernCheckoutPage } from "../_templates/modern/modern-checkout-page";
 
 export default async function CheckoutPage() {
   const business = await api.business.simplifiedGetWithProducts();
-
   if (!business) notFound();
 
   if (business.templateId === "pollen") {

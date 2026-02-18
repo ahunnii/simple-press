@@ -15,7 +15,7 @@ import { Button } from "~/components/ui/button";
 export default function WelcomeNotification() {
   const { data: business } = api.business.simplifiedGet.useQuery();
 
-  if (business?.customDomain) {
+  if (business?.customDomain || !business) {
     return null;
   }
   return (

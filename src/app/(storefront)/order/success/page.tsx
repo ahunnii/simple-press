@@ -7,7 +7,7 @@ import { DefaultOrderSuccessPage } from "../../_templates/default/default-order-
 
 export default async function OrderSuccessPage() {
   const business = await api.business.simplifiedGet();
-
+  if (!business) notFound();
   if (business.templateId === "pollen") {
     notFound();
   }

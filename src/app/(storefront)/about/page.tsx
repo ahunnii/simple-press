@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { api } from "~/trpc/server";
 
 import { DarkTrendAboutPage } from "../_templates/dark-trend/dark-trend-about-page";
@@ -7,7 +9,7 @@ import { PollenAboutPage } from "../_templates/pollen/pollen-about-page";
 
 export default async function AboutPage() {
   const business = await api.business.simplifiedGet();
-
+  if (!business) notFound();
   const TemplateComponent =
     {
       "dark-trend": DarkTrendAboutPage,

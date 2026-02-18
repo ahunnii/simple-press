@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { AccountView } from "@daveyplate/better-auth-ui";
 import { accountViewPaths } from "@daveyplate/better-auth-ui/server";
 
@@ -17,7 +18,7 @@ type Props = {
 export default async function AccountPage({ params }: Props) {
   const { path } = await params;
   const business = await api.business.simplifiedGet();
-
+  if (!business) notFound();
   const templateStyle =
     {
       "dark-trend": "bg-[#424242]",

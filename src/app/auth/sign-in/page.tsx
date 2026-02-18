@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { api } from "~/trpc/server";
 import { DefaultSignInPage } from "~/app/(storefront)/_templates/default/default-sign-in-page";
 
@@ -9,7 +11,7 @@ export default async function SignInPage({ searchParams }: Props) {
   const { redirectTo } = await searchParams;
 
   const business = await api.business.simplifiedGet();
-
+  if (!business) notFound();
   const TemplateComponent =
     {
       "dark-trend": DefaultSignInPage,

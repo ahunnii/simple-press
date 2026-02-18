@@ -13,6 +13,7 @@ type Props = {
 export default async function PageView({ params }: Props) {
   const { slug } = await params;
   const business = await api.business.simplifiedGet();
+  if (!business) notFound();
 
   const page = await api.content.getPageBySlug({
     slug,

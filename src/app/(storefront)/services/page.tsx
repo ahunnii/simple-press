@@ -6,7 +6,7 @@ import { PollenServicesPage } from "../_templates/pollen/pollen-services-page";
 
 export default async function ServicesPage() {
   const business = await api.business.simplifiedGet();
-
+  if (!business) notFound();
   if (business.templateId !== "pollen") {
     notFound();
   }

@@ -14,7 +14,6 @@ type Props = {
 
 export default async function StorefrontLayout({ children }: Props) {
   const business = await api.business.simplifiedGetWithProducts();
-
   if (!business) notFound();
 
   const TemplateLayout =

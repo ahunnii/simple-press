@@ -13,12 +13,7 @@ export const businessRouter = createTRPCRouter({
   simplifiedGet: publicProcedure.query(async ({ ctx }) => {
     const business = await checkBusiness();
 
-    if (!business) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
-      });
-    }
+    if (!business) return null;
 
     const businessData = await ctx.db.business.findFirst({
       where: {
@@ -54,10 +49,7 @@ export const businessRouter = createTRPCRouter({
     });
 
     if (!businessData) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
-      });
+      return null;
     }
 
     const { stripeAccountId, ...rest } = businessData;
@@ -69,10 +61,7 @@ export const businessRouter = createTRPCRouter({
     const business = await checkBusiness();
 
     if (!business) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
-      });
+      return null;
     }
 
     const businessData = await ctx.db.business.findFirst({
@@ -108,10 +97,7 @@ export const businessRouter = createTRPCRouter({
     });
 
     if (!businessData) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
-      });
+      return null;
     }
     const { stripeAccountId, ...rest } = businessData;
     return { ...rest, isStripeConnected: !!stripeAccountId };

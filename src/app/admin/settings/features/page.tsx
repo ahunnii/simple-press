@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api } from "~/trpc/server";
 
@@ -6,7 +8,7 @@ import { FeatureFlagsEditor } from "./_components/feature-flags-editor";
 
 export default async function FeatureFlagsPage() {
   const business = await api.business.simplifiedGet();
-
+  if (!business) notFound();
   const { flags } = await getBusinessFlags(business.id);
 
   return (
