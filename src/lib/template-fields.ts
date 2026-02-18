@@ -1,4 +1,7 @@
-import { darkTrendData } from "~/app/(storefront)/_templates/dark-trend";
+import {
+  darkTrendData,
+  darkTrendFieldGroups,
+} from "~/app/(storefront)/_templates/dark-trend";
 import {
   pollenData,
   pollenFieldGroups,
@@ -116,6 +119,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
     },
   ],
   ...pollenFieldGroups,
+  ...darkTrendFieldGroups,
 };
 
 export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {

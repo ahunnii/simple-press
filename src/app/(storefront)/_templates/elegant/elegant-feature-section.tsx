@@ -7,28 +7,28 @@ import { Flower2, Globe, Leaf, Recycle } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { getThemeFields, TEMPLATE_FIELDS } from "~/lib/template-fields";
 
-// const features = [
-//   {
-//     icon: Recycle,
-//     title: "Eco-Friendly Packaging",
-//     description: "Recyclable and biodegradable materials",
-//   },
-//   {
-//     icon: Leaf,
-//     title: "100% Natural",
-//     description: "No synthetic chemicals or parabens",
-//   },
-//   {
-//     icon: Flower2,
-//     title: "Plant-Based",
-//     description: "Botanical extracts and essential oils",
-//   },
-//   {
-//     icon: Globe,
-//     title: "Ethical Sourcing",
-//     description: "Fair trade certified ingredients",
-//   },
-// ];
+const features = [
+  {
+    icon: Recycle,
+    title: "Eco-Friendly Packaging",
+    description: "Recyclable and biodegradable materials",
+  },
+  {
+    icon: Leaf,
+    title: "100% Natural",
+    description: "No synthetic chemicals or parabens",
+  },
+  {
+    icon: Flower2,
+    title: "Plant-Based",
+    description: "Botanical extracts and essential oils",
+  },
+  {
+    icon: Globe,
+    title: "Ethical Sourcing",
+    description: "Fair trade certified ingredients",
+  },
+];
 
 type Props = {
   homepage: RouterOutputs["business"]["getHomepage"];
@@ -50,11 +50,11 @@ export function ElegantFeatureSection({ homepage }: Props) {
 
   const aboutTitle = themeSpecificFields["elegant.homepage.about.title"];
   const aboutText = themeSpecificFields["elegant.homepage.about.text"];
-  const features = homepage?.siteContent?.features as {
-    title: string;
-    description: string;
-    icon: string;
-  }[];
+  // const features = homepage?.siteContent?.features as {
+  //   title: string;
+  //   description: string;
+  //   icon: string;
+  // }[];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -294,28 +294,22 @@ export function ElegantFeatureSection({ homepage }: Props) {
 
             {/* Feature Cards */}
             <div className="grid gap-4 sm:grid-cols-2">
-              {features?.map(
-                (feature: {
-                  title: string;
-                  description: string;
-                  icon: string;
-                }) => (
-                  <div
-                    key={feature.title}
-                    className="group boty-transition rounded-md bg-white p-5 hover:scale-[1.02]"
-                  >
-                    <div className="group-hover:bg-primary/20 boty-transition mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-stone-50">
-                      {/* <feature.icon className="text-primary h-5 w-5" /> */}
-                    </div>
-                    <h3 className="text-foreground mb-1 font-medium">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      {feature.description}
-                    </p>
+              {features?.map((feature) => (
+                <div
+                  key={feature.title}
+                  className="group boty-transition rounded-md bg-white p-5 hover:scale-[1.02]"
+                >
+                  <div className="group-hover:bg-primary/20 boty-transition mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-stone-50">
+                    {/* <feature.icon className="text-primary h-5 w-5" /> */}
                   </div>
-                ),
-              )}
+                  <h3 className="text-foreground mb-1 font-medium">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

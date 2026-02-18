@@ -1,4 +1,4 @@
-import type { TemplateField } from "~/lib/template-fields";
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 const aboutPageData: TemplateField[] = [
   {
@@ -224,6 +224,43 @@ const homepageData: TemplateField[] = [
     type: "gallery",
     page: "homepage",
   },
+  {
+    key: "dark-trend.homepage.hero-image",
+    label: "Homepage Hero Image",
+    description: "Image for the hero section",
+    type: "image",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "dark-trend.homepage.hero-title",
+    label: "Homepage Hero Title",
+    description: "Title for the hero section",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+  },
+
+  {
+    key: "dark-trend.homepage.hero-button-text",
+    label: "Homepage Hero Button Text",
+    description: "Button text for the hero section",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+  },
+  {
+    key: "dark-trend.homepage.hero-button-link",
+    label: "Homepage Hero Button Link",
+    description: "Button link for the hero section",
+    type: "url",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+  },
 ];
 
 const contactPageData: TemplateField[] = [
@@ -257,6 +294,20 @@ const contactPageData: TemplateField[] = [
   },
 ];
 
+const fieldGroups: TemplateFieldGroup[] = [
+  {
+    id: "homepage.hero",
+    title: "Hero Section",
+    description: "Main banner area at the top of homepage",
+    icon: "🎯",
+    columns: 2,
+  },
+];
+
 export const darkTrendData = {
   "dark-trend": [...aboutPageData, ...homepageData, ...contactPageData],
+};
+
+export const darkTrendFieldGroups = {
+  "dark-trend": fieldGroups,
 };

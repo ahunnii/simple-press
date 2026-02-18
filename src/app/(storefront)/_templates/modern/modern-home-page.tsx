@@ -14,7 +14,7 @@ export async function ModernHomePage() {
       <section className="relative overflow-hidden">
         <div className="relative h-[85vh] min-h-[600px]">
           <Image
-            src={homepage?.siteContent?.heroImageUrl ?? "/placeholder.svg"}
+            src={"/placeholder.svg"}
             alt={homepage?.name ?? "Hero Image"}
             fill
             className="object-cover"
@@ -25,18 +25,18 @@ export async function ModernHomePage() {
             <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
               <div className="max-w-xl">
                 <h1 className="text-background font-serif text-5xl leading-tight text-balance md:text-7xl md:leading-tight">
-                  {homepage?.siteContent?.heroTitle ??
-                    "Designed for modern living"}
+                  {"Designed for modern living"}
                 </h1>
                 <p className="text-background/80 mt-6 text-lg leading-relaxed">
-                  {homepage?.siteContent?.heroSubtitle ??
-                    "Thoughtfully crafted home goods that blend beauty with everyday function."}
+                  {
+                    "Thoughtfully crafted home goods that blend beauty with everyday function."
+                  }
                 </p>
                 <Link
-                  href={homepage?.siteContent?.heroButtonLink ?? "/shop"}
+                  href={"/shop"}
                   className="bg-background text-foreground mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
                 >
-                  {homepage?.siteContent?.heroButtonText ?? "Shop Collection"}
+                  {"Shop Collection"}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -141,7 +141,7 @@ export async function ModernHomePage() {
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
               <Image
-                src={homepage?.siteContent?.aboutImageUrl ?? "/placeholder.svg"}
+                src={"/placeholder.svg"}
                 alt="Curated collection of modern home goods"
                 fill
                 className="object-cover"

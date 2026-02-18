@@ -24,7 +24,7 @@ type Props = {
   homepage: RouterOutputs["business"]["getHomepage"];
 };
 export function ElegantHero({ homepage }: Props) {
-  const heroImageUrl = homepage?.siteContent?.heroImageUrl ?? null;
+  const heroImageUrl = "/placeholder.svg";
   const useImage = Boolean(heroImageUrl?.trim());
 
   return (
@@ -40,7 +40,7 @@ export function ElegantHero({ homepage }: Props) {
         {useImage ? (
           <>
             <img
-              src={heroImageUrl!}
+              src={heroImageUrl}
               alt=""
               className="pointer-events-none select-none"
               style={heroMediaStyle}
@@ -73,9 +73,7 @@ export function ElegantHero({ homepage }: Props) {
             <h2 className="mb-6 font-serif text-5xl leading-[1.1] text-balance text-black md:text-6xl lg:text-7xl">
               {(() => {
                 // Get the heroTitle from homepage or fallback text
-                const heroTitle =
-                  homepage?.siteContent?.heroTitle ??
-                  "Made with care.\nEspecially for you.";
+                const heroTitle = "Made with care.\nEspecially for you.";
                 // Split heroTitle into lines by newline, defaulting to two lines
                 const [firstLine, secondLine = ""] = heroTitle.split("\n");
                 return (
@@ -106,7 +104,7 @@ export function ElegantHero({ homepage }: Props) {
               className="animate-blur-in mx-auto mb-10 max-w-md text-lg leading-relaxed text-black opacity-0 lg:mx-0"
               style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
             >
-              {homepage?.siteContent?.heroSubtitle ?? "Check out our products!"}
+              {"Check out our products!"}
             </p>
 
             <div
@@ -114,16 +112,10 @@ export function ElegantHero({ homepage }: Props) {
               style={{ animationDelay: "1s", animationFillMode: "forwards" }}
             >
               <Link
-                href={
-                  !!homepage?.siteContent?.heroButtonLink
-                    ? homepage?.siteContent?.heroButtonLink
-                    : "/shop"
-                }
+                href={"/shop"}
                 className="group bg-primary text-primary-foreground boty-transition hover:bg-primary/90 boty-shadow inline-flex items-center justify-center gap-3 rounded-full px-8 py-4 text-sm tracking-wide"
               >
-                {!!homepage?.siteContent?.heroButtonText
-                  ? homepage?.siteContent?.heroButtonText
-                  : "Shop Now"}
+                {"Shop Now"}
                 <ArrowRight className="boty-transition h-4 w-4 group-hover:translate-x-1" />
               </Link>
             </div>

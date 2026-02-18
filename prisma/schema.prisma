@@ -132,7 +132,7 @@ model Business {
   taxId           String? // For tax purposes
   
   // Integrations
-  stripeAccountId String? @unique // Stripe Connect account ID
+  stripeAccountId String? @unique 
 
   // Analytics
   umamiWebsiteId String? // Each business gets their own website ID

@@ -39,7 +39,10 @@ export async function DarkTrendHomepage() {
       <section className="relative overflow-hidden">
         <div className="relative h-[85vh] min-h-[560px]">
           <Image
-            src={homepage?.siteContent?.heroImageUrl ?? "/placeholder.svg"}
+            src={
+              themeSpecificFields["dark-trend.homepage.hero-image"] ??
+              "/placeholder.svg"
+            }
             alt={homepage?.name ?? "Business Name"}
             fill
             className="object-cover"
@@ -50,11 +53,18 @@ export async function DarkTrendHomepage() {
           <div className="absolute inset-0 flex items-center">
             <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
               <DarkTrendHeroContent
-                title={homepage?.siteContent?.heroTitle ?? "Hero Title"}
-                buttonText={
-                  homepage?.siteContent?.heroButtonText ?? "Hero Button Text"
+                title={
+                  themeSpecificFields["dark-trend.homepage.hero-title"] ??
+                  "Hero Title"
                 }
-                buttonLink={homepage?.siteContent?.heroButtonLink ?? "#!"}
+                buttonText={
+                  themeSpecificFields["dark-trend.homepage.hero-button-text"] ??
+                  "Hero Button Text"
+                }
+                buttonLink={
+                  themeSpecificFields["dark-trend.homepage.hero-button-link"] ??
+                  "#!"
+                }
               />
             </div>
           </div>
