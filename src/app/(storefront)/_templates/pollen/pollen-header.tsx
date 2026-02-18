@@ -68,7 +68,7 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
         },
       }}
       additionalLinks={[
-        ...(user.role === "ADMIN"
+        ...(user.role === "ADMIN" || user.role === "OWNER"
           ? [
               {
                 icon: <LayoutDashboardIcon className="h-4 w-4" />,
@@ -142,7 +142,7 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
                   className="border-green-500/30 bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700 dark:border-green-400/30 dark:bg-green-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 dark:hover:text-rose-300"
                   variant="outline"
                 >
-                  <Link href="/get-quote">
+                  <Link href="/contact">
                     <MessageSquare className="mr-1.5 h-4 w-4" />
                     Get in Touch
                   </Link>

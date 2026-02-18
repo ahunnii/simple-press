@@ -21,6 +21,7 @@ export default async function AccountPage({ params }: Props) {
   const templateStyle =
     {
       "dark-trend": "bg-[#424242]",
+      pollen: "py-24 md:py-36",
     }[business.templateId] ?? "";
 
   return (

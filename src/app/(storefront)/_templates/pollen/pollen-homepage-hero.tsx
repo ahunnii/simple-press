@@ -63,7 +63,7 @@ export function PollenHero({
           <motion.p
             variants={fadeUp}
             transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-sm font-medium tracking-[0.2em] text-white uppercase"
+            className="text-base font-medium tracking-[0.2em] text-white uppercase"
           >
             {title}
           </motion.p>
@@ -71,7 +71,7 @@ export function PollenHero({
           <motion.h1
             variants={fadeUp}
             transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-4xl leading-tight font-bold text-balance text-white md:text-5xl lg:text-6xl"
+            className="text-9xl leading-tight font-bold text-balance text-white md:text-5xl lg:text-6xl"
           >
             {subtitle}
           </motion.h1>
@@ -79,7 +79,7 @@ export function PollenHero({
           <motion.p
             variants={fadeUp}
             transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="max-w-2xl text-lg leading-relaxed text-white/90 md:text-xl"
+            className="max-w-2xl text-xl leading-relaxed text-white/90 md:text-xl"
           >
             {descriptionText}
           </motion.p>
@@ -93,7 +93,7 @@ export function PollenHero({
               className={buttonVariants({
                 size: "lg",
                 className:
-                  "bg-primary/90 text-primary-foreground hover:bg-primary gap-2 px-8 py-6 text-base font-medium",
+                  "gap-2 bg-[#5e8b4a]! px-8 py-6 text-lg! font-medium text-white hover:bg-[#5e8b4a]/90!",
               })}
             >
               {buttonText}

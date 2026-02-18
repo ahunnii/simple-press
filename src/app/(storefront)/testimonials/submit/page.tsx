@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
+import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 
 import { TestimonialForm } from "./_components/testimonial-form";
@@ -17,26 +17,15 @@ export default async function SubmitTestimonialPage({
 
   // Check if using invite code
   if (code) {
-    return <TestimonialFormWithCode code={code} business={business} />;
+    return <TestimonialFormUnauthenticated code={code} business={business} />;
   }
 
   // Otherwise require authentication
-  const session = await auth.api.getSession();
+  const session = await getSession();
 
   if (!session?.user) {
     redirect(`/auth/sign-in?redirect=/testimonials/submit`);
   }
 
   return <TestimonialForm business={business} />;
-}
-
-// Component for invite code flow
-async function TestimonialFormWithCode({
-  code,
-  business,
-}: {
-  code: string;
-  business: { id: string; name: string };
-}) {
-  return <TestimonialFormUnauthenticated code={code} business={business} />;
 }

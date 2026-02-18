@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { cn } from "~/lib/utils";
 import { buttonVariants } from "~/components/ui/button";
 
 export function PollenCallToAction({
@@ -21,18 +22,18 @@ export function PollenCallToAction({
   imageUrl: string;
 }) {
   return (
-    <section id="contact" className="relative overflow-hidden py-24 md:py-32">
+    <section className="relative mx-auto max-w-7xl overflow-hidden py-12 md:py-24">
       <Image
         src={imageUrl}
         alt=""
         fill
-        className="object-cover blur-sm brightness-75"
+        className="object-cover"
         sizes="100vw"
         priority={false}
       />
       <div className="absolute inset-0 bg-black/30" />
 
-      <div className="relative z-10 flex min-h-[50vh] items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 flex min-h-[30vh] items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <p className="mb-6 text-sm font-medium tracking-wider text-[#A8D081] uppercase">
             {subtitle}
@@ -48,11 +49,13 @@ export function PollenCallToAction({
 
           <Link
             href={buttonLink}
-            className={buttonVariants({
-              size: "lg",
-              className:
-                "rounded-full bg-[#5e8b4a] px-8 py-6 text-base font-medium text-white shadow-lg hover:bg-[#4d7a3d]",
-            })}
+            className={cn(
+              buttonVariants({
+                size: "lg",
+                variant: "default",
+              }),
+              `rounded-full bg-[#5e8b4a] px-8 py-6 text-base font-medium text-white shadow-lg hover:bg-[#5e8b4a]/90!`,
+            )}
           >
             {buttonText}
           </Link>

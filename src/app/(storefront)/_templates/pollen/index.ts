@@ -2,6 +2,15 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 const globalData: TemplateField[] = [
   {
+    key: "pollen.global.header-background",
+    label: "Header Background",
+    description: "Background image for the header",
+    type: "image",
+    page: "global",
+    group: "global.header",
+    gridColumn: "col-span-full",
+  },
+  {
     key: "pollen.global.cta-image",
     label: "CTA Image",
     description: "Image for the CTA section",
@@ -343,6 +352,26 @@ const contactPageData: TemplateField[] = [
     group: "contact.main",
     gridColumn: "col-span-full",
   },
+  {
+    key: "pollen.contact.address",
+    label: "Physical Address",
+    description: "Address shown on the contact page (use new line for second line)",
+    type: "textarea",
+    page: "contact",
+    group: "contact.main",
+    gridColumn: "col-span-full",
+    placeholder: "19926 Derby St\nDetroit, MI 48203",
+  },
+  {
+    key: "pollen.contact.phone",
+    label: "Phone Number",
+    description: "Phone number shown on the contact page",
+    type: "text",
+    page: "contact",
+    group: "contact.main",
+    gridColumn: "col-span-1",
+    placeholder: "(313) 312-6691",
+  },
 ];
 
 const homepageData: TemplateField[] = [
@@ -683,6 +712,14 @@ const fieldGroups: TemplateFieldGroup[] = [
     title: "Call to Action",
     description:
       "CTA section for your business, displayed at the bottom of the page",
+    icon: "🎯",
+    columns: 2,
+  },
+
+  {
+    id: "global.header",
+    title: "Header",
+    description: "Header displayed on the top of most every page",
     icon: "🎯",
     columns: 2,
   },

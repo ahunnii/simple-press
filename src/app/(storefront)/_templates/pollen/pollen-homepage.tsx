@@ -12,6 +12,8 @@ import { PollenHero } from "./pollen-homepage-hero";
 export async function PollenHomepage() {
   const homepage = await api.business.getHomepage();
 
+  const primaryColor = homepage?.siteContent?.primaryColor ?? "#5e8b4a";
+
   const themeSpecificFields = homepage?.siteContent?.customFields as Record<
     string,
     string
@@ -58,12 +60,12 @@ export async function PollenHomepage() {
   const portfolioGalleryId = themeSpecificFields["pollen.global.gallery"];
 
   // Fetch gallery if set
-  const gallery = portfolioGalleryId
-    ? await db.gallery.findUnique({
-        where: { id: portfolioGalleryId },
-        include: { images: { orderBy: { sortOrder: "asc" } } },
-      })
-    : null;
+  // const gallery = portfolioGalleryId
+  //   ? await db.gallery.findUnique({
+  //       where: { id: portfolioGalleryId },
+  //       include: { images: { orderBy: { sortOrder: "asc" } } },
+  //     })
+  //   : null;
 
   return (
     <>
@@ -91,7 +93,7 @@ export async function PollenHomepage() {
       />
       <PollenHomepageAbout services={services} />
 
-      {gallery && <GalleryRenderer gallery={gallery} />}
+      {/* {gallery && <GalleryRenderer gallery={gallery} />} */}
 
       <PollenHomepageGallery />
       <PollenCallToAction

@@ -52,7 +52,7 @@ export function PollenAboutPage({ business }: DefaultAboutPageTemplateProps) {
       title="About Us"
       subtitle="Our Story"
     >
-      <section className="py-20 md:py-32">
+      <section className="pt-20 md:pt-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
@@ -80,7 +80,7 @@ export function PollenAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* Team Section */}
-      <section className="bg-white py-20 md:py-32">
+      <section className="bg-white py-10 md:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">

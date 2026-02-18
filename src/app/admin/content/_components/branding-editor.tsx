@@ -43,6 +43,8 @@ type Props = {
     footerText: string | null;
     socialLinks: unknown;
     primaryColor: string | null;
+    secondaryColor: string | null;
+    accentColor: string | null;
   };
 };
 
@@ -81,6 +83,8 @@ export function BrandingEditor({ business, siteContent }: Props) {
       logoUrl: siteContent.logoUrl ?? "",
       logoFile: null,
       primaryColor: siteContent?.primaryColor ?? "",
+      secondaryColor: siteContent?.secondaryColor ?? "",
+      accentColor: siteContent?.accentColor ?? "",
       templateId: business?.templateId ?? "",
       faviconUrl: siteContent.faviconUrl ?? "",
       faviconFile: null,
@@ -113,6 +117,8 @@ export function BrandingEditor({ business, siteContent }: Props) {
         logoUrl: data.logoUrl ?? "",
         logoFile: null,
         primaryColor: data?.primaryColor ?? "",
+        secondaryColor: data?.secondaryColor ?? "",
+        accentColor: data?.accentColor ?? "",
         templateId: templateId ?? "",
         faviconUrl: data.faviconUrl ?? "",
         faviconFile: null,
@@ -157,6 +163,8 @@ export function BrandingEditor({ business, siteContent }: Props) {
       socialLinks: socialLinks,
       logoUrl: siteContent.logoUrl ?? "",
       primaryColor: siteContent?.primaryColor ?? "",
+      secondaryColor: siteContent?.secondaryColor ?? "",
+      accentColor: siteContent?.accentColor ?? "",
       templateId: business?.templateId ?? "",
       faviconUrl: siteContent.faviconUrl ?? "",
       faviconFile: null,
@@ -206,6 +214,8 @@ export function BrandingEditor({ business, siteContent }: Props) {
       socialLinks: data.socialLinks ?? {},
       logoUrl,
       primaryColor: data.primaryColor ?? "",
+      secondaryColor: data.secondaryColor ?? "",
+      accentColor: data.accentColor ?? "",
       faviconUrl,
     });
   };
@@ -337,6 +347,64 @@ export function BrandingEditor({ business, siteContent }: Props) {
                       </div>
                       <p className="mt-1 text-sm text-gray-500">
                         Main color used for buttons and accents
+                      </p>
+                    </>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="secondaryColor"
+                  render={({ field }) => (
+                    <>
+                      <Label htmlFor="secondaryColor">
+                        Secondary Color (WIP)
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="primaryColor"
+                          type="color"
+                          value={field.value ?? ""}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          className="h-10 w-20"
+                        />
+                        <Input
+                          type="text"
+                          value={field.value ?? ""}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          placeholder="#3b82f6"
+                          className="flex-1"
+                        />
+                      </div>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Secondary color used for background and accents
+                      </p>
+                    </>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="accentColor"
+                  render={({ field }) => (
+                    <>
+                      <Label htmlFor="accentColor">Accent Color (WIP)</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="primaryColor"
+                          type="color"
+                          value={field.value ?? ""}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          className="h-10 w-20"
+                        />
+                        <Input
+                          type="text"
+                          value={field.value ?? ""}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          placeholder="#3b82f6"
+                          className="flex-1"
+                        />
+                      </div>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Accent color used for buttons and accents
                       </p>
                     </>
                   )}

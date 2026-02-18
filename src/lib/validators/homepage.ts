@@ -50,6 +50,8 @@ export const brandingFormSchema = z.object({
   logoUrl: z.string().url().optional().nullable(),
   logoFile: z.instanceof(File).optional().nullable(),
   primaryColor: z.string().nullable(),
+  secondaryColor: z.string().nullable(),
+  accentColor: z.string().nullable(),
   templateId: z.string(),
   faviconUrl: z.string().url().optional().nullable(),
   faviconFile: z.instanceof(File).optional().nullable(),

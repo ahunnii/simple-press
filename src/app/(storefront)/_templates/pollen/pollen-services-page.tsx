@@ -147,7 +147,8 @@ export function PollenServicesPage({ business }: Props) {
                 }
                 className={buttonVariants({
                   size: "lg",
-                  className: "gap-2 bg-[#2a351f] text-white hover:bg-[#3d4d2f]",
+                  className:
+                    "gap-2 bg-[#2a351f]! text-white hover:bg-[#3d4d2f]!",
                 })}
               >
                 {themeSpecificFields["pollen.services.cta-button-text"] ??
@@ -227,7 +228,7 @@ export function PollenServicesPage({ business }: Props) {
                   size: "lg",
                   variant: "outline",
                   className:
-                    "border-[#374151] text-[#374151] hover:bg-[#374151] hover:text-white",
+                    "border-[#374151] text-[#374151] hover:bg-[#374151]",
                 })}
               >
                 {themeSpecificFields["pollen.services.faq-button-text"] ??

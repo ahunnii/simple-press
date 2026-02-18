@@ -70,7 +70,7 @@ export function PollenHomepageGallery() {
             href="/gallery"
             className={buttonVariants({
               size: "lg",
-              className: "gap-2",
+              className: "gap-2 bg-[#5e8b4a]! hover:bg-[#5e8b4a]/90!",
             })}
           >
             View Portfolio

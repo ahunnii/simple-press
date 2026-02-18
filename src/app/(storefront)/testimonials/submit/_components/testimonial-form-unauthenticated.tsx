@@ -28,7 +28,6 @@ type TestimonialFormUnauthenticatedProps = {
 
 export function TestimonialFormUnauthenticated({
   code,
-  business,
 }: TestimonialFormUnauthenticatedProps) {
   const router = useRouter();
   const [name, setName] = useState("");

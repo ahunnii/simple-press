@@ -150,15 +150,12 @@ export const businessRouter = createTRPCRouter({
         templateId: true,
         siteContent: {
           select: {
-            heroTitle: true,
-            heroSubtitle: true,
-            heroImageUrl: true,
-            heroButtonText: true,
-            heroButtonLink: true,
-            aboutTitle: true,
-            aboutText: true,
-            aboutImageUrl: true,
-            features: true,
+            primaryColor: true,
+            secondaryColor: true,
+            accentColor: true,
+            logoUrl: true,
+            logoAltText: true,
+            faviconUrl: true,
             customFields: true,
           },
         },
@@ -285,6 +282,7 @@ export const businessRouter = createTRPCRouter({
       },
       include: {
         siteContent: true,
+
         images: true,
 
         products: {
@@ -339,11 +337,7 @@ export const businessRouter = createTRPCRouter({
           : {}),
         ...(input?.includeSiteContent
           ? {
-              siteContent: {
-                include: {
-                  navigationItems: true,
-                },
-              },
+              siteContent: true,
             }
           : {}),
       };
