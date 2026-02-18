@@ -1,14 +1,6 @@
 import Image from "next/image";
 
-// import { SubmitTestimonialClient } from "./_components/submit-testimonial-client";
-
-export const metadata = {
-  title: "Submit a Testimonial",
-  description:
-    "Share your experience with Detroit Pollinator Company. Your feedback helps others discover our pollinator garden design and green space services.",
-};
-
-export default function SubmitTestimonialPage() {
+export function SubmitTestimonialPage() {
   return (
     <div className="bg-background">
       {/* Hero Section */}

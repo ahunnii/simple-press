@@ -51,7 +51,7 @@ export function DarkTrendContactPage({
           <div className="relative aspect-square max-w-md overflow-hidden rounded-full">
             <Image
               src={
-                themeSpecificFields["dark-trend.contact.image"] ??
+                themeSpecificFields?.["dark-trend.contact.image"] ??
                 "/placeholder.svg"
               }
               alt="Contact Us"
@@ -65,15 +65,15 @@ export function DarkTrendContactPage({
           <div className="space-y-6">
             <div>
               <span className="text-sm font-semibold tracking-wider text-purple-500 uppercase">
-                {themeSpecificFields["dark-trend.contact.subheader"] ??
+                {themeSpecificFields?.["dark-trend.contact.subheader"] ??
                   "Contact Us Subheader"}
               </span>
               <h2 className="mt-2 text-3xl font-bold text-white md:text-5xl">
-                {themeSpecificFields["dark-trend.contact.header"] ??
+                {themeSpecificFields?.["dark-trend.contact.header"] ??
                   "Contact Us"}
               </h2>
               <p className="mt-4 text-white/70">
-                {themeSpecificFields["dark-trend.contact.description"] ??
+                {themeSpecificFields?.["dark-trend.contact.description"] ??
                   "Contact Us Description"}
               </p>
             </div>

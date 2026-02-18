@@ -2,12 +2,12 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 const globalData: TemplateField[] = [
   {
-    key: "pollen.global.header-background",
-    label: "Header Background",
-    description: "Background image for the header",
-    type: "image",
+    key: "pollen.global.phone-number",
+    label: "Phone Number",
+    description: "Phone number visible on the site",
+    type: "text",
     page: "global",
-    group: "global.header",
+    group: "global.contact",
     gridColumn: "col-span-full",
   },
   {
@@ -355,7 +355,8 @@ const contactPageData: TemplateField[] = [
   {
     key: "pollen.contact.address",
     label: "Physical Address",
-    description: "Address shown on the contact page (use new line for second line)",
+    description:
+      "Address shown on the contact page (use new line for second line)",
     type: "textarea",
     page: "contact",
     group: "contact.main",
@@ -699,6 +700,14 @@ const fieldGroups: TemplateFieldGroup[] = [
     description: "Services section after the hero section",
     icon: "🎯",
     columns: 1,
+  },
+  {
+    id: "global.contact",
+    title: "Contact",
+    description:
+      "Contact information for your business, displayed throughout the site",
+    icon: "🎯",
+    columns: 2,
   },
   {
     id: "global.services",

@@ -23,7 +23,7 @@ export function DarkTrendAboutPage({
           <div className="relative aspect-square overflow-hidden rounded-sm bg-linear-to-br from-purple-600 to-blue-500">
             <Image
               src={
-                themeSpecificFields["dark-trend.about.first-image"] ??
+                themeSpecificFields?.["dark-trend.about.first-image"] ??
                 "/placeholder.svg"
               }
               alt="About Us"
@@ -37,11 +37,11 @@ export function DarkTrendAboutPage({
           <div className="space-y-8">
             <div>
               <span className="text-sm font-semibold tracking-wider text-purple-500 uppercase">
-                {themeSpecificFields["dark-trend.about.subheader"] ??
+                {themeSpecificFields?.["dark-trend.about.subheader"] ??
                   "Subheader"}
               </span>
               <h2 className="mt-2 text-3xl font-bold text-white md:text-5xl">
-                {themeSpecificFields["dark-trend.about.header"] ?? "Header"}
+                {themeSpecificFields?.["dark-trend.about.header"] ?? "Header"}
               </h2>
             </div>
 
@@ -53,8 +53,9 @@ export function DarkTrendAboutPage({
                 </div>
                 <div>
                   <h3 className="mb-2 text-xl font-semibold text-white">
-                    {themeSpecificFields["dark-trend.about.feature-1-header"] ??
-                      "Feature 1 Header"}
+                    {themeSpecificFields?.[
+                      "dark-trend.about.feature-1-header"
+                    ] ?? "Feature 1 Header"}
                   </h3>
                   <p className="text-white/70">
                     {themeSpecificFields[
@@ -70,8 +71,9 @@ export function DarkTrendAboutPage({
                 </div>
                 <div>
                   <h3 className="mb-2 text-xl font-semibold text-white">
-                    {themeSpecificFields["dark-trend.about.feature-2-header"] ??
-                      "Feature 2 Header"}
+                    {themeSpecificFields?.[
+                      "dark-trend.about.feature-2-header"
+                    ] ?? "Feature 2 Header"}
                   </h3>
                   <p className="text-white/70">
                     {themeSpecificFields[
@@ -87,8 +89,9 @@ export function DarkTrendAboutPage({
                 </div>
                 <div>
                   <h3 className="mb-2 text-xl font-semibold text-white">
-                    {themeSpecificFields["dark-trend.about.feature-3-header"] ??
-                      "Feature 3 Header"}
+                    {themeSpecificFields?.[
+                      "dark-trend.about.feature-3-header"
+                    ] ?? "Feature 3 Header"}
                   </h3>
                   <p className="text-white/70">
                     {themeSpecificFields[
@@ -105,10 +108,10 @@ export function DarkTrendAboutPage({
             >
               <Link
                 href={
-                  themeSpecificFields["dark-trend.about.button-link"] ?? "#!"
+                  themeSpecificFields?.["dark-trend.about.button-link"] ?? "#!"
                 }
               >
-                {themeSpecificFields["dark-trend.about.button"] ?? "Button"}
+                {themeSpecificFields?.["dark-trend.about.button"] ?? "Button"}
               </Link>
             </Button>
           </div>
@@ -121,11 +124,11 @@ export function DarkTrendAboutPage({
           {/* Content */}
           <div className="space-y-6">
             <h2 className="text-4xl font-bold text-white md:text-6xl">
-              {themeSpecificFields["dark-trend.about.cta-header"] ??
+              {themeSpecificFields?.["dark-trend.about.cta-header"] ??
                 "CTA Header"}
             </h2>
             <p className="text-lg text-white/70">
-              {themeSpecificFields["dark-trend.about.cta-description"] ??
+              {themeSpecificFields?.["dark-trend.about.cta-description"] ??
                 "CTA Description"}
             </p>
             <Button
@@ -134,11 +137,11 @@ export function DarkTrendAboutPage({
             >
               <Link
                 href={
-                  themeSpecificFields["dark-trend.about.cta-button-link"] ??
+                  themeSpecificFields?.["dark-trend.about.cta-button-link"] ??
                   "#!"
                 }
               >
-                {themeSpecificFields["dark-trend.about.cta-button-text"] ??
+                {themeSpecificFields?.["dark-trend.about.cta-button-text"] ??
                   "CTA Button"}
               </Link>
             </Button>
@@ -147,7 +150,7 @@ export function DarkTrendAboutPage({
           <div className="relative aspect-4/5 overflow-hidden rounded-sm bg-zinc-900">
             <Image
               src={
-                themeSpecificFields["dark-trend.about.second-image"] ??
+                themeSpecificFields?.["dark-trend.about.second-image"] ??
                 "/placeholder.svg"
               }
               alt="Custom Work"

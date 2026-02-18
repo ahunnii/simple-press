@@ -92,7 +92,7 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
             <div className="relative aspect-4/3 overflow-hidden rounded-sm">
               <Image
                 src={
-                  themeSpecificFields["modern.about.first-image"] ??
+                  themeSpecificFields?.["modern.about.first-image"] ??
                   "/placeholder.svg"
                 }
                 alt=""
@@ -129,19 +129,22 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
       <section className="bg-primary py-20">
         <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
           <h2 className="text-primary-foreground font-serif text-3xl md:text-4xl">
-            {themeSpecificFields["modern.about.cta-header"] ?? "Call to Action"}
+            {themeSpecificFields?.["modern.about.cta-header"] ??
+              "Call to Action"}
           </h2>
           <p className="text-primary-foreground/70 mx-auto mt-4 max-w-md text-sm">
-            {themeSpecificFields["modern.about.cta-text"] ??
+            {themeSpecificFields?.["modern.about.cta-text"] ??
               "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
           </p>
           <Link
             href={
-              themeSpecificFields["modern.about.cta-button-link"] ?? "/products"
+              themeSpecificFields?.["modern.about.cta-button-link"] ??
+              "/products"
             }
             className="bg-primary-foreground text-primary mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
           >
-            {themeSpecificFields["modern.about.cta-button-text"] ?? "Shop Now"}
+            {themeSpecificFields?.["modern.about.cta-button-text"] ??
+              "Shop Now"}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

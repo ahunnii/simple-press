@@ -32,7 +32,7 @@ export function PollenGeneralLayout({
         <Image
           src={
             imageUrl ??
-            themeSpecificFields["pollen.global.header-background"] ??
+            themeSpecificFields?.["pollen.global.header-background"] ??
             "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1920&h=600&fit=crop"
           }
           alt=""
@@ -58,24 +58,26 @@ export function PollenGeneralLayout({
         <div className="py-16">
           <PollenCallToAction
             title={
-              themeSpecificFields["pollen.global.cta-title"] ?? "Call to Action"
+              themeSpecificFields?.["pollen.global.cta-title"] ??
+              "Call to Action"
             }
             subtitle={
-              themeSpecificFields["pollen.global.cta-subtitle"] ??
+              themeSpecificFields?.["pollen.global.cta-subtitle"] ??
               "Call to Action"
             }
             description={
-              themeSpecificFields["pollen.global.cta-text"] ?? "Call to Action"
+              themeSpecificFields?.["pollen.global.cta-text"] ??
+              "Call to Action"
             }
             buttonText={
-              themeSpecificFields["pollen.global.cta-button-text"] ??
+              themeSpecificFields?.["pollen.global.cta-button-text"] ??
               "Call to Action"
             }
             buttonLink={
-              themeSpecificFields["pollen.global.cta-button-link"] ?? "#!"
+              themeSpecificFields?.["pollen.global.cta-button-link"] ?? "#!"
             }
             imageUrl={
-              themeSpecificFields["pollen.global.cta-image"] ??
+              themeSpecificFields?.["pollen.global.cta-image"] ??
               "/placeholder.svg"
             }
           />

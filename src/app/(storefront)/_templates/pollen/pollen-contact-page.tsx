@@ -19,20 +19,20 @@ export function PollenContactPage({
   >;
 
   const formImage =
-    themeSpecificFields["pollen.contact.form-image"] ?? DEFAULT_FORM_IMAGE;
+    themeSpecificFields?.["pollen.contact.form-image"] ?? DEFAULT_FORM_IMAGE;
   const formTitle =
-    themeSpecificFields["pollen.contact.form-title"] ?? "Send us a message";
+    themeSpecificFields?.["pollen.contact.form-title"] ?? "Send us a message";
   const formDescription =
-    themeSpecificFields["pollen.contact.form-description"] ??
+    themeSpecificFields?.["pollen.contact.form-description"] ??
     "We'd love to hear from you!";
 
   const physicalAddress =
-    themeSpecificFields["pollen.contact.address"] ??
+    themeSpecificFields?.["pollen.contact.address"] ??
     business?.businessAddress ??
     "Detroit, MI";
   const contactEmail = business?.supportEmail ?? "hello@example.com";
   const phoneNumber =
-    themeSpecificFields["pollen.contact.phone"] ?? "(123) 456-7890";
+    themeSpecificFields?.["pollen.contact.phone"] ?? "(123) 456-7890";
 
   return (
     <PollenGeneralLayout

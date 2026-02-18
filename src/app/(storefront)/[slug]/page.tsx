@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
@@ -42,5 +43,5 @@ export async function generateMetadata({ params }: Props) {
   return {
     title: !!page.metaTitle ? page.metaTitle : page.title,
     description: !!page.metaDescription ? page.metaDescription : page.excerpt,
-  };
+  } as Metadata;
 }

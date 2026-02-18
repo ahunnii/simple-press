@@ -19,6 +19,11 @@ const accountLinks = [
 ];
 
 export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
+  const themeSpecificFields = business?.siteContent?.customFields as Record<
+    string,
+    string
+  >;
+
   return (
     <footer className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -38,9 +43,17 @@ export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
               )}
             </Link>
             <div className="space-y-3 text-sm leading-relaxed text-[#6b7280]">
-              <p>Phone: (313) 312-6691</p>
-              <p>Email: hello@detroitpollinatorcompany.com</p>
-              <p>Address: 19926 Derby St, Detroit, MI 48203</p>
+              <p>
+                Phone:{" "}
+                {themeSpecificFields?.["pollen.global.phone-number"] ??
+                  "(XXX) XXX-XXXX"}
+              </p>
+              <p>Email: {business?.supportEmail ?? "hello@example.com"}</p>
+              <p>
+                {" "}
+                Address:{" "}
+                {business?.businessAddress ?? "123 Main St, Anytown, USA"}
+              </p>
             </div>
           </div>
 
@@ -85,7 +98,8 @@ export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
 
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-[#e5e7eb] pt-8 md:flex-row">
           <p className="text-sm text-[#6b7280]">
-            Copyright © 2026 Detroit Pollinator Company
+            Copyright © {new Date().getFullYear()} {business.name}. All rights
+            reserved.
           </p>
           <a
             href="#"

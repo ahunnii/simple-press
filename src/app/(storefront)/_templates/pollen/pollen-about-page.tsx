@@ -13,35 +13,35 @@ export function PollenAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const teamMembers = [
     {
       name:
-        themeSpecificFields["pollen.about.team-member-1-name"] ??
+        themeSpecificFields?.["pollen.about.team-member-1-name"] ??
         "Team Member 1",
       role:
-        themeSpecificFields["pollen.about.team-member-1-role"] ??
+        themeSpecificFields?.["pollen.about.team-member-1-role"] ??
         "Team Member 1 Role",
       image:
-        themeSpecificFields["pollen.about.team-member-1-image"] ??
+        themeSpecificFields?.["pollen.about.team-member-1-image"] ??
         "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face",
     },
     {
       name:
-        themeSpecificFields["pollen.about.team-member-2-name"] ??
+        themeSpecificFields?.["pollen.about.team-member-2-name"] ??
         "Team Member 2",
       role:
-        themeSpecificFields["pollen.about.team-member-2-role"] ??
+        themeSpecificFields?.["pollen.about.team-member-2-role"] ??
         "Team Member 2 Role",
       image:
-        themeSpecificFields["pollen.about.team-member-2-image"] ??
+        themeSpecificFields?.["pollen.about.team-member-2-image"] ??
         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
     },
     {
       name:
-        themeSpecificFields["pollen.about.team-member-3-name"] ??
+        themeSpecificFields?.["pollen.about.team-member-3-name"] ??
         "Team Member 3",
       role:
-        themeSpecificFields["pollen.about.team-member-3-role"] ??
+        themeSpecificFields?.["pollen.about.team-member-3-role"] ??
         "Team Member 3 Role",
       image:
-        themeSpecificFields["pollen.about.team-member-3-image"] ??
+        themeSpecificFields?.["pollen.about.team-member-3-image"] ??
         "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
     },
   ];
@@ -57,16 +57,16 @@ export function PollenAboutPage({ business }: DefaultAboutPageTemplateProps) {
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
               <h2 className="mb-6 text-4xl font-bold text-[#374151] md:text-5xl">
-                {themeSpecificFields["pollen.about.header"] ?? "Heya!"}
+                {themeSpecificFields?.["pollen.about.header"] ?? "Heya!"}
               </h2>
               <div className="space-y-6 leading-relaxed text-[#4b5563]">
-                <p>{themeSpecificFields["pollen.about.text"] ?? "Text"}</p>
+                <p>{themeSpecificFields?.["pollen.about.text"] ?? "Text"}</p>
               </div>
             </div>
             <div className="relative aspect-3/4 overflow-hidden rounded-2xl">
               <Image
                 src={
-                  themeSpecificFields["pollen.about.image"] ??
+                  themeSpecificFields?.["pollen.about.image"] ??
                   "https://images.unsplash.com/photo-1598902108854-10e335adac99?w=800&h=1000&fit=crop"
                 }
                 alt="Lush green plants in a greenhouse or conservatory"
@@ -84,11 +84,11 @@ export function PollenAboutPage({ business }: DefaultAboutPageTemplateProps) {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
-              {themeSpecificFields["pollen.about.staff-subheader"] ??
+              {themeSpecificFields?.["pollen.about.staff-subheader"] ??
                 "The Faces of Business"}
             </p>
             <h2 className="text-3xl font-bold text-[#374151] md:text-4xl">
-              {themeSpecificFields["pollen.about.staff-header"] ??
+              {themeSpecificFields?.["pollen.about.staff-header"] ??
                 "Meet Our Team"}
             </h2>
           </div>

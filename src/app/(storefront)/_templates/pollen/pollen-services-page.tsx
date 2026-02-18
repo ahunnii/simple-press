@@ -32,37 +32,37 @@ export function PollenServicesPage({ business }: Props) {
     {
       icon: Flower2,
       title:
-        themeSpecificFields["pollen.global.about-service-title-1"] ??
+        themeSpecificFields?.["pollen.global.about-service-title-1"] ??
         "Service 1",
       description:
-        themeSpecificFields["pollen.global.about-service-description-1"] ??
+        themeSpecificFields?.["pollen.global.about-service-description-1"] ??
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     },
     {
       icon: HandHelping,
       title:
-        themeSpecificFields["pollen.global.about-service-title-2"] ??
+        themeSpecificFields?.["pollen.global.about-service-title-2"] ??
         "Service 2",
       description:
-        themeSpecificFields["pollen.global.about-service-description-2"] ??
+        themeSpecificFields?.["pollen.global.about-service-description-2"] ??
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     },
     {
       icon: MapIcon,
       title:
-        themeSpecificFields["pollen.global.about-service-title-3"] ??
+        themeSpecificFields?.["pollen.global.about-service-title-3"] ??
         "Service 3",
       description:
-        themeSpecificFields["pollen.global.about-service-description-3"] ??
+        themeSpecificFields?.["pollen.global.about-service-description-3"] ??
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     },
     {
       icon: BookOpen,
       title:
-        themeSpecificFields["pollen.global.about-service-title-4"] ??
+        themeSpecificFields?.["pollen.global.about-service-title-4"] ??
         "Service 4",
       description:
-        themeSpecificFields["pollen.global.about-service-description-4"] ??
+        themeSpecificFields?.["pollen.global.about-service-description-4"] ??
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     },
   ];
@@ -70,50 +70,50 @@ export function PollenServicesPage({ business }: Props) {
   const faqs = [
     {
       question:
-        themeSpecificFields["pollen.services.faq-question-1"] ??
+        themeSpecificFields?.["pollen.services.faq-question-1"] ??
         "FAQ Question 1",
       answer:
-        themeSpecificFields["pollen.services.faq-answer-1"] ?? "FAQ Answer 1",
+        themeSpecificFields?.["pollen.services.faq-answer-1"] ?? "FAQ Answer 1",
     },
     {
       question:
-        themeSpecificFields["pollen.services.faq-question-2"] ??
+        themeSpecificFields?.["pollen.services.faq-question-2"] ??
         "FAQ Question 2",
       answer:
-        themeSpecificFields["pollen.services.faq-answer-2"] ?? "FAQ Answer 2",
+        themeSpecificFields?.["pollen.services.faq-answer-2"] ?? "FAQ Answer 2",
     },
     {
       question:
-        themeSpecificFields["pollen.services.faq-question-3"] ??
+        themeSpecificFields?.["pollen.services.faq-question-3"] ??
         "FAQ Question 3",
       answer:
-        themeSpecificFields["pollen.services.faq-answer-3"] ?? "FAQ Answer 3",
+        themeSpecificFields?.["pollen.services.faq-answer-3"] ?? "FAQ Answer 3",
     },
   ];
 
   const testimonials = [
     {
       quote:
-        themeSpecificFields["pollen.services.testimonial-quote-1"] ??
+        themeSpecificFields?.["pollen.services.testimonial-quote-1"] ??
         "Testimonial Quote 1",
       author:
-        themeSpecificFields["pollen.services.testimonial-author-1"] ??
+        themeSpecificFields?.["pollen.services.testimonial-author-1"] ??
         "Testimonial Author 1",
     },
     {
       quote:
-        themeSpecificFields["pollen.services.testimonial-quote-2"] ??
+        themeSpecificFields?.["pollen.services.testimonial-quote-2"] ??
         "Testimonial Quote 2",
       author:
-        themeSpecificFields["pollen.services.testimonial-author-2"] ??
+        themeSpecificFields?.["pollen.services.testimonial-author-2"] ??
         "Testimonial Author 2",
     },
     {
       quote:
-        themeSpecificFields["pollen.services.testimonial-quote-3"] ??
+        themeSpecificFields?.["pollen.services.testimonial-quote-3"] ??
         "Testimonial Quote 3",
       author:
-        themeSpecificFields["pollen.services.testimonial-author-3"] ??
+        themeSpecificFields?.["pollen.services.testimonial-author-3"] ??
         "Testimonial Author 3",
     },
   ];
@@ -130,20 +130,21 @@ export function PollenServicesPage({ business }: Props) {
           <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
               <p className="mb-4 text-sm font-semibold tracking-wider text-[#2a351f] uppercase">
-                {themeSpecificFields["pollen.services.subtitle"] ??
+                {themeSpecificFields?.["pollen.services.subtitle"] ??
                   "About Our Services"}
               </p>
               <h2 className="mb-6 text-3xl leading-tight font-bold text-balance text-[#374151] md:text-4xl">
-                {themeSpecificFields["pollen.services.title"] ??
+                {themeSpecificFields?.["pollen.services.title"] ??
                   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
               </h2>
               <p className="mb-8 leading-relaxed text-[#4b5563]">
-                {themeSpecificFields["pollen.services.text"] ??
+                {themeSpecificFields?.["pollen.services.text"] ??
                   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
               </p>
               <Link
                 href={
-                  themeSpecificFields["pollen.services.cta-button-link"] ?? "#!"
+                  themeSpecificFields?.["pollen.services.cta-button-link"] ??
+                  "#!"
                 }
                 className={buttonVariants({
                   size: "lg",
@@ -151,7 +152,7 @@ export function PollenServicesPage({ business }: Props) {
                     "gap-2 bg-[#2a351f]! text-white hover:bg-[#3d4d2f]!",
                 })}
               >
-                {themeSpecificFields["pollen.services.cta-button-text"] ??
+                {themeSpecificFields?.["pollen.services.cta-button-text"] ??
                   "Request a Quote"}
                 <ArrowRight className="h-4 w-4" />
               </Link>
@@ -195,15 +196,15 @@ export function PollenServicesPage({ business }: Props) {
 
             <div>
               <p className="mb-4 text-sm font-semibold tracking-wider text-[#2a351f] uppercase">
-                {themeSpecificFields["pollen.services.faq-subtitle"] ??
+                {themeSpecificFields?.["pollen.services.faq-subtitle"] ??
                   "You Have Questions?"}
               </p>
               <h2 className="mb-4 text-3xl font-bold text-[#374151] md:text-4xl">
-                {themeSpecificFields["pollen.services.faq-title"] ??
+                {themeSpecificFields?.["pollen.services.faq-title"] ??
                   "Frequently Asked Questions"}
               </h2>
               <p className="mb-8 leading-relaxed text-[#6b7280]">
-                {themeSpecificFields["pollen.services.faq-description"] ??
+                {themeSpecificFields?.["pollen.services.faq-description"] ??
                   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
               </p>
 
@@ -222,7 +223,8 @@ export function PollenServicesPage({ business }: Props) {
 
               <Link
                 href={
-                  themeSpecificFields["pollen.services.faq-button-link"] ?? "#!"
+                  themeSpecificFields?.["pollen.services.faq-button-link"] ??
+                  "#!"
                 }
                 className={buttonVariants({
                   size: "lg",
@@ -231,7 +233,7 @@ export function PollenServicesPage({ business }: Props) {
                     "border-[#374151] text-[#374151] hover:bg-[#374151]",
                 })}
               >
-                {themeSpecificFields["pollen.services.faq-button-text"] ??
+                {themeSpecificFields?.["pollen.services.faq-button-text"] ??
                   "Contact Us"}
               </Link>
             </div>
@@ -247,11 +249,11 @@ export function PollenServicesPage({ business }: Props) {
         />
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p className="mb-4 text-center text-sm font-medium tracking-wider text-[#A8D081] uppercase">
-            {themeSpecificFields["pollen.services.testimonial-subtitle"] ??
+            {themeSpecificFields?.["pollen.services.testimonial-subtitle"] ??
               "Testimonials"}
           </p>
           <h2 className="mb-12 text-center text-3xl font-bold text-white md:text-4xl">
-            {themeSpecificFields["pollen.services.testimonial-title"] ??
+            {themeSpecificFields?.["pollen.services.testimonial-title"] ??
               "Hear From Our Clients"}
           </h2>
 

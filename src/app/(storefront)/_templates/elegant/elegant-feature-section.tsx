@@ -48,8 +48,8 @@ export function ElegantFeatureSection({ homepage }: Props) {
     homepage?.siteContent?.customFields as unknown,
   );
 
-  const aboutTitle = themeSpecificFields["elegant.homepage.about.title"];
-  const aboutText = themeSpecificFields["elegant.homepage.about.text"];
+  const aboutTitle = themeSpecificFields?.["elegant.homepage.about.title"];
+  const aboutText = themeSpecificFields?.["elegant.homepage.about.text"];
   // const features = homepage?.siteContent?.features as {
   //   title: string;
   //   description: string;

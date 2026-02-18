@@ -8,7 +8,6 @@ import { TrailHeader } from "../../_components/trail-header";
 export default async function PagesListPage() {
   const business = await api.business.getWith({ includePages: true });
   if (!business) notFound();
-  if (!business.siteContent) notFound();
 
   return (
     <>
