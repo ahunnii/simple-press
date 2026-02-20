@@ -39,11 +39,14 @@ model User {
 
   role          ROLE @default(USER)
 
-  businessId String?
-  business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId        String? @unique
+  business          Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-  inventoryHistory InventoryHistory[]
+  inventoryHistory  InventoryHistory[]
   customers        Customer[]
+
+    // Track invites this user created (platform admins only)
+  createdInvites PlatformInvite[] @relation("CreatedInvites")
   
   @@unique([email, businessId]) // Same email can exist across different businesses
   @@index([businessId])
@@ -160,6 +163,7 @@ model Business {
   galleries     Gallery[]
   testimonials         Testimonial[]
   testimonialInvites   TestimonialInvite[]
+   platformInvites PlatformInvite[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -396,7 +400,7 @@ model Customer {
   shippingAddresses ShippingAddress[]
   testimonials         Testimonial[]
   testimonialInvites   TestimonialInvite[]
-   reviews     ProductReview[]
+  reviews     ProductReview[]
   
   @@unique([businessId, email])
   @@index([businessId])
@@ -893,4 +897,36 @@ model ReviewVote {
   @@unique([reviewId, userId])
   @@unique([reviewId, ipAddress])
   @@index([reviewId])
+}
+
+
+// Platform admin invite codes for business creation wizard
+model PlatformInvite {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  // Who is this for?
+  email       String
+  code        String   @unique // Used in wizard URL
+  
+  // What role will they have?
+  role        String   // "owner" | "admin"
+  
+  // If owner, which business? (can be pre-created or created during wizard)
+  businessId  String?
+  business    Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  
+  // Status
+  used        Boolean   @default(false)
+  usedAt      DateTime?
+  usedBy      String?   // userId who redeemed it
+  
+  // Who created this invite
+  createdBy   String?
+  creator     User?     @relation("CreatedInvites", fields: [createdBy], references: [id], onDelete: SetNull)
+  
+  @@index([email])
+  @@index([code])
+  @@index([businessId])
 }

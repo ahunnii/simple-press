@@ -562,6 +562,20 @@ exports.Prisma.ReviewVoteScalarFieldEnum = {
   ipAddress: 'ipAddress'
 };
 
+exports.Prisma.PlatformInviteScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  email: 'email',
+  code: 'code',
+  role: 'role',
+  businessId: 'businessId',
+  used: 'used',
+  usedAt: 'usedAt',
+  usedBy: 'usedBy',
+  createdBy: 'createdBy'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -631,7 +645,8 @@ exports.Prisma.ModelName = {
   Testimonial: 'Testimonial',
   TestimonialInvite: 'TestimonialInvite',
   ProductReview: 'ProductReview',
-  ReviewVote: 'ReviewVote'
+  ReviewVote: 'ReviewVote',
+  PlatformInvite: 'PlatformInvite'
 };
 
 /**
