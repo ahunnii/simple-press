@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, Plus } from "lucide-react";
 
+import { formatPrice } from "~/lib/prices";
 import { useCart } from "~/providers/cart-context";
 
 export type CardProduct = Product & { images: ProductImage[] } & {
@@ -22,7 +23,7 @@ export function ModernProductCard({ product }: { product: CardProduct }) {
 
   return (
     <div className="group">
-      <Link href={`/products/${product.slug}`} className="block">
+      <Link href={`/shop/${product.slug}`} className="block">
         <div className="bg-muted relative aspect-square overflow-hidden rounded-sm">
           <Image
             src={product.images[0]?.url ?? "/placeholder.svg"}
@@ -35,18 +36,20 @@ export function ModernProductCard({ product }: { product: CardProduct }) {
       </Link>
       <div className="mt-4 flex items-start justify-between">
         <div>
-          <Link href={`/products/${product.id}`}>
+          <Link href={`/shop/${product.id}`}>
             <h3 className="text-foreground group-hover:text-muted-foreground text-sm font-medium transition-colors">
               {product.name}
             </h3>
           </Link>
-          <p className="text-muted-foreground mt-1 text-sm">${product.price}</p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {formatPrice(product.price)}
+          </p>
         </div>
         <button
           type="button"
           onClick={() => {
             if (product?.variants?.length > 0) {
-              router.push(`/products/${product.slug}`);
+              router.push(`/shop/${product.slug}`);
             } else {
               addItem({
                 productId: product.id,

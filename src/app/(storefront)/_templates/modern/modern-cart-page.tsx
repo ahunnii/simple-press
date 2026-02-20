@@ -8,9 +8,7 @@ export default function ModernCartPage({
   business,
 }: DefaultCartPageTemplateProps) {
   return (
-    <div className="font-sans antialiased">
-      <ModernHeader business={business} />
-
+    <div>
       <div className="bg-background">
         <div className="border-border border-b">
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
@@ -23,7 +21,6 @@ export default function ModernCartPage({
           <ModernCartContent />
         </div>
       </div>
-      <ModernFooter business={business} />
     </div>
   );
 }

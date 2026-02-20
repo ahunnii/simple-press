@@ -304,11 +304,11 @@ export function BrandingEditor({ business, siteContent }: Props) {
                   label="Template"
                   description="Choose the design template for your storefront"
                   values={[
-                    { value: "default", label: "Default" },
+                    // { value: "default", label: "Default" },
                     { value: "modern", label: "Modern" },
-                    { value: "vintage", label: "Vintage" },
-                    { value: "minimal", label: "Minimal" },
-                    { value: "elegant", label: "Elegant" },
+                    // { value: "vintage", label: "Vintage" },
+                    // { value: "minimal", label: "Minimal" },
+                    // { value: "elegant", label: "Elegant" },
                     { value: "dark-trend", label: "Dark Trend" },
                     { value: "pollen", label: "Pollen" },
                   ]}

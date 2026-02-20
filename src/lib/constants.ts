@@ -6,8 +6,10 @@ export const PLATFORM_CONFIG = {
 
 export const TEMPLATE_IDS = {
   MODERN: "modern",
-  VINTAGE: "vintage",
-  MINIMAL: "minimal",
+  // VINTAGE: "vintage",
+  // MINIMAL: "minimal",
+  DARK_TREND: "dark-trend",
+  POLLEN: "pollen",
 } as const;
 
 export const TEMPLATES = [
@@ -18,19 +20,33 @@ export const TEMPLATES = [
       "Clean and contemporary design perfect for fashion, tech, or lifestyle brands",
     previewImage: "/templates/modern-preview.png",
   },
+  // {
+  //   id: TEMPLATE_IDS.VINTAGE,
+  //   name: "Vintage",
+  //   description:
+  //     "Classic design ideal for artisan goods, antiques, or heritage brands",
+  //   previewImage: "/templates/vintage-preview.png",
+  // },
+  // {
+  //   id: TEMPLATE_IDS.MINIMAL,
+  //   name: "Minimal",
+  //   description:
+  //     "Ultra-clean design for luxury brands or professional services",
+  //   previewImage: "/templates/minimal-preview.png",
+  // },
   {
-    id: TEMPLATE_IDS.VINTAGE,
-    name: "Vintage",
+    id: TEMPLATE_IDS.DARK_TREND,
+    name: "Dark Trend",
     description:
-      "Classic design ideal for artisan goods, antiques, or heritage brands",
-    previewImage: "/templates/vintage-preview.png",
+      "Dark and mysterious design perfect for tech, gaming, or lifestyle brands",
+    previewImage: "/templates/dark-trend-preview.png",
   },
   {
-    id: TEMPLATE_IDS.MINIMAL,
-    name: "Minimal",
+    id: TEMPLATE_IDS.POLLEN,
+    name: "Pollen",
     description:
-      "Ultra-clean design for luxury brands or professional services",
-    previewImage: "/templates/minimal-preview.png",
+      "Bright and colorful design perfect for environmental brands not interested in selling.",
+    previewImage: "/templates/pollen-preview.png",
   },
 ] as const;
 

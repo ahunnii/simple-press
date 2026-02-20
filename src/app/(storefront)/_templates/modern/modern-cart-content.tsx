@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
 
+import { formatPrice } from "~/lib/prices";
 import { useCart } from "~/providers/cart-context";
 
 export function ModernCartContent() {
@@ -45,7 +46,7 @@ export function ModernCartContent() {
               className="border-border flex gap-6 border-b py-8 first:pt-0 last:border-b-0"
             >
               <Link
-                href={`/products/${item.productId}`}
+                href={`/shop/${item.productId}`}
                 className="bg-muted relative h-28 w-28 flex-shrink-0 overflow-hidden rounded-sm"
               >
                 <Image
@@ -61,7 +62,7 @@ export function ModernCartContent() {
                 <div className="flex items-start justify-between">
                   <div>
                     <Link
-                      href={`/products/${item.productId}`}
+                      href={`/shop/${item.productId}`}
                       className="text-foreground hover:text-muted-foreground text-sm font-medium transition-colors"
                     >
                       {item.productName}
@@ -115,7 +116,7 @@ export function ModernCartContent() {
                     </button>
                   </div>
                   <p className="text-foreground text-sm font-medium">
-                    ${item.price * item.quantity}
+                    {formatPrice(item.price * item.quantity)}
                   </p>
                 </div>
               </div>
@@ -134,7 +135,7 @@ export function ModernCartContent() {
           <div className="mt-6 flex flex-col gap-3">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
-              <span className="text-foreground">${totalPrice}</span>
+              <span className="text-foreground">{formatPrice(totalPrice)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Shipping</span>
@@ -148,7 +149,7 @@ export function ModernCartContent() {
             <div className="flex items-center justify-between">
               <span className="text-foreground font-medium">Total</span>
               <span className="text-foreground text-lg font-medium">
-                ${totalPrice >= 150 ? totalPrice : totalPrice + 12}
+                {formatPrice(totalPrice >= 150 ? totalPrice : totalPrice + 12)}
               </span>
             </div>
           </div>

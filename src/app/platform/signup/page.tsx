@@ -4,14 +4,20 @@ import { api } from "~/trpc/server";
 
 import { WizardClient } from "./_components/wizard-client";
 
-export default async function PlatformSignupPage() {
+type Props = {
+  searchParams: Promise<{ code?: string }>;
+};
+
+export default async function PlatformSignupPage({ searchParams }: Props) {
   const business = await api.business.simplifiedGet();
 
   if (business) {
     notFound();
   }
 
-  return <WizardClient />;
+  const { code } = await searchParams;
+
+  return <WizardClient initialCode={code} />;
 }
 
 export const metadata = {

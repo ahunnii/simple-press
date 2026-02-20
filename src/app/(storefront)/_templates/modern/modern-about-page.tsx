@@ -19,14 +19,12 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-foreground font-serif text-3xl text-balance md:text-4xl">
-              We believe your home should tell your story
+              {themeSpecificFields?.["modern.about.mission-header"] ??
+                "We believe your home should tell your story"}
             </h2>
             <p className="text-muted-foreground mt-6 leading-relaxed">
-              Haven was founded on a simple idea: that the objects we surround
-              ourselves with should be beautiful, functional, and made with
-              care. We partner directly with artisans and small makers from
-              around the world, bringing you pieces that are as meaningful as
-              they are well-made.
+              {themeSpecificFields?.["modern.about.mission-description"] ??
+                "Haven was founded on a simple idea: that the objects we surround ourselves with should be beautiful, functional, and made with care. We partner directly with artisans and small makers from around the world, bringing you pieces that are as meaningful as they are well-made."}
             </p>
           </div>
         </div>
@@ -37,10 +35,12 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center">
             <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-              What We Stand For
+              {themeSpecificFields?.["modern.about.values-subheader"] ??
+                "What We Stand For"}
             </p>
             <h2 className="text-foreground mt-2 font-serif text-3xl md:text-4xl">
-              Our Values
+              {themeSpecificFields?.["modern.about.values-header"] ??
+                "Our Values"}
             </h2>
           </div>
           <div className="mt-16 grid grid-cols-1 gap-12 md:grid-cols-3">
@@ -49,12 +49,12 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 <span className="text-accent font-serif text-lg">01</span>
               </div>
               <h3 className="text-foreground mt-6 text-sm font-semibold tracking-widest uppercase">
-                Quality First
+                {themeSpecificFields?.["modern.about.value-1-title"] ??
+                  "Quality First"}
               </h3>
               <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-                Every product is selected for its material quality,
-                craftsmanship, and durability. We believe in buying less but
-                buying better.
+                {themeSpecificFields?.["modern.about.value-1-description"] ??
+                  "Every product is selected for its material quality, craftsmanship, and durability. We believe in buying less but buying better."}
               </p>
             </div>
             <div className="text-center">
@@ -62,11 +62,12 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 <span className="text-accent font-serif text-lg">02</span>
               </div>
               <h3 className="text-foreground mt-6 text-sm font-semibold tracking-widest uppercase">
-                Sustainably Sourced
+                {themeSpecificFields?.["modern.about.value-2-title"] ??
+                  "Sustainably Sourced"}
               </h3>
               <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-                We prioritize natural, renewable, and recycled materials. Our
-                packaging is plastic-free and our shipping is carbon-neutral.
+                {themeSpecificFields?.["modern.about.value-2-description"] ??
+                  "We prioritize natural, renewable, and recycled materials. Our packaging is plastic-free and our shipping is carbon-neutral."}
               </p>
             </div>
             <div className="text-center">
@@ -74,11 +75,12 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 <span className="text-accent font-serif text-lg">03</span>
               </div>
               <h3 className="text-foreground mt-6 text-sm font-semibold tracking-widest uppercase">
-                Artisan Partnerships
+                {themeSpecificFields?.["modern.about.value-3-title"] ??
+                  "Artisan Partnerships"}
               </h3>
               <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-                We work directly with makers, ensuring fair wages and preserving
-                traditional techniques that might otherwise be lost.
+                {themeSpecificFields?.["modern.about.value-3-description"] ??
+                  "We work directly with makers, ensuring fair wages and preserving traditional techniques that might otherwise be lost."}
               </p>
             </div>
           </div>
@@ -103,22 +105,20 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
             </div>
             <div>
               <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-                How It Started
+                {themeSpecificFields?.["modern.about.story-subheader"] ??
+                  "How It Started"}
               </p>
               <h2 className="text-foreground mt-2 font-serif text-3xl text-balance md:text-4xl">
-                From a small studio to your home
+                {themeSpecificFields?.["modern.about.story-header"] ??
+                  "From a small studio to your home"}
               </h2>
               <p className="text-muted-foreground mt-6 leading-relaxed">
-                What began as a personal search for well-made, honest home goods
-                turned into Haven. After years of working in interior design,
-                our founder grew frustrated with the gap between mass production
-                and unreachable luxury.
+                {themeSpecificFields?.["modern.about.story-paragraph-1"] ??
+                  "What began as a personal search for well-made, honest home goods turned into Haven. After years of working in interior design, our founder grew frustrated with the gap between mass production and unreachable luxury."}
               </p>
               <p className="text-muted-foreground mt-4 leading-relaxed">
-                Haven bridges that gap. We travel to workshops, visit studios,
-                and build lasting relationships with the people who make our
-                products. The result is a collection that feels personal,
-                because it is.
+                {themeSpecificFields?.["modern.about.story-paragraph-2"] ??
+                  "Haven bridges that gap. We travel to workshops, visit studios, and build lasting relationships with the people who make our products. The result is a collection that feels personal, because it is."}
               </p>
             </div>
           </div>

@@ -1,17 +1,18 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../types";
+import { useProduct } from "~/hooks/use-product";
 
 import { ModernProductActions } from "./modern-product-actions";
 
-export async function ModernProductPage({
+export function ModernProductPage({
   product,
 }: DefaultProductPageTemplateProps) {
-  //   const related = products
-  //     .filter((p) => p.category === product.category && p.id !== product.id)
-  //     .slice(0, 4);
+  const { formatPrice, displayPrice } = useProduct(product);
 
   const related = [];
   return (
@@ -53,7 +54,7 @@ export async function ModernProductPage({
               {product.name}
             </h1>
             <p className="text-foreground mt-4 text-2xl font-light">
-              ${product.price}
+              {formatPrice(displayPrice)}
             </p>
 
             <p className="text-muted-foreground mt-6 leading-relaxed">

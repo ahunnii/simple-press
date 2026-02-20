@@ -12,6 +12,11 @@ export function FeaturedProductsGrid() {
       {products?.map((product) => (
         <ModernProductCard key={product.id} product={product as CardProduct} />
       ))}
+      {products?.length === 0 && (
+        <div className="col-span-full text-center">
+          <p className="text-muted-foreground">No products found</p>
+        </div>
+      )}
     </div>
   );
 }

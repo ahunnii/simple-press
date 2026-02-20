@@ -4,6 +4,7 @@ import { api } from "~/trpc/server";
 
 import { DarkTrendContactPage } from "../_templates/dark-trend/dark-trend-contact-page";
 import { DefaultContactPage } from "../_templates/default/default-contact-page";
+import { ModernContactPage } from "../_templates/modern/modern-contact-page";
 import { PollenContactPage } from "../_templates/pollen/pollen-contact-page";
 
 export default async function ContactPage() {
@@ -13,6 +14,7 @@ export default async function ContactPage() {
     {
       "dark-trend": DarkTrendContactPage,
       pollen: PollenContactPage,
+      modern: ModernContactPage,
     }[business.templateId] ?? DefaultContactPage;
 
   return <TemplateComponent business={business} />;

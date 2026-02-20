@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 
 import type { SignupFormData } from "./wizard-client";
@@ -27,6 +27,44 @@ export function InvitationCodeStep({
   const [code, setCode] = useState(formData.invitationCode ?? "");
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [autoVerified, setAutoVerified] = useState(false);
+
+  // Auto-verify code if it's prefilled from URL
+  useEffect(() => {
+    const verifyPrefilled = async () => {
+      if (!code || autoVerified || code !== formData.invitationCode) {
+        return;
+      }
+
+      setIsVerifying(true);
+      setError(null);
+
+      try {
+        const response = await fetch("/api/signup/verify-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ invitationCode: code }),
+        });
+
+        const data = (await response.json()) as { error?: string };
+
+        if (response.ok) {
+          setAutoVerified(true);
+          // Code is valid, auto-advance to next step
+          onNext({ invitationCode: code });
+        } else {
+          setError(data.error ?? "Invalid invitation code");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Something went wrong. Please try again.");
+      } finally {
+        setIsVerifying(false);
+      }
+    };
+
+    void verifyPrefilled();
+  }, [code, formData.invitationCode, autoVerified, onNext]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

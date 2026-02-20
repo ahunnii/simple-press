@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Check, ShoppingBag } from "lucide-react";
 
+import { formatPrice } from "~/lib/prices";
 import { useCart } from "~/providers/cart-context";
 
 export function ModernCheckoutForm() {
@@ -298,7 +299,7 @@ export function ModernCheckoutForm() {
                     </p>
                   </div>
                   <p className="text-foreground text-sm">
-                    ${item.price * item.quantity}
+                    {formatPrice(item.price * item.quantity)}
                   </p>
                 </div>
               </div>
@@ -309,12 +310,14 @@ export function ModernCheckoutForm() {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="text-foreground">${totalPrice}</span>
+                <span className="text-foreground">
+                  {formatPrice(totalPrice)}
+                </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
                 <span className="text-foreground">
-                  {shipping === 0 ? "Free" : `$${shipping}`}
+                  {shipping === 0 ? "Free" : formatPrice(shipping)}
                 </span>
               </div>
             </div>
@@ -324,7 +327,7 @@ export function ModernCheckoutForm() {
             <div className="flex items-center justify-between">
               <span className="text-foreground font-medium">Total</span>
               <span className="text-foreground text-lg font-medium">
-                ${total}
+                {formatPrice(total)}
               </span>
             </div>
           </div>

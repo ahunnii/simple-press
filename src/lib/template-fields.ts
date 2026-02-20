@@ -3,6 +3,10 @@ import {
   darkTrendFieldGroups,
 } from "~/app/(storefront)/_templates/dark-trend";
 import {
+  modernData,
+  modernFieldGroups,
+} from "~/app/(storefront)/_templates/modern";
+import {
   pollenData,
   pollenFieldGroups,
 } from "~/app/(storefront)/_templates/pollen";
@@ -39,127 +43,12 @@ export type TemplateFieldGroup = {
 
 // Define groups for each template
 export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
-  modern: [
-    // Global groups
-    {
-      id: "global.announcement",
-      title: "Announcement Banner",
-      description: "Top banner that appears across all pages",
-      icon: "📢",
-      columns: 2,
-    },
-    {
-      id: "global.branding",
-      title: "Branding",
-      description: "Brand colors and styling",
-      icon: "🎨",
-      columns: 2,
-    },
-
-    // Homepage groups
-    {
-      id: "homepage.hero",
-      title: "Hero Section",
-      description: "Main banner area at the top of homepage",
-      icon: "🎯",
-      columns: 1,
-    },
-    {
-      id: "homepage.cta",
-      title: "Call-to-Action Buttons",
-      description: "Primary and secondary action buttons",
-      icon: "🔘",
-      columns: 2,
-    },
-    {
-      id: "homepage.featured",
-      title: "Featured Section",
-      description: "Highlighted products or content area",
-      icon: "⭐",
-      columns: 1,
-    },
-    {
-      id: "homepage.social",
-      title: "Social Proof",
-      description: "Customer count, ratings, testimonials",
-      icon: "👥",
-      columns: 3,
-    },
-
-    // Product groups
-    {
-      id: "product.badges",
-      title: "Product Badges",
-      description: "Labels for new, sale, featured products",
-      icon: "🏷️",
-      columns: 3,
-    },
-    {
-      id: "product.details",
-      title: "Product Details",
-      description: "Additional product information",
-      icon: "📋",
-      columns: 1,
-    },
-
-    // Cart groups
-    {
-      id: "cart.empty",
-      title: "Empty Cart State",
-      description: "Messages when cart is empty",
-      icon: "🛒",
-      columns: 1,
-    },
-    {
-      id: "cart.incentives",
-      title: "Cart Incentives",
-      description: "Free shipping, discounts, etc.",
-      icon: "🎁",
-      columns: 2,
-    },
-  ],
   ...pollenFieldGroups,
   ...darkTrendFieldGroups,
+  ...modernFieldGroups,
 };
 
 export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
-  modern: [
-    {
-      key: "modern.banner.text",
-      label: "Banner Text",
-      description: "Text shown in the top banner",
-      type: "text",
-      page: "global",
-    },
-    {
-      key: "modern.homepage.gallery",
-      label: "Homepage Gallery",
-      description: "Gallery to display on homepage",
-      type: "gallery",
-      page: "homepage",
-    },
-    {
-      key: "modern.cta.primary",
-      label: "Primary CTA Text",
-      description: "Main call-to-action button text",
-      type: "text",
-      page: "homepage",
-    },
-    {
-      key: "modern.cta.secondary",
-      label: "Secondary CTA Text",
-      description: "Secondary call-to-action button text",
-      type: "text",
-      page: "homepage",
-    },
-    {
-      key: "modern.announcement",
-      label: "Announcement",
-      description: "Special announcement or promo message",
-      type: "textarea",
-      page: "global",
-    },
-  ],
   elegant: [
     {
       key: "elegant.tagline",
@@ -267,6 +156,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
 
   ...darkTrendData,
   ...pollenData,
+  ...modernData,
 };
 
 /**

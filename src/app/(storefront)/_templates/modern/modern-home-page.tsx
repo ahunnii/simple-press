@@ -8,13 +8,21 @@ import { FeaturedProductsGrid } from "./modern-featured-products-grid";
 
 export async function ModernHomePage() {
   const homepage = await api.business.getHomepage();
+
+  const themeSpecificFields = homepage?.siteContent?.customFields as Record<
+    string,
+    string
+  >;
   return (
     <div>
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="relative h-[85vh] min-h-[600px]">
           <Image
-            src={"/placeholder.svg"}
+            src={
+              themeSpecificFields?.["modern.homepage.hero-image"] ??
+              "/placeholder.svg"
+            }
             alt={homepage?.name ?? "Hero Image"}
             fill
             className="object-cover"
@@ -25,18 +33,24 @@ export async function ModernHomePage() {
             <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
               <div className="max-w-xl">
                 <h1 className="text-background font-serif text-5xl leading-tight text-balance md:text-7xl md:leading-tight">
-                  {"Designed for modern living"}
+                  {themeSpecificFields?.["modern.homepage.hero-title"] ??
+                    "Designed for modern living"}
                 </h1>
                 <p className="text-background/80 mt-6 text-lg leading-relaxed">
-                  {
-                    "Thoughtfully crafted home goods that blend beauty with everyday function."
-                  }
+                  {themeSpecificFields?.["modern.homepage.hero-subtitle"] ??
+                    "Thoughtfully crafted home goods that blend beauty with everyday function."}
                 </p>
                 <Link
-                  href={"/shop"}
+                  href={
+                    themeSpecificFields?.[
+                      "modern.homepage.hero-cta-button-link"
+                    ] ?? "/shop"
+                  }
                   className="bg-background text-foreground mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
                 >
-                  {"Shop Collection"}
+                  {themeSpecificFields?.[
+                    "modern.homepage.hero-cta-button-text"
+                  ] ?? "Shop Collection"}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -51,29 +65,38 @@ export async function ModernHomePage() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             <div className="text-center">
               <h3 className="text-foreground text-xs font-semibold tracking-widest uppercase">
-                Crafted With Care
+                {themeSpecificFields?.["modern.homepage.features-title-1"] ??
+                  "Crafted With Care"}
               </h3>
               <p className="text-muted-foreground mt-2 text-sm">
-                Every piece is made by skilled artisans using time-honored
-                techniques.
+                {themeSpecificFields?.[
+                  "modern.homepage.features-description-1"
+                ] ??
+                  "Every piece is made by skilled artisans using time-honored techniques."}
               </p>
             </div>
             <div className="text-center">
               <h3 className="text-foreground text-xs font-semibold tracking-widest uppercase">
-                Sustainably Made
+                {themeSpecificFields?.["modern.homepage.features-title-2"] ??
+                  "Sustainably Made"}
               </h3>
               <p className="text-muted-foreground mt-2 text-sm">
-                We source responsibly and prioritize natural, sustainable
-                materials.
+                {themeSpecificFields?.[
+                  "modern.homepage.features-description-2"
+                ] ??
+                  "We source responsibly and prioritize natural, sustainable materials."}
               </p>
             </div>
             <div className="text-center">
               <h3 className="text-foreground text-xs font-semibold tracking-widest uppercase">
-                Built to Last
+                {themeSpecificFields?.["modern.homepage.features-title-3"] ??
+                  "Built to Last"}
               </h3>
               <p className="text-muted-foreground mt-2 text-sm">
-                Quality construction means pieces you will love for years to
-                come.
+                {themeSpecificFields?.[
+                  "modern.homepage.features-description-3"
+                ] ??
+                  "Quality construction means pieces you will love for years to come."}
               </p>
             </div>
           </div>
@@ -86,14 +109,16 @@ export async function ModernHomePage() {
           <div className="flex items-end justify-between">
             <div>
               <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-                Curated Selection
+                {themeSpecificFields?.["modern.homepage.products-subtitle"] ??
+                  "Curated Selection"}
               </p>
               <h2 className="text-foreground mt-2 font-serif text-3xl md:text-4xl">
-                Featured Pieces
+                {themeSpecificFields?.["modern.homepage.products-title"] ??
+                  "Featured Pieces"}
               </h2>
             </div>
             <Link
-              href="/products"
+              href="/shop"
               className="text-foreground hover:text-muted-foreground hidden items-center gap-1 text-sm font-medium transition-colors md:flex"
             >
               View All
@@ -105,7 +130,7 @@ export async function ModernHomePage() {
           </div>
           <div className="mt-8 text-center md:hidden">
             <Link
-              href="/products"
+              href="/shop"
               className="text-foreground inline-flex items-center gap-1 text-sm font-medium"
             >
               View All Products
@@ -121,27 +146,37 @@ export async function ModernHomePage() {
           <div className="grid grid-cols-1 items-center gap-12 py-20 lg:grid-cols-2">
             <div>
               <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-                Our Story
+                {themeSpecificFields?.["modern.homepage.about-title"] ??
+                  "Our Story"}
               </p>
               <h2 className="text-foreground mt-2 font-serif text-3xl text-balance md:text-4xl">
-                Where craftsmanship meets contemporary design
+                {themeSpecificFields?.["modern.homepage.about-subtitle"] ??
+                  "Where craftsmanship meets contemporary design"}
               </h2>
               <p className="text-muted-foreground mt-6 leading-relaxed">
-                We work directly with artisans from around the world to bring
-                you pieces that tell a story. Every item in our collection is
-                chosen for its quality, beauty, and the hands that made it.
+                {themeSpecificFields?.["modern.homepage.about-text"] ??
+                  "We work directly with artisans from around the world to bring you pieces that tell a story. Every item in our collection is chosen for its quality, beauty, and the hands that made it."}
               </p>
               <Link
-                href="/about"
+                href={
+                  themeSpecificFields?.[
+                    "modern.homepage.about-cta-button-link"
+                  ] ?? "/about"
+                }
                 className="border-foreground text-foreground hover:bg-foreground hover:text-background mt-8 inline-flex items-center gap-2 border px-8 py-3 text-sm font-medium tracking-wide transition-colors"
               >
-                Learn More
+                {themeSpecificFields?.[
+                  "modern.homepage.about-cta-button-text"
+                ] ?? "Learn More"}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
+            <div className="relative aspect-4/3 overflow-hidden rounded-sm">
               <Image
-                src={"/placeholder.svg"}
+                src={
+                  themeSpecificFields?.["modern.homepage.about-image"] ??
+                  "/placeholder.svg"
+                }
                 alt="Curated collection of modern home goods"
                 fill
                 className="object-cover"
@@ -151,14 +186,8 @@ export async function ModernHomePage() {
           </div>
         </div>
       </section>
-      {/* 
-        Newsletter */}
-      {/* 
-          In a server component, interactive client-side logic such as form submission prevention and
-          state management is not possible. This renders the newsletter form as static markup.
-          For real interactivity, hydrate or extract the form to a client component. 
-        */}
-      <section className="bg-primary py-20">
+
+      {/* <section className="bg-primary py-20">
         <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
           <h2 className="text-primary-foreground font-serif text-3xl md:text-4xl">
             Stay in the loop
@@ -189,7 +218,7 @@ export async function ModernHomePage() {
             </button>
           </form>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }

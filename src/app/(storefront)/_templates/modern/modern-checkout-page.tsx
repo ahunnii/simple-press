@@ -8,8 +8,7 @@ export function ModernCheckoutPage({
   business,
 }: DefaultCheckoutPageTemplateProps) {
   return (
-    <div className="font-sans antialiased">
-      <ModernHeader business={business} />
+    <div>
       <div className="bg-background">
         <div className="border-border border-b">
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
@@ -22,7 +21,6 @@ export function ModernCheckoutPage({
           <ModernCheckoutForm />
         </div>
       </div>
-      <ModernFooter business={business} />
     </div>
   );
 }

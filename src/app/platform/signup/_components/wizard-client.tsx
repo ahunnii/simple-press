@@ -43,10 +43,15 @@ const STEPS = [
   { id: 5, name: "Customize", component: StoreCustomizationStep },
 ] as const;
 
-export function WizardClient() {
+type WizardClientProps = {
+  initialCode?: string;
+};
+
+export function WizardClient({ initialCode }: WizardClientProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Partial<SignupFormData>>({
     templateId: "modern", // Default template
+    invitationCode: initialCode?.toUpperCase(),
   });
 
   const CurrentStepComponent = STEPS[currentStep - 1]?.component ?? null;
