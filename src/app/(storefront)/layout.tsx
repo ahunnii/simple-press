@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api, HydrateClient } from "~/trpc/server";
 
+import { BambooLayout } from "./_templates/bamboo/bamboo-general-layout";
 import { DarkTrendLayout } from "./_templates/dark-trend/dark-trend-layout";
 import { DefaultLayout } from "./_templates/default/default-layout";
 import { ElegantLayout } from "./_templates/elegant/elegant-layout";
@@ -19,6 +20,7 @@ export default async function StorefrontLayout({ children }: Props) {
   const TemplateLayout =
     {
       "dark-trend": DarkTrendLayout,
+      bamboo: BambooLayout,
       default: DefaultLayout,
       elegant: ElegantLayout,
       modern: ModernLayout,

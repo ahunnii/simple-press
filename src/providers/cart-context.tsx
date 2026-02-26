@@ -147,7 +147,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-type CartItem = {
+export type CartItem = {
   productId: string;
   variantId: string | null;
   productName: string;

@@ -1,6 +1,8 @@
 import { api, HydrateClient } from "~/trpc/server";
 
 import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
+import { BambooLayout } from "./(storefront)/_templates/bamboo/bamboo-general-layout";
+import { BambooHomepage } from "./(storefront)/_templates/bamboo/bamboo-homepage";
 import { DarkTrendHomepage } from "./(storefront)/_templates/dark-trend/dark-trend-homepage";
 import { DarkTrendLayout } from "./(storefront)/_templates/dark-trend/dark-trend-layout";
 import { DefaultHomePage } from "./(storefront)/_templates/default/default-homepage";
@@ -29,12 +31,14 @@ export default async function PlatformLandingPage() {
       minimal: MinimalTemplate,
       elegant: ElegantHomePage,
       pollen: PollenHomepage,
+      bamboo: BambooHomepage,
     }[business.templateId] ?? DefaultHomePage;
 
   const TemplateLayout =
     {
       "dark-trend": DarkTrendLayout,
       default: DefaultLayout,
+      bamboo: BambooLayout,
       elegant: ElegantLayout,
       modern: ModernLayout,
       pollen: PollenLayout,

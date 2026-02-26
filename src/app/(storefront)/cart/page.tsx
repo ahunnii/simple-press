@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
+import { BambooCartPage } from "../_templates/bamboo/bamboo-cart-page";
 import { DarkTrendCartPage } from "../_templates/dark-trend/dark-trend-cart-page";
 import { DefaultCartPage } from "../_templates/default/default-cart-page";
 import ModernCartPage from "../_templates/modern/modern-cart-page";
@@ -18,6 +19,7 @@ export default async function CartPage() {
     {
       "dark-trend": DarkTrendCartPage,
       modern: ModernCartPage,
+      bamboo: BambooCartPage,
     }[business.templateId] ?? DefaultCartPage;
 
   return <TemplateComponent business={business} />;
