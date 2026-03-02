@@ -78,6 +78,11 @@ model Session {
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   activeOrganizationId String?
 
+  // Business context — cached at session creation
+  businessId     String?
+  membershipId   String?
+  membershipRole String?
+
   @@unique([token])
   @@map("session")
 }
@@ -136,6 +141,7 @@ model Business {
   // Contact & Legal
   ownerEmail      String
   supportEmail    String?
+  phoneNumber     String?
   businessAddress String?
   taxId           String? // For tax purposes
 

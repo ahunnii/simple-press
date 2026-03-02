@@ -14,6 +14,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { generalBusinessFormSchema } from "~/lib/validators/general-business";
 import { api } from "~/trpc/react";
+import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Button } from "~/components/ui/button";
 import {
@@ -43,10 +44,13 @@ export function GeneralSettings({ business }: Props) {
   const form = useForm<GeneralBusinessFormSchema>({
     resolver: zodResolver(generalBusinessFormSchema),
     defaultValues: {
-      ...business,
-      supportEmail: business.supportEmail ?? undefined,
-      businessAddress: business.businessAddress ?? undefined,
-      taxId: business.taxId ?? undefined,
+      name: business.name ?? "",
+      ownerEmail: business.ownerEmail ?? "",
+      phoneNumber: business.phoneNumber ?? "",
+      supportEmail: business.supportEmail ?? "",
+      businessAddress: business.businessAddress ?? "",
+      taxId: business.taxId ?? "",
+      slug: business.slug ?? "",
     },
   });
 
@@ -55,23 +59,22 @@ export function GeneralSettings({ business }: Props) {
     onSuccess: (data) => {
       toast.dismiss();
       toast.success(data.message);
-      form.reset({
-        ...data.business,
-        supportEmail: data.business.supportEmail ?? undefined,
-        businessAddress: data.business.businessAddress ?? undefined,
-        taxId: data.business.taxId ?? undefined,
+      handleReset({
+        name: data.business.name,
+        ownerEmail: data.business.ownerEmail,
+        supportEmail: data.business.supportEmail ?? "",
+        businessAddress: data.business.businessAddress ?? "",
+        taxId: data.business.taxId ?? "",
+        phoneNumber: data.business.phoneNumber ?? "",
+        slug: data.business.slug,
       });
+      router.refresh();
     },
     onError: (error) => {
       toast.dismiss();
       toast.error(error.message ?? "Failed to update general settings");
     },
-    onMutate: () => {
-      toast.loading("Updating general settings...");
-    },
-    onSettled: () => {
-      router.refresh();
-    },
+    onMutate: () => toast.loading("Updating general settings..."),
   });
 
   //Handlers
@@ -85,21 +88,25 @@ export function GeneralSettings({ business }: Props) {
     });
   };
 
-  const handleReset = () => {
-    form.reset({
-      ...business,
-      supportEmail: business.supportEmail ?? undefined,
-      businessAddress: business.businessAddress ?? undefined,
-      taxId: business.taxId ?? undefined,
-    });
+  const handleReset = (data?: GeneralBusinessFormSchema) => {
+    form.reset(
+      data ?? {
+        name: business.name,
+        ownerEmail: business.ownerEmail,
+        supportEmail: business.supportEmail ?? undefined,
+        businessAddress: business.businessAddress ?? undefined,
+        taxId: business.taxId ?? undefined,
+        phoneNumber: business.phoneNumber ?? undefined,
+      },
+    );
   };
 
   // Checks and Hooks
-  const isSaving = updateGeneralMutation.isPending;
+  const isSubmitting = updateGeneralMutation.isPending;
   const isDirty = form.formState.isDirty;
 
   useKeyboardEnter(form, handleSubmit);
-
+  useDirtyForm(isDirty);
   return (
     <Form {...form}>
       <form
@@ -134,15 +141,15 @@ export function GeneralSettings({ business }: Props) {
               type="button"
               variant="outline"
               size="sm"
-              disabled={isSaving || !isDirty}
-              onClick={handleReset}
+              disabled={isSubmitting || !isDirty}
+              onClick={() => handleReset()}
               className="hidden md:inline-flex"
             >
               Reset
             </Button>
 
-            <Button type="submit" size="sm" disabled={isSaving}>
-              {isSaving ? (
+            <Button type="submit" size="sm" disabled={isSubmitting}>
+              {isSubmitting ? (
                 <>
                   <span className="saving-indicator" />
                   Saving...
@@ -171,15 +178,16 @@ export function GeneralSettings({ business }: Props) {
                 <InputFormField
                   form={form}
                   name="name"
-                  label="Business Name"
+                  label="Business Name *"
                   description="The name of your business"
+                  placeholder="My Awesome Store"
                   required
                 />
 
                 <InputFormField
                   form={form}
                   name="slug"
-                  label="Store Slug"
+                  label="Store Slug *"
                   description="Your unique store identifier (cannot be changed)"
                   required
                   disabled
@@ -199,16 +207,10 @@ export function GeneralSettings({ business }: Props) {
                 <InputFormField
                   form={form}
                   name="ownerEmail"
-                  label="Owner Email"
-                  description="Primary contact email for the business owner"
+                  label="Owner Email *"
+                  placeholder="owner@example.com"
+                  description="Primary contact email for the business. Used for notifications and account management."
                   required
-                />
-
-                <InputFormField
-                  form={form}
-                  name="supportEmail"
-                  label="Support Email"
-                  description="Customer support email address"
                 />
               </CardContent>
             </Card>
@@ -216,9 +218,9 @@ export function GeneralSettings({ business }: Props) {
             {/* Legal Information */}
             <Card>
               <CardHeader>
-                <CardTitle>Legal Information</CardTitle>
+                <CardTitle>Public Information</CardTitle>
                 <CardDescription>
-                  Business address and tax information
+                  Business address and other public information
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -226,15 +228,24 @@ export function GeneralSettings({ business }: Props) {
                   form={form}
                   name="businessAddress"
                   label="Business Address"
-                  description="Full business address for legal purposes"
+                  description="Public business address. Customers will see this address on your storefront."
+                  placeholder="123 Main St, Detroit, MI, USA"
                 />
-
                 <InputFormField
                   form={form}
-                  name="taxId"
-                  label="Tax ID / EIN"
-                  description="Your business tax identification number"
-                  required
+                  name="supportEmail"
+                  label="Support Email"
+                  description="Public customer support email address. Customers will see this email address on your storefront."
+                  placeholder="support@example.com"
+                  type="email"
+                />
+                <InputFormField
+                  form={form}
+                  name="phoneNumber"
+                  label="Phone Number"
+                  description="Public business phone number. Customers will see this number on your storefront."
+                  type="tel"
+                  placeholder="123-456-7890"
                 />
               </CardContent>
             </Card>

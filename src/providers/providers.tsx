@@ -31,8 +31,15 @@ export function Providers({ children }: { children: ReactNode }) {
           // Clear router cache (protected routes)
           router.refresh();
         }}
-        social={{
-          providers: ["discord"],
+        signUp={{
+          fields: ["terms"],
+        }}
+        additionalFields={{
+          terms: {
+            label: `I agree to SimplePress's Terms of Service and Privacy Policy`,
+            type: "boolean",
+            required: true,
+          },
         }}
         Link={Link}
       >

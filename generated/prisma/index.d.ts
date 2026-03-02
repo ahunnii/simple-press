@@ -6305,6 +6305,9 @@ export namespace Prisma {
     userAgent: string | null
     userId: string | null
     activeOrganizationId: string | null
+    businessId: string | null
+    membershipId: string | null
+    membershipRole: string | null
   }
 
   export type SessionMaxAggregateOutputType = {
@@ -6317,6 +6320,9 @@ export namespace Prisma {
     userAgent: string | null
     userId: string | null
     activeOrganizationId: string | null
+    businessId: string | null
+    membershipId: string | null
+    membershipRole: string | null
   }
 
   export type SessionCountAggregateOutputType = {
@@ -6329,6 +6335,9 @@ export namespace Prisma {
     userAgent: number
     userId: number
     activeOrganizationId: number
+    businessId: number
+    membershipId: number
+    membershipRole: number
     _all: number
   }
 
@@ -6343,6 +6352,9 @@ export namespace Prisma {
     userAgent?: true
     userId?: true
     activeOrganizationId?: true
+    businessId?: true
+    membershipId?: true
+    membershipRole?: true
   }
 
   export type SessionMaxAggregateInputType = {
@@ -6355,6 +6367,9 @@ export namespace Prisma {
     userAgent?: true
     userId?: true
     activeOrganizationId?: true
+    businessId?: true
+    membershipId?: true
+    membershipRole?: true
   }
 
   export type SessionCountAggregateInputType = {
@@ -6367,6 +6382,9 @@ export namespace Prisma {
     userAgent?: true
     userId?: true
     activeOrganizationId?: true
+    businessId?: true
+    membershipId?: true
+    membershipRole?: true
     _all?: true
   }
 
@@ -6452,6 +6470,9 @@ export namespace Prisma {
     userAgent: string | null
     userId: string
     activeOrganizationId: string | null
+    businessId: string | null
+    membershipId: string | null
+    membershipRole: string | null
     _count: SessionCountAggregateOutputType | null
     _min: SessionMinAggregateOutputType | null
     _max: SessionMaxAggregateOutputType | null
@@ -6481,6 +6502,9 @@ export namespace Prisma {
     userAgent?: boolean
     userId?: boolean
     activeOrganizationId?: boolean
+    businessId?: boolean
+    membershipId?: boolean
+    membershipRole?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
@@ -6494,6 +6518,9 @@ export namespace Prisma {
     userAgent?: boolean
     userId?: boolean
     activeOrganizationId?: boolean
+    businessId?: boolean
+    membershipId?: boolean
+    membershipRole?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
@@ -6507,6 +6534,9 @@ export namespace Prisma {
     userAgent?: boolean
     userId?: boolean
     activeOrganizationId?: boolean
+    businessId?: boolean
+    membershipId?: boolean
+    membershipRole?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
@@ -6520,9 +6550,12 @@ export namespace Prisma {
     userAgent?: boolean
     userId?: boolean
     activeOrganizationId?: boolean
+    businessId?: boolean
+    membershipId?: boolean
+    membershipRole?: boolean
   }
 
-  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "expiresAt" | "token" | "createdAt" | "updatedAt" | "ipAddress" | "userAgent" | "userId" | "activeOrganizationId", ExtArgs["result"]["session"]>
+  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "expiresAt" | "token" | "createdAt" | "updatedAt" | "ipAddress" | "userAgent" | "userId" | "activeOrganizationId" | "businessId" | "membershipId" | "membershipRole", ExtArgs["result"]["session"]>
   export type SessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -6548,6 +6581,9 @@ export namespace Prisma {
       userAgent: string | null
       userId: string
       activeOrganizationId: string | null
+      businessId: string | null
+      membershipId: string | null
+      membershipRole: string | null
     }, ExtArgs["result"]["session"]>
     composites: {}
   }
@@ -6981,6 +7017,9 @@ export namespace Prisma {
     readonly userAgent: FieldRef<"Session", 'String'>
     readonly userId: FieldRef<"Session", 'String'>
     readonly activeOrganizationId: FieldRef<"Session", 'String'>
+    readonly businessId: FieldRef<"Session", 'String'>
+    readonly membershipId: FieldRef<"Session", 'String'>
+    readonly membershipRole: FieldRef<"Session", 'String'>
   }
     
 
@@ -9587,6 +9626,7 @@ export namespace Prisma {
     templateId: string | null
     ownerEmail: string | null
     supportEmail: string | null
+    phoneNumber: string | null
     businessAddress: string | null
     taxId: string | null
     stripeAccountId: string | null
@@ -9608,6 +9648,7 @@ export namespace Prisma {
     templateId: string | null
     ownerEmail: string | null
     supportEmail: string | null
+    phoneNumber: string | null
     businessAddress: string | null
     taxId: string | null
     stripeAccountId: string | null
@@ -9629,6 +9670,7 @@ export namespace Prisma {
     templateId: number
     ownerEmail: number
     supportEmail: number
+    phoneNumber: number
     businessAddress: number
     taxId: number
     stripeAccountId: number
@@ -9653,6 +9695,7 @@ export namespace Prisma {
     templateId?: true
     ownerEmail?: true
     supportEmail?: true
+    phoneNumber?: true
     businessAddress?: true
     taxId?: true
     stripeAccountId?: true
@@ -9674,6 +9717,7 @@ export namespace Prisma {
     templateId?: true
     ownerEmail?: true
     supportEmail?: true
+    phoneNumber?: true
     businessAddress?: true
     taxId?: true
     stripeAccountId?: true
@@ -9695,6 +9739,7 @@ export namespace Prisma {
     templateId?: true
     ownerEmail?: true
     supportEmail?: true
+    phoneNumber?: true
     businessAddress?: true
     taxId?: true
     stripeAccountId?: true
@@ -9790,6 +9835,7 @@ export namespace Prisma {
     templateId: string
     ownerEmail: string
     supportEmail: string | null
+    phoneNumber: string | null
     businessAddress: string | null
     taxId: string | null
     stripeAccountId: string | null
@@ -9829,6 +9875,7 @@ export namespace Prisma {
     templateId?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
+    phoneNumber?: boolean
     businessAddress?: boolean
     taxId?: boolean
     stripeAccountId?: boolean
@@ -9867,6 +9914,7 @@ export namespace Prisma {
     templateId?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
+    phoneNumber?: boolean
     businessAddress?: boolean
     taxId?: boolean
     stripeAccountId?: boolean
@@ -9889,6 +9937,7 @@ export namespace Prisma {
     templateId?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
+    phoneNumber?: boolean
     businessAddress?: boolean
     taxId?: boolean
     stripeAccountId?: boolean
@@ -9911,6 +9960,7 @@ export namespace Prisma {
     templateId?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
+    phoneNumber?: boolean
     businessAddress?: boolean
     taxId?: boolean
     stripeAccountId?: boolean
@@ -9921,7 +9971,7 @@ export namespace Prisma {
     featureFlags?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "businessAddress" | "taxId" | "stripeAccountId" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "taxId" | "stripeAccountId" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -9974,6 +10024,7 @@ export namespace Prisma {
       templateId: string
       ownerEmail: string
       supportEmail: string | null
+      phoneNumber: string | null
       businessAddress: string | null
       taxId: string | null
       stripeAccountId: string | null
@@ -10431,6 +10482,7 @@ export namespace Prisma {
     readonly templateId: FieldRef<"Business", 'String'>
     readonly ownerEmail: FieldRef<"Business", 'String'>
     readonly supportEmail: FieldRef<"Business", 'String'>
+    readonly phoneNumber: FieldRef<"Business", 'String'>
     readonly businessAddress: FieldRef<"Business", 'String'>
     readonly taxId: FieldRef<"Business", 'String'>
     readonly stripeAccountId: FieldRef<"Business", 'String'>
@@ -38679,7 +38731,10 @@ export namespace Prisma {
     ipAddress: 'ipAddress',
     userAgent: 'userAgent',
     userId: 'userId',
-    activeOrganizationId: 'activeOrganizationId'
+    activeOrganizationId: 'activeOrganizationId',
+    businessId: 'businessId',
+    membershipId: 'membershipId',
+    membershipRole: 'membershipRole'
   };
 
   export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
@@ -38728,6 +38783,7 @@ export namespace Prisma {
     templateId: 'templateId',
     ownerEmail: 'ownerEmail',
     supportEmail: 'supportEmail',
+    phoneNumber: 'phoneNumber',
     businessAddress: 'businessAddress',
     taxId: 'taxId',
     stripeAccountId: 'stripeAccountId',
@@ -39506,6 +39562,9 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"Session"> | string | null
     userId?: StringFilter<"Session"> | string
     activeOrganizationId?: StringNullableFilter<"Session"> | string | null
+    businessId?: StringNullableFilter<"Session"> | string | null
+    membershipId?: StringNullableFilter<"Session"> | string | null
+    membershipRole?: StringNullableFilter<"Session"> | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
@@ -39519,6 +39578,9 @@ export namespace Prisma {
     userAgent?: SortOrderInput | SortOrder
     userId?: SortOrder
     activeOrganizationId?: SortOrderInput | SortOrder
+    businessId?: SortOrderInput | SortOrder
+    membershipId?: SortOrderInput | SortOrder
+    membershipRole?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
   }
 
@@ -39535,6 +39597,9 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"Session"> | string | null
     userId?: StringFilter<"Session"> | string
     activeOrganizationId?: StringNullableFilter<"Session"> | string | null
+    businessId?: StringNullableFilter<"Session"> | string | null
+    membershipId?: StringNullableFilter<"Session"> | string | null
+    membershipRole?: StringNullableFilter<"Session"> | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "token">
 
@@ -39548,6 +39613,9 @@ export namespace Prisma {
     userAgent?: SortOrderInput | SortOrder
     userId?: SortOrder
     activeOrganizationId?: SortOrderInput | SortOrder
+    businessId?: SortOrderInput | SortOrder
+    membershipId?: SortOrderInput | SortOrder
+    membershipRole?: SortOrderInput | SortOrder
     _count?: SessionCountOrderByAggregateInput
     _max?: SessionMaxOrderByAggregateInput
     _min?: SessionMinOrderByAggregateInput
@@ -39566,6 +39634,9 @@ export namespace Prisma {
     userAgent?: StringNullableWithAggregatesFilter<"Session"> | string | null
     userId?: StringWithAggregatesFilter<"Session"> | string
     activeOrganizationId?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    businessId?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    membershipId?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    membershipRole?: StringNullableWithAggregatesFilter<"Session"> | string | null
   }
 
   export type AccountWhereInput = {
@@ -39735,6 +39806,7 @@ export namespace Prisma {
     templateId?: StringFilter<"Business"> | string
     ownerEmail?: StringFilter<"Business"> | string
     supportEmail?: StringNullableFilter<"Business"> | string | null
+    phoneNumber?: StringNullableFilter<"Business"> | string | null
     businessAddress?: StringNullableFilter<"Business"> | string | null
     taxId?: StringNullableFilter<"Business"> | string | null
     stripeAccountId?: StringNullableFilter<"Business"> | string | null
@@ -39772,6 +39844,7 @@ export namespace Prisma {
     templateId?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrderInput | SortOrder
+    phoneNumber?: SortOrderInput | SortOrder
     businessAddress?: SortOrderInput | SortOrder
     taxId?: SortOrderInput | SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
@@ -39813,6 +39886,7 @@ export namespace Prisma {
     templateId?: StringFilter<"Business"> | string
     ownerEmail?: StringFilter<"Business"> | string
     supportEmail?: StringNullableFilter<"Business"> | string | null
+    phoneNumber?: StringNullableFilter<"Business"> | string | null
     businessAddress?: StringNullableFilter<"Business"> | string | null
     taxId?: StringNullableFilter<"Business"> | string | null
     umamiWebsiteId?: StringNullableFilter<"Business"> | string | null
@@ -39849,6 +39923,7 @@ export namespace Prisma {
     templateId?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrderInput | SortOrder
+    phoneNumber?: SortOrderInput | SortOrder
     businessAddress?: SortOrderInput | SortOrder
     taxId?: SortOrderInput | SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
@@ -39877,6 +39952,7 @@ export namespace Prisma {
     templateId?: StringWithAggregatesFilter<"Business"> | string
     ownerEmail?: StringWithAggregatesFilter<"Business"> | string
     supportEmail?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    phoneNumber?: StringNullableWithAggregatesFilter<"Business"> | string | null
     businessAddress?: StringNullableWithAggregatesFilter<"Business"> | string | null
     taxId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     stripeAccountId?: StringNullableWithAggregatesFilter<"Business"> | string | null
@@ -42371,6 +42447,9 @@ export namespace Prisma {
     ipAddress?: string | null
     userAgent?: string | null
     activeOrganizationId?: string | null
+    businessId?: string | null
+    membershipId?: string | null
+    membershipRole?: string | null
     user: UserCreateNestedOneWithoutSessionsInput
   }
 
@@ -42384,6 +42463,9 @@ export namespace Prisma {
     userAgent?: string | null
     userId: string
     activeOrganizationId?: string | null
+    businessId?: string | null
+    membershipId?: string | null
+    membershipRole?: string | null
   }
 
   export type SessionUpdateInput = {
@@ -42395,6 +42477,9 @@ export namespace Prisma {
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     activeOrganizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipRole?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneRequiredWithoutSessionsNestedInput
   }
 
@@ -42408,6 +42493,9 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     activeOrganizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipRole?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SessionCreateManyInput = {
@@ -42420,6 +42508,9 @@ export namespace Prisma {
     userAgent?: string | null
     userId: string
     activeOrganizationId?: string | null
+    businessId?: string | null
+    membershipId?: string | null
+    membershipRole?: string | null
   }
 
   export type SessionUpdateManyMutationInput = {
@@ -42431,6 +42522,9 @@ export namespace Prisma {
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     activeOrganizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipRole?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SessionUncheckedUpdateManyInput = {
@@ -42443,6 +42537,9 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     activeOrganizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipRole?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AccountCreateInput = {
@@ -42631,6 +42728,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -42668,6 +42766,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -42705,6 +42804,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42742,6 +42842,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42779,6 +42880,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -42801,6 +42903,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42823,6 +42926,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -45733,6 +45837,9 @@ export namespace Prisma {
     userAgent?: SortOrder
     userId?: SortOrder
     activeOrganizationId?: SortOrder
+    businessId?: SortOrder
+    membershipId?: SortOrder
+    membershipRole?: SortOrder
   }
 
   export type SessionMaxOrderByAggregateInput = {
@@ -45745,6 +45852,9 @@ export namespace Prisma {
     userAgent?: SortOrder
     userId?: SortOrder
     activeOrganizationId?: SortOrder
+    businessId?: SortOrder
+    membershipId?: SortOrder
+    membershipRole?: SortOrder
   }
 
   export type SessionMinOrderByAggregateInput = {
@@ -45757,6 +45867,9 @@ export namespace Prisma {
     userAgent?: SortOrder
     userId?: SortOrder
     activeOrganizationId?: SortOrder
+    businessId?: SortOrder
+    membershipId?: SortOrder
+    membershipRole?: SortOrder
   }
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
@@ -46006,6 +46119,7 @@ export namespace Prisma {
     templateId?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrder
+    phoneNumber?: SortOrder
     businessAddress?: SortOrder
     taxId?: SortOrder
     stripeAccountId?: SortOrder
@@ -46028,6 +46142,7 @@ export namespace Prisma {
     templateId?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrder
+    phoneNumber?: SortOrder
     businessAddress?: SortOrder
     taxId?: SortOrder
     stripeAccountId?: SortOrder
@@ -46049,6 +46164,7 @@ export namespace Prisma {
     templateId?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrder
+    phoneNumber?: SortOrder
     businessAddress?: SortOrder
     taxId?: SortOrder
     stripeAccountId?: SortOrder
@@ -50520,6 +50636,9 @@ export namespace Prisma {
     ipAddress?: string | null
     userAgent?: string | null
     activeOrganizationId?: string | null
+    businessId?: string | null
+    membershipId?: string | null
+    membershipRole?: string | null
   }
 
   export type SessionUncheckedCreateWithoutUserInput = {
@@ -50531,6 +50650,9 @@ export namespace Prisma {
     ipAddress?: string | null
     userAgent?: string | null
     activeOrganizationId?: string | null
+    businessId?: string | null
+    membershipId?: string | null
+    membershipRole?: string | null
   }
 
   export type SessionCreateOrConnectWithoutUserInput = {
@@ -50758,6 +50880,9 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"Session"> | string | null
     userId?: StringFilter<"Session"> | string
     activeOrganizationId?: StringNullableFilter<"Session"> | string | null
+    businessId?: StringNullableFilter<"Session"> | string | null
+    membershipId?: StringNullableFilter<"Session"> | string | null
+    membershipRole?: StringNullableFilter<"Session"> | string | null
   }
 
   export type AccountUpsertWithWhereUniqueWithoutUserInput = {
@@ -50972,6 +51097,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -51008,6 +51134,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -51103,6 +51230,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -51139,6 +51267,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -52525,6 +52654,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -52561,6 +52691,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -52613,6 +52744,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -52649,6 +52781,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -52685,6 +52818,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -52721,6 +52855,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -52999,6 +53134,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -53035,6 +53171,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -53486,6 +53623,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -53522,6 +53660,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -53596,6 +53735,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -53632,6 +53772,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -53973,6 +54114,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -54009,6 +54151,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -54136,6 +54279,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54172,6 +54316,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54245,6 +54390,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -54281,6 +54427,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -54636,6 +54783,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54672,6 +54820,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54993,6 +55142,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -55029,6 +55179,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -55334,6 +55485,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -55370,6 +55522,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -55967,6 +56120,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -56003,6 +56157,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -56131,6 +56286,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56167,6 +56323,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56325,6 +56482,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -56361,6 +56519,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -56639,6 +56798,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56675,6 +56835,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56831,6 +56992,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -56867,6 +57029,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -56919,6 +57082,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56955,6 +57119,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56991,6 +57156,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -57027,6 +57193,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -57079,6 +57246,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57115,6 +57283,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57151,6 +57320,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -57187,6 +57357,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -57271,6 +57442,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57307,6 +57479,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57454,6 +57627,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -57490,6 +57664,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -57585,6 +57760,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57621,6 +57797,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57706,6 +57883,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -57742,6 +57920,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -57837,6 +58016,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57873,6 +58053,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58508,6 +58689,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -58544,6 +58726,7 @@ export namespace Prisma {
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
+    phoneNumber?: string | null
     businessAddress?: string | null
     taxId?: string | null
     stripeAccountId?: string | null
@@ -58633,6 +58816,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58669,6 +58853,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58745,6 +58930,9 @@ export namespace Prisma {
     ipAddress?: string | null
     userAgent?: string | null
     activeOrganizationId?: string | null
+    businessId?: string | null
+    membershipId?: string | null
+    membershipRole?: string | null
   }
 
   export type AccountCreateManyUserInput = {
@@ -58819,6 +59007,9 @@ export namespace Prisma {
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     activeOrganizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipRole?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SessionUncheckedUpdateWithoutUserInput = {
@@ -58830,6 +59021,9 @@ export namespace Prisma {
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     activeOrganizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipRole?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SessionUncheckedUpdateManyWithoutUserInput = {
@@ -58841,6 +59035,9 @@ export namespace Prisma {
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     activeOrganizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    membershipRole?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AccountUpdateWithoutUserInput = {

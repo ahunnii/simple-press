@@ -77,9 +77,12 @@ export function PagesList({ business }: PagesListProps) {
     }
   };
 
-  const storefrontUrl = business.customDomain
-    ? `https://${business.customDomain}`
-    : `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  const storefrontUrl =
+    process.env.NODE_ENV === "development"
+      ? `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`
+      : business.customDomain
+        ? `https://${business.customDomain}`
+        : `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -156,7 +159,16 @@ export function PagesList({ business }: PagesListProps) {
                   {filteredPages.map((page) => (
                     <TableRow key={page.id}>
                       <TableCell className="font-medium">
-                        {page.title}
+                        <Link
+                          href={`/admin/content/pages/${page.id}`}
+                          className="relative cursor-pointer transition-colors after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-200 hover:after:scale-x-100"
+                          style={{
+                            textUnderlineOffset: 4,
+                            textDecoration: "none",
+                          }}
+                        >
+                          {page.title}
+                        </Link>
                       </TableCell>
                       <TableCell className="text-gray-600">
                         /{page.slug}

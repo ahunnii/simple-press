@@ -1,9 +1,13 @@
-import { betterAuth } from "better-auth";
+import type { ReactElement, ReactNode } from "react";
+import { EmailTemplate } from "@daveyplate/better-auth-ui/server";
+import { betterAuth, email } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { createAuthMiddleware, organization } from "better-auth/plugins";
 
 import { env } from "~/env";
 import { checkBusiness } from "~/lib/check-business";
+import { resend } from "~/lib/email/resend";
+import { EMAIL_FROM } from "~/lib/email/send";
 import { db } from "~/server/db";
 
 export const auth = betterAuth({
@@ -16,6 +20,27 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: false, // Set to true in production
     autoSignIn: true,
+    sendResetPassword: async ({ user, url }) => {
+      void resend.emails.send({
+        from: EMAIL_FROM.NOREPLY,
+        to: user.email,
+        subject: "Reset your password",
+        // html: `Click the link to reset your password: ${url}`,
+        react: EmailTemplate({
+          action: "Reset Password",
+          heading: "Reset Password",
+          content: (
+            <>
+              <p>{`Hello ${user.name},`}</p>
+              <p>Click the button below to reset your password.</p>
+            </>
+          ),
+          siteName: "SimplePress",
+          baseUrl: env.BETTER_AUTH_BASE_URL,
+          url,
+        }),
+      });
+    },
   },
 
   socialProviders: {
@@ -42,6 +67,7 @@ export const auth = betterAuth({
       },
     },
   },
+
   // hooks: {
   //   after: createAuthMiddleware(async (ctx) => {
   //     const business = await checkBusiness();
@@ -84,28 +110,55 @@ export const auth = betterAuth({
       },
     }),
   ],
-  // databaseHooks: {
-  //   session: {
-  //     create: {
-  //       before: async (session) => {
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const business = await checkBusiness();
+          if (!business) return { data: session };
 
-  //         const business = await checkBusiness();
-  //         // Implement your custom logic to set initial active organization
+          const membership = await db.businessMembership.findFirst({
+            where: {
+              userId: session.userId,
+              businessId: business.id,
+            },
+            select: { id: true, businessId: true, role: true },
+          });
 
-  //         return {
-  //           data: {
-  //             ...session,
-  //             activeOrganizationId: business?.id,
-  //           },
-  //         };
-  //       },
-  //     },
-  //   },
-  // },
+          return {
+            data: {
+              ...session,
+              businessId: membership?.businessId ?? null,
+              membershipId: membership?.id ?? null,
+              membershipRole: membership?.role ?? null,
+              activeOrganizationId: business.id, // keep for org plugin compat
+            },
+          };
+        },
+      },
+    },
+  },
 
   trustedOrigins: ["*"],
 
   session: {
+    additionalFields: {
+      businessId: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+      },
+      membershipId: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+      },
+      membershipRole: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+      },
+    },
     cookieCache: {
       enabled: true,
       maxAge: 60 * 60 * 24 * 7, // 7 days

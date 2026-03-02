@@ -491,6 +491,7 @@ export function ProductForm({ product }: Props) {
                 />
 
                 {/* Base Inventory */}
+
                 <Card>
                   <CardHeader>
                     <CardTitle>Inventory</CardTitle>

@@ -9,21 +9,17 @@ import { DefaultPlatformBadge } from "./default-platform-badge";
 
 type Props = {
   redirectTo: string;
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]> | null;
+  business: RouterOutputs["business"]["simplifiedGet"];
 };
 
-/**
- * Used at both store subdomains (business != null)
- * and the platform root (business == null, e.g. platform admins).
- */
-export function DefaultSignInPage({ redirectTo, business }: Props) {
+export function DefaultResetPasswordPage({ redirectTo, business }: Props) {
   const isPlatformRoot = !business;
   const themeSpecificFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
 
   const signInImageUrl =
-    themeSpecificFields?.["global.sign-in.image-url"] ?? "/placeholder.svg";
+    themeSpecificFields?.["global.auth.image-url"] ?? "/placeholder.svg";
   return (
     <div className="bg-background flex min-h-screen">
       {/* ── Left panel (desktop only) ── */}
@@ -61,14 +57,12 @@ export function DefaultSignInPage({ redirectTo, business }: Props) {
           {/* Headline */}
           <div className="max-w-md">
             <h1 className="mb-4 text-4xl font-bold text-balance">
-              {isPlatformRoot
-                ? "Welcome back"
-                : `Welcome back to ${business.name}`}
+              {isPlatformRoot ? "Reset your password" : `Reset your password`}
             </h1>
             <p className="text-primary-foreground/80 mb-8 text-lg">
               {isPlatformRoot
-                ? "Sign in to your SimplePress account to manage your stores."
-                : "Sign in to track your orders and manage your account."}
+                ? "Enter your new password."
+                : `Enter your new password for ${business?.name}.`}
             </p>
 
             {/* Platform context callout — only shown on store pages */}
@@ -79,7 +73,8 @@ export function DefaultSignInPage({ redirectTo, business }: Props) {
                     Using a SimplePress account.
                   </span>{" "}
                   Your login works across all stores on the SimplePress platform
-                  — one account, everywhere.
+                  — one account, everywhere. Resetting your password will sign
+                  you out of all other stores.
                 </p>
               </div>
             )}
@@ -139,7 +134,7 @@ export function DefaultSignInPage({ redirectTo, business }: Props) {
             )}
 
             <AuthView
-              view="SIGN_IN"
+              view="RESET_PASSWORD"
               redirectTo={redirectTo}
               classNames={{ base: "max-w-full" }}
             />
@@ -157,7 +152,7 @@ export function DefaultSignInPage({ redirectTo, business }: Props) {
         </div>
 
         <div className="text-muted-foreground border-t p-4 text-center text-xs">
-          By signing in, you agree to our{" "}
+          By utilizing this service, you agree to our{" "}
           <Link
             href="/platform/terms-of-service"
             className="text-primary hover:underline"

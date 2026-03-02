@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GripVertical, Plus, X } from "lucide-react";
 
 import type { FormVariant, FormVariantOption } from "../_validators/schema";
@@ -28,10 +28,23 @@ export function VariantManager({
   basePrice,
   existingVariantOptions,
 }: Props) {
-  const [variantOptions, setVariantOptions] = useState<FormVariantOption[]>(
-    existingVariantOptions ?? [{ name: "Size", values: [] }],
+  const initialOptions =
+    existingVariantOptions ?? [{ name: "Size", values: [] }];
+  const [variantOptions, setVariantOptions] =
+    useState<FormVariantOption[]>(initialOptions);
+  const [rawValuesInputs, setRawValuesInputs] = useState<string[]>(() =>
+    initialOptions.map((o) => o.values.join(", ")),
   );
   const [showOptionsEditor, setShowOptionsEditor] = useState(false);
+
+  const prevShowOptionsEditor = useRef(showOptionsEditor);
+  useEffect(() => {
+    const justOpened = showOptionsEditor && !prevShowOptionsEditor.current;
+    prevShowOptionsEditor.current = showOptionsEditor;
+    if (justOpened) {
+      setRawValuesInputs(variantOptions.map((o) => o.values.join(", ")));
+    }
+  }, [showOptionsEditor, variantOptions]);
 
   // Generate all variant combinations from options
   const generateVariants = () => {
@@ -109,6 +122,7 @@ export function VariantManager({
 
   const addOption = () => {
     setVariantOptions([...variantOptions, { name: "", values: [] }]);
+    setRawValuesInputs((prev) => [...prev, ""]);
   };
 
   const updateOptionName = (index: number, name: string) => {
@@ -118,16 +132,27 @@ export function VariantManager({
   };
 
   const updateOptionValues = (index: number, valuesStr: string) => {
-    const updated = [...variantOptions];
-    updated[index]!.values = valuesStr
-      .split(",")
-      .map((v) => v.trim())
-      .filter(Boolean);
-    setVariantOptions(updated);
+    setRawValuesInputs((prev) => {
+      const next = [...prev];
+      next[index] = valuesStr;
+      return next;
+    });
+    setVariantOptions((prev) => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index]!,
+        values: valuesStr
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean),
+      };
+      return updated;
+    });
   };
 
   const removeOption = (index: number) => {
     setVariantOptions(variantOptions.filter((_, i) => i !== index));
+    setRawValuesInputs((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -192,8 +217,13 @@ export function VariantManager({
                 </div>
                 <Input
                   placeholder="Values (comma separated, e.g., Small, Medium, Large)"
-                  value={option.values.join(",")}
-                  onChange={(e) => updateOptionValues(index, e.target.value)}
+                  value={
+                    rawValuesInputs[index] ??
+                    option.values.join(", ")
+                  }
+                  onChange={(e) =>
+                    updateOptionValues(index, e.target.value)
+                  }
                 />
               </div>
             ))}

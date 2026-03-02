@@ -25,11 +25,16 @@ export default async function AdminLayout({ children }: Props) {
   // Allow PLATFORM_ADMIN unconditionally
   if (session.user.platformRole !== "PLATFORM_ADMIN") {
     // For everyone else, check BusinessMembership
-    const membership = await checkBusinessMembership(business.id, session.user.id);
+    const membership = await checkBusinessMembership(
+      business.id,
+      session.user.id,
+    );
     if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
       redirect("/not-permitted");
     }
   }
+
+  const businessName = business?.name ?? null;
 
   return (
     <HydrateClient>
@@ -41,7 +46,11 @@ export default async function AdminLayout({ children }: Props) {
           } as React.CSSProperties
         }
       >
-        <AppSidebar variant="inset" session={session} />
+        <AppSidebar
+          variant="inset"
+          session={session}
+          businessName={businessName}
+        />
         <SidebarInset>
           <div className="min-h-screen bg-gray-50">{children}</div>
         </SidebarInset>

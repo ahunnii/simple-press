@@ -149,7 +149,10 @@ exports.Prisma.SessionScalarFieldEnum = {
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
   userId: 'userId',
-  activeOrganizationId: 'activeOrganizationId'
+  activeOrganizationId: 'activeOrganizationId',
+  businessId: 'businessId',
+  membershipId: 'membershipId',
+  membershipRole: 'membershipRole'
 };
 
 exports.Prisma.AccountScalarFieldEnum = {
@@ -189,6 +192,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   templateId: 'templateId',
   ownerEmail: 'ownerEmail',
   supportEmail: 'supportEmail',
+  phoneNumber: 'phoneNumber',
   businessAddress: 'businessAddress',
   taxId: 'taxId',
   stripeAccountId: 'stripeAccountId',

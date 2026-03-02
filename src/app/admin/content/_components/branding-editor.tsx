@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { BrandingFormSchema } from "~/lib/validators/homepage";
+import { getAvailableTemplates } from "~/lib/template-ownership";
 import { cn } from "~/lib/utils";
 import { brandingFormSchema } from "~/lib/validators/homepage";
 import { api } from "~/trpc/react";
@@ -35,6 +36,7 @@ type Props = {
   business: {
     id: string;
     templateId: string;
+    subdomain: string;
   };
   siteContent: {
     id: string;
@@ -68,6 +70,8 @@ export function BrandingEditor({ business, siteContent }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const logoFileInputRef = useRef<HTMLInputElement | null>(null);
   const faviconFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const availableTemplates = getAvailableTemplates(business?.subdomain ?? "");
 
   // Form Setup
   const form = useForm<BrandingFormSchema>({
@@ -301,17 +305,9 @@ export function BrandingEditor({ business, siteContent }: Props) {
                 <SelectFormField
                   form={form}
                   name="templateId"
-                  label="Template"
+                  label="Template *"
                   description="Choose the design template for your storefront"
-                  values={[
-                    // { value: "default", label: "Default" },
-                    { value: "modern", label: "Modern" },
-                    // { value: "vintage", label: "Vintage" },
-                    // { value: "minimal", label: "Minimal" },
-                    // { value: "elegant", label: "Elegant" },
-                    { value: "dark-trend", label: "Dark Trend" },
-                    { value: "pollen", label: "Pollen" },
-                  ]}
+                  values={availableTemplates}
                 />
 
                 <ImageUploadFormField
@@ -324,7 +320,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
                   inputRef={logoFileInputRef}
                 />
 
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="primaryColor"
                   render={({ field }) => (
@@ -409,7 +405,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
                       </p>
                     </>
                   )}
-                />
+                /> */}
               </CardContent>
             </Card>
             {/* Favicon */}
@@ -470,37 +466,57 @@ export function BrandingEditor({ business, siteContent }: Props) {
                 <TextareaFormField
                   form={form}
                   name="footerText"
-                  label="Footer Text"
-                  placeholder="© 2024 Your Store. All rights reserved."
-                  rows={3}
+                  label="Footer Tagline"
+                  placeholder="We are here for you. Contact us for any questions or concerns."
+                  rows={2}
+                  description="This tagline will be displayed in the footer of your storefront. Acts like a mission statement or blurb about your business."
                 />
 
                 <div>
-                  <Label className="mb-4 block">Social Links</Label>
-                  <div className="space-y-3">
+                  <div className="space-y-2 pb-4">
+                    <Label className="block">Social Links</Label>
+                    <p className="text-sm text-gray-500">
+                      Want to promote your social media accounts? Add your
+                      social media links here and they will be displayed in the
+                      footer.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <InputFormField
                       form={form}
                       name="socialLinks.instagram"
                       label="Instagram"
                       placeholder="https://instagram.com/yourstore"
+                      type="url"
+                      disabled={isSubmitting}
+                      className="col-span-1"
                     />
                     <InputFormField
                       form={form}
                       name="socialLinks.facebook"
                       label="Facebook"
                       placeholder="https://facebook.com/yourstore"
+                      type="url"
+                      disabled={isSubmitting}
+                      className="col-span-1"
                     />
                     <InputFormField
                       form={form}
                       name="socialLinks.twitter"
                       label="Twitter / X"
                       placeholder="https://twitter.com/yourstore"
+                      type="url"
+                      disabled={isSubmitting}
+                      className="col-span-1"
                     />
                     <InputFormField
                       form={form}
                       name="socialLinks.linkedin"
                       label="LinkedIn"
                       placeholder="https://linkedin.com/company/yourstore"
+                      type="url"
+                      disabled={isSubmitting}
+                      className="col-span-1"
                     />
                   </div>
                 </div>

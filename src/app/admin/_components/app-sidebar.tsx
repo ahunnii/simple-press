@@ -20,6 +20,7 @@ import { Building2, Images, Users } from "lucide-react";
 
 import type { Session } from "~/server/better-auth/config";
 import { env } from "~/env";
+import { api } from "~/trpc/react";
 import {
   Sidebar,
   SidebarContent,
@@ -126,9 +127,14 @@ const getNavData = (session: Session | null) => {
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   session?: Session | null;
+  businessName?: string | null;
 };
 
-export function AppSidebar({ session, ...props }: AppSidebarProps) {
+export function AppSidebar({
+  session,
+  businessName,
+  ...props
+}: AppSidebarProps) {
   const navData = getNavData(session ?? null);
 
   return (
@@ -145,7 +151,9 @@ export function AppSidebar({ session, ...props }: AppSidebarProps) {
                   <IconTerminal className="size-8" />
                   simple_press
                 </span>
-                {/* <span className="text-sm text-gray-500">Artisanal Futures</span> */}
+                <span className="text-sm text-gray-500">
+                  {businessName ?? "Business"}
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
