@@ -1,21 +1,12 @@
 import {
   BanknoteArrowDown,
   CheckCircle,
-  Droplets,
-  Leaf,
-  Recycle,
-  Shield,
   Users,
 } from "lucide-react";
 
 import { StaggerContainer, StaggerItem } from "./bamboo-animations";
 
-const features = [
-  // {
-  //   icon: Leaf,
-  //   label: "100% Bamboo",
-  //   description: "Tree-free and sustainably sourced",
-  // },
+const DEFAULT_FEATURES = [
   {
     icon: CheckCircle,
     label: "Premium Quality",
@@ -34,7 +25,26 @@ const features = [
   },
 ];
 
-export function BambooSustainabilityBanner() {
+type BambooSustainabilityBannerProps = {
+  fields?: Record<string, string> | null;
+};
+
+export function BambooSustainabilityBanner({
+  fields,
+}: BambooSustainabilityBannerProps) {
+  const features = DEFAULT_FEATURES.map((defaultFeature, i) => {
+    const n = i + 1;
+    return {
+      icon: defaultFeature.icon,
+      label:
+        fields?.[`bamboo.homepage.sustainability-${n}-label`] ??
+        defaultFeature.label,
+      description:
+        fields?.[`bamboo.homepage.sustainability-${n}-description`] ??
+        defaultFeature.description,
+    };
+  });
+
   return (
     <section className="bg-primary">
       <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8">

@@ -121,7 +121,9 @@ export async function POST(req: NextRequest) {
           const existingUser = await db.user.findFirst({
             where: {
               email: customerEmail,
-              businessId: business.id,
+              memberships: {
+                some: { businessId: business.id },
+              },
             },
             select: { id: true },
           });

@@ -1,4 +1,8 @@
 import {
+  bambooData,
+  bambooFieldGroups,
+} from "~/app/(storefront)/_templates/bamboo";
+import {
   darkTrendData,
   darkTrendFieldGroups,
 } from "~/app/(storefront)/_templates/dark-trend";
@@ -43,6 +47,7 @@ export type TemplateFieldGroup = {
 
 // Define groups for each template
 export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
+  ...bambooFieldGroups,
   ...pollenFieldGroups,
   ...darkTrendFieldGroups,
   ...modernFieldGroups,
@@ -154,6 +159,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
     },
   ],
 
+  ...bambooData,
   ...darkTrendData,
   ...pollenData,
   ...modernData,

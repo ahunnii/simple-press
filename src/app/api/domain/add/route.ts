@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import type { DomainRouteInput } from "~/lib/validators/domain";
+import { checkBusiness } from "~/lib/check-business";
 import { isValidDomain } from "~/lib/utils";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
@@ -10,6 +11,8 @@ export async function POST(req: NextRequest) {
   try {
     // Get session
     const session = await auth.api.getSession({ headers: req.headers });
+
+    const currentBusiness = await checkBusiness();
 
     if (!session?.user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -25,20 +28,20 @@ export async function POST(req: NextRequest) {
     }
 
     // Get user's business
-    const user = await db.user.findUnique({
-      where: { id: session.user.id },
-      select: { businessId: true },
-    });
+    // const user = await db.user.findUnique({
+    //   where: { id: session.user.id },
+    //   select: { businessId: true },
+    // });
 
-    if (!user?.businessId) {
-      return NextResponse.json({ error: "No business found" }, { status: 404 });
-    }
+    // if (!user?.businessId) {
+    //   return NextResponse.json({ error: "No business found" }, { status: 404 });
+    // }
 
     // Check if domain is already taken
     const existingDomain = await db.business.findFirst({
       where: {
         customDomain: domain,
-        id: { not: user.businessId },
+        id: { not: currentBusiness?.id },
       },
     });
 
@@ -51,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     // Update business with custom domain
     await db.business.update({
-      where: { id: user.businessId },
+      where: { id: currentBusiness?.id },
       data: {
         customDomain: domain,
         domainStatus: "PENDING_DNS",
@@ -62,7 +65,7 @@ export async function POST(req: NextRequest) {
     await db.domainQueue.create({
       data: {
         domain,
-        businessId: user.businessId,
+        businessId: currentBusiness?.id ?? "",
         status: "pending",
       },
     });

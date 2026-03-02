@@ -144,27 +144,13 @@ export async function POST(req: NextRequest) {
       return newBusiness;
     });
 
-    // Create a one-time signup token for secure cross-domain session creation
-    const { randomBytes } = await import("crypto");
-    const token = randomBytes(32).toString("hex");
-
-    await db.signupToken.create({
-      data: {
-        token,
-        userId: existingUser.id,
-        businessId: business.id,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
-        used: false,
-      },
-    });
-
     // Redirect to signup completion page with token
     const isDev = process.env.NODE_ENV === "development";
     const subdomainUrl = isDev
       ? `http://${subdomain}.localhost:3000`
       : `https://${subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
 
-    const redirectUrl = `${subdomainUrl}/auth/signup-complete?token=${token}`;
+    const redirectUrl = `${subdomainUrl}/auth/signup-complete}`;
 
     return NextResponse.json({
       success: true,

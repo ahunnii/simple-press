@@ -68,7 +68,7 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
         },
       }}
       additionalLinks={[
-        ...(user.role === "ADMIN" || user.role === "OWNER"
+        ...(user.platformRole === "PLATFORM_ADMIN"
           ? [
               {
                 icon: <LayoutDashboardIcon className="h-4 w-4" />,

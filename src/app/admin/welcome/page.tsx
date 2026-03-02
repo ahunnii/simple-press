@@ -16,14 +16,18 @@ export default async function AdminWelcomePage() {
   const user = await db.user.findUnique({
     where: { id: session?.user?.id },
     include: {
-      business: {
-        where: { id: businessId?.id },
+      memberships: {
+        where: { businessId: businessId?.id },
         include: {
-          siteContent: true,
-          _count: {
-            select: {
-              products: true,
-              orders: true,
+          business: {
+            include: {
+              siteContent: true,
+              _count: {
+                select: {
+                  products: true,
+                  orders: true,
+                },
+              },
             },
           },
         },
@@ -31,7 +35,7 @@ export default async function AdminWelcomePage() {
     },
   });
 
-  if (!user?.business) {
+  if (!user?.memberships[0]?.business) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -44,7 +48,7 @@ export default async function AdminWelcomePage() {
     );
   }
 
-  const { business } = user;
+  const { business } = user.memberships[0];
 
   // Calculate setup completion
   const setupSteps = {

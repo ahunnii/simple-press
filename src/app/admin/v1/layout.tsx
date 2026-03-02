@@ -9,7 +9,7 @@ export default async function V1Layout({ children }: Props) {
   const session = await auth.api.getSession();
 
   if (!session) notFound();
-  if (session.user.role !== "ADMIN") notFound();
+  if (session.user.platformRole !== "PLATFORM_ADMIN") notFound();
 
   return <>{children}</>;
 }

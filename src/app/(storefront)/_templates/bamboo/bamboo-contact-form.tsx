@@ -75,10 +75,10 @@ export function BambooContactForm({ businessName: _businessName }: Props) {
     return (
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="flex flex-col items-center gap-4 p-12 text-center">
-          <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
-            <CheckCircle2 className="size-8 text-primary" />
+          <div className="bg-primary/10 flex size-16 items-center justify-center rounded-full">
+            <CheckCircle2 className="text-primary size-8" />
           </div>
-          <h2 className="font-serif text-xl font-semibold text-foreground">
+          <h2 className="text-foreground font-serif text-xl font-semibold">
             Message Sent
           </h2>
           <p className="text-muted-foreground">
@@ -100,7 +100,7 @@ export function BambooContactForm({ businessName: _businessName }: Props) {
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
-      className="flex flex-col gap-5"
+      className="flex w-full flex-col gap-5"
     >
       {error && (
         <Alert variant="destructive">
@@ -111,13 +111,9 @@ export function BambooContactForm({ businessName: _businessName }: Props) {
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            placeholder="Your name"
-            {...form.register("name")}
-          />
+          <Input id="name" placeholder="Your name" {...form.register("name")} />
           {form.formState.errors.name && (
-            <p className="text-xs text-destructive">
+            <p className="text-destructive text-xs">
               {form.formState.errors.name.message}
             </p>
           )}
@@ -131,7 +127,7 @@ export function BambooContactForm({ businessName: _businessName }: Props) {
             {...form.register("email")}
           />
           {form.formState.errors.email && (
-            <p className="text-xs text-destructive">
+            <p className="text-destructive text-xs">
               {form.formState.errors.email.message}
             </p>
           )}
@@ -157,7 +153,7 @@ export function BambooContactForm({ businessName: _businessName }: Props) {
           {...form.register("message")}
         />
         {form.formState.errors.message && (
-          <p className="text-xs text-destructive">
+          <p className="text-destructive text-xs">
             {form.formState.errors.message.message}
           </p>
         )}

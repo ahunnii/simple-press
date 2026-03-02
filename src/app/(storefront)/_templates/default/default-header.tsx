@@ -41,7 +41,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
         },
       }}
       additionalLinks={[
-        ...(user.role === "ADMIN"
+        ...(user.platformRole === "PLATFORM_ADMIN"
           ? [
               {
                 icon: <LayoutDashboardIcon className="h-4 w-4" />,

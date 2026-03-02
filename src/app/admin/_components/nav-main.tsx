@@ -20,7 +20,7 @@ export function NavMain({
   items: {
     title: string;
     url: string;
-    icon?: Icon | React.ComponentType<any>;
+    icon?: Icon | React.ComponentType<unknown>;
   }[];
 }) {
   const pathname = usePathname();

@@ -68,10 +68,14 @@ export const importRouter = createTRPCRouter({
       // Verify ownership
       const user = await ctx.db.user.findUnique({
         where: { id: ctx.session.user.id },
-        select: { businessId: true },
+        select: { memberships: true },
       });
 
-      if (user?.businessId !== importRecord.business.id) {
+      if (
+        !user?.memberships.some(
+          (m) => m.businessId === importRecord.business.id,
+        )
+      ) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Not authorized",
@@ -110,10 +114,14 @@ export const importRouter = createTRPCRouter({
       // Verify ownership
       const user = await ctx.db.user.findUnique({
         where: { id: ctx.session.user.id },
-        select: { businessId: true },
+        select: { memberships: true },
       });
 
-      if (user?.businessId !== importRecord.business.id) {
+      if (
+        !user?.memberships.some(
+          (m) => m.businessId === importRecord.business.id,
+        )
+      ) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Not authorized",
@@ -174,10 +182,10 @@ export const importRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const user = await ctx.db.user.findUnique({
         where: { id: ctx.session.user.id },
-        select: { businessId: true },
+        select: { memberships: true },
       });
 
-      if (user?.businessId !== input.businessId) {
+      if (!user?.memberships.some((m) => m.businessId === input.businessId)) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Not authorized",

@@ -9,7 +9,7 @@ export default async function CollectionsLayout({
 }) {
   const session = await auth.api.getSession();
 
-  if (!session?.user && session?.user.role !== "ADMIN") {
+  if (!session?.user && session?.user.platformRole !== "PLATFORM_ADMIN") {
     notFound();
   }
 

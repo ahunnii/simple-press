@@ -6,49 +6,51 @@ import type { DefaultContactPageTemplateProps } from "../types";
 
 import { BambooContactForm } from "./bamboo-contact-form";
 
-const contactInfo = [
-  {
-    icon: Mail,
-    label: "Email",
-    value: "hello@finallyresults.com",
-    href: "mailto:hello@finallyresults.com",
-  },
-  {
-    icon: MapPin,
-    label: "Location",
-    value: "Detroit, Michigan",
-    href: undefined,
-  },
-  {
-    icon: Phone,
-    label: "Phone",
-    value: "(313) 555-0199",
-    href: "tel:+13135550199",
-  },
-  {
-    icon: Clock,
-    label: "Business Hours",
-    value: "Mon - Fri, 9am - 5pm EST",
-    href: undefined,
-  },
-];
+const DEFAULT_EMAIL = "hello@finallyresults.com";
+const DEFAULT_LOCATION = "Detroit, Michigan";
+const DEFAULT_PHONE = "(313) 555-0199";
+const DEFAULT_HOURS = "Mon - Fri, 9am - 5pm EST";
 
 export function BambooContactPage({
   business,
 }: DefaultContactPageTemplateProps) {
+  const themeSpecificFields = business?.siteContent?.customFields as
+    | Record<string, string>
+    | undefined;
+
+  const header =
+    themeSpecificFields?.["bamboo.contact.header"] ?? "Get in Touch";
+  const subheader =
+    themeSpecificFields?.["bamboo.contact.subheader"] ??
+    "Have a question, want to partner with us, or just want to say hello? We would love to hear from you.";
+  const email = themeSpecificFields?.["bamboo.contact.email"] ?? DEFAULT_EMAIL;
+  const locationValue =
+    themeSpecificFields?.["bamboo.contact.location"] ?? DEFAULT_LOCATION;
+  const phone = themeSpecificFields?.["bamboo.contact.phone"] ?? DEFAULT_PHONE;
+  const hours = themeSpecificFields?.["bamboo.contact.hours"] ?? DEFAULT_HOURS;
+
+  const contactInfo = [
+    { icon: Mail, label: "Email", value: email, href: `mailto:${email}` },
+    { icon: MapPin, label: "Location", value: locationValue, href: undefined },
+    {
+      icon: Phone,
+      label: "Phone",
+      value: phone,
+      href: `tel:${phone.replace(/\D/g, "")}`,
+    },
+    { icon: Clock, label: "Business Hours", value: hours, href: undefined },
+  ];
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
       <div className="mb-12">
         <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
-          Get in Touch
+          {header}
         </h1>
-        <p className="text-muted-foreground mt-3 max-w-2xl">
-          Have a question, want to partner with us, or just want to say hello?
-          We would love to hear from you.
-        </p>
+        <p className="text-muted-foreground mt-3 max-w-2xl">{subheader}</p>
       </div>
 
-      <div className="flex flex-col gap-12 lg:flex-row">
+      <div className="flex w-full flex-col gap-12 lg:flex-row">
         {/* Form */}
         <BambooContactForm businessName={business.name} />
 

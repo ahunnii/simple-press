@@ -71,7 +71,10 @@ export const featuresRouter = createTRPCRouter({
           message: "Unknown feature flag",
         });
       }
-      if (!feature.ownerCanToggle && ctx.session.user.role !== "ADMIN") {
+      if (
+        !feature.ownerCanToggle &&
+        ctx.session.user.platformRole !== "PLATFORM_ADMIN"
+      ) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "This feature can only be toggled by platform admins",
@@ -100,7 +103,7 @@ export const featuresRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      if (ctx.session.user.role !== "ADMIN") {
+      if (ctx.session.user.platformRole !== "PLATFORM_ADMIN") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "This feature can only be set by platform admins",

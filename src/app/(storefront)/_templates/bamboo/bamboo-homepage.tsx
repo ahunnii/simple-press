@@ -10,15 +10,20 @@ import { BambooFeaturedProducts } from "./bamboo-featured-products";
 import { BambooSustainabilityBanner } from "./bamboo-sustainability-banner";
 import { BambooTestimonials } from "./bamboo-testimonials";
 
+const DEFAULT_LOCATION_ADDRESS = "18058, Detroit, MI 48234";
+
 export async function BambooHomepage() {
   const homepage = await api.business.getHomepage();
-  const businessAddress = "18058, Detroit, MI 48234";
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(businessAddress)}`;
 
   const themeSpecificFields = homepage?.siteContent?.customFields as Record<
     string,
     string
   >;
+
+  const businessAddress =
+    themeSpecificFields?.["bamboo.global.location-address"] ??
+    DEFAULT_LOCATION_ADDRESS;
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(businessAddress)}`;
 
   return (
     <PageTransition>
@@ -45,12 +50,31 @@ export async function BambooHomepage() {
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Button size="lg" asChild>
-                <Link href="/shop">
-                  Shop Now <ArrowRight className="size-4" />
+                <Link
+                  href={
+                    themeSpecificFields?.[
+                      "bamboo.homepage.hero-primary-button-link"
+                    ] ?? "/shop"
+                  }
+                >
+                  {themeSpecificFields?.[
+                    "bamboo.homepage.hero-primary-button-text"
+                  ] ?? "Shop Now"}{" "}
+                  <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
-                <Link href="/about">Our Story</Link>
+                <Link
+                  href={
+                    themeSpecificFields?.[
+                      "bamboo.homepage.hero-secondary-button-link"
+                    ] ?? "/about"
+                  }
+                >
+                  {themeSpecificFields?.[
+                    "bamboo.homepage.hero-secondary-button-text"
+                  ] ?? "Our Story"}
+                </Link>
               </Button>
             </div>
           </FadeIn>
@@ -77,11 +101,14 @@ export async function BambooHomepage() {
         <FadeIn direction="up">
           <div className="mb-12 text-center">
             <h2 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
-              <span className="text-balance">Our Curated Collection</span>
+              <span className="text-balance">
+                {themeSpecificFields?.["bamboo.homepage.featured-title"] ??
+                  "Our Curated Collection"}
+              </span>
             </h2>
             <p className="text-muted-foreground mx-auto mt-4 max-w-2xl">
-              Every product is 100% bamboo, tree-free, and crafted to the
-              highest standard. No compromises.
+              {themeSpecificFields?.["bamboo.homepage.featured-description"] ??
+                "Every product is 100% bamboo, tree-free, and crafted to the highest standard. No compromises."}
             </p>
           </div>
         </FadeIn>
@@ -90,7 +117,10 @@ export async function BambooHomepage() {
           <div className="mt-12 text-center">
             <Button variant="outline" size="lg" asChild>
               <Link href="/shop">
-                View All Products <ArrowRight className="size-4" />
+                {themeSpecificFields?.[
+                  "bamboo.homepage.featured-button-text"
+                ] ?? "View All Products"}{" "}
+                <ArrowRight className="size-4" />
               </Link>
             </Button>
           </div>
@@ -98,24 +128,29 @@ export async function BambooHomepage() {
       </section>
 
       {/* Sustainability Banner */}
-      <BambooSustainabilityBanner />
+      <BambooSustainabilityBanner fields={themeSpecificFields} />
 
       {/* About Teaser */}
       <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
         <ScaleIn>
           <div className="bg-secondary flex flex-col items-center gap-6 rounded-2xl p-8 text-center md:p-16">
             <h2 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
-              <span className="text-balance">From Detroit, With Purpose</span>
+              <span className="text-balance">
+                {themeSpecificFields?.[
+                  "bamboo.homepage.about-teaser-heading"
+                ] ?? "From Detroit, With Purpose"}
+              </span>
             </h2>
             <p className="text-muted-foreground max-w-2xl text-lg leading-relaxed">
-              We started Finally Results LLC with a simple belief: the everyday
-              products in your home should be better -- better for your family,
-              and better for the planet. Our roots in Detroit drive everything
-              we do.
+              {themeSpecificFields?.["bamboo.homepage.about-teaser-body"] ??
+                "We started Finally Results LLC with a simple belief: the everyday products in your home should be better -- better for your family, and better for the planet. Our roots in Detroit drive everything we do."}
             </p>
             <Button variant="outline" asChild>
               <Link href="/about">
-                Learn More <ArrowRight className="size-4" />
+                {themeSpecificFields?.[
+                  "bamboo.homepage.about-teaser-button-text"
+                ] ?? "Learn More"}{" "}
+                <ArrowRight className="size-4" />
               </Link>
             </Button>
           </div>
@@ -128,7 +163,10 @@ export async function BambooHomepage() {
           <FadeIn direction="up">
             <div className="mb-12 text-center">
               <h2 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
-                <span className="text-balance">Our Location</span>
+                <span className="text-balance">
+                  {themeSpecificFields?.["bamboo.homepage.location-heading"] ??
+                    "Our Location"}
+                </span>
               </h2>
             </div>
           </FadeIn>
@@ -158,7 +196,7 @@ export async function BambooHomepage() {
               </div>
             </div>
           </a>
-          {/* <BambooTestimonials /> */}
+          {/* <BambooTestimonials fields={themeSpecificFields} /> */}
         </div>
       </section>
     </PageTransition>
