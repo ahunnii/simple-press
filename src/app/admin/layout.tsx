@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
-import { checkBusiness } from "~/lib/check-business";
+import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
 import { HydrateClient } from "~/trpc/server";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
@@ -16,14 +16,19 @@ export default async function AdminLayout({ children }: Props) {
     redirect("/auth/sign-in?callbackUrl=/admin");
   }
 
-  if (session.user.role !== "ADMIN" && session.user.role !== "OWNER") {
-    redirect("/not-permitted");
-  }
-
   const business = await checkBusiness();
 
   if (!business) {
     notFound();
+  }
+
+  // Allow PLATFORM_ADMIN unconditionally
+  if (session.user.platformRole !== "PLATFORM_ADMIN") {
+    // For everyone else, check BusinessMembership
+    const membership = await checkBusinessMembership(business.id, session.user.id);
+    if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
+      redirect("/not-permitted");
+    }
   }
 
   return (
@@ -36,7 +41,7 @@ export default async function AdminLayout({ children }: Props) {
           } as React.CSSProperties
         }
       >
-        <AppSidebar variant="inset" />
+        <AppSidebar variant="inset" session={session} />
         <SidebarInset>
           <div className="min-h-screen bg-gray-50">{children}</div>
         </SidebarInset>

@@ -26,6 +26,7 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
+
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const links =
@@ -54,7 +55,7 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
         },
       }}
       additionalLinks={[
-        ...(session?.user?.role === "ADMIN" || session?.user?.role === "OWNER"
+        ...(session?.user?.platformRole === "PLATFORM_ADMIN"
           ? [
               {
                 icon: <IconLayoutDashboard className="h-4 w-4" />,

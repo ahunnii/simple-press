@@ -39,7 +39,7 @@ export function BambooFeaturedProducts() {
       {featuredProducts?.slice(0, 3).map((product) => (
         <StaggerItem key={product.id}>
           <Link
-            href={`/shop/${product.id}`}
+            href={`/shop/${product.slug}`}
             className="group border-border bg-card relative flex flex-col overflow-hidden rounded-xl border transition-shadow hover:shadow-lg"
           >
             <div className="bg-secondary relative aspect-square overflow-hidden">

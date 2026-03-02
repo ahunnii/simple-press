@@ -14,11 +14,20 @@ export const customerRouter = createTRPCRouter({
   getMyProfile: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.user;
 
+    // Get the current business from the domain
+    const business = await checkBusiness();
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
     // Find customer linked to this user
     const customer = await ctx.db.customer.findFirst({
       where: {
         userId: user.id,
-        businessId: user.businessId ?? undefined,
+        businessId: business.id,
       },
       include: {
         shippingAddresses: {
@@ -76,8 +85,20 @@ export const customerRouter = createTRPCRouter({
       // This is a public endpoint but requires knowing the exact email
       // Used for "check order status" type features
 
+      // Get the current business from the domain
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       const orders = await ctx.db.order.findMany({
-        where: { customerEmail: input.email.toLowerCase() },
+        where: {
+          customerEmail: input.email.toLowerCase(),
+          businessId: business.id,
+        },
         include: {
           items: true,
           shippingAddress: {

@@ -87,24 +87,24 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
           </h2>
           <div className="text-muted-foreground mt-6 flex flex-col gap-4 leading-relaxed">
             <p>
-              We started Finally Results LLC with a question that would not go
-              away: why do the most basic products in our homes also have to be
-              the most wasteful? Traditional toilet paper and paper towels rely
-              on virgin wood pulp harvested from forests that take decades to
-              regrow. We knew there had to be a better way.
+              Welcome to Finally Results LLC, your trusted supplier of retail
+              household paper products nationwide. We take pride in offering
+              top-quality items that enhance your everyday life, such as toilet
+              paper. Our commitment to excellence is evident in the careful
+              selection of materials, ensuring that our bathroom toilet tissue
+              is made of 100% recycled virgin pulp, delivering septic-safe
+              properties and superior absorbency.
             </p>
             <p>
-              Bamboo was our answer. As one of the fastest-growing plants on
-              Earth, bamboo can be harvested repeatedly without replanting. It
-              is naturally antibacterial, incredibly soft, and requires no
-              pesticides. When we discovered how remarkable this material was,
-              we built our entire business around it.
-            </p>
-            <p>
-              Today, every product we make is 100% bamboo, tree-free,
-              septic-safe, and hypoallergenic. We package everything in
-              recycled, plastic-free materials. And we prove every day that
-              luxury and sustainability can coexist.
+              At Finally Results LLC, we believe in providing not only quality
+              products but also competitive prices to make essential household
+              items accessible to everyone. Located in the heart of Detroit,
+              Michigan, we extend our warmest greetings to you, valuing each
+              customer as a member of our extended family and business partners.
+              Our dedicated team is here to serve you, ensuring that your
+              experience with Finally Results LLC is marked by reliability,
+              affordability, and the satisfaction of finally achieving the
+              results you seek in household paper products.
             </p>
           </div>
         </FadeIn>

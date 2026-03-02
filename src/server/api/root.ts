@@ -12,6 +12,7 @@ import { galleryRouter } from "./routers/gallery";
 import { importRouter } from "./routers/import";
 import { inventoryRouter } from "./routers/inventory";
 import { orderRouter } from "./routers/order";
+import { platformRouter } from "./routers/platform";
 import { productRouter } from "./routers/product";
 import { reviewRouter } from "./routers/review";
 import { testimonialRouter } from "./routers/testimonials";
@@ -40,6 +41,8 @@ export const appRouter = createTRPCRouter({
 
   features: featuresRouter,
   review: reviewRouter,
+
+  platform: platformRouter,
 });
 
 // export type definition of API

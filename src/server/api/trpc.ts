@@ -170,14 +170,16 @@ export const ownerAdminProcedure = t.procedure
       throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
     }
 
-    if (
-      ctx.session.user.businessId !== business?.id &&
-      ctx.session.user.role !== "ADMIN"
-    ) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "You are not authorized to access this resource",
+    const user = ctx.session.user;
+    // PLATFORM_ADMIN bypasses membership check
+    if (user.platformRole !== "PLATFORM_ADMIN") {
+      const membership = await ctx.db.businessMembership.findUnique({
+        where: { userId_businessId: { userId: user.id, businessId: business.id } },
+        select: { role: true },
       });
+      if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Not a business member" });
+      }
     }
 
     return next({
@@ -185,6 +187,35 @@ export const ownerAdminProcedure = t.procedure
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
         businessId: business.id,
+      },
+    });
+  });
+
+/**
+ * Platform Admin procedure
+ *
+ * For platform-wide administration tasks. Only accessible to users with PLATFORM_ADMIN role.
+ * This procedure bypasses business-scoping since platform admins work across all businesses.
+ *
+ * @see https://trpc.io/docs/procedures
+ */
+export const platformAdminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    if (ctx.session.user.platformRole !== "PLATFORM_ADMIN") {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Platform admin access required",
+      });
+    }
+
+    return next({
+      ctx: {
+        session: { ...ctx.session, user: ctx.session.user },
       },
     });
   });

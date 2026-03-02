@@ -129,16 +129,15 @@ exports.Prisma.UserScalarFieldEnum = {
   image: 'image',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  role: 'role',
-  businessId: 'businessId'
+  platformRole: 'platformRole'
 };
 
-exports.Prisma.SignupTokenScalarFieldEnum = {
-  token: 'token',
+exports.Prisma.BusinessMembershipScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
   userId: 'userId',
   businessId: 'businessId',
-  expiresAt: 'expiresAt',
-  used: 'used'
+  role: 'role'
 };
 
 exports.Prisma.SessionScalarFieldEnum = {
@@ -149,7 +148,8 @@ exports.Prisma.SessionScalarFieldEnum = {
   updatedAt: 'updatedAt',
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
-  userId: 'userId'
+  userId: 'userId',
+  activeOrganizationId: 'activeOrganizationId'
 };
 
 exports.Prisma.AccountScalarFieldEnum = {
@@ -391,16 +391,6 @@ exports.Prisma.DomainQueueScalarFieldEnum = {
   lastError: 'lastError'
 };
 
-exports.Prisma.PageViewScalarFieldEnum = {
-  id: 'id',
-  createdAt: 'createdAt',
-  path: 'path',
-  referrer: 'referrer',
-  userAgent: 'userAgent',
-  ipAddress: 'ipAddress',
-  businessId: 'businessId'
-};
-
 exports.Prisma.DiscountCodeScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -605,10 +595,14 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
-exports.ROLE = exports.$Enums.ROLE = {
-  ADMIN: 'ADMIN',
-  USER: 'USER',
-  OWNER: 'OWNER'
+exports.PlatformRole = exports.$Enums.PlatformRole = {
+  PLATFORM_ADMIN: 'PLATFORM_ADMIN',
+  BUSINESS_USER: 'BUSINESS_USER'
+};
+
+exports.BusinessRole = exports.$Enums.BusinessRole = {
+  OWNER: 'OWNER',
+  MANAGER: 'MANAGER'
 };
 
 exports.BusinessDomainStatus = exports.$Enums.BusinessDomainStatus = {
@@ -619,7 +613,7 @@ exports.BusinessDomainStatus = exports.$Enums.BusinessDomainStatus = {
 
 exports.Prisma.ModelName = {
   User: 'User',
-  SignupToken: 'SignupToken',
+  BusinessMembership: 'BusinessMembership',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
@@ -635,7 +629,6 @@ exports.Prisma.ModelName = {
   Order: 'Order',
   OrderItem: 'OrderItem',
   DomainQueue: 'DomainQueue',
-  PageView: 'PageView',
   DiscountCode: 'DiscountCode',
   InventoryHistory: 'InventoryHistory',
   Page: 'Page',

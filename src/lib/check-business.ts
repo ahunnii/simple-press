@@ -24,3 +24,13 @@ export const checkBusiness = async () => {
   });
   return business;
 };
+
+export const checkBusinessMembership = async (
+  businessId: string,
+  userId: string,
+) => {
+  return db.businessMembership.findUnique({
+    where: { userId_businessId: { userId, businessId } },
+    select: { role: true },
+  });
+};

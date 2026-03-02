@@ -1,27 +1,36 @@
-import { Droplets, Leaf, Recycle, Shield } from "lucide-react";
+import {
+  BanknoteArrowDown,
+  CheckCircle,
+  Droplets,
+  Leaf,
+  Recycle,
+  Shield,
+  Users,
+} from "lucide-react";
 
 import { StaggerContainer, StaggerItem } from "./bamboo-animations";
 
 const features = [
+  // {
+  //   icon: Leaf,
+  //   label: "100% Bamboo",
+  //   description: "Tree-free and sustainably sourced",
+  // },
   {
-    icon: Leaf,
-    label: "100% Bamboo",
-    description: "Tree-free and sustainably sourced",
+    icon: CheckCircle,
+    label: "Premium Quality",
+    description:
+      "Experience top-quality household paper products, crafted for comfort and reliability.",
   },
   {
-    icon: Recycle,
-    label: "Eco-Friendly",
-    description: "Biodegradable and plastic-free",
+    icon: BanknoteArrowDown,
+    label: "Competitive Prices",
+    description: "Affordable prices without compromising quality.",
   },
   {
-    icon: Droplets,
-    label: "Septic Safe",
-    description: "Breaks down naturally in any system",
-  },
-  {
-    icon: Shield,
-    label: "Hypoallergenic",
-    description: "No dyes, inks, or fragrances",
+    icon: Users,
+    label: "Customer-Centric Approach",
+    description: "Your satisfaction comes first in everything we do.",
   },
 ];
 
@@ -30,7 +39,7 @@ export function BambooSustainabilityBanner() {
     <section className="bg-primary">
       <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
         <StaggerContainer
-          className="grid grid-cols-2 gap-8 lg:grid-cols-4"
+          className="grid grid-cols-2 gap-8 lg:grid-cols-3"
           staggerDelay={0.1}
         >
           {features.map((feature) => (

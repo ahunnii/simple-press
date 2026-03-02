@@ -15,59 +15,68 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ROLE {
-  ADMIN
-  USER
-  OWNER
+enum PlatformRole {
+  PLATFORM_ADMIN // Was ADMIN - global, can do anything
+  BUSINESS_USER // Was USER - customer/shopper, no admin access
+}
+
+enum BusinessRole {
+  OWNER // Full control of one business
+  MANAGER // Operational access, scoped per membership row
 }
 
 // Necessary for Better Auth
 
 model User {
-  id            String    @id @default(cuid())
-  name          String //@db.Text
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String? //@db.Text
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  id            String       @id @default(cuid())
+  name          String
+  email         String       @unique // ← globally unique now
+  emailVerified Boolean      @default(false)
+  image         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  platformRole  PlatformRole @default(BUSINESS_USER)
 
-  role ROLE @default(USER)
+  sessions Session[]
+  accounts Account[]
 
-  businessId String?   @unique
-  business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
-
-  inventoryHistory InventoryHistory[]
+  memberships      BusinessMembership[]
   customers        Customer[]
+  inventoryHistory InventoryHistory[]
+  createdInvites   PlatformInvite[]     @relation("CreatedInvites")
 
-  // Track invites this user created (platform admins only)
-  createdInvites PlatformInvite[] @relation("CreatedInvites")
-
-  @@unique([email, businessId]) // Same email can exist across different businesses
-  @@index([businessId])
+  // ← removed businessId direct FK, membership table handles this
   @@map("user")
 }
 
-model SignupToken {
-  token      String   @unique
-  userId     String
+model BusinessMembership {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   businessId String
-  expiresAt  DateTime // 5 minutes
-  used       Boolean  @default(false)
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  role BusinessRole // ← typed enum, not a raw string
+
+  @@unique([userId, businessId])
+  @@index([userId])
+  @@index([businessId])
 }
 
 model Session {
-  id        String   @id @default(cuid())
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String? //@db.Text
-  userAgent String? //@db.Text
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                   String   @id @default(cuid())
+  expiresAt            DateTime
+  token                String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String? //@db.Text
+  userAgent            String? //@db.Text
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
 
   @@unique([token])
   @@map("session")
@@ -145,7 +154,6 @@ model Business {
   featureFlags Json @default("{}") // Record<string, boolean>
 
   // Relationships
-  users              User[]
   products           Product[]
   collections        Collection[]
   orders             Order[]
@@ -160,6 +168,7 @@ model Business {
   testimonials       Testimonial[]
   testimonialInvites TestimonialInvite[]
   platformInvites    PlatformInvite[]
+  memberships        BusinessMembership[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -537,22 +546,6 @@ model DomainQueue {
   @@index([status])
 }
 
-// Analytics (optional - could also use external service)
-model PageView {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-
-  path      String
-  referrer  String?
-  userAgent String?
-  ipAddress String?
-
-  businessId String
-
-  @@index([businessId, createdAt])
-  @@index([createdAt])
-}
-
 // ============================================
 // DISCOUNTS & PROMOTIONS
 // ============================================
@@ -898,7 +891,7 @@ model PlatformInvite {
   code  String @unique // Used in wizard URL
 
   // What role will they have?
-  role String // "owner" | "admin"
+  role BusinessRole // "owner" | "admin"
 
   // If owner, which business? (can be pre-created or created during wizard)
   businessId String?

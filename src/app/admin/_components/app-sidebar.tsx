@@ -15,8 +15,9 @@ import {
   IconStar,
   IconTerminal,
 } from "@tabler/icons-react";
-import { Images } from "lucide-react";
+import { Building2, Images, Users } from "lucide-react";
 
+import type { Session } from "~/server/better-auth/config";
 import { env } from "~/env";
 import {
   Sidebar,
@@ -33,8 +34,8 @@ import { NavUser } from "~/app/admin/_components/nav-user";
 
 import WelcomeNotification from "./welcome-notification";
 
-const data = {
-  navMain: [
+const getNavData = (session: Session | null) => {
+  const navMain = [
     {
       title: "Dashboard",
       url: "/admin/dashboard",
@@ -45,18 +46,11 @@ const data = {
       url: "/admin/orders",
       icon: IconShoppingCart,
     },
-
     {
       title: "Products",
       url: "/admin/products",
       icon: IconPackage,
     },
-
-    // {
-    //   title: "Discounts",
-    //   url: "/admin/discounts",
-    //   icon: IconDiscount,
-    // },
     {
       title: "Collections",
       url: "/admin/collections",
@@ -82,29 +76,60 @@ const data = {
       url: "/admin/reviews",
       icon: IconStar,
     },
-  ],
-  navClouds: [],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "/admin/settings",
-      icon: IconSettings,
-    },
-    {
-      title: "Emails",
-      url: "/admin/emails",
-      icon: IconMail,
-    },
-    {
-      title: "Get Help",
-      url: env.NEXT_PUBLIC_HELP_URL,
-      icon: IconHelp,
-    },
-  ],
-  documents: [],
+  ];
+
+  const navPlatformAdmin:
+    | {
+        title: string;
+        url: string;
+        icon: React.ComponentType<any>;
+      }[]
+    | [] =
+    session?.user.platformRole === "PLATFORM_ADMIN"
+      ? [
+          {
+            title: "Platform Users",
+            url: "/admin/platform/users",
+            icon: Users,
+          },
+          {
+            title: "Platform Businesses",
+            url: "/admin/platform/businesses",
+            icon: Building2,
+          },
+        ]
+      : [];
+
+  return {
+    navMain,
+    navPlatformAdmin,
+    navSecondary: [
+      {
+        title: "Settings",
+        url: "/admin/settings",
+        icon: IconSettings,
+      },
+      {
+        title: "Emails",
+        url: "/admin/emails",
+        icon: IconMail,
+      },
+      {
+        title: "Get Help",
+        url: env.NEXT_PUBLIC_HELP_URL,
+        icon: IconHelp,
+      },
+    ],
+  };
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  session?: Session | null;
+};
+
+export function AppSidebar({ session, ...props }: AppSidebarProps) {
+  const navData = getNavData(session ?? null);
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -126,8 +151,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navData.navMain} />
+        {navData.navPlatformAdmin.length > 0 && (
+          <NavMain items={navData.navPlatformAdmin} />
+        )}
+        <NavSecondary items={navData.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <WelcomeNotification />

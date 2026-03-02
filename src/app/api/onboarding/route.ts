@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     // Check if email already exists
     const existingUser = await db.user.findFirst({
-      where: { email, businessId: null },
+      where: { email },
     });
 
     if (!existingUser) {
@@ -121,13 +121,12 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // 3. Create owner user (WITHOUT password - Better Auth will handle it)
-      await tx.user.update({
-        where: { id: existingUser.id },
+      // 3. Create business membership for the owner
+      await tx.businessMembership.create({
         data: {
-          role: "OWNER",
+          userId: existingUser.id,
           businessId: newBusiness.id,
-          emailVerified: false,
+          role: "OWNER",
         },
       });
 

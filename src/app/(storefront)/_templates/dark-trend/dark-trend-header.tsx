@@ -70,7 +70,7 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
         },
       }}
       additionalLinks={[
-        ...(session?.user?.role === "ADMIN" || session?.user?.role === "OWNER"
+        ...(session?.user?.platformRole === "PLATFORM_ADMIN"
           ? [
               {
                 icon: <IconLayoutDashboard className="h-4 w-4" />,

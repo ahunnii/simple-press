@@ -133,6 +133,7 @@ export const businessRouter = createTRPCRouter({
       },
       select: {
         name: true,
+        businessAddress: true,
         templateId: true,
         siteContent: {
           select: {

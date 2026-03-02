@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 
+import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 
 import { FadeIn, PageTransition, ScaleIn } from "./bamboo-animations";
@@ -9,7 +10,16 @@ import { BambooFeaturedProducts } from "./bamboo-featured-products";
 import { BambooSustainabilityBanner } from "./bamboo-sustainability-banner";
 import { BambooTestimonials } from "./bamboo-testimonials";
 
-export function BambooHomepage() {
+export async function BambooHomepage() {
+  const homepage = await api.business.getHomepage();
+  const businessAddress = "18058, Detroit, MI 48234";
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(businessAddress)}`;
+
+  const themeSpecificFields = homepage?.siteContent?.customFields as Record<
+    string,
+    string
+  >;
+
   return (
     <PageTransition>
       {/* Hero Section */}
@@ -20,15 +30,18 @@ export function BambooHomepage() {
             className="flex flex-1 flex-col items-start gap-6"
           >
             <span className="bg-primary/10 text-primary rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase">
-              Premium Bamboo Products
+              {themeSpecificFields?.["bamboo.homepage.hero-title"] ??
+                "Elevate Your Everyday"}
             </span>
             <h1 className="text-foreground font-serif text-4xl leading-tight font-bold tracking-tight md:text-5xl lg:text-6xl">
-              <span className="text-balance">Elevate Your Everyday</span>
+              <span className="text-balance">
+                {themeSpecificFields?.["bamboo.homepage.hero-title"] ??
+                  "Elevate Your Everyday"}
+              </span>
             </h1>
             <p className="text-muted-foreground max-w-md text-lg leading-relaxed">
-              Luxuriously soft, tree-free bamboo paper products crafted in
-              Detroit. Because what you bring into your home should be as
-              thoughtful as the life you build in it.
+              {themeSpecificFields?.["bamboo.homepage.hero-description"] ??
+                "Luxuriously soft, tree-free bamboo paper products crafted in Detroit. Because what you bring into your home should be as thoughtful as the life you build in it."}
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Button size="lg" asChild>
@@ -44,7 +57,10 @@ export function BambooHomepage() {
           <FadeIn direction="left" delay={0.15} className="relative flex-1">
             <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl">
               <Image
-                src="/placeholder.svg"
+                src={
+                  themeSpecificFields?.["bamboo.homepage.hero-image"] ??
+                  "/placeholder.svg"
+                }
                 alt="Hero Image"
                 fill
                 className="object-cover"
@@ -106,17 +122,43 @@ export function BambooHomepage() {
         </ScaleIn>
       </section>
 
-      {/* Testimonials */}
+      {/* Location */}
       <section className="bg-secondary/50 py-20">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <FadeIn direction="up">
             <div className="mb-12 text-center">
               <h2 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
-                <span className="text-balance">What Our Customers Say</span>
+                <span className="text-balance">Our Location</span>
               </h2>
             </div>
           </FadeIn>
-          <BambooTestimonials />
+
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative block aspect-4/3 w-full overflow-hidden rounded-lg bg-slate-100"
+          >
+            {/* The image fills the parent */}
+            <img
+              src={
+                themeSpecificFields?.["bamboo.global.location-map"] ??
+                "/placeholder.svg"
+              }
+              alt="Map"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            {/* Overlay appears only on hover */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="flex flex-col items-center justify-center">
+                <MapPin className="h-12 w-12 text-white" />
+                <p className="text-lg font-medium text-white drop-shadow">
+                  Click to view on Google Maps
+                </p>
+              </div>
+            </div>
+          </a>
+          {/* <BambooTestimonials /> */}
         </div>
       </section>
     </PageTransition>
