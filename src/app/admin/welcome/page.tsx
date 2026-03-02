@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { checkBusiness } from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
 import { db } from "~/server/db";
@@ -12,43 +14,19 @@ export default async function AdminWelcomePage() {
   const businessId = await checkBusiness();
   const session = await getSession();
 
-  // Get user with business info
-  const user = await db.user.findUnique({
-    where: { id: session?.user?.id },
+  const business = await db.business.findUnique({
+    where: { id: businessId?.id },
     include: {
-      memberships: {
-        where: { businessId: businessId?.id },
-        include: {
-          business: {
-            include: {
-              siteContent: true,
-              _count: {
-                select: {
-                  products: true,
-                  orders: true,
-                },
-              },
-            },
-          },
-        },
+      siteContent: true,
+      _count: {
+        select: { products: true, orders: true },
       },
     },
   });
 
-  if (!user?.memberships[0]?.business) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <h1 className="mb-4 text-2xl font-bold">No Business Found</h1>
-          <p className="text-gray-600">
-            Your account is not associated with a business.
-          </p>
-        </div>
-      </div>
-    );
+  if (!business) {
+    return notFound();
   }
-
-  const { business } = user.memberships[0];
 
   // Calculate setup completion
   const setupSteps = {
@@ -69,7 +47,7 @@ export default async function AdminWelcomePage() {
       <div className="mx-auto max-w-7xl px-4 py-8">
         <WelcomeHeader
           businessName={business.name}
-          userName={user.name || user.email}
+          userName={session?.user.name ?? session?.user.email ?? ""}
           isComplete={isComplete}
         />
 

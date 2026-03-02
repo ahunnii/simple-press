@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Download, Plus, Upload } from "lucide-react";
 
+import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import {
@@ -16,6 +17,7 @@ import { ProductsTable } from "./_components/products-client-data-table";
 
 export default async function ProductsPage() {
   const products = await api.product.secureListAll();
+  const session = await getSession();
 
   return (
     <>
@@ -28,19 +30,23 @@ export default async function ProductsPage() {
           </div>
 
           <div className="flex gap-3">
-            <Button variant="outline" asChild size="sm">
-              <Link href="/admin/products/export">
-                <Download className="mr-2 h-4 w-4" />
-                Export to WordPress
-              </Link>
-            </Button>
+            {session?.user.platformRole === "PLATFORM_ADMIN" && (
+              <>
+                <Button variant="outline" asChild size="sm">
+                  <Link href="/admin/products/export">
+                    <Download className="mr-2 h-4 w-4" />
+                    Export to WordPress
+                  </Link>
+                </Button>
 
-            <Button variant="outline" asChild size="sm">
-              <Link href="/admin/products/import">
-                <Upload className="mr-2 h-4 w-4" />
-                Import from WooCommerce
-              </Link>
-            </Button>
+                <Button variant="outline" asChild size="sm">
+                  <Link href="/admin/products/import">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Import from WooCommerce
+                  </Link>
+                </Button>
+              </>
+            )}
 
             <Button asChild size="sm">
               <Link href="/admin/products/new">
