@@ -36,7 +36,7 @@ export function BambooCartContents({ business }: Props) {
             <div className="bg-secondary mx-auto flex size-20 items-center justify-center rounded-full">
               <ShoppingBag className="text-muted-foreground size-8" />
             </div>
-            <h1 className="text-foreground mt-6 font-serif text-2xl font-bold">
+            <h1 className="text-foreground font-heading mt-6 text-2xl font-bold">
               Your cart is empty
             </h1>
             <p className="text-muted-foreground mx-auto mt-2 max-w-md">
@@ -56,7 +56,7 @@ export function BambooCartContents({ business }: Props) {
     <PageTransition>
       <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
         <FadeIn direction="up">
-          <h1 className="text-foreground mb-8 font-serif text-3xl font-bold tracking-tight md:text-4xl">
+          <h1 className="text-foreground font-heading mb-8 text-3xl font-bold tracking-tight md:text-4xl">
             Your Cart
           </h1>
         </FadeIn>

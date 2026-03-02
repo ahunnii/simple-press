@@ -44,7 +44,7 @@ export function BambooContactPage({
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
       <div className="mb-12">
-        <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
+        <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
           {header}
         </h1>
         <p className="text-muted-foreground mt-3 max-w-2xl">{subheader}</p>

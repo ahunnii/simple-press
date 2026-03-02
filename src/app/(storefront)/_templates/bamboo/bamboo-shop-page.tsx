@@ -22,10 +22,10 @@ export function BambooShopPage({ business }: DefaultProductsPageTemplateProps) {
       <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
         <FadeIn direction="up">
           <div className="mb-12">
-            <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
+            <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
               <span className="text-balance">Our Collection</span>
             </h1>
-            <p className="text-muted-foreground mt-3 max-w-2xl">
+            <p className="text-muted-foreground mt-3 max-w-2xl font-sans">
               Every product is 100% bamboo, tree-free, and crafted to the
               highest standard. Choose the option that fits your home.
             </p>

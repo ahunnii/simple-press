@@ -131,7 +131,7 @@ export function BambooGenericPage({ page }: Props) {
             {/* <span className="rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
               Septic-Safe Guarantee
             </span> */}
-            <h1 className="text-foreground font-serif text-4xl leading-tight font-bold tracking-tight md:text-5xl">
+            <h1 className="text-foreground font-heading text-4xl leading-tight font-bold tracking-tight md:text-5xl">
               <span className="text-balance">{page.title}</span>
             </h1>
             <p className="text-muted-foreground max-w-md text-lg leading-relaxed">

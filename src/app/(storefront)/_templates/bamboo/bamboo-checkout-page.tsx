@@ -40,7 +40,7 @@ export async function BambooCheckoutPage({
   //       <PageTransition>
   //         <section className="mx-auto flex max-w-7xl flex-col items-center justify-center px-4 py-24 text-center lg:px-8">
   //           <FadeIn direction="up">
-  //             <h1 className="text-foreground font-serif text-2xl font-bold">
+  //             <h1 className="text-foreground font-heading text-2xl font-bold">
   //               Nothing to checkout
   //             </h1>
   //             <p className="text-muted-foreground mt-2">
@@ -71,7 +71,7 @@ export async function BambooCheckoutPage({
                 Back to Cart
               </Link>
             </Button>
-            <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
+            <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
               Checkout
             </h1>
           </div>

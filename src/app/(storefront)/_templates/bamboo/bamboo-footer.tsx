@@ -42,7 +42,7 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
           <div className="flex flex-col gap-4">
             <Link href="/" className="flex items-center gap-2">
               <Leaf className="size-5" />
-              <span className="font-serif text-xl font-bold">
+              <span className="font-heading text-xl font-bold">
                 Finally Results LLC
               </span>
             </Link>

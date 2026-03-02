@@ -14,7 +14,7 @@ export function OrderSummary() {
 
   return (
     <div className="border-border bg-card rounded-xl border p-6">
-      <h2 className="text-card-foreground font-serif text-lg font-semibold">
+      <h2 className="text-card-foreground font-heading text-lg font-semibold">
         Order Summary
       </h2>
       <div className="mt-4 flex flex-col gap-3">

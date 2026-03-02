@@ -78,7 +78,7 @@ export function BambooOrderConfirmation({ business }: Props) {
   if (!sessionId) {
     return (
       <div className="mx-auto max-w-2xl text-center">
-        <p className="mb-4 text-muted-foreground">No order found</p>
+        <p className="text-muted-foreground mb-4">No order found</p>
         <Button asChild>
           <Link href="/shop">Continue Shopping</Link>
         </Button>
@@ -90,29 +90,29 @@ export function BambooOrderConfirmation({ business }: Props) {
     <div className="mx-auto max-w-3xl">
       {/* Success Header */}
       <div className="mb-12 text-center">
-        <div className="mb-6 inline-flex size-16 items-center justify-center rounded-full bg-primary/10">
-          <CheckCircle2 className="size-8 text-primary" />
+        <div className="bg-primary/10 mb-6 inline-flex size-16 items-center justify-center rounded-full">
+          <CheckCircle2 className="text-primary size-8" />
         </div>
-        <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl">
+        <h1 className="font-heading text-foreground text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
           Order Confirmed!
         </h1>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <p className="text-muted-foreground mt-3 text-lg">
           Thank you for your purchase from {business.name}
         </p>
       </div>
 
       {/* Order Details Card */}
-      <Card className="mb-8 border-primary/20 bg-primary/5">
+      <Card className="border-primary/20 bg-primary/5 mb-8">
         <CardContent className="p-8">
           <div className="flex items-start gap-4">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <Package className="size-5 text-primary" />
+            <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-full">
+              <Package className="text-primary size-5" />
             </div>
             <div className="flex-1">
-              <h2 className="mb-3 text-xl font-semibold text-foreground">
+              <h2 className="text-foreground mb-3 text-xl font-semibold">
                 What happens next?
               </h2>
-              <ul className="space-y-2 text-muted-foreground">
+              <ul className="text-muted-foreground space-y-2">
                 <li className="flex items-start gap-2">
                   <span className="text-primary">•</span>
                   <span>You&apos;ll receive an email confirmation shortly</span>
@@ -130,10 +130,10 @@ export function BambooOrderConfirmation({ business }: Props) {
           </div>
 
           {orderDetails?.customer_email && (
-            <div className="mt-6 border-t border-border pt-6 text-sm">
+            <div className="border-border mt-6 border-t pt-6 text-sm">
               <p className="text-muted-foreground">
                 Confirmation sent to:{" "}
-                <span className="font-semibold text-foreground">
+                <span className="text-foreground font-semibold">
                   {orderDetails.customer_email}
                 </span>
               </p>

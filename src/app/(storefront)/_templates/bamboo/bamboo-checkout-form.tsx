@@ -133,7 +133,7 @@ export function CheckoutForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
         {/* Contact Information */}
         <fieldset className="flex flex-col gap-4">
-          <legend className="text-foreground font-serif text-lg font-semibold">
+          <legend className="text-foreground font-heading text-lg font-semibold">
             Contact Information
           </legend>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -170,7 +170,7 @@ export function CheckoutForm() {
 
         {/* Shipping Address */}
         <fieldset className="flex flex-col gap-4">
-          <legend className="text-foreground font-serif text-lg font-semibold">
+          <legend className="text-foreground font-heading text-lg font-semibold">
             Shipping Address
           </legend>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -255,7 +255,7 @@ export function CheckoutForm() {
 
         {/* Payment (Mock) */}
         <fieldset className="flex flex-col gap-4">
-          <legend className="text-foreground font-serif text-lg font-semibold">
+          <legend className="text-foreground font-heading text-lg font-semibold">
             Payment
           </legend>
           <p className="text-muted-foreground text-xs">
@@ -318,7 +318,7 @@ export function CheckoutForm() {
             <div className="bg-primary/10 mx-auto flex size-16 items-center justify-center rounded-full">
               <CheckCircle2 className="text-primary size-8" />
             </div>
-            <DialogTitle className="font-serif text-xl">
+            <DialogTitle className="font-heading text-xl">
               Order Placed!
             </DialogTitle>
             <DialogDescription className="text-center">

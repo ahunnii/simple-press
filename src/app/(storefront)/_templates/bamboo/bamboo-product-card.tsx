@@ -56,7 +56,7 @@ export function BambooProductCard({ product }: Props) {
       </div>
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div>
-          <h3 className="text-card-foreground group-hover:text-primary font-serif text-lg font-semibold transition-colors">
+          <h3 className="text-card-foreground group-hover:text-primary font-heading text-lg font-semibold transition-colors">
             {product.name}
           </h3>
           <p className="text-muted-foreground mt-1 text-sm leading-relaxed">

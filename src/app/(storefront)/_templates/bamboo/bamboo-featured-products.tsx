@@ -62,7 +62,7 @@ export function BambooFeaturedProducts({
               )} */}
             </div>
             <div className="flex flex-1 flex-col gap-3 p-5">
-              <h3 className="text-card-foreground group-hover:text-primary font-serif text-lg font-semibold transition-colors">
+              <h3 className="text-card-foreground group-hover:text-primary font-heading text-lg font-semibold transition-colors">
                 {product.name}
               </h3>
               <p className="text-muted-foreground line-clamp-2 flex-1 text-sm leading-relaxed">

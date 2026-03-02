@@ -83,7 +83,7 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
               />
             </div>
           ) : (
-            <span className="text-primary font-serif text-xl font-bold tracking-tight">
+            <span className="text-primary font-heading text-xl font-bold tracking-tight">
               {business.name ?? "Business"}
             </span>
           )}

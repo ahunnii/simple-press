@@ -40,7 +40,7 @@ export async function BambooHomepage() {
                 {themeSpecificFields?.["bamboo.homepage.hero-title"] ??
                   "Elevate Your Everyday"}
               </span>
-              <h1 className="text-foreground font-serif text-4xl leading-tight font-bold tracking-tight md:text-5xl lg:text-6xl">
+              <h1 className="text-foreground font-heading text-4xl leading-tight font-bold tracking-tight md:text-5xl lg:text-6xl">
                 <span className="text-balance">
                   {themeSpecificFields?.["bamboo.homepage.hero-title"] ??
                     "Elevate Your Everyday"}
@@ -102,7 +102,7 @@ export async function BambooHomepage() {
         <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
           <FadeIn direction="up">
             <div className="mb-12 text-center">
-              <h2 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
+              <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
                 <span className="text-balance">
                   {themeSpecificFields?.["bamboo.homepage.featured-title"] ??
                     "Our Curated Collection"}
@@ -138,7 +138,7 @@ export async function BambooHomepage() {
         <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
           <ScaleIn>
             <div className="bg-secondary flex flex-col items-center gap-6 rounded-2xl p-8 text-center md:p-16">
-              <h2 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
+              <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
                 <span className="text-balance">
                   {themeSpecificFields?.[
                     "bamboo.homepage.about-teaser-heading"
@@ -166,7 +166,7 @@ export async function BambooHomepage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn direction="up">
               <div className="mb-12 text-center">
-                <h2 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
+                <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
                   <span className="text-balance">
                     {themeSpecificFields?.[
                       "bamboo.homepage.location-heading"

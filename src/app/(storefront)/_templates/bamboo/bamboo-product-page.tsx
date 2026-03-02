@@ -171,7 +171,7 @@ export function BambooProductPage({
             className="flex flex-1 flex-col gap-6"
           >
             <div>
-              <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
+              <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
                 <span className="text-balance">{product.name}</span>
               </h1>
               <p className="text-muted-foreground mt-3 text-lg leading-relaxed">
@@ -291,7 +291,7 @@ export function BambooProductPage({
         {/* {details && (
           <div className="mt-16 flex flex-col gap-12 lg:flex-row lg:gap-16">
             <FadeIn direction="up" delay={0.1} className="flex-1">
-              <h2 className="text-foreground font-serif text-2xl font-bold">
+              <h2 className="text-foreground font-heading text-2xl font-bold">
                 Why You Will Love It
               </h2>
               <ul className="mt-6 flex flex-col gap-3">
@@ -307,7 +307,7 @@ export function BambooProductPage({
             </FadeIn>
 
             <FadeIn direction="up" delay={0.2} className="flex-1">
-              <h2 className="text-foreground font-serif text-2xl font-bold">
+              <h2 className="text-foreground font-heading text-2xl font-bold">
                 Product Specifications
               </h2>
               <div className="divide-border border-border mt-6 flex flex-col divide-y overflow-hidden rounded-xl border">
@@ -328,7 +328,7 @@ export function BambooProductPage({
         {/* Other Products */}
         {/* <div className="mt-20">
           <FadeIn direction="up">
-            <h2 className="text-foreground font-serif text-2xl font-bold">
+            <h2 className="text-foreground font-heading text-2xl font-bold">
               You Might Also Like
             </h2>
           </FadeIn>
@@ -352,7 +352,7 @@ export function BambooProductPage({
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <h3 className="text-card-foreground group-hover:text-primary font-serif text-base font-semibold transition-colors">
+                    <h3 className="text-card-foreground group-hover:text-primary font-heading text-base font-semibold transition-colors">
                       {p.name}
                     </h3>
                     <p className="text-muted-foreground line-clamp-2 text-sm">
@@ -372,7 +372,7 @@ export function BambooProductPage({
         <FadeIn direction="up" delay={0.1} className="mt-16">
           <div className="bg-secondary flex flex-col items-center gap-4 rounded-2xl p-8 text-center md:p-12">
             <Droplets className="text-primary size-8" />
-            <h2 className="text-foreground font-serif text-2xl font-bold">
+            <h2 className="text-foreground font-heading text-2xl font-bold">
               <span className="text-balance">Septic Safe, Guaranteed</span>
             </h2>
             <p className="text-muted-foreground max-w-xl">

@@ -78,7 +78,7 @@ export function BambooContactForm({ businessName: _businessName }: Props) {
           <div className="bg-primary/10 flex size-16 items-center justify-center rounded-full">
             <CheckCircle2 className="text-primary size-8" />
           </div>
-          <h2 className="text-foreground font-serif text-xl font-semibold">
+          <h2 className="text-foreground font-heading text-xl font-semibold">
             Message Sent
           </h2>
           <p className="text-muted-foreground">

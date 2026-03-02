@@ -40,7 +40,7 @@ export function CartItem({ item }: Props) {
       <div className="flex flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h3 className="text-card-foreground font-serif text-sm font-semibold sm:text-base">
+            <h3 className="text-card-foreground font-heading text-sm font-semibold sm:text-base">
               {productName}
             </h3>
             <p className="text-muted-foreground text-xs sm:text-sm">

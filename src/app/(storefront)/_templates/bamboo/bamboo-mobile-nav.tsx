@@ -36,7 +36,7 @@ export function MobileNav({ open, onOpenChange, business }: MobileNavProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="bg-background w-72">
         <SheetHeader>
-          <SheetTitle className="text-primary font-serif text-xl">
+          <SheetTitle className="text-primary font-heading text-xl">
             {business.name ?? "Business"}
           </SheetTitle>
         </SheetHeader>
