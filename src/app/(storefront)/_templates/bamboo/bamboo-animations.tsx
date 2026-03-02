@@ -4,6 +4,8 @@ import type { HTMLMotionProps } from "motion/react";
 import { type ReactNode } from "react";
 import { motion } from "motion/react";
 
+import { HydrateClient } from "~/trpc/server";
+
 interface FadeInProps extends HTMLMotionProps<"div"> {
   children: ReactNode;
   delay?: number;
@@ -127,13 +129,15 @@ export function PageTransition({
   className?: string;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className={className}
-    >
-      {children}
-    </motion.div>
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className={className}
+      >
+        {children}
+      </motion.div>
+    </>
   );
 }

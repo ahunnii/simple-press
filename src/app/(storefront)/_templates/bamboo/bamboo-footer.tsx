@@ -7,19 +7,21 @@ import { api } from "~/trpc/server";
 const quickLinks = [
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About Us" },
-  { href: "/blog", label: "Blog" },
+  { href: "/insights", label: "Insights" },
   { href: "/contact", label: "Contact" },
 ];
 
-const customerCare = [
-  { href: "/shop", label: "Shipping Info" },
-  { href: "/shop", label: "Returns & Refunds" },
-  { href: "/contact", label: "FAQs" },
-  { href: "/contact", label: "Support" },
-];
+// const customerCare = [
+//   { href: "/shop", label: "Shipping Info" },
+//   { href: "/shop", label: "Returns & Refunds" },
+//   { href: "/contact", label: "FAQs" },
+//   { href: "/contact", label: "Support" },
+// ];
 
 export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
   const currentYear = new Date().getFullYear();
+
+  const email = business?.supportEmail ?? "hello@finallyresults.com";
 
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
@@ -41,7 +43,7 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
             <Link href="/" className="flex items-center gap-2">
               <Leaf className="size-5" />
               <span className="font-serif text-xl font-bold">
-                Finally Results
+                Finally Results LLC
               </span>
             </Link>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
@@ -69,19 +71,19 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
 
           <div>
             <h3 className="text-primary-foreground/60 mb-4 text-sm font-semibold tracking-wider uppercase">
-              Customer Care
+              Policies
             </h3>
             <nav
               className="flex flex-col gap-2.5"
               aria-label="Customer care links"
             >
-              {customerCare.map((link) => (
+              {policies.map((link) => (
                 <Link
-                  key={link.label}
-                  href={link.href}
+                  key={link.id}
+                  href={link.slug}
                   className="text-primary-foreground/80 hover:text-primary-foreground text-sm transition-colors"
                 >
-                  {link.label}
+                  {link.title}
                 </Link>
               ))}
             </nav>
@@ -95,10 +97,10 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
               <span>Finally Results LLC</span>
               <span>Detroit, Michigan</span>
               <a
-                href="mailto:hello@finallyresults.com"
+                href={`mailto:${email}`}
                 className="hover:text-primary-foreground transition-colors"
               >
-                hello@finallyresults.com
+                {email}
               </a>
             </address>
           </div>

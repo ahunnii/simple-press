@@ -16,10 +16,15 @@ import { useCart } from "~/providers/cart-context";
 
 import { StaggerContainer, StaggerItem } from "./bamboo-animations";
 
-export function BambooFeaturedProducts() {
+export function BambooFeaturedProducts({
+  featuredProducts,
+}: {
+  featuredProducts: NonNullable<
+    RouterOutputs["business"]["getHomepage"]
+  >["products"];
+}) {
   const { addItem } = useCart();
   const router = useRouter();
-  const { data: featuredProducts } = api.product.getFeatured.useQuery();
 
   //   const handleAdd = (
   //     e: React.MouseEvent,
@@ -60,7 +65,7 @@ export function BambooFeaturedProducts() {
               <h3 className="text-card-foreground group-hover:text-primary font-serif text-lg font-semibold transition-colors">
                 {product.name}
               </h3>
-              <p className="text-muted-foreground flex-1 text-sm leading-relaxed">
+              <p className="text-muted-foreground line-clamp-2 flex-1 text-sm leading-relaxed">
                 {product.description}
               </p>
               <div className="flex items-center justify-between gap-4">

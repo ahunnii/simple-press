@@ -381,7 +381,9 @@ export function BambooProductPage({
               makes our bamboo paper truly septic-friendly.
             </p>
             <Button variant="outline" asChild>
-              <Link href="/septic-safe">Learn About Septic Safety</Link>
+              <Link href="/understanding-the-importance-of-septic-safe-toilet-paper">
+                Learn About Septic Safety
+              </Link>
             </Button>
           </div>
         </FadeIn>
