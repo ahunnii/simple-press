@@ -1,7 +1,14 @@
 "use client";
 
+import type { Resolver } from "react-hook-form";
+import { useRef, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle, Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
+import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -9,7 +16,32 @@ import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Textarea } from "~/components/ui/textarea";
 import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
-import { useContactForm } from "~/hooks/use-contact-form";
+
+const MESSAGE_MAX_LENGTH = 180;
+
+const contactSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().optional(),
+  message: z
+    .string()
+    .min(10, "Message must be at least 10 characters")
+    .max(
+      MESSAGE_MAX_LENGTH,
+      `Message must be at most ${MESSAGE_MAX_LENGTH} characters`,
+    ),
+  preferredContactMethod: z
+    .enum(["email", "phone", "no-preference"])
+    .default("no-preference"),
+});
+
+type ContactFormValues = {
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+  preferredContactMethod: "email" | "phone" | "no-preference";
+};
 
 type Props = {
   businessName: string;
@@ -26,19 +58,70 @@ export function PollenContactForm({
   formTitle = "Send us a message",
   formDescription = "We'd love to hear from you!",
 }: Props) {
-  const {
-    form,
-    messageLength,
-    messageMaxLength,
-    isSubmitting,
-    isSuccess,
-    error,
-    captchaToken,
-    setCaptchaToken,
-    captchaRef,
-    onSubmit,
-    resetSuccess,
-  } = useContactForm({ messageMaxLength: 180 });
+  const captchaRef = useRef<HCaptchaHandle>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
+
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactSchema) as Resolver<ContactFormValues>,
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      message: "",
+      preferredContactMethod: "no-preference",
+    },
+  });
+
+  const messageLength = form.watch("message")?.length ?? 0;
+
+  const onSubmit = async (data: ContactFormValues) => {
+    if (!captchaToken) {
+      toast.error("Please complete the captcha");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          message: data.message,
+          phone: data.phone,
+          preferredContactMethod: data.preferredContactMethod,
+          captchaToken: captchaToken,
+        }),
+      });
+
+      const result = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Failed to send message");
+      }
+
+      setIsSuccess(true);
+      setCaptchaToken("");
+      captchaRef.current?.reset();
+      form.reset();
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
+      captchaRef.current?.reset();
+      setCaptchaToken("");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (isSuccess) {
     return (
@@ -50,7 +133,7 @@ export function PollenContactForm({
           We&apos;ve received your message and will get back to you soon.
         </AlertDescription>
         <Button
-          onClick={resetSuccess}
+          onClick={() => setIsSuccess(false)}
           className="mt-4 bg-[#215935] font-medium text-white hover:bg-[#1a4729]"
         >
           Send Another Message
@@ -131,7 +214,7 @@ export function PollenContactForm({
             Message *
           </Label>
           <span className="text-xs text-gray-500">
-            {messageLength}/{messageMaxLength}
+            {messageLength}/{MESSAGE_MAX_LENGTH}
           </span>
         </div>
         <Textarea
@@ -139,7 +222,7 @@ export function PollenContactForm({
           {...form.register("message")}
           placeholder=""
           rows={5}
-          maxLength={messageMaxLength}
+          maxLength={MESSAGE_MAX_LENGTH}
           className={`resize-y ${inputClassName} min-h-[120px]`}
         />
         {form.formState.errors.message && (
@@ -157,7 +240,10 @@ export function PollenContactForm({
         <RadioGroup
           value={form.watch("preferredContactMethod")}
           onValueChange={(value) =>
-            form.setValue("preferredContactMethod", value as "email" | "phone" | "no-preference")
+            form.setValue(
+              "preferredContactMethod",
+              value as ContactFormValues["preferredContactMethod"],
+            )
           }
           className="flex flex-col gap-3 pt-1"
         >
