@@ -1,14 +1,22 @@
 import Image from "next/image";
+import Link from "next/link";
+
+import { api } from "~/trpc/server";
 
 import type { DefaultAboutPageTemplateProps } from "../types";
 
 import { PollenGeneralLayout } from "./pollen-general-layout";
 
-export function PollenAboutPage({ business }: DefaultAboutPageTemplateProps) {
+export async function PollenAboutPage({
+  business,
+}: DefaultAboutPageTemplateProps) {
   const themeSpecificFields = business?.siteContent?.customFields as Record<
     string,
     string
   >;
+
+  const testimonials =
+    (await api.testimonial.listRandom({ limit: 3 })) ?? [];
 
   const teamMembers = [
     {
@@ -116,6 +124,63 @@ export function PollenAboutPage({ business }: DefaultAboutPageTemplateProps) {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section — only when business has public testimonials */}
+      {testimonials.length > 0 && (
+        <section className="bg-gray-50 py-10 md:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 text-center">
+              <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
+                Kind Words
+              </p>
+              <h2 className="text-3xl font-bold text-[#374151] md:text-4xl">
+                What Our Customers Say
+              </h2>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-3">
+              {testimonials.map((t) => (
+                <div
+                  key={t.id}
+                  className="rounded-2xl bg-white p-6 shadow-sm"
+                >
+                  <p className="mb-4 text-gray-700">{t.text}</p>
+                  <p className="font-medium text-[#374151]">
+                    {t.customerName}
+                  </p>
+                  {t.photoUrls && t.photoUrls.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {t.photoUrls.slice(0, 3).map((url, i) => (
+                        <div
+                          key={i}
+                          className="relative h-16 w-16 overflow-hidden rounded-lg"
+                        >
+                          <Image
+                            src={url}
+                            alt=""
+                            fill
+                            className="object-cover"
+                            sizes="64px"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10 text-center">
+              <Link
+                href="/testimonials"
+                className="inline-flex items-center text-[#5e8b4a] font-semibold hover:underline"
+              >
+                View all testimonials
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
     </PollenGeneralLayout>
   );
 }

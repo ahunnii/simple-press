@@ -32636,18 +32636,8 @@ export namespace Prisma {
 
   export type AggregateTestimonial = {
     _count: TestimonialCountAggregateOutputType | null
-    _avg: TestimonialAvgAggregateOutputType | null
-    _sum: TestimonialSumAggregateOutputType | null
     _min: TestimonialMinAggregateOutputType | null
     _max: TestimonialMaxAggregateOutputType | null
-  }
-
-  export type TestimonialAvgAggregateOutputType = {
-    rating: number | null
-  }
-
-  export type TestimonialSumAggregateOutputType = {
-    rating: number | null
   }
 
   export type TestimonialMinAggregateOutputType = {
@@ -32655,11 +32645,8 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     source: string | null
-    rating: number | null
     title: string | null
     text: string | null
-    videoUrl: string | null
-    photoUrl: string | null
     isPublic: boolean | null
     customerName: string | null
     customerEmail: string | null
@@ -32675,11 +32662,8 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     source: string | null
-    rating: number | null
     title: string | null
     text: string | null
-    videoUrl: string | null
-    photoUrl: string | null
     isPublic: boolean | null
     customerName: string | null
     customerEmail: string | null
@@ -32695,11 +32679,9 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     source: number
-    rating: number
     title: number
     text: number
-    videoUrl: number
-    photoUrl: number
+    photoUrls: number
     isPublic: number
     customerName: number
     customerEmail: number
@@ -32712,24 +32694,13 @@ export namespace Prisma {
   }
 
 
-  export type TestimonialAvgAggregateInputType = {
-    rating?: true
-  }
-
-  export type TestimonialSumAggregateInputType = {
-    rating?: true
-  }
-
   export type TestimonialMinAggregateInputType = {
     id?: true
     createdAt?: true
     updatedAt?: true
     source?: true
-    rating?: true
     title?: true
     text?: true
-    videoUrl?: true
-    photoUrl?: true
     isPublic?: true
     customerName?: true
     customerEmail?: true
@@ -32745,11 +32716,8 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     source?: true
-    rating?: true
     title?: true
     text?: true
-    videoUrl?: true
-    photoUrl?: true
     isPublic?: true
     customerName?: true
     customerEmail?: true
@@ -32765,11 +32733,9 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     source?: true
-    rating?: true
     title?: true
     text?: true
-    videoUrl?: true
-    photoUrl?: true
+    photoUrls?: true
     isPublic?: true
     customerName?: true
     customerEmail?: true
@@ -32819,18 +32785,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: TestimonialAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: TestimonialSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: TestimonialMinAggregateInputType
@@ -32861,8 +32815,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: TestimonialCountAggregateInputType | true
-    _avg?: TestimonialAvgAggregateInputType
-    _sum?: TestimonialSumAggregateInputType
     _min?: TestimonialMinAggregateInputType
     _max?: TestimonialMaxAggregateInputType
   }
@@ -32872,11 +32824,9 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     source: string
-    rating: number
     title: string | null
     text: string
-    videoUrl: string | null
-    photoUrl: string | null
+    photoUrls: string[]
     isPublic: boolean
     customerName: string
     customerEmail: string | null
@@ -32886,8 +32836,6 @@ export namespace Prisma {
     businessId: string
     customerId: string | null
     _count: TestimonialCountAggregateOutputType | null
-    _avg: TestimonialAvgAggregateOutputType | null
-    _sum: TestimonialSumAggregateOutputType | null
     _min: TestimonialMinAggregateOutputType | null
     _max: TestimonialMaxAggregateOutputType | null
   }
@@ -32911,11 +32859,9 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     source?: boolean
-    rating?: boolean
     title?: boolean
     text?: boolean
-    videoUrl?: boolean
-    photoUrl?: boolean
+    photoUrls?: boolean
     isPublic?: boolean
     customerName?: boolean
     customerEmail?: boolean
@@ -32933,11 +32879,9 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     source?: boolean
-    rating?: boolean
     title?: boolean
     text?: boolean
-    videoUrl?: boolean
-    photoUrl?: boolean
+    photoUrls?: boolean
     isPublic?: boolean
     customerName?: boolean
     customerEmail?: boolean
@@ -32955,11 +32899,9 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     source?: boolean
-    rating?: boolean
     title?: boolean
     text?: boolean
-    videoUrl?: boolean
-    photoUrl?: boolean
+    photoUrls?: boolean
     isPublic?: boolean
     customerName?: boolean
     customerEmail?: boolean
@@ -32977,11 +32919,9 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     source?: boolean
-    rating?: boolean
     title?: boolean
     text?: boolean
-    videoUrl?: boolean
-    photoUrl?: boolean
+    photoUrls?: boolean
     isPublic?: boolean
     customerName?: boolean
     customerEmail?: boolean
@@ -32992,7 +32932,7 @@ export namespace Prisma {
     customerId?: boolean
   }
 
-  export type TestimonialOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "source" | "rating" | "title" | "text" | "videoUrl" | "photoUrl" | "isPublic" | "customerName" | "customerEmail" | "customerTitle" | "customerCompany" | "testimonialDate" | "businessId" | "customerId", ExtArgs["result"]["testimonial"]>
+  export type TestimonialOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "source" | "title" | "text" | "photoUrls" | "isPublic" | "customerName" | "customerEmail" | "customerTitle" | "customerCompany" | "testimonialDate" | "businessId" | "customerId", ExtArgs["result"]["testimonial"]>
   export type TestimonialInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Testimonial$customerArgs<ExtArgs>
@@ -33017,11 +32957,9 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       source: string
-      rating: number
       title: string | null
       text: string
-      videoUrl: string | null
-      photoUrl: string | null
+      photoUrls: string[]
       isPublic: boolean
       customerName: string
       customerEmail: string | null
@@ -33459,11 +33397,9 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"Testimonial", 'DateTime'>
     readonly updatedAt: FieldRef<"Testimonial", 'DateTime'>
     readonly source: FieldRef<"Testimonial", 'String'>
-    readonly rating: FieldRef<"Testimonial", 'Int'>
     readonly title: FieldRef<"Testimonial", 'String'>
     readonly text: FieldRef<"Testimonial", 'String'>
-    readonly videoUrl: FieldRef<"Testimonial", 'String'>
-    readonly photoUrl: FieldRef<"Testimonial", 'String'>
+    readonly photoUrls: FieldRef<"Testimonial", 'String[]'>
     readonly isPublic: FieldRef<"Testimonial", 'Boolean'>
     readonly customerName: FieldRef<"Testimonial", 'String'>
     readonly customerEmail: FieldRef<"Testimonial", 'String'>
@@ -33911,8 +33847,18 @@ export namespace Prisma {
 
   export type AggregateTestimonialInvite = {
     _count: TestimonialInviteCountAggregateOutputType | null
+    _avg: TestimonialInviteAvgAggregateOutputType | null
+    _sum: TestimonialInviteSumAggregateOutputType | null
     _min: TestimonialInviteMinAggregateOutputType | null
     _max: TestimonialInviteMaxAggregateOutputType | null
+  }
+
+  export type TestimonialInviteAvgAggregateOutputType = {
+    maxPhotos: number | null
+  }
+
+  export type TestimonialInviteSumAggregateOutputType = {
+    maxPhotos: number | null
   }
 
   export type TestimonialInviteMinAggregateOutputType = {
@@ -33923,6 +33869,7 @@ export namespace Prisma {
     code: string | null
     used: boolean | null
     usedAt: Date | null
+    maxPhotos: number | null
     businessId: string | null
     customerId: string | null
   }
@@ -33935,6 +33882,7 @@ export namespace Prisma {
     code: string | null
     used: boolean | null
     usedAt: Date | null
+    maxPhotos: number | null
     businessId: string | null
     customerId: string | null
   }
@@ -33947,11 +33895,20 @@ export namespace Prisma {
     code: number
     used: number
     usedAt: number
+    maxPhotos: number
     businessId: number
     customerId: number
     _all: number
   }
 
+
+  export type TestimonialInviteAvgAggregateInputType = {
+    maxPhotos?: true
+  }
+
+  export type TestimonialInviteSumAggregateInputType = {
+    maxPhotos?: true
+  }
 
   export type TestimonialInviteMinAggregateInputType = {
     id?: true
@@ -33961,6 +33918,7 @@ export namespace Prisma {
     code?: true
     used?: true
     usedAt?: true
+    maxPhotos?: true
     businessId?: true
     customerId?: true
   }
@@ -33973,6 +33931,7 @@ export namespace Prisma {
     code?: true
     used?: true
     usedAt?: true
+    maxPhotos?: true
     businessId?: true
     customerId?: true
   }
@@ -33985,6 +33944,7 @@ export namespace Prisma {
     code?: true
     used?: true
     usedAt?: true
+    maxPhotos?: true
     businessId?: true
     customerId?: true
     _all?: true
@@ -34028,6 +33988,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: TestimonialInviteAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TestimonialInviteSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: TestimonialInviteMinAggregateInputType
@@ -34058,6 +34030,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: TestimonialInviteCountAggregateInputType | true
+    _avg?: TestimonialInviteAvgAggregateInputType
+    _sum?: TestimonialInviteSumAggregateInputType
     _min?: TestimonialInviteMinAggregateInputType
     _max?: TestimonialInviteMaxAggregateInputType
   }
@@ -34070,9 +34044,12 @@ export namespace Prisma {
     code: string
     used: boolean
     usedAt: Date | null
+    maxPhotos: number
     businessId: string
     customerId: string | null
     _count: TestimonialInviteCountAggregateOutputType | null
+    _avg: TestimonialInviteAvgAggregateOutputType | null
+    _sum: TestimonialInviteSumAggregateOutputType | null
     _min: TestimonialInviteMinAggregateOutputType | null
     _max: TestimonialInviteMaxAggregateOutputType | null
   }
@@ -34099,6 +34076,7 @@ export namespace Prisma {
     code?: boolean
     used?: boolean
     usedAt?: boolean
+    maxPhotos?: boolean
     businessId?: boolean
     customerId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -34113,6 +34091,7 @@ export namespace Prisma {
     code?: boolean
     used?: boolean
     usedAt?: boolean
+    maxPhotos?: boolean
     businessId?: boolean
     customerId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -34127,6 +34106,7 @@ export namespace Prisma {
     code?: boolean
     used?: boolean
     usedAt?: boolean
+    maxPhotos?: boolean
     businessId?: boolean
     customerId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -34141,11 +34121,12 @@ export namespace Prisma {
     code?: boolean
     used?: boolean
     usedAt?: boolean
+    maxPhotos?: boolean
     businessId?: boolean
     customerId?: boolean
   }
 
-  export type TestimonialInviteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "expiresAt" | "email" | "code" | "used" | "usedAt" | "businessId" | "customerId", ExtArgs["result"]["testimonialInvite"]>
+  export type TestimonialInviteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "expiresAt" | "email" | "code" | "used" | "usedAt" | "maxPhotos" | "businessId" | "customerId", ExtArgs["result"]["testimonialInvite"]>
   export type TestimonialInviteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | TestimonialInvite$customerArgs<ExtArgs>
@@ -34173,6 +34154,7 @@ export namespace Prisma {
       code: string
       used: boolean
       usedAt: Date | null
+      maxPhotos: number
       businessId: string
       customerId: string | null
     }, ExtArgs["result"]["testimonialInvite"]>
@@ -34607,6 +34589,7 @@ export namespace Prisma {
     readonly code: FieldRef<"TestimonialInvite", 'String'>
     readonly used: FieldRef<"TestimonialInvite", 'Boolean'>
     readonly usedAt: FieldRef<"TestimonialInvite", 'DateTime'>
+    readonly maxPhotos: FieldRef<"TestimonialInvite", 'Int'>
     readonly businessId: FieldRef<"TestimonialInvite", 'String'>
     readonly customerId: FieldRef<"TestimonialInvite", 'String'>
   }
@@ -39141,11 +39124,9 @@ export namespace Prisma {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     source: 'source',
-    rating: 'rating',
     title: 'title',
     text: 'text',
-    videoUrl: 'videoUrl',
-    photoUrl: 'photoUrl',
+    photoUrls: 'photoUrls',
     isPublic: 'isPublic',
     customerName: 'customerName',
     customerEmail: 'customerEmail',
@@ -39167,6 +39148,7 @@ export namespace Prisma {
     code: 'code',
     used: 'used',
     usedAt: 'usedAt',
+    maxPhotos: 'maxPhotos',
     businessId: 'businessId',
     customerId: 'customerId'
   };
@@ -41797,11 +41779,9 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Testimonial"> | Date | string
     updatedAt?: DateTimeFilter<"Testimonial"> | Date | string
     source?: StringFilter<"Testimonial"> | string
-    rating?: IntFilter<"Testimonial"> | number
     title?: StringNullableFilter<"Testimonial"> | string | null
     text?: StringFilter<"Testimonial"> | string
-    videoUrl?: StringNullableFilter<"Testimonial"> | string | null
-    photoUrl?: StringNullableFilter<"Testimonial"> | string | null
+    photoUrls?: StringNullableListFilter<"Testimonial">
     isPublic?: BoolFilter<"Testimonial"> | boolean
     customerName?: StringFilter<"Testimonial"> | string
     customerEmail?: StringNullableFilter<"Testimonial"> | string | null
@@ -41819,11 +41799,9 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     source?: SortOrder
-    rating?: SortOrder
     title?: SortOrderInput | SortOrder
     text?: SortOrder
-    videoUrl?: SortOrderInput | SortOrder
-    photoUrl?: SortOrderInput | SortOrder
+    photoUrls?: SortOrder
     isPublic?: SortOrder
     customerName?: SortOrder
     customerEmail?: SortOrderInput | SortOrder
@@ -41844,11 +41822,9 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Testimonial"> | Date | string
     updatedAt?: DateTimeFilter<"Testimonial"> | Date | string
     source?: StringFilter<"Testimonial"> | string
-    rating?: IntFilter<"Testimonial"> | number
     title?: StringNullableFilter<"Testimonial"> | string | null
     text?: StringFilter<"Testimonial"> | string
-    videoUrl?: StringNullableFilter<"Testimonial"> | string | null
-    photoUrl?: StringNullableFilter<"Testimonial"> | string | null
+    photoUrls?: StringNullableListFilter<"Testimonial">
     isPublic?: BoolFilter<"Testimonial"> | boolean
     customerName?: StringFilter<"Testimonial"> | string
     customerEmail?: StringNullableFilter<"Testimonial"> | string | null
@@ -41866,11 +41842,9 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     source?: SortOrder
-    rating?: SortOrder
     title?: SortOrderInput | SortOrder
     text?: SortOrder
-    videoUrl?: SortOrderInput | SortOrder
-    photoUrl?: SortOrderInput | SortOrder
+    photoUrls?: SortOrder
     isPublic?: SortOrder
     customerName?: SortOrder
     customerEmail?: SortOrderInput | SortOrder
@@ -41880,10 +41854,8 @@ export namespace Prisma {
     businessId?: SortOrder
     customerId?: SortOrderInput | SortOrder
     _count?: TestimonialCountOrderByAggregateInput
-    _avg?: TestimonialAvgOrderByAggregateInput
     _max?: TestimonialMaxOrderByAggregateInput
     _min?: TestimonialMinOrderByAggregateInput
-    _sum?: TestimonialSumOrderByAggregateInput
   }
 
   export type TestimonialScalarWhereWithAggregatesInput = {
@@ -41894,11 +41866,9 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Testimonial"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Testimonial"> | Date | string
     source?: StringWithAggregatesFilter<"Testimonial"> | string
-    rating?: IntWithAggregatesFilter<"Testimonial"> | number
     title?: StringNullableWithAggregatesFilter<"Testimonial"> | string | null
     text?: StringWithAggregatesFilter<"Testimonial"> | string
-    videoUrl?: StringNullableWithAggregatesFilter<"Testimonial"> | string | null
-    photoUrl?: StringNullableWithAggregatesFilter<"Testimonial"> | string | null
+    photoUrls?: StringNullableListFilter<"Testimonial">
     isPublic?: BoolWithAggregatesFilter<"Testimonial"> | boolean
     customerName?: StringWithAggregatesFilter<"Testimonial"> | string
     customerEmail?: StringNullableWithAggregatesFilter<"Testimonial"> | string | null
@@ -41920,6 +41890,7 @@ export namespace Prisma {
     code?: StringFilter<"TestimonialInvite"> | string
     used?: BoolFilter<"TestimonialInvite"> | boolean
     usedAt?: DateTimeNullableFilter<"TestimonialInvite"> | Date | string | null
+    maxPhotos?: IntFilter<"TestimonialInvite"> | number
     businessId?: StringFilter<"TestimonialInvite"> | string
     customerId?: StringNullableFilter<"TestimonialInvite"> | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
@@ -41934,6 +41905,7 @@ export namespace Prisma {
     code?: SortOrder
     used?: SortOrder
     usedAt?: SortOrderInput | SortOrder
+    maxPhotos?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrderInput | SortOrder
     business?: BusinessOrderByWithRelationInput
@@ -41951,6 +41923,7 @@ export namespace Prisma {
     email?: StringFilter<"TestimonialInvite"> | string
     used?: BoolFilter<"TestimonialInvite"> | boolean
     usedAt?: DateTimeNullableFilter<"TestimonialInvite"> | Date | string | null
+    maxPhotos?: IntFilter<"TestimonialInvite"> | number
     businessId?: StringFilter<"TestimonialInvite"> | string
     customerId?: StringNullableFilter<"TestimonialInvite"> | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
@@ -41965,11 +41938,14 @@ export namespace Prisma {
     code?: SortOrder
     used?: SortOrder
     usedAt?: SortOrderInput | SortOrder
+    maxPhotos?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrderInput | SortOrder
     _count?: TestimonialInviteCountOrderByAggregateInput
+    _avg?: TestimonialInviteAvgOrderByAggregateInput
     _max?: TestimonialInviteMaxOrderByAggregateInput
     _min?: TestimonialInviteMinOrderByAggregateInput
+    _sum?: TestimonialInviteSumOrderByAggregateInput
   }
 
   export type TestimonialInviteScalarWhereWithAggregatesInput = {
@@ -41983,6 +41959,7 @@ export namespace Prisma {
     code?: StringWithAggregatesFilter<"TestimonialInvite"> | string
     used?: BoolWithAggregatesFilter<"TestimonialInvite"> | boolean
     usedAt?: DateTimeNullableWithAggregatesFilter<"TestimonialInvite"> | Date | string | null
+    maxPhotos?: IntWithAggregatesFilter<"TestimonialInvite"> | number
     businessId?: StringWithAggregatesFilter<"TestimonialInvite"> | string
     customerId?: StringNullableWithAggregatesFilter<"TestimonialInvite"> | string | null
   }
@@ -45010,11 +44987,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     source?: string
-    rating: number
     title?: string | null
     text: string
-    videoUrl?: string | null
-    photoUrl?: string | null
+    photoUrls?: TestimonialCreatephotoUrlsInput | string[]
     isPublic?: boolean
     customerName: string
     customerEmail?: string | null
@@ -45030,11 +45005,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     source?: string
-    rating: number
     title?: string | null
     text: string
-    videoUrl?: string | null
-    photoUrl?: string | null
+    photoUrls?: TestimonialCreatephotoUrlsInput | string[]
     isPublic?: boolean
     customerName: string
     customerEmail?: string | null
@@ -45050,11 +45023,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     source?: StringFieldUpdateOperationsInput | string
-    rating?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
-    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -45070,11 +45041,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     source?: StringFieldUpdateOperationsInput | string
-    rating?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
-    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -45090,11 +45059,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     source?: string
-    rating: number
     title?: string | null
     text: string
-    videoUrl?: string | null
-    photoUrl?: string | null
+    photoUrls?: TestimonialCreatephotoUrlsInput | string[]
     isPublic?: boolean
     customerName: string
     customerEmail?: string | null
@@ -45110,11 +45077,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     source?: StringFieldUpdateOperationsInput | string
-    rating?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
-    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -45128,11 +45093,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     source?: StringFieldUpdateOperationsInput | string
-    rating?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
-    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -45151,6 +45114,7 @@ export namespace Prisma {
     code: string
     used?: boolean
     usedAt?: Date | string | null
+    maxPhotos?: number
     business: BusinessCreateNestedOneWithoutTestimonialInvitesInput
     customer?: CustomerCreateNestedOneWithoutTestimonialInvitesInput
   }
@@ -45163,6 +45127,7 @@ export namespace Prisma {
     code: string
     used?: boolean
     usedAt?: Date | string | null
+    maxPhotos?: number
     businessId: string
     customerId?: string | null
   }
@@ -45175,6 +45140,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     used?: BoolFieldUpdateOperationsInput | boolean
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxPhotos?: IntFieldUpdateOperationsInput | number
     business?: BusinessUpdateOneRequiredWithoutTestimonialInvitesNestedInput
     customer?: CustomerUpdateOneWithoutTestimonialInvitesNestedInput
   }
@@ -45187,6 +45153,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     used?: BoolFieldUpdateOperationsInput | boolean
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxPhotos?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -45199,6 +45166,7 @@ export namespace Prisma {
     code: string
     used?: boolean
     usedAt?: Date | string | null
+    maxPhotos?: number
     businessId: string
     customerId?: string | null
   }
@@ -45211,6 +45179,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     used?: BoolFieldUpdateOperationsInput | boolean
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxPhotos?: IntFieldUpdateOperationsInput | number
   }
 
   export type TestimonialInviteUncheckedUpdateManyInput = {
@@ -45221,6 +45190,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     used?: BoolFieldUpdateOperationsInput | boolean
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxPhotos?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -47560,16 +47530,22 @@ export namespace Prisma {
     sortOrder?: SortOrder
   }
 
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
   export type TestimonialCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     source?: SortOrder
-    rating?: SortOrder
     title?: SortOrder
     text?: SortOrder
-    videoUrl?: SortOrder
-    photoUrl?: SortOrder
+    photoUrls?: SortOrder
     isPublic?: SortOrder
     customerName?: SortOrder
     customerEmail?: SortOrder
@@ -47580,20 +47556,13 @@ export namespace Prisma {
     customerId?: SortOrder
   }
 
-  export type TestimonialAvgOrderByAggregateInput = {
-    rating?: SortOrder
-  }
-
   export type TestimonialMaxOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     source?: SortOrder
-    rating?: SortOrder
     title?: SortOrder
     text?: SortOrder
-    videoUrl?: SortOrder
-    photoUrl?: SortOrder
     isPublic?: SortOrder
     customerName?: SortOrder
     customerEmail?: SortOrder
@@ -47609,11 +47578,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     source?: SortOrder
-    rating?: SortOrder
     title?: SortOrder
     text?: SortOrder
-    videoUrl?: SortOrder
-    photoUrl?: SortOrder
     isPublic?: SortOrder
     customerName?: SortOrder
     customerEmail?: SortOrder
@@ -47624,10 +47590,6 @@ export namespace Prisma {
     customerId?: SortOrder
   }
 
-  export type TestimonialSumOrderByAggregateInput = {
-    rating?: SortOrder
-  }
-
   export type TestimonialInviteCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -47636,8 +47598,13 @@ export namespace Prisma {
     code?: SortOrder
     used?: SortOrder
     usedAt?: SortOrder
+    maxPhotos?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
+  }
+
+  export type TestimonialInviteAvgOrderByAggregateInput = {
+    maxPhotos?: SortOrder
   }
 
   export type TestimonialInviteMaxOrderByAggregateInput = {
@@ -47648,6 +47615,7 @@ export namespace Prisma {
     code?: SortOrder
     used?: SortOrder
     usedAt?: SortOrder
+    maxPhotos?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
   }
@@ -47660,16 +47628,13 @@ export namespace Prisma {
     code?: SortOrder
     used?: SortOrder
     usedAt?: SortOrder
+    maxPhotos?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
   }
 
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
+  export type TestimonialInviteSumOrderByAggregateInput = {
+    maxPhotos?: SortOrder
   }
 
   export type ReviewVoteListRelationFilter = {
@@ -50094,6 +50059,10 @@ export namespace Prisma {
     update?: XOR<XOR<GalleryUpdateToOneWithWhereWithoutImagesInput, GalleryUpdateWithoutImagesInput>, GalleryUncheckedUpdateWithoutImagesInput>
   }
 
+  export type TestimonialCreatephotoUrlsInput = {
+    set: string[]
+  }
+
   export type BusinessCreateNestedOneWithoutTestimonialsInput = {
     create?: XOR<BusinessCreateWithoutTestimonialsInput, BusinessUncheckedCreateWithoutTestimonialsInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutTestimonialsInput
@@ -50104,6 +50073,11 @@ export namespace Prisma {
     create?: XOR<CustomerCreateWithoutTestimonialsInput, CustomerUncheckedCreateWithoutTestimonialsInput>
     connectOrCreate?: CustomerCreateOrConnectWithoutTestimonialsInput
     connect?: CustomerWhereUniqueInput
+  }
+
+  export type TestimonialUpdatephotoUrlsInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type BusinessUpdateOneRequiredWithoutTestimonialsNestedInput = {
@@ -52000,11 +51974,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     source?: string
-    rating: number
     title?: string | null
     text: string
-    videoUrl?: string | null
-    photoUrl?: string | null
+    photoUrls?: TestimonialCreatephotoUrlsInput | string[]
     isPublic?: boolean
     customerName: string
     customerEmail?: string | null
@@ -52019,11 +51991,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     source?: string
-    rating: number
     title?: string | null
     text: string
-    videoUrl?: string | null
-    photoUrl?: string | null
+    photoUrls?: TestimonialCreatephotoUrlsInput | string[]
     isPublic?: boolean
     customerName: string
     customerEmail?: string | null
@@ -52051,6 +52021,7 @@ export namespace Prisma {
     code: string
     used?: boolean
     usedAt?: Date | string | null
+    maxPhotos?: number
     customer?: CustomerCreateNestedOneWithoutTestimonialInvitesInput
   }
 
@@ -52062,6 +52033,7 @@ export namespace Prisma {
     code: string
     used?: boolean
     usedAt?: Date | string | null
+    maxPhotos?: number
     customerId?: string | null
   }
 
@@ -52564,11 +52536,9 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Testimonial"> | Date | string
     updatedAt?: DateTimeFilter<"Testimonial"> | Date | string
     source?: StringFilter<"Testimonial"> | string
-    rating?: IntFilter<"Testimonial"> | number
     title?: StringNullableFilter<"Testimonial"> | string | null
     text?: StringFilter<"Testimonial"> | string
-    videoUrl?: StringNullableFilter<"Testimonial"> | string | null
-    photoUrl?: StringNullableFilter<"Testimonial"> | string | null
+    photoUrls?: StringNullableListFilter<"Testimonial">
     isPublic?: BoolFilter<"Testimonial"> | boolean
     customerName?: StringFilter<"Testimonial"> | string
     customerEmail?: StringNullableFilter<"Testimonial"> | string | null
@@ -52606,6 +52576,7 @@ export namespace Prisma {
     code?: StringFilter<"TestimonialInvite"> | string
     used?: BoolFilter<"TestimonialInvite"> | boolean
     usedAt?: DateTimeNullableFilter<"TestimonialInvite"> | Date | string | null
+    maxPhotos?: IntFilter<"TestimonialInvite"> | number
     businessId?: StringFilter<"TestimonialInvite"> | string
     customerId?: StringNullableFilter<"TestimonialInvite"> | string | null
   }
@@ -54584,11 +54555,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     source?: string
-    rating: number
     title?: string | null
     text: string
-    videoUrl?: string | null
-    photoUrl?: string | null
+    photoUrls?: TestimonialCreatephotoUrlsInput | string[]
     isPublic?: boolean
     customerName: string
     customerEmail?: string | null
@@ -54603,11 +54572,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     source?: string
-    rating: number
     title?: string | null
     text: string
-    videoUrl?: string | null
-    photoUrl?: string | null
+    photoUrls?: TestimonialCreatephotoUrlsInput | string[]
     isPublic?: boolean
     customerName: string
     customerEmail?: string | null
@@ -54635,6 +54602,7 @@ export namespace Prisma {
     code: string
     used?: boolean
     usedAt?: Date | string | null
+    maxPhotos?: number
     business: BusinessCreateNestedOneWithoutTestimonialInvitesInput
   }
 
@@ -54646,6 +54614,7 @@ export namespace Prisma {
     code: string
     used?: boolean
     usedAt?: Date | string | null
+    maxPhotos?: number
     businessId: string
   }
 
@@ -59418,11 +59387,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     source?: string
-    rating: number
     title?: string | null
     text: string
-    videoUrl?: string | null
-    photoUrl?: string | null
+    photoUrls?: TestimonialCreatephotoUrlsInput | string[]
     isPublic?: boolean
     customerName: string
     customerEmail?: string | null
@@ -59440,6 +59407,7 @@ export namespace Prisma {
     code: string
     used?: boolean
     usedAt?: Date | string | null
+    maxPhotos?: number
     customerId?: string | null
   }
 
@@ -60024,11 +59992,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     source?: StringFieldUpdateOperationsInput | string
-    rating?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
-    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60043,11 +60009,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     source?: StringFieldUpdateOperationsInput | string
-    rating?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
-    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60062,11 +60026,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     source?: StringFieldUpdateOperationsInput | string
-    rating?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
-    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60084,6 +60046,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     used?: BoolFieldUpdateOperationsInput | boolean
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxPhotos?: IntFieldUpdateOperationsInput | number
     customer?: CustomerUpdateOneWithoutTestimonialInvitesNestedInput
   }
 
@@ -60095,6 +60058,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     used?: BoolFieldUpdateOperationsInput | boolean
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxPhotos?: IntFieldUpdateOperationsInput | number
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -60106,6 +60070,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     used?: BoolFieldUpdateOperationsInput | boolean
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxPhotos?: IntFieldUpdateOperationsInput | number
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -60675,11 +60640,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     source?: string
-    rating: number
     title?: string | null
     text: string
-    videoUrl?: string | null
-    photoUrl?: string | null
+    photoUrls?: TestimonialCreatephotoUrlsInput | string[]
     isPublic?: boolean
     customerName: string
     customerEmail?: string | null
@@ -60697,6 +60660,7 @@ export namespace Prisma {
     code: string
     used?: boolean
     usedAt?: Date | string | null
+    maxPhotos?: number
     businessId: string
   }
 
@@ -60877,11 +60841,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     source?: StringFieldUpdateOperationsInput | string
-    rating?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
-    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60896,11 +60858,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     source?: StringFieldUpdateOperationsInput | string
-    rating?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
-    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60915,11 +60875,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     source?: StringFieldUpdateOperationsInput | string
-    rating?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
-    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60937,6 +60895,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     used?: BoolFieldUpdateOperationsInput | boolean
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxPhotos?: IntFieldUpdateOperationsInput | number
     business?: BusinessUpdateOneRequiredWithoutTestimonialInvitesNestedInput
   }
 
@@ -60948,6 +60907,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     used?: BoolFieldUpdateOperationsInput | boolean
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxPhotos?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -60959,6 +60919,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     used?: BoolFieldUpdateOperationsInput | boolean
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxPhotos?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
   }
 

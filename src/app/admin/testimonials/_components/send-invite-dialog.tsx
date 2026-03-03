@@ -29,6 +29,7 @@ export function SendInviteDialog() {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [customerId, setCustomerId] = useState<string | undefined>(undefined);
+  const [maxPhotos, setMaxPhotos] = useState(3);
 
   // Get customers for dropdown
   const { data: customers } = api.customer.list.useQuery(undefined, {
@@ -41,6 +42,7 @@ export function SendInviteDialog() {
       setOpen(false);
       setEmail("");
       setCustomerId(undefined);
+      setMaxPhotos(3);
     },
     onError: (error) => {
       toast.error(error.message || "Failed to send invite");
@@ -58,6 +60,7 @@ export function SendInviteDialog() {
     sendInviteMutation.mutate({
       email: email.trim(),
       customerId,
+      maxPhotos,
     });
   };
 
@@ -123,6 +126,29 @@ export function SendInviteDialog() {
               <p className="mt-1 text-xs text-gray-500">
                 If this email isn&apos;t a customer, we&apos;ll create one
                 automatically
+              </p>
+            </div>
+
+            {/* Max Photos */}
+            <div>
+              <Label htmlFor="maxPhotos">Max photos (0–5)</Label>
+              <Select
+                value={String(maxPhotos)}
+                onValueChange={(v) => setMaxPhotos(Number(v))}
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[0, 1, 2, 3, 4, 5].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n} {n === 1 ? "photo" : "photos"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="mt-1 text-xs text-gray-500">
+                How many photos this customer can add to their testimonial
               </p>
             </div>
           </div>

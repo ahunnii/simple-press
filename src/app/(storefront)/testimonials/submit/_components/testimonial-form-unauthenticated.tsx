@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, Star } from "lucide-react";
+import { useUploadFiles } from "@better-upload/client";
+import { Check, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
@@ -17,6 +18,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { getStoredPath } from "~/lib/uploads";
 
 type TestimonialFormUnauthenticatedProps = {
   code: string;
@@ -31,12 +33,24 @@ export function TestimonialFormUnauthenticated({
 }: TestimonialFormUnauthenticatedProps) {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [rating, setRating] = useState(5);
-  const [hoveredRating, setHoveredRating] = useState(0);
   const [text, setText] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
+
+  const maxPhotos = 5; // cap for upload; invite.maxPhotos enforced on submit
+  const uploadFiles = useUploadFiles({
+    api: "/api/upload",
+    route: "testimonials",
+    onUploadComplete: (data) => {
+      const newUrls = data.files.map((file) => getStoredPath(file)).filter(Boolean);
+      if (newUrls.length > 0) {
+        setPhotoUrls((prev) => [...prev, ...newUrls].slice(0, maxPhotos));
+      }
+    },
+    onError: (error) => {
+      toast.error(error?.message ?? "Failed to upload image");
+    },
+  });
 
   // Verify invite code
   const { data: invite, isLoading: loadingInvite } =
@@ -72,13 +86,17 @@ export function TestimonialFormUnauthenticated({
       return;
     }
 
+    const allowedPhotos = invite?.maxPhotos ?? 5;
+    if (photoUrls.length > allowedPhotos) {
+      toast.error(`This invite allows up to ${allowedPhotos} photo(s)`);
+      return;
+    }
+
     submitMutation.mutate({
       code,
       name: name.trim(),
-      rating,
       text: text.trim(),
-      videoUrl: videoUrl.trim() || undefined,
-      photoUrl: photoUrl.trim() || undefined,
+      photoUrls,
     });
   };
 
@@ -115,8 +133,7 @@ export function TestimonialFormUnauthenticated({
             </div>
             <h2 className="mb-2 text-xl font-semibold">Thank You!</h2>
             <p className="mb-6 text-gray-600">
-              Your testimonial has been submitted successfully. It will be
-              reviewed by {invite.business.name} before being published.
+              Your testimonial has been submitted and is now live on the site.
             </p>
             <Button
               onClick={() =>
@@ -168,41 +185,6 @@ export function TestimonialFormUnauthenticated({
                 />
               </div>
 
-              {/* Rating */}
-              <div>
-                <Label>
-                  Rating <span className="text-red-500">*</span>
-                </Label>
-                <div className="mt-2 flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      title={`Rate ${star} stars`}
-                      onClick={() => setRating(star)}
-                      onMouseEnter={() => setHoveredRating(star)}
-                      onMouseLeave={() => setHoveredRating(0)}
-                      className="transition-transform hover:scale-110"
-                    >
-                      <Star
-                        className={`h-8 w-8 ${
-                          star <= (hoveredRating || rating)
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-1 text-sm text-gray-500">
-                  {rating === 1 && "Poor"}
-                  {rating === 2 && "Fair"}
-                  {rating === 3 && "Good"}
-                  {rating === 4 && "Very Good"}
-                  {rating === 5 && "Excellent"}
-                </p>
-              </div>
-
               {/* Text Testimonial */}
               <div>
                 <Label htmlFor="text">
@@ -223,31 +205,91 @@ export function TestimonialFormUnauthenticated({
                 </p>
               </div>
 
-              {/* Photo (Optional) */}
+              {/* Photos (Optional, up to invite max) — upload */}
               <div>
-                <Label htmlFor="photo">Photo (Optional)</Label>
-                <Input
-                  id="photo"
-                  type="url"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
-                  placeholder="https://example.com/photo.jpg"
-                  className="mt-2"
-                />
-              </div>
-
-              {/* Video (Optional) */}
-              <div>
-                <Label htmlFor="video">Video (Optional)</Label>
-                <Input
-                  id="video"
-                  type="url"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://example.com/video.mp4"
-                  className="mt-2"
-                />
-                <p className="mt-1 text-sm text-gray-500">Max 1 minute</p>
+                <Label>
+                  Photos (Optional, max {invite?.maxPhotos ?? 5})
+                </Label>
+                <p className="mt-1 text-sm text-gray-500">
+                  Upload images to include with your testimonial
+                </p>
+                <div className="mt-2 space-y-3">
+                  {photoUrls.length > 0 && (
+                    <div className="flex flex-wrap gap-3">
+                      {photoUrls.map((url, i) => (
+                        <div
+                          key={url}
+                          className="relative h-24 w-24 overflow-hidden rounded-lg border bg-gray-100"
+                        >
+                          <img
+                            src={url}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute right-1 top-1 h-6 w-6"
+                            onClick={() =>
+                              setPhotoUrls(photoUrls.filter((_, j) => j !== i))
+                            }
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {photoUrls.length < (invite?.maxPhotos ?? 5) && (
+                    <div>
+                      <input
+                        type="file"
+                        id="testimonial-invite-photo-upload"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        disabled={uploadFiles.isPending}
+                        title="Upload photos"
+                        aria-label="Upload photos for your testimonial"
+                        onChange={async (e) => {
+                          const files = e.target.files;
+                          if (!files?.length || !invite) return;
+                          const valid = Array.from(files).filter((f) =>
+                            f.type.startsWith("image/"),
+                          );
+                          const remaining = (invite.maxPhotos ?? 5) - photoUrls.length;
+                          const toUpload = valid.slice(0, remaining);
+                          if (toUpload.length === 0) return;
+                          e.target.value = "";
+                          await uploadFiles.upload(toUpload, { metadata: { code } });
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          document
+                            .getElementById("testimonial-invite-photo-upload")
+                            ?.click()
+                        }
+                        disabled={uploadFiles.isPending}
+                      >
+                        {uploadFiles.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Upload photos
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Submit */}

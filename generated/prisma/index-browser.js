@@ -496,11 +496,9 @@ exports.Prisma.TestimonialScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   source: 'source',
-  rating: 'rating',
   title: 'title',
   text: 'text',
-  videoUrl: 'videoUrl',
-  photoUrl: 'photoUrl',
+  photoUrls: 'photoUrls',
   isPublic: 'isPublic',
   customerName: 'customerName',
   customerEmail: 'customerEmail',
@@ -519,6 +517,7 @@ exports.Prisma.TestimonialInviteScalarFieldEnum = {
   code: 'code',
   used: 'used',
   usedAt: 'usedAt',
+  maxPhotos: 'maxPhotos',
   businessId: 'businessId',
   customerId: 'customerId'
 };

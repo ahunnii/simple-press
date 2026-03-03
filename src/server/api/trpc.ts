@@ -171,14 +171,20 @@ export const ownerAdminProcedure = t.procedure
     }
 
     const user = ctx.session.user;
+
     // PLATFORM_ADMIN bypasses membership check
     if (user.platformRole !== "PLATFORM_ADMIN") {
       const membership = await ctx.db.businessMembership.findUnique({
-        where: { userId_businessId: { userId: user.id, businessId: business.id } },
+        where: {
+          userId_businessId: { userId: user.id, businessId: business.id },
+        },
         select: { role: true },
       });
       if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Not a business member" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Not a business member",
+        });
       }
     }
 

@@ -8,7 +8,6 @@ import {
   EyeOff,
   MoreVertical,
   Pencil,
-  Star,
   Trash2,
   UserCheck,
   UserCog,
@@ -71,19 +70,6 @@ export function TestimonialsList() {
     testimonials?.filter((t) => t.source === "customer") ?? [];
   const pendingApproval = customerSubmitted.filter((t) => !t.isPublic);
 
-  const renderStars = (rating: number) => (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          className={`h-4 w-4 ${
-            star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-          }`}
-        />
-      ))}
-    </div>
-  );
-
   const renderTestimonial = (testimonial: Testimonial) => (
     <Card key={testimonial.id}>
       <CardContent className="p-6">
@@ -91,8 +77,6 @@ export function TestimonialsList() {
           <div className="min-w-0 flex-1">
             {/* Header row */}
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              {renderStars(testimonial.rating)}
-
               {/* Source badge */}
               {testimonial.source === "owner" ? (
                 <Badge variant="outline" className="gap-1 text-xs">

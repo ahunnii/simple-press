@@ -1,8 +1,10 @@
 import crypto from "crypto";
 import type { PrismaClient } from "generated/prisma";
+import { BusinessDomainStatus } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { env } from "~/env";
 import { checkBusiness } from "~/lib/check-business";
 import { sendTestimonialInviteEmail } from "~/lib/email/templates";
 
@@ -89,6 +91,30 @@ export const testimonialRouter = createTRPCRouter({
       });
     }),
 
+  listRandom: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(10).default(3),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const businessId = await checkBusiness();
+      if (!businessId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      const all = await ctx.db.testimonial.findMany({
+        where: { businessId: businessId.id, isPublic: true },
+        orderBy: { testimonialDate: "desc" },
+        take: 20,
+      });
+      const shuffled = [...all].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, input.limit);
+    }),
+
   getInvite: publicProcedure
     .input(z.object({ code: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -150,10 +176,8 @@ export const testimonialRouter = createTRPCRouter({
     .input(
       z.object({
         businessId: z.string(),
-        rating: z.number().min(1).max(5),
         text: z.string().min(10).max(1000),
-        videoUrl: z.string().url().optional(),
-        photoUrl: z.string().url().optional(),
+        photoUrls: z.array(z.string().url()).max(5).default([]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -203,11 +227,9 @@ export const testimonialRouter = createTRPCRouter({
           customerId: customer.id,
           customerEmail: user.email,
           customerName: user.name || user.email,
-          rating: input.rating,
           text: input.text,
-          videoUrl: input.videoUrl,
-          photoUrl: input.photoUrl,
-          isPublic: false, // Always requires owner approval
+          photoUrls: input.photoUrls,
+          isPublic: true, // Auto-publish on submit
         },
       });
     }),
@@ -217,10 +239,8 @@ export const testimonialRouter = createTRPCRouter({
       z.object({
         code: z.string(),
         name: z.string().min(1),
-        rating: z.number().min(1).max(5),
         text: z.string().min(10).max(1000),
-        videoUrl: z.string().url().optional(),
-        photoUrl: z.string().url().optional(),
+        photoUrls: z.array(z.string().url()).max(5).default([]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -243,6 +263,13 @@ export const testimonialRouter = createTRPCRouter({
           code: "BAD_REQUEST",
           message: "This invite has expired",
         });
+
+      if (input.photoUrls.length > invite.maxPhotos) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `This invite allows up to ${invite.maxPhotos} photo(s)`,
+        });
+      }
 
       const existing = await ctx.db.testimonial.findFirst({
         where: {
@@ -282,11 +309,9 @@ export const testimonialRouter = createTRPCRouter({
           customerId: customer.id,
           customerEmail: invite.email,
           customerName: input.name,
-          rating: input.rating,
           text: input.text,
-          videoUrl: input.videoUrl,
-          photoUrl: input.photoUrl,
-          isPublic: false,
+          photoUrls: input.photoUrls,
+          isPublic: true, // Auto-publish on submit
         },
       });
 
@@ -308,11 +333,9 @@ export const testimonialRouter = createTRPCRouter({
         customerEmail: z.string().email().optional(),
         customerTitle: z.string().optional(),
         customerCompany: z.string().optional(),
-        rating: z.number().min(1).max(5),
         title: z.string().optional(),
         text: z.string().min(1),
-        videoUrl: z.string().url().optional(),
-        photoUrl: z.string().url().optional(),
+        photoUrls: z.array(z.string().url()).max(5).default([]),
         isPublic: z.boolean().default(true),
         testimonialDate: z.string().optional(),
       }),
@@ -330,11 +353,9 @@ export const testimonialRouter = createTRPCRouter({
           customerEmail: input.customerEmail,
           customerTitle: input.customerTitle,
           customerCompany: input.customerCompany,
-          rating: input.rating,
           title: input.title,
           text: input.text,
-          videoUrl: input.videoUrl,
-          photoUrl: input.photoUrl,
+          photoUrls: input.photoUrls,
           isPublic: input.isPublic,
           testimonialDate: input.testimonialDate
             ? new Date(input.testimonialDate)
@@ -352,11 +373,9 @@ export const testimonialRouter = createTRPCRouter({
         customerEmail: z.string().email().optional().nullable(),
         customerTitle: z.string().optional().nullable(),
         customerCompany: z.string().optional().nullable(),
-        rating: z.number().min(1).max(5).optional(),
         title: z.string().optional().nullable(),
         text: z.string().min(1).optional(),
-        videoUrl: z.string().url().optional().nullable(),
-        photoUrl: z.string().url().optional().nullable(),
+        photoUrls: z.array(z.string().url()).max(5).optional(),
         isPublic: z.boolean().optional(),
         testimonialDate: z.string().optional(),
       }),
@@ -414,16 +433,20 @@ export const testimonialRouter = createTRPCRouter({
       z.object({
         email: z.string().email(),
         customerId: z.string().optional(),
+        maxPhotos: z.number().min(0).max(5).default(3),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      await assertOwner(ctx.db, ctx.session.user.id, businessId);
-
       const business = await ctx.db.business.findUnique({
         where: { id: businessId },
-        select: { name: true, subdomain: true },
+        select: {
+          name: true,
+          subdomain: true,
+          customDomain: true,
+          domainStatus: true,
+        },
       });
 
       if (!business)
@@ -443,13 +466,22 @@ export const testimonialRouter = createTRPCRouter({
           code,
           expiresAt,
           customerId: input.customerId,
+          maxPhotos: input.maxPhotos,
         },
       });
+
+      let inviteUrl = `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/testimonials/submit?code=${code}`;
+      if (
+        business.customDomain &&
+        business.domainStatus === BusinessDomainStatus.ACTIVE
+      ) {
+        inviteUrl = `https://${business.customDomain}/testimonials/submit?code=${code}`;
+      }
 
       await sendTestimonialInviteEmail({
         to: input.email,
         businessName: business.name,
-        inviteUrl: `https://${business.subdomain}.${process.env.NEXT_PUBLIC_PLATFORM_DOMAIN}/testimonials/submit?code=${code}`,
+        inviteUrl,
       });
 
       return invite;

@@ -760,14 +760,12 @@ model Testimonial {
   // Who created this
   source String @default("customer") // "customer" | "owner"
 
-  // Content
-  rating   Int // 1-5 stars
-  title    String? // Optional title (owner-created often has one)
-  text     String  @db.Text
-  videoUrl String?
-  photoUrl String?
+  // Content — name, text, photos only (no rating/video)
+  title     String? // Optional title (owner-created often has one)
+  text      String   @db.Text
+  photoUrls String[] // Max 5; enforced in API
 
-  // Status — owner-created are public by default, customer-submitted need approval
+  // Status — owner-created are public by default; customer-submitted auto-publish
   isPublic Boolean @default(false)
 
   // Attribution (used by both types)
@@ -797,10 +795,11 @@ model TestimonialInvite {
   expiresAt DateTime
 
   // Invite details
-  email  String
-  code   String    @unique // Unique code for URL
-  used   Boolean   @default(false)
-  usedAt DateTime?
+  email     String
+  code      String    @unique // Unique code for URL
+  used      Boolean   @default(false)
+  usedAt    DateTime?
+  maxPhotos Int       @default(3) // 0–5 photos allowed for this invite
 
   // Relationships
   businessId String

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, Star, Upload } from "lucide-react";
+import { useUploadFiles } from "@better-upload/client";
+import { Check, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
@@ -14,9 +15,9 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { getStoredPath } from "~/lib/uploads";
 
 type TestimonialFormProps = {
   business: {
@@ -25,14 +26,27 @@ type TestimonialFormProps = {
   };
 };
 
+const MAX_PHOTOS = 5;
+
 export function TestimonialForm({ business }: TestimonialFormProps) {
   const router = useRouter();
-  const [rating, setRating] = useState(5);
-  const [hoveredRating, setHoveredRating] = useState(0);
   const [text, setText] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
+
+  const uploadFiles = useUploadFiles({
+    api: "/api/upload",
+    route: "testimonials",
+    onUploadComplete: (data) => {
+      const newUrls = data.files.map((file) => getStoredPath(file)).filter(Boolean);
+      if (newUrls.length > 0) {
+        setPhotoUrls((prev) => [...prev, ...newUrls].slice(0, MAX_PHOTOS));
+      }
+    },
+    onError: (error) => {
+      toast.error(error?.message ?? "Failed to upload image");
+    },
+  });
 
   // Check if user can submit
   const { data: canSubmitData } = api.testimonial.canSubmit.useQuery({
@@ -62,12 +76,14 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
       return;
     }
 
+    if (photoUrls.length > MAX_PHOTOS) {
+      toast.error(`Maximum ${MAX_PHOTOS} photos allowed`);
+      return;
+    }
     submitMutation.mutate({
       businessId: business.id,
-      rating,
       text: text.trim(),
-      videoUrl: videoUrl.trim() || undefined,
-      photoUrl: photoUrl.trim() || undefined,
+      photoUrls,
     });
   };
 
@@ -78,7 +94,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
         <Card className="max-w-md">
           <CardContent className="pt-6 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
-              <Star className="h-6 w-6 text-yellow-600" />
+              <Check className="h-6 w-6 text-yellow-600" />
             </div>
             <h2 className="mb-2 text-xl font-semibold">Already Submitted</h2>
             <p className="text-gray-600">
@@ -105,8 +121,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
             </div>
             <h2 className="mb-2 text-xl font-semibold">Thank You!</h2>
             <p className="mb-6 text-gray-600">
-              Your testimonial has been submitted successfully. It will be
-              reviewed by {business.name} before being published.
+              Your testimonial has been submitted and is now live on the site.
             </p>
             <Button onClick={() => router.push("/")}>Back to Home</Button>
           </CardContent>
@@ -135,41 +150,6 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              {/* Rating */}
-              <div>
-                <Label>
-                  Rating <span className="text-red-500">*</span>
-                </Label>
-                <div className="mt-2 flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      title={`Rate ${star} stars`}
-                      onClick={() => setRating(star)}
-                      onMouseEnter={() => setHoveredRating(star)}
-                      onMouseLeave={() => setHoveredRating(0)}
-                      className="transition-transform hover:scale-110"
-                    >
-                      <Star
-                        className={`h-8 w-8 ${
-                          star <= (hoveredRating || rating)
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-1 text-sm text-gray-500">
-                  {rating === 1 && "Poor"}
-                  {rating === 2 && "Fair"}
-                  {rating === 3 && "Good"}
-                  {rating === 4 && "Very Good"}
-                  {rating === 5 && "Excellent"}
-                </p>
-              </div>
-
               {/* Text Testimonial */}
               <div>
                 <Label htmlFor="text">
@@ -190,36 +170,87 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                 </p>
               </div>
 
-              {/* Photo (Optional) */}
+              {/* Photos (Optional, max 5) — upload */}
               <div>
-                <Label htmlFor="photo">Photo (Optional)</Label>
-                <Input
-                  id="photo"
-                  type="url"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
-                  placeholder="https://example.com/photo.jpg"
-                  className="mt-2"
-                />
+                <Label>Photos (Optional, max {MAX_PHOTOS})</Label>
                 <p className="mt-1 text-sm text-gray-500">
-                  Provide a URL to a photo
+                  Upload images to include with your testimonial
                 </p>
-              </div>
-
-              {/* Video (Optional) */}
-              <div>
-                <Label htmlFor="video">Video (Optional)</Label>
-                <Input
-                  id="video"
-                  type="url"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://example.com/video.mp4"
-                  className="mt-2"
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  Provide a URL to a video (max 1 minute)
-                </p>
+                <div className="mt-2 space-y-3">
+                  {photoUrls.length > 0 && (
+                    <div className="flex flex-wrap gap-3">
+                      {photoUrls.map((url, i) => (
+                        <div
+                          key={url}
+                          className="relative h-24 w-24 overflow-hidden rounded-lg border bg-gray-100"
+                        >
+                          <img
+                            src={url}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute right-1 top-1 h-6 w-6"
+                            onClick={() =>
+                              setPhotoUrls(photoUrls.filter((_, j) => j !== i))
+                            }
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {photoUrls.length < MAX_PHOTOS && (
+                    <div>
+                      <input
+                        type="file"
+                        id="testimonial-photo-upload"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        disabled={uploadFiles.isPending}
+                        title="Upload photos"
+                        aria-label="Upload photos for your testimonial"
+                        onChange={async (e) => {
+                          const files = e.target.files;
+                          if (!files?.length) return;
+                          const valid = Array.from(files).filter((f) =>
+                            f.type.startsWith("image/"),
+                          );
+                          const remaining = MAX_PHOTOS - photoUrls.length;
+                          const toUpload = valid.slice(0, remaining);
+                          if (toUpload.length === 0) return;
+                          e.target.value = "";
+                          await uploadFiles.upload(toUpload);
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          document.getElementById("testimonial-photo-upload")?.click()
+                        }
+                        disabled={uploadFiles.isPending}
+                      >
+                        {uploadFiles.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Upload photos
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Submit */}
@@ -239,7 +270,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                   )}
                 </Button>
                 <p className="mt-2 text-center text-xs text-gray-500">
-                  Your testimonial will be reviewed before being published
+                  Your testimonial will appear on the site right away
                 </p>
               </div>
             </CardContent>

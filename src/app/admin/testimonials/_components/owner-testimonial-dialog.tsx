@@ -3,7 +3,7 @@
 import type { Testimonial } from "generated/prisma";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { Loader2, Star } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
@@ -41,12 +41,9 @@ export function OwnerTestimonialDialog({
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerTitle, setCustomerTitle] = useState("");
   const [customerCompany, setCustomerCompany] = useState("");
-  const [rating, setRating] = useState(5);
-  const [hoveredRating, setHoveredRating] = useState(0);
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
+  const [photoUrls, setPhotoUrls] = useState<string[]>([""]);
   const [isPublic, setIsPublic] = useState(true);
   const [testimonialDate, setTestimonialDate] = useState(
     format(new Date(), "yyyy-MM-dd"),
@@ -59,11 +56,13 @@ export function OwnerTestimonialDialog({
       setCustomerEmail(testimonial.customerEmail ?? "");
       setCustomerTitle(testimonial.customerTitle ?? "");
       setCustomerCompany(testimonial.customerCompany ?? "");
-      setRating(testimonial.rating ?? 5);
       setTitle(testimonial.title ?? "");
       setText(testimonial.text ?? "");
-      setPhotoUrl(testimonial.photoUrl ?? "");
-      setVideoUrl(testimonial.videoUrl ?? "");
+      setPhotoUrls(
+        testimonial.photoUrls?.length
+          ? [...testimonial.photoUrls]
+          : [""],
+      );
       setIsPublic(testimonial.isPublic ?? true);
       setTestimonialDate(
         format(
@@ -72,16 +71,13 @@ export function OwnerTestimonialDialog({
         ),
       );
     } else {
-      // Reset for create
       setCustomerName("");
       setCustomerEmail("");
       setCustomerTitle("");
       setCustomerCompany("");
-      setRating(5);
       setTitle("");
       setText("");
-      setPhotoUrl("");
-      setVideoUrl("");
+      setPhotoUrls([""]);
       setIsPublic(true);
       setTestimonialDate(format(new Date(), "yyyy-MM-dd"));
     }
@@ -117,16 +113,22 @@ export function OwnerTestimonialDialog({
       return;
     }
 
+    const urls = photoUrls
+      .map((u) => u.trim())
+      .filter(Boolean) as string[];
+    if (urls.length > 5) {
+      toast.error("Maximum 5 photos allowed");
+      return;
+    }
+
     const payload = {
       customerName: customerName.trim(),
       customerEmail: customerEmail.trim() || undefined,
       customerTitle: customerTitle.trim() || undefined,
       customerCompany: customerCompany.trim() || undefined,
-      rating,
       title: title.trim() || undefined,
       text: text.trim(),
-      photoUrl: photoUrl.trim() || undefined,
-      videoUrl: videoUrl.trim() || undefined,
+      photoUrls: urls,
       isPublic,
       testimonialDate,
     };
@@ -206,46 +208,19 @@ export function OwnerTestimonialDialog({
               </div>
             </div>
 
-            {/* Rating & Date row */}
-            <div className="grid grid-cols-2 items-start gap-4">
-              <div>
-                <Label>
-                  Rating <span className="text-red-500">*</span>
-                </Label>
-                <div className="mt-2 flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      title={`Rate ${star} stars`}
-                      onClick={() => setRating(star)}
-                      onMouseEnter={() => setHoveredRating(star)}
-                      onMouseLeave={() => setHoveredRating(0)}
-                    >
-                      <Star
-                        className={`h-7 w-7 transition-colors ${
-                          star <= (hoveredRating || rating)
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="testimonialDate">Date</Label>
-                <Input
-                  id="testimonialDate"
-                  type="date"
-                  value={testimonialDate}
-                  onChange={(e) => setTestimonialDate(e.target.value)}
-                  className="mt-2"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Backdate if importing from another system
-                </p>
-              </div>
+            {/* Date */}
+            <div>
+              <Label htmlFor="testimonialDate">Date</Label>
+              <Input
+                id="testimonialDate"
+                type="date"
+                value={testimonialDate}
+                onChange={(e) => setTestimonialDate(e.target.value)}
+                className="mt-2 max-w-xs"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Backdate if importing from another system
+              </p>
             </div>
 
             {/* Title */}
@@ -276,29 +251,48 @@ export function OwnerTestimonialDialog({
               />
             </div>
 
-            {/* Photo & Video URLs */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="photoUrl">Photo URL (Optional)</Label>
-                <Input
-                  id="photoUrl"
-                  type="url"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor="videoUrl">Video URL (Optional)</Label>
-                <Input
-                  id="videoUrl"
-                  type="url"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="mt-2"
-                />
+            {/* Photo URLs (max 5) */}
+            <div>
+              <Label>Photo URLs (Optional, max 5)</Label>
+              <div className="mt-2 space-y-2">
+                {photoUrls.map((url, i) => (
+                  <div key={i} className="flex gap-2">
+                    <Input
+                      type="url"
+                      value={url}
+                      onChange={(e) => {
+                        const next = [...photoUrls];
+                        next[i] = e.target.value;
+                        setPhotoUrls(next);
+                      }}
+                      placeholder="https://..."
+                      className="flex-1"
+                    />
+                    {photoUrls.length > 1 ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          setPhotoUrls(photoUrls.filter((_, j) => j !== i))
+                        }
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    ) : null}
+                  </div>
+                ))}
+                {photoUrls.length < 5 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPhotoUrls([...photoUrls, ""])}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add photo URL
+                  </Button>
+                )}
               </div>
             </div>
 

@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import type { Router } from "@better-upload/server";
 import { RejectUpload, route } from "@better-upload/server";
 import { toRouteHandler } from "@better-upload/server/adapters/next";
@@ -6,6 +7,7 @@ import { env } from "~/env";
 import { checkBusiness } from "~/lib/check-business";
 import { s3Client } from "~/lib/s3/client";
 import { auth } from "~/server/better-auth";
+import { db } from "~/server/db";
 
 const router: Router = {
   client: s3Client,
@@ -130,6 +132,57 @@ const router: Router = {
               metadata: {
                 pathName: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${business.id}/${file.name}`,
               },
+            };
+          },
+        };
+      },
+    }),
+    testimonials: route({
+      fileTypes: ["image/*"],
+      multipleFiles: true,
+      maxFiles: 5,
+      onBeforeUpload: async ({ req, clientMetadata }) => {
+        const code = (clientMetadata as { code?: string } | undefined)?.code;
+        let businessId: string;
+
+        if (code) {
+          const invite = await db.testimonialInvite.findUnique({
+            where: { code },
+            select: { businessId: true, used: true, expiresAt: true },
+          });
+          if (!invite) {
+            throw new RejectUpload("Invalid invite code");
+          }
+          if (invite.used) {
+            throw new RejectUpload("This invite has already been used");
+          }
+          if (new Date() > invite.expiresAt) {
+            throw new RejectUpload("This invite has expired");
+          }
+          businessId = invite.businessId;
+        } else {
+          const user = await auth.api.getSession({ headers: req.headers });
+          if (!user) {
+            throw new RejectUpload("Not logged in!");
+          }
+          const business = await checkBusiness();
+          if (!business) {
+            throw new RejectUpload("Business not found!");
+          }
+          businessId = business.id;
+        }
+
+        return {
+          generateObjectInfo: ({ file }) => {
+            const ext = file.name.includes(".")
+              ? file.name.slice(file.name.lastIndexOf("."))
+              : "";
+            const uniqueName = `${crypto.randomBytes(8).toString("hex")}${ext}`;
+            const key = `${businessId}/testimonials/${uniqueName}`;
+            const pathName = `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${key}`;
+            return {
+              key,
+              metadata: { pathName },
             };
           },
         };
