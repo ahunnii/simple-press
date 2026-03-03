@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, MapPin } from "lucide-react";
 
+import { cn } from "~/lib/utils";
 import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 
@@ -25,19 +26,43 @@ export async function BambooHomepage() {
     DEFAULT_LOCATION_ADDRESS;
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(businessAddress)}`;
 
+  const heroBackground =
+    themeSpecificFields?.["bamboo.homepage.hero-background"];
   return (
     <HydrateClient>
       {" "}
       <PageTransition>
         {/* Hero Section */}
-        <section className="bg-secondary relative overflow-hidden">
-          <div className="mx-auto flex max-w-7xl flex-col-reverse items-center gap-8 px-4 py-16 md:flex-row md:py-24 lg:px-8">
+        <section
+          className={cn(
+            "relative overflow-hidden",
+            themeSpecificFields?.["bamboo.homepage.hero-background"]
+              ? ""
+              : "bg-secondary",
+          )}
+          style={
+            themeSpecificFields?.["bamboo.homepage.hero-background"]
+              ? {
+                  backgroundImage: `url('${heroBackground?.trim()}')`,
+                  backgroundSize: "600px",
+                  backgroundRepeat: "repeat",
+                }
+              : undefined
+          }
+        >
+          {!!heroBackground && (
+            <div
+              className="bg-background/40 absolute inset-0"
+              aria-hidden="true"
+            />
+          )}
+          <div className="relative mx-auto flex max-w-7xl flex-col-reverse items-center gap-8 px-4 py-16 md:flex-row md:py-24 lg:px-8">
             <FadeIn
               direction="right"
               className="flex flex-1 flex-col items-start gap-6"
             >
               <span className="bg-primary/10 text-primary rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase">
-                {themeSpecificFields?.["bamboo.homepage.hero-title"] ??
+                {themeSpecificFields?.["bamboo.homepage.hero-tagline"] ??
                   "Elevate Your Everyday"}
               </span>
               <h1 className="text-foreground font-heading text-4xl leading-tight font-bold tracking-tight md:text-5xl lg:text-6xl">
