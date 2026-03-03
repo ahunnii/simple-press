@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { env } from "~/env";
+import { verifyHCaptcha } from "~/lib/captcha/verify-hcaptcha";
 import { checkBusiness } from "~/lib/check-business";
 import { sendTestimonialInviteEmail } from "~/lib/email/templates";
 
@@ -178,9 +179,20 @@ export const testimonialRouter = createTRPCRouter({
         businessId: z.string(),
         text: z.string().min(10).max(1000),
         photoUrls: z.array(z.string().url()).max(5).default([]),
+        captchaToken: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (input.captchaToken) {
+        const isValid = await verifyHCaptcha(input.captchaToken);
+        if (!isValid) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Captcha verification failed",
+          });
+        }
+      }
+
       const user = await ctx.db.user.findUnique({
         where: { id: ctx.session.user.id },
         select: { email: true, name: true },
@@ -241,9 +253,18 @@ export const testimonialRouter = createTRPCRouter({
         name: z.string().min(1),
         text: z.string().min(10).max(1000),
         photoUrls: z.array(z.string().url()).max(5).default([]),
+        captchaToken: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const isValid = await verifyHCaptcha(input.captchaToken);
+      if (!isValid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Captcha verification failed",
+        });
+      }
+
       const invite = await ctx.db.testimonialInvite.findUnique({
         where: { code: input.code },
       });

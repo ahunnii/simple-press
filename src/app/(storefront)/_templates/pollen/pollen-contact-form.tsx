@@ -1,18 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import type { Resolver } from "react-hook-form";
+import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle, Loader2 } from "lucide-react";
-import type { Resolver } from "react-hook-form";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
+import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Textarea } from "~/components/ui/textarea";
+import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 
 const MESSAGE_MAX_LENGTH = 180;
 
@@ -23,7 +26,10 @@ const contactSchema = z.object({
   message: z
     .string()
     .min(10, "Message must be at least 10 characters")
-    .max(MESSAGE_MAX_LENGTH, `Message must be at most ${MESSAGE_MAX_LENGTH} characters`),
+    .max(
+      MESSAGE_MAX_LENGTH,
+      `Message must be at most ${MESSAGE_MAX_LENGTH} characters`,
+    ),
   preferredContactMethod: z
     .enum(["email", "phone", "no-preference"])
     .default("no-preference"),
@@ -52,9 +58,11 @@ export function PollenContactForm({
   formTitle = "Send us a message",
   formDescription = "We'd love to hear from you!",
 }: Props) {
+  const captchaRef = useRef<HCaptchaHandle>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema) as Resolver<ContactFormValues>,
@@ -70,6 +78,11 @@ export function PollenContactForm({
   const messageLength = form.watch("message")?.length ?? 0;
 
   const onSubmit = async (data: ContactFormValues) => {
+    if (!captchaToken) {
+      toast.error("Please complete the captcha");
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -81,6 +94,9 @@ export function PollenContactForm({
           name: data.name,
           email: data.email,
           message: data.message,
+          phone: data.phone,
+          preferredContactMethod: data.preferredContactMethod,
+          captchaToken: captchaToken,
         }),
       });
 
@@ -91,6 +107,8 @@ export function PollenContactForm({
       }
 
       setIsSuccess(true);
+      setCaptchaToken("");
+      captchaRef.current?.reset();
       form.reset();
     } catch (err: unknown) {
       setError(
@@ -98,6 +116,8 @@ export function PollenContactForm({
           ? err.message
           : "Something went wrong. Please try again.",
       );
+      captchaRef.current?.reset();
+      setCaptchaToken("");
     } finally {
       setIsSubmitting(false);
     }
@@ -132,7 +152,10 @@ export function PollenContactForm({
       </div>
 
       {error && (
-        <Alert variant="destructive" className="border-red-500/50 bg-red-500/10">
+        <Alert
+          variant="destructive"
+          className="border-red-500/50 bg-red-500/10"
+        >
           <AlertDescription className="text-red-700">{error}</AlertDescription>
         </Alert>
       )}
@@ -239,9 +262,19 @@ export function PollenContactForm({
         </RadioGroup>
       </div>
 
+      {/* hCaptcha */}
+      <HCaptchaField
+        ref={captchaRef}
+        onVerify={setCaptchaToken}
+        onExpire={() => setCaptchaToken("")}
+        onError={() => setCaptchaToken("")}
+        label="Verification"
+        required
+      />
+
       <Button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || !captchaToken}
         className="rounded-md bg-[#215935] px-6 py-2.5 font-semibold text-white hover:bg-[#1a4729]"
       >
         {isSubmitting ? (

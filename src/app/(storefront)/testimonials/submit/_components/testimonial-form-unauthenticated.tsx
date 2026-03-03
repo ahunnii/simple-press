@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUploadFiles } from "@better-upload/client";
 import { Check, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
+import { getStoredPath } from "~/lib/uploads";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -18,7 +20,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { getStoredPath } from "~/lib/uploads";
+import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 
 type TestimonialFormUnauthenticatedProps = {
   code: string;
@@ -32,6 +34,10 @@ export function TestimonialFormUnauthenticated({
   code,
 }: TestimonialFormUnauthenticatedProps) {
   const router = useRouter();
+
+  const captchaRef = useRef<HCaptchaHandle>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
+
   const [name, setName] = useState("");
   const [text, setText] = useState("");
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
@@ -42,7 +48,9 @@ export function TestimonialFormUnauthenticated({
     api: "/api/upload",
     route: "testimonials",
     onUploadComplete: (data) => {
-      const newUrls = data.files.map((file) => getStoredPath(file)).filter(Boolean);
+      const newUrls = data.files
+        .map((file) => getStoredPath(file))
+        .filter(Boolean);
       if (newUrls.length > 0) {
         setPhotoUrls((prev) => [...prev, ...newUrls].slice(0, maxPhotos));
       }
@@ -65,11 +73,18 @@ export function TestimonialFormUnauthenticated({
     },
     onError: (error) => {
       toast.error(error.message || "Failed to submit testimonial");
+      captchaRef.current?.reset();
+      setCaptchaToken("");
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!captchaToken) {
+      toast.error("Please complete the captcha");
+      return;
+    }
 
     if (!name.trim()) {
       toast.error("Please enter your name");
@@ -97,6 +112,7 @@ export function TestimonialFormUnauthenticated({
       name: name.trim(),
       text: text.trim(),
       photoUrls,
+      captchaToken,
     });
   };
 
@@ -207,9 +223,7 @@ export function TestimonialFormUnauthenticated({
 
               {/* Photos (Optional, up to invite max) — upload */}
               <div>
-                <Label>
-                  Photos (Optional, max {invite?.maxPhotos ?? 5})
-                </Label>
+                <Label>Photos (Optional, max {invite?.maxPhotos ?? 5})</Label>
                 <p className="mt-1 text-sm text-gray-500">
                   Upload images to include with your testimonial
                 </p>
@@ -230,7 +244,7 @@ export function TestimonialFormUnauthenticated({
                             type="button"
                             variant="destructive"
                             size="icon"
-                            className="absolute right-1 top-1 h-6 w-6"
+                            className="absolute top-1 right-1 h-6 w-6"
                             onClick={() =>
                               setPhotoUrls(photoUrls.filter((_, j) => j !== i))
                             }
@@ -258,11 +272,14 @@ export function TestimonialFormUnauthenticated({
                           const valid = Array.from(files).filter((f) =>
                             f.type.startsWith("image/"),
                           );
-                          const remaining = (invite.maxPhotos ?? 5) - photoUrls.length;
+                          const remaining =
+                            (invite.maxPhotos ?? 5) - photoUrls.length;
                           const toUpload = valid.slice(0, remaining);
                           if (toUpload.length === 0) return;
                           e.target.value = "";
-                          await uploadFiles.upload(toUpload, { metadata: { code } });
+                          await uploadFiles.upload(toUpload, {
+                            metadata: { code },
+                          });
                         }}
                       />
                       <Button
@@ -292,12 +309,21 @@ export function TestimonialFormUnauthenticated({
                 </div>
               </div>
 
+              <HCaptchaField
+                ref={captchaRef}
+                onVerify={setCaptchaToken}
+                onExpire={() => setCaptchaToken("")}
+                onError={() => setCaptchaToken("")}
+                label="Verification"
+                required
+              />
+
               {/* Submit */}
               <div className="border-t pt-4">
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={submitMutation.isPending}
+                  disabled={submitMutation.isPending || !captchaToken}
                 >
                   {submitMutation.isPending ? (
                     <>

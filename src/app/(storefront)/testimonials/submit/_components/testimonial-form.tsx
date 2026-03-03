@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUploadFiles } from "@better-upload/client";
 import { Check, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
+import { getStoredPath } from "~/lib/uploads";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -17,7 +19,7 @@ import {
 } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { getStoredPath } from "~/lib/uploads";
+import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 
 type TestimonialFormProps = {
   business: {
@@ -34,11 +36,16 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
+  const captchaRef = useRef<HCaptchaHandle>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
+
   const uploadFiles = useUploadFiles({
     api: "/api/upload",
     route: "testimonials",
     onUploadComplete: (data) => {
-      const newUrls = data.files.map((file) => getStoredPath(file)).filter(Boolean);
+      const newUrls = data.files
+        .map((file) => getStoredPath(file))
+        .filter(Boolean);
       if (newUrls.length > 0) {
         setPhotoUrls((prev) => [...prev, ...newUrls].slice(0, MAX_PHOTOS));
       }
@@ -60,11 +67,17 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
     },
     onError: (error) => {
       toast.error(error.message || "Failed to submit testimonial");
+      captchaRef.current?.reset();
+      setCaptchaToken("");
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captchaToken) {
+      toast.error("Please complete the captcha");
+      return;
+    }
 
     if (!text.trim()) {
       toast.error("Please write your testimonial");
@@ -84,6 +97,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
       businessId: business.id,
       text: text.trim(),
       photoUrls,
+      captchaToken,
     });
   };
 
@@ -193,7 +207,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                             type="button"
                             variant="destructive"
                             size="icon"
-                            className="absolute right-1 top-1 h-6 w-6"
+                            className="absolute top-1 right-1 h-6 w-6"
                             onClick={() =>
                               setPhotoUrls(photoUrls.filter((_, j) => j !== i))
                             }
@@ -232,7 +246,9 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                         type="button"
                         variant="outline"
                         onClick={() =>
-                          document.getElementById("testimonial-photo-upload")?.click()
+                          document
+                            .getElementById("testimonial-photo-upload")
+                            ?.click()
                         }
                         disabled={uploadFiles.isPending}
                       >
@@ -252,13 +268,20 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                   )}
                 </div>
               </div>
-
+              <HCaptchaField
+                ref={captchaRef}
+                onVerify={setCaptchaToken}
+                onExpire={() => setCaptchaToken("")}
+                onError={() => setCaptchaToken("")}
+                label="Verification"
+                required
+              />
               {/* Submit */}
               <div className="border-t pt-4">
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={submitMutation.isPending}
+                  disabled={submitMutation.isPending || !captchaToken}
                 >
                   {submitMutation.isPending ? (
                     <>

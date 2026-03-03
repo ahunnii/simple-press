@@ -31,6 +31,8 @@ export const env = createEnv({
 
     SLACK_WEBHOOK_URL: z.string().url(),
     VPS_IP: z.string(),
+
+    HCAPTCHA_SECRET_KEY: z.string(),
   },
 
   /**
@@ -53,6 +55,7 @@ export const env = createEnv({
     NEXT_PUBLIC_EMAIL_FROM_NOREPLY: z.string(),
     NEXT_PUBLIC_EMAIL_FROM_ORDERS: z.string(),
     NEXT_PUBLIC_EMAIL_FROM_SUPPORT: z.string(),
+    NEXT_PUBLIC_HCAPTCHA_SITE_KEY: z.string(),
   },
 
   /**
@@ -89,6 +92,8 @@ export const env = createEnv({
     NEXT_PUBLIC_EMAIL_FROM_SUPPORT: process.env.NEXT_PUBLIC_EMAIL_FROM_SUPPORT,
     SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
     VPS_IP: process.env.VPS_IP,
+    NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
+    HCAPTCHA_SECRET_KEY: process.env.HCAPTCHA_SECRET_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -2,7 +2,11 @@ import type { ReactElement, ReactNode } from "react";
 import { EmailTemplate } from "@daveyplate/better-auth-ui/server";
 import { betterAuth, email } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { createAuthMiddleware, organization } from "better-auth/plugins";
+import {
+  captcha,
+  createAuthMiddleware,
+  organization,
+} from "better-auth/plugins";
 
 import { env } from "~/env";
 import { checkBusiness } from "~/lib/check-business";
@@ -108,6 +112,11 @@ export const auth = betterAuth({
           fields: { organizationId: "businessId" },
         },
       },
+    }),
+    captcha({
+      provider: "hcaptcha",
+      secretKey: env.HCAPTCHA_SECRET_KEY,
+      siteKey: env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
     }),
   ],
   databaseHooks: {

@@ -110,6 +110,8 @@ export async function sendContactFormSubmission(params: {
   email: string;
   subject?: string;
   message: string;
+  phone?: string;
+  preferredContactMethod?: "email" | "phone" | "no-preference";
   business: {
     name: string;
     ownerEmail: string;
@@ -117,7 +119,7 @@ export async function sendContactFormSubmission(params: {
 }) {
   return sendEmail({
     from: EMAIL_FROM.NOREPLY,
-    fromName: params.business.name, // ← NEW
+    fromName: params.business.name,
     to: params.business.ownerEmail,
     replyTo: params.email,
     subject:

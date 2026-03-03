@@ -7,6 +7,7 @@ import { AuthUIProvider } from "@daveyplate/better-auth-ui";
 import { useRouter } from "nextjs-toploader/app";
 import { Toaster } from "sonner";
 
+import { env } from "~/env";
 import { authClient } from "~/server/better-auth/client";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { CartProvider } from "~/providers/cart-context";
@@ -42,6 +43,10 @@ export function Providers({ children }: { children: ReactNode }) {
           },
         }}
         Link={Link}
+        captcha={{
+          provider: "hcaptcha",
+          siteKey: env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
+        }}
       >
         <TooltipProvider>{children}</TooltipProvider>
 
