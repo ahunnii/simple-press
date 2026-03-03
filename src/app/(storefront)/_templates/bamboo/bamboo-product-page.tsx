@@ -174,7 +174,7 @@ export function BambooProductPage({
               <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
                 <span className="text-balance">{product.name}</span>
               </h1>
-              <p className="text-muted-foreground mt-3 text-lg leading-relaxed">
+              <p className="text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line">
                 {product.description}
               </p>
             </div>

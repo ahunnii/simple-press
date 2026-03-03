@@ -4,7 +4,18 @@ const homepageHeroData: TemplateField[] = [
   {
     key: "bamboo.homepage.hero-image",
     label: "Homepage Hero Image",
-    description: "Image for the hero section",
+    description:
+      "This image is used as the main focal point of the hero section.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "bamboo.homepage.hero-background",
+    label: "Homepage Hero Background",
+    description:
+      "This image is used as the background texture of the hero section. Defaults to a subtle tan color if no image is provided.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
@@ -17,17 +28,17 @@ const homepageHeroData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.hero",
-    gridColumn: "col-span-full",
+    gridColumn: "col-span-1",
     defaultValue: "Elevate Your Everyday",
   },
   {
-    key: "bamboo.homepage.hero-subtitle",
-    label: "Homepage Hero Subtitle",
-    description: "Subtitle for the hero section",
+    key: "bamboo.homepage.hero-tagline",
+    label: "Homepage Hero Tagline",
+    description: "Tagline for the hero section, above the title.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
-    gridColumn: "col-span-full",
+    gridColumn: "col-span-1",
   },
   {
     key: "bamboo.homepage.hero-description",
@@ -321,22 +332,40 @@ const aboutHeroData: TemplateField[] = [
     defaultValue:
       "Finally Results LLC was born from a simple belief: the everyday products in your home should be better -- better for your family, and better for the planet.",
   },
+  {
+    key: "bamboo.about.hero-image",
+    label: "About Hero Image",
+    description: "Image for the about page",
+    type: "image",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-1",
+  },
+  {
+    key: "bamboo.about.hero-tagline",
+    label: "About Hero Tagline",
+    description: "Tagline for the about page, above the title.",
+    type: "text",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-1",
+  },
 ];
 
 const aboutMissionData: TemplateField[] = [
   {
     key: "bamboo.about.mission-heading",
-    label: "Mission Section Heading",
-    description: "Our Mission heading",
+    label: "Why We Started Heading",
+    description: "Heading for the Why We Started section",
     type: "text",
     page: "about",
     group: "about.mission",
-    defaultValue: "Our Mission",
+    defaultValue: "Why We Started",
   },
   {
-    key: "bamboo.about.mission-paragraph-1",
-    label: "Mission Paragraph 1",
-    description: "First mission paragraph",
+    key: "bamboo.about.mission-paragraph",
+    label: "Why We Started Text",
+    description: "Text for the Why We Started section",
     type: "textarea",
     page: "about",
     group: "about.mission",
@@ -344,14 +373,13 @@ const aboutMissionData: TemplateField[] = [
       "Welcome to Finally Results LLC, your trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
   },
   {
-    key: "bamboo.about.mission-paragraph-2",
-    label: "Mission Paragraph 2",
-    description: "Second mission paragraph",
-    type: "textarea",
+    key: "bamboo.about.mission-image",
+    label: "Why We Started Image",
+    description: "Image for the Why We Started section",
+    type: "image",
     page: "about",
     group: "about.mission",
-    defaultValue:
-      "At Finally Results LLC, we believe in providing not only quality products but also competitive prices to make essential household items accessible to everyone. Located in the heart of Detroit, Michigan, we extend our warmest greetings to you, valuing each customer as a member of our extended family and business partners. Our dedicated team is here to serve you, ensuring that your experience with Finally Results LLC is marked by reliability, affordability, and the satisfaction of finally achieving the results you seek in household paper products.",
+    gridColumn: "col-span-1",
   },
 ];
 
@@ -421,6 +449,37 @@ const aboutValuesData: TemplateField[] = [
     group: "about.values",
     defaultValue:
       "Rooted in Detroit, we believe in building something that serves our community and sets an example for responsible business.",
+  },
+];
+
+const aboutSupplierData: TemplateField[] = [
+  {
+    key: "bamboo.about.supplier-heading",
+    label: "Supplier Heading",
+    description: "Heading for the Supplier section",
+    type: "text",
+    page: "about",
+    group: "about.supplier",
+    defaultValue: "Supplier",
+  },
+  {
+    key: "bamboo.about.supplier-text",
+    label: "Supplier Text",
+    description: "Text for the Supplier section",
+    type: "textarea",
+    page: "about",
+    group: "about.supplier",
+    defaultValue:
+      "We are a trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
+  },
+  {
+    key: "bamboo.about.supplier-image",
+    label: "Supplier Image",
+    description: "Image for the Supplier section",
+    type: "image",
+    page: "about",
+    group: "about.supplier",
+    gridColumn: "col-span-1",
   },
 ];
 
@@ -503,6 +562,97 @@ const aboutWhyBambooData: TemplateField[] = [
   },
 ];
 
+const aboutNationwideData: TemplateField[] = [
+  {
+    key: "bamboo.about.nationwide-heading",
+    label: "Nationwide Distribution Heading",
+    description: "Heading for the Nationwide Distribution section",
+    type: "text",
+    page: "about",
+    group: "about.nationwide",
+    defaultValue: "Nationwide Distribution",
+  },
+  {
+    key: "bamboo.about.nationwide-text",
+    label: "Nationwide Distribution Text",
+    description: "Text for the Nationwide Distribution section",
+    type: "textarea",
+    page: "about",
+    group: "about.nationwide",
+    defaultValue:
+      "We are a trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
+  },
+  {
+    key: "bamboo.about.nationwide-image",
+    label: "Nationwide Distribution Image",
+    description: "Image for the Nationwide Distribution section",
+    type: "image",
+    page: "about",
+    group: "about.nationwide",
+    gridColumn: "col-span-1",
+  },
+  {
+    key: "bamboo.about.nationwide-fact-1-title",
+    label: "Nationwide Distribution Fact 1 Title",
+    description: "First fact title for the Nationwide Distribution section",
+    type: "text",
+    page: "about",
+    group: "about.nationwide",
+    defaultValue: "Nationwide Shipping",
+  },
+  {
+    key: "bamboo.about.nationwide-fact-1-description",
+    label: "Nationwide Distribution Fact 1 Description",
+    description:
+      "First fact description for the Nationwide Distribution section",
+    type: "textarea",
+    page: "about",
+    group: "about.nationwide",
+    defaultValue:
+      "We ship our products to customers in all 50 states. We are a trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
+  },
+  {
+    key: "bamboo.about.nationwide-fact-2-title",
+    label: "Nationwide Distribution Fact 2 Title",
+    description: "Second fact title for the Nationwide Distribution section",
+    type: "text",
+    page: "about",
+    group: "about.nationwide",
+    defaultValue: "Nationwide Shipping",
+  },
+  {
+    key: "bamboo.about.nationwide-fact-2-description",
+    label: "Nationwide Distribution Fact 2 Description",
+    description:
+      "Second fact description for the Nationwide Distribution section",
+    type: "textarea",
+    page: "about",
+    group: "about.nationwide",
+    defaultValue:
+      "We ship our products to customers in all 50 states. We are a trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
+  },
+  {
+    key: "bamboo.about.nationwide-fact-3-title",
+    label: "Nationwide Distribution Fact 3 Title",
+    description: "Third fact title for the Nationwide Distribution section",
+    type: "text",
+    page: "about",
+    group: "about.nationwide",
+    defaultValue: "Nationwide Shipping",
+  },
+  {
+    key: "bamboo.about.nationwide-fact-3-description",
+    label: "Nationwide Distribution Fact 3 Description",
+    description:
+      "Third fact description for the Nationwide Distribution section",
+    type: "textarea",
+    page: "about",
+    group: "about.nationwide",
+    defaultValue:
+      "We ship our products to customers in all 50 states. We are a trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
+  },
+];
+
 const aboutDetroitData: TemplateField[] = [
   {
     key: "bamboo.about.detroit-heading",
@@ -522,6 +672,46 @@ const aboutDetroitData: TemplateField[] = [
     group: "about.detroit",
     defaultValue:
       "Detroit is a city that understands transformation. From the automotive revolution to its current renaissance in art, technology, and small business, this city teaches you that great things are built through perseverance and purpose. We chose to build Finally Results here because Detroit embodies everything our brand stands for: quality craftsmanship, community, and the belief that you can always do better.",
+  },
+];
+
+const aboutCTAData: TemplateField[] = [
+  {
+    key: "bamboo.about.cta-heading",
+    label: "CTA Heading",
+    description: "CTA heading",
+    type: "text",
+    page: "about",
+    group: "about.cta",
+    defaultValue: "Ready to Make the Switch?",
+  },
+  {
+    key: "bamboo.about.cta-text",
+    label: "CTA Text",
+    description: "CTA text",
+    type: "textarea",
+    page: "about",
+    group: "about.cta",
+    defaultValue:
+      "Join the families, businesses, and communities across the nation who trust Finally Results for their everyday essentials.",
+  },
+  {
+    key: "bamboo.about.cta-button-text",
+    label: "CTA Button Text",
+    description: "CTA button text",
+    type: "text",
+    page: "about",
+    group: "about.cta",
+    defaultValue: "Shop Our Products",
+  },
+  {
+    key: "bamboo.about.cta-button-link",
+    label: "CTA Button Link",
+    description: "CTA button link",
+    type: "url",
+    page: "about",
+    group: "about.cta",
+    defaultValue: "/shop",
   },
 ];
 
@@ -630,7 +820,8 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.sustainability",
     title: "Sustainability Banner",
-    description: "Three feature highlights (e.g. Premium Quality, Competitive Prices)",
+    description:
+      "Three feature highlights (e.g. Premium Quality, Competitive Prices)",
     icon: "🌿",
     columns: 2,
   },
@@ -670,6 +861,13 @@ const fieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
   {
+    id: "about.supplier",
+    title: "Supplier",
+    description: "Supplier section heading and text",
+    icon: "🏪",
+    columns: 2,
+  },
+  {
     id: "about.whyBamboo",
     title: "Why Bamboo",
     description: "Why Bamboo section and bamboo facts",
@@ -677,10 +875,24 @@ const fieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
   {
+    id: "about.nationwide",
+    title: "Nationwide Distribution",
+    description: "Nationwide distribution section",
+    icon: "🗺️",
+    columns: 2,
+  },
+  {
     id: "about.detroit",
     title: "Rooted in Detroit",
     description: "Detroit roots section",
     icon: "🏙️",
+    columns: 2,
+  },
+  {
+    id: "about.cta",
+    title: "About CTA",
+    description: "About CTA section",
+    icon: "💬",
     columns: 2,
   },
   {
@@ -714,6 +926,9 @@ export const bambooData = {
     ...aboutDetroitData,
     ...contactPageData,
     ...globalLocationData,
+    ...aboutSupplierData,
+    ...aboutNationwideData,
+    ...aboutCTAData,
   ],
 };
 
