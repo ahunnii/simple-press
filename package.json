@@ -131,7 +131,6 @@
     "@tailwindcss/postcss": "^4.0.15",
     "@tailwindcss/typography": "^0.5.19",
     "@types/bcrypt": "^6.0.0",
-    "@types/hcaptcha__react-hcaptcha": "^0.3.7",
     "@types/node": "^20.14.10",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.0.0",

@@ -59,9 +59,7 @@ export function OwnerTestimonialDialog({
       setTitle(testimonial.title ?? "");
       setText(testimonial.text ?? "");
       setPhotoUrls(
-        testimonial.photoUrls?.length
-          ? [...testimonial.photoUrls]
-          : [""],
+        testimonial.photoUrls?.length ? [...testimonial.photoUrls] : [""],
       );
       setIsPublic(testimonial.isPublic ?? true);
       setTestimonialDate(
@@ -113,9 +111,7 @@ export function OwnerTestimonialDialog({
       return;
     }
 
-    const urls = photoUrls
-      .map((u) => u.trim())
-      .filter(Boolean) as string[];
+    const urls = photoUrls.map((u) => u.trim()).filter(Boolean);
     if (urls.length > 5) {
       toast.error("Maximum 5 photos allowed");
       return;

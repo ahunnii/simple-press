@@ -315,9 +315,6 @@ importers:
       '@types/bcrypt':
         specifier: ^6.0.0
         version: 6.0.0
-      '@types/hcaptcha__react-hcaptcha':
-        specifier: ^0.3.7
-        version: 0.3.7
       '@types/node':
         specifier: ^20.14.10
         version: 20.19.30
@@ -2627,10 +2624,6 @@ packages:
 
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
-
-  '@types/hcaptcha__react-hcaptcha@0.3.7':
-    resolution: {integrity: sha512-Hw1UXr6q4M/2NZQLVY+ZZx2uAJ2GEz18D126WmoRg8onGdsnIts7DE19RtMiJsphkS47JAQJz7v/A980UHc2OQ==}
-    deprecated: This is a stub types definition. @hcaptcha/react-hcaptcha provides its own type definitions, so you do not need this installed.
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -7419,10 +7412,6 @@ snapshots:
   '@types/hast@3.0.4':
     dependencies:
       '@types/unist': 3.0.3
-
-  '@types/hcaptcha__react-hcaptcha@0.3.7':
-    dependencies:
-      '@hcaptcha/react-hcaptcha': 2.0.2
 
   '@types/json-schema@7.0.15': {}
 
