@@ -10,7 +10,6 @@ import { Button } from "~/components/ui/button";
 
 import { FadeIn, PageTransition } from "./bamboo-animations";
 import { CheckoutForm } from "./bamboo-checkout-form";
-import { OrderSummary } from "./bamboo-order-summary";
 
 export async function BambooCheckoutPage({
   business,
@@ -76,20 +75,9 @@ export async function BambooCheckoutPage({
             </h1>
           </div>
         </FadeIn>
-        <div className="flex flex-col gap-8 lg:flex-row">
-          <FadeIn direction="up" delay={0.1} className="flex-1">
-            <CheckoutForm />
-          </FadeIn>
-          <FadeIn
-            direction="left"
-            delay={0.2}
-            className="w-full shrink-0 lg:w-80"
-          >
-            <div className="sticky top-20">
-              <OrderSummary />
-            </div>
-          </FadeIn>
-        </div>
+        <FadeIn direction="up" delay={0.1}>
+          <CheckoutForm business={business} />
+        </FadeIn>
       </section>
     </PageTransition>
   );

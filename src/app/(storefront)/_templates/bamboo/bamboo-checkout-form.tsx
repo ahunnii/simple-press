@@ -1,336 +1,273 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import Image from "next/image";
+import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
+import { formatPrice } from "~/lib/prices";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { useCart } from "~/providers/cart-context";
 
-const checkoutSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().min(10, "Please enter a valid phone number"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  address: z.string().min(1, "Address is required"),
-  address2: z.string().optional(),
-  city: z.string().min(1, "City is required"),
-  state: z.string().min(1, "State is required"),
-  zip: z.string().min(5, "Please enter a valid ZIP code"),
-  cardNumber: z.string().min(16, "Please enter a valid card number"),
-  expiry: z.string().min(5, "Please enter a valid expiry date"),
-  cvc: z.string().min(3, "Please enter a valid CVC"),
-});
+import { DiscountDiscountInput } from "../default/default-discount-input";
 
-type CheckoutFormData = z.infer<typeof checkoutSchema>;
+type Business = {
+  id: string;
+  isStripeConnected: boolean;
+  siteContent: {
+    primaryColor: string | null;
+  } | null;
+};
 
-const US_STATES = [
-  "AL",
-  "AK",
-  "AZ",
-  "AR",
-  "CA",
-  "CO",
-  "CT",
-  "DE",
-  "FL",
-  "GA",
-  "HI",
-  "ID",
-  "IL",
-  "IN",
-  "IA",
-  "KS",
-  "KY",
-  "LA",
-  "ME",
-  "MD",
-  "MA",
-  "MI",
-  "MN",
-  "MS",
-  "MO",
-  "MT",
-  "NE",
-  "NV",
-  "NH",
-  "NJ",
-  "NM",
-  "NY",
-  "NC",
-  "ND",
-  "OH",
-  "OK",
-  "OR",
-  "PA",
-  "RI",
-  "SC",
-  "SD",
-  "TN",
-  "TX",
-  "UT",
-  "VT",
-  "VA",
-  "WA",
-  "WV",
-  "WI",
-  "WY",
-];
+type CheckoutFormProps = {
+  business: Business;
+};
 
-export function CheckoutForm() {
-  const { clearCart } = useCart();
-  const router = useRouter();
-  const [submitting, setSubmitting] = useState(false);
-  const [successOpen, setSuccessOpen] = useState(false);
+export function CheckoutForm({ business }: CheckoutFormProps) {
+  const { items, total } = useCart();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<CheckoutFormData>({
-    resolver: zodResolver(checkoutSchema),
-    defaultValues: {
-      state: "",
-    },
-  });
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
 
-  const onSubmit = async (_data: CheckoutFormData) => {
-    setSubmitting(true);
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setSubmitting(false);
-    setSuccessOpen(true);
+  const [appliedDiscount, setAppliedDiscount] = useState<{
+    id: string;
+    code: string;
+    discountAmount: number;
+  } | null>(null);
+
+  const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
+
+  const subtotal = total;
+  const discountAmount = appliedDiscount?.discountAmount ?? 0;
+  const finalTotal = subtotal - discountAmount;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsProcessing(true);
+
+    try {
+      if (!email || !name) {
+        throw new Error("Please fill in all required fields");
+      }
+
+      if (items.length === 0) {
+        throw new Error("Your cart is empty");
+      }
+
+      const response = await fetch("/api/stripe/create-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items,
+          customerInfo: {
+            email,
+            name,
+          },
+          discountCodeId: appliedDiscount?.id ?? null,
+          discountAmount: appliedDiscount?.discountAmount ?? 0,
+        }),
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+        unavailableItems?: string[];
+        sessionUrl?: string;
+      };
+
+      if (!response.ok) {
+        if (data.unavailableItems && data.unavailableItems.length > 0) {
+          setError(
+            `${data.error ?? "Some items are unavailable."} Remove or update: ${data.unavailableItems.join(", ")}`,
+          );
+        } else {
+          setError(data.error ?? "Failed to create checkout session");
+        }
+        setIsProcessing(false);
+        return;
+      }
+
+      const sessionUrl = data.sessionUrl;
+      if (!sessionUrl) {
+        setError("Failed to create checkout session");
+        setIsProcessing(false);
+        return;
+      }
+
+      window.location.href = sessionUrl;
+    } catch (err: unknown) {
+      setError((err as Error).message ?? "Failed to create checkout session");
+      setIsProcessing(false);
+    }
   };
 
-  const handleSuccessClose = () => {
-    clearCart();
-    setSuccessOpen(false);
-    router.push("/");
-  };
+  if (items.length === 0) {
+    return (
+      <div className="py-16 text-center">
+        <p className="text-muted-foreground mb-4">Your cart is empty</p>
+        <Button asChild>
+          <Link href="/products">Continue Shopping</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
-        {/* Contact Information */}
+    <form onSubmit={handleSubmit} className="flex flex-col gap-8 lg:flex-row">
+      {/* Customer Information - bamboo styled */}
+      <div className="flex-1 space-y-8">
         <fieldset className="flex flex-col gap-4">
-          <legend className="text-foreground font-heading text-lg font-semibold">
+          <legend className="text-foreground font-heading pb-4 text-lg font-semibold">
             Contact Information
           </legend>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                {...register("email")}
+                required
               />
-              {errors.email && (
-                <p className="text-destructive text-xs">
-                  {errors.email.message}
-                </p>
-              )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="name">Full Name *</Label>
               <Input
-                id="phone"
-                type="tel"
-                placeholder="(555) 555-5555"
-                {...register("phone")}
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="John Doe"
+                required
               />
-              {errors.phone && (
-                <p className="text-destructive text-xs">
-                  {errors.phone.message}
-                </p>
-              )}
             </div>
           </div>
         </fieldset>
 
-        {/* Shipping Address */}
         <fieldset className="flex flex-col gap-4">
           <legend className="text-foreground font-heading text-lg font-semibold">
             Shipping Address
           </legend>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input id="firstName" {...register("firstName")} />
-              {errors.firstName && (
-                <p className="text-destructive text-xs">
-                  {errors.firstName.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input id="lastName" {...register("lastName")} />
-              {errors.lastName && (
-                <p className="text-destructive text-xs">
-                  {errors.lastName.message}
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              placeholder="123 Main St"
-              {...register("address")}
-            />
-            {errors.address && (
-              <p className="text-destructive text-xs">
-                {errors.address.message}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="address2">
-              Apartment, suite, etc.{" "}
-              <span className="text-muted-foreground">(optional)</span>
-            </Label>
-            <Input id="address2" {...register("address2")} />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="city">City</Label>
-              <Input id="city" {...register("city")} />
-              {errors.city && (
-                <p className="text-destructive text-xs">
-                  {errors.city.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="state">State</Label>
-              <Select onValueChange={(val) => setValue("state", val)}>
-                <SelectTrigger id="state">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  {US_STATES.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.state && (
-                <p className="text-destructive text-xs">
-                  {errors.state.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="zip">ZIP Code</Label>
-              <Input id="zip" placeholder="48201" {...register("zip")} />
-              {errors.zip && (
-                <p className="text-destructive text-xs">{errors.zip.message}</p>
-              )}
-            </div>
-          </div>
-        </fieldset>
-
-        {/* Payment (Mock) */}
-        <fieldset className="flex flex-col gap-4">
-          <legend className="text-foreground font-heading text-lg font-semibold">
-            Payment
-          </legend>
-          <p className="text-muted-foreground text-xs">
-            This is a demo checkout. No real payment will be processed.
+          <p className="text-muted-foreground text-sm">
+            You&apos;ll enter your shipping address on the next page (Stripe
+            Checkout)
           </p>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cardNumber">Card Number</Label>
-            <Input
-              id="cardNumber"
-              placeholder="4242 4242 4242 4242"
-              {...register("cardNumber")}
-            />
-            {errors.cardNumber && (
-              <p className="text-destructive text-xs">
-                {errors.cardNumber.message}
-              </p>
-            )}
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="expiry">Expiry Date</Label>
-              <Input id="expiry" placeholder="MM/YY" {...register("expiry")} />
-              {errors.expiry && (
-                <p className="text-destructive text-xs">
-                  {errors.expiry.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="cvc">CVC</Label>
-              <Input id="cvc" placeholder="123" {...register("cvc")} />
-              {errors.cvc && (
-                <p className="text-destructive text-xs">{errors.cvc.message}</p>
-              )}
-            </div>
-          </div>
         </fieldset>
+      </div>
 
-        <Button
-          type="submit"
-          size="lg"
-          disabled={submitting}
-          className="w-full"
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="size-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Place Order"
-          )}
-        </Button>
-      </form>
-
-      {/* Success Dialog */}
-      <Dialog open={successOpen} onOpenChange={handleSuccessClose}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader className="items-center text-center">
-            <div className="bg-primary/10 mx-auto flex size-16 items-center justify-center rounded-full">
-              <CheckCircle2 className="text-primary size-8" />
+      {/* Order Summary - bamboo styled */}
+      <div className="w-full shrink-0 lg:w-80">
+        <div className="border-border bg-card sticky top-20 rounded-xl border p-6">
+          <h2 className="text-card-foreground font-heading text-lg font-semibold">
+            Order Summary
+          </h2>
+          <div className="mt-4 flex flex-col gap-4">
+            <div className="max-h-64 space-y-3 overflow-y-auto">
+              {items.map((item) => (
+                <div
+                  key={`${item.productId}-${item.variantId}`}
+                  className="flex items-center gap-3"
+                >
+                  <div className="bg-secondary relative size-12 shrink-0 overflow-hidden rounded-md">
+                    {item.imageUrl ? (
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.productName}
+                        fill
+                        className="object-cover"
+                        sizes="48px"
+                      />
+                    ) : (
+                      <div className="text-muted-foreground flex size-full items-center justify-center text-xs">
+                        No img
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-card-foreground truncate text-sm font-medium">
+                      {item.productName}
+                    </p>
+                    {item.variantName && (
+                      <p className="text-muted-foreground text-xs">
+                        {item.variantName}
+                      </p>
+                    )}
+                    <p className="text-muted-foreground text-xs">
+                      Qty: {item.quantity}
+                    </p>
+                  </div>
+                  <span className="text-foreground text-sm font-medium">
+                    {formatPrice(item.price * item.quantity)}
+                  </span>
+                </div>
+              ))}
             </div>
-            <DialogTitle className="font-heading text-xl">
-              Order Placed!
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              Thank you for your purchase. Your premium bamboo products are on
-              their way from Detroit to your door.
-            </DialogDescription>
-          </DialogHeader>
-          <Button onClick={handleSuccessClose} className="mt-4 w-full">
-            Return Home
-          </Button>
-        </DialogContent>
-      </Dialog>
-    </>
+
+            {/* <div className="pt-4">
+              <DiscountDiscountInput
+                businessId={business.id}
+                cartTotal={subtotal}
+                onDiscountApplied={setAppliedDiscount}
+              />
+            </div> */}
+
+            <div className="space-y-2 border-t pt-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>{formatPrice(subtotal)}</span>
+              </div>
+              {appliedDiscount && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Discount ({appliedDiscount.code})</span>
+                  <span>-{formatPrice(discountAmount)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Shipping</span>
+                <span>Calculated at checkout</span>
+              </div>
+              <div className="flex justify-between border-t pt-2 font-bold">
+                <span>Total</span>
+                <span>{formatPrice(finalTotal)}</span>
+              </div>
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <Button
+              type="submit"
+              disabled={isProcessing}
+              className="w-full text-white"
+              size="lg"
+              style={{ backgroundColor: primaryColor }}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Continue to Payment"
+              )}
+            </Button>
+
+            <p className="text-muted-foreground text-center text-xs">
+              Secure checkout powered by Stripe
+            </p>
+          </div>
+        </div>
+      </div>
+    </form>
   );
 }
