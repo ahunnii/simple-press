@@ -147,14 +147,14 @@ export async function PollenServicesPage({ business }: Props) {
             <StaggerContainer className="grid gap-6 sm:grid-cols-2">
               {services.map((service) => (
                 <StaggerItem key={service.title}>
-                  <div className="rounded-2xl bg-white p-6 shadow-sm">
+                  <div className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-sm">
                     <div className="mb-4 flex h-12 w-12 items-center justify-center">
                       <service.icon className="h-6 w-6 text-[#5e8b4a]" />
                     </div>
                     <h3 className="mb-3 font-bold text-[#374151]">
                       {service.title}
                     </h3>
-                    <p className="text-sm leading-relaxed text-[#6b7280]">
+                    <p className="min-h-0 flex-1 text-sm leading-relaxed text-[#6b7280]">
                       {service.description}
                     </p>
                   </div>
@@ -251,12 +251,12 @@ export async function PollenServicesPage({ business }: Props) {
               }`}
             >
               {resources.map((resource) => (
-                <StaggerItem key={resource.url}>
+                <StaggerItem key={resource.url} className="h-full">
                   <Link
                     href={resource.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+                    className="flex h-full items-center gap-3 rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
                   >
                     <ExternalLink className="h-5 w-5 shrink-0 text-[#5e8b4a]" />
                     <span className="font-medium text-[#374151]">

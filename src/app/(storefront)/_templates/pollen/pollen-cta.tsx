@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { cn } from "~/lib/utils";
-import { FadeIn } from "~/components/page-animations";
 import { buttonVariants } from "~/components/ui/button";
+import { FadeIn } from "~/components/page-animations";
 
 export function PollenCallToAction({
   title,
@@ -23,7 +23,7 @@ export function PollenCallToAction({
   imageUrl: string;
 }) {
   return (
-    <section className="relative mx-auto max-w-7xl overflow-hidden py-12 md:py-24">
+    <section className="relative mx-auto max-w-7xl overflow-hidden rounded-xl py-12 md:py-24">
       <Image
         src={imageUrl}
         alt=""

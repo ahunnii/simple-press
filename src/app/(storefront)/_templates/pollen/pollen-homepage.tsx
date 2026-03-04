@@ -22,38 +22,38 @@ export async function PollenHomepage() {
     {
       icon: Flower2,
       title:
-        themeSpecificFields?.["pollen.global.about-service-title-1"] ??
+        themeSpecificFields?.["pollen.homepage.about-service-title-1"] ??
         "Service 1",
       description:
-        themeSpecificFields?.["pollen.global.about-service-description-1"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        themeSpecificFields?.["pollen.homepage.about-service-description-1"] ??
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
     },
     {
       icon: HandHelping,
       title:
-        themeSpecificFields?.["pollen.global.about-service-title-2"] ??
+        themeSpecificFields?.["pollen.homepage.about-service-title-2"] ??
         "Service 2",
       description:
-        themeSpecificFields?.["pollen.global.about-service-description-2"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        themeSpecificFields?.["pollen.homepage.about-service-description-2"] ??
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
     },
     {
       icon: MapIcon,
       title:
-        themeSpecificFields?.["pollen.global.about-service-title-3"] ??
+        themeSpecificFields?.["pollen.homepage.about-service-title-3"] ??
         "Service 3",
       description:
-        themeSpecificFields?.["pollen.global.about-service-description-3"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        themeSpecificFields?.["pollen.homepage.about-service-description-3"] ??
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
     },
     {
       icon: BookOpen,
       title:
-        themeSpecificFields?.["pollen.global.about-service-title-4"] ??
+        themeSpecificFields?.["pollen.homepage.about-service-title-4"] ??
         "Service 4",
       description:
-        themeSpecificFields?.["pollen.global.about-service-description-4"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        themeSpecificFields?.["pollen.homepage.about-service-description-4"] ??
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
     },
   ];
   // const portfolioGalleryId = themeSpecificFields?.["pollen.global.gallery"];
