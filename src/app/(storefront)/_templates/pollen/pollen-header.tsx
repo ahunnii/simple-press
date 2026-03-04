@@ -153,7 +153,7 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
                 ) : user ? (
                   userMenu
                 ) : (
-                  authActions
+                  <></>
                 )}
               </div>
 

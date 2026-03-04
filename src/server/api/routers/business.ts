@@ -78,6 +78,7 @@ export const businessRouter = createTRPCRouter({
         businessAddress: true,
         stripeAccountId: true,
         supportEmail: true,
+        phoneNumber: true,
         products: {
           where: { published: true },
           include: {
@@ -354,15 +355,30 @@ export const businessRouter = createTRPCRouter({
         supportEmail: z.string().optional(),
         businessAddress: z.string().optional(),
         taxId: z.string().optional(),
+        phoneNumber: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const { name, ownerEmail, supportEmail, businessAddress, taxId } = input;
+      const {
+        name,
+        ownerEmail,
+        supportEmail,
+        businessAddress,
+        taxId,
+        phoneNumber,
+      } = input;
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
-        data: { name, ownerEmail, supportEmail, businessAddress, taxId },
+        data: {
+          name,
+          ownerEmail,
+          supportEmail,
+          businessAddress,
+          taxId,
+          phoneNumber,
+        },
       });
       return {
         message: "General settings updated successfully",

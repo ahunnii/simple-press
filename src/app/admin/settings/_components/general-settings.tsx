@@ -85,6 +85,7 @@ export function GeneralSettings({ business }: Props) {
       supportEmail: data.supportEmail ?? undefined,
       businessAddress: data.businessAddress ?? undefined,
       taxId: data.taxId ?? undefined,
+      phoneNumber: data.phoneNumber ?? undefined,
     });
   };
 
