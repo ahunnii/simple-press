@@ -39,7 +39,7 @@ export function PollenContactPage({
   const contactInfo = [
     {
       icon: MapPin,
-      label: "Physical Address",
+      label: "Location",
       value: physicalAddress,
       href: undefined,
     },
@@ -79,27 +79,27 @@ export function PollenContactPage({
 
         <FadeIn direction="up" delay={0.15}>
           <div className="grid min-h-[560px] grid-cols-1 overflow-hidden rounded-lg shadow-xl lg:grid-cols-3">
-          <div className="relative flex flex-col items-center justify-end bg-[#2D4E2A] px-8 pt-8 lg:col-span-1 lg:justify-center lg:px-12">
-            <div className="relative h-full w-full">
-              <Image
-                src={formImage}
-                alt=""
-                fill
-                className="object-cover object-bottom"
-                sizes="100vw"
-                priority
+            <div className="relative flex flex-col items-center justify-end bg-[#2D4E2A] px-8 pt-8 lg:col-span-1 lg:justify-center lg:px-12">
+              <div className="relative h-full w-full">
+                <Image
+                  src={formImage}
+                  alt=""
+                  fill
+                  className="object-cover object-bottom"
+                  sizes="100vw"
+                  priority
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col bg-[#f5f5f5] p-8 lg:col-span-2 lg:justify-center lg:p-12">
+              <PollenContactForm
+                businessName={business.name}
+                formTitle={formTitle}
+                formDescription={formDescription}
               />
             </div>
           </div>
-
-          <div className="flex flex-col bg-[#f5f5f5] p-8 lg:col-span-2 lg:justify-center lg:p-12">
-            <PollenContactForm
-              businessName={business.name}
-              formTitle={formTitle}
-              formDescription={formDescription}
-            />
-          </div>
-        </div>
         </FadeIn>
       </div>
     </PollenGeneralLayout>

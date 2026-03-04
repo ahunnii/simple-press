@@ -174,16 +174,18 @@ export async function sendTestimonialInviteEmail({
   to,
   businessName,
   inviteUrl,
+  logoUrl,
 }: {
   to: string;
   businessName: string;
   inviteUrl: string;
+  logoUrl?: string;
 }) {
   return sendEmail({
     from: EMAIL_FROM.NOREPLY,
     fromName: businessName,
     to,
     subject: `Share your experience with ${businessName}`,
-    react: TestimonialInviteEmail({ businessName, inviteUrl }),
+    react: TestimonialInviteEmail({ businessName, inviteUrl, logoUrl }),
   });
 }

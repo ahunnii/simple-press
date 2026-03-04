@@ -33,6 +33,10 @@ export type DefaultAboutPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 
+export type DefaultTestimonialsPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+};
+
 export type DefaultCartPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
 };

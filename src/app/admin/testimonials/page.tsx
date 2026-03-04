@@ -1,8 +1,16 @@
+import { api } from "~/trpc/server";
+
 import { TrailHeader } from "../_components/trail-header";
 import { TestimonialsActions } from "./_components/testimonials-actions";
 import { TestimonialsList } from "./_components/testimonials-list";
 
 export default async function TestimonialsPage() {
+  const testimonials = await api.testimonial.list({
+    publicOnly: false,
+  });
+
+  const invites = await api.testimonial.listInvites();
+
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Testimonials" }]} />
@@ -15,7 +23,10 @@ export default async function TestimonialsPage() {
           <TestimonialsActions />
         </div>
 
-        <TestimonialsList />
+        <TestimonialsList
+          testimonials={testimonials ?? []}
+          invites={invites ?? []}
+        />
       </div>
     </>
   );

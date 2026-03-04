@@ -4,6 +4,7 @@ import { useState } from "react";
 import ContactFormEmail from "~/emails/contact-form";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderShippedEmail from "~/emails/order-shipped";
+import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import WelcomeEmail from "~/emails/welcome";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -109,6 +110,19 @@ export function EmailPreview({ business, sampleOrder }: Props) {
     setIsLoading(false);
   };
 
+  const previewTestimonialInvite = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      TestimonialInviteEmail({
+        businessName: business.name,
+        inviteUrl: "https://example.com/testimonials/submit?code=sample",
+        logoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
   return (
     <div className="admin-container">
       <div className="admin-header">
@@ -155,6 +169,14 @@ export function EmailPreview({ business, sampleOrder }: Props) {
               className="w-full justify-start"
             >
               Contact Form
+            </Button>
+            <Button
+              onClick={previewTestimonialInvite}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Testimonial Invite
             </Button>
           </CardContent>
         </Card>

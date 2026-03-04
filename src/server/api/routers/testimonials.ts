@@ -1,5 +1,4 @@
 import crypto from "crypto";
-import type { PrismaClient } from "generated/prisma";
 import { BusinessDomainStatus } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -15,55 +14,6 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "../trpc";
-
-// Shared ownership check helper
-async function assertOwner(
-  db: PrismaClient,
-  userId: string,
-  businessId: string,
-) {
-  const user = await db.user.findUnique({
-    where: { id: userId },
-    select: { memberships: true },
-  });
-
-  if (!user?.memberships.some((m) => m.businessId === businessId)) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Not authorized",
-    });
-  }
-}
-
-// Shared testimonial ownership check helper
-async function assertTestimonialOwner(
-  db: PrismaClient,
-  userId: string,
-  testimonialId: string,
-) {
-  const testimonial = await db.testimonial.findUnique({
-    where: { id: testimonialId },
-    select: { businessId: true, source: true },
-  });
-
-  if (!testimonial) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Testimonial not found",
-    });
-  }
-
-  const user = await db.user.findUnique({
-    where: { id: userId },
-    select: { memberships: true },
-  });
-
-  if (!user?.memberships.some((m) => m.businessId === testimonial.businessId)) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
-  }
-
-  return testimonial;
-}
 
 export const testimonialRouter = createTRPCRouter({
   // ─── PUBLIC ──────────────────────────────────────────────────────────────────
@@ -238,10 +188,11 @@ export const testimonialRouter = createTRPCRouter({
           businessId: input.businessId,
           customerId: customer.id,
           customerEmail: user.email,
-          customerName: user.name || user.email,
+          customerName: user.name ?? "Anonymous",
           text: input.text,
           photoUrls: input.photoUrls,
           isPublic: true, // Auto-publish on submit
+          testimonialDate: new Date(),
         },
       });
     }),
@@ -329,10 +280,11 @@ export const testimonialRouter = createTRPCRouter({
           businessId: invite.businessId,
           customerId: customer.id,
           customerEmail: invite.email,
-          customerName: input.name,
+          customerName: input.name ?? "Anonymous",
           text: input.text,
           photoUrls: input.photoUrls,
           isPublic: true, // Auto-publish on submit
+          testimonialDate: new Date(),
         },
       });
 
@@ -351,10 +303,7 @@ export const testimonialRouter = createTRPCRouter({
     .input(
       z.object({
         customerName: z.string().min(1),
-        customerEmail: z.string().email().optional(),
-        customerTitle: z.string().optional(),
-        customerCompany: z.string().optional(),
-        title: z.string().optional(),
+        customerEmail: z.string().email().optional().nullable(),
         text: z.string().min(1),
         photoUrls: z.array(z.string().url()).max(5).default([]),
         isPublic: z.boolean().default(true),
@@ -364,18 +313,13 @@ export const testimonialRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      await assertOwner(ctx.db, ctx.session.user.id, businessId);
-
       return ctx.db.testimonial.create({
         data: {
           source: "owner",
           businessId,
           customerName: input.customerName,
-          customerEmail: input.customerEmail,
-          customerTitle: input.customerTitle,
-          customerCompany: input.customerCompany,
-          title: input.title,
           text: input.text,
+          customerEmail: input.customerEmail,
           photoUrls: input.photoUrls,
           isPublic: input.isPublic,
           testimonialDate: input.testimonialDate
@@ -392,9 +336,6 @@ export const testimonialRouter = createTRPCRouter({
         id: z.string(),
         customerName: z.string().min(1).optional(),
         customerEmail: z.string().email().optional().nullable(),
-        customerTitle: z.string().optional().nullable(),
-        customerCompany: z.string().optional().nullable(),
-        title: z.string().optional().nullable(),
         text: z.string().min(1).optional(),
         photoUrls: z.array(z.string().url()).max(5).optional(),
         isPublic: z.boolean().optional(),
@@ -404,11 +345,17 @@ export const testimonialRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
       const { id, testimonialDate, ...rest } = input;
-      const testimonial = await assertTestimonialOwner(
-        ctx.db,
-        ctx.session.user.id,
-        id,
-      );
+      const testimonial = await ctx.db.testimonial.findUnique({
+        where: { id, businessId },
+        select: { source: true },
+      });
+
+      if (!testimonial) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Testimonial not found",
+        });
+      }
 
       if (testimonial.source !== "owner") {
         throw new TRPCError({
@@ -430,11 +377,25 @@ export const testimonialRouter = createTRPCRouter({
 
   // ─── ADMIN (BOTH TYPES) ───────────────────────────────────────────────────
 
+  updatePhotoUrls: ownerAdminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        photoUrls: z.array(z.string().url()).max(5),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      return ctx.db.testimonial.update({
+        where: { id: input.id, businessId },
+        data: { photoUrls: input.photoUrls },
+      });
+    }),
+
   togglePublic: ownerAdminProcedure
     .input(z.object({ id: z.string(), isPublic: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      await assertTestimonialOwner(ctx.db, ctx.session.user.id, input.id);
       return ctx.db.testimonial.update({
         where: { id: input.id, businessId },
         data: { isPublic: input.isPublic },
@@ -445,7 +406,6 @@ export const testimonialRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      await assertTestimonialOwner(ctx.db, ctx.session.user.id, input.id);
       return ctx.db.testimonial.delete({ where: { id: input.id, businessId } });
     }),
 
@@ -467,6 +427,9 @@ export const testimonialRouter = createTRPCRouter({
           subdomain: true,
           customDomain: true,
           domainStatus: true,
+          siteContent: {
+            select: { logoUrl: true },
+          },
         },
       });
 
@@ -499,25 +462,27 @@ export const testimonialRouter = createTRPCRouter({
         inviteUrl = `https://${business.customDomain}/testimonials/submit?code=${code}`;
       }
 
+      if (process.env.NODE_ENV === "development") {
+        inviteUrl = `http://${business.subdomain}.localhost:3000/testimonials/submit?code=${code}`;
+      }
+
       await sendTestimonialInviteEmail({
         to: input.email,
         businessName: business.name,
         inviteUrl,
+        logoUrl: business.siteContent?.logoUrl ?? undefined,
       });
 
       return invite;
     }),
 
-  listInvites: protectedProcedure
-    .input(z.object({ businessId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      await assertOwner(ctx.db, ctx.session.user.id, input.businessId);
-      return ctx.db.testimonialInvite.findMany({
-        where: { businessId: input.businessId },
-        orderBy: { createdAt: "desc" },
-        include: {
-          customer: { select: { firstName: true, lastName: true } },
-        },
-      });
-    }),
+  listInvites: ownerAdminProcedure.query(async ({ ctx }) => {
+    return ctx.db.testimonialInvite.findMany({
+      where: { businessId: ctx.businessId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        customer: { select: { firstName: true, lastName: true } },
+      },
+    });
+  }),
 });

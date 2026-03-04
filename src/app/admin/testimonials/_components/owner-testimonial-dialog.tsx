@@ -2,10 +2,11 @@
 
 import type { Testimonial } from "generated/prisma";
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { useUploadFiles } from "@better-upload/client";
+import { Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import { getStoredPath } from "~/lib/uploads";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -39,45 +40,43 @@ export function OwnerTestimonialDialog({
   // Form state
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [customerTitle, setCustomerTitle] = useState("");
-  const [customerCompany, setCustomerCompany] = useState("");
-  const [title, setTitle] = useState("");
   const [text, setText] = useState("");
-  const [photoUrls, setPhotoUrls] = useState<string[]>([""]);
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(true);
-  const [testimonialDate, setTestimonialDate] = useState(
-    format(new Date(), "yyyy-MM-dd"),
-  );
+
+  const maxPhotos = 5;
+  const uploadFiles = useUploadFiles({
+    api: "/api/upload",
+    route: "testimonials",
+    onUploadComplete: (data) => {
+      const newUrls = data.files
+        .map((file) => getStoredPath(file))
+        .filter(Boolean);
+      if (newUrls.length > 0) {
+        setPhotoUrls((prev) => [...prev, ...newUrls].slice(0, maxPhotos));
+      }
+    },
+    onError: (error) => {
+      toast.error(error?.message ?? "Failed to upload image");
+    },
+  });
 
   // Populate form when editing
   useEffect(() => {
     if (testimonial) {
       setCustomerName(testimonial.customerName ?? "");
       setCustomerEmail(testimonial.customerEmail ?? "");
-      setCustomerTitle(testimonial.customerTitle ?? "");
-      setCustomerCompany(testimonial.customerCompany ?? "");
-      setTitle(testimonial.title ?? "");
       setText(testimonial.text ?? "");
       setPhotoUrls(
-        testimonial.photoUrls?.length ? [...testimonial.photoUrls] : [""],
+        testimonial.photoUrls?.length ? [...testimonial.photoUrls] : [],
       );
       setIsPublic(testimonial.isPublic ?? true);
-      setTestimonialDate(
-        format(
-          new Date(testimonial.testimonialDate ?? testimonial.createdAt),
-          "yyyy-MM-dd",
-        ),
-      );
     } else {
       setCustomerName("");
       setCustomerEmail("");
-      setCustomerTitle("");
-      setCustomerCompany("");
-      setTitle("");
       setText("");
-      setPhotoUrls([""]);
+      setPhotoUrls([]);
       setIsPublic(true);
-      setTestimonialDate(format(new Date(), "yyyy-MM-dd"));
     }
   }, [testimonial, isOpen]);
 
@@ -120,13 +119,9 @@ export function OwnerTestimonialDialog({
     const payload = {
       customerName: customerName.trim(),
       customerEmail: customerEmail.trim() || undefined,
-      customerTitle: customerTitle.trim() || undefined,
-      customerCompany: customerCompany.trim() || undefined,
-      title: title.trim() || undefined,
       text: text.trim(),
       photoUrls: urls,
       isPublic,
-      testimonialDate,
     };
 
     if (isEditing) {
@@ -180,57 +175,6 @@ export function OwnerTestimonialDialog({
               </div>
             </div>
 
-            {/* Title & Company row */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="customerTitle">Job Title (Optional)</Label>
-                <Input
-                  id="customerTitle"
-                  value={customerTitle}
-                  onChange={(e) => setCustomerTitle(e.target.value)}
-                  placeholder="CEO"
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor="customerCompany">Company (Optional)</Label>
-                <Input
-                  id="customerCompany"
-                  value={customerCompany}
-                  onChange={(e) => setCustomerCompany(e.target.value)}
-                  placeholder="Acme Corp"
-                  className="mt-2"
-                />
-              </div>
-            </div>
-
-            {/* Date */}
-            <div>
-              <Label htmlFor="testimonialDate">Date</Label>
-              <Input
-                id="testimonialDate"
-                type="date"
-                value={testimonialDate}
-                onChange={(e) => setTestimonialDate(e.target.value)}
-                className="mt-2 max-w-xs"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Backdate if importing from another system
-              </p>
-            </div>
-
-            {/* Title */}
-            <div>
-              <Label htmlFor="title">Testimonial Title (Optional)</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Best service I've ever had!"
-                className="mt-2"
-              />
-            </div>
-
             {/* Text */}
             <div>
               <Label htmlFor="text">
@@ -247,47 +191,88 @@ export function OwnerTestimonialDialog({
               />
             </div>
 
-            {/* Photo URLs (max 5) */}
+            {/* Photos (Optional, max 5) — upload */}
             <div>
-              <Label>Photo URLs (Optional, max 5)</Label>
-              <div className="mt-2 space-y-2">
-                {photoUrls.map((url, i) => (
-                  <div key={i} className="flex gap-2">
-                    <Input
-                      type="url"
-                      value={url}
-                      onChange={(e) => {
-                        const next = [...photoUrls];
-                        next[i] = e.target.value;
-                        setPhotoUrls(next);
-                      }}
-                      placeholder="https://..."
-                      className="flex-1"
-                    />
-                    {photoUrls.length > 1 ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() =>
-                          setPhotoUrls(photoUrls.filter((_, j) => j !== i))
-                        }
+              <Label>Photos (Optional, max 5)</Label>
+              <p className="mt-1 text-sm text-gray-500">
+                Upload images to include with this testimonial
+              </p>
+              <div className="mt-2 space-y-3">
+                {photoUrls.length > 0 && (
+                  <div className="flex flex-wrap gap-3">
+                    {photoUrls.map((url, i) => (
+                      <div
+                        key={url}
+                        className="relative h-24 w-24 overflow-hidden rounded-lg border bg-gray-100"
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    ) : null}
+                        {/* eslint-disable-next-line @next/next/no-img-element -- thumbnails from upload URLs */}
+                        <img
+                          src={url}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-1 right-1 h-6 w-6"
+                          onClick={() =>
+                            setPhotoUrls(photoUrls.filter((_, j) => j !== i))
+                          }
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                ))}
-                {photoUrls.length < 5 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPhotoUrls([...photoUrls, ""])}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add photo URL
-                  </Button>
+                )}
+                {photoUrls.length < maxPhotos && (
+                  <div>
+                    <input
+                      type="file"
+                      id="owner-testimonial-photo-upload"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      disabled={uploadFiles.isPending}
+                      title="Upload photos"
+                      aria-label="Upload photos for this testimonial"
+                      onChange={async (e) => {
+                        const files = e.target.files;
+                        if (!files?.length) return;
+                        const valid = Array.from(files).filter((f) =>
+                          f.type.startsWith("image/"),
+                        );
+                        const remaining = maxPhotos - photoUrls.length;
+                        const toUpload = valid.slice(0, remaining);
+                        if (toUpload.length === 0) return;
+                        e.target.value = "";
+                        await uploadFiles.upload(toUpload);
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        document
+                          .getElementById("owner-testimonial-photo-upload")
+                          ?.click()
+                      }
+                      disabled={uploadFiles.isPending}
+                    >
+                      {uploadFiles.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-4 w-4" />
+                          Upload photos
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>

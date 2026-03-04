@@ -14,6 +14,7 @@ const mainMenuLinks = [
 const accountLinks = [
   { label: "My Account", href: "/account/settings" },
   { label: "Sign In", href: "/auth/sign-in" },
+  { label: "Testimonials", href: "/testimonials" },
 ];
 
 export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
