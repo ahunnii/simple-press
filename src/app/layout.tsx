@@ -22,12 +22,30 @@ export async function generateMetadata() {
   }
   return {
     title: {
-      template: `%s - ${business.name}`,
-      default: business.name ?? business.siteContent?.metaTitle,
+      template: `%s | ${business.name}`,
+      default: business.siteContent?.metaTitle ?? business.name,
     },
     description:
       business.siteContent?.metaDescription ??
       "The simplest way to get started with your online business.",
+    keywords:
+      business.siteContent?.metaKeywords
+        ?.split(",")
+        .map((keyword: string) => keyword.trim()) ?? [],
+    openGraph: {
+      title: business.siteContent?.metaTitle ?? business.name,
+      description: business.siteContent?.metaDescription ?? "",
+
+      images: [
+        business.siteContent?.ogImage ??
+          business.siteContent?.logoUrl ??
+          "/placeholder.svg",
+      ],
+      url:
+        business?.customDomain && business.domainStatus === "ACTIVE"
+          ? `https://${business.customDomain}`
+          : `https://${business.subdomain}.${process.env.NEXT_PUBLIC_DOMAIN}`,
+    },
     icons: [
       { rel: "icon", url: business.siteContent?.faviconUrl ?? "/favicon.ico" },
     ],

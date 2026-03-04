@@ -30,6 +30,7 @@ export const businessRouter = createTRPCRouter({
         phoneNumber: true,
         customDomain: true,
         domainStatus: true,
+        subdomain: true,
         siteContent: {
           select: {
             logoUrl: true,
