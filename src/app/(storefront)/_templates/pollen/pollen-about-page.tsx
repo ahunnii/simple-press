@@ -1,9 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { api } from "~/trpc/server";
-
 import type { DefaultAboutPageTemplateProps } from "../types";
+import { api } from "~/trpc/server";
+import {
+  FadeIn,
+  StaggerContainer,
+  StaggerItem,
+} from "~/components/page-animations";
 
 import { PollenGeneralLayout } from "./pollen-general-layout";
 
@@ -15,44 +19,23 @@ export async function PollenAboutPage({
     string
   >;
 
-  const testimonials =
-    (await api.testimonial.listRandom({ limit: 3 })) ?? [];
+  const testimonials = (await api.testimonial.listRandom({ limit: 3 })) ?? [];
 
-  const teamMembers = [
-    {
-      name:
-        themeSpecificFields?.["pollen.about.team-member-1-name"] ??
-        "Team Member 1",
-      role:
-        themeSpecificFields?.["pollen.about.team-member-1-role"] ??
-        "Team Member 1 Role",
-      image:
-        themeSpecificFields?.["pollen.about.team-member-1-image"] ??
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face",
-    },
-    {
-      name:
-        themeSpecificFields?.["pollen.about.team-member-2-name"] ??
-        "Team Member 2",
-      role:
-        themeSpecificFields?.["pollen.about.team-member-2-role"] ??
-        "Team Member 2 Role",
-      image:
-        themeSpecificFields?.["pollen.about.team-member-2-image"] ??
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-    },
-    {
-      name:
-        themeSpecificFields?.["pollen.about.team-member-3-name"] ??
-        "Team Member 3",
-      role:
-        themeSpecificFields?.["pollen.about.team-member-3-role"] ??
-        "Team Member 3 Role",
-      image:
-        themeSpecificFields?.["pollen.about.team-member-3-image"] ??
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
-    },
-  ];
+  // Owner section: prefer new owner-* keys, fall back to legacy team-member-1-* for migration
+  const ownerSubheader =
+    themeSpecificFields?.["pollen.about.owner-subheader"] ??
+    "The Face Behind [Business]";
+  const ownerHeading =
+    themeSpecificFields?.["pollen.about.owner-heading"] ?? "Meet the Owner";
+  const ownerName =
+    themeSpecificFields?.["pollen.about.owner-name"] ?? "Jane Doe";
+  const ownerRole = themeSpecificFields?.["pollen.about.owner-role"] ?? "Owner";
+  const ownerImage =
+    themeSpecificFields?.["pollen.about.owner-image"] ?? "/placeholder.svg";
+
+  const ownerBlurb =
+    themeSpecificFields?.["pollen.about.owner-blurb"] ??
+    "A few sentences about the owner and their story.";
 
   return (
     <PollenGeneralLayout
@@ -60,18 +43,25 @@ export async function PollenAboutPage({
       title="About Us"
       subtitle="Our Story"
     >
-      <section className="pt-20 md:pt-32">
+      <section className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-            <div>
+            <FadeIn direction="right">
               <h2 className="mb-6 text-4xl font-bold text-[#374151] md:text-5xl">
                 {themeSpecificFields?.["pollen.about.header"] ?? "Heya!"}
               </h2>
               <div className="space-y-6 leading-relaxed text-[#4b5563]">
-                <p>{themeSpecificFields?.["pollen.about.text"] ?? "Text"}</p>
+                <p className="whitespace-pre-line">
+                  {themeSpecificFields?.["pollen.about.text"] ??
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit..."}
+                </p>
               </div>
-            </div>
-            <div className="relative aspect-3/4 overflow-hidden rounded-2xl">
+            </FadeIn>
+            <FadeIn
+              direction="left"
+              delay={0.15}
+              className="relative aspect-3/4 overflow-hidden rounded-2xl"
+            >
               <Image
                 src={
                   themeSpecificFields?.["pollen.about.image"] ??
@@ -82,98 +72,110 @@ export async function PollenAboutPage({
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
-            </div>
+            </FadeIn>
           </div>
         </div>
       </section>
 
-      {/* Team Section */}
-      <section className="bg-white py-10 md:py-24">
+      {/* Owner Section — Bamboo-style two-column image + blurb */}
+      <section className="bg-white py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
-              {themeSpecificFields?.["pollen.about.staff-subheader"] ??
-                "The Faces of Business"}
-            </p>
-            <h2 className="text-3xl font-bold text-[#374151] md:text-4xl">
-              {themeSpecificFields?.["pollen.about.staff-header"] ??
-                "Meet Our Team"}
-            </h2>
-          </div>
-
-          <div className="flex flex-col items-center justify-center gap-12 sm:flex-row sm:gap-16">
-            {teamMembers.map((member) => (
-              <div key={member.name} className="flex flex-col items-center">
-                <div className="relative mb-4 h-48 w-48 overflow-hidden rounded-full">
-                  <Image
-                    src={member.image}
-                    alt={member.name}
-                    fill
-                    className="object-cover"
-                    sizes="192px"
-                  />
-                </div>
-                <h3 className="text-lg font-semibold text-[#374151]">
-                  {member.name}
-                </h3>
-                <p className="text-sm font-medium tracking-wider text-[#5e8b4a] uppercase">
-                  {member.role}
-                </p>
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            <FadeIn direction="right" className="flex-1">
+              <div className="relative aspect-3/4 overflow-hidden rounded-2xl">
+                <Image
+                  src={ownerImage}
+                  alt={ownerName || "Owner"}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
               </div>
-            ))}
+            </FadeIn>
+            <FadeIn direction="left" delay={0.1} className="flex-1">
+              {ownerSubheader && (
+                <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
+                  {ownerSubheader}
+                </p>
+              )}
+              <h2 className="mb-6 text-3xl font-bold text-[#374151] md:text-4xl">
+                {ownerHeading}
+              </h2>
+              {ownerName && (
+                <h3 className="text-xl font-semibold text-[#374151]">
+                  {ownerName}
+                </h3>
+              )}
+              {ownerRole && (
+                <p className="mb-6 text-sm font-medium tracking-wider text-[#5e8b4a] uppercase">
+                  {ownerRole}
+                </p>
+              )}
+              {ownerBlurb ? (
+                <div className="space-y-4 leading-relaxed text-[#4b5563]">
+                  <p className="whitespace-pre-line">{ownerBlurb}</p>
+                </div>
+              ) : (
+                <p className="leading-relaxed text-[#4b5563]">
+                  Add a short bio in the Owner section of your About page
+                  content.
+                </p>
+              )}
+            </FadeIn>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section — only when business has public testimonials */}
       {testimonials.length > 0 && (
-        <section className="bg-gray-50 py-10 md:py-24">
+        <section className="bg-gray-50 py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-12 text-center">
-              <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
-                Kind Words
-              </p>
-              <h2 className="text-3xl font-bold text-[#374151] md:text-4xl">
-                What Our Customers Say
-              </h2>
-            </div>
+            <FadeIn direction="up">
+              <div className="mb-12 text-center">
+                <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
+                  Kind Words
+                </p>
+                <h2 className="text-3xl font-bold text-[#374151] md:text-4xl">
+                  What Our Customers Say
+                </h2>
+              </div>
+            </FadeIn>
 
-            <div className="grid gap-8 md:grid-cols-3">
+            <StaggerContainer className="grid gap-8 md:grid-cols-3">
               {testimonials.map((t) => (
-                <div
-                  key={t.id}
-                  className="rounded-2xl bg-white p-6 shadow-sm"
-                >
-                  <p className="mb-4 text-gray-700">{t.text}</p>
-                  <p className="font-medium text-[#374151]">
-                    {t.customerName}
-                  </p>
-                  {t.photoUrls && t.photoUrls.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {t.photoUrls.slice(0, 3).map((url, i) => (
-                        <div
-                          key={i}
-                          className="relative h-16 w-16 overflow-hidden rounded-lg"
-                        >
-                          <Image
-                            src={url}
-                            alt=""
-                            fill
-                            className="object-cover"
-                            sizes="64px"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <StaggerItem key={t.id}>
+                  <div className="rounded-2xl bg-white p-6 shadow-sm">
+                    <p className="mb-4 text-gray-700">{t.text}</p>
+                    <p className="font-medium text-[#374151]">
+                      {t.customerName}
+                    </p>
+                    {t.photoUrls && t.photoUrls.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {t.photoUrls.slice(0, 3).map((url, i) => (
+                          <div
+                            key={i}
+                            className="relative h-16 w-16 overflow-hidden rounded-lg"
+                          >
+                            <Image
+                              src={url}
+                              alt=""
+                              fill
+                              className="object-cover"
+                              sizes="64px"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
 
             <div className="mt-10 text-center">
               <Link
                 href="/testimonials"
-                className="inline-flex items-center text-[#5e8b4a] font-semibold hover:underline"
+                className="inline-flex items-center font-semibold text-[#5e8b4a] hover:underline"
               >
                 View all testimonials
               </Link>

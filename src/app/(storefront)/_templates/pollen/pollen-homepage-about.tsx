@@ -1,6 +1,12 @@
 import type { LucideIcon } from "lucide-react";
 import { BookOpen, Flower2, HandHelping, Map } from "lucide-react";
 
+import {
+  FadeIn,
+  StaggerContainer,
+  StaggerItem,
+} from "~/components/page-animations";
+
 export function PollenHomepageAbout({
   services,
 }: {
@@ -22,32 +28,33 @@ export function PollenHomepageAbout({
       />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-16 max-w-3xl text-center">
-          <p className="mb-4 text-sm font-medium tracking-wider text-white/70 uppercase">
-            About Our Services
-          </p>
-          <h2 className="text-3xl leading-tight font-bold text-balance text-white md:text-4xl">
-            We&apos;re passionate about creating pollinator-friendly spaces that
-            bring your vision to life
-          </h2>
-        </div>
+        <FadeIn direction="up">
+          <div className="mx-auto mb-16 max-w-3xl text-center">
+            <p className="mb-4 text-sm font-medium tracking-wider text-white/70 uppercase">
+              About Our Services
+            </p>
+            <h2 className="text-3xl leading-tight font-bold text-balance text-white md:text-4xl">
+              We&apos;re passionate about creating pollinator-friendly spaces that
+              bring your vision to life
+            </h2>
+          </div>
+        </FadeIn>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((service) => (
-            <div
-              key={service.title}
-              className="rounded-2xl bg-[#3d4d2f] p-6 text-left transition-all duration-300 hover:bg-[#455734]"
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center">
-                <service.icon className="h-6 w-6 text-white" />
+            <StaggerItem key={service.title}>
+              <div className="rounded-2xl bg-[#3d4d2f] p-6 text-left transition-all duration-300 hover:bg-[#455734]">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center">
+                  <service.icon className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mb-3 font-semibold text-white">{service.title}</h3>
+                <p className="text-sm leading-relaxed text-white/90">
+                  {service.description}
+                </p>
               </div>
-              <h3 className="mb-3 font-semibold text-white">{service.title}</h3>
-              <p className="text-sm leading-relaxed text-white/90">
-                {service.description}
-              </p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );

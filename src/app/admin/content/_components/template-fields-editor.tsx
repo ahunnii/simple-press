@@ -48,6 +48,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
+import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 import {
@@ -646,6 +647,12 @@ function FieldInput({
           onChange={(e) => onChange(e.target.value)}
           placeholder={field.placeholder ?? field.description}
           rows={3}
+        />
+      ) : field.type === "boolean" ? (
+        <Switch
+          checked={value === "true"}
+          defaultChecked={field.defaultValue === "true"}
+          onCheckedChange={(checked) => onChange(checked ? "true" : "false")}
         />
       ) : (
         <Input

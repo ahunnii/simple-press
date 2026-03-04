@@ -11,6 +11,10 @@ const AVAILABLE_FREE_TEMPLATES = [
     value: "pollen",
     label: "Pollen",
   },
+  {
+    value: "default",
+    label: "Default",
+  },
 ] as const;
 
 const COMMERCIAL_TEMPLATE_OWNERSHIP = {

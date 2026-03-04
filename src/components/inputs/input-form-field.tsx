@@ -31,6 +31,8 @@ type Props<CurrentForm extends FieldValues> = {
   type?: InputHTMLAttributes<HTMLInputElement>["type"];
   required?: boolean;
   autoFocus?: boolean;
+  labelClassName?: string;
+  inputClassName?: string;
 };
 
 export const InputFormField = <CurrentForm extends FieldValues>({
@@ -50,6 +52,8 @@ export const InputFormField = <CurrentForm extends FieldValues>({
   inputRef,
   required,
   autoFocus,
+  labelClassName,
+  inputClassName,
 }: Props<CurrentForm>) => {
   return (
     <FormField
@@ -59,10 +63,13 @@ export const InputFormField = <CurrentForm extends FieldValues>({
         const { ref: _fieldRef, ...fieldRest } = field;
         return (
           <FormItem className={cn("col-span-full", className)}>
-            {label && <FormLabel>{label}</FormLabel>}
+            {label && (
+              <FormLabel className={cn(labelClassName)}>{label}</FormLabel>
+            )}
             <FormControl>
               <Input
                 disabled={disabled}
+                className={inputClassName}
                 placeholder={placeholder ?? ""}
                 {...fieldRest}
                 ref={(el) => {

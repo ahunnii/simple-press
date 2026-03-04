@@ -12,6 +12,9 @@ export function ModernContactPage({
     string
   >;
 
+  const businessPhone = business?.phoneNumber;
+  const businessAddress = business?.businessAddress;
+
   return (
     <div className="bg-background">
       {/* Header */}
@@ -135,62 +138,62 @@ export function ModernContactPage({
       </section>
 
       {/* FAQ teaser */}
-      <section className="border-border bg-secondary border-t py-20">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-              {themeSpecificFields?.["modern.contact.faq-subheader"] ??
-                "Common Questions"}
-            </p>
-            <h2 className="text-foreground mt-2 font-serif text-3xl md:text-4xl">
-              {themeSpecificFields?.["modern.contact.faq-title"] ??
-                "Frequently Asked"}
-            </h2>
+      {themeSpecificFields?.["modern.contact.faq-enabled"] === "true" && (
+        <section className="border-border bg-secondary border-t py-20">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center">
+              <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+                Common Questions
+              </p>
+              <h2 className="text-foreground mt-2 font-serif text-3xl md:text-4xl">
+                Frequently Asked
+              </h2>
+            </div>
+            <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
+              <div>
+                <h3 className="text-foreground text-sm font-semibold">
+                  {themeSpecificFields?.["modern.contact.faq-1-question"] ??
+                    "What is your return policy?"}
+                </h3>
+                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                  {themeSpecificFields?.["modern.contact.faq-1-answer"] ??
+                    "We offer a 30-day return policy on all items in their original condition. Simply contact us to initiate a return and we'll provide a prepaid shipping label."}
+                </p>
+              </div>
+              <div>
+                <h3 className="text-foreground text-sm font-semibold">
+                  {themeSpecificFields?.["modern.contact.faq-2-question"] ??
+                    "How long does shipping take?"}
+                </h3>
+                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                  {themeSpecificFields?.["modern.contact.faq-2-answer"] ??
+                    "Standard shipping takes 5-7 business days. We also offer expedited shipping (2-3 business days) at checkout for an additional fee."}
+                </p>
+              </div>
+              <div>
+                <h3 className="text-foreground text-sm font-semibold">
+                  {themeSpecificFields?.["modern.contact.faq-3-question"] ??
+                    "Do you ship internationally?"}
+                </h3>
+                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                  {themeSpecificFields?.["modern.contact.faq-3-answer"] ??
+                    "Yes! We ship to over 40 countries. International shipping typically takes 10-15 business days. Duties and taxes may apply depending on your location."}
+                </p>
+              </div>
+              <div>
+                <h3 className="text-foreground text-sm font-semibold">
+                  {themeSpecificFields?.["modern.contact.faq-4-question"] ??
+                    "Can I modify or cancel an order?"}
+                </h3>
+                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                  {themeSpecificFields?.["modern.contact.faq-4-answer"] ??
+                    "Orders can be modified or cancelled within 2 hours of placement. After that, please contact us and we'll do our best to accommodate your request."}
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
-            <div>
-              <h3 className="text-foreground text-sm font-semibold">
-                {themeSpecificFields?.["modern.contact.faq-1-question"] ??
-                  "What is your return policy?"}
-              </h3>
-              <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                {themeSpecificFields?.["modern.contact.faq-1-answer"] ??
-                  "We offer a 30-day return policy on all items in their original condition. Simply contact us to initiate a return and we'll provide a prepaid shipping label."}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-foreground text-sm font-semibold">
-                {themeSpecificFields?.["modern.contact.faq-2-question"] ??
-                  "How long does shipping take?"}
-              </h3>
-              <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                {themeSpecificFields?.["modern.contact.faq-2-answer"] ??
-                  "Standard shipping takes 5-7 business days. We also offer expedited shipping (2-3 business days) at checkout for an additional fee."}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-foreground text-sm font-semibold">
-                {themeSpecificFields?.["modern.contact.faq-3-question"] ??
-                  "Do you ship internationally?"}
-              </h3>
-              <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                {themeSpecificFields?.["modern.contact.faq-3-answer"] ??
-                  "Yes! We ship to over 40 countries. International shipping typically takes 10-15 business days. Duties and taxes may apply depending on your location."}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-foreground text-sm font-semibold">
-                {themeSpecificFields?.["modern.contact.faq-4-question"] ??
-                  "Can I modify or cancel an order?"}
-              </h3>
-              <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                {themeSpecificFields?.["modern.contact.faq-4-answer"] ??
-                  "Orders can be modified or cancelled within 2 hours of placement. After that, please contact us and we'll do our best to accommodate your request."}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }

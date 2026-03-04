@@ -1,70 +1,36 @@
 "use client";
 
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle, Loader2, Send } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
+import { useContactForm } from "~/hooks/use-contact-form";
+import { useDirtyForm } from "~/hooks/use-dirty-form";
+import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
+import { Form } from "~/components/ui/form";
+import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
-const contactSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  subject: z.string().optional(),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-});
+export function DefaultContactForm() {
+  const {
+    form,
+    messageLength,
+    messageMaxLength,
+    isSubmitting,
+    error,
+    captchaToken,
+    setCaptchaToken,
+    captchaRef,
+    onSubmit,
+    formRef,
+    isDirty,
+    isSuccess,
+    resetSuccess,
+  } = useContactForm({ messageMaxLength: 180 });
 
-type ContactFormValues = z.infer<typeof contactSchema>;
-
-export function DefaultContactForm({ businessName }: { businessName: string }) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(contactSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    },
-  });
-
-  const onSubmit = async (data: ContactFormValues) => {
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      const result = (await response.json()) as { error?: string };
-
-      if (!response.ok) {
-        throw new Error(result.error ?? "Failed to send message");
-      }
-
-      setIsSuccess(true);
-      form.reset();
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  useKeyboardEnter(form, onSubmit);
+  useDirtyForm(isDirty);
 
   if (isSuccess) {
     return (
@@ -75,11 +41,7 @@ export function DefaultContactForm({ businessName }: { businessName: string }) {
           <br />
           We&apos;ve received your message and will get back to you soon.
         </AlertDescription>
-        <Button
-          variant="outline"
-          onClick={() => setIsSuccess(false)}
-          className="mt-4"
-        >
+        <Button variant="outline" onClick={resetSuccess} className="mt-4">
           Send Another Message
         </Button>
       </Alert>
@@ -87,88 +49,86 @@ export function DefaultContactForm({ businessName }: { businessName: string }) {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div>
-        <Label htmlFor="name">Name *</Label>
-        <Input
-          id="name"
-          {...form.register("name")}
-          placeholder="Your name"
-          className="mt-2"
-        />
-        {form.formState.errors.name && (
-          <p className="mt-1 text-sm text-red-600">
-            {form.formState.errors.name.message}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="email">Email *</Label>
-        <Input
-          id="email"
-          type="email"
-          {...form.register("email")}
-          placeholder="your.email@example.com"
-          className="mt-2"
-        />
-        {form.formState.errors.email && (
-          <p className="mt-1 text-sm text-red-600">
-            {form.formState.errors.email.message}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="subject">Subject (optional)</Label>
-        <Input
-          id="subject"
-          {...form.register("subject")}
-          placeholder="What is this about?"
-          className="mt-2"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="message">Message *</Label>
-        <Textarea
-          id="message"
-          {...form.register("message")}
-          placeholder="Your message..."
-          rows={6}
-          className="mt-2"
-        />
-        {form.formState.errors.message && (
-          <p className="mt-1 text-sm text-red-600">
-            {form.formState.errors.message.message}
-          </p>
-        )}
-      </div>
-
-      <Button
-        type="submit"
-        disabled={isSubmitting}
-        size="lg"
-        className="w-full"
+    <Form {...form}>
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6"
       >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Sending...
-          </>
-        ) : (
-          <>
-            <Send className="mr-2 h-5 w-5" />
-            Send Message
-          </>
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
-      </Button>
-    </form>
+
+        <InputFormField
+          form={form}
+          name="name"
+          label="First Name *"
+          inputClassName={"mt-2"}
+          placeholder="Jane"
+          required
+        />
+
+        <InputFormField
+          form={form}
+          name="email"
+          label="Email *"
+          inputClassName={"mt-2"}
+          type="email"
+          placeholder="jane@example.com"
+          required
+        />
+
+        <InputFormField
+          form={form}
+          name="phone"
+          label="Phone Number (Optional)"
+          inputClassName={"mt-2"}
+          type="tel"
+          placeholder="+1 300 555 0000"
+        />
+
+        <TextareaFormField
+          form={form}
+          name="message"
+          label="Message *"
+          messageLength={messageLength}
+          textareaClassName={"mt-2"}
+          maxLength={messageMaxLength}
+          placeholder="Tell us how we can help..."
+          required
+        />
+
+        {/* hCaptcha */}
+        <HCaptchaField
+          ref={captchaRef}
+          onVerify={setCaptchaToken}
+          onExpire={() => setCaptchaToken("")}
+          onError={() => setCaptchaToken("")}
+          label="Verification"
+          required
+        />
+
+        <Button
+          type="submit"
+          disabled={isSubmitting || !captchaToken}
+          size="lg"
+          className="w-full"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            <>
+              <Send className="mr-2 h-5 w-5" />
+              Send Message
+            </>
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }

@@ -19,7 +19,15 @@ export type TemplateField = {
   key: string;
   label: string;
   description: string;
-  type: "text" | "textarea" | "url" | "color" | "number" | "gallery" | "image";
+  type:
+    | "text"
+    | "textarea"
+    | "url"
+    | "color"
+    | "number"
+    | "gallery"
+    | "image"
+    | "boolean";
   page:
     | "homepage"
     | "contact"

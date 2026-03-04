@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { PageTransition } from "~/components/page-animations";
 
 import { PollenCallToAction } from "./pollen-cta";
 
@@ -26,63 +27,65 @@ export function PollenGeneralLayout({
   >;
 
   return (
-    <div className="bg-background pt-24">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-24 pb-16 md:py-32">
-        <Image
-          src={
-            imageUrl ??
-            themeSpecificFields?.["pollen.global.header-background"] ??
-            "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1920&h=600&fit=crop"
-          }
-          alt=""
-          fill
-          className="object-cover object-right"
-          sizes="100vw"
-          priority
-        />
-        <div className="absolute inset-0 bg-[#2a351f]/50" />
-        <div className="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="mb-4 text-sm font-medium tracking-wider text-[#A8D081] uppercase">
-            {subtitle}
-          </p>
-          <h1 className="text-5xl font-bold text-white md:text-6xl lg:text-7xl">
-            {title}
-          </h1>
-        </div>
-      </section>
-
-      {children}
-
-      {showCTA && (
-        <div className="py-16">
-          <PollenCallToAction
-            title={
-              themeSpecificFields?.["pollen.global.cta-title"] ??
-              "Call to Action"
+    <PageTransition>
+      <div className="bg-background pt-24">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden py-24 pb-16 md:py-32">
+          <Image
+            src={
+              imageUrl ??
+              themeSpecificFields?.["pollen.global.header-background"] ??
+              "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1920&h=600&fit=crop"
             }
-            subtitle={
-              themeSpecificFields?.["pollen.global.cta-subtitle"] ??
-              "Call to Action"
-            }
-            description={
-              themeSpecificFields?.["pollen.global.cta-text"] ??
-              "Call to Action"
-            }
-            buttonText={
-              themeSpecificFields?.["pollen.global.cta-button-text"] ??
-              "Call to Action"
-            }
-            buttonLink={
-              themeSpecificFields?.["pollen.global.cta-button-link"] ?? "#!"
-            }
-            imageUrl={
-              themeSpecificFields?.["pollen.global.cta-image"] ??
-              "/placeholder.svg"
-            }
+            alt=""
+            fill
+            className="object-cover object-right"
+            sizes="100vw"
+            priority
           />
-        </div>
-      )}
-    </div>
+          <div className="absolute inset-0 bg-[#2a351f]/50" />
+          <div className="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+            <p className="mb-4 text-sm font-medium tracking-wider text-[#A8D081] uppercase">
+              {subtitle}
+            </p>
+            <h1 className="text-5xl font-bold text-white md:text-6xl lg:text-7xl">
+              {title}
+            </h1>
+          </div>
+        </section>
+
+        {children}
+
+        {showCTA && (
+          <div className="py-16">
+            <PollenCallToAction
+              title={
+                themeSpecificFields?.["pollen.global.cta-title"] ??
+                "Call to Action"
+              }
+              subtitle={
+                themeSpecificFields?.["pollen.global.cta-subtitle"] ??
+                "Call to Action"
+              }
+              description={
+                themeSpecificFields?.["pollen.global.cta-text"] ??
+                "Call to Action"
+              }
+              buttonText={
+                themeSpecificFields?.["pollen.global.cta-button-text"] ??
+                "Call to Action"
+              }
+              buttonLink={
+                themeSpecificFields?.["pollen.global.cta-button-link"] ?? "#!"
+              }
+              imageUrl={
+                themeSpecificFields?.["pollen.global.cta-image"] ??
+                "/placeholder.svg"
+              }
+            />
+          </div>
+        )}
+      </div>
+    </PageTransition>
   );
 }

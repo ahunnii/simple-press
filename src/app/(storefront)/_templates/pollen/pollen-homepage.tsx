@@ -1,6 +1,7 @@
 import { BookOpen, Flower2, HandHelping, MapIcon } from "lucide-react";
 
 import { api } from "~/trpc/server";
+import { PageTransition } from "~/components/page-animations";
 
 // import { GalleryRenderer } from "~/components/gallery-renderer";
 
@@ -66,7 +67,7 @@ export async function PollenHomepage() {
   //   : null;
 
   return (
-    <>
+    <PageTransition>
       <PollenHero
         title={
           themeSpecificFields?.["pollen.homepage.hero-title"] ?? "Business"
@@ -118,6 +119,6 @@ export async function PollenHomepage() {
           themeSpecificFields?.["pollen.global.cta-image"] ?? "/placeholder.svg"
         }
       />
-    </>
+    </PageTransition>
   );
 }

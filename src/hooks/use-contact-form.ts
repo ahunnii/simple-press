@@ -33,6 +33,7 @@ export function useContactForm(options: UseContactFormOptions = {}) {
   const schema = contactFormSchema(messageMaxLength);
 
   const captchaRef = useRef<HCaptchaHandle>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState("");
@@ -49,25 +50,28 @@ export function useContactForm(options: UseContactFormOptions = {}) {
   });
 
   const { mutate, isPending } = api.contact.send.useMutation({
-    onSuccess: () => {
-      setIsSuccess(true);
+    onSuccess: ({ message }) => {
+      toast.dismiss();
+      toast.success(message);
       setCaptchaToken("");
       const handle = captchaRef.current;
       if (handle) handle.reset();
       form.reset();
     },
     onError: (err: { message?: string }) => {
-      setError(err.message ?? "Something went wrong. Please try again.");
+      toast.dismiss();
+      toast.error(err.message ?? "Something went wrong. Please try again.");
       const handle = captchaRef.current;
       if (handle) handle.reset();
       setCaptchaToken("");
     },
+    onMutate: () => toast.loading("Sending message..."),
   });
 
   const messageLength =
     (form.watch("message") as string | undefined)?.length ?? 0;
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
     if (!captchaToken) {
       toast.error("Please complete the captcha");
       return;
@@ -88,6 +92,8 @@ export function useContactForm(options: UseContactFormOptions = {}) {
     setIsSuccess(false);
   };
 
+  const isDirty = form.formState.isDirty;
+
   return {
     form,
     messageLength,
@@ -99,6 +105,8 @@ export function useContactForm(options: UseContactFormOptions = {}) {
     setCaptchaToken,
     captchaRef,
     onSubmit,
+    formRef,
     resetSuccess,
+    isDirty,
   };
 }

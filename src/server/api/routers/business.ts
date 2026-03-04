@@ -27,6 +27,7 @@ export const businessRouter = createTRPCRouter({
         templateId: true,
         businessAddress: true,
         supportEmail: true,
+        phoneNumber: true,
         customDomain: true,
         domainStatus: true,
         siteContent: {

@@ -1,87 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle, Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
+import { useContactForm } from "~/hooks/use-contact-form";
+import { useDirtyForm } from "~/hooks/use-dirty-form";
+import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
+import { Form } from "~/components/ui/form";
+import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
-const contactSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().optional(),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-});
+export function DarkTrendContactForm() {
+  const {
+    form,
+    messageLength,
+    messageMaxLength,
+    isSubmitting,
+    error,
+    captchaToken,
+    setCaptchaToken,
+    captchaRef,
+    onSubmit,
+    formRef,
+    isDirty,
+    isSuccess,
+    resetSuccess,
+  } = useContactForm({ messageMaxLength: 180 });
 
-type ContactFormValues = z.infer<typeof contactSchema>;
-
-type Props = {
-  businessName: string;
-};
-
-export function DarkTrendContactForm({ businessName: _businessName }: Props) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(contactSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      message: "",
-    },
-  });
-
-  const onSubmit = async (data: ContactFormValues) => {
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      const result = (await response.json()) as { error?: string };
-
-      if (!response.ok) {
-        throw new Error(result.error ?? "Failed to send message");
-      }
-
-      setIsSuccess(true);
-      form.reset();
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  useKeyboardEnter(form, onSubmit);
+  useDirtyForm(isDirty);
 
   if (isSuccess) {
     return (
-      <Alert className="border-green-500/50 bg-green-500/10">
-        <CheckCircle className="h-5 w-5 text-green-400" />
-        <AlertDescription className="text-green-400">
+      <Alert className="border-purple-500/50 bg-purple-500/10">
+        <CheckCircle className="h-5 w-5 text-purple-400" />
+        <AlertDescription className="text-purple-300">
           <strong>Message sent successfully!</strong>
           <br />
           We&apos;ve received your message and will get back to you soon.
         </AlertDescription>
         <Button
-          onClick={() => setIsSuccess(false)}
-          className="mt-4 border border-white/60 bg-transparent font-medium text-white hover:bg-white/10"
+          onClick={resetSuccess}
+          className="mt-4 border border-purple-400/60 bg-purple-950/60 font-medium text-purple-100 transition-colors hover:border-purple-300 hover:bg-purple-900/70"
         >
           Send Another Message
         </Button>
@@ -90,108 +52,103 @@ export function DarkTrendContactForm({ businessName: _businessName }: Props) {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      {error && (
-        <Alert
-          variant="destructive"
-          className="border-red-500/50 bg-red-500/10"
-        >
-          <AlertDescription className="text-red-400">{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div>
-        <Label htmlFor="name" className="text-white">
-          Full Name *
-        </Label>
-        <p className="mb-2 text-sm text-white/60">
-          Please enter your full name
-        </p>
-        <Input
-          id="name"
-          {...form.register("name")}
-          placeholder="E.g. John Doe"
-          className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-        />
-        {form.formState.errors.name && (
-          <p className="mt-1 text-sm text-red-400">
-            {form.formState.errors.name.message}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="email" className="text-white">
-          Email Address *
-        </Label>
-        <p className="mb-2 text-sm text-white/60">
-          Enter a valid email address to receive updates
-        </p>
-        <Input
-          id="email"
-          type="email"
-          {...form.register("email")}
-          placeholder="E.g. john@doe.com"
-          className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40 focus:border-purple-500"
-        />
-        {form.formState.errors.email && (
-          <p className="mt-1 text-sm text-red-400">
-            {form.formState.errors.email.message}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="phone" className="text-white">
-          Phone
-        </Label>
-        <p className="mb-2 text-sm text-white/60">
-          Optional. Provide your phone number for quicker responses.
-        </p>
-        <Input
-          id="phone"
-          type="tel"
-          {...form.register("phone")}
-          placeholder="E.g. +1 300 555 0000"
-          className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="message" className="text-white">
-          Message *
-        </Label>
-        <p className="mb-2 text-sm text-white/60">
-          Tell us what&apos;s on your mind
-        </p>
-        <Textarea
-          id="message"
-          {...form.register("message")}
-          placeholder="E.g. Hey, how are you?"
-          rows={6}
-          className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-        />
-        {form.formState.errors.message && (
-          <p className="mt-1 text-sm text-red-400">
-            {form.formState.errors.message.message}
-          </p>
-        )}
-      </div>
-
-      <Button
-        type="submit"
-        disabled={isSubmitting}
-        className="bg-violet-500 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-600"
+    <Form {...form}>
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6"
       >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Sending...
-          </>
-        ) : (
-          "Submit"
+        {error && (
+          <Alert
+            variant="destructive"
+            className="border-red-500/50 bg-red-500/10"
+          >
+            <AlertDescription className="text-red-400">
+              {error}
+            </AlertDescription>
+          </Alert>
         )}
-      </Button>
-    </form>
+
+        <InputFormField
+          form={form}
+          name="name"
+          label="First Name *"
+          className="flex flex-col gap-2"
+          labelClassName={"text-white"}
+          inputClassName={
+            "border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
+          }
+          placeholder="E.g. John Doe"
+          required
+        />
+
+        <InputFormField
+          form={form}
+          name="email"
+          label="Email *"
+          className="flex flex-col gap-2"
+          labelClassName={"text-white"}
+          inputClassName={
+            "border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
+          }
+          type="email"
+          placeholder="E.g. john@doe.com"
+          required
+        />
+
+        <InputFormField
+          form={form}
+          name="phone"
+          label="Phone Number (Optional)"
+          className="flex flex-col gap-2"
+          labelClassName={"text-white"}
+          inputClassName={
+            "border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
+          }
+          type="tel"
+          placeholder="+1 300 555 0000"
+        />
+
+        <TextareaFormField
+          form={form}
+          name="message"
+          label="Message *"
+          messageLength={messageLength}
+          labelClassName={"text-white"}
+          textareaClassName={
+            "border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
+          }
+          className="flex flex-col gap-2"
+          maxLength={messageMaxLength}
+          placeholder="I had a question about..."
+          required
+        />
+
+        {/* hCaptcha */}
+        <HCaptchaField
+          ref={captchaRef}
+          onVerify={setCaptchaToken}
+          onExpire={() => setCaptchaToken("")}
+          onError={() => setCaptchaToken("")}
+          label="Verification"
+          required
+        />
+
+        <Button
+          type="submit"
+          disabled={isSubmitting || !captchaToken}
+          className="bg-violet-500 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-600"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            "Submit"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }

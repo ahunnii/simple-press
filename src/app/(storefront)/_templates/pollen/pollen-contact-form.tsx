@@ -1,15 +1,17 @@
 "use client";
 
-import { CheckCircle, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
+import { useContactForm } from "~/hooks/use-contact-form";
+import { useDirtyForm } from "~/hooks/use-dirty-form";
+import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { Textarea } from "~/components/ui/textarea";
+import { Form } from "~/components/ui/form";
 import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
-import { useContactForm } from "~/hooks/use-contact-form";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { RadioFormField } from "~/components/inputs/radio-form-field";
+import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
   businessName: string;
@@ -31,175 +33,136 @@ export function PollenContactForm({
     messageLength,
     messageMaxLength,
     isSubmitting,
-    isSuccess,
     error,
     captchaToken,
     setCaptchaToken,
     captchaRef,
     onSubmit,
-    resetSuccess,
+    formRef,
+    isDirty,
   } = useContactForm({ messageMaxLength: 180 });
 
-  if (isSuccess) {
-    return (
-      <Alert className="border-[#215935]/50 bg-[#215935]/10">
-        <CheckCircle className="h-5 w-5 text-[#215935]" />
-        <AlertDescription className="text-gray-800">
-          <strong>Message sent successfully!</strong>
-          <br />
-          We&apos;ve received your message and will get back to you soon.
-        </AlertDescription>
-        <Button
-          onClick={resetSuccess}
-          className="mt-4 bg-[#215935] font-medium text-white hover:bg-[#1a4729]"
-        >
-          Send Another Message
-        </Button>
-      </Alert>
-    );
-  }
+  useKeyboardEnter(form, onSubmit);
+  useDirtyForm(isDirty);
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
-          {formTitle}
-        </h2>
-        <p className="mt-1 text-sm text-gray-600">{formDescription}</p>
-      </div>
-
-      {error && (
-        <Alert
-          variant="destructive"
-          className="border-red-500/50 bg-red-500/10"
-        >
-          <AlertDescription className="text-red-700">{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div>
-        <Label htmlFor="name" className={labelClassName}>
-          First Name *
-        </Label>
-        <Input
-          id="name"
-          {...form.register("name")}
-          placeholder=""
-          className={inputClassName}
-        />
-        {form.formState.errors.name && (
-          <p className="mt-1 text-sm text-red-600">
-            {form.formState.errors.name.message}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="email" className={labelClassName}>
-          Email Address *
-        </Label>
-        <Input
-          id="email"
-          type="email"
-          {...form.register("email")}
-          placeholder=""
-          className={inputClassName}
-        />
-        {form.formState.errors.email && (
-          <p className="mt-1 text-sm text-red-600">
-            {form.formState.errors.email.message}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="phone" className={labelClassName}>
-          Phone Number (Optional)
-        </Label>
-        <Input
-          id="phone"
-          type="tel"
-          {...form.register("phone")}
-          placeholder=""
-          className={inputClassName}
-        />
-      </div>
-
-      <div>
-        <div className="flex items-baseline justify-between">
-          <Label htmlFor="message" className={labelClassName}>
-            Message *
-          </Label>
-          <span className="text-xs text-gray-500">
-            {messageLength}/{messageMaxLength}
-          </span>
-        </div>
-        <Textarea
-          id="message"
-          {...form.register("message")}
-          placeholder=""
-          rows={5}
-          maxLength={messageMaxLength}
-          className={`resize-y ${inputClassName} min-h-[120px]`}
-        />
-        {form.formState.errors.message && (
-          <p className="mt-1 text-sm text-red-600">
-            {form.formState.errors.message.message}
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label className={labelClassName}>Preferred Contact Method</Label>
-        <p className="text-sm text-gray-600">
-          Choose how you&apos;d like to be contacted.
-        </p>
-        <RadioGroup
-          value={form.watch("preferredContactMethod")}
-          onValueChange={(value) =>
-            form.setValue("preferredContactMethod", value as "email" | "phone" | "no-preference")
-          }
-          className="flex flex-col gap-3 pt-1"
-        >
-          <label className="flex cursor-pointer items-center gap-3">
-            <RadioGroupItem value="email" id="pref-email" />
-            <span className="text-sm text-gray-900">Email</span>
-          </label>
-          <label className="flex cursor-pointer items-center gap-3">
-            <RadioGroupItem value="phone" id="pref-phone" />
-            <span className="text-sm text-gray-900">Phone</span>
-          </label>
-          <label className="flex cursor-pointer items-center gap-3">
-            <RadioGroupItem value="no-preference" id="pref-none" />
-            <span className="text-sm text-gray-900">No Preference</span>
-          </label>
-        </RadioGroup>
-      </div>
-
-      {/* hCaptcha */}
-      <HCaptchaField
-        ref={captchaRef}
-        onVerify={setCaptchaToken}
-        onExpire={() => setCaptchaToken("")}
-        onError={() => setCaptchaToken("")}
-        label="Verification"
-        required
-      />
-
-      <Button
-        type="submit"
-        disabled={isSubmitting || !captchaToken}
-        className="rounded-md bg-[#215935] px-6 py-2.5 font-semibold text-white hover:bg-[#1a4729]"
+    <Form {...form}>
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6"
       >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Sending...
-          </>
-        ) : (
-          "Submit"
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
+            {formTitle}
+          </h2>
+          <p className="mt-1 text-sm text-gray-600">{formDescription}</p>
+        </div>
+
+        {error && (
+          <Alert
+            variant="destructive"
+            className="border-red-500/50 bg-red-500/10"
+          >
+            <AlertDescription className="text-red-700">
+              {error}
+            </AlertDescription>
+          </Alert>
         )}
-      </Button>
-    </form>
+
+        <InputFormField
+          form={form}
+          name="name"
+          label="First Name *"
+          labelClassName={labelClassName}
+          inputClassName={inputClassName}
+          placeholder="e.g. John"
+          required
+        />
+
+        <InputFormField
+          form={form}
+          name="email"
+          label="Email Address *"
+          labelClassName={labelClassName}
+          inputClassName={inputClassName}
+          type="email"
+          placeholder="e.g. john@example.com"
+          required
+        />
+
+        <InputFormField
+          form={form}
+          name="phone"
+          label="Phone Number (Optional)"
+          labelClassName={labelClassName}
+          inputClassName={inputClassName}
+          type="tel"
+          placeholder="e.g. +1 234 567 8900"
+        />
+
+        <TextareaFormField
+          form={form}
+          name="message"
+          label="Message *"
+          messageLength={messageLength}
+          labelClassName={labelClassName}
+          textareaClassName={`resize-y ${inputClassName} min-h-[120px]`}
+          maxLength={messageMaxLength}
+          placeholder="e.g. I have a question about your product."
+          required
+        />
+
+        <RadioFormField
+          form={form}
+          name="preferredContactMethod"
+          label="Preferred Contact Method"
+          labelClassName={labelClassName}
+          radioGroupClassName="flex flex-col gap-3 pt-1"
+          options={[
+            {
+              label: "Email",
+              value: "email",
+              className: "text-sm text-gray-900",
+            },
+            {
+              label: "Phone",
+              value: "phone",
+              className: "text-sm text-gray-900",
+            },
+            {
+              label: "No Preference",
+              value: "no-preference",
+              className: "text-sm text-gray-900",
+            },
+          ]}
+        />
+
+        {/* hCaptcha */}
+        <HCaptchaField
+          ref={captchaRef}
+          onVerify={setCaptchaToken}
+          onExpire={() => setCaptchaToken("")}
+          onError={() => setCaptchaToken("")}
+          label="Verification"
+          required
+        />
+
+        <Button
+          type="submit"
+          disabled={isSubmitting || !captchaToken}
+          className="rounded-md bg-[#215935] px-6 py-2.5 font-semibold text-white hover:bg-[#1a4729]"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            "Submit"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }

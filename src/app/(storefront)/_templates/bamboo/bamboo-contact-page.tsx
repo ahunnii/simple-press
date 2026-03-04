@@ -76,7 +76,7 @@ export function BambooContactPage({
         <FadeIn direction="up">
           <div className="flex w-full flex-col gap-12 lg:flex-row">
             {/* Form */}
-            <BambooContactForm businessName={business.name} />
+            <BambooContactForm />
 
             {/* Contact Info Sidebar */}
             <div className="w-full shrink-0 lg:w-80">

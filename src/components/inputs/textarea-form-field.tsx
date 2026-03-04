@@ -20,11 +20,16 @@ type Props<CurrentForm extends FieldValues> = {
   disabled?: boolean;
   placeholder?: string;
   defaultValue?: string;
-
+  maxLength?: number;
   textareaRef?: React.RefObject<HTMLTextAreaElement | null>;
   onFocus?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   rows?: number;
+  labelClassName?: string;
+  required?: boolean;
+  messageLength?: number;
+
+  textareaClassName?: string;
 };
 
 export const TextareaFormField = <CurrentForm extends FieldValues>({
@@ -39,7 +44,13 @@ export const TextareaFormField = <CurrentForm extends FieldValues>({
   textareaRef,
   onFocus,
   onBlur,
+  labelClassName,
+  maxLength,
+  required,
   rows = 4,
+  messageLength,
+
+  textareaClassName,
 }: Props<CurrentForm>) => {
   return (
     <FormField
@@ -47,12 +58,18 @@ export const TextareaFormField = <CurrentForm extends FieldValues>({
       name={name}
       render={({ field }) => (
         <FormItem className={cn("col-span-full", className)}>
-          <FormLabel>{label}</FormLabel>
-
+          <FormLabel className={cn(labelClassName)}>{label}</FormLabel>
+          {maxLength && (
+            <span className="text-xs text-gray-500">
+              {messageLength ?? 0}/{maxLength ?? 0}
+            </span>
+          )}
           <FormControl>
             <div className="space-y-2">
               <Textarea
                 disabled={disabled}
+                className={textareaClassName}
+                maxLength={maxLength}
                 placeholder={placeholder ?? ""}
                 defaultValue={defaultValue}
                 {...field}
@@ -70,6 +87,7 @@ export const TextareaFormField = <CurrentForm extends FieldValues>({
                 }}
                 onFocus={onFocus}
                 rows={rows}
+                required={required}
               />
             </div>
           </FormControl>

@@ -1,75 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
+import { useContactForm } from "~/hooks/use-contact-form";
+import { useDirtyForm } from "~/hooks/use-dirty-form";
+import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
+import { Form } from "~/components/ui/form";
+import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
-const contactSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().optional(),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-});
+export function BambooContactForm() {
+  const {
+    form,
+    messageLength,
+    messageMaxLength,
+    isSubmitting,
+    error,
+    captchaToken,
+    setCaptchaToken,
+    captchaRef,
+    onSubmit,
+    formRef,
+    isDirty,
+    isSuccess,
+    resetSuccess,
+  } = useContactForm({ messageMaxLength: 180 });
 
-type ContactFormValues = z.infer<typeof contactSchema>;
-
-type Props = {
-  businessName: string;
-};
-
-export function BambooContactForm({ businessName: _businessName }: Props) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(contactSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      message: "",
-    },
-  });
-
-  const onSubmit = async (data: ContactFormValues) => {
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      const result = (await response.json()) as { error?: string };
-
-      if (!response.ok) {
-        throw new Error(result.error ?? "Failed to send message");
-      }
-
-      setIsSuccess(true);
-      form.reset();
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  useKeyboardEnter(form, onSubmit);
+  useDirtyForm(isDirty);
 
   if (isSuccess) {
     return (
@@ -85,11 +47,7 @@ export function BambooContactForm({ businessName: _businessName }: Props) {
             Thank you for reaching out. We will get back to you within 1-2
             business days.
           </p>
-          <Button
-            variant="outline"
-            onClick={() => setIsSuccess(false)}
-            className="mt-2"
-          >
+          <Button variant="outline" onClick={resetSuccess} className="mt-2">
             Send Another Message
           </Button>
         </CardContent>
@@ -98,77 +56,84 @@ export function BambooContactForm({ businessName: _businessName }: Props) {
   }
 
   return (
-    <form
-      onSubmit={form.handleSubmit(onSubmit)}
-      className="flex w-full flex-col gap-5"
-    >
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+    <Form {...form}>
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex w-full flex-col gap-5"
+      >
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" placeholder="Your name" {...form.register("name")} />
-          {form.formState.errors.name && (
-            <p className="text-destructive text-xs">
-              {form.formState.errors.name.message}
-            </p>
-          )}
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            {...form.register("email")}
+        <div className="grid gap-5 sm:grid-cols-2">
+          <InputFormField
+            form={form}
+            name="name"
+            label="First Name *"
+            className="col-span-1 flex flex-col gap-1.5"
+            placeholder="Jane"
+            required
           />
-          {form.formState.errors.email && (
-            <p className="text-destructive text-xs">
-              {form.formState.errors.email.message}
-            </p>
-          )}
+
+          <InputFormField
+            form={form}
+            name="email"
+            label="Email *"
+            className="col-span-1 flex flex-col gap-1.5"
+            type="email"
+            placeholder="jane@example.com"
+            required
+          />
         </div>
-      </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="phone">Phone</Label>
-        <Input
-          id="phone"
+        <InputFormField
+          form={form}
+          name="phone"
+          label="Phone Number (Optional)"
+          className="flex flex-col gap-1.5"
           type="tel"
-          placeholder="Optional"
-          {...form.register("phone")}
+          placeholder="+1 300 555 0000"
         />
-      </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="message">Message</Label>
-        <Textarea
-          id="message"
-          placeholder="How can we help?"
-          rows={6}
-          {...form.register("message")}
+        <TextareaFormField
+          form={form}
+          name="message"
+          label="Message *"
+          messageLength={messageLength}
+          className="flex flex-col gap-1.5"
+          maxLength={messageMaxLength}
+          placeholder="Tell us how we can help..."
+          required
         />
-        {form.formState.errors.message && (
-          <p className="text-destructive text-xs">
-            {form.formState.errors.message.message}
-          </p>
-        )}
-      </div>
 
-      <Button type="submit" size="lg" disabled={isSubmitting}>
-        {isSubmitting ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Sending...
-          </>
-        ) : (
-          "Send Message"
-        )}
-      </Button>
-    </form>
+        {/* hCaptcha */}
+        <HCaptchaField
+          ref={captchaRef}
+          onVerify={setCaptchaToken}
+          onExpire={() => setCaptchaToken("")}
+          onError={() => setCaptchaToken("")}
+          label="Verification"
+          required
+        />
+
+        <Button
+          type="submit"
+          size="lg"
+          disabled={isSubmitting || !captchaToken}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            "Send Message"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }
