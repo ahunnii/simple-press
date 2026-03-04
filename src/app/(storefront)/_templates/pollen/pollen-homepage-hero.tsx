@@ -39,7 +39,7 @@ export function PollenHero({
   imageUrl,
 }: Props) {
   return (
-    <section className="relative flex h-svh min-h-[70vh] items-center justify-center overflow-hidden py-32 md:min-h-[80vh] md:py-40">
+    <section className="relative flex h-svh min-h-[70vh] items-center justify-center overflow-hidden py-20 sm:py-28 md:min-h-[80vh] md:py-40">
       {/* Background image */}
       <Image
         src={imageUrl}
@@ -54,7 +54,7 @@ export function PollenHero({
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
         <motion.div
-          className="flex flex-col items-center gap-6"
+          className="flex flex-col items-center gap-5 sm:gap-6"
           variants={stagger}
           initial="initial"
           animate="animate"
@@ -62,7 +62,7 @@ export function PollenHero({
           <motion.p
             variants={fadeUp}
             transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-base font-medium tracking-[0.2em] text-white uppercase"
+            className="text-xs font-medium tracking-[0.2em] text-white uppercase sm:text-sm md:text-base"
           >
             {title}
           </motion.p>
@@ -70,7 +70,7 @@ export function PollenHero({
           <motion.h1
             variants={fadeUp}
             transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-9xl leading-tight font-bold text-balance text-white md:text-5xl lg:text-6xl"
+            className="text-3xl leading-tight font-bold text-balance text-white sm:text-5xl md:text-6xl lg:text-7xl xl:text-9xl"
           >
             {subtitle}
           </motion.h1>
@@ -78,7 +78,7 @@ export function PollenHero({
           <motion.p
             variants={fadeUp}
             transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="max-w-2xl text-xl leading-relaxed text-white/90 md:text-xl"
+            className="max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg md:text-xl"
           >
             {descriptionText}
           </motion.p>
@@ -92,7 +92,7 @@ export function PollenHero({
               className={buttonVariants({
                 size: "lg",
                 className:
-                  "gap-2 bg-[#5e8b4a]! px-8 py-6 text-lg! font-medium text-white hover:bg-[#5e8b4a]/90!",
+                  "gap-2 bg-[#5e8b4a]! px-6 py-4 text-base font-medium text-white hover:bg-[#5e8b4a]/90! sm:px-8 sm:py-6 sm:text-lg!",
               })}
             >
               {buttonText}
