@@ -15,7 +15,7 @@ export function DefaultContactPage({
             and we&apos;ll respond as soon as possible.
           </p>
 
-          <DefaultContactForm businessName={business.name} />
+          <DefaultContactForm />
         </div>
       </div>
     </div>

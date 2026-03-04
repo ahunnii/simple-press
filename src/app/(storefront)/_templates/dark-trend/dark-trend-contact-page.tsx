@@ -78,7 +78,7 @@ export function DarkTrendContactPage({
               </p>
             </div>
 
-            <DarkTrendContactForm businessName={business.name} />
+            <DarkTrendContactForm />
           </div>
         </div>
       </section>
