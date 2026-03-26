@@ -33,6 +33,9 @@ export const env = createEnv({
     VPS_IP: z.string(),
 
     HCAPTCHA_SECRET_KEY: z.string(),
+
+    SIMPLEPRESS_HASH_SECRET: z.string(),
+    ARTISANAL_FUTURES_API_URL: z.string().url(),
   },
 
   /**
@@ -94,6 +97,9 @@ export const env = createEnv({
     VPS_IP: process.env.VPS_IP,
     NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
     HCAPTCHA_SECRET_KEY: process.env.HCAPTCHA_SECRET_KEY,
+
+    SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,
+    ARTISANAL_FUTURES_API_URL: process.env.ARTISANAL_FUTURES_API_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
       ? `http://${subdomain}.localhost:3000`
       : `https://${subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
 
-    const redirectUrl = `${subdomainUrl}/auth/signup-complete}`;
+    const redirectUrl = `${subdomainUrl}/auth/signup-complete`;
 
     return NextResponse.json({
       success: true,

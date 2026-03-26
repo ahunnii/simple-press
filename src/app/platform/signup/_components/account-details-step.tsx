@@ -27,6 +27,7 @@ export function AccountDetailsStep({
   onNext,
   onBack,
 }: AccountDetailsStepProps) {
+  const artisanFlow = Boolean(formData.artisanFlow);
   const [email, setEmail] = useState(formData.email ?? "");
   const [password, setPassword] = useState(formData.password ?? "");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -103,6 +104,8 @@ export function AccountDetailsStep({
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
+              readOnly={artisanFlow}
+              className={artisanFlow ? "bg-muted" : undefined}
             />
           </div>
 

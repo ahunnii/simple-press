@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertCircle, ArrowLeft, Check, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, Loader2, X } from "lucide-react";
 
 import type { SignupFormData } from "./wizard-client";
 import { env } from "~/env";
+import { findFirstAvailableSubdomain } from "~/lib/subdomain";
 import { isSubdomainReserved, isValidDomain, slugify } from "~/lib/utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -28,30 +29,64 @@ export function BusinessInfoStep({
   onNext,
   onBack,
 }: BusinessInfoStepProps) {
+  const artisanFlow = Boolean(formData.artisanFlow);
   const [businessName, setBusinessName] = useState(formData.businessName ?? "");
   const [subdomain, setSubdomain] = useState(formData.subdomain ?? "");
   const [customDomain, setCustomDomain] = useState(formData.customDomain ?? "");
   const [error, setError] = useState<string | null>(null);
   const [subdomainStatus, setSubdomainStatus] = useState<
     "idle" | "checking" | "available" | "taken"
-  >("idle");
+  >(() => (artisanFlow ? "checking" : "idle"));
+  const [artisanSubdomainError, setArtisanSubdomainError] = useState<
+    string | null
+  >(null);
 
-  // Auto-generate subdomain from business name
+  // Auto-generate subdomain from business name (regular flow only)
   useEffect(() => {
+    if (artisanFlow) return;
     if (businessName && !subdomain) {
       const generated = slugify(businessName);
       setSubdomain(generated);
     }
-  }, [businessName, subdomain]);
+  }, [artisanFlow, businessName, subdomain]);
 
-  // Check subdomain availability
+  // Artisan: pick first available subdomain from locked business name
   useEffect(() => {
+    if (!artisanFlow || !formData.businessName) return;
+
+    let cancelled = false;
+    setSubdomainStatus("checking");
+    setArtisanSubdomainError(null);
+
+    void findFirstAvailableSubdomain(formData.businessName)
+      .then((resolved) => {
+        if (cancelled) return;
+        setSubdomain(resolved);
+        setSubdomainStatus("available");
+      })
+      .catch((err: unknown) => {
+        console.error(err);
+        if (cancelled) return;
+        setArtisanSubdomainError(
+          "Could not reserve a subdomain. Please try again or contact support.",
+        );
+        setSubdomainStatus("idle");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [artisanFlow, formData.businessName]);
+
+  // Check subdomain availability (regular flow only — artisan uses findFirstAvailableSubdomain)
+  useEffect(() => {
+    if (artisanFlow) return;
+
     if (!subdomain || subdomain.length < 3) {
       setSubdomainStatus("idle");
       return;
     }
 
-    // Check if reserved
     if (isSubdomainReserved(subdomain)) {
       setSubdomainStatus("taken");
       return;
@@ -62,7 +97,7 @@ export function BusinessInfoStep({
 
       try {
         const response = await fetch(
-          `/api/signup/check-subdomain?subdomain=${subdomain}`,
+          `/api/signup/check-subdomain?subdomain=${encodeURIComponent(subdomain)}`,
         );
         const data = (await response.json()) as { available: boolean };
 
@@ -75,13 +110,12 @@ export function BusinessInfoStep({
 
     const debounce = setTimeout(() => void checkAvailability(), 500);
     return () => clearTimeout(debounce);
-  }, [subdomain]);
+  }, [subdomain, artisanFlow]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    // Validation
     if (!businessName.trim()) {
       setError("Please enter your business name");
       return;
@@ -102,13 +136,15 @@ export function BusinessInfoStep({
       return;
     }
 
-    // Validation passed
     onNext({
       businessName,
       subdomain,
       customDomain: customDomain || undefined,
     });
   };
+
+  const continueDisabled =
+    artisanSubdomainError !== null || subdomainStatus !== "available";
 
   return (
     <Card>
@@ -124,6 +160,12 @@ export function BusinessInfoStep({
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          {artisanSubdomainError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{artisanSubdomainError}</AlertDescription>
             </Alert>
           )}
 
@@ -142,6 +184,8 @@ export function BusinessInfoStep({
               placeholder="My Awesome Store"
               required
               autoFocus
+              readOnly={artisanFlow}
+              className={artisanFlow ? "bg-muted" : undefined}
             />
           </div>
 
@@ -157,21 +201,31 @@ export function BusinessInfoStep({
                 id="subdomain"
                 type="text"
                 value={subdomain}
-                onChange={(e) => setSubdomain(slugify(e.target.value))}
+                onChange={(e) =>
+                  setSubdomain(artisanFlow ? subdomain : slugify(e.target.value))
+                }
                 placeholder="mystore"
                 required
-                className="flex-1"
+                readOnly={artisanFlow}
+                className={`flex-1${artisanFlow ? " bg-muted" : ""}`}
               />
               <span className="text-sm whitespace-nowrap text-gray-500">
                 .{env.NEXT_PUBLIC_PLATFORM_DOMAIN}
               </span>
             </div>
 
-            {/* Subdomain status indicator */}
-            {subdomain && subdomain.length >= 3 && (
+            {artisanFlow && subdomainStatus === "checking" && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Reserving your subdomain...
+              </div>
+            )}
+
+            {!artisanFlow && subdomain && subdomain.length >= 3 && (
               <div className="mt-2 flex items-center gap-2 text-sm">
                 {subdomainStatus === "checking" && (
-                  <span className="text-gray-500">
+                  <span className="flex items-center gap-2 text-gray-500">
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Checking availability...
                   </span>
                 )}
@@ -187,6 +241,13 @@ export function BusinessInfoStep({
                     <span className="text-red-600">Not available</span>
                   </>
                 )}
+              </div>
+            )}
+
+            {artisanFlow && subdomain && subdomainStatus === "available" && (
+              <div className="mt-2 flex items-center gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-600" />
+                <span className="text-green-600">Available!</span>
               </div>
             )}
 
@@ -227,7 +288,7 @@ export function BusinessInfoStep({
             <Button
               type="submit"
               className="flex-1"
-              disabled={subdomainStatus !== "available"}
+              disabled={continueDisabled}
             >
               Continue
             </Button>

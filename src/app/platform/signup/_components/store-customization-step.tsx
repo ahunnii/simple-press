@@ -5,6 +5,7 @@ import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 
 import type { SignupFormData } from "./wizard-client";
 import { authClient } from "~/server/better-auth/client";
+import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -26,6 +27,8 @@ export function StoreCustomizationStep({
   formData,
   onBack,
 }: StoreCustomizationStepProps) {
+  const updateArtisanToken = api.external.updateArtisanToken.useMutation();
+
   const [heroTitle, setHeroTitle] = useState(
     formData.heroTitle ?? `Welcome to ${formData.businessName ?? "Our Store"}`,
   );
@@ -57,20 +60,14 @@ export function StoreCustomizationStep({
         return;
       }
 
-      const { data: authUser, error } = await authClient.signUp.email({
+      const { error: signUpError } = await authClient.signUp.email({
         email: formData.email,
         password: formData.password,
         name: formData.name,
       });
 
-      console.log(authUser);
-
-      const { data: session } = await authClient.getSession();
-
-      console.log(session);
-
-      if (error) {
-        setError(error.message ?? "Failed to create account");
+      if (signUpError) {
+        setError(signUpError.message ?? "Failed to create account");
         return;
       }
 
@@ -83,6 +80,7 @@ export function StoreCustomizationStep({
       const data = (await response.json()) as {
         error?: string;
         redirectUrl?: string;
+        businessId?: string;
       };
 
       if (!response.ok) {
@@ -90,9 +88,23 @@ export function StoreCustomizationStep({
         return;
       }
 
-      // Success! Redirect to their new store
+      if (
+        formData.artisanFlow &&
+        formData.aftoken &&
+        data.businessId
+      ) {
+        try {
+          await updateArtisanToken.mutateAsync({
+            aftoken: formData.aftoken,
+            businessId: data.businessId,
+          });
+        } catch (err) {
+          console.error("Failed to update artisan token (non-blocking)", err);
+        }
+      }
+
       window.location.href = data.redirectUrl ?? "";
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);

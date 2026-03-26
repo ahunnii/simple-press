@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { AccountDetailsStep } from "./account-details-step";
 import { BusinessInfoStep } from "./business-info-step";
@@ -33,6 +33,10 @@ export type SignupFormData = {
   heroSubtitle?: string;
   aboutText?: string;
   primaryColor?: string;
+
+  /** Artisan Futures flow: skip invitation, lock email / business name */
+  artisanFlow?: boolean;
+  aftoken?: string;
 };
 
 const STEPS = [
@@ -43,23 +47,52 @@ const STEPS = [
   { id: 5, name: "Customize", component: StoreCustomizationStep },
 ] as const;
 
+const STEPS_ARTISAN = [
+  { id: 1, name: "Account", component: AccountDetailsStep },
+  { id: 2, name: "Business", component: BusinessInfoStep },
+  { id: 3, name: "Template", component: TemplateSelectionStep },
+  { id: 4, name: "Customize", component: StoreCustomizationStep },
+] as const;
+
 type WizardClientProps = {
   initialCode?: string;
+  /** When set, artisan token verified on server — skip invitation step */
+  artisanPrefill?: { email: string; businessName: string };
+  aftoken?: string;
 };
 
-export function WizardClient({ initialCode }: WizardClientProps) {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<Partial<SignupFormData>>({
-    templateId: "modern", // Default template
-    invitationCode: initialCode?.toUpperCase(),
-  });
+export function WizardClient({
+  initialCode,
+  artisanPrefill,
+  aftoken,
+}: WizardClientProps) {
+  const isArtisan = Boolean(artisanPrefill && aftoken);
 
-  const CurrentStepComponent = STEPS[currentStep - 1]?.component ?? null;
+  const steps = useMemo(
+    () => (isArtisan ? STEPS_ARTISAN : STEPS),
+    [isArtisan],
+  );
+
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<Partial<SignupFormData>>(() => ({
+    templateId: "modern",
+    invitationCode: isArtisan ? undefined : initialCode?.toUpperCase(),
+    ...(isArtisan && artisanPrefill && aftoken
+      ? {
+          email: artisanPrefill.email,
+          businessName: artisanPrefill.businessName,
+          artisanFlow: true,
+          aftoken,
+        }
+      : {}),
+  }));
+
+  const CurrentStepComponent = steps[currentStep - 1]?.component ?? null;
 
   const handleNext = (data: Partial<SignupFormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
 
-    if (currentStep < STEPS.length) {
+    if (currentStep < steps.length) {
       setCurrentStep((prev) => prev + 1);
     }
   };
@@ -72,21 +105,18 @@ export function WizardClient({ initialCode }: WizardClientProps) {
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
-      {/* Header */}
       <header className="border-b bg-white">
         <div className="container mx-auto px-4 py-4">
           <h1 className="text-xl font-bold">Create Your Store</h1>
         </div>
       </header>
 
-      {/* Progress Indicator */}
       <div className="border-b bg-white">
         <div className="container mx-auto px-4 py-6">
-          <SignupProgress currentStep={currentStep} steps={STEPS} />
+          <SignupProgress currentStep={currentStep} steps={steps} />
         </div>
       </div>
 
-      {/* Form Content */}
       <main className="container mx-auto flex-1 px-4 py-8">
         <div className="mx-auto max-w-2xl">
           {CurrentStepComponent ? (
