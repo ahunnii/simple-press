@@ -200,7 +200,11 @@ exports.Prisma.BusinessScalarFieldEnum = {
   umamiEnabled: 'umamiEnabled',
   status: 'status',
   onboardingComplete: 'onboardingComplete',
-  featureFlags: 'featureFlags'
+  featureFlags: 'featureFlags',
+  shippingType: 'shippingType',
+  shippingFlatRate: 'shippingFlatRate',
+  freeShippingThreshold: 'freeShippingThreshold',
+  offersInStorePickup: 'offersInStorePickup'
 };
 
 exports.Prisma.SiteContentScalarFieldEnum = {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
+import type { ShippingConfig } from "~/lib/shipping-utils";
 import { formatPrice } from "~/lib/prices";
 import { Button } from "~/components/ui/button";
 import {
@@ -15,9 +16,16 @@ import {
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
 
-export function HappyBambooCartDrawer() {
-  const { items, isOpen, setIsOpen, updateQuantity, removeItem, subtotal } =
-    useCart();
+import { CartSummary } from "./bamboo-cart-summary";
+
+type HappyBambooCartDrawerProps = {
+  shippingConfig: ShippingConfig;
+};
+
+export function HappyBambooCartDrawer({
+  shippingConfig,
+}: HappyBambooCartDrawerProps) {
+  const { items, isOpen, setIsOpen, updateQuantity, removeItem } = useCart();
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -43,7 +51,7 @@ export function HappyBambooCartDrawer() {
               <AnimatePresence mode="popLayout">
                 {items.map((item) => (
                   <motion.div
-                    key={item.productId}
+                    key={`${item.productId}-${item.variantId ?? "base"}`}
                     layout
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -61,7 +69,8 @@ export function HappyBambooCartDrawer() {
                     <div className="flex flex-1 flex-col">
                       <div className="flex items-start justify-between">
                         <h4 className="font-medium">
-                          {item.productName} - {item.variantName}
+                          {item.productName}
+                          {item.variantName ? ` - ${item.variantName}` : ""}
                         </h4>
                         <Button
                           variant="ghost"
@@ -114,26 +123,8 @@ export function HappyBambooCartDrawer() {
               </AnimatePresence>
             </div>
 
-            <div className="space-y-4 border-t px-4 pt-4 pb-4">
-              <div className="flex items-center justify-between text-lg font-semibold">
-                <span>Subtotal</span>
-                <span>${formatPrice(subtotal)}</span>
-              </div>
-              <Button
-                className="w-full"
-                size="lg"
-                onClick={() => setIsOpen(false)}
-                asChild
-              >
-                <Link href="/checkout">Proceed to Checkout</Link>
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => setIsOpen(false)}
-              >
-                Continue Shopping
-              </Button>
+            <div className="border-t px-4 pb-4">
+              <CartSummary shippingConfig={shippingConfig} />
             </div>
           </>
         )}

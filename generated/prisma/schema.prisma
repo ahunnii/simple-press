@@ -159,6 +159,12 @@ model Business {
   // Features
   featureFlags Json @default("{}") // Record<string, boolean>
 
+  // Shipping (storefront + Stripe)
+  shippingType          String  @default("free") // free | flat_rate | flat_rate_with_threshold
+  shippingFlatRate      Int? // cents; used by flat_rate and flat_rate_with_threshold
+  freeShippingThreshold Int? // cents; subtotal at which shipping becomes free
+  offersInStorePickup   Boolean @default(false)
+
   // Relationships
   products           Product[]
   collections        Collection[]

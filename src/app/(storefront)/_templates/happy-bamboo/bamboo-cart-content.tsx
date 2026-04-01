@@ -6,6 +6,8 @@ import { ShoppingBag } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
+import { DEFAULT_SHIPPING_CONFIG } from "~/lib/shipping-utils";
+
 import { CartItem } from "./bamboo-cart-item";
 import { CartSummary } from "./bamboo-cart-summary";
 import {
@@ -74,7 +76,7 @@ export function BambooCartContent() {
             className="w-full shrink-0 lg:w-80"
           >
             <div className="sticky top-20">
-              <CartSummary />
+              <CartSummary shippingConfig={DEFAULT_SHIPPING_CONFIG} />
             </div>
           </FadeIn>
         </div>

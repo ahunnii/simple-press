@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, Home, Shield, Wrench } from "lucide-react";
+import { FileText, Home, Package, Shield, Wrench } from "lucide-react";
 
 import {
   Card,
@@ -35,6 +35,30 @@ export function SettingsDashboard() {
             <CardContent>
               <p className="text-sm text-gray-600">
                 Edit general settings for your business
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Shipping */}
+        <Link href="/admin/settings/shipping">
+          <Card className="h-full cursor-pointer transition-all hover:border-emerald-500 hover:shadow-lg">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-emerald-100 p-3">
+                  <Package className="h-6 w-6 text-emerald-600" />
+                </div>
+                <div>
+                  <CardTitle>Shipping</CardTitle>
+                  <CardDescription>
+                    Rates, free-shipping thresholds, in-store pickup
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">
+                Configure how customers are charged for delivery
               </p>
             </CardContent>
           </Card>

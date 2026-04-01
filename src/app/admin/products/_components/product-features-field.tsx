@@ -1,12 +1,13 @@
 "use client";
 
+import type { UseFormReturn } from "react-hook-form";
 import { Plus, Trash2 } from "lucide-react";
-import { useFieldArray, type UseFormReturn } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
 
 import type { ProductFormSchema } from "~/lib/validators/product";
 import {
-  TEMPLATE_LUCIDE_ICON_NAMES,
   getLucideTemplateIcon,
+  TEMPLATE_LUCIDE_ICON_NAMES,
 } from "~/lib/lucide-template-icons";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
@@ -107,10 +108,7 @@ export function ProductFeaturesField({ form, className }: Props) {
               <FormItem className="min-w-0 flex-[2] space-y-2">
                 <FormLabel className="text-xs text-gray-600">Label</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="e.g. Septic Safe"
-                    {...textField}
-                  />
+                  <Input placeholder="e.g. Septic Safe" {...textField} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -136,7 +134,7 @@ export function ProductFeaturesField({ form, className }: Props) {
         size="sm"
         onClick={() =>
           append({
-            icon: TEMPLATE_LUCIDE_ICON_NAMES[0]!,
+            icon: TEMPLATE_LUCIDE_ICON_NAMES[0],
             text: "",
           })
         }

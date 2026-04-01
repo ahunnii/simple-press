@@ -22,6 +22,8 @@ import {
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
 
+import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
+
 import { MobileNav } from "./bamboo-mobile-nav";
 import { FadeIn } from "./happy-bamboo-animations";
 import { HappyBambooCartDrawer } from "./happy-bamboo-cart-drawer";
@@ -180,7 +182,9 @@ export function HappyBambooHeader({ business }: DefaultHeaderTemplateProps) {
           </div>
         </div>
       </header>
-      <HappyBambooCartDrawer />
+      <HappyBambooCartDrawer
+        shippingConfig={shippingConfigFromBusiness(business)}
+      />
     </>
   );
 }

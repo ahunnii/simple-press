@@ -9610,8 +9610,20 @@ export namespace Prisma {
 
   export type AggregateBusiness = {
     _count: BusinessCountAggregateOutputType | null
+    _avg: BusinessAvgAggregateOutputType | null
+    _sum: BusinessSumAggregateOutputType | null
     _min: BusinessMinAggregateOutputType | null
     _max: BusinessMaxAggregateOutputType | null
+  }
+
+  export type BusinessAvgAggregateOutputType = {
+    shippingFlatRate: number | null
+    freeShippingThreshold: number | null
+  }
+
+  export type BusinessSumAggregateOutputType = {
+    shippingFlatRate: number | null
+    freeShippingThreshold: number | null
   }
 
   export type BusinessMinAggregateOutputType = {
@@ -9634,6 +9646,10 @@ export namespace Prisma {
     umamiEnabled: boolean | null
     status: string | null
     onboardingComplete: boolean | null
+    shippingType: string | null
+    shippingFlatRate: number | null
+    freeShippingThreshold: number | null
+    offersInStorePickup: boolean | null
   }
 
   export type BusinessMaxAggregateOutputType = {
@@ -9656,6 +9672,10 @@ export namespace Prisma {
     umamiEnabled: boolean | null
     status: string | null
     onboardingComplete: boolean | null
+    shippingType: string | null
+    shippingFlatRate: number | null
+    freeShippingThreshold: number | null
+    offersInStorePickup: boolean | null
   }
 
   export type BusinessCountAggregateOutputType = {
@@ -9679,9 +9699,23 @@ export namespace Prisma {
     status: number
     onboardingComplete: number
     featureFlags: number
+    shippingType: number
+    shippingFlatRate: number
+    freeShippingThreshold: number
+    offersInStorePickup: number
     _all: number
   }
 
+
+  export type BusinessAvgAggregateInputType = {
+    shippingFlatRate?: true
+    freeShippingThreshold?: true
+  }
+
+  export type BusinessSumAggregateInputType = {
+    shippingFlatRate?: true
+    freeShippingThreshold?: true
+  }
 
   export type BusinessMinAggregateInputType = {
     id?: true
@@ -9703,6 +9737,10 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    shippingType?: true
+    shippingFlatRate?: true
+    freeShippingThreshold?: true
+    offersInStorePickup?: true
   }
 
   export type BusinessMaxAggregateInputType = {
@@ -9725,6 +9763,10 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    shippingType?: true
+    shippingFlatRate?: true
+    freeShippingThreshold?: true
+    offersInStorePickup?: true
   }
 
   export type BusinessCountAggregateInputType = {
@@ -9748,6 +9790,10 @@ export namespace Prisma {
     status?: true
     onboardingComplete?: true
     featureFlags?: true
+    shippingType?: true
+    shippingFlatRate?: true
+    freeShippingThreshold?: true
+    offersInStorePickup?: true
     _all?: true
   }
 
@@ -9789,6 +9835,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: BusinessAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BusinessSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: BusinessMinAggregateInputType
@@ -9819,6 +9877,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: BusinessCountAggregateInputType | true
+    _avg?: BusinessAvgAggregateInputType
+    _sum?: BusinessSumAggregateInputType
     _min?: BusinessMinAggregateInputType
     _max?: BusinessMaxAggregateInputType
   }
@@ -9844,7 +9904,13 @@ export namespace Prisma {
     status: string
     onboardingComplete: boolean
     featureFlags: JsonValue
+    shippingType: string
+    shippingFlatRate: number | null
+    freeShippingThreshold: number | null
+    offersInStorePickup: boolean
     _count: BusinessCountAggregateOutputType | null
+    _avg: BusinessAvgAggregateOutputType | null
+    _sum: BusinessSumAggregateOutputType | null
     _min: BusinessMinAggregateOutputType | null
     _max: BusinessMaxAggregateOutputType | null
   }
@@ -9884,6 +9950,10 @@ export namespace Prisma {
     status?: boolean
     onboardingComplete?: boolean
     featureFlags?: boolean
+    shippingType?: boolean
+    shippingFlatRate?: boolean
+    freeShippingThreshold?: boolean
+    offersInStorePickup?: boolean
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
     orders?: boolean | Business$ordersArgs<ExtArgs>
@@ -9923,6 +9993,10 @@ export namespace Prisma {
     status?: boolean
     onboardingComplete?: boolean
     featureFlags?: boolean
+    shippingType?: boolean
+    shippingFlatRate?: boolean
+    freeShippingThreshold?: boolean
+    offersInStorePickup?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -9946,6 +10020,10 @@ export namespace Prisma {
     status?: boolean
     onboardingComplete?: boolean
     featureFlags?: boolean
+    shippingType?: boolean
+    shippingFlatRate?: boolean
+    freeShippingThreshold?: boolean
+    offersInStorePickup?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectScalar = {
@@ -9969,9 +10047,13 @@ export namespace Prisma {
     status?: boolean
     onboardingComplete?: boolean
     featureFlags?: boolean
+    shippingType?: boolean
+    shippingFlatRate?: boolean
+    freeShippingThreshold?: boolean
+    offersInStorePickup?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "taxId" | "stripeAccountId" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "taxId" | "stripeAccountId" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -10033,6 +10115,10 @@ export namespace Prisma {
       status: string
       onboardingComplete: boolean
       featureFlags: Prisma.JsonValue
+      shippingType: string
+      shippingFlatRate: number | null
+      freeShippingThreshold: number | null
+      offersInStorePickup: boolean
     }, ExtArgs["result"]["business"]>
     composites: {}
   }
@@ -10491,6 +10577,10 @@ export namespace Prisma {
     readonly status: FieldRef<"Business", 'String'>
     readonly onboardingComplete: FieldRef<"Business", 'Boolean'>
     readonly featureFlags: FieldRef<"Business", 'Json'>
+    readonly shippingType: FieldRef<"Business", 'String'>
+    readonly shippingFlatRate: FieldRef<"Business", 'Int'>
+    readonly freeShippingThreshold: FieldRef<"Business", 'Int'>
+    readonly offersInStorePickup: FieldRef<"Business", 'Boolean'>
   }
     
 
@@ -38783,7 +38873,11 @@ export namespace Prisma {
     umamiEnabled: 'umamiEnabled',
     status: 'status',
     onboardingComplete: 'onboardingComplete',
-    featureFlags: 'featureFlags'
+    featureFlags: 'featureFlags',
+    shippingType: 'shippingType',
+    shippingFlatRate: 'shippingFlatRate',
+    freeShippingThreshold: 'freeShippingThreshold',
+    offersInStorePickup: 'offersInStorePickup'
   };
 
   export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
@@ -39367,20 +39461,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float[]'
-   */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
-
-  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -39391,6 +39471,20 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
   /**
    * Deep Input Types
@@ -39807,6 +39901,10 @@ export namespace Prisma {
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
     featureFlags?: JsonFilter<"Business">
+    shippingType?: StringFilter<"Business"> | string
+    shippingFlatRate?: IntNullableFilter<"Business"> | number | null
+    freeShippingThreshold?: IntNullableFilter<"Business"> | number | null
+    offersInStorePickup?: BoolFilter<"Business"> | boolean
     products?: ProductListRelationFilter
     collections?: CollectionListRelationFilter
     orders?: OrderListRelationFilter
@@ -39845,6 +39943,10 @@ export namespace Prisma {
     status?: SortOrder
     onboardingComplete?: SortOrder
     featureFlags?: SortOrder
+    shippingType?: SortOrder
+    shippingFlatRate?: SortOrderInput | SortOrder
+    freeShippingThreshold?: SortOrderInput | SortOrder
+    offersInStorePickup?: SortOrder
     products?: ProductOrderByRelationAggregateInput
     collections?: CollectionOrderByRelationAggregateInput
     orders?: OrderOrderByRelationAggregateInput
@@ -39886,6 +39988,10 @@ export namespace Prisma {
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
     featureFlags?: JsonFilter<"Business">
+    shippingType?: StringFilter<"Business"> | string
+    shippingFlatRate?: IntNullableFilter<"Business"> | number | null
+    freeShippingThreshold?: IntNullableFilter<"Business"> | number | null
+    offersInStorePickup?: BoolFilter<"Business"> | boolean
     products?: ProductListRelationFilter
     collections?: CollectionListRelationFilter
     orders?: OrderListRelationFilter
@@ -39924,9 +40030,15 @@ export namespace Prisma {
     status?: SortOrder
     onboardingComplete?: SortOrder
     featureFlags?: SortOrder
+    shippingType?: SortOrder
+    shippingFlatRate?: SortOrderInput | SortOrder
+    freeShippingThreshold?: SortOrderInput | SortOrder
+    offersInStorePickup?: SortOrder
     _count?: BusinessCountOrderByAggregateInput
+    _avg?: BusinessAvgOrderByAggregateInput
     _max?: BusinessMaxOrderByAggregateInput
     _min?: BusinessMinOrderByAggregateInput
+    _sum?: BusinessSumOrderByAggregateInput
   }
 
   export type BusinessScalarWhereWithAggregatesInput = {
@@ -39953,6 +40065,10 @@ export namespace Prisma {
     status?: StringWithAggregatesFilter<"Business"> | string
     onboardingComplete?: BoolWithAggregatesFilter<"Business"> | boolean
     featureFlags?: JsonWithAggregatesFilter<"Business">
+    shippingType?: StringWithAggregatesFilter<"Business"> | string
+    shippingFlatRate?: IntNullableWithAggregatesFilter<"Business"> | number | null
+    freeShippingThreshold?: IntNullableWithAggregatesFilter<"Business"> | number | null
+    offersInStorePickup?: BoolWithAggregatesFilter<"Business"> | boolean
   }
 
   export type SiteContentWhereInput = {
@@ -42729,6 +42845,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -42767,6 +42887,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -42805,6 +42929,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -42843,6 +42971,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -42881,6 +43013,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
   }
 
   export type BusinessUpdateManyMutationInput = {
@@ -42904,6 +43040,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type BusinessUncheckedUpdateManyInput = {
@@ -42927,6 +43067,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SiteContentCreateInput = {
@@ -45994,6 +46138,17 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type ProductListRelationFilter = {
     every?: ProductWhereInput
     some?: ProductWhereInput
@@ -46120,6 +46275,15 @@ export namespace Prisma {
     status?: SortOrder
     onboardingComplete?: SortOrder
     featureFlags?: SortOrder
+    shippingType?: SortOrder
+    shippingFlatRate?: SortOrder
+    freeShippingThreshold?: SortOrder
+    offersInStorePickup?: SortOrder
+  }
+
+  export type BusinessAvgOrderByAggregateInput = {
+    shippingFlatRate?: SortOrder
+    freeShippingThreshold?: SortOrder
   }
 
   export type BusinessMaxOrderByAggregateInput = {
@@ -46142,6 +46306,10 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    shippingType?: SortOrder
+    shippingFlatRate?: SortOrder
+    freeShippingThreshold?: SortOrder
+    offersInStorePickup?: SortOrder
   }
 
   export type BusinessMinOrderByAggregateInput = {
@@ -46164,6 +46332,15 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    shippingType?: SortOrder
+    shippingFlatRate?: SortOrder
+    freeShippingThreshold?: SortOrder
+    offersInStorePickup?: SortOrder
+  }
+
+  export type BusinessSumOrderByAggregateInput = {
+    shippingFlatRate?: SortOrder
+    freeShippingThreshold?: SortOrder
   }
 
   export type EnumBusinessDomainStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -46200,6 +46377,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedJsonFilter<$PrismaModel>
     _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -46717,17 +46910,6 @@ export namespace Prisma {
     sortOrder?: SortOrder
   }
 
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type ProductNullableScalarRelationFilter = {
     is?: ProductWhereInput | null
     isNot?: ProductWhereInput | null
@@ -46784,22 +46966,6 @@ export namespace Prisma {
     width?: SortOrder
     height?: SortOrder
     sortOrder?: SortOrder
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type UserNullableScalarRelationFilter = {
@@ -48384,6 +48550,14 @@ export namespace Prisma {
     set?: $Enums.BusinessDomainStatus
   }
 
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type ProductUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -49292,14 +49466,6 @@ export namespace Prisma {
     create?: XOR<BusinessCreateWithoutImagesInput, BusinessUncheckedCreateWithoutImagesInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutImagesInput
     connect?: BusinessWhereUniqueInput
-  }
-
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type ProductUpdateOneWithoutImagesNestedInput = {
@@ -50514,6 +50680,33 @@ export namespace Prisma {
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
   export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -50547,17 +50740,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -50606,22 +50788,6 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type SessionCreateWithoutUserInput = {
@@ -51103,6 +51269,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -51140,6 +51310,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -51236,6 +51410,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -51273,6 +51451,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -52660,6 +52842,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -52697,6 +52883,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -52750,6 +52940,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -52787,6 +52981,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -52824,6 +53022,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
@@ -52861,6 +53063,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
@@ -53140,6 +53346,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
@@ -53177,6 +53387,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
@@ -53633,6 +53847,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
@@ -53670,6 +53888,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
@@ -53745,6 +53967,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
@@ -53782,6 +54008,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
@@ -54130,6 +54360,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -54167,6 +54401,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -54297,6 +54535,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -54334,6 +54576,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -54408,6 +54654,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -54445,6 +54695,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -54799,6 +55053,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -54836,6 +55094,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -55158,6 +55420,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
@@ -55195,6 +55461,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
@@ -55501,6 +55771,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
@@ -55538,6 +55812,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
@@ -56140,6 +56418,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -56177,6 +56459,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -56306,6 +56592,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -56343,6 +56633,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -56504,6 +56798,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -56541,6 +56839,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -56822,6 +57124,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -56859,6 +57165,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -57016,6 +57326,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -57053,6 +57367,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -57106,6 +57424,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -57143,6 +57465,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -57180,6 +57506,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -57217,6 +57547,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -57270,6 +57604,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -57307,6 +57645,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -57344,6 +57686,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -57381,6 +57727,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -57466,6 +57816,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -57503,6 +57857,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -57651,6 +58009,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -57688,6 +58050,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -57784,6 +58150,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -57821,6 +58191,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -57907,6 +58281,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -57944,6 +58322,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -58040,6 +58422,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -58077,6 +58463,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -58717,6 +59107,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -58754,6 +59148,10 @@ export namespace Prisma {
     status?: string
     onboardingComplete?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -58844,6 +59242,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -58881,6 +59283,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput

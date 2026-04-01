@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { env } from "~/env";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { calculateShipping, shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
 
@@ -29,36 +30,38 @@ async function createStripeCoupon(
 
 export async function POST(req: NextRequest) {
   try {
-    const { items, customerInfo, discountCodeId, discountAmount } =
-      (await req.json()) as {
-        items: {
-          productId: string;
-          variantId: string | null;
-          productName: string;
-          variantName: string | null;
-          price: number;
-          quantity: number;
-          imageUrl: string | null;
-          sku?: string;
-        }[];
-        customerInfo: {
-          email: string;
-          name: string;
-          /** Contact phone; prefills Stripe Checkout when `phone_number_collection` is enabled. */
+    const body = (await req.json()) as {
+      items: {
+        productId: string;
+        variantId: string | null;
+        productName: string;
+        variantName: string | null;
+        price: number;
+        quantity: number;
+        imageUrl: string | null;
+        sku?: string;
+      }[];
+      customerInfo: {
+        email: string;
+        name: string;
+        /** Contact phone; prefills Stripe Checkout when `phone_number_collection` is enabled. */
+        phone?: string | null;
+        shippingAddress?: {
+          line1: string;
+          line2?: string | null;
+          city: string;
+          state: string;
+          postalCode: string;
+          country: string;
           phone?: string | null;
-          shippingAddress?: {
-            line1: string;
-            line2?: string | null;
-            city: string;
-            state: string;
-            postalCode: string;
-            country: string;
-            phone?: string | null;
-          } | null;
-        };
-        discountCodeId: string;
-        discountAmount: number;
+        } | null;
       };
+      discountCodeId?: string | null;
+      discountAmount?: number;
+      deliveryMethod?: "ship" | "pickup";
+    };
+
+    const { items, customerInfo, discountCodeId, discountAmount } = body;
 
     if (!items || !customerInfo) {
       return NextResponse.json(
@@ -196,6 +199,60 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const deliveryMethod =
+      body.deliveryMethod === "pickup" ? "pickup" : "ship";
+
+    if (deliveryMethod === "pickup" && !business.offersInStorePickup) {
+      return NextResponse.json(
+        { error: "In-store pickup is not available for this store" },
+        { status: 400 },
+      );
+    }
+
+    if (deliveryMethod === "ship") {
+      const saPre = customerInfo.shippingAddress;
+      if (
+        !saPre ||
+        typeof saPre.line1 !== "string" ||
+        !saPre.line1.trim() ||
+        typeof saPre.city !== "string" ||
+        !saPre.city.trim() ||
+        typeof saPre.state !== "string" ||
+        !saPre.state.trim() ||
+        typeof saPre.postalCode !== "string" ||
+        !saPre.postalCode.trim() ||
+        (saPre.country !== "US" && saPre.country !== "CA")
+      ) {
+        return NextResponse.json(
+          { error: "Complete shipping address is required" },
+          { status: 400 },
+        );
+      }
+    }
+
+    const subtotalCents = itemList.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+
+    const shippingConfig = shippingConfigFromBusiness({
+      shippingType: business.shippingType,
+      shippingFlatRate: business.shippingFlatRate,
+      freeShippingThreshold: business.freeShippingThreshold,
+      offersInStorePickup: business.offersInStorePickup,
+    });
+
+    let shippingCents = 0;
+    let shippingDisplayName = "Shipping";
+    if (deliveryMethod === "pickup") {
+      shippingCents = 0;
+      shippingDisplayName = "In-Store Pickup";
+    } else {
+      shippingCents = calculateShipping(subtotalCents, shippingConfig);
+      shippingDisplayName =
+        shippingCents === 0 ? "Free shipping" : "Standard shipping";
+    }
+
     // Initialize Stripe with platform account
 
     // Create line items for Stripe (metadata so webhook can store product/variant and deduct inventory)
@@ -232,6 +289,7 @@ export async function POST(req: NextRequest) {
     const contactPhone =
       (customerInfo.phone ?? sa?.phone)?.trim() ?? "";
     const hasFullShipping =
+      deliveryMethod === "ship" &&
       !!sa &&
       typeof sa.line1 === "string" &&
       sa.line1.trim().length > 0 &&
@@ -277,10 +335,9 @@ export async function POST(req: NextRequest) {
       stripeCustomerId = customer.id;
     }
 
-    // Always collect shipping on Stripe (visible + editable). Prefill comes from the
-    // Stripe Customer’s shipping when `customer` is set — Stripe does not allow
-    // `payment_intent_data.shipping` together with `shipping_address_collection`.
-    // Phone: `phone_number_collection` shows the field on Checkout; Customer.phone prefills it.
+    // Shipping: `shipping_options` sets the amount Stripe charges (Connect webhook reads `amount_shipping`).
+    // Address collection only when shipping to customer (not in-store pickup).
+    // Phone: `phone_number_collection` prefills when Customer.phone is set.
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "payment",
       line_items: lineItems,
@@ -294,9 +351,25 @@ export async function POST(req: NextRequest) {
             },
           }
         : { customer_email: customerInfo.email }),
-      shipping_address_collection: {
-        allowed_countries: ["US", "CA"],
-      },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: {
+              amount: shippingCents,
+              currency: "usd",
+            },
+            display_name: shippingDisplayName,
+          },
+        },
+      ],
+      ...(deliveryMethod === "ship"
+        ? {
+            shipping_address_collection: {
+              allowed_countries: ["US", "CA"],
+            },
+          }
+        : {}),
       phone_number_collection: {
         enabled: true,
       },
@@ -304,7 +377,8 @@ export async function POST(req: NextRequest) {
         businessId: business.id,
         customerName: customerInfo.name,
         customerEmail: customerInfo.email,
-        discountCodeId: discountCodeId || "",
+        discountCodeId: discountCodeId ?? "",
+        deliveryMethod,
         ...(hasFullShipping && sa
           ? {
               shippingLine1: sa.line1.trim(),
@@ -319,14 +393,16 @@ export async function POST(req: NextRequest) {
       },
     };
 
+    const discountCents = discountAmount ?? 0;
+
     // Add discount if applicable
-    if (discountAmount && discountAmount > 0) {
+    if (discountCents > 0) {
       sessionParams.discounts = [
         {
           coupon: await createStripeCoupon(
             stripeClient,
             business.stripeAccountId,
-            discountAmount,
+            discountCents,
           ),
         },
       ];
