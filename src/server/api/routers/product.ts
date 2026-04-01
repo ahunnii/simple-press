@@ -35,6 +35,41 @@ export const productRouter = createTRPCRouter({
     });
     return products;
   }),
+
+  getRelated: publicProcedure
+    .input(z.object({ productId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+      const product = await ctx.db.product.findUnique({
+        where: { id: input.productId, businessId: business.id },
+      });
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+
+      const products = await ctx.db.product.findMany({
+        where: { businessId: business.id, id: { not: product.id } },
+        include: {
+          images: {
+            orderBy: { sortOrder: "asc" },
+            take: 4,
+          },
+          variants: true,
+        },
+        orderBy: { createdAt: "desc" },
+        take: 4,
+      });
+      return products;
+    }),
   create: ownerAdminProcedure
     .input(productCreateSchema)
     .mutation(async ({ ctx, input }) => {

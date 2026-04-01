@@ -157,6 +157,7 @@ export const businessRouter = createTRPCRouter({
             slug: true,
             price: true,
             description: true,
+            variants: true,
             images: {
               take: 1,
               orderBy: { sortOrder: "asc" },

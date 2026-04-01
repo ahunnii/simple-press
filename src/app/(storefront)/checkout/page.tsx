@@ -6,6 +6,7 @@ import { BambooCheckoutPage } from "../_templates/bamboo/bamboo-checkout-page";
 import { DarkTrendCheckoutPage } from "../_templates/dark-trend/dark-trend-checkout-page";
 import { DefaultCheckoutPage } from "../_templates/default/default-checkout-page";
 import { DefaultCheckoutUnavailable } from "../_templates/default/default-checkout-unavailable";
+import { HappyBambooCheckoutPage } from "../_templates/happy-bamboo/happy-bamboo-checkout-page";
 import { ModernCheckoutPage } from "../_templates/modern/modern-checkout-page";
 
 export default async function CheckoutPage() {
@@ -29,6 +30,7 @@ export default async function CheckoutPage() {
       "dark-trend": DarkTrendCheckoutPage,
       modern: ModernCheckoutPage,
       bamboo: BambooCheckoutPage,
+      "happy-bamboo": HappyBambooCheckoutPage,
     }[business.templateId] ?? DefaultCheckoutPage;
 
   return <TemplateComponent business={business} />;
