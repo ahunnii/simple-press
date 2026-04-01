@@ -22,6 +22,18 @@ export function slugify(text: string): string {
 }
 
 /**
+ * Sanitizes a slug as the user types: lowercases, converts spaces to dashes,
+ * preserves dashes, strips everything else. Does not collapse or trim dashes
+ * so partial input like "t-shirt-" stays intact while typing.
+ */
+export function sanitizeSlugInput(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+}
+
+/**
  * Format currency for display
  * Example: 1999 -> "$19.99"
  */

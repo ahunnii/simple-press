@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
-import { cn, slugify } from "~/lib/utils";
+import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import { productFormSchema } from "~/lib/validators/product";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
@@ -392,7 +392,7 @@ export function ProductForm({ product }: Props) {
                       label="URL Slug *"
                       placeholder="classic-white-t-shirt"
                       onChange={(value) =>
-                        form.setValue("slug", slugify(value), {
+                        form.setValue("slug", sanitizeSlugInput(value), {
                           shouldValidate: true,
                         })
                       }
