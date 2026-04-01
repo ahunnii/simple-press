@@ -8,6 +8,89 @@ import { sendOrderConfirmation } from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
 
+/** Prefer shipping collected on Checkout; fall back to PI shipping or session metadata (storefront pre-filled address). */
+function resolveCheckoutShipping(fullSession: Stripe.Checkout.Session): {
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string;
+  province: string;
+  zip: string;
+  country: string;
+  phone: string | null;
+  nameForAddress: string | null;
+} {
+  const collected = fullSession.collected_information?.shipping_details;
+  if (collected?.address?.line1) {
+    const a = collected.address;
+    return {
+      addressLine1: a.line1 ?? null,
+      addressLine2: a.line2 ?? null,
+      city: a.city ?? "",
+      province: a.state ?? "",
+      zip: a.postal_code ?? "",
+      country: a.country ?? "",
+      phone: fullSession.customer_details?.phone ?? null,
+      nameForAddress:
+        collected.name ?? fullSession.customer_details?.name ?? null,
+    };
+  }
+
+  const cd = fullSession.customer_details?.address;
+  if (cd?.line1) {
+    return {
+      addressLine1: cd.line1 ?? null,
+      addressLine2: cd.line2 ?? null,
+      city: cd.city ?? "",
+      province: cd.state ?? "",
+      zip: cd.postal_code ?? "",
+      country: cd.country ?? "",
+      phone: fullSession.customer_details?.phone ?? null,
+      nameForAddress: fullSession.customer_details?.name ?? null,
+    };
+  }
+
+  const pi = fullSession.payment_intent;
+  if (typeof pi === "object" && pi?.shipping?.address?.line1) {
+    const a = pi.shipping.address;
+    return {
+      addressLine1: a.line1 ?? null,
+      addressLine2: a.line2 ?? null,
+      city: a.city ?? "",
+      province: a.state ?? "",
+      zip: a.postal_code ?? "",
+      country: a.country ?? "",
+      phone: pi.shipping.phone ?? null,
+      nameForAddress: pi.shipping.name ?? null,
+    };
+  }
+
+  const m = fullSession.metadata;
+  if (m?.shippingLine1) {
+    return {
+      addressLine1: m.shippingLine1,
+      addressLine2: m.shippingLine2 ?? null,
+      city: m.shippingCity ?? "",
+      province: m.shippingState ?? "",
+      zip: m.shippingPostalCode ?? "",
+      country: m.shippingCountry ?? "",
+      phone: m.shippingPhone ?? null,
+      nameForAddress:
+        m.customerName ?? fullSession.customer_details?.name ?? null,
+    };
+  }
+
+  return {
+    addressLine1: null,
+    addressLine2: null,
+    city: "",
+    province: "",
+    zip: "",
+    country: "",
+    phone: null,
+    nameForAddress: null,
+  };
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.text();
@@ -88,6 +171,7 @@ export async function POST(req: NextRequest) {
               "line_items",
               "line_items.data.price.product",
               "total_details",
+              "payment_intent",
             ],
           },
           {
@@ -163,14 +247,14 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        // Create or reuse shipping address if provided
+        // Create or reuse shipping address if provided (see resolveCheckoutShipping)
         let shippingAddressId: string | null = null;
 
-        const shippingDetails = fullSession.customer_details?.address;
+        const resolved = resolveCheckoutShipping(fullSession);
 
-        if (shippingDetails && customer) {
-          const customerName = fullSession.customer_details?.name ?? "";
-          const nameParts = customerName.split(" ");
+        if (resolved.addressLine1 && customer) {
+          const customerName = resolved.nameForAddress ?? "";
+          const nameParts = customerName.split(" ").filter((p) => p.length > 0);
           const firstName = nameParts[0] ?? "Guest";
           const lastName = nameParts.slice(1).join(" ") || "";
 
@@ -178,15 +262,15 @@ export async function POST(req: NextRequest) {
             customerId: customer.id,
             firstName,
             lastName,
-            address1: shippingDetails.line1 ?? "",
-            address2: shippingDetails.line2 ?? null,
-            city: shippingDetails.city ?? "",
-            province: shippingDetails.state ?? "",
-            zip: shippingDetails.postal_code ?? "",
-            country: shippingDetails.country ?? "",
-            phone: fullSession.customer_details?.phone ?? null,
+            address1: resolved.addressLine1,
+            address2: resolved.addressLine2,
+            city: resolved.city,
+            province: resolved.province,
+            zip: resolved.zip,
+            country: resolved.country,
+            phone: resolved.phone,
           });
-        } else if (shippingDetails && !customer) {
+        } else if (resolved.addressLine1 && !customer) {
           console.warn(
             "[Webhook] Shipping details provided but no customer - cannot create address",
           );

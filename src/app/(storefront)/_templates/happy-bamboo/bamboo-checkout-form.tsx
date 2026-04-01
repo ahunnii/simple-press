@@ -10,6 +10,13 @@ import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { useCart } from "~/providers/cart-context";
 
 import { DiscountDiscountInput } from "../default/default-discount-input";
@@ -34,6 +41,14 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
 
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [country, setCountry] = useState<"US" | "CA">("US");
+  const [phone, setPhone] = useState("");
+
   const [appliedDiscount, setAppliedDiscount] = useState<{
     id: string;
     code: string;
@@ -52,7 +67,15 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
     setIsProcessing(true);
 
     try {
-      if (!email || !name) {
+      if (
+        !email ||
+        !name ||
+        !phone.trim() ||
+        !addressLine1.trim() ||
+        !city.trim() ||
+        !state.trim() ||
+        !postalCode.trim()
+      ) {
         throw new Error("Please fill in all required fields");
       }
 
@@ -68,6 +91,16 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
           customerInfo: {
             email,
             name,
+            phone: phone.trim(),
+            shippingAddress: {
+              line1: addressLine1.trim(),
+              line2: addressLine2.trim() || null,
+              city: city.trim(),
+              state: state.trim(),
+              postalCode: postalCode.trim(),
+              country,
+              phone: phone.trim(),
+            },
           },
           discountCodeId: appliedDiscount?.id ?? null,
           discountAmount: appliedDiscount?.discountAmount ?? 0,
@@ -148,17 +181,108 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 required
               />
             </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="phone">Phone *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                autoComplete="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+1 555 123 4567"
+                required
+              />
+            </div>
           </div>
         </fieldset>
 
         <fieldset className="flex flex-col gap-4">
-          <legend className="text-foreground font-heading text-lg font-semibold">
+          <legend className="text-foreground font-heading pb-4 text-lg font-semibold">
             Shipping Address
           </legend>
           <p className="text-muted-foreground text-sm">
-            You&apos;ll enter your shipping address on the next page (Stripe
-            Checkout)
+            This is sent to Stripe Checkout prefilled so you can confirm or edit
+            your name, phone, and address before paying.
           </p>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="address-line1">Address line 1 *</Label>
+              <Input
+                id="address-line1"
+                type="text"
+                autoComplete="shipping address-line1"
+                value={addressLine1}
+                onChange={(e) => setAddressLine1(e.target.value)}
+                placeholder="Street address, P.O. box"
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="address-line2">Address line 2</Label>
+              <Input
+                id="address-line2"
+                type="text"
+                autoComplete="shipping address-line2"
+                value={addressLine2}
+                onChange={(e) => setAddressLine2(e.target.value)}
+                placeholder="Apartment, suite, etc."
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  type="text"
+                  autoComplete="shipping address-level2"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="state">State / Province *</Label>
+                <Input
+                  id="state"
+                  type="text"
+                  autoComplete="shipping address-level1"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  placeholder="e.g. CA or ON"
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="postal">ZIP / Postal code *</Label>
+                <Input
+                  id="postal"
+                  type="text"
+                  autoComplete="shipping postal-code"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="country">Country *</Label>
+                <Select
+                  value={country}
+                  onValueChange={(v) => setCountry(v as "US" | "CA")}
+                  required
+                >
+                  <SelectTrigger id="country">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="US">United States</SelectItem>
+                    <SelectItem value="CA">Canada</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
         </fieldset>
       </div>
 
@@ -231,7 +355,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               )}
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
-                <span>Calculated at checkout</span>
+                <span>At checkout (Stripe)</span>
               </div>
               <div className="flex justify-between border-t pt-2 font-bold">
                 <span>Total</span>

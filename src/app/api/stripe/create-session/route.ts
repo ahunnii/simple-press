@@ -44,6 +44,17 @@ export async function POST(req: NextRequest) {
         customerInfo: {
           email: string;
           name: string;
+          /** Contact phone; prefills Stripe Checkout when `phone_number_collection` is enabled. */
+          phone?: string | null;
+          shippingAddress?: {
+            line1: string;
+            line2?: string | null;
+            city: string;
+            state: string;
+            postalCode: string;
+            country: string;
+            phone?: string | null;
+          } | null;
         };
         discountCodeId: string;
         discountAmount: number;
@@ -217,21 +228,94 @@ export async function POST(req: NextRequest) {
         ? `https://${business.customDomain}`
         : `https://${business.subdomain}.${platformDomain}`;
 
-    // Build session params
+    const sa = customerInfo.shippingAddress;
+    const contactPhone =
+      (customerInfo.phone ?? sa?.phone)?.trim() ?? "";
+    const hasFullShipping =
+      !!sa &&
+      typeof sa.line1 === "string" &&
+      sa.line1.trim().length > 0 &&
+      typeof sa.city === "string" &&
+      sa.city.trim().length > 0 &&
+      typeof sa.state === "string" &&
+      sa.state.trim().length > 0 &&
+      typeof sa.postalCode === "string" &&
+      sa.postalCode.trim().length > 0 &&
+      (sa.country === "US" || sa.country === "CA") &&
+      contactPhone.length > 0;
+
+    let stripeCustomerId: string | undefined;
+
+    if (hasFullShipping && sa) {
+      const line1 = sa.line1.trim();
+      const line2 = sa.line2?.trim();
+      const city = sa.city.trim();
+      const state = sa.state.trim();
+      const postalCode = sa.postalCode.trim();
+      const country = sa.country;
+
+      const customer = await stripeClient.customers.create(
+        {
+          email: customerInfo.email,
+          name: customerInfo.name,
+          phone: contactPhone,
+          shipping: {
+            name: customerInfo.name,
+            phone: contactPhone,
+            address: {
+              line1,
+              ...(line2 ? { line2 } : {}),
+              city,
+              state,
+              postal_code: postalCode,
+              country,
+            },
+          },
+        },
+        { stripeAccount: business.stripeAccountId },
+      );
+      stripeCustomerId = customer.id;
+    }
+
+    // Always collect shipping on Stripe (visible + editable). Prefill comes from the
+    // Stripe Customer’s shipping when `customer` is set — Stripe does not allow
+    // `payment_intent_data.shipping` together with `shipping_address_collection`.
+    // Phone: `phone_number_collection` shows the field on Checkout; Customer.phone prefills it.
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "payment",
       line_items: lineItems,
       success_url: `${baseUrl}/order/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout`,
-      customer_email: customerInfo.email,
+      ...(stripeCustomerId
+        ? {
+            customer: stripeCustomerId,
+            customer_update: {
+              shipping: "auto",
+            },
+          }
+        : { customer_email: customerInfo.email }),
       shipping_address_collection: {
         allowed_countries: ["US", "CA"],
+      },
+      phone_number_collection: {
+        enabled: true,
       },
       metadata: {
         businessId: business.id,
         customerName: customerInfo.name,
         customerEmail: customerInfo.email,
         discountCodeId: discountCodeId || "",
+        ...(hasFullShipping && sa
+          ? {
+              shippingLine1: sa.line1.trim(),
+              shippingLine2: sa.line2?.trim() ?? "",
+              shippingCity: sa.city.trim(),
+              shippingState: sa.state.trim(),
+              shippingPostalCode: sa.postalCode.trim(),
+              shippingCountry: sa.country,
+              shippingPhone: contactPhone,
+            }
+          : {}),
       },
     };
 
