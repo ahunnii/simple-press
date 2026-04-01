@@ -256,7 +256,8 @@ exports.Prisma.ProductScalarFieldEnum = {
   metaDescription: 'metaDescription',
   businessId: 'businessId',
   averageRating: 'averageRating',
-  reviewCount: 'reviewCount'
+  reviewCount: 'reviewCount',
+  additionalFields: 'additionalFields'
 };
 
 exports.Prisma.ProductVariantScalarFieldEnum = {

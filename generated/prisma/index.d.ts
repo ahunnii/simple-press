@@ -12680,6 +12680,7 @@ export namespace Prisma {
     businessId: number
     averageRating: number
     reviewCount: number
+    additionalFields: number
     _all: number
   }
 
@@ -12785,6 +12786,7 @@ export namespace Prisma {
     businessId?: true
     averageRating?: true
     reviewCount?: true
+    additionalFields?: true
     _all?: true
   }
 
@@ -12899,6 +12901,7 @@ export namespace Prisma {
     businessId: string
     averageRating: number | null
     reviewCount: number
+    additionalFields: JsonValue | null
     _count: ProductCountAggregateOutputType | null
     _avg: ProductAvgAggregateOutputType | null
     _sum: ProductSumAggregateOutputType | null
@@ -12945,6 +12948,7 @@ export namespace Prisma {
     businessId?: boolean
     averageRating?: boolean
     reviewCount?: boolean
+    additionalFields?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     images?: boolean | Product$imagesArgs<ExtArgs>
     variants?: boolean | Product$variantsArgs<ExtArgs>
@@ -12980,6 +12984,7 @@ export namespace Prisma {
     businessId?: boolean
     averageRating?: boolean
     reviewCount?: boolean
+    additionalFields?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
 
@@ -13008,6 +13013,7 @@ export namespace Prisma {
     businessId?: boolean
     averageRating?: boolean
     reviewCount?: boolean
+    additionalFields?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
 
@@ -13036,9 +13042,10 @@ export namespace Prisma {
     businessId?: boolean
     averageRating?: boolean
     reviewCount?: boolean
+    additionalFields?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "allowBackorders" | "weight" | "weightUnit" | "published" | "featured" | "sortOrder" | "metaTitle" | "metaDescription" | "businessId" | "averageRating" | "reviewCount", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "allowBackorders" | "weight" | "weightUnit" | "published" | "featured" | "sortOrder" | "metaTitle" | "metaDescription" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     images?: boolean | Product$imagesArgs<ExtArgs>
@@ -13092,6 +13099,7 @@ export namespace Prisma {
       businessId: string
       averageRating: number | null
       reviewCount: number
+      additionalFields: Prisma.JsonValue | null
     }, ExtArgs["result"]["product"]>
     composites: {}
   }
@@ -13546,6 +13554,7 @@ export namespace Prisma {
     readonly businessId: FieldRef<"Product", 'String'>
     readonly averageRating: FieldRef<"Product", 'Float'>
     readonly reviewCount: FieldRef<"Product", 'Int'>
+    readonly additionalFields: FieldRef<"Product", 'Json'>
   }
     
 
@@ -38836,7 +38845,8 @@ export namespace Prisma {
     metaDescription: 'metaDescription',
     businessId: 'businessId',
     averageRating: 'averageRating',
-    reviewCount: 'reviewCount'
+    reviewCount: 'reviewCount',
+    additionalFields: 'additionalFields'
   };
 
   export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
@@ -40133,6 +40143,7 @@ export namespace Prisma {
     businessId?: StringFilter<"Product"> | string
     averageRating?: FloatNullableFilter<"Product"> | number | null
     reviewCount?: IntFilter<"Product"> | number
+    additionalFields?: JsonNullableFilter<"Product">
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     images?: ImageListRelationFilter
     variants?: ProductVariantListRelationFilter
@@ -40167,6 +40178,7 @@ export namespace Prisma {
     businessId?: SortOrder
     averageRating?: SortOrderInput | SortOrder
     reviewCount?: SortOrder
+    additionalFields?: SortOrderInput | SortOrder
     business?: BusinessOrderByWithRelationInput
     images?: ImageOrderByRelationAggregateInput
     variants?: ProductVariantOrderByRelationAggregateInput
@@ -40205,6 +40217,7 @@ export namespace Prisma {
     businessId?: StringFilter<"Product"> | string
     averageRating?: FloatNullableFilter<"Product"> | number | null
     reviewCount?: IntFilter<"Product"> | number
+    additionalFields?: JsonNullableFilter<"Product">
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     images?: ImageListRelationFilter
     variants?: ProductVariantListRelationFilter
@@ -40239,6 +40252,7 @@ export namespace Prisma {
     businessId?: SortOrder
     averageRating?: SortOrderInput | SortOrder
     reviewCount?: SortOrder
+    additionalFields?: SortOrderInput | SortOrder
     _count?: ProductCountOrderByAggregateInput
     _avg?: ProductAvgOrderByAggregateInput
     _max?: ProductMaxOrderByAggregateInput
@@ -40274,6 +40288,7 @@ export namespace Prisma {
     businessId?: StringWithAggregatesFilter<"Product"> | string
     averageRating?: FloatNullableWithAggregatesFilter<"Product"> | number | null
     reviewCount?: IntWithAggregatesFilter<"Product"> | number
+    additionalFields?: JsonNullableWithAggregatesFilter<"Product">
   }
 
   export type ProductVariantWhereInput = {
@@ -43140,6 +43155,7 @@ export namespace Prisma {
     metaDescription?: string | null
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business: BusinessCreateNestedOneWithoutProductsInput
     images?: ImageCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -43174,6 +43190,7 @@ export namespace Prisma {
     businessId: string
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedCreateNestedManyWithoutProductInput
     variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
@@ -43206,6 +43223,7 @@ export namespace Prisma {
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business?: BusinessUpdateOneRequiredWithoutProductsNestedInput
     images?: ImageUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -43240,6 +43258,7 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
@@ -43273,6 +43292,7 @@ export namespace Prisma {
     businessId: string
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ProductUpdateManyMutationInput = {
@@ -43299,6 +43319,7 @@ export namespace Prisma {
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ProductUncheckedUpdateManyInput = {
@@ -43326,6 +43347,7 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ProductVariantCreateInput = {
@@ -46411,6 +46433,7 @@ export namespace Prisma {
     businessId?: SortOrder
     averageRating?: SortOrder
     reviewCount?: SortOrder
+    additionalFields?: SortOrder
   }
 
   export type ProductAvgOrderByAggregateInput = {
@@ -51450,6 +51473,7 @@ export namespace Prisma {
     metaDescription?: string | null
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
@@ -51482,6 +51506,7 @@ export namespace Prisma {
     metaDescription?: string | null
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedCreateNestedManyWithoutProductInput
     variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
@@ -52151,6 +52176,7 @@ export namespace Prisma {
     businessId?: StringFilter<"Product"> | string
     averageRating?: FloatNullableFilter<"Product"> | number | null
     reviewCount?: IntFilter<"Product"> | number
+    additionalFields?: JsonNullableFilter<"Product">
   }
 
   export type CollectionUpsertWithWhereUniqueWithoutBusinessInput = {
@@ -53358,6 +53384,7 @@ export namespace Prisma {
     metaDescription?: string | null
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business: BusinessCreateNestedOneWithoutProductsInput
     images?: ImageCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
@@ -53391,6 +53418,7 @@ export namespace Prisma {
     businessId: string
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -53510,6 +53538,7 @@ export namespace Prisma {
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business?: BusinessUpdateOneRequiredWithoutProductsNestedInput
     images?: ImageUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
@@ -53543,6 +53572,7 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -53843,6 +53873,7 @@ export namespace Prisma {
     metaDescription?: string | null
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business: BusinessCreateNestedOneWithoutProductsInput
     images?: ImageCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -53876,6 +53907,7 @@ export namespace Prisma {
     businessId: string
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedCreateNestedManyWithoutProductInput
     variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -53964,6 +53996,7 @@ export namespace Prisma {
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business?: BusinessUpdateOneRequiredWithoutProductsNestedInput
     images?: ImageUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -53997,6 +54030,7 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -54028,6 +54062,7 @@ export namespace Prisma {
     metaDescription?: string | null
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business: BusinessCreateNestedOneWithoutProductsInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
@@ -54061,6 +54096,7 @@ export namespace Prisma {
     businessId: string
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -54187,6 +54223,7 @@ export namespace Prisma {
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business?: BusinessUpdateOneRequiredWithoutProductsNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
@@ -54220,6 +54257,7 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -55729,6 +55767,7 @@ export namespace Prisma {
     metaDescription?: string | null
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business: BusinessCreateNestedOneWithoutProductsInput
     images?: ImageCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -55762,6 +55801,7 @@ export namespace Prisma {
     businessId: string
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedCreateNestedManyWithoutProductInput
     variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
@@ -55917,6 +55957,7 @@ export namespace Prisma {
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business?: BusinessUpdateOneRequiredWithoutProductsNestedInput
     images?: ImageUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -55950,6 +55991,7 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
@@ -56394,6 +56436,7 @@ export namespace Prisma {
     metaDescription?: string | null
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business: BusinessCreateNestedOneWithoutProductsInput
     images?: ImageCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -56427,6 +56470,7 @@ export namespace Prisma {
     businessId: string
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedCreateNestedManyWithoutProductInput
     variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
@@ -56704,6 +56748,7 @@ export namespace Prisma {
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business?: BusinessUpdateOneRequiredWithoutProductsNestedInput
     images?: ImageUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -56737,6 +56782,7 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
@@ -58120,6 +58166,7 @@ export namespace Prisma {
     metaDescription?: string | null
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business: BusinessCreateNestedOneWithoutProductsInput
     images?: ImageCreateNestedManyWithoutProductInput
     variants?: ProductVariantCreateNestedManyWithoutProductInput
@@ -58153,6 +58200,7 @@ export namespace Prisma {
     businessId: string
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedCreateNestedManyWithoutProductInput
     variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
@@ -58340,6 +58388,7 @@ export namespace Prisma {
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     business?: BusinessUpdateOneRequiredWithoutProductsNestedInput
     images?: ImageUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
@@ -58373,6 +58422,7 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
@@ -59232,6 +59282,7 @@ export namespace Prisma {
     metaDescription?: string | null
     averageRating?: number | null
     reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CollectionCreateManyBusinessInput = {
@@ -59455,6 +59506,7 @@ export namespace Prisma {
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
@@ -59487,6 +59539,7 @@ export namespace Prisma {
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
     images?: ImageUncheckedUpdateManyWithoutProductNestedInput
     variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
@@ -59519,6 +59572,7 @@ export namespace Prisma {
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CollectionUpdateWithoutBusinessInput = {

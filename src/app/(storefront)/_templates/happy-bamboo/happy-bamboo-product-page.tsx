@@ -14,11 +14,13 @@ import {
   Shield,
   ShoppingBag,
   Sparkles,
+  type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import type { DefaultProductPageTemplateProps } from "../types";
 import type { RouterOutputs } from "~/trpc/react";
+import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { Badge } from "~/components/ui/badge";
@@ -33,6 +35,10 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { Spotlight } from "~/components/ui/spotlight-new";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import {
+  TiptapRenderer,
+  type TiptapJSON,
+} from "~/components/tiptap-renderer";
 
 import { BambooVariantSelector } from "./bamboo-variant-selector";
 import {
@@ -42,11 +48,27 @@ import {
   StaggerItem,
 } from "./happy-bamboo-animations";
 
+type ProductAdditionalFields = {
+  additionalInformation?: unknown;
+  productFeatures?: Array<{ icon: string; text: string }>;
+} | null;
+
+function parseProductAdditionalFields(
+  raw: unknown,
+): ProductAdditionalFields {
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
+    return null;
+  }
+  return raw as ProductAdditionalFields;
+}
+
 export function HappyBambooProductDetailsTabs({
   product,
 }: {
   product: NonNullable<RouterOutputs["product"]["get"]>;
 }) {
+  const additional = parseProductAdditionalFields(product.additionalFields);
+
   return (
     <Tabs
       defaultValue="overview"
@@ -82,7 +104,14 @@ export function HappyBambooProductDetailsTabs({
             </CardDescription> */}
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">
-            No additional information available.
+            {additional?.additionalInformation ? (
+              <TiptapRenderer
+                content={additional.additionalInformation as TiptapJSON}
+                className="prose prose-sm dark:prose-invert max-w-none"
+              />
+            ) : (
+              <p>No additional information available.</p>
+            )}
           </CardContent>
         </Card>
       </TabsContent>
@@ -154,6 +183,21 @@ const trustBadges = [
   { icon: Sparkles, label: "Premium Quality" },
 ];
 
+function buildDisplayTrustBadges(
+  additional: ProductAdditionalFields,
+): Array<{ Icon: LucideIcon; label: string }> {
+  const features = additional?.productFeatures ?? [];
+  const fromDb = features
+    .map((f) => {
+      const Icon = getLucideTemplateIcon(f.icon);
+      if (!Icon || !f.text?.trim()) return null;
+      return { Icon, label: f.text.trim() };
+    })
+    .filter((b): b is { Icon: LucideIcon; label: string } => b !== null);
+  if (fromDb.length > 0) return fromDb;
+  return trustBadges.map((b) => ({ Icon: b.icon, label: b.label }));
+}
+
 export function HappyBambooProductPage({
   product,
 }: DefaultProductPageTemplateProps) {
@@ -186,6 +230,11 @@ export function HappyBambooProductPage({
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
+
+  const displayTrustBadges = buildDisplayTrustBadges(
+    parseProductAdditionalFields(product.additionalFields),
+  );
+
   const related: (typeof product)[] = [];
   return (
     <PageTransition>
@@ -334,12 +383,12 @@ export function HappyBambooProductPage({
 
             {/* Trust badges */}
             <div className="grid grid-cols-2 gap-3">
-              {trustBadges.map((badge) => (
+              {displayTrustBadges.map((badge, i) => (
                 <div
-                  key={badge.label}
+                  key={`${badge.label}-${i}`}
                   className="bg-secondary/60 flex items-center gap-2 rounded-lg px-3 py-2"
                 >
-                  <badge.icon className="text-primary size-4" />
+                  <badge.Icon className="text-primary size-4" />
                   <span className="text-secondary-foreground text-xs font-medium">
                     {badge.label}
                   </span>

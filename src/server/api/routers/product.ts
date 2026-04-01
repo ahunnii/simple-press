@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { Prisma } from "../../../../generated/prisma";
 import { checkBusiness } from "~/lib/check-business";
 import {
   productCreateSchema,
@@ -83,6 +84,7 @@ export const productRouter = createTRPCRouter({
         allowBackorders,
         inventoryQty,
         variants,
+        additionalFields,
       } = input;
 
       const { businessId } = ctx;
@@ -112,6 +114,11 @@ export const productRouter = createTRPCRouter({
           trackInventory,
           allowBackorders,
           inventoryQty,
+          additionalFields: additionalFields
+            ? (JSON.parse(
+                JSON.stringify(additionalFields),
+              ) as Prisma.InputJsonValue)
+            : undefined,
           businessId,
           variants: {
             create: variants.map((v) => ({
@@ -146,6 +153,7 @@ export const productRouter = createTRPCRouter({
         allowBackorders,
         inventoryQty,
         variants,
+        additionalFields,
       } = input;
 
       // Check if slug is already taken for this business
@@ -175,6 +183,11 @@ export const productRouter = createTRPCRouter({
           trackInventory,
           allowBackorders,
           inventoryQty,
+          additionalFields: additionalFields
+            ? (JSON.parse(
+                JSON.stringify(additionalFields),
+              ) as Prisma.InputJsonValue)
+            : undefined,
         },
       });
       if (variants) {
