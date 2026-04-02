@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 
 import type { SignupFormData } from "./wizard-client";
+import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
 import { authClient } from "~/server/better-auth/client";
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -17,6 +18,7 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 
 type StoreCustomizationStepProps = {
   formData: Partial<SignupFormData>;
@@ -29,6 +31,8 @@ export function StoreCustomizationStep({
 }: StoreCustomizationStepProps) {
   const updateArtisanToken = api.external.updateArtisanToken.useMutation();
 
+  const captchaRef = useRef<HCaptchaHandle>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
   const [heroTitle, setHeroTitle] = useState(
     formData.heroTitle ?? `Welcome to ${formData.businessName ?? "Our Store"}`,
   );
@@ -64,6 +68,11 @@ export function StoreCustomizationStep({
         email: formData.email,
         password: formData.password,
         name: formData.name,
+        fetchOptions: {
+          headers: {
+            "x-captcha-response": captchaToken,
+          },
+        },
       });
 
       if (signUpError) {
@@ -88,11 +97,7 @@ export function StoreCustomizationStep({
         return;
       }
 
-      if (
-        formData.artisanFlow &&
-        formData.aftoken &&
-        data.businessId
-      ) {
+      if (formData.artisanFlow && formData.aftoken && data.businessId) {
         try {
           await updateArtisanToken.mutateAsync({
             aftoken: formData.aftoken,
@@ -221,6 +226,15 @@ export function StoreCustomizationStep({
               )}
             </div>
           </div>
+
+          <HCaptchaField
+            ref={captchaRef}
+            onVerify={setCaptchaToken}
+            onExpire={() => setCaptchaToken("")}
+            onError={() => setCaptchaToken("")}
+            label="Verification"
+            required
+          />
 
           <Alert>
             <AlertDescription>
