@@ -1,7 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -30,16 +28,16 @@ import type {
   TemplateListRow,
 } from "~/lib/template-fields";
 import {
+  getLucideTemplateIcon,
+  TEMPLATE_LUCIDE_ICON_NAMES,
+} from "~/lib/lucide-template-icons";
+import {
   getGroupMetadata,
   groupFieldsByGroup,
   groupFieldsByPage,
   PAGE_METADATA,
   parseTemplateListRows,
 } from "~/lib/template-fields";
-import {
-  TEMPLATE_LUCIDE_ICON_NAMES,
-  getLucideTemplateIcon,
-} from "~/lib/lucide-template-icons";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
@@ -704,10 +702,7 @@ function ListItemSubFieldInput({
           {Preview ? (
             <Preview className="text-muted-foreground h-5 w-5 shrink-0" />
           ) : null}
-          <Select
-            value={selected}
-            onValueChange={(v) => onChange(v)}
-          >
+          <Select value={selected} onValueChange={(v) => onChange(v)}>
             <SelectTrigger className="flex-1">
               <SelectValue placeholder="Icon" />
             </SelectTrigger>
@@ -717,9 +712,7 @@ function ListItemSubFieldInput({
                 return (
                   <SelectItem key={name} value={name}>
                     <span className="flex items-center gap-2">
-                      {Icon ? (
-                        <Icon className="h-4 w-4 shrink-0" />
-                      ) : null}
+                      {Icon ? <Icon className="h-4 w-4 shrink-0" /> : null}
                       {name}
                     </span>
                   </SelectItem>
@@ -732,10 +725,7 @@ function ListItemSubFieldInput({
     );
   }
 
-  const inputType =
-    subField.type === "url"
-      ? "url"
-      : "text";
+  const inputType = subField.type === "url" ? "url" : "text";
 
   return (
     <div className="space-y-1.5">
@@ -804,9 +794,7 @@ function TemplateListFieldEditor({
   return (
     <div className="space-y-3">
       {rows.length === 0 && (
-        <p className="text-sm text-gray-500">
-          No items yet. Add one below.
-        </p>
+        <p className="text-sm text-gray-500">No items yet. Add one below.</p>
       )}
       {rows.map((row, rowIndex) => (
         <div

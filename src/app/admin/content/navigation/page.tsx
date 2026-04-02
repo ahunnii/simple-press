@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
-import { NavigationBuilder } from "../_components/navigation-builder";
 import { TrailHeader } from "../../_components/trail-header";
+import { NavigationBuilder } from "./_components/navigation-builder";
 
 export default async function NavigationPage() {
   const business = await api.business.getWith({
@@ -44,5 +44,5 @@ export default async function NavigationPage() {
 }
 
 export const metadata = {
-  title: "Navigation",
+  title: "Edit Site Navigation",
 };

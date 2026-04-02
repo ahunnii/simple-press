@@ -65,7 +65,9 @@ export function ConnectStripeButton({
       toast.success("Stripe disconnected");
       window.location.reload();
     } catch (error) {
-      toast.error("Failed to disconnect");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to disconnect",
+      );
     } finally {
       setIsDisconnecting(false);
     }

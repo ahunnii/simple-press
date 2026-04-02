@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { SEOEditor } from "../_components/seo-editor";
 import { TrailHeader } from "../../_components/trail-header";
+import { SEOEditor } from "./_components/seo-editor";
 
 export default async function SEOPage() {
   const business = await api.business.getWith({ includeSiteContent: true });

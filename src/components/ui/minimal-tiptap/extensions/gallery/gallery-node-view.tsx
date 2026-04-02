@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import type { NodeViewProps } from "@tiptap/core";
@@ -58,7 +56,7 @@ export function GalleryNodeView({
       <NodeViewWrapper className="gallery-node my-4">
         <div className="rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 p-6">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
                 <Images className="h-6 w-6 text-blue-600" />
               </div>

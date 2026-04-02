@@ -1,11 +1,11 @@
 "use client";
 
 import type { DiscountCode } from "generated/prisma";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Loader2, Save, Trash2, X } from "lucide-react";
+import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -15,7 +15,6 @@ import { discountFormSchema } from "~/lib/validators/discounts";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
-import { Alert, AlertDescription } from "~/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,23 +41,14 @@ import {
   FormItem,
   FormLabel,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { NumberInput } from "~/components/ui/number-input";
 import { Switch } from "~/components/ui/switch";
-import { Textarea } from "~/components/ui/textarea";
 import { DateTimeFormField } from "~/components/inputs/date-time-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { RadioFormField } from "~/components/inputs/radio-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
-
-function toDatetimeLocalValue(d: Date | null | undefined): string {
-  if (!d) return "";
-  const date = new Date(d);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
 
 type Props = {
   initialDiscount?: DiscountCode;

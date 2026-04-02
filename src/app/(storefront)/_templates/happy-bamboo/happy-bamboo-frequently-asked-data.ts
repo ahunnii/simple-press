@@ -1,18 +1,4 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  Droplets,
-  Feather,
-  Heart,
-  Leaf,
-  Recycle,
-  Shield,
-  TreeDeciduous,
-  TreePine,
-  Wind,
-} from "lucide-react";
 import { z } from "zod";
-
-import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 
 const bambooRowSchema = z
   .object({

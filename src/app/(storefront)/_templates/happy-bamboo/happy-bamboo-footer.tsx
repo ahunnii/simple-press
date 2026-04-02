@@ -24,9 +24,7 @@ const quickLinks = [
 export async function HappyBambooFooter({
   business,
 }: DefaultFooterTemplateProps) {
-  const currentYear = new Date().getFullYear();
-
-  const email = business?.supportEmail ?? "hello@finallyresults.com";
+  const email = business?.supportEmail ?? "hello@zairesvisions.com";
 
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
@@ -138,27 +136,34 @@ export async function HappyBambooFooter({
               nurtures both people and the planet.
             </p>
             <div className="flex gap-4">
-              <a
-                href="#"
-                className="text-muted hover:text-primary transition-colors"
-                aria-label="Facebook"
-              >
-                <FacebookIcon className="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                className="text-muted hover:text-primary transition-colors"
-                aria-label="Instagram"
-              >
-                <InstagramLogoIcon className="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                className="text-muted hover:text-primary transition-colors"
-                aria-label="Twitter"
-              >
-                <TwitterLogoIcon className="h-5 w-5" />
-              </a>
+              {socialLinks?.facebook && (
+                <a
+                  href={socialLinks.facebook}
+                  className="text-muted hover:text-primary transition-colors"
+                  aria-label="Facebook"
+                >
+                  <FacebookIcon className="h-5 w-5" />
+                </a>
+              )}
+
+              {socialLinks?.instagram && (
+                <a
+                  href={socialLinks.instagram}
+                  className="text-muted hover:text-primary transition-colors"
+                  aria-label="Instagram"
+                >
+                  <InstagramLogoIcon className="h-5 w-5" />
+                </a>
+              )}
+              {socialLinks?.twitter && (
+                <a
+                  href={socialLinks.twitter}
+                  className="text-muted hover:text-primary transition-colors"
+                  aria-label="Twitter"
+                >
+                  <TwitterLogoIcon className="h-5 w-5" />
+                </a>
+              )}
             </div>
           </div>
 

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard, IconTerminal } from "@tabler/icons-react";
-import { Store } from "lucide-react";
 
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";

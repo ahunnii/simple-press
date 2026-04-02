@@ -1,12 +1,7 @@
-import type { ReactElement, ReactNode } from "react";
 import { EmailTemplate } from "@daveyplate/better-auth-ui/server";
-import { betterAuth, email } from "better-auth";
+import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import {
-  captcha,
-  createAuthMiddleware,
-  organization,
-} from "better-auth/plugins";
+import { captcha, organization } from "better-auth/plugins";
 
 import { env } from "~/env";
 import { checkBusiness } from "~/lib/check-business";
@@ -41,6 +36,7 @@ export const auth = betterAuth({
           ),
           siteName: "SimplePress",
           baseUrl: env.BETTER_AUTH_BASE_URL,
+
           url,
         }),
       });

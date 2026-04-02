@@ -170,7 +170,7 @@ function mapWooCommerceProduct(row: WooCommerceProduct): ParsedProduct {
   let variantName: string | null = null;
   if (row.Type === "variation" && Object.keys(attributes).length > 0) {
     variantName = Object.entries(attributes)
-      .map(([key, value]) => `${value}`)
+      .map(([_, value]) => `${value}`)
       .join(" / ");
   }
 

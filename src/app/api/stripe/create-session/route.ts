@@ -3,9 +3,12 @@ import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 
 import { env } from "~/env";
-import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
-import { calculateShipping, shippingConfigFromBusiness } from "~/lib/shipping-utils";
+import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import {
+  calculateShipping,
+  shippingConfigFromBusiness,
+} from "~/lib/shipping-utils";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
 
@@ -157,8 +160,10 @@ export async function POST(req: NextRequest) {
     const productMap = new Map(productsNoVariant.map((p) => [p.id, p]));
 
     const unavailableItems: string[] = [];
-    const unavailableItemIds: { productId: string; variantId: string | null }[] =
-      [];
+    const unavailableItemIds: {
+      productId: string;
+      variantId: string | null;
+    }[] = [];
     const unavailableIdKeySet = new Set<string>();
 
     const pushUnavailable = (
@@ -182,7 +187,7 @@ export async function POST(req: NextRequest) {
 
       if (item.variantId) {
         const variant = variantMap.get(item.variantId);
-        if (!variant || !variant.product.published) {
+        if (!variant?.product.published) {
           pushUnavailable(name, item.productId, item.variantId);
           continue;
         }
@@ -227,8 +232,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const deliveryMethod =
-      body.deliveryMethod === "pickup" ? "pickup" : "ship";
+    const deliveryMethod = body.deliveryMethod === "pickup" ? "pickup" : "ship";
 
     if (deliveryMethod === "pickup" && !business.offersInStorePickup) {
       return NextResponse.json(
@@ -346,8 +350,7 @@ export async function POST(req: NextRequest) {
         : `https://${business.subdomain}.${platformDomain}`;
 
     const sa = customerInfo.shippingAddress;
-    const contactPhone =
-      (customerInfo.phone ?? sa?.phone)?.trim() ?? "";
+    const contactPhone = (customerInfo.phone ?? sa?.phone)?.trim() ?? "";
     const hasFullShipping =
       deliveryMethod === "ship" &&
       !!sa &&

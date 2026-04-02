@@ -10,7 +10,6 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 
 import { NumberInput } from "../ui/number-input";
 
@@ -62,6 +61,7 @@ export const NumberFormField = <CurrentForm extends FieldValues>({
       control={form.control}
       name={name}
       render={({ field }) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { ref: _fieldRef, ...fieldRest } = field;
         return (
           <FormItem className={cn("col-span-full", className)}>

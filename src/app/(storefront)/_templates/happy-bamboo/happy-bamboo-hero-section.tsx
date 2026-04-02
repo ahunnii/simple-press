@@ -6,7 +6,7 @@ import { ArrowRight, Leaf } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 
-import { FadeIn, ScaleIn } from "./happy-bamboo-animations";
+import { FadeIn } from "./happy-bamboo-animations";
 
 export function HappyBambooHeroSection({
   heroImage,

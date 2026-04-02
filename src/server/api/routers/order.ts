@@ -4,19 +4,41 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
-import { sendOrderShipped } from "~/lib/email/templates";
+import {
+  sendOrderFulfilled,
+  sendOrderRefunded,
+  sendOrderShipped,
+} from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
 import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
+
+const STRIPE_REFUND_REASON_LABEL: Record<string, string> = {
+  requested_by_customer: "Customer requested refund",
+  duplicate: "Duplicate order",
+  fraudulent: "Fraudulent order",
+};
 
 export const orderRouter = createTRPCRouter({
   markAsFulfilled: ownerAdminProcedure
     .input(
-      z.object({
-        orderId: z.string(),
-        carrier: z.string(),
-        trackingNumber: z.string(),
-        trackingUrl: z.string(),
-      }),
+      z
+        .object({
+          orderId: z.string(),
+          carrier: z.string().optional(),
+          trackingNumber: z.string().optional(),
+          trackingUrl: z.string().optional(),
+        })
+        .superRefine((data, ctx) => {
+          const tn = data.trackingNumber?.trim();
+          if (tn && !data.carrier?.trim()) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message:
+                "Carrier is required when a tracking number is provided",
+              path: ["carrier"],
+            });
+          }
+        }),
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -41,40 +63,70 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
+      const hasTracking = Boolean(input.trackingNumber?.trim());
+      const trimmedTrackingUrl = input.trackingUrl?.trim();
+      const trackingUrlToSave =
+        trimmedTrackingUrl && trimmedTrackingUrl.length > 0
+          ? trimmedTrackingUrl
+          : null;
+
       // Update order
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
         data: {
           status: "fulfilled",
           fulfillmentStatus: "fulfilled",
-          trackingNumber: input.trackingNumber,
-          trackingUrl: input.trackingUrl,
           shippedAt: new Date(),
+          ...(hasTracking
+            ? {
+                trackingNumber: input.trackingNumber!.trim(),
+                trackingUrl: trackingUrlToSave,
+              }
+            : {
+                trackingNumber: null,
+                trackingUrl: null,
+              }),
         },
       });
 
-      // Send shipping notification email
       try {
-        await sendOrderShipped({
-          to: order.customerEmail,
-          orderNumber: order.orderNumber,
-          customerName: order.customerName ?? "Guest",
-          trackingNumber: input.trackingNumber,
-          trackingUrl: input.trackingUrl,
-          carrier: input.carrier,
-          business: {
-            name: order.business.name,
-            ownerEmail: order.business.ownerEmail,
-            siteContent: order.business.siteContent,
-            subdomain: order.business.subdomain,
-          },
-        });
-
-        console.log(
-          `[Orders] Shipping email sent for order #${order.orderNumber}`,
-        );
+        if (hasTracking) {
+          await sendOrderShipped({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            trackingNumber: input.trackingNumber!.trim(),
+            trackingUrl: trackingUrlToSave ?? "",
+            carrier: input.carrier!.trim(),
+            business: {
+              name: order.business.name,
+              ownerEmail: order.business.ownerEmail,
+              siteContent: order.business.siteContent,
+              subdomain: order.business.subdomain,
+            },
+          });
+          console.log(
+            `[Orders] Shipping email sent for order #${order.orderNumber}`,
+          );
+        } else {
+          await sendOrderFulfilled({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            business: {
+              name: order.business.name,
+              ownerEmail: order.business.ownerEmail,
+              siteContent: order.business.siteContent,
+              subdomain: order.business.subdomain,
+              customDomain: order.business.customDomain,
+            },
+          });
+          console.log(
+            `[Orders] Order fulfilled email sent for order #${order.orderNumber}`,
+          );
+        }
       } catch (emailError) {
-        console.error("[Orders] Failed to send shipping email:", emailError);
+        console.error("[Orders] Failed to send fulfillment email:", emailError);
         // Don't fail the mutation if email fails
       }
 
@@ -158,7 +210,16 @@ export const orderRouter = createTRPCRouter({
         },
         include: {
           business: {
-            select: { stripeAccountId: true },
+            select: {
+              stripeAccountId: true,
+              name: true,
+              ownerEmail: true,
+              subdomain: true,
+              customDomain: true,
+              siteContent: {
+                select: { logoUrl: true },
+              },
+            },
           },
         },
       });
@@ -293,7 +354,35 @@ export const orderRouter = createTRPCRouter({
         }
       }
 
-      // TODO: Send refund confirmation email to customer
+      try {
+        const reasonLabel = input.reason
+          ? (STRIPE_REFUND_REASON_LABEL[input.reason] ?? input.reason)
+          : null;
+        await sendOrderRefunded({
+          to: order.customerEmail,
+          orderNumber: order.orderNumber,
+          customerName: order.customerName ?? "Guest",
+          refundAmountCents: input.amount,
+          orderTotalCents: order.total,
+          isFullRefund,
+          reason: reasonLabel,
+          business: {
+            name: order.business.name,
+            ownerEmail: order.business.ownerEmail,
+            siteContent: order.business.siteContent,
+            subdomain: order.business.subdomain,
+            customDomain: order.business.customDomain,
+          },
+        });
+        console.log(
+          `[Orders] Refund confirmation email sent for order #${order.orderNumber}`,
+        );
+      } catch (emailError) {
+        console.error(
+          "[Orders] Failed to send refund confirmation email:",
+          emailError,
+        );
+      }
 
       return {
         success: true,

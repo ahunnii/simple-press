@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { BrandingEditor } from "../_components/branding-editor";
 import { TrailHeader } from "../../_components/trail-header";
+import { BrandingEditor } from "./_components/branding-editor";
 
 export default async function BrandingPage() {
   const business = await api.business.getWith({ includeSiteContent: true });
@@ -17,7 +17,7 @@ export default async function BrandingPage() {
       <TrailHeader
         breadcrumbs={[
           { label: "Content", href: "/admin/content" },
-          { label: "Branding" },
+          { label: "Brand Identity" },
         ]}
       />
 
@@ -27,5 +27,5 @@ export default async function BrandingPage() {
 }
 
 export const metadata = {
-  title: "Branding",
+  title: "Edit Brand Identity",
 };

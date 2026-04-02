@@ -1,7 +1,5 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { checkBusiness } from "~/lib/check-business";
-import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 import { DiscountForm } from "../_components/discount-form";

@@ -1,5 +1,4 @@
 import type { ReactElement } from "react";
-import { render } from "@react-email/components";
 
 import { env } from "~/env";
 

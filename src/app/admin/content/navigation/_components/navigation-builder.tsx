@@ -43,13 +43,11 @@ export function NavigationBuilder({ business, siteContent }: Props) {
     onSuccess: () => {
       toast.dismiss();
       toast.success("Navigation updated");
+      router.refresh();
     },
     onError: (error) => {
       toast.dismiss();
       toast.error(error.message || "Failed to update navigation");
-    },
-    onSettled: () => {
-      router.refresh();
     },
     onMutate: () => {
       toast.loading("Updating navigation...");
@@ -132,7 +130,7 @@ export function NavigationBuilder({ business, siteContent }: Props) {
           </Button>
           <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
-            <h1 className="text-base font-medium">{"Update Navigation"}</h1>
+            <h1 className="text-base font-medium">Edit Navigation</h1>
 
             <span
               className={`admin-status-badge ${

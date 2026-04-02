@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { TemplateFieldsEditor } from "../_components/template-fields-editor";
 import { TrailHeader } from "../../_components/trail-header";
+import { TemplateFieldsEditor } from "./_components/template-fields-editor";
 
 export default async function TemplateFieldsPage() {
   const business = await api.business.getWith({ includeSiteContent: true });

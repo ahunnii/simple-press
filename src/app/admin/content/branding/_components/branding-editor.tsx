@@ -24,8 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Form, FormField } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
+import { Form } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
@@ -52,6 +51,7 @@ type Props = {
 
 export function BrandingEditor({ business, siteContent }: Props) {
   const router = useRouter();
+  const utils = api.useUtils();
   const socialLinks = (siteContent.socialLinks as
     | {
         instagram?: string;
@@ -127,9 +127,8 @@ export function BrandingEditor({ business, siteContent }: Props) {
         faviconUrl: data.faviconUrl ?? null,
         faviconFile: null,
       });
-
-      // if (logoFileInputRef.current) logoFileInputRef.current.value = "";
-      // if (faviconFileInputRef.current) faviconFileInputRef.current.value = "";
+      void utils.business.invalidate();
+      router.refresh();
     },
     onError: (error) => {
       toast.dismiss();
@@ -137,9 +136,6 @@ export function BrandingEditor({ business, siteContent }: Props) {
     },
     onMutate: () => {
       toast.loading("Updating general settings...");
-    },
-    onSettled: () => {
-      router.refresh();
     },
   });
 
@@ -237,7 +233,6 @@ export function BrandingEditor({ business, siteContent }: Props) {
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(handleSubmit)(e)}
         className="min-h-screen bg-gray-50"
-        onChange={() => console.log(form.formState.errors)}
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">
@@ -249,7 +244,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
             </Button>
             <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
             <div className="hidden min-w-0 items-center gap-2 sm:flex">
-              <h1 className="text-base font-medium">Branding</h1>
+              <h1 className="text-base font-medium">Edit Brand Identity</h1>
 
               <span
                 className={`admin-status-badge ${
@@ -295,178 +290,67 @@ export function BrandingEditor({ business, siteContent }: Props) {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Visuals</CardTitle>
+                <CardTitle>Site Visuals</CardTitle>
                 <CardDescription>
-                  How does your site look to people? Upload a logo and choose a
-                  template.
+                  How does your site look to people?
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <SelectFormField
                   form={form}
                   name="templateId"
-                  label="Template *"
-                  description="Choose the design template for your storefront"
+                  label="Select a template"
+                  description="A template changes the overall look and feel of your storefront."
                   values={availableTemplates}
+                  required
                 />
-
-                <ImageUploadFormField
-                  form={form}
-                  name="logoFile"
-                  label="Logo image"
-                  description="Upload your store logo image here!"
-                  disabled={isSubmitting}
-                  existingPreviewUrl={siteContent?.logoUrl ?? undefined}
-                  inputRef={logoFileInputRef}
-                />
-
-                {/* <FormField
-                  control={form.control}
-                  name="primaryColor"
-                  render={({ field }) => (
-                    <>
-                      <Label htmlFor="primaryColor">Primary Color (WIP)</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="primaryColor"
-                          type="color"
-                          value={field.value ?? ""}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          className="h-10 w-20"
-                        />
-                        <Input
-                          type="text"
-                          value={field.value ?? ""}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          placeholder="#3b82f6"
-                          className="flex-1"
-                        />
-                      </div>
-                      <p className="mt-1 text-sm text-gray-500">
-                        Main color used for buttons and accents
-                      </p>
-                    </>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="secondaryColor"
-                  render={({ field }) => (
-                    <>
-                      <Label htmlFor="secondaryColor">
-                        Secondary Color (WIP)
-                      </Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="primaryColor"
-                          type="color"
-                          value={field.value ?? ""}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          className="h-10 w-20"
-                        />
-                        <Input
-                          type="text"
-                          value={field.value ?? ""}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          placeholder="#3b82f6"
-                          className="flex-1"
-                        />
-                      </div>
-                      <p className="mt-1 text-sm text-gray-500">
-                        Secondary color used for background and accents
-                      </p>
-                    </>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="accentColor"
-                  render={({ field }) => (
-                    <>
-                      <Label htmlFor="accentColor">Accent Color (WIP)</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="primaryColor"
-                          type="color"
-                          value={field.value ?? ""}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          className="h-10 w-20"
-                        />
-                        <Input
-                          type="text"
-                          value={field.value ?? ""}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          placeholder="#3b82f6"
-                          className="flex-1"
-                        />
-                      </div>
-                      <p className="mt-1 text-sm text-gray-500">
-                        Accent color used for buttons and accents
-                      </p>
-                    </>
-                  )}
-                /> */}
               </CardContent>
             </Card>
-            {/* Favicon */}
+
             <Card>
               <CardHeader>
-                <CardTitle>Favicon</CardTitle>
+                <CardTitle>Business Branding</CardTitle>
                 <CardDescription>
-                  The small icon shown in browser tabs
+                  Add your business branding here.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ImageUploadFormField
-                  form={form}
-                  name="faviconFile"
-                  label="Favicon Image"
-                  // placeholder="https://example.com/favicon.ico"
-                  description="Recommended: 32x32px or 16x16px .ico or .png"
-                  existingPreviewUrl={siteContent.faviconUrl ?? undefined}
-                  inputRef={faviconFileInputRef}
-                />
-                {/* <div>
-                  <Label htmlFor="faviconUrl">Favicon URL</Label>
-                  <div className="mt-2 flex gap-2">
-                    <Input
-                      id="faviconUrl"
-                      value={faviconUrl}
-                      onChange={(e) => setFaviconUrl(e.target.value)}
-                      placeholder="https://example.com/favicon.ico"
-                    />
-                    <Button variant="outline">
-                      <ImageIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Recommended: 32x32px or 16x16px .ico or .png
-                  </p>
-                  {faviconUrl && (
-                    <div className="mt-4 flex items-center gap-3">
-                      <img
-                        src={faviconUrl}
-                        alt="Favicon preview"
-                        className="h-8 w-8"
-                      />
-                      <span className="text-sm text-gray-600">Preview</span>
-                    </div>
-                  )}
-                </div> */}
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <ImageUploadFormField
+                    form={form}
+                    name="logoFile"
+                    label="Upload your store's logo"
+                    description="Your logo will be displayed in key places across your storefront.  Defaults to your store's name if no logo is uploaded."
+                    disabled={isSubmitting}
+                    existingPreviewUrl={siteContent?.logoUrl ?? undefined}
+                    inputRef={logoFileInputRef}
+                    className="col-span-1"
+                  />
+                  <ImageUploadFormField
+                    form={form}
+                    name="faviconFile"
+                    label="Upload your store's favicon"
+                    description="The small icon shown in browser tabs. Recommended: 32x32px or 16x16px .ico or .png. Defaults to SimplePress's favicon if no favicon is uploaded."
+                    existingPreviewUrl={siteContent.faviconUrl ?? undefined}
+                    inputRef={faviconFileInputRef}
+                    className="col-span-1"
+                  />
+                </div>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader>
-                <CardTitle>Footer</CardTitle>
+                <CardTitle>Socials and Footer</CardTitle>
                 <CardDescription>
-                  Footer text and social media links
+                  Promote your socials as well as add a footer tagline.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <TextareaFormField
                   form={form}
                   name="footerText"
-                  label="Footer Tagline"
+                  label="Add a footer tagline"
                   placeholder="We are here for you. Contact us for any questions or concerns."
                   rows={2}
                   description="This tagline will be displayed in the footer of your storefront. Acts like a mission statement or blurb about your business."

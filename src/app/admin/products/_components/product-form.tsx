@@ -42,13 +42,12 @@ import {
   FormItem,
   FormLabel,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { NumberInput } from "~/components/ui/number-input";
 import { Switch } from "~/components/ui/switch";
 import { InputFormField } from "~/components/inputs/input-form-field";
-import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
+import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 import { getExistingVariantOptions } from "../_utils/existing-variant-options";
@@ -104,11 +103,9 @@ export function ProductForm({ product }: Props) {
       inventoryQty: product?.inventoryQty ?? 0,
       allowBackorders: product?.allowBackorders ?? false,
       additionalFields: {
-        additionalInformation:
-          (storedAdditional?.additionalInformation as Record<
-            string,
-            unknown
-          > | undefined) ?? { ...EMPTY_TIPTAP_DOC },
+        additionalInformation: (storedAdditional?.additionalInformation as
+          | Record<string, unknown>
+          | undefined) ?? { ...EMPTY_TIPTAP_DOC },
         productFeatures: storedAdditional?.productFeatures ?? [],
       },
     },
@@ -622,7 +619,7 @@ export function ProductForm({ product }: Props) {
                   form={form}
                   name="additionalFields.additionalInformation"
                   label="Additional information"
-                  description="Shown in the &quot;Additional Information&quot; tab on the product page."
+                  description='Shown in the "Additional Information" tab on the product page.'
                   output="json"
                 />
                 <ProductFeaturesField form={form} />

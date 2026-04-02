@@ -136,7 +136,7 @@ export const discountRouter = createTRPCRouter({
     return deactivateExpiredDiscountCodes(ctx.db, businessId);
   }),
 
-  getActiveBanner: publicProcedure.query(async ({ ctx, input }) => {
+  getActiveBanner: publicProcedure.query(async ({ ctx }) => {
     const business = await checkBusiness();
     if (!business) {
       throw new TRPCError({

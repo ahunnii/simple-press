@@ -1,6 +1,6 @@
 import { TrailHeader } from "~/app/admin/_components/trail-header";
 
-import { PageEditor } from "../../_components/page-editor";
+import { PageEditor } from "../_components/page-editor";
 
 export default async function NewPagePage() {
   return (
@@ -8,7 +8,7 @@ export default async function NewPagePage() {
       <TrailHeader
         breadcrumbs={[
           { label: "Content", href: "/admin/content" },
-          { label: "Custom Pages", href: "/admin/content/pages" },
+          { label: "Pages", href: "/admin/content/pages" },
           { label: "New Page" },
         ]}
       />

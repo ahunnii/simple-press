@@ -374,27 +374,6 @@ export function PoliciesManager({ business }: Props) {
     );
   };
 
-  // // Check if any policy form has unsaved changes (different from fetched policy pages)
-  // const isDirty = Object.entries(forms).some(([key, form]) => {
-  //   const template = POLICY_TEMPLATES[key as keyof typeof POLICY_TEMPLATES];
-  //   const existing = existingPolicies.get(template.slug);
-  //   const formContent = form.getValues().content;
-
-  //   // If no existing, consider dirty if form is not empty
-  //   if (!existing) {
-  //     return (
-  //       !!formContent &&
-  //       formContent.type === "doc" &&
-  //       formContent.content &&
-  //       formContent.content.length > 0
-  //     );
-  //   }
-
-  //   // Compare form content with existing policy content (TipTap JSON)
-  //   // Basic deep comparison using JSON.stringify - adjust for edge cases if needed
-  //   return JSON.stringify(formContent) !== JSON.stringify(existing.content);
-  // });
-
   const isSaving = createPage.isPending || updatePage.isPending;
 
   const handleReset = () => {

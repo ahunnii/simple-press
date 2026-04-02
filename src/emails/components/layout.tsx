@@ -5,7 +5,6 @@ import {
   Hr,
   Html,
   Img,
-  Link,
   Section,
   Text,
 } from "@react-email/components";
@@ -20,7 +19,6 @@ type EmailLayoutProps = {
 
 export function EmailLayout({
   children,
-  previewText,
   businessName,
   logoUrl,
   footerText,

@@ -9,10 +9,7 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "./happy-bamboo-animations";
-import {
-  HappyBambooHorizontalProductCard,
-  HappyBambooProductCard,
-} from "./happy-bamboo-product-card";
+import { HappyBambooHorizontalProductCard } from "./happy-bamboo-product-card";
 
 export const metadata: Metadata = {
   title: "Shop",

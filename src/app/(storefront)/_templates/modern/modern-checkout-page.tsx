@@ -1,12 +1,11 @@
 import type { DefaultCheckoutPageTemplateProps } from "../types";
 
 import { ModernCheckoutForm } from "./modern-checkout-form";
-import { ModernFooter } from "./modern-footer";
-import { ModernHeader } from "./modern-header";
 
 export function ModernCheckoutPage({
   business,
 }: DefaultCheckoutPageTemplateProps) {
+  console.log(business.id);
   return (
     <div>
       <div className="bg-background">

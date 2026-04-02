@@ -1,12 +1,11 @@
 import type { DefaultCartPageTemplateProps } from "../types";
 
 import { ModernCartContent } from "./modern-cart-content";
-import { ModernFooter } from "./modern-footer";
-import { ModernHeader } from "./modern-header";
 
 export default function ModernCartPage({
   business,
 }: DefaultCartPageTemplateProps) {
+  console.log(business.id);
   return (
     <div>
       <div className="bg-background">

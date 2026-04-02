@@ -1,5 +1,5 @@
 import { inferAdditionalFields } from "better-auth/client/plugins";
-import { captcha, organization } from "better-auth/plugins";
+import { organization } from "better-auth/plugins";
 import { createAuthClient } from "better-auth/react";
 
 import type { auth } from "./config";

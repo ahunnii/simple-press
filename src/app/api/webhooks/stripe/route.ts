@@ -4,7 +4,10 @@ import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
-import { sendOrderConfirmation } from "~/lib/email/templates";
+import {
+  sendNewOrderNotification,
+  sendOrderConfirmation,
+} from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
 
@@ -679,7 +682,39 @@ export async function POST(req: NextRequest) {
           // Don't fail the webhook if email fails
         }
 
-        // TODO: Notify store owner
+        try {
+          await sendNewOrderNotification({
+            to: business.ownerEmail,
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            customerEmail: order.customerEmail,
+            items: order.items.map((item) => ({
+              productName: item.productName,
+              variantName: item.variantName,
+              quantity: item.quantity,
+              total: Math.round(item.total),
+            })),
+            subtotal: order.subtotal,
+            shipping: order.shipping,
+            tax: order.tax,
+            discount: order.discount,
+            total: order.total,
+            business: {
+              name: business.name,
+              siteContent: business.siteContent,
+              subdomain: business.subdomain,
+            },
+          });
+          console.log(
+            `[Webhook] New order notification sent to ${business.ownerEmail}`,
+          );
+        } catch (ownerEmailError) {
+          console.error(
+            "[Webhook] Failed to send owner new-order notification:",
+            ownerEmailError,
+          );
+        }
 
         return NextResponse.json({ received: true });
       } catch (orderError: unknown) {

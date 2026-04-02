@@ -1,9 +1,9 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound, useParams } from "next/navigation";
 import {
   ArrowLeft,
   Check,
@@ -14,31 +14,19 @@ import {
   Shield,
   ShoppingBag,
   Sparkles,
-  type LucideIcon,
 } from "lucide-react";
-import { toast } from "sonner";
 
 import type { DefaultProductPageTemplateProps } from "../types";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
-import { Spotlight } from "~/components/ui/spotlight-new";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import {
-  TiptapRenderer,
-  type TiptapJSON,
-} from "~/components/tiptap-renderer";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { BambooVariantSelector } from "./bamboo-variant-selector";
 import {
@@ -53,9 +41,7 @@ type ProductAdditionalFields = {
   productFeatures?: Array<{ icon: string; text: string }>;
 } | null;
 
-function parseProductAdditionalFields(
-  raw: unknown,
-): ProductAdditionalFields {
+function parseProductAdditionalFields(raw: unknown): ProductAdditionalFields {
   if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
     return null;
   }
@@ -207,7 +193,7 @@ export function HappyBambooProductPage({
     variantOptions,
     displayPrice,
     handleAddToCart,
-    remainingStock,
+
     canAddMore,
     handleDecrement,
     handleIncrement,
@@ -235,7 +221,7 @@ export function HappyBambooProductPage({
     parseProductAdditionalFields(product.additionalFields),
   );
 
-  const related: (typeof product)[] = [];
+  // const related: (typeof product)[] = [];
   return (
     <PageTransition>
       <section className="mx-auto max-w-7xl px-4 py-8 lg:px-8">

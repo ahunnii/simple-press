@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
@@ -274,7 +275,7 @@ function FileUploadFormFieldInner({
             }}
             onDragOver={(e) => e.preventDefault()}
             className={cn(
-              "border-border border-muted-foreground/25 rounded-lg border-2 border-dashed p-4 text-center text-sm transition-colors",
+              "border-border rounded-lg border-2 border-dashed p-4 text-center text-sm transition-colors",
               "hover:border-muted-foreground/50 hover:bg-muted/50",
               disabled && "pointer-events-none opacity-50",
             )}

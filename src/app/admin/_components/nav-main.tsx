@@ -3,9 +3,7 @@
 import type { Icon } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconCirclePlusFilled, IconMail } from "@tabler/icons-react";
 
-import { Button } from "~/components/ui/button";
 import {
   SidebarGroup,
   SidebarGroupContent,

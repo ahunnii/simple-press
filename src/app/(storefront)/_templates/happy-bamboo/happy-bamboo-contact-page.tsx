@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Clock, Mail, MapPin, MessageSquare, Phone } from "lucide-react";

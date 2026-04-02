@@ -1,4 +1,4 @@
-import { Inter, Outfit, Plus_Jakarta_Sans } from "next/font/google";
+import { Outfit } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../types";
 

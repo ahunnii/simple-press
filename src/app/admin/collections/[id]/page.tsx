@@ -36,6 +36,6 @@ export const generateMetadata = async ({ params }: PageProps) => {
   const collection = await api.collections.getById(id);
   if (!collection) notFound();
   return {
-    title: collection.name ?? "Edit Collection",
+    title: `Edit ${collection?.name ?? "Collection"}`,
   };
 };

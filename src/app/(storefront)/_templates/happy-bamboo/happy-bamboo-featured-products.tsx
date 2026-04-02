@@ -3,15 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Eye, ShoppingBag, ShoppingCart } from "lucide-react";
+import { ArrowRight, Eye, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { formatPrice } from "~/lib/prices";
-import { cn } from "~/lib/utils";
-import { api } from "~/trpc/react";
-import { Badge } from "~/components/ui/badge";
-import { Button, buttonVariants } from "~/components/ui/button";
+import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
 import {

@@ -32,6 +32,7 @@ type Props<CurrentForm extends FieldValues> = {
   }[];
   onValueChange?: (value: string) => void;
   defaultValue?: string;
+  required?: boolean;
 };
 
 export const SelectFormField = <CurrentForm extends FieldValues>({
@@ -44,6 +45,7 @@ export const SelectFormField = <CurrentForm extends FieldValues>({
   placeholder,
   values,
   onValueChange,
+  required,
 }: Props<CurrentForm>) => {
   return (
     <FormField
@@ -51,7 +53,11 @@ export const SelectFormField = <CurrentForm extends FieldValues>({
       name={name}
       render={({ field }) => (
         <FormItem className={cn("col-span-full", className)}>
-          {label && <FormLabel>{label}</FormLabel>}
+          {label && (
+            <FormLabel>
+              {label} {required && <span className="text-red-500">*</span>}
+            </FormLabel>
+          )}
           <FormControl>
             <Select
               disabled={disabled}

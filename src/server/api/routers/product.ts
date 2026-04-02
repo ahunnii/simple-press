@@ -1,7 +1,7 @@
+import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { Prisma } from "../../../../generated/prisma";
 import { checkBusiness } from "~/lib/check-business";
 import {
   productCreateSchema,

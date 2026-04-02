@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ContactFormEmail from "~/emails/contact-form";
+import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
+import OrderFulfilledEmail from "~/emails/order-fulfilled";
+import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import WelcomeEmail from "~/emails/welcome";
@@ -63,6 +66,61 @@ export async function sendOrderConfirmation(params: {
   });
 }
 
+// New order — notify store owner (platform email)
+export async function sendNewOrderNotification(params: {
+  to: string;
+  orderId: string;
+  orderNumber: number;
+  customerName: string;
+  customerEmail: string;
+  items: Array<{
+    productName: string;
+    variantName: string | null;
+    quantity: number;
+    total: number;
+  }>;
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  discount: number;
+  total: number;
+  business: {
+    name: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+  };
+}) {
+  const adminOrderUrl = `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/admin/orders/${params.orderId}`;
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.customerEmail,
+    subject: `New order #${params.orderNumber} — ${params.business.name}`,
+    react: NewOrderNotificationEmail({
+      orderNumber: params.orderNumber,
+      customerName: params.customerName,
+      customerEmail: params.customerEmail,
+      items: params.items,
+      subtotal: params.subtotal,
+      shipping: params.shipping,
+      tax: params.tax,
+      discount: params.discount,
+      total: params.total,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      adminOrderUrl,
+    }),
+    tags: [
+      { name: "category", value: "new_order_owner" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
 // Order Shipped
 export async function sendOrderShipped(params: {
   to: string;
@@ -104,6 +162,94 @@ export async function sendOrderShipped(params: {
   });
 }
 
+// Order marked fulfilled without tracking (customer)
+export async function sendOrderFulfilled(params: {
+  to: string;
+  orderNumber: number;
+  customerName: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+  };
+}) {
+  const businessUrl = params.business.customDomain
+    ? `https://${params.business.customDomain}`
+    : `https://${params.business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: `Order #${params.orderNumber} has been fulfilled`,
+    react: OrderFulfilledEmail({
+      orderNumber: params.orderNumber,
+      customerName: params.customerName,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      businessUrl,
+    }),
+    tags: [
+      { name: "category", value: "order_fulfilled" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
+// Refund confirmation (customer)
+export async function sendOrderRefunded(params: {
+  to: string;
+  orderNumber: number;
+  customerName: string;
+  refundAmountCents: number;
+  orderTotalCents: number;
+  isFullRefund: boolean;
+  reason?: string | null;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+  };
+}) {
+  const businessUrl = params.business.customDomain
+    ? `https://${params.business.customDomain}`
+    : `https://${params.business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: params.isFullRefund
+      ? `Refund for order #${params.orderNumber}`
+      : `Partial refund for order #${params.orderNumber}`,
+    react: OrderRefundedEmail({
+      orderNumber: params.orderNumber,
+      customerName: params.customerName,
+      refundAmountCents: params.refundAmountCents,
+      orderTotalCents: params.orderTotalCents,
+      isFullRefund: params.isFullRefund,
+      reason: params.reason,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      businessUrl,
+    }),
+    tags: [
+      { name: "category", value: "order_refunded" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
 // Contact Form Submission (to owner)
 export async function sendContactFormSubmission(params: {
   name: string;
@@ -115,6 +261,9 @@ export async function sendContactFormSubmission(params: {
   business: {
     name: string;
     ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
   };
 }) {
   return sendEmail({
@@ -130,6 +279,7 @@ export async function sendContactFormSubmission(params: {
       subject: params.subject,
       message: params.message,
       businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
     }),
     tags: [{ name: "category", value: "contact_form" }],
   });

@@ -30,6 +30,7 @@ type Props<CurrentForm extends FieldValues> = {
   messageLength?: number;
 
   textareaClassName?: string;
+  descriptionClassName?: string;
 };
 
 export const TextareaFormField = <CurrentForm extends FieldValues>({
@@ -45,12 +46,14 @@ export const TextareaFormField = <CurrentForm extends FieldValues>({
   onFocus,
   onBlur,
   labelClassName,
+
   maxLength,
   required,
   rows = 4,
   messageLength,
 
   textareaClassName,
+  descriptionClassName,
 }: Props<CurrentForm>) => {
   return (
     <FormField
@@ -58,7 +61,10 @@ export const TextareaFormField = <CurrentForm extends FieldValues>({
       name={name}
       render={({ field }) => (
         <FormItem className={cn("col-span-full", className)}>
-          <FormLabel className={cn(labelClassName)}>{label}</FormLabel>
+          <FormLabel className={cn(labelClassName)}>
+            {label}
+            {required && <span className="text-red-500">*</span>}
+          </FormLabel>
           {maxLength && (
             <span className="text-xs text-gray-500">
               {messageLength ?? 0}/{maxLength ?? 0}
@@ -91,7 +97,11 @@ export const TextareaFormField = <CurrentForm extends FieldValues>({
               />
             </div>
           </FormControl>
-          {description && <FormDescription>{description}</FormDescription>}
+          {description && (
+            <FormDescription className={cn(descriptionClassName)}>
+              {description}
+            </FormDescription>
+          )}
           <FormMessage />
         </FormItem>
       )}

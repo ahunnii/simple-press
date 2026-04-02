@@ -6,10 +6,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard } from "@tabler/icons-react";
-import { Leaf, Menu, ShoppingBag, ShoppingCart } from "lucide-react";
+import { Leaf, Menu, ShoppingCart } from "lucide-react";
 import { motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../types";
+import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
@@ -22,10 +23,6 @@ import {
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
 
-import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
-
-import { MobileNav } from "./bamboo-mobile-nav";
-import { FadeIn } from "./happy-bamboo-animations";
 import { HappyBambooCartDrawer } from "./happy-bamboo-cart-drawer";
 
 const NAV_LINKS = [
@@ -36,7 +33,7 @@ const NAV_LINKS = [
 ] as const;
 
 export function HappyBambooHeader({ business }: DefaultHeaderTemplateProps) {
-  const { itemCount, isOpen, setIsOpen } = useCart();
+  const { itemCount, setIsOpen } = useCart();
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
 

@@ -1,5 +1,5 @@
-import type { NodeViewProps } from "@tiptap/react";
-import type { Editor } from "@tiptap/react";
+/* eslint-disable @next/next/no-img-element */
+import type { Editor, NodeViewProps } from "@tiptap/react";
 import * as React from "react";
 import { InfoCircledIcon, TrashIcon } from "@radix-ui/react-icons";
 import { NodeViewWrapper } from "@tiptap/react";

@@ -52,14 +52,14 @@ export function ContentDashboard({ pages }: Props) {
                   <Home className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <CardTitle>Branding</CardTitle>
-                  <CardDescription>Logo, colors, fonts</CardDescription>
+                  <CardTitle>Brand Identity </CardTitle>
+                  <CardDescription>Personality of your site</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
-                Edit your branding and layout
+                Edit your logo, template selection, socials, and more
               </p>
             </CardContent>
           </Card>
@@ -87,10 +87,6 @@ export function ContentDashboard({ pages }: Props) {
               <p className="mb-3 text-sm text-gray-600">
                 About, Contact, FAQ, and custom pages
               </p>
-              {/* <Button variant="outline" size="sm" className="w-full">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Page
-                </Button> */}
             </CardContent>
           </Card>
         </Link>
@@ -162,7 +158,7 @@ export function ContentDashboard({ pages }: Props) {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
-                Meta tags, favicons, social media
+                Meta tags, favicons, social media preview images
               </p>
             </CardContent>
           </Card>

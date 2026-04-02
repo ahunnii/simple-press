@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { api } from "~/trpc/server";
 import {
   Card,
@@ -9,8 +7,8 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
-import { TrailHeader } from "../../_components/trail-header";
 import { UsersTable } from "../_components/users-table";
+import { TrailHeader } from "../../_components/trail-header";
 
 export default async function UsersPage() {
   const { users } = await api.platform.listUsers();
