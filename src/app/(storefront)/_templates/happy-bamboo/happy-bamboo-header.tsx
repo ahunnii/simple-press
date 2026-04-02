@@ -13,6 +13,7 @@ import type { DefaultHeaderTemplateProps } from "../types";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
+import { HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import {
   Sheet,
@@ -32,10 +33,13 @@ const NAV_LINKS = [
   { href: "/contact", label: "Contact" },
 ] as const;
 
-export function HappyBambooHeader({ business }: DefaultHeaderTemplateProps) {
+export function HappyBambooHeader({
+  business,
+  session,
+}: DefaultHeaderTemplateProps) {
   const { itemCount, setIsOpen } = useCart();
   const pathname = usePathname();
-  const { data: session, isPending } = authClient.useSession();
+  // const { data: session, isPending } = authClient.useSession();
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -122,17 +126,11 @@ export function HappyBambooHeader({ business }: DefaultHeaderTemplateProps) {
           </nav>
 
           <div className="flex items-center gap-4">
-            {isPending ? (
-              <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
-            ) : session?.user ? (
-              userMenu
-            ) : (
-              authActions
-            )}
+            {session?.user ? userMenu : authActions}
             <Button
               variant="ghost"
               size="icon"
-              className="text-background hover:bg-background/10 hover:text-[#E3CF99] relative"
+              className="text-background hover:bg-background/10 relative hover:text-[#E3CF99]"
               onClick={() => setIsOpen(true)}
               aria-label="Open cart"
             >
@@ -164,19 +162,16 @@ export function HappyBambooHeader({ business }: DefaultHeaderTemplateProps) {
                 side="right"
                 className={cn(
                   "flex w-[min(100vw-1rem,20rem)] flex-col gap-0 border-l border-[#608418]/20 p-0",
-                  "[&>button]:text-background [&>button]:hover:bg-white/15 [&>button]:opacity-90 [&>button]:hover:opacity-100",
+                  "[&>button]:text-background [&>button]:opacity-90 [&>button]:hover:bg-white/15 [&>button]:hover:opacity-100",
                 )}
               >
                 <div className="bg-[#608418] pt-12 pr-14 pb-5 pl-4">
                   <SheetTitle className="text-background flex items-center gap-2.5 text-left text-lg font-semibold tracking-tight">
-                    <span className="bg-[#E3CF99]/20 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <Leaf
-                        className="text-[#E3CF99] h-5 w-5"
-                        aria-hidden
-                      />
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E3CF99]/20">
+                      <Leaf className="h-5 w-5 text-[#E3CF99]" aria-hidden />
                     </span>
                     <span className="flex min-w-0 flex-col gap-0.5">
-                      <span className="text-[#E3CF99]/90 text-xs font-medium uppercase tracking-widest">
+                      <span className="text-xs font-medium tracking-widest text-[#E3CF99]/90 uppercase">
                         Explore
                       </span>
                       <span className="truncate">
@@ -191,7 +186,7 @@ export function HappyBambooHeader({ business }: DefaultHeaderTemplateProps) {
                 </div>
 
                 <nav
-                  className="bg-[#FFFCF6] flex flex-1 flex-col gap-1 overflow-y-auto overscroll-contain p-3"
+                  className="flex flex-1 flex-col gap-1 overflow-y-auto overscroll-contain bg-[#FFFCF6] p-3"
                   aria-label="Mobile navigation"
                 >
                   {links.map((link) => {
@@ -205,7 +200,7 @@ export function HappyBambooHeader({ business }: DefaultHeaderTemplateProps) {
                           "flex min-h-12 items-center rounded-lg border-l-4 py-3 pr-4 pl-3 text-base font-medium transition-colors",
                           active
                             ? "border-[#608418] bg-[#E3CF99]/40 text-[#3d560d] shadow-sm"
-                            : "text-foreground/85 hover:bg-[#608418]/8 hover:text-[#608418] border-transparent active:bg-[#608418]/12",
+                            : "text-foreground/85 border-transparent hover:bg-[#608418]/8 hover:text-[#608418] active:bg-[#608418]/12",
                         )}
                       >
                         {link.label}
@@ -214,7 +209,7 @@ export function HappyBambooHeader({ business }: DefaultHeaderTemplateProps) {
                   })}
                 </nav>
 
-                <div className="border-[#608418]/12 bg-[#F5F0E4] border-t px-4 py-3 text-center text-xs leading-relaxed text-[#5a6b3a]">
+                <div className="border-t border-[#608418]/12 bg-[#F5F0E4] px-4 py-3 text-center text-xs leading-relaxed text-[#5a6b3a]">
                   Tree-free products · Crafted with care
                 </div>
               </SheetContent>

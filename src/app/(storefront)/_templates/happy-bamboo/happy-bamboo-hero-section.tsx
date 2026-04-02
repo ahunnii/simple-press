@@ -42,23 +42,36 @@ export function HappyBambooHeroSection({
 
       <div className="relative z-10 container mx-auto flex min-h-[90vh] items-center justify-center px-4 py-20">
         <div className="flex max-w-3xl flex-col items-center text-center">
-          <FadeIn delay={0} className="mb-4 flex items-center gap-2">
+          {/* <FadeIn delay={0} className="mb-4 flex items-center gap-2">
             <Leaf className="text-primary h-5 w-5" />
             <span className="text-lg font-semibold tracking-widest text-white/90 uppercase">
               {heroWelcome}
             </span>
-          </FadeIn>
+          </FadeIn> */}
 
-          <FadeIn delay={0.15}>
-            <h1 className="mb-4 text-6xl leading-tight font-bold text-white md:text-7xl lg:text-8xl">
-              {heroTitle}
+          <FadeIn delay={0}>
+            <h1 className="mb-2 text-6xl leading-tight font-bold text-white uppercase md:text-7xl lg:text-8xl">
+              {heroWelcome}
             </h1>
           </FadeIn>
 
+          <FadeIn delay={0.15}>
+            <p className="text-primary mb-3 text-5xl leading-tight font-extrabold drop-shadow-md md:text-6xl lg:text-7xl">
+              {heroTitle}
+            </p>
+          </FadeIn>
+
+          {/* <FadeIn delay={0.15}>
+            <h1 className="mb-4 text-6xl leading-tight font-bold text-white md:text-7xl lg:text-8xl">
+              {heroTitle}
+            </h1>
+          </FadeIn> */}
+
           <FadeIn delay={0.25}>
-            <h2 className="mb-4 text-4xl font-semibold text-white md:text-5xl">
+            <p className="mb-4 flex items-center gap-2 text-2xl font-semibold tracking-wide text-white/80 md:text-3xl">
+              <Leaf className="text-primary h-5 w-5 shrink-0" />
               {heroTagline}
-            </h2>
+            </p>
           </FadeIn>
 
           <FadeIn delay={0.35}>
@@ -66,6 +79,18 @@ export function HappyBambooHeroSection({
               {heroDescription}
             </p>
           </FadeIn>
+
+          {/* <FadeIn delay={0.25}>
+            <h2 className="mb-4 text-4xl font-semibold text-white md:text-5xl">
+              {heroTagline}
+            </h2>
+          </FadeIn> */}
+
+          {/* <FadeIn delay={0.35}>
+            <p className="mb-10 text-xl text-white/80 md:text-2xl">
+              {heroDescription}
+            </p>
+          </FadeIn> */}
 
           <FadeIn delay={0.45}>
             <Button

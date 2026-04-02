@@ -321,6 +321,7 @@ export const businessRouter = createTRPCRouter({
       z.object({
         includePages: z.boolean().optional(),
         includeSiteContent: z.boolean().optional(),
+        includeBlog: z.boolean().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -333,6 +334,11 @@ export const businessRouter = createTRPCRouter({
         ...(input?.includeSiteContent
           ? {
               siteContent: true,
+            }
+          : {}),
+        ...(input?.includeBlog
+          ? {
+              pages: { where: { type: "blog" }, orderBy: { sortOrder: "asc" } },
             }
           : {}),
       };
@@ -413,11 +419,7 @@ export const businessRouter = createTRPCRouter({
   updateShipping: ownerAdminProcedure
     .input(
       z.object({
-        shippingType: z.enum([
-          "free",
-          "flat_rate",
-          "flat_rate_with_threshold",
-        ]),
+        shippingType: z.enum(["free", "flat_rate", "flat_rate_with_threshold"]),
         shippingFlatRate: z.number().int().min(0).nullable().optional(),
         freeShippingThreshold: z.number().int().min(0).nullable().optional(),
         offersInStorePickup: z.boolean(),

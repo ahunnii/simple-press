@@ -1,3 +1,4 @@
+import type { Session } from "~/server/better-auth/config";
 import type { RouterOutputs } from "~/trpc/react";
 
 export type DefaultHomepageTemplateProps = {
@@ -11,6 +12,7 @@ export type DefaultLayoutTemplateProps = {
 
 export type DefaultHeaderTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
+  session?: Session | null;
 };
 
 export type DefaultFooterTemplateProps = {
@@ -43,4 +45,13 @@ export type DefaultCartPageTemplateProps = {
 
 export type DefaultCheckoutPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
+};
+
+export type DefaultBlogPostPageTemplateProps = {
+  page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
+  relatedPosts: NonNullable<RouterOutputs["content"]["getBlogPages"]>;
+};
+
+export type DefaultBlogPageTemplateProps = {
+  pages: NonNullable<RouterOutputs["content"]["getBlogPages"]>;
 };

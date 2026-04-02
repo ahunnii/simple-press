@@ -29,10 +29,10 @@ export function HappyBambooAboutSection({
   aboutButtonLink = "/about",
 }: Props) {
   return (
-    <section className="py-20 md:py-32">
+    <section className="pt-20 pb-10 md:pt-32 md:pb-16">
       <div className="container mx-auto px-4">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
-          <FadeIn direction="left" className="relative">
+        <div className="grid items-center gap-12 lg:grid-cols-1">
+          <FadeIn direction="up" className="relative">
             <div className="relative aspect-video overflow-hidden rounded-2xl">
               <video
                 className="absolute inset-0 h-full w-full object-fill"
@@ -54,7 +54,7 @@ export function HappyBambooAboutSection({
             </ScaleIn>
           </FadeIn>
 
-          <FadeIn direction="right" className="space-y-6">
+          <FadeIn direction="up" className="space-y-6 text-center">
             <span className="text-primary text-sm font-semibold tracking-wider uppercase">
               Zaires Visions
             </span>
@@ -83,7 +83,7 @@ export function HappyBambooAboutSection({
                 </p>
               </div>
             )}
-            <Button variant="outline" className="group" asChild>
+            <Button className="group" asChild>
               <Link href={aboutButtonLink ?? "/about"}>
                 {aboutButtonText}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

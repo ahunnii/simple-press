@@ -9,6 +9,7 @@ const additionalFieldsSchema = z
   .object({
     additionalInformation: z.record(z.string(), z.unknown()).optional(),
     productFeatures: z.array(productFeatureSchema).optional(),
+    // comingSoon: z.boolean().optional().nullable(),
   })
   .optional();
 

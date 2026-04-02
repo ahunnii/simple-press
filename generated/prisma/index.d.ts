@@ -27973,6 +27973,7 @@ export namespace Prisma {
     title: string | null
     slug: string | null
     excerpt: string | null
+    image: string | null
     metaTitle: string | null
     metaDescription: string | null
     metaKeywords: string | null
@@ -27991,6 +27992,7 @@ export namespace Prisma {
     title: string | null
     slug: string | null
     excerpt: string | null
+    image: string | null
     metaTitle: string | null
     metaDescription: string | null
     metaKeywords: string | null
@@ -28010,6 +28012,7 @@ export namespace Prisma {
     slug: number
     content: number
     excerpt: number
+    image: number
     metaTitle: number
     metaDescription: number
     metaKeywords: number
@@ -28038,6 +28041,7 @@ export namespace Prisma {
     title?: true
     slug?: true
     excerpt?: true
+    image?: true
     metaTitle?: true
     metaDescription?: true
     metaKeywords?: true
@@ -28056,6 +28060,7 @@ export namespace Prisma {
     title?: true
     slug?: true
     excerpt?: true
+    image?: true
     metaTitle?: true
     metaDescription?: true
     metaKeywords?: true
@@ -28075,6 +28080,7 @@ export namespace Prisma {
     slug?: true
     content?: true
     excerpt?: true
+    image?: true
     metaTitle?: true
     metaDescription?: true
     metaKeywords?: true
@@ -28181,6 +28187,7 @@ export namespace Prisma {
     slug: string
     content: JsonValue
     excerpt: string | null
+    image: string | null
     metaTitle: string | null
     metaDescription: string | null
     metaKeywords: string | null
@@ -28219,6 +28226,7 @@ export namespace Prisma {
     slug?: boolean
     content?: boolean
     excerpt?: boolean
+    image?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
     metaKeywords?: boolean
@@ -28239,6 +28247,7 @@ export namespace Prisma {
     slug?: boolean
     content?: boolean
     excerpt?: boolean
+    image?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
     metaKeywords?: boolean
@@ -28259,6 +28268,7 @@ export namespace Prisma {
     slug?: boolean
     content?: boolean
     excerpt?: boolean
+    image?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
     metaKeywords?: boolean
@@ -28279,6 +28289,7 @@ export namespace Prisma {
     slug?: boolean
     content?: boolean
     excerpt?: boolean
+    image?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
     metaKeywords?: boolean
@@ -28290,7 +28301,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "title" | "slug" | "content" | "excerpt" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "published" | "sortOrder" | "type" | "template" | "businessId", ExtArgs["result"]["page"]>
+  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "title" | "slug" | "content" | "excerpt" | "image" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "published" | "sortOrder" | "type" | "template" | "businessId", ExtArgs["result"]["page"]>
   export type PageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -28314,6 +28325,7 @@ export namespace Prisma {
       slug: string
       content: Prisma.JsonValue
       excerpt: string | null
+      image: string | null
       metaTitle: string | null
       metaDescription: string | null
       metaKeywords: string | null
@@ -28754,6 +28766,7 @@ export namespace Prisma {
     readonly slug: FieldRef<"Page", 'String'>
     readonly content: FieldRef<"Page", 'Json'>
     readonly excerpt: FieldRef<"Page", 'String'>
+    readonly image: FieldRef<"Page", 'String'>
     readonly metaTitle: FieldRef<"Page", 'String'>
     readonly metaDescription: FieldRef<"Page", 'String'>
     readonly metaKeywords: FieldRef<"Page", 'String'>
@@ -39197,6 +39210,7 @@ export namespace Prisma {
     slug: 'slug',
     content: 'content',
     excerpt: 'excerpt',
+    image: 'image',
     metaTitle: 'metaTitle',
     metaDescription: 'metaDescription',
     metaKeywords: 'metaKeywords',
@@ -41577,6 +41591,7 @@ export namespace Prisma {
     slug?: StringFilter<"Page"> | string
     content?: JsonFilter<"Page">
     excerpt?: StringNullableFilter<"Page"> | string | null
+    image?: StringNullableFilter<"Page"> | string | null
     metaTitle?: StringNullableFilter<"Page"> | string | null
     metaDescription?: StringNullableFilter<"Page"> | string | null
     metaKeywords?: StringNullableFilter<"Page"> | string | null
@@ -41597,6 +41612,7 @@ export namespace Prisma {
     slug?: SortOrder
     content?: SortOrder
     excerpt?: SortOrderInput | SortOrder
+    image?: SortOrderInput | SortOrder
     metaTitle?: SortOrderInput | SortOrder
     metaDescription?: SortOrderInput | SortOrder
     metaKeywords?: SortOrderInput | SortOrder
@@ -41621,6 +41637,7 @@ export namespace Prisma {
     slug?: StringFilter<"Page"> | string
     content?: JsonFilter<"Page">
     excerpt?: StringNullableFilter<"Page"> | string | null
+    image?: StringNullableFilter<"Page"> | string | null
     metaTitle?: StringNullableFilter<"Page"> | string | null
     metaDescription?: StringNullableFilter<"Page"> | string | null
     metaKeywords?: StringNullableFilter<"Page"> | string | null
@@ -41641,6 +41658,7 @@ export namespace Prisma {
     slug?: SortOrder
     content?: SortOrder
     excerpt?: SortOrderInput | SortOrder
+    image?: SortOrderInput | SortOrder
     metaTitle?: SortOrderInput | SortOrder
     metaDescription?: SortOrderInput | SortOrder
     metaKeywords?: SortOrderInput | SortOrder
@@ -41668,6 +41686,7 @@ export namespace Prisma {
     slug?: StringWithAggregatesFilter<"Page"> | string
     content?: JsonWithAggregatesFilter<"Page">
     excerpt?: StringNullableWithAggregatesFilter<"Page"> | string | null
+    image?: StringNullableWithAggregatesFilter<"Page"> | string | null
     metaTitle?: StringNullableWithAggregatesFilter<"Page"> | string | null
     metaDescription?: StringNullableWithAggregatesFilter<"Page"> | string | null
     metaKeywords?: StringNullableWithAggregatesFilter<"Page"> | string | null
@@ -44786,6 +44805,7 @@ export namespace Prisma {
     slug: string
     content: JsonNullValueInput | InputJsonValue
     excerpt?: string | null
+    image?: string | null
     metaTitle?: string | null
     metaDescription?: string | null
     metaKeywords?: string | null
@@ -44805,6 +44825,7 @@ export namespace Prisma {
     slug: string
     content: JsonNullValueInput | InputJsonValue
     excerpt?: string | null
+    image?: string | null
     metaTitle?: string | null
     metaDescription?: string | null
     metaKeywords?: string | null
@@ -44824,6 +44845,7 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
     excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
@@ -44843,6 +44865,7 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
     excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
@@ -44862,6 +44885,7 @@ export namespace Prisma {
     slug: string
     content: JsonNullValueInput | InputJsonValue
     excerpt?: string | null
+    image?: string | null
     metaTitle?: string | null
     metaDescription?: string | null
     metaKeywords?: string | null
@@ -44881,6 +44905,7 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
     excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
@@ -44899,6 +44924,7 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
     excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47566,6 +47592,7 @@ export namespace Prisma {
     slug?: SortOrder
     content?: SortOrder
     excerpt?: SortOrder
+    image?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
     metaKeywords?: SortOrder
@@ -47588,6 +47615,7 @@ export namespace Prisma {
     title?: SortOrder
     slug?: SortOrder
     excerpt?: SortOrder
+    image?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
     metaKeywords?: SortOrder
@@ -47606,6 +47634,7 @@ export namespace Prisma {
     title?: SortOrder
     slug?: SortOrder
     excerpt?: SortOrder
+    image?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
     metaKeywords?: SortOrder
@@ -52147,6 +52176,7 @@ export namespace Prisma {
     slug: string
     content: JsonNullValueInput | InputJsonValue
     excerpt?: string | null
+    image?: string | null
     metaTitle?: string | null
     metaDescription?: string | null
     metaKeywords?: string | null
@@ -52165,6 +52195,7 @@ export namespace Prisma {
     slug: string
     content: JsonNullValueInput | InputJsonValue
     excerpt?: string | null
+    image?: string | null
     metaTitle?: string | null
     metaDescription?: string | null
     metaKeywords?: string | null
@@ -52734,6 +52765,7 @@ export namespace Prisma {
     slug?: StringFilter<"Page"> | string
     content?: JsonFilter<"Page">
     excerpt?: StringNullableFilter<"Page"> | string | null
+    image?: StringNullableFilter<"Page"> | string | null
     metaTitle?: StringNullableFilter<"Page"> | string | null
     metaDescription?: StringNullableFilter<"Page"> | string | null
     metaKeywords?: StringNullableFilter<"Page"> | string | null
@@ -59909,6 +59941,7 @@ export namespace Prisma {
     slug: string
     content: JsonNullValueInput | InputJsonValue
     excerpt?: string | null
+    image?: string | null
     metaTitle?: string | null
     metaDescription?: string | null
     metaKeywords?: string | null
@@ -60426,6 +60459,7 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
     excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60444,6 +60478,7 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
     excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60462,6 +60497,7 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
     excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null

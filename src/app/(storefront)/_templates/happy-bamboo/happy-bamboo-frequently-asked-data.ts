@@ -34,11 +34,6 @@ const defaultFrequentlyAsked = (): HappyBambooFrequentlyAskedItem[] => [
       "Absolutely! All our packaging is plastic-free, made from recycled materials, and fully recyclable or compostable.",
   },
   {
-    question: "Do you offer subscriptions?",
-    answer:
-      "Yes! Our subscription service delivers fresh rolls to your door monthly at a 20% discount. You can pause, skip, or cancel anytime.",
-  },
-  {
     question: "Where is your bamboo sourced?",
     answer:
       "Our bamboo is sustainably sourced from certified farms that practice responsible harvesting. We never use bamboo from protected forests.",

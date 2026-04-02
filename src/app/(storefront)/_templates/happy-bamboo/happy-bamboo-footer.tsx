@@ -8,9 +8,9 @@ import { api } from "~/trpc/server";
 import { Separator } from "~/components/ui/separator";
 
 const quickLinks = [
+  { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About Us" },
-  { href: "/insights", label: "Insights" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -24,8 +24,8 @@ const quickLinks = [
 export async function HappyBambooFooter({
   business,
 }: DefaultFooterTemplateProps) {
-  const email = business?.supportEmail ?? "hello@zairesvisions.com";
-
+  const email = business?.supportEmail ?? "happybamboo25@gmail.com";
+  const phone = business?.phoneNumber ?? "(313) 765-1551";
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
   });
@@ -201,10 +201,10 @@ export async function HappyBambooFooter({
               <span>Zaires Visions LLC</span>
               <span>Detroit, Michigan</span>
               <a
-                href="tel:+13138139450"
+                href={`tel:${phone.replace(/\D/g, "")}`}
                 className="hover:text-primary transition-colors"
               >
-                (313) 813-9450
+                {phone}
               </a>
               <a
                 href={`mailto:${email}`}

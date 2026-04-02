@@ -32,6 +32,7 @@ export const contactRouter = createTRPCRouter({
       select: {
         name: true,
         ownerEmail: true,
+        supportEmail: true,
         siteContent: {
           select: { logoUrl: true },
         },
@@ -47,7 +48,8 @@ export const contactRouter = createTRPCRouter({
       preferredContactMethod,
       business: {
         name: businessData?.name ?? "",
-        ownerEmail: businessData?.ownerEmail ?? "",
+        ownerEmail:
+          businessData?.supportEmail ?? businessData?.ownerEmail ?? "",
         siteContent: businessData?.siteContent,
       },
     });

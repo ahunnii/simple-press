@@ -5,6 +5,7 @@ import {
   Building2,
   CheckCircle2,
   Droplets,
+  ExternalLinkIcon,
   Heart,
   Leaf,
   Recycle,
@@ -12,6 +13,7 @@ import {
   ShieldCheck,
   Sparkles,
   Sprout,
+  Star,
   TreeDeciduous,
   TreePine,
   Truck,
@@ -297,91 +299,126 @@ export function HappyBambooAboutPage({
         </div>
       </section>
 
-      {/* Commitment Section */}
-      {/* <section className="bg-muted/50 py-20 md:py-32">
-        <div className="container mx-auto px-4">
-          <FadeIn className="mx-auto max-w-3xl text-center">
-            <h2 className="mb-6 text-3xl font-bold md:text-4xl">
-              Our Commitment to You
-            </h2>
-            <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
-              So by choosing our chemical free product is a beneficial for
-              personal health, and environmental stability, it reflects a
-              commitment to making a safer and more responsible choices for both
-              individuals and the planet.
-            </p>
-            <StaggerContainer
-              staggerDelay={0.1}
-              className="flex flex-wrap justify-center gap-4"
-            >
-              {[
-                "Chemical Free",
-                "Hypoallergenic",
-                "Eco-Friendly",
-                "Sustainable",
-              ].map((item) => (
-                <StaggerItem
-                  key={item}
-                  className="bg-primary/10 flex items-center gap-2 rounded-full px-4 py-2"
-                >
-                  <CheckCircle2 className="text-primary h-4 w-4" />
-                  <span className="text-sm font-medium">{item}</span>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </FadeIn>
-        </div>
-      </section> */}
-
       {/* CTA Section with Image */}
       <section className="relative mx-auto max-w-7xl overflow-hidden">
-        <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+        <FadeIn
+          direction="up"
+          className="relative aspect-video w-full overflow-hidden rounded-xl"
+        >
           <Image
             src={ctaImage ?? "/placeholder.svg"}
             alt="Bamboo forest"
             fill
             className="object-cover object-bottom"
           />
-        </div>
+        </FadeIn>
+      </section>
+      {/* Connect With Us Section */}
+      <section className="py-20 md:py-32">
+        <div className="container mx-auto px-4">
+          <FadeIn className="mb-12 text-center">
+            <Badge className="mb-4">
+              <Heart className="mr-1 h-3 w-3" />
+              Stay Connected
+            </Badge>
+            <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+              Join the Happy Bamboo Community
+            </h2>
+            <p className="text-muted-foreground mx-auto max-w-2xl leading-relaxed">
+              We love hearing from our customers! Share your experience, leave
+              us a review, and follow along on social media for tips, updates,
+              and sustainable living inspiration.
+            </p>
+          </FadeIn>
 
-        <div className="w-full border-t border-white/20 py-20 md:py-32">
-          <p className="mx-auto mb-4 text-center text-2xl">
-            Follow us on social media
-          </p>
-          <div className="flex justify-center gap-4">
-            {socialLinks?.facebook && (
-              <a
-                href={socialLinks.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-primary/10 text-primary hover:bg-primary/20 flex h-14 w-14 items-center justify-center rounded-full transition-colors"
-                aria-label="Follow us on Facebook"
-              >
-                <FacebookIcon className="h-7 w-7" />
-              </a>
-            )}
-            {socialLinks?.instagram && (
-              <a
-                href={socialLinks.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-primary/10 text-primary hover:bg-primary/20 flex h-14 w-14 items-center justify-center rounded-full transition-colors"
-                aria-label="Follow us on Instagram"
-              >
-                <InstagramIcon className="h-7 w-7" />
-              </a>
-            )}
-            {socialLinks?.tiktok && (
-              <a
-                href={socialLinks.tiktok}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-primary/10 text-primary hover:bg-primary/20 flex h-14 w-14 items-center justify-center rounded-full transition-colors"
-                aria-label="Follow us on TikTok"
-              >
-                <TikTokIcon className="h-7 w-7" />
-              </a>
-            )}
+          <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
+            {/* Review Prompt */}
+            <FadeIn
+              delay={0.1}
+              className="flex flex-col items-center text-center"
+            >
+              <div className="bg-primary/10 mb-6 flex h-16 w-16 items-center justify-center rounded-full">
+                <Star className="text-primary h-8 w-8" />
+              </div>
+              <h3 className="mb-3 text-xl font-semibold">
+                Share Your Feedback
+              </h3>
+              <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
+                Your reviews help others discover the comfort of sustainable
+                bamboo products. Scan the code or tap the button to leave a
+                quick Google review.
+              </p>
+              <div className="mb-6 rounded-xl bg-white p-4 shadow-sm">
+                <Image
+                  src="https://storage.artisanalfutures.org/business-sites/cmngzygd600002g41j3kcs7j6/QR-Code-Reviews-1.png"
+                  alt="QR Code"
+                  width={180}
+                  height={180}
+                  className="rounded-lg"
+                />
+              </div>
+              <Button asChild className="group">
+                <a
+                  href="https://search.google.com/local/writereview?placeid=ChIJ008r2PrRJIgRaaMPENARjUc"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Write a Review
+                  <ExternalLinkIcon className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </a>
+              </Button>
+            </FadeIn>
+
+            {/* Social Follow */}
+            <FadeIn
+              delay={0.2}
+              className="flex flex-col items-center text-center"
+            >
+              <div className="bg-primary/10 mb-6 flex h-16 w-16 items-center justify-center rounded-full">
+                <Heart className="text-primary h-8 w-8" />
+              </div>
+              <h3 className="mb-3 text-xl font-semibold">Follow Our Journey</h3>
+              <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
+                Stay up to date with new products, eco-tips, behind-the-scenes
+                stories, and exclusive offers. Join our growing community on
+                social media.
+              </p>
+              <div className="mb-6 flex gap-4">
+                {socialLinks?.facebook && (
+                  <a
+                    href={socialLinks.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-colors"
+                    aria-label="Follow us on Facebook"
+                  >
+                    <FacebookIcon className="h-6 w-6" />
+                  </a>
+                )}
+                {socialLinks?.instagram && (
+                  <a
+                    href={socialLinks.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-colors"
+                    aria-label="Follow us on Instagram"
+                  >
+                    <InstagramIcon className="h-6 w-6" />
+                  </a>
+                )}
+                {socialLinks?.tiktok && (
+                  <a
+                    href={socialLinks.tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-colors"
+                    aria-label="Follow us on TikTok"
+                  >
+                    <TikTokIcon className="h-6 w-6" />
+                  </a>
+                )}
+              </div>
+            </FadeIn>
           </div>
         </div>
       </section>

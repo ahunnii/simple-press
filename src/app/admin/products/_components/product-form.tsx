@@ -256,6 +256,7 @@ export function ProductForm({ product }: Props) {
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,
           productFeatures: data.additionalFields?.productFeatures ?? [],
+          // comingSoon: data.additionalFields?.comingSoon ?? false,
         },
       });
 
@@ -292,6 +293,7 @@ export function ProductForm({ product }: Props) {
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,
           productFeatures: data.additionalFields?.productFeatures ?? [],
+          // comingSoon: data.additionalFields?.comingSoon ?? false,
         },
       });
 
@@ -623,6 +625,13 @@ export function ProductForm({ product }: Props) {
                   output="json"
                 />
                 <ProductFeaturesField form={form} />
+
+                {/* <SwitchFormField
+                  form={form}
+                  name="additionalFields.comingSoon"
+                  label="Is this product coming soon?"
+                  description="Show a 'Coming Soon' badge on the product page and card"
+                /> */}
               </CardContent>
             </Card>
           </div>

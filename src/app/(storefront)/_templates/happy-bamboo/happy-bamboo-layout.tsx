@@ -1,6 +1,9 @@
+"use server";
+
 import { Outfit } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../types";
+import { getSession } from "~/server/better-auth/server";
 
 import { BambooAnnouncementBar } from "./bamboo-announcement-bar";
 import { HappyBambooFooter } from "./happy-bamboo-footer";
@@ -8,14 +11,15 @@ import { HappyBambooHeader } from "./happy-bamboo-header";
 
 const fontSans = Outfit({ subsets: ["latin"], variable: "--font-sans" });
 
-export function HappyBambooLayout({
+export async function HappyBambooLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
+  const session = await getSession();
   return (
     <main className={`${fontSans.variable} happy-bamboo dark:happy-bamboo`}>
       <BambooAnnouncementBar businessId={business.id} />
-      <HappyBambooHeader business={business} />
+      <HappyBambooHeader business={business} session={session ?? null} />
       <div className="min-h-[calc(100vh-4rem)]">{children}</div>
       <HappyBambooFooter business={business} />
     </main>

@@ -659,6 +659,8 @@ model Page {
   content Json
   excerpt String? @db.Text
 
+  image String?
+
   // SEO
   metaTitle       String?
   metaDescription String?
@@ -670,7 +672,7 @@ model Page {
   sortOrder Int     @default(0)
 
   // Page type
-  type     String @default("page") // page | policy | custom
+  type     String @default("page") // page | policy | blog | custom
   template String @default("default") // default | sidebar | full-width
 
   // Relationships

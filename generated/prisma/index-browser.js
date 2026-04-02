@@ -443,6 +443,7 @@ exports.Prisma.PageScalarFieldEnum = {
   slug: 'slug',
   content: 'content',
   excerpt: 'excerpt',
+  image: 'image',
   metaTitle: 'metaTitle',
   metaDescription: 'metaDescription',
   metaKeywords: 'metaKeywords',

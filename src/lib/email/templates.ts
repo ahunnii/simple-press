@@ -90,9 +90,12 @@ export async function sendNewOrderNotification(params: {
       logoUrl?: string | null;
     } | null;
     subdomain: string;
+    customDomain?: string | null;
   };
 }) {
-  const adminOrderUrl = `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/admin/orders/${params.orderId}`;
+  const adminOrderUrl = params.business.customDomain
+    ? `https://${params.business.customDomain}/admin/orders/${params.orderId}`
+    : `https://${params.business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/admin/orders/${params.orderId}`;
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,

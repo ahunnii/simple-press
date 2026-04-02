@@ -58,6 +58,7 @@ export const pageSchema = z.object({
   ogImage: z.string().url().optional().or(z.literal("")),
   published: z.boolean().default(true),
   sortOrder: z.number().int().default(0),
-  type: z.enum(["page", "policy", "custom"]).default("page"),
+  type: z.enum(["page", "policy", "blog", "custom"]).default("page"),
   template: z.enum(["default", "sidebar", "full-width"]).default("default"),
+  image: z.string().url().optional().or(z.literal("")),
 });

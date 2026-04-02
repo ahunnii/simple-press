@@ -146,7 +146,12 @@ export const contentRouter = createTRPCRouter({
     }),
 
   getPageBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
+    .input(
+      z.object({
+        slug: z.string(),
+        type: z.enum(["page", "policy", "blog", "custom"]).optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const business = await checkBusiness();
 
@@ -163,11 +168,34 @@ export const contentRouter = createTRPCRouter({
             businessId: business.id,
             slug: input.slug,
           },
+          ...(input.type ? { type: input.type } : {}),
         },
       });
 
       return page;
     }),
+
+  getBlogPages: publicProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
+    const pages = await ctx.db.page.findMany({
+      where: {
+        businessId: business.id,
+        type: "blog",
+        published: true,
+      },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    });
+
+    return pages;
+  }),
 
   // Create page
   createPage: ownerAdminProcedure

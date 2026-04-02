@@ -37,6 +37,7 @@ type Props = {
 export function ContentDashboard({ pages }: Props) {
   const regularPages = pages.filter((p) => p.type === "page");
   const policyPages = pages.filter((p) => p.type === "policy");
+  const blogPages = pages.filter((p) => p.type === "blog");
   const publishedPages = pages.filter((p) => p.published);
 
   return (
@@ -91,6 +92,29 @@ export function ContentDashboard({ pages }: Props) {
           </Card>
         </Link>
 
+        {/* Blog */}
+        <Link href="/admin/content/blog">
+          <Card className="h-full cursor-pointer transition-all hover:border-purple-500 hover:shadow-lg">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-purple-100 p-3">
+                  <FileText className="h-6 w-6 text-purple-600" />
+                </div>
+                <div>
+                  <CardTitle>Blog</CardTitle>
+                  <CardDescription>
+                    {blogPages.length} blog posts
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-3 text-sm text-gray-600">
+                Blog posts for your site
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
         {/* Policies */}
         <Link href="/admin/content/policies">
           <Card className="h-full cursor-pointer transition-all hover:border-purple-500 hover:shadow-lg">
