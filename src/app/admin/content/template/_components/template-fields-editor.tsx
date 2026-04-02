@@ -97,7 +97,7 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("global");
+  const [activeTab, setActiveTab] = useState("homepage");
 
   // Group fields by page
   const groupedByPage = groupFieldsByPage(business.templateId);

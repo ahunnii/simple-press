@@ -63,8 +63,11 @@ export function HappyBambooFeaturedProducts({
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
       <FadeIn direction="up">
-        <div className="mb-12 text-center">
-          <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
+        <div className="mb-12 space-y-6 text-center">
+          <span className="text-primary text-sm font-semibold tracking-wider uppercase">
+            Happy Bamboo
+          </span>
+          <h2 className="text-foreground font-heading text-4xl font-bold tracking-tight md:text-5xl">
             <span className="text-balance">{featuredTitle}</span>
           </h2>
           <p className="text-muted-foreground mx-auto mt-4 max-w-2xl">
@@ -84,7 +87,7 @@ export function HappyBambooFeaturedProducts({
       </StaggerContainer>
       <FadeIn direction="up" delay={0.3}>
         <div className="mt-12 text-center">
-          <Button variant="outline" size="lg" asChild>
+          <Button size="lg" asChild>
             <Link href={featuredButtonLink ?? "/shop"}>
               {featuredButtonText}
               <ArrowRight className="size-4" />

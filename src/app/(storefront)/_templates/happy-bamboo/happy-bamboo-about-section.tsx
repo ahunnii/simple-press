@@ -30,7 +30,7 @@ export function HappyBambooAboutSection({
 }: Props) {
   return (
     <section className="pt-20 pb-10 md:pt-32 md:pb-16">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto max-w-6xl px-4">
         <div className="grid items-center gap-12 lg:grid-cols-1">
           <FadeIn direction="up" className="relative">
             <div className="relative aspect-video overflow-hidden rounded-2xl">
@@ -83,7 +83,7 @@ export function HappyBambooAboutSection({
                 </p>
               </div>
             )}
-            <Button className="group" asChild>
+            <Button variant="outline" className="group" asChild>
               <Link href={aboutButtonLink ?? "/about"}>
                 {aboutButtonText}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

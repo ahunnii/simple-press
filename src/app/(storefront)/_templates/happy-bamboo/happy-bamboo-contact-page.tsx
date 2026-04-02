@@ -38,7 +38,7 @@ export function HappyBambooContactPage({
   const email = themeSpecificFields?.["bamboo.contact.email"] ?? DEFAULT_EMAIL;
   const locationValue =
     themeSpecificFields?.["bamboo.contact.location"] ?? DEFAULT_LOCATION;
-  const phone = themeSpecificFields?.["bamboo.contact.phone"] ?? DEFAULT_PHONE;
+  const phone = business?.phoneNumber ?? DEFAULT_PHONE;
 
   const servicesListRaw = getListFieldValue(
     themeSpecificFields as unknown,
