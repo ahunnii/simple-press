@@ -1,5 +1,4 @@
 import type { LucideIcon } from "lucide-react";
-import { BookOpen, Flower2, HandHelping, Map } from "lucide-react";
 
 import {
   FadeIn,
@@ -34,8 +33,8 @@ export function PollenHomepageAbout({
               About Our Services
             </p>
             <h2 className="text-3xl leading-tight font-bold text-balance text-white md:text-4xl">
-              We&apos;re passionate about creating pollinator-friendly spaces that
-              bring your vision to life
+              We&apos;re passionate about creating pollinator-friendly spaces
+              that bring your vision to life
             </h2>
           </div>
         </FadeIn>
@@ -47,7 +46,9 @@ export function PollenHomepageAbout({
                 <div className="mb-4 flex h-12 w-12 items-center justify-center">
                   <service.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="mb-3 font-semibold text-white">{service.title}</h3>
+                <h3 className="mb-3 font-semibold text-white">
+                  {service.title}
+                </h3>
                 <p className="min-h-0 flex-1 text-sm leading-relaxed text-white/90">
                   {service.description}
                 </p>

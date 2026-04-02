@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import ContactFormEmail from "~/emails/contact-form";
+import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
+import OrderFulfilledEmail from "~/emails/order-fulfilled";
+import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import WelcomeEmail from "~/emails/welcome";
@@ -81,6 +84,75 @@ export function EmailPreview({ business, sampleOrder }: Props) {
     setIsLoading(false);
   };
 
+  const previewNewOrderOwner = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      NewOrderNotificationEmail({
+        orderNumber: sampleOrder?.orderNumber ?? 1001,
+        customerName: "John Doe",
+        customerEmail: "john@example.com",
+        items:
+          sampleOrder?.items?.map((item) => ({
+            productName: item.productName,
+            variantName: item.variantName,
+            quantity: item.quantity,
+            total: Math.round(item.total),
+          })) ?? [
+            {
+              productName: "Sample Product",
+              variantName: "Medium / Blue",
+              quantity: 2,
+              total: 5998,
+            },
+          ],
+        subtotal: sampleOrder?.subtotal ?? 5998,
+        shipping: sampleOrder?.shipping ?? 500,
+        tax: sampleOrder?.tax ?? 540,
+        discount: sampleOrder?.discount ?? 0,
+        total: sampleOrder?.total ?? 7038,
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+        adminOrderUrl: `https://${business.subdomain}.yourdomain.com/admin/orders/sample`,
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewOrderFulfilled = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      OrderFulfilledEmail({
+        orderNumber: sampleOrder?.orderNumber ?? 1001,
+        customerName: "John Doe",
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+        businessUrl: `https://${business.subdomain}.yourdomain.com`,
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewOrderRefunded = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      OrderRefundedEmail({
+        orderNumber: sampleOrder?.orderNumber ?? 1001,
+        customerName: "John Doe",
+        refundAmountCents: 7038,
+        orderTotalCents: 7038,
+        isFullRefund: true,
+        reason: "Customer requested refund",
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+        businessUrl: `https://${business.subdomain}.yourdomain.com`,
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
   const previewWelcome = async () => {
     setIsLoading(true);
     const rendered = await renderEmail(
@@ -104,6 +176,7 @@ export function EmailPreview({ business, sampleOrder }: Props) {
         subject: "Question about your products",
         message: "Hi, I was wondering if you have this item in stock...",
         businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
       }),
     );
     setHtml(rendered);
@@ -153,6 +226,30 @@ export function EmailPreview({ business, sampleOrder }: Props) {
               className="w-full justify-start"
             >
               Order Shipped
+            </Button>
+            <Button
+              onClick={previewNewOrderOwner}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              New Order (owner)
+            </Button>
+            <Button
+              onClick={previewOrderFulfilled}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Order Fulfilled (no tracking)
+            </Button>
+            <Button
+              onClick={previewOrderRefunded}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Order Refunded
             </Button>
             <Button
               onClick={previewWelcome}

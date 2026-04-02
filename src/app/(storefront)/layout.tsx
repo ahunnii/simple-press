@@ -6,6 +6,7 @@ import { BambooLayout } from "./_templates/bamboo/bamboo-general-layout";
 import { DarkTrendLayout } from "./_templates/dark-trend/dark-trend-layout";
 import { DefaultLayout } from "./_templates/default/default-layout";
 import { ElegantLayout } from "./_templates/elegant/elegant-layout";
+import { HappyBambooLayout } from "./_templates/happy-bamboo/happy-bamboo-layout";
 import { ModernLayout } from "./_templates/modern/modern-layout";
 import { PollenLayout } from "./_templates/pollen/pollen-layout";
 
@@ -25,6 +26,7 @@ export default async function StorefrontLayout({ children }: Props) {
       elegant: ElegantLayout,
       modern: ModernLayout,
       pollen: PollenLayout,
+      "happy-bamboo": HappyBambooLayout,
     }[business.templateId] ?? DefaultLayout;
 
   return (

@@ -159,6 +159,12 @@ model Business {
   // Features
   featureFlags Json @default("{}") // Record<string, boolean>
 
+  // Shipping (storefront + Stripe)
+  shippingType          String  @default("free") // free | flat_rate | flat_rate_with_threshold
+  shippingFlatRate      Int? // cents; used by flat_rate and flat_rate_with_threshold
+  freeShippingThreshold Int? // cents; subtotal at which shipping becomes free
+  offersInStorePickup   Boolean @default(false)
+
   // Relationships
   products           Product[]
   collections        Collection[]
@@ -279,6 +285,9 @@ model Product {
   // Computed fields (can be calculated on demand)
   averageRating Float?
   reviewCount   Int    @default(0)
+
+  // Additional fields based on template needs
+  additionalFields Json? // { key: value }
 
   reviews ProductReview[]
 
@@ -580,9 +589,14 @@ model DiscountCode {
   startsAt  DateTime?
   expiresAt DateTime?
 
-  // Restrictions (future enhancements)
+  // Restrictions
   minPurchase Int? // minimum order value in cents
   maxDiscount Int? // cap discount amount in cents
+
+  // Banner advertising (storefront)
+  showAsBanner  Boolean @default(false)
+  bannerText    String?
+  bannerLinkUrl String?
 
   // Relationships
   orders Order[]

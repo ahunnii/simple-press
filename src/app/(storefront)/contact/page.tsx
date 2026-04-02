@@ -5,6 +5,7 @@ import { api } from "~/trpc/server";
 import { BambooContactPage } from "../_templates/bamboo/bamboo-contact-page";
 import { DarkTrendContactPage } from "../_templates/dark-trend/dark-trend-contact-page";
 import { DefaultContactPage } from "../_templates/default/default-contact-page";
+import { HappyBambooContactPage } from "../_templates/happy-bamboo/happy-bamboo-contact-page";
 import { ModernContactPage } from "../_templates/modern/modern-contact-page";
 import { PollenContactPage } from "../_templates/pollen/pollen-contact-page";
 
@@ -17,6 +18,7 @@ export default async function ContactPage() {
       pollen: PollenContactPage,
       modern: ModernContactPage,
       bamboo: BambooContactPage,
+      "happy-bamboo": HappyBambooContactPage,
     }[business.templateId] ?? DefaultContactPage;
 
   return <TemplateComponent business={business} />;

@@ -1,3 +1,5 @@
+import type { JSONContent } from "@tiptap/react";
+
 import {
   bambooData,
   bambooFieldGroups,
@@ -7,6 +9,10 @@ import {
   darkTrendFieldGroups,
 } from "~/app/(storefront)/_templates/dark-trend";
 import {
+  happyBambooData,
+  happyBambooFieldGroups,
+} from "~/app/(storefront)/_templates/happy-bamboo";
+import {
   modernData,
   modernFieldGroups,
 } from "~/app/(storefront)/_templates/modern";
@@ -15,35 +21,110 @@ import {
   pollenFieldGroups,
 } from "~/app/(storefront)/_templates/pollen";
 
-export type TemplateField = {
+export type TemplatePage =
+  | "homepage"
+  | "contact"
+  | "product"
+  | "products"
+  | "about"
+  | "cart"
+  | "checkout"
+  | "global";
+
+export type TemplateListItemField = {
+  key: string;
+  label: string;
+  description?: string;
+  type: "text" | "textarea" | "image" | "video" | "url" | "icon";
+  placeholder?: string;
+};
+
+type TemplateFieldCommon = {
   key: string;
   label: string;
   description: string;
-  type:
-    | "text"
-    | "textarea"
-    | "url"
-    | "color"
-    | "number"
-    | "gallery"
-    | "image"
-    | "boolean";
-  page:
-    | "homepage"
-    | "contact"
-    | "product"
-    | "products"
-    | "about"
-    | "cart"
-    | "checkout"
-    | "global";
+  page: TemplatePage;
   defaultValue?: string;
-
-  // NEW: Grouping and layout
-  group?: string; // Fields with same group render together
-  gridColumn?: string; // Tailwind grid column classes (e.g., "col-span-2")
-  placeholder?: string; // Override description as placeholder
+  group?: string;
+  gridColumn?: string;
+  placeholder?: string;
 };
+
+export type TemplateFieldScalarType =
+  | "text"
+  | "textarea"
+  | "richtext"
+  | "url"
+  | "color"
+  | "number"
+  | "gallery"
+  | "image"
+  | "video"
+  | "boolean";
+
+export type TemplateField =
+  | (TemplateFieldCommon & {
+      type: TemplateFieldScalarType;
+    })
+  | (TemplateFieldCommon & {
+      type: "list";
+      itemSchema: TemplateListItemField[];
+      minItems?: number;
+      maxItems?: number;
+    });
+
+export type RichTextFieldValue = JSONContent & {
+  type: "doc";
+  content: JSONContent[];
+};
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return value != null && typeof value === "object" && !Array.isArray(value);
+}
+
+export function getRichTextFieldValue(
+  customFields: unknown,
+  key: string,
+): RichTextFieldValue | null {
+  if (!isObjectRecord(customFields)) return null;
+  const value = customFields[key];
+  if (!isObjectRecord(value)) return null;
+  if (value.type !== "doc" || !Array.isArray(value.content)) return null;
+  return value as RichTextFieldValue;
+}
+
+/** One row in a template list field; `_id` is for admin/editor stable keys. */
+export type TemplateListRow = Record<string, unknown> & { _id?: string };
+
+function newListRowId(index: number): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `row-${index}-${Date.now()}`;
+}
+
+export function parseTemplateListRows(raw: unknown): TemplateListRow[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((item, index) => {
+    if (!isObjectRecord(item)) {
+      return { _id: newListRowId(index) };
+    }
+    const row = { ...item } as TemplateListRow;
+    if (typeof row._id !== "string" || !row._id) {
+      row._id = newListRowId(index);
+    }
+    return row;
+  });
+}
+
+export function getListFieldValue(
+  customFields: unknown,
+  key: string,
+): unknown[] | null {
+  if (!isObjectRecord(customFields)) return null;
+  const value = customFields[key];
+  return Array.isArray(value) ? value : null;
+}
 
 export type TemplateFieldGroup = {
   id: string;
@@ -59,6 +140,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...pollenFieldGroups,
   ...darkTrendFieldGroups,
   ...modernFieldGroups,
+  ...happyBambooFieldGroups,
 };
 
 export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
@@ -171,11 +253,13 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...darkTrendData,
   ...pollenData,
   ...modernData,
+  ...happyBambooData,
 };
 
 /**
  * Returns only the custom field values that belong to the given template.
  * Keys are those defined in TEMPLATE_FIELDS for that templateId; missing values default to "".
+ * List fields (`type: "list"`) are omitted — use `getListFieldValue` / `parseTemplateListRows` instead.
  * Accepts Prisma JsonValue (e.g. from siteContent.customFields).
  */
 export function getThemeFields(
@@ -191,6 +275,7 @@ export function getThemeFields(
       : {};
   const result: Record<string, string> = {};
   for (const field of fields) {
+    if (field.type === "list") continue;
     const value = raw[field.key];
     result[field.key] = typeof value === "string" ? value : "";
   }

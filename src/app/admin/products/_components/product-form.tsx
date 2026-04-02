@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
-import { cn, slugify } from "~/lib/utils";
+import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import { productFormSchema } from "~/lib/validators/product";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
@@ -42,20 +42,34 @@ import {
   FormItem,
   FormLabel,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { NumberInput } from "~/components/ui/number-input";
 import { Switch } from "~/components/ui/switch";
 import { InputFormField } from "~/components/inputs/input-form-field";
+import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 import { getExistingVariantOptions } from "../_utils/existing-variant-options";
 import { ImageUploader } from "./image-uploader";
+import { ProductFeaturesField } from "./product-features-field";
 import { VariantManager } from "./variant-manager";
 
 type Props = {
   product?: RouterOutputs["product"]["secureGet"];
 };
+
+const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
+
+function parseStoredAdditionalFields(raw: unknown) {
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
+    return null;
+  }
+  return raw as {
+    additionalInformation?: unknown;
+    productFeatures?: Array<{ icon: string; text: string }>;
+  };
+}
 
 export function ProductForm({ product }: Props) {
   const router = useRouter();
@@ -71,6 +85,10 @@ export function ProductForm({ product }: Props) {
     (product?.variants as FormVariant[]) ?? [],
   );
 
+  const storedAdditional = parseStoredAdditionalFields(
+    product?.additionalFields ?? null,
+  );
+
   // Initialize form with react-hook-form
   const form = useForm<ProductFormSchema>({
     resolver: zodResolver(productFormSchema),
@@ -84,8 +102,25 @@ export function ProductForm({ product }: Props) {
       trackInventory: product?.trackInventory ?? false,
       inventoryQty: product?.inventoryQty ?? 0,
       allowBackorders: product?.allowBackorders ?? false,
+      additionalFields: {
+        additionalInformation: (storedAdditional?.additionalInformation as
+          | Record<string, unknown>
+          | undefined) ?? { ...EMPTY_TIPTAP_DOC },
+        productFeatures: storedAdditional?.productFeatures ?? [],
+      },
     },
   });
+
+  /** Re-baseline after TipTap normalizes empty doc on mount (avoids false dirty). */
+  const dirtyBaselineRef = useRef(false);
+  useEffect(() => {
+    if (dirtyBaselineRef.current) return;
+    dirtyBaselineRef.current = true;
+    const raf = requestAnimationFrame(() => {
+      form.reset(form.getValues());
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [form]);
 
   // Load existing images on mount
   useEffect(() => {
@@ -102,7 +137,8 @@ export function ProductForm({ product }: Props) {
   }, [product]);
 
   // Auto-generate slug from name (only for new products)
-  const handleNameChange = (value: string) => {
+  const handleNameChange = (value: string | null) => {
+    if (!value) return;
     if (!product) {
       form.setValue("slug", slugify(value), { shouldValidate: true });
     }
@@ -199,7 +235,7 @@ export function ProductForm({ product }: Props) {
       // Update existing product
       imagesToSyncRef.current = images;
 
-      const response = await updateProductMutation.mutateAsync({
+      await updateProductMutation.mutateAsync({
         id: product.id,
         name: data.name,
         slug: data.slug,
@@ -217,11 +253,21 @@ export function ProductForm({ product }: Props) {
           inventoryQty: v.inventoryQty,
           options: v.options,
         })),
+        additionalFields: {
+          additionalInformation: data.additionalFields?.additionalInformation,
+          productFeatures: data.additionalFields?.productFeatures ?? [],
+        },
       });
 
-      if (response.productId) {
+      // New default baseline so isDirty clears (RHF only used initial defaultValues otherwise).
+      form.reset(data);
+      requestAnimationFrame(() => {
+        form.reset(form.getValues());
+      });
+
+      if (product.id) {
         void syncImagesMutation.mutateAsync({
-          productId: response.productId,
+          productId: product.id,
           images: imagesToSyncRef.current,
         });
       }
@@ -243,6 +289,10 @@ export function ProductForm({ product }: Props) {
           inventoryQty: v.inventoryQty,
           options: v.options,
         })),
+        additionalFields: {
+          additionalInformation: data.additionalFields?.additionalInformation,
+          productFeatures: data.additionalFields?.productFeatures ?? [],
+        },
       });
 
       if (images.length > 0 && !!response.productId) {
@@ -257,6 +307,11 @@ export function ProductForm({ product }: Props) {
         });
 
         router.push(`/admin/products/${response.productId}`);
+      } else {
+        form.reset({ ...data, id: response.productId });
+        requestAnimationFrame(() => {
+          form.reset(form.getValues());
+        });
       }
     }
   };
@@ -392,7 +447,7 @@ export function ProductForm({ product }: Props) {
                       label="URL Slug *"
                       placeholder="classic-white-t-shirt"
                       onChange={(value) =>
-                        form.setValue("slug", slugify(value), {
+                        form.setValue("slug", sanitizeSlugInput(value), {
                           shouldValidate: true,
                         })
                       }
@@ -428,18 +483,12 @@ export function ProductForm({ product }: Props) {
                               <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
                                 $
                               </span>
-                              <Input
-                                type="number"
+                              <NumberInput
                                 step="0.01"
                                 min="0"
                                 placeholder="19.99"
                                 className="pl-7"
                                 {...field}
-                                value={field.value || ""}
-                                onChange={(e) => {
-                                  const value = parseFloat(e.target.value);
-                                  field.onChange(isNaN(value) ? 0 : value);
-                                }}
                               />
                             </div>
                           </FormControl>
@@ -516,37 +565,30 @@ export function ProductForm({ product }: Props) {
                       />
                     )}
 
-                    <FormField
-                      control={form.control}
-                      name="inventoryQty"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Inventory Quantity</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                placeholder="19.99"
-                                className="pl-7"
-                                {...field}
-                                value={field.value ?? ""}
-                                onChange={(e) => {
-                                  const value = parseFloat(e.target.value);
-                                  field.onChange(isNaN(value) ? 0 : value);
-                                }}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormDescription>
-                            Set the inventory quantity for this product (ignored
-                            if inventory tracking is disabled or if variants are
-                            used)
-                          </FormDescription>
-                        </FormItem>
-                      )}
-                    />
+                    {form.watch("trackInventory") && variants.length === 0 && (
+                      <FormField
+                        control={form.control}
+                        name="inventoryQty"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Inventory Quantity</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <NumberInput
+                                  step="1"
+                                  min="0"
+                                  placeholder="10"
+                                  {...field}
+                                />
+                              </div>
+                            </FormControl>
+                            <FormDescription>
+                              Stock for this product when it has no variants.
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -556,6 +598,7 @@ export function ProductForm({ product }: Props) {
             <VariantManager
               variants={variants}
               onChange={setVariants}
+              trackInventory={form.watch("trackInventory")}
               basePrice={Math.round((form.watch("price") || 0) * 100)}
               existingVariantOptions={getExistingVariantOptions(
                 product?.variants as
@@ -563,6 +606,25 @@ export function ProductForm({ product }: Props) {
                   | undefined,
               )}
             />
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Additional details</CardTitle>
+                <CardDescription>
+                  Extra information and feature badges for the product page
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <MinimalTiptapFormField
+                  form={form}
+                  name="additionalFields.additionalInformation"
+                  label="Additional information"
+                  description='Shown in the "Additional Information" tab on the product page.'
+                  output="json"
+                />
+                <ProductFeaturesField form={form} />
+              </CardContent>
+            </Card>
           </div>
         </form>
       </Form>

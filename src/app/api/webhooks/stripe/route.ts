@@ -4,9 +4,95 @@ import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
-import { sendOrderConfirmation } from "~/lib/email/templates";
+import {
+  sendNewOrderNotification,
+  sendOrderConfirmation,
+} from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
+
+/** Prefer shipping collected on Checkout; fall back to PI shipping or session metadata (storefront pre-filled address). */
+function resolveCheckoutShipping(fullSession: Stripe.Checkout.Session): {
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string;
+  province: string;
+  zip: string;
+  country: string;
+  phone: string | null;
+  nameForAddress: string | null;
+} {
+  const collected = fullSession.collected_information?.shipping_details;
+  if (collected?.address?.line1) {
+    const a = collected.address;
+    return {
+      addressLine1: a.line1 ?? null,
+      addressLine2: a.line2 ?? null,
+      city: a.city ?? "",
+      province: a.state ?? "",
+      zip: a.postal_code ?? "",
+      country: a.country ?? "",
+      phone: fullSession.customer_details?.phone ?? null,
+      nameForAddress:
+        collected.name ?? fullSession.customer_details?.name ?? null,
+    };
+  }
+
+  const cd = fullSession.customer_details?.address;
+  if (cd?.line1) {
+    return {
+      addressLine1: cd.line1 ?? null,
+      addressLine2: cd.line2 ?? null,
+      city: cd.city ?? "",
+      province: cd.state ?? "",
+      zip: cd.postal_code ?? "",
+      country: cd.country ?? "",
+      phone: fullSession.customer_details?.phone ?? null,
+      nameForAddress: fullSession.customer_details?.name ?? null,
+    };
+  }
+
+  const pi = fullSession.payment_intent;
+  if (typeof pi === "object" && pi?.shipping?.address?.line1) {
+    const a = pi.shipping.address;
+    return {
+      addressLine1: a.line1 ?? null,
+      addressLine2: a.line2 ?? null,
+      city: a.city ?? "",
+      province: a.state ?? "",
+      zip: a.postal_code ?? "",
+      country: a.country ?? "",
+      phone: pi.shipping.phone ?? null,
+      nameForAddress: pi.shipping.name ?? null,
+    };
+  }
+
+  const m = fullSession.metadata;
+  if (m?.shippingLine1) {
+    return {
+      addressLine1: m.shippingLine1,
+      addressLine2: m.shippingLine2 ?? null,
+      city: m.shippingCity ?? "",
+      province: m.shippingState ?? "",
+      zip: m.shippingPostalCode ?? "",
+      country: m.shippingCountry ?? "",
+      phone: m.shippingPhone ?? null,
+      nameForAddress:
+        m.customerName ?? fullSession.customer_details?.name ?? null,
+    };
+  }
+
+  return {
+    addressLine1: null,
+    addressLine2: null,
+    city: "",
+    province: "",
+    zip: "",
+    country: "",
+    phone: null,
+    nameForAddress: null,
+  };
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -88,6 +174,7 @@ export async function POST(req: NextRequest) {
               "line_items",
               "line_items.data.price.product",
               "total_details",
+              "payment_intent",
             ],
           },
           {
@@ -163,14 +250,14 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        // Create or reuse shipping address if provided
+        // Create or reuse shipping address if provided (see resolveCheckoutShipping)
         let shippingAddressId: string | null = null;
 
-        const shippingDetails = fullSession.customer_details?.address;
+        const resolved = resolveCheckoutShipping(fullSession);
 
-        if (shippingDetails && customer) {
-          const customerName = fullSession.customer_details?.name ?? "";
-          const nameParts = customerName.split(" ");
+        if (resolved.addressLine1 && customer) {
+          const customerName = resolved.nameForAddress ?? "";
+          const nameParts = customerName.split(" ").filter((p) => p.length > 0);
           const firstName = nameParts[0] ?? "Guest";
           const lastName = nameParts.slice(1).join(" ") || "";
 
@@ -178,15 +265,15 @@ export async function POST(req: NextRequest) {
             customerId: customer.id,
             firstName,
             lastName,
-            address1: shippingDetails.line1 ?? "",
-            address2: shippingDetails.line2 ?? null,
-            city: shippingDetails.city ?? "",
-            province: shippingDetails.state ?? "",
-            zip: shippingDetails.postal_code ?? "",
-            country: shippingDetails.country ?? "",
-            phone: fullSession.customer_details?.phone ?? null,
+            address1: resolved.addressLine1,
+            address2: resolved.addressLine2,
+            city: resolved.city,
+            province: resolved.province,
+            zip: resolved.zip,
+            country: resolved.country,
+            phone: resolved.phone,
           });
-        } else if (shippingDetails && !customer) {
+        } else if (resolved.addressLine1 && !customer) {
           console.warn(
             "[Webhook] Shipping details provided but no customer - cannot create address",
           );
@@ -208,12 +295,19 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ received: true });
         }
 
-        // TODO: Fix how we handle discount codes. DO NOT ADD THEM if they don't exist
-        // const discountCode = appliedDiscount?.code
-        //   ? await ctx.discountCode.findUnique({
-        //       where: { code: appliedDiscount.code },
-        //     })
-        //   : null;
+        const rawMetaDiscountId =
+          typeof discountCodeId === "string" ? discountCodeId.trim() : "";
+        let verifiedDiscountCodeId: string | null = null;
+        if (rawMetaDiscountId.length > 0) {
+          const dc = await db.discountCode.findFirst({
+            where: {
+              id: rawMetaDiscountId,
+              businessId: business.id,
+            },
+            select: { id: true },
+          });
+          verifiedDiscountCodeId = dc?.id ?? null;
+        }
 
         // Create order
         const order = await db.order.create({
@@ -242,12 +336,11 @@ export async function POST(req: NextRequest) {
             stripeSessionId: session.id,
             stripePaymentIntentId: session.payment_intent as string,
 
-            // Discount code
-            // discountCodeId: discountCodeId ?? null,
-
-            // discountCode: !!discountCodeId
-            //   ? { connect: { id: discountCodeId } }
-            //   : undefined,
+            ...(verifiedDiscountCodeId
+              ? {
+                  discountCodeId: verifiedDiscountCodeId,
+                }
+              : {}),
 
             // Order items
             items: {
@@ -313,10 +406,10 @@ export async function POST(req: NextRequest) {
         }
 
         // Increment discount code usage
-        if (discountCodeId) {
+        if (verifiedDiscountCodeId) {
           try {
             await db.discountCode.update({
-              where: { id: discountCodeId },
+              where: { id: verifiedDiscountCodeId },
               data: {
                 usageCount: { increment: 1 },
               },
@@ -344,7 +437,11 @@ export async function POST(req: NextRequest) {
                     inventoryQty: true,
                     productId: true,
                     product: {
-                      select: { businessId: true },
+                      select: {
+                        businessId: true,
+                        trackInventory: true,
+                        allowBackorders: true,
+                      },
                     },
                   },
                 });
@@ -356,36 +453,75 @@ export async function POST(req: NextRequest) {
                   continue;
                 }
 
-                const newQty = variant.inventoryQty - qty;
-
-                // Prevent negative inventory
-                if (newQty < 0) {
-                  console.warn(
-                    `[Webhook] Insufficient inventory for variant ${variant.id}`,
-                  );
+                if (!variant.product.trackInventory) {
                   continue;
                 }
 
-                // Update inventory
-                await tx.productVariant.update({
-                  where: { id: variant.id },
-                  data: { inventoryQty: newQty },
-                });
+                const previousQty = variant.inventoryQty;
 
-                // Create history record
-                await tx.inventoryHistory.create({
-                  data: {
-                    variantId: variant.id,
-                    productId: variant.productId,
-                    businessId: variant.product.businessId,
-                    previousQty: variant.inventoryQty,
-                    newQty,
-                    changeQty: -qty,
-                    reason: "sale",
-                    note: `Order #${orderNumber}`,
-                    orderId: order.id,
-                  },
-                });
+                if (variant.product.allowBackorders) {
+                  await tx.productVariant.update({
+                    where: { id: variant.id },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  const newQty = previousQty - qty;
+                  await tx.inventoryHistory.create({
+                    data: {
+                      variantId: variant.id,
+                      productId: variant.productId,
+                      businessId: variant.product.businessId,
+                      previousQty,
+                      newQty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Order #${orderNumber}`,
+                      orderId: order.id,
+                    },
+                  });
+                } else {
+                  const result = await tx.productVariant.updateMany({
+                    where: {
+                      id: variant.id,
+                      inventoryQty: { gte: qty },
+                    },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+
+                  if (result.count === 0) {
+                    console.warn(
+                      `[Webhook] Oversell for variant ${variant.id} on order ${orderNumber}`,
+                    );
+                    await tx.inventoryHistory.create({
+                      data: {
+                        variantId: variant.id,
+                        productId: variant.productId,
+                        businessId: variant.product.businessId,
+                        previousQty,
+                        newQty: previousQty,
+                        changeQty: 0,
+                        reason: "oversell",
+                        note: `Order #${orderNumber}: insufficient stock at fulfillment; inventory unchanged`,
+                        orderId: order.id,
+                      },
+                    });
+                    continue;
+                  }
+
+                  const newQty = previousQty - qty;
+                  await tx.inventoryHistory.create({
+                    data: {
+                      variantId: variant.id,
+                      productId: variant.productId,
+                      businessId: variant.product.businessId,
+                      previousQty,
+                      newQty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Order #${orderNumber}`,
+                      orderId: order.id,
+                    },
+                  });
+                }
               }
               // Handle product inventory (no variant)
               else if (item.productId) {
@@ -410,36 +546,71 @@ export async function POST(req: NextRequest) {
                   continue;
                 }
 
-                const newQty = product.inventoryQty - qty;
+                const previousQty = product.inventoryQty;
 
-                // Prevent negative inventory unless backorders are allowed
-                if (newQty < 0 && !product.allowBackorders) {
-                  console.warn(
-                    `[Webhook] Insufficient inventory for product ${product.id}`,
-                  );
-                  continue;
+                if (product.allowBackorders) {
+                  await tx.product.update({
+                    where: { id: product.id },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  const newQty = previousQty - qty;
+                  await tx.inventoryHistory.create({
+                    data: {
+                      productId: product.id,
+                      businessId: product.businessId,
+                      previousQty,
+                      newQty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Order #${orderNumber}`,
+                      orderId: order.id,
+                      variantId: null,
+                    },
+                  });
+                } else {
+                  const result = await tx.product.updateMany({
+                    where: {
+                      id: product.id,
+                      inventoryQty: { gte: qty },
+                    },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+
+                  if (result.count === 0) {
+                    console.warn(
+                      `[Webhook] Oversell for product ${product.id} on order ${orderNumber}`,
+                    );
+                    await tx.inventoryHistory.create({
+                      data: {
+                        productId: product.id,
+                        businessId: product.businessId,
+                        previousQty,
+                        newQty: previousQty,
+                        changeQty: 0,
+                        reason: "oversell",
+                        note: `Order #${orderNumber}: insufficient stock at fulfillment; inventory unchanged`,
+                        orderId: order.id,
+                        variantId: null,
+                      },
+                    });
+                    continue;
+                  }
+
+                  const newQty = previousQty - qty;
+                  await tx.inventoryHistory.create({
+                    data: {
+                      productId: product.id,
+                      businessId: product.businessId,
+                      previousQty,
+                      newQty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Order #${orderNumber}`,
+                      orderId: order.id,
+                      variantId: null,
+                    },
+                  });
                 }
-
-                // Update inventory
-                await tx.product.update({
-                  where: { id: product.id },
-                  data: { inventoryQty: newQty },
-                });
-
-                // Create history record
-                await tx.inventoryHistory.create({
-                  data: {
-                    productId: product.id,
-                    businessId: product.businessId,
-                    previousQty: product.inventoryQty,
-                    newQty,
-                    changeQty: -qty,
-                    reason: "sale",
-                    note: `Order #${orderNumber}`,
-                    orderId: order.id,
-                    variantId: null,
-                  },
-                });
               }
             }
           });
@@ -511,7 +682,39 @@ export async function POST(req: NextRequest) {
           // Don't fail the webhook if email fails
         }
 
-        // TODO: Notify store owner
+        try {
+          await sendNewOrderNotification({
+            to: business.ownerEmail,
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            customerEmail: order.customerEmail,
+            items: order.items.map((item) => ({
+              productName: item.productName,
+              variantName: item.variantName,
+              quantity: item.quantity,
+              total: Math.round(item.total),
+            })),
+            subtotal: order.subtotal,
+            shipping: order.shipping,
+            tax: order.tax,
+            discount: order.discount,
+            total: order.total,
+            business: {
+              name: business.name,
+              siteContent: business.siteContent,
+              subdomain: business.subdomain,
+            },
+          });
+          console.log(
+            `[Webhook] New order notification sent to ${business.ownerEmail}`,
+          );
+        } catch (ownerEmailError) {
+          console.error(
+            "[Webhook] Failed to send owner new-order notification:",
+            ownerEmailError,
+          );
+        }
 
         return NextResponse.json({ received: true });
       } catch (orderError: unknown) {

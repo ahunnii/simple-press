@@ -21,9 +21,16 @@ type TiptapRendererProps = {
   className?: string;
 };
 
+const ALLOWED_LINK_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"]);
+
 const extensions = [
   StarterKit,
-  Link,
+  Link.configure({
+    HTMLAttributes: {
+      rel: "noopener noreferrer nofollow",
+    },
+    protocols: ["http", "https", "mailto", "tel"],
+  }),
   Image,
   Underline,
   TextStyle,
@@ -80,17 +87,64 @@ type ContentNode = {
   content?: ContentNode[];
 };
 
+type TiptapDoc = {
+  type: "doc";
+  content: ContentNode[];
+};
+
+function isContentNode(value: unknown): value is ContentNode {
+  return value != null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isTiptapDoc(value: unknown): value is TiptapDoc {
+  if (!isContentNode(value)) return false;
+  if (value.type !== "doc" || !Array.isArray(value.content)) return false;
+  return value.content.every(isContentNode);
+}
+
+function sanitizeGeneratedHtml(html: string): string {
+  if (typeof window === "undefined") return html;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+
+  doc.querySelectorAll("*").forEach((el) => {
+    for (const attr of [...el.attributes]) {
+      if (attr.name.toLowerCase().startsWith("on")) {
+        el.removeAttribute(attr.name);
+      }
+    }
+  });
+
+  doc.querySelectorAll("a[href]").forEach((link) => {
+    const href = link.getAttribute("href");
+    if (!href) return;
+
+    try {
+      const parsed = new URL(href, window.location.origin);
+      if (!ALLOWED_LINK_PROTOCOLS.has(parsed.protocol)) {
+        link.removeAttribute("href");
+      }
+    } catch {
+      link.removeAttribute("href");
+    }
+
+    link.setAttribute("rel", "noopener noreferrer nofollow");
+  });
+
+  return doc.body.innerHTML;
+}
+
 function isGalleryNode(node: ContentNode): node is ContentNode & { attrs: { galleryId?: string } } {
   return node.type === "gallery" && node.attrs != null && "galleryId" in node.attrs;
 }
 
 export function TiptapRenderer({ content, className }: TiptapRendererProps) {
   const elements = useMemo(() => {
-    if (!content || typeof content !== "object" || !Array.isArray((content as { content?: ContentNode[] }).content)) {
+    if (!isTiptapDoc(content)) {
       return [];
     }
 
-    const nodes = (content as { content: ContentNode[] }).content;
+    const nodes = content.content;
     return nodes.map((node, index) => {
       if (isGalleryNode(node) && node.attrs.galleryId) {
         return (
@@ -101,9 +155,11 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
         );
       }
       try {
-        const html = generateHTML(
+        const html = sanitizeGeneratedHtml(
+          generateHTML(
           { type: "doc", content: [node] as Parameters<typeof generateHTML>[0]["content"] },
           extensions,
+          ),
         );
         return (
           <div

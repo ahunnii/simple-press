@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { PagesList } from "../_components/pages-list";
 import { TrailHeader } from "../../_components/trail-header";
+import { PagesList } from "./_components/pages-list";
 
 export default async function PagesListPage() {
   const business = await api.business.getWith({ includePages: true });
@@ -14,7 +14,7 @@ export default async function PagesListPage() {
       <TrailHeader
         breadcrumbs={[
           { label: "Content", href: "/admin/content" },
-          { label: "Custom Pages" },
+          { label: "Pages" },
         ]}
       />
       <PagesList business={business} />
@@ -23,5 +23,5 @@ export default async function PagesListPage() {
 }
 
 export const metadata = {
-  title: "Custom Pages",
+  title: "Pages",
 };

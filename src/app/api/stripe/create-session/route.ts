@@ -3,7 +3,12 @@ import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 
 import { env } from "~/env";
+import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import {
+  calculateShipping,
+  shippingConfigFromBusiness,
+} from "~/lib/shipping-utils";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
 
@@ -29,25 +34,38 @@ async function createStripeCoupon(
 
 export async function POST(req: NextRequest) {
   try {
-    const { items, customerInfo, discountCodeId, discountAmount } =
-      (await req.json()) as {
-        items: {
-          productId: string;
-          variantId: string | null;
-          productName: string;
-          variantName: string | null;
-          price: number;
-          quantity: number;
-          imageUrl: string | null;
-          sku?: string;
-        }[];
-        customerInfo: {
-          email: string;
-          name: string;
-        };
-        discountCodeId: string;
-        discountAmount: number;
+    const body = (await req.json()) as {
+      items: {
+        productId: string;
+        variantId: string | null;
+        productName: string;
+        variantName: string | null;
+        price: number;
+        quantity: number;
+        imageUrl: string | null;
+        sku?: string;
+      }[];
+      customerInfo: {
+        email: string;
+        name: string;
+        /** Contact phone; prefills Stripe Checkout when `phone_number_collection` is enabled. */
+        phone?: string | null;
+        shippingAddress?: {
+          line1: string;
+          line2?: string | null;
+          city: string;
+          state: string;
+          postalCode: string;
+          country: string;
+          phone?: string | null;
+        } | null;
       };
+      discountCodeId?: string | null;
+      discountAmount?: number;
+      deliveryMethod?: "ship" | "pickup";
+    };
+
+    const { items, customerInfo, discountCodeId } = body;
 
     if (!items || !customerInfo) {
       return NextResponse.json(
@@ -107,7 +125,12 @@ export async function POST(req: NextRequest) {
               name: true,
               productId: true,
               product: {
-                select: { businessId: true, published: true },
+                select: {
+                  businessId: true,
+                  published: true,
+                  trackInventory: true,
+                  allowBackorders: true,
+                },
               },
             },
           })
@@ -137,6 +160,25 @@ export async function POST(req: NextRequest) {
     const productMap = new Map(productsNoVariant.map((p) => [p.id, p]));
 
     const unavailableItems: string[] = [];
+    const unavailableItemIds: {
+      productId: string;
+      variantId: string | null;
+    }[] = [];
+    const unavailableIdKeySet = new Set<string>();
+
+    const pushUnavailable = (
+      name: string,
+      productId: string,
+      variantId: string | null,
+    ) => {
+      unavailableItems.push(name);
+      const key = `${productId}-${variantId ?? "base"}`;
+      if (!unavailableIdKeySet.has(key)) {
+        unavailableIdKeySet.add(key);
+        unavailableItemIds.push({ productId, variantId });
+      }
+    };
+
     for (const item of itemList) {
       const name = item.variantName
         ? `${item.productName} (${item.variantName})`
@@ -145,22 +187,26 @@ export async function POST(req: NextRequest) {
 
       if (item.variantId) {
         const variant = variantMap.get(item.variantId);
+        if (!variant?.product.published) {
+          pushUnavailable(name, item.productId, item.variantId);
+          continue;
+        }
         if (
-          !variant ||
-          !variant.product.published ||
+          variant.product.trackInventory &&
+          !variant.product.allowBackorders &&
           variant.inventoryQty < qty
         ) {
-          unavailableItems.push(name);
+          pushUnavailable(name, item.productId, item.variantId);
           continue;
         }
       } else {
         const product = productMap.get(item.productId);
         if (!product?.published) {
-          unavailableItems.push(name);
+          pushUnavailable(name, item.productId, null);
           continue;
         }
         if (product._count.variants > 0) {
-          unavailableItems.push(name);
+          pushUnavailable(name, item.productId, null);
           continue;
         }
         if (
@@ -168,7 +214,7 @@ export async function POST(req: NextRequest) {
           !product.allowBackorders &&
           product.inventoryQty < qty
         ) {
-          unavailableItems.push(name);
+          pushUnavailable(name, item.productId, null);
         }
       }
     }
@@ -180,9 +226,95 @@ export async function POST(req: NextRequest) {
           error:
             "Some items in your cart are out of stock or no longer available. Please update your cart and try again.",
           unavailableItems: uniqueNames,
+          unavailableItemIds,
         },
         { status: 400 },
       );
+    }
+
+    const deliveryMethod = body.deliveryMethod === "pickup" ? "pickup" : "ship";
+
+    if (deliveryMethod === "pickup" && !business.offersInStorePickup) {
+      return NextResponse.json(
+        { error: "In-store pickup is not available for this store" },
+        { status: 400 },
+      );
+    }
+
+    if (deliveryMethod === "ship") {
+      const saPre = customerInfo.shippingAddress;
+      if (
+        !saPre ||
+        typeof saPre.line1 !== "string" ||
+        !saPre.line1.trim() ||
+        typeof saPre.city !== "string" ||
+        !saPre.city.trim() ||
+        typeof saPre.state !== "string" ||
+        !saPre.state.trim() ||
+        typeof saPre.postalCode !== "string" ||
+        !saPre.postalCode.trim() ||
+        (saPre.country !== "US" && saPre.country !== "CA")
+      ) {
+        return NextResponse.json(
+          { error: "Complete shipping address is required" },
+          { status: 400 },
+        );
+      }
+    }
+
+    const subtotalCents = itemList.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+
+    const rawDiscountId =
+      typeof discountCodeId === "string" && discountCodeId.trim() !== ""
+        ? discountCodeId.trim()
+        : null;
+
+    let discountCents = 0;
+    let verifiedDiscountCodeId: string | null = null;
+
+    if (rawDiscountId) {
+      const discountRow = await db.discountCode.findFirst({
+        where: {
+          id: rawDiscountId,
+          businessId: business.id,
+        },
+      });
+
+      if (!discountRow) {
+        return NextResponse.json(
+          { error: "Invalid or expired discount code" },
+          { status: 400 },
+        );
+      }
+
+      const computed = validateAndComputeDiscount(discountRow, subtotalCents);
+      if (!computed.ok) {
+        return NextResponse.json({ error: computed.error }, { status: 400 });
+      }
+
+      discountCents = computed.discountAmountCents;
+      verifiedDiscountCodeId = discountRow.id;
+    }
+
+    const shippingConfig = shippingConfigFromBusiness({
+      shippingType: business.shippingType,
+      shippingFlatRate: business.shippingFlatRate,
+      freeShippingThreshold: business.freeShippingThreshold,
+      offersInStorePickup: business.offersInStorePickup,
+    });
+
+    let shippingCents = 0;
+    let shippingDisplayName = "Shipping";
+    if (deliveryMethod === "pickup") {
+      shippingCents = 0;
+      shippingDisplayName = "In-Store Pickup";
+    } else {
+      shippingCents = calculateShipping(subtotalCents, shippingConfig);
+      shippingDisplayName =
+        shippingCents === 0 ? "Free shipping" : "Standard shipping";
     }
 
     // Initialize Stripe with platform account
@@ -217,32 +349,121 @@ export async function POST(req: NextRequest) {
         ? `https://${business.customDomain}`
         : `https://${business.subdomain}.${platformDomain}`;
 
-    // Build session params
+    const sa = customerInfo.shippingAddress;
+    const contactPhone = (customerInfo.phone ?? sa?.phone)?.trim() ?? "";
+    const hasFullShipping =
+      deliveryMethod === "ship" &&
+      !!sa &&
+      typeof sa.line1 === "string" &&
+      sa.line1.trim().length > 0 &&
+      typeof sa.city === "string" &&
+      sa.city.trim().length > 0 &&
+      typeof sa.state === "string" &&
+      sa.state.trim().length > 0 &&
+      typeof sa.postalCode === "string" &&
+      sa.postalCode.trim().length > 0 &&
+      (sa.country === "US" || sa.country === "CA") &&
+      contactPhone.length > 0;
+
+    let stripeCustomerId: string | undefined;
+
+    if (hasFullShipping && sa) {
+      const line1 = sa.line1.trim();
+      const line2 = sa.line2?.trim();
+      const city = sa.city.trim();
+      const state = sa.state.trim();
+      const postalCode = sa.postalCode.trim();
+      const country = sa.country;
+
+      const customer = await stripeClient.customers.create(
+        {
+          email: customerInfo.email,
+          name: customerInfo.name,
+          phone: contactPhone,
+          shipping: {
+            name: customerInfo.name,
+            phone: contactPhone,
+            address: {
+              line1,
+              ...(line2 ? { line2 } : {}),
+              city,
+              state,
+              postal_code: postalCode,
+              country,
+            },
+          },
+        },
+        { stripeAccount: business.stripeAccountId },
+      );
+      stripeCustomerId = customer.id;
+    }
+
+    // Shipping: `shipping_options` sets the amount Stripe charges (Connect webhook reads `amount_shipping`).
+    // Address collection only when shipping to customer (not in-store pickup).
+    // Phone: `phone_number_collection` prefills when Customer.phone is set.
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "payment",
       line_items: lineItems,
       success_url: `${baseUrl}/order/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout`,
-      customer_email: customerInfo.email,
-      shipping_address_collection: {
-        allowed_countries: ["US", "CA"],
+      ...(stripeCustomerId
+        ? {
+            customer: stripeCustomerId,
+            customer_update: {
+              shipping: "auto",
+            },
+          }
+        : { customer_email: customerInfo.email }),
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: {
+              amount: shippingCents,
+              currency: "usd",
+            },
+            display_name: shippingDisplayName,
+          },
+        },
+      ],
+      ...(deliveryMethod === "ship"
+        ? {
+            shipping_address_collection: {
+              allowed_countries: ["US", "CA"],
+            },
+          }
+        : {}),
+      phone_number_collection: {
+        enabled: true,
       },
       metadata: {
         businessId: business.id,
         customerName: customerInfo.name,
         customerEmail: customerInfo.email,
-        discountCodeId: discountCodeId || "",
+        discountCodeId: verifiedDiscountCodeId ?? "",
+        deliveryMethod,
+        ...(hasFullShipping && sa
+          ? {
+              shippingLine1: sa.line1.trim(),
+              shippingLine2: sa.line2?.trim() ?? "",
+              shippingCity: sa.city.trim(),
+              shippingState: sa.state.trim(),
+              shippingPostalCode: sa.postalCode.trim(),
+              shippingCountry: sa.country,
+              shippingPhone: contactPhone,
+            }
+          : {}),
       },
     };
 
-    // Add discount if applicable
-    if (discountAmount && discountAmount > 0) {
+    // Add discount if applicable (amount computed server-side when code present)
+    if (discountCents > 0) {
       sessionParams.discounts = [
         {
           coupon: await createStripeCoupon(
             stripeClient,
             business.stripeAccountId,
-            discountAmount,
+            discountCents,
           ),
         },
       ];

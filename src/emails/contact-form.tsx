@@ -8,6 +8,7 @@ type ContactFormEmailProps = {
   subject?: string;
   message: string;
   businessName: string;
+  businessLogoUrl?: string;
   phone?: string;
   preferredContactMethod?: "email" | "phone" | "no-preference";
 };
@@ -18,6 +19,7 @@ export default function ContactFormEmail({
   subject,
   message,
   businessName,
+  businessLogoUrl,
   phone,
   preferredContactMethod,
 }: ContactFormEmailProps) {
@@ -25,6 +27,7 @@ export default function ContactFormEmail({
     <EmailLayout
       previewText={`New contact form submission from ${name}`}
       businessName={businessName}
+      logoUrl={businessLogoUrl}
     >
       <Text style={heading}>New Contact Form Submission</Text>
 

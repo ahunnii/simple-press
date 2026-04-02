@@ -22,6 +22,10 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Bamboo",
     subdomains: ["finallyresults"],
   },
+  "happy-bamboo": {
+    label: "Happy Bamboo",
+    subdomains: ["zaires"],
+  },
 };
 
 // List all subdomains associated with commercial templates

@@ -1,0 +1,143 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Eye, ShoppingCart } from "lucide-react";
+import { toast } from "sonner";
+
+import type { RouterOutputs } from "~/trpc/react";
+import { formatPrice } from "~/lib/prices";
+import { Button } from "~/components/ui/button";
+import { useCart } from "~/providers/cart-context";
+
+import {
+  FadeIn,
+  StaggerContainer,
+  StaggerItem,
+} from "./happy-bamboo-animations";
+
+type Props = {
+  featuredProducts: NonNullable<
+    RouterOutputs["business"]["getHomepage"]
+  >["products"];
+  featuredTitle?: string;
+  featuredDescription?: string;
+  featuredButtonText?: string;
+  featuredButtonLink?: string;
+};
+export function HappyBambooFeaturedProducts({
+  featuredProducts,
+  featuredTitle = "Our Curated Collection",
+  featuredDescription = "Every product is 100% bamboo, tree-free, and crafted to the highest standard. No compromises.",
+  featuredButtonText = "View All Products",
+  featuredButtonLink = "/shop",
+}: Props) {
+  const { addItem } = useCart();
+  const router = useRouter();
+
+  const handleAdd = (
+    e: React.MouseEvent,
+    product: NonNullable<
+      RouterOutputs["business"]["getHomepage"]
+    >["products"][number],
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem({
+      productId: product.id,
+      variantId: null,
+      productName: product.name,
+      variantName: null,
+      price: product.price,
+      imageUrl: product.images[0]?.url ?? "/placeholder.svg",
+      sku: null,
+    });
+    toast.success(`${product.name} added to cart`);
+  };
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
+      <FadeIn direction="up">
+        <div className="mb-12 text-center">
+          <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
+            <span className="text-balance">{featuredTitle}</span>
+          </h2>
+          <p className="text-muted-foreground mx-auto mt-4 max-w-2xl">
+            {featuredDescription}
+          </p>
+        </div>
+      </FadeIn>
+      <StaggerContainer
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2"
+        staggerDelay={0.12}
+      >
+        {featuredProducts?.slice(0, 3).map((product) => (
+          <StaggerItem key={product.id}>
+            <Link
+              href={`/shop/${product.slug}`}
+              className="group border-border bg-card relative flex flex-col overflow-hidden rounded-xl border transition-shadow hover:shadow-lg"
+            >
+              <div className="bg-secondary relative aspect-square overflow-hidden">
+                <Image
+                  src={product.images[0]?.url ?? "/placeholder.svg"}
+                  alt={product.name}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+                {/* {product.badge && (
+                <Badge className="bg-primary text-primary-foreground absolute top-3 left-3">
+                  {product.badge}
+                </Badge>
+              )} */}
+              </div>
+              <div className="flex flex-1 flex-col gap-3 p-5">
+                <h3 className="text-card-foreground group-hover:text-primary font-heading text-lg font-semibold transition-colors">
+                  {product.name}
+                </h3>
+                <p className="text-muted-foreground line-clamp-2 flex-1 text-sm leading-relaxed">
+                  {product.description}
+                </p>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-foreground text-lg font-bold">
+                    {formatPrice(product.price)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={(e) => handleAdd(e, product)}
+                  >
+                    <ShoppingCart className="size-4" />
+                    Add to Cart
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => router.push(`/shop/${product.slug}`)}
+                    //   onClick={(e) => handleAdd(e, product)}
+                  >
+                    <Eye className="size-4" />
+                    View Product
+                  </Button>
+                </div>
+              </div>
+            </Link>
+          </StaggerItem>
+        ))}
+      </StaggerContainer>
+      <FadeIn direction="up" delay={0.3}>
+        <div className="mt-12 text-center">
+          <Button variant="outline" size="lg" asChild>
+            <Link href={featuredButtonLink ?? "/shop"}>
+              {featuredButtonText}
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </FadeIn>
+    </section>
+  );
+}

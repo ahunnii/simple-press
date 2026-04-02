@@ -1,5 +1,17 @@
 import { z } from "zod";
 
+const productFeatureSchema = z.object({
+  icon: z.string(),
+  text: z.string(),
+});
+
+const additionalFieldsSchema = z
+  .object({
+    additionalInformation: z.record(z.string(), z.unknown()).optional(),
+    productFeatures: z.array(productFeatureSchema).optional(),
+  })
+  .optional();
+
 export const productCreateSchema = z.object({
   name: z.string(),
   slug: z.string(),
@@ -18,6 +30,7 @@ export const productCreateSchema = z.object({
       options: z.record(z.string(), z.string()),
     }),
   ),
+  additionalFields: additionalFieldsSchema,
 });
 
 export const productUpdateSchema = z.object({
@@ -40,6 +53,7 @@ export const productUpdateSchema = z.object({
       options: z.record(z.string(), z.string()),
     }),
   ),
+  additionalFields: additionalFieldsSchema,
 });
 
 export const productFormSchema = z.object({
@@ -74,6 +88,7 @@ export const productFormSchema = z.object({
       }),
     )
     .optional(),
+  additionalFields: additionalFieldsSchema,
 });
 
 export type ProductFormSchema = z.infer<typeof productFormSchema>;

@@ -45,6 +45,37 @@ const router: Router = {
         };
       },
     }),
+    video: route({
+      fileTypes: ["video/*"],
+      multipleFiles: false,
+      maxFileSize: 1024 * 1024 * 20, // 20MB
+      onBeforeUpload: async ({ req, file }) => {
+        const user = await auth.api.getSession({ headers: req.headers });
+        if (!user) {
+          throw new RejectUpload("Not logged in!");
+        }
+        const business = await checkBusiness();
+        if (!business) {
+          throw new RejectUpload("Business not found!");
+        }
+
+        return {
+          objectInfo: {
+            key: `${business.id}/${file.name}`,
+            metadata: {
+              pathname: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${business.id}/${file.name}`,
+            },
+          },
+        };
+      },
+      onAfterSignedUrl: async ({ metadata }) => {
+        return {
+          metadata: {
+            ...metadata,
+          },
+        };
+      },
+    }),
     logo: route({
       fileTypes: ["image/*"],
       multipleFiles: false,

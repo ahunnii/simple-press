@@ -64,7 +64,7 @@ export function DarkTrendDiscountInput({
     setIsValidating(true);
     validateDiscountMutation.mutate({
       code: code.trim().toUpperCase(),
-      businessId,
+
       cartTotal,
     });
   };

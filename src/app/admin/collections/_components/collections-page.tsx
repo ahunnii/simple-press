@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 import {
   AlertDialog,
@@ -26,11 +27,13 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
-export function CollectionsPage() {
+type Props = {
+  collections: RouterOutputs["collections"]["getAll"];
+};
+
+export function CollectionsPage({ collections }: Props) {
   const utils = api.useUtils();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  const { data: collections, isLoading } = api.collections.getAll.useQuery();
 
   const deleteMutation = api.collections.delete.useMutation({
     onSuccess: () => {
@@ -43,14 +46,6 @@ export function CollectionsPage() {
     if (!deleteId) return;
     deleteMutation.mutate(deleteId);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-gray-500">Loading collections...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

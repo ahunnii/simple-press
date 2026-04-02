@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, ExternalLink, Globe, Loader2, X } from "lucide-react";
+import { Check, Copy, ExternalLink, Globe, Loader2 } from "lucide-react";
 
 import { env } from "~/env";
 import { isValidDomain } from "~/lib/utils";
@@ -97,9 +97,9 @@ export function DomainSetup({ business }: DomainSetupProps) {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    void navigator.clipboard.writeText(text);
-  };
+  // const copyToClipboard = (text: string) => {
+  //   void navigator.clipboard.writeText(text);
+  // };
 
   // Already has active custom domain
   if (business.customDomain && business.domainStatus === "active") {
@@ -232,7 +232,7 @@ export function DomainSetup({ business }: DomainSetupProps) {
   );
 }
 
-function DNSInstructions({ domain, vpsIp }: { domain: string; vpsIp: string }) {
+function DNSInstructions({ vpsIp }: { domain: string; vpsIp: string }) {
   const copyToClipboard = (text: string) => {
     void navigator.clipboard.writeText(text);
   };

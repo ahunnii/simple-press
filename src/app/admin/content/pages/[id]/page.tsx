@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { api } from "~/trpc/server";
 import { TrailHeader } from "~/app/admin/_components/trail-header";
 
-import { PageEditor } from "../../_components/page-editor";
+import { PageEditor } from "../_components/page-editor";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -20,7 +20,7 @@ export default async function EditPagePage({ params }: Props) {
       <TrailHeader
         breadcrumbs={[
           { label: "Content", href: "/admin/content" },
-          { label: "Custom Pages", href: "/admin/content/pages" },
+          { label: "Pages", href: "/admin/content/pages" },
           { label: page.title },
         ]}
       />
@@ -36,6 +36,6 @@ export const generateMetadata = async ({ params }: Props) => {
     id,
   });
   return {
-    title: page?.title ?? "Edit Page",
+    title: `Edit ${page?.title ?? "Page"}`,
   };
 };

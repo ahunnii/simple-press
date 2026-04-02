@@ -12,9 +12,6 @@ export function ModernContactPage({
     string
   >;
 
-  const businessPhone = business?.phoneNumber;
-  const businessAddress = business?.businessAddress;
-
   return (
     <div className="bg-background">
       {/* Header */}

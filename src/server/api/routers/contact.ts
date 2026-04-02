@@ -29,7 +29,13 @@ export const contactRouter = createTRPCRouter({
     }
     const businessData = await db.business.findUnique({
       where: { id: business.id },
-      select: { name: true, ownerEmail: true },
+      select: {
+        name: true,
+        ownerEmail: true,
+        siteContent: {
+          select: { logoUrl: true },
+        },
+      },
     });
 
     const contactEmail = await sendContactFormSubmission({
@@ -42,6 +48,7 @@ export const contactRouter = createTRPCRouter({
       business: {
         name: businessData?.name ?? "",
         ownerEmail: businessData?.ownerEmail ?? "",
+        siteContent: businessData?.siteContent,
       },
     });
 

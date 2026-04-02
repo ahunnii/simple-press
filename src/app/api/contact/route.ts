@@ -71,6 +71,7 @@ export async function POST(req: NextRequest) {
       business: {
         name: business.name,
         ownerEmail: business.ownerEmail,
+        siteContent: business.siteContent,
       },
     });
 

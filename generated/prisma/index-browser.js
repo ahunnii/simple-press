@@ -200,7 +200,11 @@ exports.Prisma.BusinessScalarFieldEnum = {
   umamiEnabled: 'umamiEnabled',
   status: 'status',
   onboardingComplete: 'onboardingComplete',
-  featureFlags: 'featureFlags'
+  featureFlags: 'featureFlags',
+  shippingType: 'shippingType',
+  shippingFlatRate: 'shippingFlatRate',
+  freeShippingThreshold: 'freeShippingThreshold',
+  offersInStorePickup: 'offersInStorePickup'
 };
 
 exports.Prisma.SiteContentScalarFieldEnum = {
@@ -256,7 +260,8 @@ exports.Prisma.ProductScalarFieldEnum = {
   metaDescription: 'metaDescription',
   businessId: 'businessId',
   averageRating: 'averageRating',
-  reviewCount: 'reviewCount'
+  reviewCount: 'reviewCount',
+  additionalFields: 'additionalFields'
 };
 
 exports.Prisma.ProductVariantScalarFieldEnum = {
@@ -409,7 +414,10 @@ exports.Prisma.DiscountCodeScalarFieldEnum = {
   startsAt: 'startsAt',
   expiresAt: 'expiresAt',
   minPurchase: 'minPurchase',
-  maxDiscount: 'maxDiscount'
+  maxDiscount: 'maxDiscount',
+  showAsBanner: 'showAsBanner',
+  bannerText: 'bannerText',
+  bannerLinkUrl: 'bannerLinkUrl'
 };
 
 exports.Prisma.InventoryHistoryScalarFieldEnum = {

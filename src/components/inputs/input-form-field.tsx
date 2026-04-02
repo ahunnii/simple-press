@@ -33,6 +33,7 @@ type Props<CurrentForm extends FieldValues> = {
   autoFocus?: boolean;
   labelClassName?: string;
   inputClassName?: string;
+  descriptionClassName?: string;
 };
 
 export const InputFormField = <CurrentForm extends FieldValues>({
@@ -54,17 +55,21 @@ export const InputFormField = <CurrentForm extends FieldValues>({
   autoFocus,
   labelClassName,
   inputClassName,
+  descriptionClassName,
 }: Props<CurrentForm>) => {
   return (
     <FormField
       control={form.control}
       name={name}
       render={({ field }) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { ref: _fieldRef, ...fieldRest } = field;
         return (
           <FormItem className={cn("col-span-full", className)}>
             {label && (
-              <FormLabel className={cn(labelClassName)}>{label}</FormLabel>
+              <FormLabel className={cn(labelClassName)}>
+                {label} {required && <span className="text-red-500">*</span>}
+              </FormLabel>
             )}
             <FormControl>
               <Input
@@ -102,7 +107,11 @@ export const InputFormField = <CurrentForm extends FieldValues>({
                 autoFocus={autoFocus}
               />
             </FormControl>
-            {description && <FormDescription>{description}</FormDescription>}
+            {description && (
+              <FormDescription className={cn(descriptionClassName)}>
+                {description}
+              </FormDescription>
+            )}
             <FormMessage />
           </FormItem>
         );

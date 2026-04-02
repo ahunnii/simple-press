@@ -1,3 +1,4 @@
+import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -35,6 +36,41 @@ export const productRouter = createTRPCRouter({
     });
     return products;
   }),
+
+  getRelated: publicProcedure
+    .input(z.object({ productId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+      const product = await ctx.db.product.findUnique({
+        where: { id: input.productId, businessId: business.id },
+      });
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+
+      const products = await ctx.db.product.findMany({
+        where: { businessId: business.id, id: { not: product.id } },
+        include: {
+          images: {
+            orderBy: { sortOrder: "asc" },
+            take: 4,
+          },
+          variants: true,
+        },
+        orderBy: { createdAt: "desc" },
+        take: 4,
+      });
+      return products;
+    }),
   create: ownerAdminProcedure
     .input(productCreateSchema)
     .mutation(async ({ ctx, input }) => {
@@ -48,6 +84,7 @@ export const productRouter = createTRPCRouter({
         allowBackorders,
         inventoryQty,
         variants,
+        additionalFields,
       } = input;
 
       const { businessId } = ctx;
@@ -77,6 +114,11 @@ export const productRouter = createTRPCRouter({
           trackInventory,
           allowBackorders,
           inventoryQty,
+          additionalFields: additionalFields
+            ? (JSON.parse(
+                JSON.stringify(additionalFields),
+              ) as Prisma.InputJsonValue)
+            : undefined,
           businessId,
           variants: {
             create: variants.map((v) => ({
@@ -111,6 +153,7 @@ export const productRouter = createTRPCRouter({
         allowBackorders,
         inventoryQty,
         variants,
+        additionalFields,
       } = input;
 
       // Check if slug is already taken for this business
@@ -140,6 +183,11 @@ export const productRouter = createTRPCRouter({
           trackInventory,
           allowBackorders,
           inventoryQty,
+          additionalFields: additionalFields
+            ? (JSON.parse(
+                JSON.stringify(additionalFields),
+              ) as Prisma.InputJsonValue)
+            : undefined,
         },
       });
       if (variants) {

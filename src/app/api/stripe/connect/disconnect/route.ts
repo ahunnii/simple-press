@@ -1,12 +1,13 @@
-// app/api/stripe/connect/disconnect/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 import { env } from "~/env";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { stripeClient } from "~/lib/stripe/client";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
+
+// app/api/stripe/connect/disconnect/route.ts
 
 export async function POST(request: NextRequest) {
   try {

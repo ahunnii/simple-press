@@ -4,10 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Edit, MoreVertical, Trash } from "lucide-react";
-import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -73,12 +71,16 @@ export function UserMembershipsTable({ memberships }: Props) {
                 >
                   {membership.business.name}
                 </Link>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-muted-foreground text-sm">
                   {membership.business.subdomain}
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant={membership.role === "OWNER" ? "default" : "secondary"}>
+                <Badge
+                  variant={
+                    membership.role === "OWNER" ? "default" : "secondary"
+                  }
+                >
                   {membership.role}
                 </Badge>
               </TableCell>

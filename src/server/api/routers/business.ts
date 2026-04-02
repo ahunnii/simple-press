@@ -79,6 +79,10 @@ export const businessRouter = createTRPCRouter({
         stripeAccountId: true,
         supportEmail: true,
         phoneNumber: true,
+        shippingType: true,
+        shippingFlatRate: true,
+        freeShippingThreshold: true,
+        offersInStorePickup: true,
         products: {
           where: { published: true },
           include: {
@@ -157,6 +161,7 @@ export const businessRouter = createTRPCRouter({
             slug: true,
             price: true,
             description: true,
+            variants: true,
             images: {
               take: 1,
               orderBy: { sortOrder: "asc" },
@@ -403,6 +408,47 @@ export const businessRouter = createTRPCRouter({
         data: { umamiWebsiteId, umamiEnabled },
       });
       return updatedBusiness;
+    }),
+
+  updateShipping: ownerAdminProcedure
+    .input(
+      z.object({
+        shippingType: z.enum([
+          "free",
+          "flat_rate",
+          "flat_rate_with_threshold",
+        ]),
+        shippingFlatRate: z.number().int().min(0).nullable().optional(),
+        freeShippingThreshold: z.number().int().min(0).nullable().optional(),
+        offersInStorePickup: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const {
+        shippingType,
+        shippingFlatRate,
+        freeShippingThreshold,
+        offersInStorePickup,
+      } = input;
+
+      const updatedBusiness = await ctx.db.business.update({
+        where: { id: businessId },
+        data: {
+          shippingType,
+          shippingFlatRate:
+            shippingType === "free" ? null : (shippingFlatRate ?? null),
+          freeShippingThreshold:
+            shippingType === "flat_rate_with_threshold"
+              ? (freeShippingThreshold ?? null)
+              : null,
+          offersInStorePickup,
+        },
+      });
+      return {
+        message: "Shipping settings updated successfully",
+        business: updatedBusiness,
+      };
     }),
 
   updateSeo: ownerAdminProcedure

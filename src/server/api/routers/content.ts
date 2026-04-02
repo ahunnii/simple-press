@@ -249,7 +249,7 @@ export const contentRouter = createTRPCRouter({
         data: input.data,
       });
 
-      return page;
+      return { data: page, message: "Page updated successfully" };
     }),
 
   // Delete page

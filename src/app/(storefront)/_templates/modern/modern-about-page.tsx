@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../types";
-import type { RouterOutputs } from "~/trpc/react";
 
 import { ModernGeneralLayout } from "./modern-general-layout";
 

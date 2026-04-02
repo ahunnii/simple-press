@@ -224,9 +224,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items, isHydrated]);
 
   // Generate unique key for cart item
-  const getItemKey = (productId: string, variantId: string | null) => {
-    return `${productId}-${variantId ?? "no-variant"}`;
-  };
+  // const getItemKey = (productId: string, variantId: string | null) => {
+  //   return `${productId}-${variantId ?? "no-variant"}`;
+  // };
 
   // Check if item is in cart
   const isInCart = useCallback(

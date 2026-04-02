@@ -5,6 +5,7 @@ import * as React from "react";
 import Link from "next/link";
 import {
   IconDashboard,
+  IconDiscount,
   IconFolder,
   IconHelp,
   IconImageInPicture,
@@ -16,11 +17,10 @@ import {
   IconStar,
   IconTerminal,
 } from "@tabler/icons-react";
-import { Building2, Images, Users } from "lucide-react";
+import { Building2, Users } from "lucide-react";
 
 import type { Session } from "~/server/better-auth/config";
 import { env } from "~/env";
-import { api } from "~/trpc/react";
 import {
   Sidebar,
   SidebarContent,
@@ -62,6 +62,11 @@ const getNavData = (session: Session | null) => {
       title: "Site content",
       url: "/admin/content",
       icon: IconLanguage,
+    },
+    {
+      title: "Discounts",
+      url: "/admin/discounts",
+      icon: IconDiscount,
     },
     {
       title: "Galleries",

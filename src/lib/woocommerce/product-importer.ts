@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import slugify from "slugify";
 
 import type { ParsedProduct } from "./csv-parser";
@@ -257,7 +255,7 @@ async function importVariableProduct(
     const variantName =
       variation.variantName ??
       Object.entries(variation.attributes)
-        .map(([key, value]) => value)
+        .map(([_, value]) => value)
         .join(" / ");
 
     await db.productVariant.create({
