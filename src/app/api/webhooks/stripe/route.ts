@@ -292,12 +292,19 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ received: true });
         }
 
-        // TODO: Fix how we handle discount codes. DO NOT ADD THEM if they don't exist
-        // const discountCode = appliedDiscount?.code
-        //   ? await ctx.discountCode.findUnique({
-        //       where: { code: appliedDiscount.code },
-        //     })
-        //   : null;
+        const rawMetaDiscountId =
+          typeof discountCodeId === "string" ? discountCodeId.trim() : "";
+        let verifiedDiscountCodeId: string | null = null;
+        if (rawMetaDiscountId.length > 0) {
+          const dc = await db.discountCode.findFirst({
+            where: {
+              id: rawMetaDiscountId,
+              businessId: business.id,
+            },
+            select: { id: true },
+          });
+          verifiedDiscountCodeId = dc?.id ?? null;
+        }
 
         // Create order
         const order = await db.order.create({
@@ -326,12 +333,11 @@ export async function POST(req: NextRequest) {
             stripeSessionId: session.id,
             stripePaymentIntentId: session.payment_intent as string,
 
-            // Discount code
-            // discountCodeId: discountCodeId ?? null,
-
-            // discountCode: !!discountCodeId
-            //   ? { connect: { id: discountCodeId } }
-            //   : undefined,
+            ...(verifiedDiscountCodeId
+              ? {
+                  discountCodeId: verifiedDiscountCodeId,
+                }
+              : {}),
 
             // Order items
             items: {
@@ -397,10 +403,10 @@ export async function POST(req: NextRequest) {
         }
 
         // Increment discount code usage
-        if (discountCodeId) {
+        if (verifiedDiscountCodeId) {
           try {
             await db.discountCode.update({
-              where: { id: discountCodeId },
+              where: { id: verifiedDiscountCodeId },
               data: {
                 usageCount: { increment: 1 },
               },
@@ -428,7 +434,11 @@ export async function POST(req: NextRequest) {
                     inventoryQty: true,
                     productId: true,
                     product: {
-                      select: { businessId: true },
+                      select: {
+                        businessId: true,
+                        trackInventory: true,
+                        allowBackorders: true,
+                      },
                     },
                   },
                 });
@@ -440,36 +450,75 @@ export async function POST(req: NextRequest) {
                   continue;
                 }
 
-                const newQty = variant.inventoryQty - qty;
-
-                // Prevent negative inventory
-                if (newQty < 0) {
-                  console.warn(
-                    `[Webhook] Insufficient inventory for variant ${variant.id}`,
-                  );
+                if (!variant.product.trackInventory) {
                   continue;
                 }
 
-                // Update inventory
-                await tx.productVariant.update({
-                  where: { id: variant.id },
-                  data: { inventoryQty: newQty },
-                });
+                const previousQty = variant.inventoryQty;
 
-                // Create history record
-                await tx.inventoryHistory.create({
-                  data: {
-                    variantId: variant.id,
-                    productId: variant.productId,
-                    businessId: variant.product.businessId,
-                    previousQty: variant.inventoryQty,
-                    newQty,
-                    changeQty: -qty,
-                    reason: "sale",
-                    note: `Order #${orderNumber}`,
-                    orderId: order.id,
-                  },
-                });
+                if (variant.product.allowBackorders) {
+                  await tx.productVariant.update({
+                    where: { id: variant.id },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  const newQty = previousQty - qty;
+                  await tx.inventoryHistory.create({
+                    data: {
+                      variantId: variant.id,
+                      productId: variant.productId,
+                      businessId: variant.product.businessId,
+                      previousQty,
+                      newQty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Order #${orderNumber}`,
+                      orderId: order.id,
+                    },
+                  });
+                } else {
+                  const result = await tx.productVariant.updateMany({
+                    where: {
+                      id: variant.id,
+                      inventoryQty: { gte: qty },
+                    },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+
+                  if (result.count === 0) {
+                    console.warn(
+                      `[Webhook] Oversell for variant ${variant.id} on order ${orderNumber}`,
+                    );
+                    await tx.inventoryHistory.create({
+                      data: {
+                        variantId: variant.id,
+                        productId: variant.productId,
+                        businessId: variant.product.businessId,
+                        previousQty,
+                        newQty: previousQty,
+                        changeQty: 0,
+                        reason: "oversell",
+                        note: `Order #${orderNumber}: insufficient stock at fulfillment; inventory unchanged`,
+                        orderId: order.id,
+                      },
+                    });
+                    continue;
+                  }
+
+                  const newQty = previousQty - qty;
+                  await tx.inventoryHistory.create({
+                    data: {
+                      variantId: variant.id,
+                      productId: variant.productId,
+                      businessId: variant.product.businessId,
+                      previousQty,
+                      newQty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Order #${orderNumber}`,
+                      orderId: order.id,
+                    },
+                  });
+                }
               }
               // Handle product inventory (no variant)
               else if (item.productId) {
@@ -494,36 +543,71 @@ export async function POST(req: NextRequest) {
                   continue;
                 }
 
-                const newQty = product.inventoryQty - qty;
+                const previousQty = product.inventoryQty;
 
-                // Prevent negative inventory unless backorders are allowed
-                if (newQty < 0 && !product.allowBackorders) {
-                  console.warn(
-                    `[Webhook] Insufficient inventory for product ${product.id}`,
-                  );
-                  continue;
+                if (product.allowBackorders) {
+                  await tx.product.update({
+                    where: { id: product.id },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  const newQty = previousQty - qty;
+                  await tx.inventoryHistory.create({
+                    data: {
+                      productId: product.id,
+                      businessId: product.businessId,
+                      previousQty,
+                      newQty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Order #${orderNumber}`,
+                      orderId: order.id,
+                      variantId: null,
+                    },
+                  });
+                } else {
+                  const result = await tx.product.updateMany({
+                    where: {
+                      id: product.id,
+                      inventoryQty: { gte: qty },
+                    },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+
+                  if (result.count === 0) {
+                    console.warn(
+                      `[Webhook] Oversell for product ${product.id} on order ${orderNumber}`,
+                    );
+                    await tx.inventoryHistory.create({
+                      data: {
+                        productId: product.id,
+                        businessId: product.businessId,
+                        previousQty,
+                        newQty: previousQty,
+                        changeQty: 0,
+                        reason: "oversell",
+                        note: `Order #${orderNumber}: insufficient stock at fulfillment; inventory unchanged`,
+                        orderId: order.id,
+                        variantId: null,
+                      },
+                    });
+                    continue;
+                  }
+
+                  const newQty = previousQty - qty;
+                  await tx.inventoryHistory.create({
+                    data: {
+                      productId: product.id,
+                      businessId: product.businessId,
+                      previousQty,
+                      newQty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Order #${orderNumber}`,
+                      orderId: order.id,
+                      variantId: null,
+                    },
+                  });
                 }
-
-                // Update inventory
-                await tx.product.update({
-                  where: { id: product.id },
-                  data: { inventoryQty: newQty },
-                });
-
-                // Create history record
-                await tx.inventoryHistory.create({
-                  data: {
-                    productId: product.id,
-                    businessId: product.businessId,
-                    previousQty: product.inventoryQty,
-                    newQty,
-                    changeQty: -qty,
-                    reason: "sale",
-                    note: `Order #${orderNumber}`,
-                    orderId: order.id,
-                    variantId: null,
-                  },
-                });
               }
             }
           });

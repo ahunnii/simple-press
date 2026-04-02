@@ -414,7 +414,10 @@ exports.Prisma.DiscountCodeScalarFieldEnum = {
   startsAt: 'startsAt',
   expiresAt: 'expiresAt',
   minPurchase: 'minPurchase',
-  maxDiscount: 'maxDiscount'
+  maxDiscount: 'maxDiscount',
+  showAsBanner: 'showAsBanner',
+  bannerText: 'bannerText',
+  bannerLinkUrl: 'bannerLinkUrl'
 };
 
 exports.Prisma.InventoryHistoryScalarFieldEnum = {

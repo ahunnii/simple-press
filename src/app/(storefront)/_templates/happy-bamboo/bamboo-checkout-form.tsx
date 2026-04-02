@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../types";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
+import { api } from "~/trpc/react";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -16,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Alert, AlertDescription } from "~/components/ui/alert";
 import { useCart } from "~/providers/cart-context";
 
 import { OrderSummary } from "./bamboo-order-summary";
@@ -26,10 +27,43 @@ type CheckoutFormProps = {
 };
 
 export function CheckoutForm({ business }: CheckoutFormProps) {
-  const { items } = useCart();
+  const { items, removeItem, subtotal } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [discountCodeInput, setDiscountCodeInput] = useState("");
+  const [discountCodeId, setDiscountCodeId] = useState<string | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountCodeLabel, setDiscountCodeLabel] = useState<string | null>(
+    null,
+  );
+  const [discountFieldError, setDiscountFieldError] = useState<string | null>(
+    null,
+  );
+
+  const validateDiscountMutation = api.discount.validate.useMutation({
+    onSuccess: (data) => {
+      setDiscountCodeId(data.discount.id);
+      setDiscountAmount(data.discount.discountAmount);
+      setDiscountCodeLabel(data.discount.code);
+      setDiscountFieldError(null);
+    },
+    onError: (err) => {
+      setDiscountCodeId(null);
+      setDiscountAmount(0);
+      setDiscountCodeLabel(null);
+      setDiscountFieldError(err.message ?? "Invalid code");
+    },
+  });
+
+  // Cart changed — discount must be re-applied
+  useEffect(() => {
+    setDiscountCodeId(null);
+    setDiscountAmount(0);
+    setDiscountCodeLabel(null);
+    setDiscountFieldError(null);
+  }, [subtotal]);
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -48,7 +82,22 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
 
   const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
 
-  const discountAmount = 0;
+  const handleApplyDiscount = () => {
+    const code = discountCodeInput.trim();
+    if (!code) {
+      setDiscountFieldError("Enter a discount code");
+      return;
+    }
+    if (subtotal <= 0) {
+      setDiscountFieldError("Your cart is empty");
+      return;
+    }
+    setDiscountFieldError(null);
+    validateDiscountMutation.mutate({
+      code,
+      cartTotal: subtotal,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,22 +146,33 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                   }
                 : null,
           },
-          discountCodeId: null,
-          discountAmount: 0,
+          discountCodeId: discountCodeId,
+          discountAmount: discountCodeId != null ? discountAmount : 0,
         }),
       });
 
       const data = (await response.json()) as {
         error?: string;
         unavailableItems?: string[];
+        unavailableItemIds?: {
+          productId: string;
+          variantId: string | null;
+        }[];
         sessionUrl?: string;
       };
 
       if (!response.ok) {
+        if (data.unavailableItemIds && data.unavailableItemIds.length > 0) {
+          for (const row of data.unavailableItemIds) {
+            removeItem(row.productId, row.variantId);
+          }
+        }
         if (data.unavailableItems && data.unavailableItems.length > 0) {
-          setError(
-            `${data.error ?? "Some items are unavailable."} Remove or update: ${data.unavailableItems.join(", ")}`,
-          );
+          const removedMsg =
+            data.unavailableItemIds && data.unavailableItemIds.length > 0
+              ? `The following items were out of stock or no longer available and have been removed from your cart: ${data.unavailableItems.join(", ")}.`
+              : `${data.error ?? "Some items are unavailable."} Remove or update: ${data.unavailableItems.join(", ")}`;
+          setError(removedMsg);
         } else {
           setError(data.error ?? "Failed to create checkout session");
         }
@@ -188,6 +248,56 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               />
             </div>
           </div>
+        </fieldset>
+
+        <fieldset className="flex flex-col gap-3">
+          <legend className="text-foreground font-heading pb-2 text-lg font-semibold">
+            Discount code
+          </legend>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className="flex flex-1 flex-col gap-1.5">
+              <Label htmlFor="discount-code">Code</Label>
+              <Input
+                id="discount-code"
+                type="text"
+                value={discountCodeInput}
+                onChange={(e) =>
+                  setDiscountCodeInput(e.target.value.toUpperCase())
+                }
+                placeholder="SAVE20"
+                autoComplete="off"
+              />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleApplyDiscount}
+              disabled={
+                validateDiscountMutation.isPending || items.length === 0
+              }
+            >
+              {validateDiscountMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Checking…
+                </>
+              ) : (
+                "Apply"
+              )}
+            </Button>
+          </div>
+          {discountFieldError && (
+            <p className="text-destructive text-sm">{discountFieldError}</p>
+          )}
+          {discountCodeLabel && discountAmount > 0 && (
+            <p className="text-sm text-green-600">
+              Code{" "}
+              <span className="font-mono font-semibold">
+                {discountCodeLabel}
+              </span>{" "}
+              applied.
+            </p>
+          )}
         </fieldset>
 
         {shippingConfig.offersInStorePickup && (
@@ -306,7 +416,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                     onValueChange={(v) => setCountry(v as "US" | "CA")}
                     required
                   >
-                    <SelectTrigger id="country">
+                    <SelectTrigger id="country" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

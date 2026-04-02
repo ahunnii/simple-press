@@ -568,30 +568,30 @@ export function ProductForm({ product }: Props) {
                       />
                     )}
 
-                    <FormField
-                      control={form.control}
-                      name="inventoryQty"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Inventory Quantity</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <NumberInput
-                                step="1"
-                                min="0"
-                                placeholder="10"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormDescription>
-                            Set the inventory quantity for this product (ignored
-                            if inventory tracking is disabled or if variants are
-                            used)
-                          </FormDescription>
-                        </FormItem>
-                      )}
-                    />
+                    {form.watch("trackInventory") && variants.length === 0 && (
+                      <FormField
+                        control={form.control}
+                        name="inventoryQty"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Inventory Quantity</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <NumberInput
+                                  step="1"
+                                  min="0"
+                                  placeholder="10"
+                                  {...field}
+                                />
+                              </div>
+                            </FormControl>
+                            <FormDescription>
+                              Stock for this product when it has no variants.
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -601,6 +601,7 @@ export function ProductForm({ product }: Props) {
             <VariantManager
               variants={variants}
               onChange={setVariants}
+              trackInventory={form.watch("trackInventory")}
               basePrice={Math.round((form.watch("price") || 0) * 100)}
               existingVariantOptions={getExistingVariantOptions(
                 product?.variants as

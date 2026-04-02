@@ -25415,6 +25415,9 @@ export namespace Prisma {
     expiresAt: Date | null
     minPurchase: number | null
     maxDiscount: number | null
+    showAsBanner: boolean | null
+    bannerText: string | null
+    bannerLinkUrl: string | null
   }
 
   export type DiscountCodeMaxAggregateOutputType = {
@@ -25432,6 +25435,9 @@ export namespace Prisma {
     expiresAt: Date | null
     minPurchase: number | null
     maxDiscount: number | null
+    showAsBanner: boolean | null
+    bannerText: string | null
+    bannerLinkUrl: string | null
   }
 
   export type DiscountCodeCountAggregateOutputType = {
@@ -25449,6 +25455,9 @@ export namespace Prisma {
     expiresAt: number
     minPurchase: number
     maxDiscount: number
+    showAsBanner: number
+    bannerText: number
+    bannerLinkUrl: number
     _all: number
   }
 
@@ -25484,6 +25493,9 @@ export namespace Prisma {
     expiresAt?: true
     minPurchase?: true
     maxDiscount?: true
+    showAsBanner?: true
+    bannerText?: true
+    bannerLinkUrl?: true
   }
 
   export type DiscountCodeMaxAggregateInputType = {
@@ -25501,6 +25513,9 @@ export namespace Prisma {
     expiresAt?: true
     minPurchase?: true
     maxDiscount?: true
+    showAsBanner?: true
+    bannerText?: true
+    bannerLinkUrl?: true
   }
 
   export type DiscountCodeCountAggregateInputType = {
@@ -25518,6 +25533,9 @@ export namespace Prisma {
     expiresAt?: true
     minPurchase?: true
     maxDiscount?: true
+    showAsBanner?: true
+    bannerText?: true
+    bannerLinkUrl?: true
     _all?: true
   }
 
@@ -25622,6 +25640,9 @@ export namespace Prisma {
     expiresAt: Date | null
     minPurchase: number | null
     maxDiscount: number | null
+    showAsBanner: boolean
+    bannerText: string | null
+    bannerLinkUrl: string | null
     _count: DiscountCodeCountAggregateOutputType | null
     _avg: DiscountCodeAvgAggregateOutputType | null
     _sum: DiscountCodeSumAggregateOutputType | null
@@ -25658,6 +25679,9 @@ export namespace Prisma {
     expiresAt?: boolean
     minPurchase?: boolean
     maxDiscount?: boolean
+    showAsBanner?: boolean
+    bannerText?: boolean
+    bannerLinkUrl?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     orders?: boolean | DiscountCode$ordersArgs<ExtArgs>
     _count?: boolean | DiscountCodeCountOutputTypeDefaultArgs<ExtArgs>
@@ -25678,6 +25702,9 @@ export namespace Prisma {
     expiresAt?: boolean
     minPurchase?: boolean
     maxDiscount?: boolean
+    showAsBanner?: boolean
+    bannerText?: boolean
+    bannerLinkUrl?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["discountCode"]>
 
@@ -25696,6 +25723,9 @@ export namespace Prisma {
     expiresAt?: boolean
     minPurchase?: boolean
     maxDiscount?: boolean
+    showAsBanner?: boolean
+    bannerText?: boolean
+    bannerLinkUrl?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["discountCode"]>
 
@@ -25714,9 +25744,12 @@ export namespace Prisma {
     expiresAt?: boolean
     minPurchase?: boolean
     maxDiscount?: boolean
+    showAsBanner?: boolean
+    bannerText?: boolean
+    bannerLinkUrl?: boolean
   }
 
-  export type DiscountCodeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "code" | "type" | "value" | "active" | "usageLimit" | "usageCount" | "startsAt" | "expiresAt" | "minPurchase" | "maxDiscount", ExtArgs["result"]["discountCode"]>
+  export type DiscountCodeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "code" | "type" | "value" | "active" | "usageLimit" | "usageCount" | "startsAt" | "expiresAt" | "minPurchase" | "maxDiscount" | "showAsBanner" | "bannerText" | "bannerLinkUrl", ExtArgs["result"]["discountCode"]>
   export type DiscountCodeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     orders?: boolean | DiscountCode$ordersArgs<ExtArgs>
@@ -25750,6 +25783,9 @@ export namespace Prisma {
       expiresAt: Date | null
       minPurchase: number | null
       maxDiscount: number | null
+      showAsBanner: boolean
+      bannerText: string | null
+      bannerLinkUrl: string | null
     }, ExtArgs["result"]["discountCode"]>
     composites: {}
   }
@@ -26189,6 +26225,9 @@ export namespace Prisma {
     readonly expiresAt: FieldRef<"DiscountCode", 'DateTime'>
     readonly minPurchase: FieldRef<"DiscountCode", 'Int'>
     readonly maxDiscount: FieldRef<"DiscountCode", 'Int'>
+    readonly showAsBanner: FieldRef<"DiscountCode", 'Boolean'>
+    readonly bannerText: FieldRef<"DiscountCode", 'String'>
+    readonly bannerLinkUrl: FieldRef<"DiscountCode", 'String'>
   }
     
 
@@ -39123,7 +39162,10 @@ export namespace Prisma {
     startsAt: 'startsAt',
     expiresAt: 'expiresAt',
     minPurchase: 'minPurchase',
-    maxDiscount: 'maxDiscount'
+    maxDiscount: 'maxDiscount',
+    showAsBanner: 'showAsBanner',
+    bannerText: 'bannerText',
+    bannerLinkUrl: 'bannerLinkUrl'
   };
 
   export type DiscountCodeScalarFieldEnum = (typeof DiscountCodeScalarFieldEnum)[keyof typeof DiscountCodeScalarFieldEnum]
@@ -41317,6 +41359,9 @@ export namespace Prisma {
     expiresAt?: DateTimeNullableFilter<"DiscountCode"> | Date | string | null
     minPurchase?: IntNullableFilter<"DiscountCode"> | number | null
     maxDiscount?: IntNullableFilter<"DiscountCode"> | number | null
+    showAsBanner?: BoolFilter<"DiscountCode"> | boolean
+    bannerText?: StringNullableFilter<"DiscountCode"> | string | null
+    bannerLinkUrl?: StringNullableFilter<"DiscountCode"> | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     orders?: OrderListRelationFilter
   }
@@ -41336,6 +41381,9 @@ export namespace Prisma {
     expiresAt?: SortOrderInput | SortOrder
     minPurchase?: SortOrderInput | SortOrder
     maxDiscount?: SortOrderInput | SortOrder
+    showAsBanner?: SortOrder
+    bannerText?: SortOrderInput | SortOrder
+    bannerLinkUrl?: SortOrderInput | SortOrder
     business?: BusinessOrderByWithRelationInput
     orders?: OrderOrderByRelationAggregateInput
   }
@@ -41359,6 +41407,9 @@ export namespace Prisma {
     expiresAt?: DateTimeNullableFilter<"DiscountCode"> | Date | string | null
     minPurchase?: IntNullableFilter<"DiscountCode"> | number | null
     maxDiscount?: IntNullableFilter<"DiscountCode"> | number | null
+    showAsBanner?: BoolFilter<"DiscountCode"> | boolean
+    bannerText?: StringNullableFilter<"DiscountCode"> | string | null
+    bannerLinkUrl?: StringNullableFilter<"DiscountCode"> | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     orders?: OrderListRelationFilter
   }, "id" | "businessId_code">
@@ -41378,6 +41429,9 @@ export namespace Prisma {
     expiresAt?: SortOrderInput | SortOrder
     minPurchase?: SortOrderInput | SortOrder
     maxDiscount?: SortOrderInput | SortOrder
+    showAsBanner?: SortOrder
+    bannerText?: SortOrderInput | SortOrder
+    bannerLinkUrl?: SortOrderInput | SortOrder
     _count?: DiscountCodeCountOrderByAggregateInput
     _avg?: DiscountCodeAvgOrderByAggregateInput
     _max?: DiscountCodeMaxOrderByAggregateInput
@@ -41403,6 +41457,9 @@ export namespace Prisma {
     expiresAt?: DateTimeNullableWithAggregatesFilter<"DiscountCode"> | Date | string | null
     minPurchase?: IntNullableWithAggregatesFilter<"DiscountCode"> | number | null
     maxDiscount?: IntNullableWithAggregatesFilter<"DiscountCode"> | number | null
+    showAsBanner?: BoolWithAggregatesFilter<"DiscountCode"> | boolean
+    bannerText?: StringNullableWithAggregatesFilter<"DiscountCode"> | string | null
+    bannerLinkUrl?: StringNullableWithAggregatesFilter<"DiscountCode"> | string | null
   }
 
   export type InventoryHistoryWhereInput = {
@@ -44492,6 +44549,9 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     minPurchase?: number | null
     maxDiscount?: number | null
+    showAsBanner?: boolean
+    bannerText?: string | null
+    bannerLinkUrl?: string | null
     business: BusinessCreateNestedOneWithoutDiscountCodesInput
     orders?: OrderCreateNestedManyWithoutDiscountCodeInput
   }
@@ -44511,6 +44571,9 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     minPurchase?: number | null
     maxDiscount?: number | null
+    showAsBanner?: boolean
+    bannerText?: string | null
+    bannerLinkUrl?: string | null
     orders?: OrderUncheckedCreateNestedManyWithoutDiscountCodeInput
   }
 
@@ -44528,6 +44591,9 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    showAsBanner?: BoolFieldUpdateOperationsInput | boolean
+    bannerText?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerLinkUrl?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutDiscountCodesNestedInput
     orders?: OrderUpdateManyWithoutDiscountCodeNestedInput
   }
@@ -44547,6 +44613,9 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    showAsBanner?: BoolFieldUpdateOperationsInput | boolean
+    bannerText?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerLinkUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orders?: OrderUncheckedUpdateManyWithoutDiscountCodeNestedInput
   }
 
@@ -44565,6 +44634,9 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     minPurchase?: number | null
     maxDiscount?: number | null
+    showAsBanner?: boolean
+    bannerText?: string | null
+    bannerLinkUrl?: string | null
   }
 
   export type DiscountCodeUpdateManyMutationInput = {
@@ -44581,6 +44653,9 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    showAsBanner?: BoolFieldUpdateOperationsInput | boolean
+    bannerText?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerLinkUrl?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type DiscountCodeUncheckedUpdateManyInput = {
@@ -44598,6 +44673,9 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    showAsBanner?: BoolFieldUpdateOperationsInput | boolean
+    bannerText?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerLinkUrl?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type InventoryHistoryCreateInput = {
@@ -47352,6 +47430,9 @@ export namespace Prisma {
     expiresAt?: SortOrder
     minPurchase?: SortOrder
     maxDiscount?: SortOrder
+    showAsBanner?: SortOrder
+    bannerText?: SortOrder
+    bannerLinkUrl?: SortOrder
   }
 
   export type DiscountCodeAvgOrderByAggregateInput = {
@@ -47377,6 +47458,9 @@ export namespace Prisma {
     expiresAt?: SortOrder
     minPurchase?: SortOrder
     maxDiscount?: SortOrder
+    showAsBanner?: SortOrder
+    bannerText?: SortOrder
+    bannerLinkUrl?: SortOrder
   }
 
   export type DiscountCodeMinOrderByAggregateInput = {
@@ -47394,6 +47478,9 @@ export namespace Prisma {
     expiresAt?: SortOrder
     minPurchase?: SortOrder
     maxDiscount?: SortOrder
+    showAsBanner?: SortOrder
+    bannerText?: SortOrder
+    bannerLinkUrl?: SortOrder
   }
 
   export type DiscountCodeSumOrderByAggregateInput = {
@@ -51978,6 +52065,9 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     minPurchase?: number | null
     maxDiscount?: number | null
+    showAsBanner?: boolean
+    bannerText?: string | null
+    bannerLinkUrl?: string | null
     orders?: OrderCreateNestedManyWithoutDiscountCodeInput
   }
 
@@ -51995,6 +52085,9 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     minPurchase?: number | null
     maxDiscount?: number | null
+    showAsBanner?: boolean
+    bannerText?: string | null
+    bannerLinkUrl?: string | null
     orders?: OrderUncheckedCreateNestedManyWithoutDiscountCodeInput
   }
 
@@ -52593,6 +52686,9 @@ export namespace Prisma {
     expiresAt?: DateTimeNullableFilter<"DiscountCode"> | Date | string | null
     minPurchase?: IntNullableFilter<"DiscountCode"> | number | null
     maxDiscount?: IntNullableFilter<"DiscountCode"> | number | null
+    showAsBanner?: BoolFilter<"DiscountCode"> | boolean
+    bannerText?: StringNullableFilter<"DiscountCode"> | string | null
+    bannerLinkUrl?: StringNullableFilter<"DiscountCode"> | string | null
   }
 
   export type InventoryHistoryUpsertWithWhereUniqueWithoutBusinessInput = {
@@ -55584,6 +55680,9 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     minPurchase?: number | null
     maxDiscount?: number | null
+    showAsBanner?: boolean
+    bannerText?: string | null
+    bannerLinkUrl?: string | null
     business: BusinessCreateNestedOneWithoutDiscountCodesInput
   }
 
@@ -55602,6 +55701,9 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     minPurchase?: number | null
     maxDiscount?: number | null
+    showAsBanner?: boolean
+    bannerText?: string | null
+    bannerLinkUrl?: string | null
   }
 
   export type DiscountCodeCreateOrConnectWithoutOrdersInput = {
@@ -55953,6 +56055,9 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    showAsBanner?: BoolFieldUpdateOperationsInput | boolean
+    bannerText?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerLinkUrl?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutDiscountCodesNestedInput
   }
 
@@ -55971,6 +56076,9 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    showAsBanner?: BoolFieldUpdateOperationsInput | boolean
+    bannerText?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerLinkUrl?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type OrderItemUpsertWithWhereUniqueWithoutOrderInput = {
@@ -59774,6 +59882,9 @@ export namespace Prisma {
     expiresAt?: Date | string | null
     minPurchase?: number | null
     maxDiscount?: number | null
+    showAsBanner?: boolean
+    bannerText?: string | null
+    bannerLinkUrl?: string | null
   }
 
   export type InventoryHistoryCreateManyBusinessInput = {
@@ -60220,6 +60331,9 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    showAsBanner?: BoolFieldUpdateOperationsInput | boolean
+    bannerText?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerLinkUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orders?: OrderUpdateManyWithoutDiscountCodeNestedInput
   }
 
@@ -60237,6 +60351,9 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    showAsBanner?: BoolFieldUpdateOperationsInput | boolean
+    bannerText?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerLinkUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orders?: OrderUncheckedUpdateManyWithoutDiscountCodeNestedInput
   }
 
@@ -60254,6 +60371,9 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
     maxDiscount?: NullableIntFieldUpdateOperationsInput | number | null
+    showAsBanner?: BoolFieldUpdateOperationsInput | boolean
+    bannerText?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerLinkUrl?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type InventoryHistoryUpdateWithoutBusinessInput = {

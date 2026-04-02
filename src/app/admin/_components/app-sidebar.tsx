@@ -5,6 +5,7 @@ import * as React from "react";
 import Link from "next/link";
 import {
   IconDashboard,
+  IconDiscount,
   IconFolder,
   IconHelp,
   IconImageInPicture,
@@ -62,6 +63,11 @@ const getNavData = (session: Session | null) => {
       title: "Site content",
       url: "/admin/content",
       icon: IconLanguage,
+    },
+    {
+      title: "Discounts",
+      url: "/admin/discounts",
+      icon: IconDiscount,
     },
     {
       title: "Galleries",

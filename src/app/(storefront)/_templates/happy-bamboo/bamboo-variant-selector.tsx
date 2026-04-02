@@ -36,7 +36,9 @@ export function BambooVariantSelector({
         price: selectedVariant.price ?? product.price,
         imageUrl: product.images[0]?.url ?? null,
         sku: selectedVariant.sku,
-        maxInventory: selectedVariant.inventoryQty,
+        maxInventory: product.trackInventory
+          ? selectedVariant.inventoryQty
+          : undefined,
       },
       quantity, // ← Add specified quantity
     );
@@ -56,31 +58,35 @@ export function BambooVariantSelector({
           Select Variant
         </Label>
         <div className="flex flex-wrap gap-3">
-          {product.variants.map((variant) => (
-            <Button
-              key={variant.id}
-              variant={
-                selectedVariant?.id === variant.id ? "default" : "outline"
-              }
-              onClick={() => {
-                setSelectedVariant(variant);
-                setSelectedVariantId(variant.id);
-              }}
-              disabled={variant.inventoryQty === 0}
-              className={`bamboo-variant-btn ${
-                selectedVariant?.id === variant.id
-                  ? "bamboo-variant-btn--selected"
-                  : "bamboo-variant-btn--unselected"
-              } ${variant.inventoryQty === 0 ? "bamboo-variant-btn--disabled" : ""}`}
-            >
-              {variant.name}
-              {variant.inventoryQty === 0 && " (Out of Stock)"}
-            </Button>
-          ))}
+          {product.variants.map((variant) => {
+            const outOfStock =
+              product.trackInventory && variant.inventoryQty === 0;
+            return (
+              <Button
+                key={variant.id}
+                variant={
+                  selectedVariant?.id === variant.id ? "default" : "outline"
+                }
+                onClick={() => {
+                  setSelectedVariant(variant);
+                  setSelectedVariantId(variant.id);
+                }}
+                disabled={outOfStock}
+                className={`bamboo-variant-btn ${
+                  selectedVariant?.id === variant.id
+                    ? "bamboo-variant-btn--selected"
+                    : "bamboo-variant-btn--unselected"
+                } ${outOfStock ? "bamboo-variant-btn--disabled" : ""}`}
+              >
+                {variant.name}
+                {outOfStock && " (Out of Stock)"}
+              </Button>
+            );
+          })}
         </div>
       </div>
 
-      {selectedVariant && (
+      {selectedVariant && product.trackInventory && (
         <span className="text-sm">
           {selectedVariant?.inventoryQty ?? 0} available
         </span>
@@ -109,7 +115,9 @@ export function BambooVariantSelector({
                 className="size-10"
                 onClick={() =>
                   setQuantity(
-                    Math.min(selectedVariant.inventoryQty, quantity + 1),
+                    product.trackInventory
+                      ? Math.min(selectedVariant.inventoryQty, quantity + 1)
+                      : quantity + 1,
                   )
                 }
                 aria-label="Increase quantity"
@@ -124,8 +132,11 @@ export function BambooVariantSelector({
         <Button
           type="button"
           onClick={handleAddToCart}
-          disabled={!selectedVariant || selectedVariant.inventoryQty === 0}
-          className={`flex-1 ${!selectedVariant || selectedVariant.inventoryQty === 0 ? "cursor-not-allowed opacity-50" : ""}`}
+          disabled={
+            !selectedVariant ||
+            (product.trackInventory && selectedVariant.inventoryQty === 0)
+          }
+          className={`flex-1 ${!selectedVariant || (product.trackInventory && selectedVariant.inventoryQty === 0) ? "cursor-not-allowed opacity-50" : ""}`}
         >
           {isAdded ? (
             <>

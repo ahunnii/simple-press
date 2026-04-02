@@ -18,6 +18,8 @@ import { Label } from "~/components/ui/label";
 type Props = {
   variants: FormVariant[];
   onChange: (variants: FormVariant[]) => void;
+  /** When false, per-variant stock fields are hidden (unlimited stock). */
+  trackInventory?: boolean;
   basePrice: number; // in cents
   existingVariantOptions: FormVariantOption[];
 };
@@ -25,6 +27,7 @@ type Props = {
 export function VariantManager({
   variants,
   onChange,
+  trackInventory = false,
   basePrice,
   existingVariantOptions,
 }: Props) {
@@ -315,28 +318,30 @@ export function VariantManager({
                       />
                     </div>
 
-                    <div>
-                      <Label
-                        htmlFor={`qty-${index}`}
-                        className="text-xs text-gray-500"
-                      >
-                        Stock
-                      </Label>
-                      <Input
-                        id={`qty-${index}`}
-                        type="number"
-                        min="0"
-                        value={variant.inventoryQty}
-                        onChange={(e) =>
-                          updateVariant(
-                            index,
-                            "inventoryQty",
-                            parseInt(e.target.value) || 0,
-                          )
-                        }
-                        className="h-8"
-                      />
-                    </div>
+                    {trackInventory && (
+                      <div>
+                        <Label
+                          htmlFor={`qty-${index}`}
+                          className="text-xs text-gray-500"
+                        >
+                          Stock
+                        </Label>
+                        <Input
+                          id={`qty-${index}`}
+                          type="number"
+                          min="0"
+                          value={variant.inventoryQty}
+                          onChange={(e) =>
+                            updateVariant(
+                              index,
+                              "inventoryQty",
+                              parseInt(e.target.value) || 0,
+                            )
+                          }
+                          className="h-8"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <Button

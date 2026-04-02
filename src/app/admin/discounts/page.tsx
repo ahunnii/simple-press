@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Plus } from "lucide-react";
 
 import { checkBusiness } from "~/lib/check-business";
+import { deactivateExpiredDiscountCodes } from "~/lib/deactivate-expired-discounts";
 import { db } from "~/server/db";
 import { Button } from "~/components/ui/button";
 import {
@@ -13,6 +14,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
+import { TrailHeader } from "../_components/trail-header";
 import { DiscountsTable } from "./_components/discounts-table";
 
 export default async function DiscountsPage() {
@@ -23,6 +25,8 @@ export default async function DiscountsPage() {
     redirect("/admin/welcome");
   }
 
+  await deactivateExpiredDiscountCodes(db, business.id);
+
   // Get all discount codes
   const discounts = await db.discountCode.findMany({
     where: { businessId: business.id },
@@ -30,22 +34,22 @@ export default async function DiscountsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+    <>
+      <TrailHeader breadcrumbs={[{ label: "Discount Codes" }]} />
+      <div className="admin-container">
+        <div className="admin-header">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Discount Codes</h1>
-            <p className="mt-1 text-gray-600">
-              Create and manage discount codes for your store
-            </p>
+            <h1>Discount Codes</h1>
+            <p>Create and manage discount codes for your store</p>
           </div>
-          <Button asChild>
-            <Link href="/admin/discounts/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Discount
-            </Link>
-          </Button>
+          <div className="flex gap-3">
+            <Button asChild size="sm">
+              <Link href="/admin/discounts/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Discount
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Discounts List */}
@@ -70,6 +74,6 @@ export default async function DiscountsPage() {
           <DiscountsTable discounts={discounts} />
         )}
       </div>
-    </div>
+    </>
   );
 }

@@ -606,9 +606,14 @@ model DiscountCode {
   startsAt  DateTime?
   expiresAt DateTime?
 
-  // Restrictions (future enhancements)
+  // Restrictions
   minPurchase Int? // minimum order value in cents
   maxDiscount Int? // cap discount amount in cents
+
+  // Banner advertising (storefront)
+  showAsBanner  Boolean  @default(false)
+  bannerText    String?
+  bannerLinkUrl String?
 
   // Relationships
   orders Order[]

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { env } from "~/env";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { calculateShipping, shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
       deliveryMethod?: "ship" | "pickup";
     };
 
-    const { items, customerInfo, discountCodeId, discountAmount } = body;
+    const { items, customerInfo, discountCodeId } = body;
 
     if (!items || !customerInfo) {
       return NextResponse.json(
@@ -121,7 +122,12 @@ export async function POST(req: NextRequest) {
               name: true,
               productId: true,
               product: {
-                select: { businessId: true, published: true },
+                select: {
+                  businessId: true,
+                  published: true,
+                  trackInventory: true,
+                  allowBackorders: true,
+                },
               },
             },
           })
@@ -151,6 +157,23 @@ export async function POST(req: NextRequest) {
     const productMap = new Map(productsNoVariant.map((p) => [p.id, p]));
 
     const unavailableItems: string[] = [];
+    const unavailableItemIds: { productId: string; variantId: string | null }[] =
+      [];
+    const unavailableIdKeySet = new Set<string>();
+
+    const pushUnavailable = (
+      name: string,
+      productId: string,
+      variantId: string | null,
+    ) => {
+      unavailableItems.push(name);
+      const key = `${productId}-${variantId ?? "base"}`;
+      if (!unavailableIdKeySet.has(key)) {
+        unavailableIdKeySet.add(key);
+        unavailableItemIds.push({ productId, variantId });
+      }
+    };
+
     for (const item of itemList) {
       const name = item.variantName
         ? `${item.productName} (${item.variantName})`
@@ -159,22 +182,26 @@ export async function POST(req: NextRequest) {
 
       if (item.variantId) {
         const variant = variantMap.get(item.variantId);
+        if (!variant || !variant.product.published) {
+          pushUnavailable(name, item.productId, item.variantId);
+          continue;
+        }
         if (
-          !variant ||
-          !variant.product.published ||
+          variant.product.trackInventory &&
+          !variant.product.allowBackorders &&
           variant.inventoryQty < qty
         ) {
-          unavailableItems.push(name);
+          pushUnavailable(name, item.productId, item.variantId);
           continue;
         }
       } else {
         const product = productMap.get(item.productId);
         if (!product?.published) {
-          unavailableItems.push(name);
+          pushUnavailable(name, item.productId, null);
           continue;
         }
         if (product._count.variants > 0) {
-          unavailableItems.push(name);
+          pushUnavailable(name, item.productId, null);
           continue;
         }
         if (
@@ -182,7 +209,7 @@ export async function POST(req: NextRequest) {
           !product.allowBackorders &&
           product.inventoryQty < qty
         ) {
-          unavailableItems.push(name);
+          pushUnavailable(name, item.productId, null);
         }
       }
     }
@@ -194,6 +221,7 @@ export async function POST(req: NextRequest) {
           error:
             "Some items in your cart are out of stock or no longer available. Please update your cart and try again.",
           unavailableItems: uniqueNames,
+          unavailableItemIds,
         },
         { status: 400 },
       );
@@ -234,6 +262,38 @@ export async function POST(req: NextRequest) {
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
+
+    const rawDiscountId =
+      typeof discountCodeId === "string" && discountCodeId.trim() !== ""
+        ? discountCodeId.trim()
+        : null;
+
+    let discountCents = 0;
+    let verifiedDiscountCodeId: string | null = null;
+
+    if (rawDiscountId) {
+      const discountRow = await db.discountCode.findFirst({
+        where: {
+          id: rawDiscountId,
+          businessId: business.id,
+        },
+      });
+
+      if (!discountRow) {
+        return NextResponse.json(
+          { error: "Invalid or expired discount code" },
+          { status: 400 },
+        );
+      }
+
+      const computed = validateAndComputeDiscount(discountRow, subtotalCents);
+      if (!computed.ok) {
+        return NextResponse.json({ error: computed.error }, { status: 400 });
+      }
+
+      discountCents = computed.discountAmountCents;
+      verifiedDiscountCodeId = discountRow.id;
+    }
 
     const shippingConfig = shippingConfigFromBusiness({
       shippingType: business.shippingType,
@@ -377,7 +437,7 @@ export async function POST(req: NextRequest) {
         businessId: business.id,
         customerName: customerInfo.name,
         customerEmail: customerInfo.email,
-        discountCodeId: discountCodeId ?? "",
+        discountCodeId: verifiedDiscountCodeId ?? "",
         deliveryMethod,
         ...(hasFullShipping && sa
           ? {
@@ -393,9 +453,7 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    const discountCents = discountAmount ?? 0;
-
-    // Add discount if applicable
+    // Add discount if applicable (amount computed server-side when code present)
     if (discountCents > 0) {
       sessionParams.discounts = [
         {

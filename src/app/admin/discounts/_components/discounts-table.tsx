@@ -102,7 +102,7 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2">
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/admin/discounts/${discount.id}`}>
+                      <Link href={`/admin/v1/discounts/${discount.id}`}>
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>
