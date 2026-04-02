@@ -179,7 +179,7 @@ export function GeneralSettings({ business }: Props) {
                 <InputFormField
                   form={form}
                   name="name"
-                  label="Business Name *"
+                  label="Business Name"
                   description="The name of your business"
                   placeholder="My Awesome Store"
                   required
@@ -188,7 +188,7 @@ export function GeneralSettings({ business }: Props) {
                 <InputFormField
                   form={form}
                   name="slug"
-                  label="Store Slug *"
+                  label="Store Slug"
                   description="Your unique store identifier (cannot be changed)"
                   required
                   disabled
@@ -208,9 +208,9 @@ export function GeneralSettings({ business }: Props) {
                 <InputFormField
                   form={form}
                   name="ownerEmail"
-                  label="Owner Email *"
+                  label="Owner Email"
                   placeholder="owner@example.com"
-                  description="Primary contact email for the business. Used for notifications and account management."
+                  description="Primary contact email for the business. Used for notifications and account management. This is not a public facing email."
                   required
                 />
               </CardContent>
@@ -236,9 +236,10 @@ export function GeneralSettings({ business }: Props) {
                   form={form}
                   name="supportEmail"
                   label="Support Email"
-                  description="Public customer support email address. Customers will see this email address on your storefront."
+                  description="Public customer support email address. Customers will see this email address on your storefront. This is a public facing email. "
                   placeholder="support@example.com"
                   type="email"
+                  required
                 />
                 <InputFormField
                   form={form}

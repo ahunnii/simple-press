@@ -297,7 +297,7 @@ export function ProductForm({ product }: Props) {
         },
       });
 
-      if (images.length > 0 && !!response.productId) {
+      if (response.productId && images.length > 0) {
         await addImagesMutation.mutateAsync({
           productId: response.productId,
           images: images.map((image) => ({
@@ -307,7 +307,9 @@ export function ProductForm({ product }: Props) {
             sortOrder: image.sortOrder,
           })),
         });
+      }
 
+      if (response.productId) {
         router.push(`/admin/products/${response.productId}`);
       } else {
         form.reset({ ...data, id: response.productId });

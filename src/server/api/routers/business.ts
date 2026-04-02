@@ -167,6 +167,7 @@ export const businessRouter = createTRPCRouter({
               orderBy: { sortOrder: "asc" },
             },
           },
+          take: 4,
         },
       },
     });
