@@ -17,7 +17,7 @@ export async function HappyBambooHomepage() {
 
   const missionRichContent = getRichTextFieldValue(
     themeSpecificFields as unknown,
-    "happy-bamboo.homepage.about-body",
+    "happy-bamboo.homepage-about-body",
   );
 
   return (

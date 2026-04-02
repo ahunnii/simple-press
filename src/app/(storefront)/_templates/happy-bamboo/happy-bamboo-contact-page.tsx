@@ -17,7 +17,7 @@ import { BambooContactForm } from "./bamboo-contact-form";
 import { FadeIn, PageTransition } from "./happy-bamboo-animations";
 import { parseHappyBambooFrequentlyAskedList } from "./happy-bamboo-frequently-asked-data";
 
-const DEFAULT_EMAIL = "hello@finallyresults.com";
+const DEFAULT_EMAIL = "happybamboo25@gmail.com";
 const DEFAULT_LOCATION = "Detroit, Michigan";
 const DEFAULT_PHONE = "(313) 555-0199";
 const DEFAULT_HOURS = "Mon - Fri, 9am - 5pm EST";
@@ -29,6 +29,7 @@ export function HappyBambooContactPage({
     | Record<string, string>
     | undefined;
 
+  const supportEmail = business?.supportEmail ?? DEFAULT_EMAIL;
   const header =
     themeSpecificFields?.["bamboo.contact.header"] ?? "Get in Touch";
   const subheader =
@@ -46,7 +47,12 @@ export function HappyBambooContactPage({
   const frequentlyAsked = parseHappyBambooFrequentlyAskedList(servicesListRaw);
 
   const contactInfo = [
-    { icon: Mail, label: "Email", value: email, href: `mailto:${email}` },
+    {
+      icon: Mail,
+      label: "Email",
+      value: supportEmail,
+      href: `mailto:${supportEmail}`,
+    },
     { icon: MapPin, label: "Location", value: locationValue, href: undefined },
     {
       icon: Phone,

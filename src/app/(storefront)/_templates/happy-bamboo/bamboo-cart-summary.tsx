@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 
+import type { ShippingConfig } from "~/lib/shipping-utils";
+import { formatPrice } from "~/lib/prices";
 import {
   calculateShipping,
   getAmountUntilFreeShipping,
   getFreeShippingProgress,
-  type ShippingConfig,
   SHIPPING_TYPES,
 } from "~/lib/shipping-utils";
-import { formatPrice } from "~/lib/prices";
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { Separator } from "~/components/ui/separator";
@@ -31,7 +31,7 @@ export function CartSummary({ shippingConfig }: CartSummaryProps) {
     untilFree !== null;
 
   return (
-    <div className="border-border bg-card rounded-xl border p-6">
+    <div className="p-6">
       <h2 className="text-card-foreground font-heading text-lg font-semibold">
         Order Summary
       </h2>

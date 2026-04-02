@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FacebookIcon } from "@daveyplate/better-auth-ui";
+import { FacebookIcon, TikTokIcon } from "@daveyplate/better-auth-ui";
 import { InstagramLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons";
 import { Leaf } from "lucide-react";
 
@@ -35,6 +35,7 @@ export async function HappyBambooFooter({
         instagram?: string;
         facebook?: string;
         twitter?: string;
+        tiktok?: string;
       }
     | undefined;
 
@@ -162,6 +163,15 @@ export async function HappyBambooFooter({
                   aria-label="Twitter"
                 >
                   <TwitterLogoIcon className="h-5 w-5" />
+                </a>
+              )}
+              {socialLinks?.tiktok && (
+                <a
+                  href={socialLinks.tiktok}
+                  className="text-muted hover:text-primary transition-colors"
+                  aria-label="TikTok"
+                >
+                  <TikTokIcon className="h-5 w-5" />
                 </a>
               )}
             </div>
