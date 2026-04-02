@@ -90,6 +90,15 @@ export function HappyBambooAboutPage({
 
   const ctaImage =
     themeSpecificFields?.["happy-bamboo.about-cta-image"]?.trim();
+
+  const socialLinks = business?.siteContent?.socialLinks as
+    | {
+        instagram?: string;
+        facebook?: string;
+        twitter?: string;
+        tiktok?: string;
+      }
+    | undefined;
   return (
     <PageTransition>
       {/* Hero Section — Mission & Vision */}
@@ -340,33 +349,39 @@ export function HappyBambooAboutPage({
             Follow us on social media
           </p>
           <div className="flex justify-center gap-4">
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-primary/10 text-primary hover:bg-primary/20 flex h-14 w-14 items-center justify-center rounded-full transition-colors"
-              aria-label="Follow us on Facebook"
-            >
-              <FacebookIcon className="h-7 w-7" />
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-primary/10 text-primary hover:bg-primary/20 flex h-14 w-14 items-center justify-center rounded-full transition-colors"
-              aria-label="Follow us on Instagram"
-            >
-              <InstagramIcon className="h-7 w-7" />
-            </a>
-            <a
-              href="https://tiktok.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-primary/10 text-primary hover:bg-primary/20 flex h-14 w-14 items-center justify-center rounded-full transition-colors"
-              aria-label="Follow us on TikTok"
-            >
-              <TikTokIcon className="h-7 w-7" />
-            </a>
+            {socialLinks?.facebook && (
+              <a
+                href={socialLinks.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-primary/10 text-primary hover:bg-primary/20 flex h-14 w-14 items-center justify-center rounded-full transition-colors"
+                aria-label="Follow us on Facebook"
+              >
+                <FacebookIcon className="h-7 w-7" />
+              </a>
+            )}
+            {socialLinks?.instagram && (
+              <a
+                href={socialLinks.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-primary/10 text-primary hover:bg-primary/20 flex h-14 w-14 items-center justify-center rounded-full transition-colors"
+                aria-label="Follow us on Instagram"
+              >
+                <InstagramIcon className="h-7 w-7" />
+              </a>
+            )}
+            {socialLinks?.tiktok && (
+              <a
+                href={socialLinks.tiktok}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-primary/10 text-primary hover:bg-primary/20 flex h-14 w-14 items-center justify-center rounded-full transition-colors"
+                aria-label="Follow us on TikTok"
+              >
+                <TikTokIcon className="h-7 w-7" />
+              </a>
+            )}
           </div>
         </div>
       </section>

@@ -58,6 +58,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
         facebook?: string;
         twitter?: string;
         linkedin?: string;
+        tiktok?: string;
       }
     | undefined) ?? {
     instagram: "",
@@ -83,6 +84,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
         facebook: socialLinks.facebook ?? "",
         twitter: socialLinks.twitter ?? "",
         linkedin: socialLinks.linkedin ?? "",
+        tiktok: socialLinks.tiktok ?? "",
       },
       logoUrl: siteContent.logoUrl ?? undefined,
       logoFile: null,
@@ -398,6 +400,15 @@ export function BrandingEditor({ business, siteContent }: Props) {
                       name="socialLinks.linkedin"
                       label="LinkedIn"
                       placeholder="https://linkedin.com/company/yourstore"
+                      type="url"
+                      disabled={isSubmitting}
+                      className="col-span-1"
+                    />
+                    <InputFormField
+                      form={form}
+                      name="socialLinks.tiktok"
+                      label="TikTok"
+                      placeholder="https://tiktok.com/@yourstore"
                       type="url"
                       disabled={isSubmitting}
                       className="col-span-1"

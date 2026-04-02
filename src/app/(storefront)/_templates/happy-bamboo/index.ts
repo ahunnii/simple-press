@@ -156,6 +156,15 @@ const homepageFeaturedData: TemplateField[] = [
     group: "homepage.featured",
     defaultValue: "View All Products",
   },
+  {
+    key: "happy-bamboo.homepage-featured-button-link",
+    label: "View All Button Link",
+    description: "Link for the View All Products button",
+    type: "url",
+    page: "homepage",
+    group: "homepage.featured",
+    defaultValue: "/shop",
+  },
 ];
 
 const homepageBenefitsData: TemplateField[] = [
@@ -193,173 +202,173 @@ const homepageBenefitsData: TemplateField[] = [
   },
 ];
 
-const homepageSustainabilityData: TemplateField[] = [
-  {
-    key: "happy-bamboo.homepage.sustainability-1-label",
-    label: "Sustainability Feature 1 Label",
-    description: "First feature label (e.g. Premium Quality)",
-    type: "text",
-    page: "homepage",
-    group: "homepage.sustainability",
-    defaultValue: "Premium Quality",
-  },
-  {
-    key: "happy-bamboo.homepage.sustainability-1-description",
-    label: "Sustainability Feature 1 Description",
-    description: "First feature description",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.sustainability",
-    defaultValue:
-      "Experience top-quality household paper products, crafted for comfort and reliability.",
-  },
-  {
-    key: "happy-bamboo.homepage.sustainability-2-label",
-    label: "Sustainability Feature 2 Label",
-    description: "Second feature label",
-    type: "text",
-    page: "homepage",
-    group: "homepage.sustainability",
-    defaultValue: "Competitive Prices",
-  },
-  {
-    key: "happy-bamboo.homepage.sustainability-2-description",
-    label: "Sustainability Feature 2 Description",
-    description: "Second feature description",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.sustainability",
-    defaultValue: "Affordable prices without compromising quality.",
-  },
-  {
-    key: "happy-bamboo.homepage.sustainability-3-label",
-    label: "Sustainability Feature 3 Label",
-    description: "Third feature label",
-    type: "text",
-    page: "homepage",
-    group: "homepage.sustainability",
-    defaultValue: "Customer-Centric Approach",
-  },
-  {
-    key: "happy-bamboo.homepage.sustainability-3-description",
-    label: "Sustainability Feature 3 Description",
-    description: "Third feature description",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.sustainability",
-    defaultValue: "Your satisfaction comes first in everything we do.",
-  },
-];
+// const homepageSustainabilityData: TemplateField[] = [
+//   {
+//     key: "happy-bamboo.homepage.sustainability-1-label",
+//     label: "Sustainability Feature 1 Label",
+//     description: "First feature label (e.g. Premium Quality)",
+//     type: "text",
+//     page: "homepage",
+//     group: "homepage.sustainability",
+//     defaultValue: "Premium Quality",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.sustainability-1-description",
+//     label: "Sustainability Feature 1 Description",
+//     description: "First feature description",
+//     type: "textarea",
+//     page: "homepage",
+//     group: "homepage.sustainability",
+//     defaultValue:
+//       "Experience top-quality household paper products, crafted for comfort and reliability.",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.sustainability-2-label",
+//     label: "Sustainability Feature 2 Label",
+//     description: "Second feature label",
+//     type: "text",
+//     page: "homepage",
+//     group: "homepage.sustainability",
+//     defaultValue: "Competitive Prices",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.sustainability-2-description",
+//     label: "Sustainability Feature 2 Description",
+//     description: "Second feature description",
+//     type: "textarea",
+//     page: "homepage",
+//     group: "homepage.sustainability",
+//     defaultValue: "Affordable prices without compromising quality.",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.sustainability-3-label",
+//     label: "Sustainability Feature 3 Label",
+//     description: "Third feature label",
+//     type: "text",
+//     page: "homepage",
+//     group: "homepage.sustainability",
+//     defaultValue: "Customer-Centric Approach",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.sustainability-3-description",
+//     label: "Sustainability Feature 3 Description",
+//     description: "Third feature description",
+//     type: "textarea",
+//     page: "homepage",
+//     group: "homepage.sustainability",
+//     defaultValue: "Your satisfaction comes first in everything we do.",
+//   },
+// ];
 
-const homepageLocationData: TemplateField[] = [
-  {
-    key: "happy-bamboo.homepage.location-heading",
-    label: "Location Section Heading",
-    description: "Heading for the location section on homepage",
-    type: "text",
-    page: "homepage",
-    group: "homepage.location",
-    defaultValue: "Our Location",
-  },
-];
+// const homepageLocationData: TemplateField[] = [
+//   {
+//     key: "happy-bamboo.homepage.location-heading",
+//     label: "Location Section Heading",
+//     description: "Heading for the location section on homepage",
+//     type: "text",
+//     page: "homepage",
+//     group: "homepage.location",
+//     defaultValue: "Our Location",
+//   },
+// ];
 
-const homepageTestimonialsData: TemplateField[] = [
-  {
-    key: "happy-bamboo.homepage.testimonial-1-name",
-    label: "Testimonial 1 Name",
-    description: "First testimonial author name",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "Sarah M.",
-  },
-  {
-    key: "happy-bamboo.homepage.testimonial-1-location",
-    label: "Testimonial 1 Location",
-    description: "First testimonial location",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "Ann Arbor, MI",
-  },
-  {
-    key: "happy-bamboo.homepage.testimonial-1-quote",
-    label: "Testimonial 1 Quote",
-    description: "First testimonial quote",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue:
-      "I never thought I would care this much about toilet paper, but the softness and quality are genuinely impressive. Knowing it is eco-friendly makes it even better.",
-  },
-  {
-    key: "happy-bamboo.homepage.testimonial-2-name",
-    label: "Testimonial 2 Name",
-    description: "Second testimonial author name",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "James T.",
-  },
-  {
-    key: "happy-bamboo.homepage.testimonial-2-location",
-    label: "Testimonial 2 Location",
-    description: "Second testimonial location",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "Chicago, IL",
-  },
-  {
-    key: "happy-bamboo.homepage.testimonial-2-quote",
-    label: "Testimonial 2 Quote",
-    description: "Second testimonial quote",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue:
-      "We switched our entire household to Finally Results and have not looked back. The starter kit is the perfect way to try everything. Our septic system thanks us too.",
-  },
-  {
-    key: "happy-bamboo.homepage.testimonial-3-name",
-    label: "Testimonial 3 Name",
-    description: "Third testimonial author name",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "Angela R.",
-  },
-  {
-    key: "happy-bamboo.homepage.testimonial-3-location",
-    label: "Testimonial 3 Location",
-    description: "Third testimonial location",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "Detroit, MI",
-  },
-  {
-    key: "happy-bamboo.homepage.testimonial-3-quote",
-    label: "Testimonial 3 Quote",
-    description: "Third testimonial quote",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue:
-      "Supporting a local Detroit business that actually cares about sustainability? That is a win-win. The product quality is on par with luxury brands at a fraction of the environmental cost.",
-  },
-];
+// const homepageTestimonialsData: TemplateField[] = [
+//   {
+//     key: "happy-bamboo.homepage.testimonial-1-name",
+//     label: "Testimonial 1 Name",
+//     description: "First testimonial author name",
+//     type: "text",
+//     page: "homepage",
+//     group: "homepage.testimonials",
+//     defaultValue: "Sarah M.",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.testimonial-1-location",
+//     label: "Testimonial 1 Location",
+//     description: "First testimonial location",
+//     type: "text",
+//     page: "homepage",
+//     group: "homepage.testimonials",
+//     defaultValue: "Ann Arbor, MI",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.testimonial-1-quote",
+//     label: "Testimonial 1 Quote",
+//     description: "First testimonial quote",
+//     type: "textarea",
+//     page: "homepage",
+//     group: "homepage.testimonials",
+//     defaultValue:
+//       "I never thought I would care this much about toilet paper, but the softness and quality are genuinely impressive. Knowing it is eco-friendly makes it even better.",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.testimonial-2-name",
+//     label: "Testimonial 2 Name",
+//     description: "Second testimonial author name",
+//     type: "text",
+//     page: "homepage",
+//     group: "homepage.testimonials",
+//     defaultValue: "James T.",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.testimonial-2-location",
+//     label: "Testimonial 2 Location",
+//     description: "Second testimonial location",
+//     type: "text",
+//     page: "homepage",
+//     group: "homepage.testimonials",
+//     defaultValue: "Chicago, IL",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.testimonial-2-quote",
+//     label: "Testimonial 2 Quote",
+//     description: "Second testimonial quote",
+//     type: "textarea",
+//     page: "homepage",
+//     group: "homepage.testimonials",
+//     defaultValue:
+//       "We switched our entire household to Finally Results and have not looked back. The starter kit is the perfect way to try everything. Our septic system thanks us too.",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.testimonial-3-name",
+//     label: "Testimonial 3 Name",
+//     description: "Third testimonial author name",
+//     type: "text",
+//     page: "homepage",
+//     group: "homepage.testimonials",
+//     defaultValue: "Angela R.",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.testimonial-3-location",
+//     label: "Testimonial 3 Location",
+//     description: "Third testimonial location",
+//     type: "text",
+//     page: "homepage",
+//     group: "homepage.testimonials",
+//     defaultValue: "Detroit, MI",
+//   },
+//   {
+//     key: "happy-bamboo.homepage.testimonial-3-quote",
+//     label: "Testimonial 3 Quote",
+//     description: "Third testimonial quote",
+//     type: "textarea",
+//     page: "homepage",
+//     group: "homepage.testimonials",
+//     defaultValue:
+//       "Supporting a local Detroit business that actually cares about sustainability? That is a win-win. The product quality is on par with luxury brands at a fraction of the environmental cost.",
+//   },
+// ];
 
 const aboutHeroData: TemplateField[] = [
-  {
-    key: "happy-bamboo.about-hero-heading",
-    label: "About Hero Heading",
-    description: "Main heading for the about page",
-    type: "text",
-    page: "about",
-    group: "about.hero",
-    defaultValue: "Our Story",
-  },
+  // {
+  //   key: "happy-bamboo.about-hero-heading",
+  //   label: "About Hero Heading",
+  //   description: "Main heading for the about page",
+  //   type: "text",
+  //   page: "about",
+  //   group: "about.hero",
+  //   defaultValue: "Our Story",
+  // },
   {
     key: "happy-bamboo.about-hero-mission",
     label: "About Hero Mission",
@@ -399,17 +408,17 @@ const aboutHeroData: TemplateField[] = [
   },
 ];
 
-const aboutMissionData: TemplateField[] = [
-  {
-    key: "happy-bamboo.about-mission-banner",
-    label: "Mission Banner",
-    description: "Mission banner for the about page",
-    type: "textarea",
-    page: "about",
-    group: "about.mission",
-    placeholder: "Join us in our mission to make everyday moments...",
-  },
-];
+// const aboutMissionData: TemplateField[] = [
+//   {
+//     key: "happy-bamboo.about-mission-banner",
+//     label: "Mission Banner",
+//     description: "Mission banner for the about page",
+//     type: "textarea",
+//     page: "about",
+//     group: "about.mission",
+//     placeholder: "Join us in our mission to make everyday moments...",
+//   },
+// ];
 
 const aboutServicesData: TemplateField[] = [
   {
@@ -579,7 +588,7 @@ const contactPageData: TemplateField[] = [
     type: "text",
     page: "contact",
     group: "contact.info",
-    defaultValue: "hello@finallyresults.com",
+    defaultValue: "happybamboo25@gmail.com",
   },
   {
     key: "happy-bamboo.contact.location",
@@ -643,27 +652,27 @@ const contactPageData: TemplateField[] = [
   },
 ];
 
-const globalLocationData: TemplateField[] = [
-  {
-    key: "happy-bamboo.global.location-address",
-    label: "Global Location Address",
-    description: "Address for the global location section (used for map link)",
-    type: "text",
-    page: "global",
-    group: "global.location",
-    gridColumn: "col-span-full",
-    defaultValue: "18058, Detroit, MI 48234",
-  },
-  {
-    key: "happy-bamboo.global.location-map",
-    label: "Global Location Map",
-    description: "Map image for the global location section",
-    type: "image",
-    page: "global",
-    group: "global.location",
-    gridColumn: "col-span-full",
-  },
-];
+// const globalLocationData: TemplateField[] = [
+//   {
+//     key: "happy-bamboo.global.location-address",
+//     label: "Global Location Address",
+//     description: "Address for the global location section (used for map link)",
+//     type: "text",
+//     page: "global",
+//     group: "global.location",
+//     gridColumn: "col-span-full",
+//     defaultValue: "18058, Detroit, MI 48234",
+//   },
+//   {
+//     key: "happy-bamboo.global.location-map",
+//     label: "Global Location Map",
+//     description: "Map image for the global location section",
+//     type: "image",
+//     page: "global",
+//     group: "global.location",
+//     gridColumn: "col-span-full",
+//   },
+// ];
 
 const fieldGroups: TemplateFieldGroup[] = [
   {
@@ -694,28 +703,28 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "📄",
     columns: 2,
   },
-  {
-    id: "homepage.sustainability",
-    title: "Sustainability Banner",
-    description:
-      "Three feature highlights (e.g. Premium Quality, Competitive Prices)",
-    icon: "🌿",
-    columns: 2,
-  },
-  {
-    id: "homepage.location",
-    title: "Location Section",
-    description: "Location heading on homepage",
-    icon: "📍",
-    columns: 2,
-  },
-  {
-    id: "homepage.testimonials",
-    title: "Testimonials",
-    description: "Customer testimonials (name, location, quote)",
-    icon: "💬",
-    columns: 2,
-  },
+  // {
+  //   id: "homepage.sustainability",
+  //   title: "Sustainability Banner",
+  //   description:
+  //     "Three feature highlights (e.g. Premium Quality, Competitive Prices)",
+  //   icon: "🌿",
+  //   columns: 2,
+  // },
+  // {
+  //   id: "homepage.location",
+  //   title: "Location Section",
+  //   description: "Location heading on homepage",
+  //   icon: "📍",
+  //   columns: 2,
+  // },
+  // {
+  //   id: "homepage.testimonials",
+  //   title: "Testimonials",
+  //   description: "Customer testimonials (name, location, quote)",
+  //   icon: "💬",
+  //   columns: 2,
+  // },
   {
     id: "about.hero",
     title: "About Hero",
@@ -723,27 +732,28 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "📖",
     columns: 2,
   },
-  {
-    id: "about.mission",
-    title: "Our Mission",
-    description: "Mission section heading and paragraphs",
-    icon: "🎯",
-    columns: 2,
-  },
-  {
-    id: "about.values",
-    title: "What We Stand For",
-    description: "Values section with three value cards",
-    icon: "❤️",
-    columns: 2,
-  },
-  {
-    id: "about.supplier",
-    title: "Supplier",
-    description: "Supplier section heading and text",
-    icon: "🏪",
-    columns: 2,
-  },
+  // {
+  //   id: "about.mission",
+  //   title: "Our Mission",
+  //   description: "Mission section heading and paragraphs",
+  //   icon: "🎯",
+  //   columns: 2,
+  // },
+  // {
+  //   id: "about.values",
+  //   title: "What We Stand For",
+  //   description: "Values section with three value cards",
+  //   icon: "❤️",
+  //   columns: 2,
+  // },
+  // {
+  //   id: "about.supplier",
+  //   title: "Supplier",
+  //   description: "Supplier section heading and text",
+  //   icon: "🏪",
+  //   columns: 2,
+  // },
+
   {
     id: "about.bamboo",
     title: "Why Bamboo",
@@ -752,17 +762,10 @@ const fieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
   {
-    id: "about.nationwide",
-    title: "Nationwide Distribution",
-    description: "Nationwide distribution section",
-    icon: "🗺️",
-    columns: 2,
-  },
-  {
-    id: "about.detroit",
-    title: "Rooted in Detroit",
-    description: "Detroit roots section",
-    icon: "🏙️",
+    id: "about.services",
+    title: "Services",
+    description: "Services section heading and paragraphs",
+    icon: "�",
     columns: 2,
   },
   {
@@ -772,20 +775,20 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "💬",
     columns: 2,
   },
-  {
-    id: "contact.info",
-    title: "Contact Info",
-    description: "Contact page header and contact details",
-    icon: "📧",
-    columns: 2,
-  },
-  {
-    id: "global.location",
-    title: "Global Location Section",
-    description: "Global location section on the homepage",
-    icon: "🗺️",
-    columns: 2,
-  },
+  // {
+  //   id: "contact.info",
+  //   title: "Contact Info",
+  //   description: "Contact page header and contact details",
+  //   icon: "📧",
+  //   columns: 2,
+  // },
+  // {
+  //   id: "global.location",
+  //   title: "Global Location Section",
+  //   description: "Global location section on the homepage",
+  //   icon: "🗺️",
+  //   columns: 2,
+  // },
 ];
 
 export const happyBambooData = {
@@ -794,16 +797,16 @@ export const happyBambooData = {
     ...homepageFeaturedData,
     ...homepageBenefitsData,
     ...homepageAboutTeaserData,
-    ...homepageSustainabilityData,
-    ...homepageLocationData,
-    ...homepageTestimonialsData,
+    // ...homepageSustainabilityData,
+    // ...homepageLocationData,
+    // ...homepageTestimonialsData,
     ...aboutHeroData,
-    ...aboutMissionData,
+    // ...aboutMissionData,
     ...aboutServicesData,
     ...aboutBambooData,
     ...aboutCTAData,
-    ...contactPageData,
-    ...globalLocationData,
+    // ...contactPageData,
+    // ...globalLocationData,
   ],
 };
 

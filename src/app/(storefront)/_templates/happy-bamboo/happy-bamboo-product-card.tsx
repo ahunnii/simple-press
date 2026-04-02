@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { formatPrice } from "~/lib/prices";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
@@ -141,6 +142,97 @@ export function HappyBambooHorizontalProductCard({ product }: Props) {
         >
           <Image
             src={product.image ?? "/placeholder.svg"}
+            alt={product.name ?? "Product"}
+            fill
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            sizes="(max-width: 640px) 100vw, 208px"
+          />
+        </Link>
+
+        {/* Content */}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-between gap-3 px-4 py-10">
+          <div className="min-w-0 space-y-1">
+            <Link
+              href={productHref}
+              className="text-foreground font-heading hover:text-primary focus-visible:ring-ring block font-semibold tracking-tight transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              <h3 className="line-clamp-2 text-base leading-snug sm:text-lg">
+                {product.name}
+              </h3>
+            </Link>
+            <p className="text-muted-foreground line-clamp-2 text-sm leading-relaxed">
+              {product.description}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <p className="text-primary text-lg font-bold tabular-nums">
+              {formatPrice(product.price)}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                size="sm"
+                className="gap-1.5"
+                onClick={handleAddToCart}
+                aria-label={`Add ${product.name} to cart`}
+              >
+                <ShoppingCart className="h-4 w-4 shrink-0" />
+                Add to cart
+              </Button>
+              <Button variant="outline" size="sm" className="gap-1.5" asChild>
+                <Link href={productHref}>
+                  <Eye className="size-4 shrink-0" aria-hidden />
+                  Details
+                  <ArrowRight className="size-3.5 opacity-60" aria-hidden />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+export function HappyBambooFeaturedProductCard({
+  product,
+}: {
+  product: NonNullable<
+    NonNullable<RouterOutputs["business"]["getHomepage"]>["products"]
+  >[number];
+}) {
+  const { addItem } = useCart();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem({
+      productId: product.id,
+      variantId: null,
+      productName: product.name,
+      variantName: null,
+      price: product.price,
+      imageUrl: product.images[0]?.url ?? "/placeholder.svg",
+      sku: null,
+    });
+    toast.success(`${product.name} added to cart`);
+  };
+
+  const productHref = `/shop/${product.slug}`;
+
+  return (
+    <Card className="group border-border/80 bg-card hover:border-primary/25 h-full overflow-hidden rounded-xl border py-0 shadow-sm transition-all duration-300 hover:shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-stretch">
+        {/* Image — overflow-hidden + matching border-radius to clip inside the card */}
+        <Link
+          href={productHref}
+          className="bg-secondary relative aspect-5/3 w-full shrink-0 overflow-hidden rounded-t-xl sm:aspect-auto sm:min-h-[160px] sm:w-44 sm:rounded-t-none sm:rounded-l-xl md:w-52"
+          aria-label={`View ${product.name}`}
+          tabIndex={-1}
+        >
+          <Image
+            src={product.images[0]?.url ?? "/placeholder.svg"}
             alt={product.name ?? "Product"}
             fill
             className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
