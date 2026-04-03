@@ -49,11 +49,13 @@ const getNavData = (session: Session | null) => {
       title: "Orders",
       url: "/admin/orders",
       icon: IconShoppingCart,
+      featureKey: "orders",
     },
     {
       title: "Products",
       url: "/admin/products",
       icon: IconPackage,
+      featureKey: "products",
     },
     {
       title: "Collections",
@@ -145,7 +147,7 @@ export function AppSidebar({
   featureData,
   ...props
 }: AppSidebarProps) {
-  const { isEnabled } = useFeatureFlags({
+  const { isEnabled, isDisabledByDependency } = useFeatureFlags({
     flags: featureData?.flags ?? {},
   });
 
@@ -154,9 +156,11 @@ export function AppSidebar({
   const filteredNavMain = useMemo(() => {
     return navData.navMain.filter((item) => {
       if (!item.featureKey) return true;
-      return isEnabled(item.featureKey);
+      return (
+        isEnabled(item.featureKey) && !isDisabledByDependency(item.featureKey)
+      );
     });
-  }, [navData.navMain, isEnabled]);
+  }, [navData.navMain, isEnabled, isDisabledByDependency]);
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

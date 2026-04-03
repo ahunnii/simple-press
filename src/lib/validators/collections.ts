@@ -12,3 +12,29 @@ export const collectionFormSchema = z.object({
 });
 
 export type CollectionFormData = z.infer<typeof collectionFormSchema>;
+
+export const collectionCreateSchema = collectionFormSchema.omit({
+  imageFile: true,
+  productIds: true,
+});
+
+export const collectionUpdateSchema = collectionFormSchema
+  .omit({
+    imageFile: true,
+    productIds: true,
+  })
+  .extend({
+    id: z.string(),
+  });
+
+export const collectionModifyProductSchema = z.object({
+  collectionId: z.string(),
+  productId: z.string(),
+});
+
+export const collectionProductOrderSchema = z.object({
+  collectionId: z.string(),
+  productIds: z.array(z.string()),
+});
+
+export const collectionCollectionOrderSchema = z.array(z.string());

@@ -2,53 +2,45 @@ import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { checkBusiness } from "~/lib/check-business";
 import {
   productCreateSchema,
+  productImageSchema,
   productUpdateSchema,
 } from "~/lib/validators/product";
 import {
   createTRPCRouter,
+  featureGate,
+  getBusinessProcedure,
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
 export const productRouter = createTRPCRouter({
-  getFeatured: publicProcedure.query(async ({ ctx }) => {
-    const business = await checkBusiness();
-    if (!business) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
-      });
-    }
-    const products = await ctx.db.product.findMany({
-      where: { businessId: business.id },
-      include: {
-        images: {
-          orderBy: { sortOrder: "asc" },
-          take: 1,
+  getFeatured: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("products"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+      const products = await ctx.db.product.findMany({
+        where: { businessId },
+        include: {
+          images: { orderBy: { sortOrder: "asc" }, take: 1 },
+          variants: true,
         },
-        variants: true,
-      },
-      orderBy: { createdAt: "desc" },
-      take: 4,
-    });
-    return products;
-  }),
+        orderBy: { createdAt: "desc" },
+        take: 4,
+      });
+      return products;
+    }),
 
   getRelated: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("products"))
     .input(z.object({ productId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const business = await checkBusiness();
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
       const product = await ctx.db.product.findUnique({
-        where: { id: input.productId, businessId: business.id },
+        where: { id: input.productId, businessId },
       });
       if (!product) {
         throw new TRPCError({
@@ -58,12 +50,9 @@ export const productRouter = createTRPCRouter({
       }
 
       const products = await ctx.db.product.findMany({
-        where: { businessId: business.id, id: { not: product.id } },
+        where: { businessId, id: { not: product.id } },
         include: {
-          images: {
-            orderBy: { sortOrder: "asc" },
-            take: 4,
-          },
+          images: { orderBy: { sortOrder: "asc" }, take: 4 },
           variants: true,
         },
         orderBy: { createdAt: "desc" },
@@ -71,7 +60,78 @@ export const productRouter = createTRPCRouter({
       });
       return products;
     }),
+
+  get: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("products"))
+    .input(z.string())
+    .query(async ({ ctx, input: slug }) => {
+      const { businessId } = ctx;
+
+      const product = await ctx.db.product.findFirst({
+        where: {
+          slug,
+          businessId,
+          published: true,
+        },
+        include: {
+          images: { orderBy: { sortOrder: "asc" } },
+          variants: { orderBy: { createdAt: "asc" } },
+          business: {
+            select: { siteContent: { select: { primaryColor: true } } },
+          },
+        },
+      });
+      return product;
+    }),
+
+  secureGet: ownerAdminProcedure
+    .use(featureGate("products"))
+    .input(z.string())
+    .query(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
+
+      const product = await ctx.db.product.findUnique({
+        where: { id, businessId },
+        include: {
+          variants: { orderBy: { createdAt: "asc" } },
+          images: { orderBy: { sortOrder: "asc" } },
+        },
+      });
+      return product;
+    }),
+
+  secureListAll: ownerAdminProcedure
+    .use(featureGate("products"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+
+      const products = await ctx.db.product.findMany({
+        where: { businessId },
+        include: {
+          images: { orderBy: { sortOrder: "asc" }, take: 1 },
+          _count: { select: { variants: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      return products;
+    }),
+
+  secureGetAll: ownerAdminProcedure
+    .use(featureGate("products"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+      const products = await ctx.db.product.findMany({
+        where: { businessId },
+        include: { variants: true, images: true },
+        orderBy: { name: "asc" },
+      });
+
+      return products;
+    }),
+
   create: ownerAdminProcedure
+    .use(featureGate("products"))
     .input(productCreateSchema)
     .mutation(async ({ ctx, input }) => {
       const {
@@ -138,6 +198,7 @@ export const productRouter = createTRPCRouter({
     }),
 
   update: ownerAdminProcedure
+    .use(featureGate("products"))
     .input(productUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -234,91 +295,8 @@ export const productRouter = createTRPCRouter({
       };
     }),
 
-  secureGet: ownerAdminProcedure
-    .input(z.string())
-    .query(async ({ ctx, input: id }) => {
-      const { businessId } = ctx;
-
-      const product = await ctx.db.product.findUnique({
-        where: { id, businessId },
-        include: {
-          variants: {
-            orderBy: { createdAt: "asc" },
-          },
-          images: {
-            orderBy: { sortOrder: "asc" },
-          },
-        },
-      });
-      return product;
-    }),
-
-  secureListAll: ownerAdminProcedure.query(async ({ ctx }) => {
-    const { businessId } = ctx;
-
-    const products = await ctx.db.product.findMany({
-      where: { businessId },
-      include: {
-        images: {
-          orderBy: { sortOrder: "asc" },
-          take: 1,
-        },
-        _count: {
-          select: { variants: true },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-    return products;
-  }),
-
-  secureGetAll: ownerAdminProcedure.query(async ({ ctx }) => {
-    const { businessId } = ctx;
-    const products = await ctx.db.product.findMany({
-      where: { businessId },
-      include: { variants: true, images: true },
-      orderBy: { name: "asc" },
-    });
-
-    return products;
-  }),
-
-  get: publicProcedure.input(z.string()).query(async ({ ctx, input: slug }) => {
-    const business = await checkBusiness();
-    if (!business) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
-      });
-    }
-    const product = await ctx.db.product.findFirst({
-      where: {
-        slug,
-        businessId: business.id,
-        published: true,
-      },
-      include: {
-        images: {
-          orderBy: { sortOrder: "asc" },
-        },
-        variants: {
-          orderBy: { createdAt: "asc" },
-        },
-        business: {
-          select: {
-            siteContent: {
-              select: {
-                primaryColor: true,
-              },
-            },
-          },
-        },
-      },
-    });
-    return product;
-  }),
-
   delete: ownerAdminProcedure
+    .use(featureGate("products"))
     .input(z.string())
     .mutation(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
@@ -332,134 +310,13 @@ export const productRouter = createTRPCRouter({
       };
     }),
 
-  // Add images to product
-  addImages: ownerAdminProcedure
-    .input(
-      z.object({
-        images: z.array(
-          z.object({
-            productId: z.string(),
-            url: z.string().url(),
-            altText: z.string().nullable(),
-            sortOrder: z.number().int(),
-          }),
-        ),
-        productId: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-      // Verify product ownership
-      const product = await ctx.db.product.findUnique({
-        where: { id: input.productId, businessId },
-        select: { businessId: true },
-      });
-
-      if (!product) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Product not found",
-        });
-      }
-
-      await ctx.db.image.createMany({
-        data: input.images.map((image) => ({
-          productId: input.productId,
-          url: image.url,
-          altText: image.altText,
-          sortOrder: image.sortOrder,
-        })),
-      });
-
-      return {
-        message: "Images added successfully!",
-        productId: input.productId,
-      };
-    }),
-
-  addImage: ownerAdminProcedure
-    .input(
-      z.object({
-        productId: z.string(),
-        url: z.string().url(),
-        altText: z.string().nullable(),
-        sortOrder: z.number().int(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-      // Verify product ownership
-      const product = await ctx.db.product.findUnique({
-        where: { id: input.productId, businessId },
-        select: { businessId: true },
-      });
-
-      if (!product) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Product not found",
-        });
-      }
-
-      const image = await ctx.db.image.create({
-        data: {
-          productId: input.productId,
-          url: input.url,
-          altText: input.altText,
-          sortOrder: input.sortOrder,
-        },
-      });
-
-      return image;
-    }),
-
-  // Update image
-  updateImage: ownerAdminProcedure
-    .input(
-      z.object({
-        imageId: z.string(),
-        altText: z.string().nullable(),
-        sortOrder: z.number().int(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-      const image = await ctx.db.image.update({
-        where: { id: input.imageId, businessId },
-        data: {
-          altText: input.altText,
-          sortOrder: input.sortOrder,
-        },
-      });
-
-      return image;
-    }),
-
-  // Delete image
-  deleteImage: ownerAdminProcedure
-    .input(z.object({ imageId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-      await ctx.db.image.delete({
-        where: { id: input.imageId, businessId },
-      });
-
-      return { success: true };
-    }),
-
   // Sync all images (helper for bulk update)
   syncImages: ownerAdminProcedure
+    .use(featureGate("products"))
     .input(
       z.object({
         productId: z.string(),
-        images: z.array(
-          z.object({
-            id: z.string().optional(),
-            url: z.string().url(),
-            altText: z.string().nullable(),
-            sortOrder: z.number().int(),
-          }),
-        ),
+        images: z.array(productImageSchema),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -517,6 +374,21 @@ export const productRouter = createTRPCRouter({
         }),
       );
 
-      return { success: true, productId: input.productId };
+      return {
+        success: true,
+        productId: input.productId,
+        message: "Images synced successfully",
+      };
+    }),
+
+  getProductImportHistory: ownerAdminProcedure
+    .use(featureGate("products"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+      const importHistory = await ctx.db.productImport.findMany({
+        where: { businessId },
+        orderBy: { createdAt: "desc" },
+      });
+      return importHistory;
     }),
 });

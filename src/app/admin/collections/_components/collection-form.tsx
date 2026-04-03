@@ -469,10 +469,11 @@ export function CollectionForm({ collection, allProducts }: Props) {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete product</AlertDialogTitle>
+            <AlertDialogTitle>Delete collection</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete &quot;{form.watch("name")}&quot;?
-              This action cannot be undone.
+              This will remove the collection but won&apos;t delete the products
+              in it. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

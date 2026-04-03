@@ -1,6 +1,14 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { generateCollectionSlug } from "~/lib/slug";
+import {
+  collectionCollectionOrderSchema,
+  collectionCreateSchema,
+  collectionModifyProductSchema,
+  collectionProductOrderSchema,
+  collectionUpdateSchema,
+} from "~/lib/validators/collections";
 import {
   createTRPCRouter,
   featureGate,
@@ -8,13 +16,6 @@ import {
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
 
 export const collectionsRouter = createTRPCRouter({
   getAll: ownerAdminProcedure
@@ -28,6 +29,7 @@ export const collectionsRouter = createTRPCRouter({
       });
       return collections;
     }),
+
   getById: ownerAdminProcedure
     .use(featureGate("collections"))
     .input(z.string())
@@ -68,11 +70,10 @@ export const collectionsRouter = createTRPCRouter({
     }),
 
   getAllPublic: publicProcedure
-    .use(featureGate("collections"))
     .use(getBusinessProcedure())
+    .use(featureGate("collections"))
     .query(async ({ ctx }) => {
       const { businessId } = ctx;
-
       const collections = await ctx.db.collection.findMany({
         where: { businessId, published: true },
         include: { _count: { select: { collectionProducts: true } } },
@@ -82,10 +83,9 @@ export const collectionsRouter = createTRPCRouter({
       return collections;
     }),
 
-  // Get single collection by slug (public)
   getBySlug: publicProcedure
-    .use(featureGate("collections"))
     .use(getBusinessProcedure())
+    .use(featureGate("collections"))
     .input(z.string())
     .query(async ({ ctx, input: slug }) => {
       const { businessId } = ctx;
@@ -123,21 +123,12 @@ export const collectionsRouter = createTRPCRouter({
 
   create: ownerAdminProcedure
     .use(featureGate("collections"))
-    .input(
-      z.object({
-        name: z.string().min(1),
-        description: z.string().optional(),
-        imageUrl: z.string().url().optional(),
-        published: z.boolean().default(true),
-        metaTitle: z.string().optional(),
-        metaDescription: z.string().optional(),
-      }),
-    )
+    .input(collectionCreateSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
       // Generate slug
-      let slug = generateSlug(input.name);
+      let slug = generateCollectionSlug(input.name);
 
       // Ensure unique slug
       let counter = 1;
@@ -152,7 +143,7 @@ export const collectionsRouter = createTRPCRouter({
         });
 
         if (!existing) break;
-        slug = `${generateSlug(input.name)}-${counter}`;
+        slug = `${generateCollectionSlug(input.name)}-${counter}`;
         counter++;
       }
 
@@ -182,17 +173,7 @@ export const collectionsRouter = createTRPCRouter({
 
   update: ownerAdminProcedure
     .use(featureGate("collections"))
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string().min(1).optional(),
-        description: z.string().optional().nullable(),
-        imageUrl: z.string().url().optional().nullable(),
-        published: z.boolean().optional(),
-        metaTitle: z.string().optional().nullable(),
-        metaDescription: z.string().optional().nullable(),
-      }),
-    )
+    .input(collectionUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
@@ -217,7 +198,7 @@ export const collectionsRouter = createTRPCRouter({
       // If name changed, update slug
       let slug = collection.slug;
       if (updates.name && updates.name !== collection.slug) {
-        slug = generateSlug(updates.name);
+        slug = generateCollectionSlug(updates.name);
 
         // Ensure unique
         let counter = 1;
@@ -232,7 +213,7 @@ export const collectionsRouter = createTRPCRouter({
           });
 
           if (!existing || existing.id === id) break;
-          slug = `${generateSlug(updates.name)}-${counter}`;
+          slug = `${generateCollectionSlug(updates.name)}-${counter}`;
           counter++;
         }
       }
@@ -278,12 +259,7 @@ export const collectionsRouter = createTRPCRouter({
 
   addProduct: ownerAdminProcedure
     .use(featureGate("collections"))
-    .input(
-      z.object({
-        collectionId: z.string(),
-        productId: z.string(),
-      }),
-    )
+    .input(collectionModifyProductSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
@@ -336,12 +312,7 @@ export const collectionsRouter = createTRPCRouter({
 
   removeProduct: ownerAdminProcedure
     .use(featureGate("collections"))
-    .input(
-      z.object({
-        collectionId: z.string(),
-        productId: z.string(),
-      }),
-    )
+    .input(collectionModifyProductSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
@@ -371,12 +342,7 @@ export const collectionsRouter = createTRPCRouter({
 
   updateProductOrder: ownerAdminProcedure
     .use(featureGate("collections"))
-    .input(
-      z.object({
-        collectionId: z.string(),
-        productIds: z.array(z.string()),
-      }),
-    )
+    .input(collectionProductOrderSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
@@ -414,7 +380,7 @@ export const collectionsRouter = createTRPCRouter({
 
   updateCollectionOrder: ownerAdminProcedure
     .use(featureGate("collections"))
-    .input(z.array(z.string()))
+    .input(collectionCollectionOrderSchema)
     .mutation(async ({ ctx, input: collectionIds }) => {
       const { businessId } = ctx;
 

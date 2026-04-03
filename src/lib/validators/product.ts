@@ -9,56 +9,28 @@ const additionalFieldsSchema = z
   .object({
     additionalInformation: z.record(z.string(), z.unknown()).optional(),
     productFeatures: z.array(productFeatureSchema).optional(),
-    // comingSoon: z.boolean().optional().nullable(),
+    comingSoon: z.boolean().optional().nullable(),
+    productTagline: z.string().optional().nullable(),
   })
   .optional();
 
-export const productCreateSchema = z.object({
-  name: z.string(),
-  slug: z.string(),
-  description: z.string().optional(),
-  price: z.number(),
-  published: z.boolean(),
-  trackInventory: z.boolean(),
-  allowBackorders: z.boolean().default(false),
-  inventoryQty: z.number().optional(),
-  variants: z.array(
-    z.object({
-      name: z.string(),
-      sku: z.string().optional(),
-      price: z.number(),
-      inventoryQty: z.number(),
-      options: z.record(z.string(), z.string()),
-    }),
-  ),
-  additionalFields: additionalFieldsSchema,
+export const productImageSchema = z.object({
+  id: z.string().optional(),
+  url: z.string().url(),
+  altText: z.string().optional().nullable(),
+  sortOrder: z.number().int(),
 });
 
-export const productUpdateSchema = z.object({
-  id: z.string(),
+export const variantSchema = z.object({
+  id: z.string().optional(),
   name: z.string(),
-  slug: z.string(),
-  description: z.string().optional(),
+  sku: z.string().optional(),
   price: z.number(),
-  published: z.boolean(),
-  trackInventory: z.boolean(),
-  allowBackorders: z.boolean().default(false),
-  inventoryQty: z.number().optional(),
-  variants: z.array(
-    z.object({
-      id: z.string().optional(),
-      name: z.string(),
-      sku: z.string().optional(),
-      price: z.number(),
-      inventoryQty: z.number(),
-      options: z.record(z.string(), z.string()),
-    }),
-  ),
-  additionalFields: additionalFieldsSchema,
+  inventoryQty: z.number(),
+  options: z.record(z.string(), z.string()),
 });
 
 export const productFormSchema = z.object({
-  id: z.string().optional(),
   name: z.string(),
   slug: z.string(),
   description: z.string().optional(),
@@ -67,29 +39,26 @@ export const productFormSchema = z.object({
   trackInventory: z.boolean(),
   allowBackorders: z.boolean(),
   inventoryQty: z.number().optional(),
-  variants: z
-    .array(
-      z.object({
-        id: z.string().optional(),
-        name: z.string(),
-        sku: z.string().optional(),
-        price: z.number(),
-        inventoryQty: z.number(),
-        options: z.record(z.string(), z.string()),
-      }),
-    )
-    .optional(),
-  images: z
-    .array(
-      z.object({
-        id: z.string().optional(),
-        url: z.string(),
-        altText: z.string().optional(),
-        sortOrder: z.number(),
-      }),
-    )
-    .optional(),
+  variants: z.array(variantSchema).optional(),
+  images: z.array(productImageSchema).optional(),
   additionalFields: additionalFieldsSchema,
 });
+
+export const productCreateSchema = productFormSchema
+  .omit({
+    images: true,
+  })
+  .extend({
+    variants: z.array(variantSchema),
+  });
+
+export const productUpdateSchema = productFormSchema
+  .omit({
+    images: true,
+  })
+  .extend({
+    id: z.string(),
+    variants: z.array(variantSchema),
+  });
 
 export type ProductFormSchema = z.infer<typeof productFormSchema>;

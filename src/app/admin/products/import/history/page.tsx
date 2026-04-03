@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { checkBusiness } from "~/lib/check-business";
-import { db } from "~/server/db";
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
+import { api } from "~/trpc/server";
 import { Badge } from "~/components/ui/badge";
 import { TrailHeader } from "~/app/admin/_components/trail-header";
 
@@ -11,11 +12,9 @@ export default async function ImportHistoryPage() {
     notFound();
   }
 
-  const imports = await db.productImport.findMany({
-    where: { businessId: business?.id },
-    orderBy: { createdAt: "desc" },
-  });
-
+  const imports = await api.product
+    .getProductImportHistory()
+    .catch(rethrowTrpcForErrorBoundary);
   return (
     <>
       <TrailHeader
@@ -66,3 +65,7 @@ export default async function ImportHistoryPage() {
     </>
   );
 }
+
+export const metadata = {
+  title: "Product Import History",
+};

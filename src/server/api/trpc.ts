@@ -229,12 +229,12 @@ export const platformAdminProcedure = t.procedure
 
 export const featureGate = (featureKey: string) =>
   t.middleware(async ({ ctx, next }) => {
-    const businessId = (ctx as unknown as { businessId: string }).businessId;
+    // const businessId = (ctx as unknown as { businessId: string }).businessId;
     // 1. Get the flags using your existing helper
-    const { isEnabled } = await getBusinessFlags(businessId);
+    const { isEnabled, disabledByDependency } = await getBusinessFlags();
 
     // 2. Check if the feature is active
-    if (!isEnabled(featureKey)) {
+    if (!isEnabled(featureKey) || disabledByDependency.has(featureKey)) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: `The ${featureKey} feature is not enabled for this business. To enable it, head to the Features page found in the Settings section of the admin dashboard.`,
@@ -266,6 +266,7 @@ export const getBusinessProcedure = () =>
       throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
     }
 
+    console.log(business, "business");
     return next({
       ctx: {
         ...ctx,

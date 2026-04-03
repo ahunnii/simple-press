@@ -35,6 +35,16 @@ export type DefaultAboutPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 
+export type DefaultCollectionsPageTemplateProps = {
+  collections: RouterOutputs["collections"]["getAllPublic"];
+};
+
+export type DefaultCollectionPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  collection: NonNullable<RouterOutputs["collections"]["getBySlug"]>;
+  additionalCollections: RouterOutputs["collections"]["getAllPublic"];
+};
+
 export type DefaultTestimonialsPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };

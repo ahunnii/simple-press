@@ -1,5 +1,5 @@
-import { ProductExporter } from "../_components/product-exporter";
 import { TrailHeader } from "../../_components/trail-header";
+import { ProductExporter } from "./_components/product-exporter";
 
 export default async function ProductExportPage() {
   return (

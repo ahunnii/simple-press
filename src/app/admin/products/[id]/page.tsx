@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
 import { ProductForm } from "../_components/product-form";
@@ -12,7 +13,9 @@ type Props = {
 export default async function EditProductPage({ params }: Props) {
   const { id } = await params;
 
-  const product = await api.product.secureGet(id);
+  const product = await api.product
+    .secureGet(id)
+    .catch(rethrowTrpcForErrorBoundary);
 
   if (!product) notFound();
 
@@ -30,6 +33,13 @@ export default async function EditProductPage({ params }: Props) {
   );
 }
 
-export const metadata = {
-  title: "Edit Product",
+export const generateMetadata = async ({ params }: Props) => {
+  const { id } = await params;
+  const product = await api.product
+    .secureGet(id)
+    .catch(rethrowTrpcForErrorBoundary);
+  if (!product) notFound();
+  return {
+    title: `Edit ${product?.name ?? "Product"}`,
+  };
 };

@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
@@ -31,14 +33,25 @@ type Props = {
   collections: RouterOutputs["collections"]["getAll"];
 };
 
-export function CollectionsPage({ collections }: Props) {
+export function CollectionsClient({ collections }: Props) {
   const utils = api.useUtils();
+  const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const deleteMutation = api.collections.delete.useMutation({
     onSuccess: () => {
+      toast.dismiss();
+      toast.success("Collection deleted successfully");
       void utils.collections.invalidate();
+      router.refresh();
       setDeleteId(null);
+    },
+    onError: (error) => {
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to delete collection");
+    },
+    onMutate: () => {
+      toast.loading("Deleting collection...");
     },
   });
 
@@ -144,8 +157,9 @@ export function CollectionsPage({ collections }: Props) {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Collection?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will remove the collection but won&apos;t delete the
-                products in it. This action cannot be undone.
+                Are you sure you want to delete the collection? This will remove
+                the collection but won&apos;t delete the products in it. This
+                action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

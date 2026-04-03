@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,6 +45,7 @@ import {
 import { Label } from "~/components/ui/label";
 import { NumberInput } from "~/components/ui/number-input";
 import { Switch } from "~/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
@@ -68,17 +69,21 @@ function parseStoredAdditionalFields(raw: unknown) {
   return raw as {
     additionalInformation?: unknown;
     productFeatures?: Array<{ icon: string; text: string }>;
+    comingSoon?: boolean;
+    productTagline?: string;
   };
 }
 
 export function ProductForm({ product }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
+  const utils = api.useUtils();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Images state (kept separate as they're uploaded independently via Better Upload)
   const [images, setImages] = useState<FormProductImage[]>([]);
   const imagesToSyncRef = useRef<FormProductImage[]>([]);
+  const initialImagesRef = useRef<FormProductImage[]>([]);
 
   // Variants state (kept separate due to complex nested structure and VariantManager component)
   const [variants, setVariants] = useState<FormVariant[]>(
@@ -93,7 +98,6 @@ export function ProductForm({ product }: Props) {
   const form = useForm<ProductFormSchema>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
-      id: product?.id ?? undefined,
       name: product?.name ?? "",
       slug: product?.slug ?? "",
       description: product?.description ?? undefined,
@@ -107,6 +111,8 @@ export function ProductForm({ product }: Props) {
           | Record<string, unknown>
           | undefined) ?? { ...EMPTY_TIPTAP_DOC },
         productFeatures: storedAdditional?.productFeatures ?? [],
+        comingSoon: storedAdditional?.comingSoon ?? false,
+        productTagline: storedAdditional?.productTagline ?? "",
       },
     },
   });
@@ -125,16 +131,31 @@ export function ProductForm({ product }: Props) {
   // Load existing images on mount
   useEffect(() => {
     if (product?.images) {
-      setImages(
-        product.images.map((img) => ({
-          id: img.id,
-          url: img.url,
-          altText: img.altText,
-          sortOrder: img.sortOrder,
-        })),
-      );
+      const loaded = product.images.map((img) => ({
+        id: img.id,
+        url: img.url,
+        altText: img.altText,
+        sortOrder: img.sortOrder,
+      }));
+      setImages(loaded);
+      initialImagesRef.current = loaded;
     }
   }, [product]);
+
+  const isImagesDirty = useMemo(() => {
+    const initial = initialImagesRef.current;
+    if (images.length !== initial.length) return true;
+    return images.some((img, i) => {
+      const orig = initial[i];
+      return (
+        !orig ||
+        img.id !== orig.id ||
+        img.url !== orig.url ||
+        img.altText !== orig.altText ||
+        img.sortOrder !== orig.sortOrder
+      );
+    });
+  }, [images]);
 
   // Auto-generate slug from name (only for new products)
   const handleNameChange = (value: string | null) => {
@@ -145,23 +166,6 @@ export function ProductForm({ product }: Props) {
   };
 
   // Mutations
-  const addImagesMutation = api.product.addImages.useMutation({
-    onError: (error) => {
-      toast.dismiss();
-      toast.error(error.message ?? "Failed to add images");
-    },
-    onSuccess: (data) => {
-      toast.dismiss();
-      toast.success(data.message);
-    },
-    onSettled: () => {
-      router.refresh();
-    },
-    onMutate: () => {
-      toast.loading("Adding images...");
-    },
-  });
-
   const syncImagesMutation = api.product.syncImages.useMutation({
     onError: (error) => {
       toast.dismiss();
@@ -169,14 +173,12 @@ export function ProductForm({ product }: Props) {
     },
     onSuccess: (data) => {
       toast.dismiss();
-      toast.success("Images synced successfully");
-      router.push(`/admin/products/${data.productId}`);
+      toast.success(data.message);
+      void utils.product.invalidate();
+      router.refresh();
     },
     onMutate: () => {
       toast.loading("Syncing images...");
-    },
-    onSettled: () => {
-      router.refresh();
     },
   });
 
@@ -187,13 +189,11 @@ export function ProductForm({ product }: Props) {
     },
     onSuccess: (data) => {
       toast.dismiss();
+      void utils.product.invalidate();
       toast.success(data.message);
     },
     onMutate: () => {
       toast.loading("Creating product...");
-    },
-    onSettled: () => {
-      router.refresh();
     },
   });
 
@@ -205,25 +205,27 @@ export function ProductForm({ product }: Props) {
     onSuccess: (data) => {
       toast.dismiss();
       toast.success(data.message);
+      void utils.product.invalidate();
+      router.refresh();
     },
     onMutate: () => {
       toast.loading("Updating product...");
-    },
-    onSettled: () => {
-      router.refresh();
     },
   });
 
   const deleteProductMutation = api.product.delete.useMutation({
     onError: (error) => {
+      toast.dismiss();
       toast.error(error.message ?? "Failed to delete product");
     },
     onSuccess: () => {
+      toast.dismiss();
       toast.success("Product deleted successfully");
+      void utils.product.invalidate();
       router.push("/admin/products");
     },
-    onSettled: () => {
-      router.refresh();
+    onMutate: () => {
+      toast.loading("Deleting product...");
     },
   });
 
@@ -256,7 +258,8 @@ export function ProductForm({ product }: Props) {
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,
           productFeatures: data.additionalFields?.productFeatures ?? [],
-          // comingSoon: data.additionalFields?.comingSoon ?? false,
+          comingSoon: data.additionalFields?.comingSoon ?? false,
+          productTagline: data.additionalFields?.productTagline ?? undefined,
         },
       });
 
@@ -293,15 +296,15 @@ export function ProductForm({ product }: Props) {
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,
           productFeatures: data.additionalFields?.productFeatures ?? [],
-          // comingSoon: data.additionalFields?.comingSoon ?? false,
+          comingSoon: data.additionalFields?.comingSoon ?? false,
+          productTagline: data.additionalFields?.productTagline ?? "",
         },
       });
 
       if (response.productId && images.length > 0) {
-        await addImagesMutation.mutateAsync({
+        await syncImagesMutation.mutateAsync({
           productId: response.productId,
           images: images.map((image) => ({
-            productId: response.productId,
             url: image.url,
             altText: image.altText,
             sortOrder: image.sortOrder,
@@ -312,7 +315,7 @@ export function ProductForm({ product }: Props) {
       if (response.productId) {
         router.push(`/admin/products/${response.productId}`);
       } else {
-        form.reset({ ...data, id: response.productId });
+        form.reset({ ...data });
         requestAnimationFrame(() => {
           form.reset(form.getValues());
         });
@@ -322,12 +325,11 @@ export function ProductForm({ product }: Props) {
 
   const isSubmitting =
     updateProductMutation.isPending ||
-    addImagesMutation.isPending ||
     createProductMutation.isPending ||
     syncImagesMutation.isPending;
 
   const isDeleting = deleteProductMutation.isPending;
-  const isDirty = form.formState.isDirty;
+  const isDirty = form.formState.isDirty || isImagesDirty;
 
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
@@ -423,221 +425,246 @@ export function ProductForm({ product }: Props) {
             </div>
           </div>
 
-          <div className="admin-container space-y-6">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="col-span-1 space-y-4">
-                {/* Basic Information */}
+          <div className="admin-container">
+            <Tabs defaultValue="basics" className="w-full">
+              <TabsList>
+                <TabsTrigger value="basics">Basics</TabsTrigger>
+                <TabsTrigger value="additional">Additional Info</TabsTrigger>
+              </TabsList>
+              <TabsContent value="basics" className="space-y-6">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="col-span-1 space-y-4">
+                    {/* Basic Information */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Basic Information</CardTitle>
+                        <CardDescription>
+                          Essential details about your product
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <InputFormField
+                          form={form}
+                          name="name"
+                          label="Product Name"
+                          onChangeAdditional={handleNameChange}
+                          placeholder="e.g., Classic White T-Shirt"
+                          required
+                          autoFocus
+                        />
+
+                        <InputFormField
+                          form={form}
+                          name="slug"
+                          label="URL Slug"
+                          placeholder="classic-white-t-shirt"
+                          onChange={(value) =>
+                            form.setValue("slug", sanitizeSlugInput(value), {
+                              shouldValidate: true,
+                            })
+                          }
+                          required
+                          description={`Used in product URL: /products/${form.watch("slug") || "your-product"}`}
+                        />
+
+                        <TextareaFormField
+                          form={form}
+                          name="description"
+                          label="Description"
+                          placeholder="Describe your product..."
+                          rows={4}
+                        />
+                      </CardContent>
+                    </Card>
+
+                    {/* Pricing */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Pricing</CardTitle>
+                        <CardDescription>
+                          Set your product pricing
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {variants.length > 0 ? (
+                          <p className="text-muted-foreground text-sm">
+                            Pricing is managed per variant. Edit each
+                            variant&apos;s price in the{" "}
+                            <span className="text-foreground font-medium">
+                              Product Variants
+                            </span>{" "}
+                            section below.
+                          </p>
+                        ) : (
+                          <FormField
+                            control={form.control}
+                            name="price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Price (USD)</FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                                      $
+                                    </span>
+                                    <NumberInput
+                                      step="0.01"
+                                      min="0"
+                                      placeholder="19.99"
+                                      className="pl-7"
+                                      {...field}
+                                    />
+                                  </div>
+                                </FormControl>
+                                <FormDescription>
+                                  Base price in USD (variant prices can override
+                                  this)
+                                </FormDescription>
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <div className="col-span-1 space-y-4">
+                    {/* Images */}
+                    <ImageUploader
+                      images={images}
+                      onImagesChange={setImages}
+                      maxImages={10}
+                    />
+
+                    {/* Base Inventory */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Inventory</CardTitle>
+                        <CardDescription>
+                          Set your product inventory
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <SwitchFormField
+                          form={form}
+                          name="trackInventory"
+                          label="Track Inventory"
+                          description="Enable inventory tracking for this product"
+                        />
+
+                        {form.watch("trackInventory") && (
+                          <SwitchFormField
+                            form={form}
+                            name="allowBackorders"
+                            label="Allow Backorders"
+                            description="Allow customers to order when out of stock"
+                          />
+                        )}
+
+                        {form.watch("trackInventory") &&
+                          variants.length === 0 && (
+                            <FormField
+                              control={form.control}
+                              name="inventoryQty"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Inventory Quantity</FormLabel>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <NumberInput
+                                        step="1"
+                                        min="0"
+                                        placeholder="10"
+                                        {...field}
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormDescription>
+                                    Stock for this product when it has no
+                                    variants.
+                                  </FormDescription>
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+
+                {/* Variants */}
+                <VariantManager
+                  variants={variants}
+                  onChange={setVariants}
+                  trackInventory={form.watch("trackInventory")}
+                  basePrice={Math.round((form.watch("price") || 0) * 100)}
+                  existingVariantOptions={getExistingVariantOptions(
+                    product?.variants as
+                      | Array<{ options: Record<string, string> }>
+                      | undefined,
+                  )}
+                />
+              </TabsContent>
+              <TabsContent value="additional" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Basic Information</CardTitle>
+                    <CardTitle>Additional information</CardTitle>
                     <CardDescription>
-                      Essential details about your product
+                      Shown in the &quot;Additional Information&quot; tab on the
+                      product page
                     </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <InputFormField
-                      form={form}
-                      name="name"
-                      label="Product Name"
-                      onChangeAdditional={handleNameChange}
-                      placeholder="e.g., Classic White T-Shirt"
-                      required
-                      autoFocus
-                    />
-
-                    <InputFormField
-                      form={form}
-                      name="slug"
-                      label="URL Slug"
-                      placeholder="classic-white-t-shirt"
-                      onChange={(value) =>
-                        form.setValue("slug", sanitizeSlugInput(value), {
-                          shouldValidate: true,
-                        })
-                      }
-                      required
-                      description={`Used in product URL: /products/${form.watch("slug") || "your-product"}`}
-                    />
-
-                    <TextareaFormField
-                      form={form}
-                      name="description"
-                      label="Description"
-                      placeholder="Describe your product..."
-                      rows={4}
-                    />
-                  </CardContent>
-                </Card>
-
-                {/* Pricing */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Pricing</CardTitle>
-                    <CardDescription>Set your product pricing</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <FormField
-                      control={form.control}
-                      name="price"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Price (USD) <span className="text-red-500">*</span>
-                          </FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
-                                $
-                              </span>
-                              <NumberInput
-                                step="0.01"
-                                min="0"
-                                placeholder="19.99"
-                                className="pl-7"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormDescription>
-                            Base price in USD (variant prices can override this)
-                          </FormDescription>
-                        </FormItem>
-                      )}
+                    <MinimalTiptapFormField
+                      form={form}
+                      name="additionalFields.additionalInformation"
+                      output="json"
+                      editorContentClassName={"p-4 min-h-[400px]"}
+                      label="Additional information"
+                      description='Shown in the "Additional Information" tab on the product page.'
                     />
                   </CardContent>
                 </Card>
-              </div>
-              <div className="col-span-1 space-y-4">
-                {/* Publishing */}
-                {/* <Card>
-                <CardHeader>
-                  <CardTitle>Publishing</CardTitle>
-                  <CardDescription>Control product visibility</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <FormField
-                    control={form.control}
-                    name="published"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between space-y-0">
-                        <div className="space-y-1">
-                          <FormLabel>Publish Product</FormLabel>
-                          <FormDescription>
-                            Make this product visible to customers
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card> */}
 
-                {/* Images */}
-                <ImageUploader
-                  images={images}
-                  onImagesChange={setImages}
-                  maxImages={10}
-                />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Feature highlights</CardTitle>
+                      <CardDescription>
+                        Key selling points shown as badges on the product page
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ProductFeaturesField form={form} />
+                    </CardContent>
+                  </Card>
 
-                {/* Base Inventory */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Presentation</CardTitle>
+                      <CardDescription>
+                        Tagline and status badges for the product
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <InputFormField
+                        form={form}
+                        name="additionalFields.productTagline"
+                        label="Product tagline"
+                        description="On some templates this appears below the product name on the card."
+                        placeholder="e.g., 'The perfect gift for any occasion'"
+                      />
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Inventory</CardTitle>
-                    <CardDescription>
-                      Set your product inventory
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <SwitchFormField
-                      form={form}
-                      name="trackInventory"
-                      label="Track Inventory"
-                      description="Enable inventory tracking for this product"
-                    />
-
-                    {form.watch("trackInventory") && (
                       <SwitchFormField
                         form={form}
-                        name="allowBackorders"
-                        label="Allow Backorders"
-                        description="Allow customers to order when out of stock"
+                        name="additionalFields.comingSoon"
+                        label="Coming soon"
+                        description="Show a 'Coming Soon' badge on the product page and card"
                       />
-                    )}
-
-                    {form.watch("trackInventory") && variants.length === 0 && (
-                      <FormField
-                        control={form.control}
-                        name="inventoryQty"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Inventory Quantity</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <NumberInput
-                                  step="1"
-                                  min="0"
-                                  placeholder="10"
-                                  {...field}
-                                />
-                              </div>
-                            </FormControl>
-                            <FormDescription>
-                              Stock for this product when it has no variants.
-                            </FormDescription>
-                          </FormItem>
-                        )}
-                      />
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* Variants */}
-            <VariantManager
-              variants={variants}
-              onChange={setVariants}
-              trackInventory={form.watch("trackInventory")}
-              basePrice={Math.round((form.watch("price") || 0) * 100)}
-              existingVariantOptions={getExistingVariantOptions(
-                product?.variants as
-                  | Array<{ options: Record<string, string> }>
-                  | undefined,
-              )}
-            />
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Additional details</CardTitle>
-                <CardDescription>
-                  Extra information and feature badges for the product page
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <MinimalTiptapFormField
-                  form={form}
-                  name="additionalFields.additionalInformation"
-                  label="Additional information"
-                  description='Shown in the "Additional Information" tab on the product page.'
-                  output="json"
-                />
-                <ProductFeaturesField form={form} />
-
-                {/* <SwitchFormField
-                  form={form}
-                  name="additionalFields.comingSoon"
-                  label="Is this product coming soon?"
-                  description="Show a 'Coming Soon' badge on the product page and card"
-                /> */}
-              </CardContent>
-            </Card>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </form>
       </Form>

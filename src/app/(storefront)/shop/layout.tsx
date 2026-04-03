@@ -5,10 +5,10 @@ import { getBusinessFlags } from "~/lib/features/get-business-flags";
 type Props = {
   children: React.ReactNode;
 };
-export default async function CollectionsLayout({ children }: Props) {
+export default async function ShopLayout({ children }: Props) {
   const { isEnabled } = await getBusinessFlags();
 
-  if (!isEnabled("collections")) {
+  if (!isEnabled("products")) {
     notFound();
   }
 

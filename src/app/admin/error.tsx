@@ -2,19 +2,18 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { AlertCircle, FolderOpen, Settings } from "lucide-react";
+import { AlertCircle, Settings } from "lucide-react";
 
 import { parseTrpcFromBoundaryMessage } from "~/lib/trpc/boundary-error";
 import { Button } from "~/components/ui/button";
 import { RefreshButton } from "~/app/_components/refresh-button";
 
-export default function CollectionsError({
-  error,
-  reset,
-}: {
+type Props = {
   error: Error & { digest?: string };
   reset?: () => void;
-}) {
+};
+
+export default function AdminError({ error, reset }: Props) {
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -42,7 +41,7 @@ export default function CollectionsError({
               {trpc.code.replace(/_/g, " ")}
             </p>
             <h1 className="text-foreground mb-6 text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-              Couldn&apos;t load collections
+              Something went wrong
             </h1>
             <div className="border-border bg-muted/40 text-muted-foreground mb-10 w-full max-w-md rounded-lg border px-4 py-3 text-left text-sm">
               <p className="text-foreground font-mono text-xs font-semibold tracking-wide uppercase">
@@ -105,7 +104,7 @@ export default function CollectionsError({
 
         <p className="text-muted-foreground/80 mt-12 text-sm">
           <Link
-            href="/admin"
+            href="/admin/dashboard"
             className="text-primary underline-offset-2 hover:underline"
           >
             Admin dashboard

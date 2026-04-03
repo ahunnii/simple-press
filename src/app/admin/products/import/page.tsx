@@ -1,5 +1,5 @@
-import { ProductImportWizard } from "../_components/product-import-wizard";
 import { TrailHeader } from "../../_components/trail-header";
+import { ProductImportWizard } from "./_components/product-import-wizard";
 
 export default async function ProductImportPage() {
   return (

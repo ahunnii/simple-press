@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { GripVertical, Plus, X } from "lucide-react";
+import { GripVertical, Plus, Trash2, X } from "lucide-react";
 
 import type { FormVariant, FormVariantOption } from "../_validators/schema";
 import { Button } from "~/components/ui/button";
@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
@@ -31,14 +32,74 @@ export function VariantManager({
   basePrice,
   existingVariantOptions,
 }: Props) {
-  const initialOptions =
-    existingVariantOptions ?? [{ name: "Size", values: [] }];
+  const initialOptions = existingVariantOptions ?? [
+    { name: "Size", values: [] },
+  ];
   const [variantOptions, setVariantOptions] =
     useState<FormVariantOption[]>(initialOptions);
   const [rawValuesInputs, setRawValuesInputs] = useState<string[]>(() =>
     initialOptions.map((o) => o.values.join(", ")),
   );
   const [showOptionsEditor, setShowOptionsEditor] = useState(false);
+
+  // Selection state
+  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(
+    new Set(),
+  );
+
+  // Bulk edit inputs
+  const [bulkPriceInput, setBulkPriceInput] = useState("");
+  const [bulkQtyInput, setBulkQtyInput] = useState("");
+
+  // Reset selection when the number of variants changes
+  useEffect(() => {
+    setSelectedIndices(new Set());
+  }, [variants.length]);
+
+  const toggleSelect = (i: number) => {
+    setSelectedIndices((prev) => {
+      const next = new Set(prev);
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedIndices(
+      selectedIndices.size === variants.length
+        ? new Set()
+        : new Set(variants.map((_, i) => i)),
+    );
+  };
+
+  const applyBulkPrice = () => {
+    const dollars = parseFloat(bulkPriceInput);
+    if (isNaN(dollars) || dollars < 0) return;
+    const cents = Math.round(dollars * 100);
+    onChange(
+      variants.map((v, i) =>
+        selectedIndices.has(i) ? { ...v, price: cents } : v,
+      ),
+    );
+    setBulkPriceInput("");
+  };
+
+  const applyBulkQty = () => {
+    const qty = parseInt(bulkQtyInput);
+    if (isNaN(qty) || qty < 0) return;
+    onChange(
+      variants.map((v, i) =>
+        selectedIndices.has(i) ? { ...v, inventoryQty: qty } : v,
+      ),
+    );
+    setBulkQtyInput("");
+  };
+
+  const deleteSelected = () => {
+    onChange(variants.filter((_, i) => !selectedIndices.has(i)));
+    // selectedIndices reset handled by the variants.length useEffect
+  };
 
   const prevShowOptionsEditor = useRef(showOptionsEditor);
   useEffect(() => {
@@ -158,6 +219,10 @@ export function VariantManager({
     setRawValuesInputs((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const allSelected =
+    variants.length > 0 && selectedIndices.size === variants.length;
+  const someSelected = selectedIndices.size > 0 && !allSelected;
+
   return (
     <Card>
       <CardHeader>
@@ -220,13 +285,8 @@ export function VariantManager({
                 </div>
                 <Input
                   placeholder="Values (comma separated, e.g., Small, Medium, Large)"
-                  value={
-                    rawValuesInputs[index] ??
-                    option.values.join(", ")
-                  }
-                  onChange={(e) =>
-                    updateOptionValues(index, e.target.value)
-                  }
+                  value={rawValuesInputs[index] ?? option.values.join(", ")}
+                  onChange={(e) => updateOptionValues(index, e.target.value)}
                 />
               </div>
             ))}
@@ -251,11 +311,89 @@ export function VariantManager({
         {/* Variants List */}
         {variants.length > 0 && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            {/* List header with select-all + count */}
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="select-all-variants"
+                checked={
+                  allSelected ? true : someSelected ? "indeterminate" : false
+                }
+                onCheckedChange={toggleSelectAll}
+                aria-label="Select all variants"
+              />
               <p className="text-sm text-gray-600">
-                {variants.length} variant{variants.length !== 1 ? "s" : ""}
+                {selectedIndices.size > 0
+                  ? `${selectedIndices.size} of ${variants.length} selected`
+                  : `${variants.length} variant${variants.length !== 1 ? "s" : ""}`}
               </p>
             </div>
+
+            {/* Bulk actions toolbar */}
+            {selectedIndices.size > 0 && (
+              <div className="bg-muted/50 flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2">
+                <span className="text-muted-foreground text-sm font-medium">
+                  Bulk edit:
+                </span>
+
+                <div className="flex items-center gap-1">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Price ($)"
+                    value={bulkPriceInput}
+                    onChange={(e) => setBulkPriceInput(e.target.value)}
+                    className="h-8 w-28"
+                    onKeyDown={(e) => e.key === "Enter" && applyBulkPrice()}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    // variant="secondary"
+                    className="h-8"
+                    onClick={applyBulkPrice}
+                    disabled={bulkPriceInput === ""}
+                  >
+                    Set Price
+                  </Button>
+                </div>
+
+                {trackInventory && (
+                  <div className="flex items-center gap-1">
+                    <Input
+                      type="number"
+                      min="0"
+                      placeholder="Qty"
+                      value={bulkQtyInput}
+                      onChange={(e) => setBulkQtyInput(e.target.value)}
+                      className="h-8 w-20"
+                      onKeyDown={(e) => e.key === "Enter" && applyBulkQty()}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      // variant="outline"
+                      className="h-8"
+                      onClick={applyBulkQty}
+                      disabled={bulkQtyInput === ""}
+                    >
+                      Set Qty
+                    </Button>
+                  </div>
+                )}
+
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="destructive"
+                  className="ml-auto h-8"
+                  onClick={deleteSelected}
+                >
+                  <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                  Delete selected
+                </Button>
+              </div>
+            )}
 
             <div className="space-y-2">
               {variants.map((variant, index) => (
@@ -263,9 +401,15 @@ export function VariantManager({
                   key={index}
                   className="flex items-center gap-3 rounded-lg border bg-white p-3"
                 >
-                  <GripVertical className="h-4 w-4 shrink-0 text-gray-400" />
+                  <Checkbox
+                    checked={selectedIndices.has(index)}
+                    onCheckedChange={() => toggleSelect(index)}
+                    aria-label={`Select variant ${variant.name}`}
+                  />
 
-                  <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-4">
+                  {/* <GripVertical className="h-4 w-4 shrink-0 text-gray-400" /> */}
+
+                  <div className="grid flex-1 grid-cols-1 items-center gap-3 md:grid-cols-4">
                     <div>
                       <Label className="text-xs text-gray-500">Name</Label>
                       <p className="text-sm font-medium">{variant.name}</p>
