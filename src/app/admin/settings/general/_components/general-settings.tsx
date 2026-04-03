@@ -36,6 +36,7 @@ type Props = {
 
 export function GeneralSettings({ business }: Props) {
   const router = useRouter();
+  const utils = api.useUtils();
 
   // Refs
   const formRef = useRef<HTMLFormElement>(null);
@@ -68,6 +69,7 @@ export function GeneralSettings({ business }: Props) {
         phoneNumber: data.business.phoneNumber ?? "",
         slug: data.business.slug,
       });
+      void utils.business.invalidate();
       router.refresh();
     },
     onError: (error) => {
@@ -108,6 +110,7 @@ export function GeneralSettings({ business }: Props) {
 
   useKeyboardEnter(form, handleSubmit);
   useDirtyForm(isDirty);
+
   return (
     <Form {...form}>
       <form

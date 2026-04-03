@@ -37,7 +37,7 @@ export function CollectionsPage({ collections }: Props) {
 
   const deleteMutation = api.collections.delete.useMutation({
     onSuccess: () => {
-      void utils.collections.getByBusiness.invalidate();
+      void utils.collections.invalidate();
       setDeleteId(null);
     },
   });

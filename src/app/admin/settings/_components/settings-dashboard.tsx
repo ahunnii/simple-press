@@ -26,9 +26,7 @@ export function SettingsDashboard() {
                 </div>
                 <div>
                   <CardTitle>General</CardTitle>
-                  <CardDescription>
-                    Name, email, address, tax ID
-                  </CardDescription>
+                  <CardDescription>Name, email, address, phone</CardDescription>
                 </div>
               </div>
             </CardHeader>

@@ -14,29 +14,45 @@ export type HappyBambooFrequentlyAskedItem = {
 
 const defaultFrequentlyAsked = (): HappyBambooFrequentlyAskedItem[] => [
   {
-    question: "How long does shipping take?",
+    question: "What is Happy Bamboo toilet tissue made from?",
     answer:
-      "Standard shipping takes 3-5 business days. Express shipping is available for 1-2 business day delivery. Free standard shipping is available on all orders over $35.",
+      "Our toilet tissue is made from 100% bamboo pulp, a renewable and eco-friendly alternative to traditional tree-based paper.",
   },
   {
-    question: "Is Happy Bamboo septic safe?",
+    question: "Is your product really chemical-free?",
     answer:
-      "Yes! Our bamboo toilet paper is 100% septic safe and biodegradable. It breaks down quickly and won't clog pipes or harm septic systems.",
+      "Yes, Happy Bamboo is free from harsh chemicals, dyes, and added fragrances, making it safe for everyday use.",
   },
   {
-    question: "What is your return policy?",
+    question: "Is it safe for sensitive skin?",
     answer:
-      "We offer a 30-day satisfaction guarantee. If you're not completely happy with your purchase, contact us for a full refund or exchange.",
+      "Absolutely. Our toilet tissue is designed to be gentle, soft, and suitable for sensitive skin.",
   },
   {
-    question: "Is the packaging eco-friendly?",
+    question: "Is Happy Bamboo septic-safe?",
     answer:
-      "Absolutely! All our packaging is plastic-free, made from recycled materials, and fully recyclable or compostable.",
+      "Yes, our product is septic-safe and biodegradable, designed to break down efficiently.",
   },
   {
-    question: "Where is your bamboo sourced?",
+    question:
+      "How soft is bamboo toilet tissue compared to regular toilet paper?",
     answer:
-      "Our bamboo is sustainably sourced from certified farms that practice responsible harvesting. We never use bamboo from protected forests.",
+      "Happy Bamboo offers a premium 3-ply design, providing both softness and durability comparable to traditional brands.",
+  },
+  {
+    question: "Where can I purchase Happy Bamboo products?",
+    answer:
+      "Our products are available through online orders and select distribution partners, with retail expansion underway.",
+  },
+  {
+    question: "Are you registered for government contracts?",
+    answer:
+      "Yes, Zaires Visions LLC is SAM.gov registered and eligible for government contracting opportunities.",
+  },
+  {
+    question: "How does your company support the community?",
+    answer:
+      "We are committed to job creation, supporting underserved communities, and promoting health awareness initiatives.",
   },
 ];
 

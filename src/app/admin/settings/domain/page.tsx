@@ -1,7 +1,7 @@
 import { api } from "~/trpc/server";
 
-import { DomainSettings } from "../_components/domain-settings";
 import { TrailHeader } from "../../_components/trail-header";
+import { DomainSettings } from "./_components/domain-settings";
 
 export default async function DomainSettingsPage() {
   const business = await api.business.getWith({});

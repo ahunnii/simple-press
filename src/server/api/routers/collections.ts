@@ -1,9 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { checkBusiness } from "~/lib/check-business";
 import {
   createTRPCRouter,
+  featureGate,
+  getBusinessProcedure,
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
@@ -16,90 +17,19 @@ function generateSlug(name: string): string {
 }
 
 export const collectionsRouter = createTRPCRouter({
-  getAll: ownerAdminProcedure.query(async ({ ctx }) => {
-    const { businessId } = ctx;
-
-    const collections = await ctx.db.collection.findMany({
-      where: { businessId },
-      include: {
-        _count: { select: { collectionProducts: true } },
-      },
-      orderBy: { sortOrder: "asc" },
-    });
-    return collections;
-  }),
-
-  // Get all collections for a business (public)
-  getByBusiness: publicProcedure.query(async ({ ctx }) => {
-    const business = await checkBusiness();
-    if (!business) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
+  getAll: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+      const collections = await ctx.db.collection.findMany({
+        where: { businessId },
+        include: { _count: { select: { collectionProducts: true } } },
+        orderBy: { sortOrder: "asc" },
       });
-    }
-
-    const collections = await ctx.db.collection.findMany({
-      where: { businessId: business.id, published: true },
-      include: {
-        _count: { select: { collectionProducts: true } },
-      },
-      orderBy: { sortOrder: "asc" },
-    });
-
-    return collections;
-  }),
-
-  // Get single collection by slug (public)
-  getBySlug: publicProcedure
-    .input(z.string())
-    .query(async ({ ctx, input: slug }) => {
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
-      const collection = await ctx.db.collection.findUnique({
-        where: {
-          businessId_slug: {
-            businessId: business.id,
-            slug,
-          },
-        },
-        include: {
-          collectionProducts: {
-            include: {
-              product: {
-                include: {
-                  images: {
-                    orderBy: { sortOrder: "asc" },
-                    take: 1,
-                  },
-                  variants: true,
-                },
-              },
-            },
-            orderBy: { sortOrder: "asc" },
-          },
-        },
-      });
-
-      if (!collection) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Collection not found",
-        });
-      }
-
-      return collection;
+      return collections;
     }),
-
-  // Get collection by ID (admin)
   getById: ownerAdminProcedure
+    .use(featureGate("collections"))
     .input(z.string())
     .query(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
@@ -137,7 +67,62 @@ export const collectionsRouter = createTRPCRouter({
       return collection;
     }),
 
+  getAllPublic: publicProcedure
+    .use(featureGate("collections"))
+    .use(getBusinessProcedure())
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+
+      const collections = await ctx.db.collection.findMany({
+        where: { businessId, published: true },
+        include: { _count: { select: { collectionProducts: true } } },
+        orderBy: { sortOrder: "asc" },
+      });
+
+      return collections;
+    }),
+
+  // Get single collection by slug (public)
+  getBySlug: publicProcedure
+    .use(featureGate("collections"))
+    .use(getBusinessProcedure())
+    .input(z.string())
+    .query(async ({ ctx, input: slug }) => {
+      const { businessId } = ctx;
+      const collection = await ctx.db.collection.findUnique({
+        where: {
+          businessId_slug: {
+            businessId,
+            slug,
+          },
+        },
+        include: {
+          collectionProducts: {
+            include: {
+              product: {
+                include: {
+                  images: { orderBy: { sortOrder: "asc" }, take: 1 },
+                  variants: true,
+                },
+              },
+            },
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      });
+
+      if (!collection) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Collection not found",
+        });
+      }
+
+      return collection;
+    }),
+
   create: ownerAdminProcedure
+    .use(featureGate("collections"))
     .input(
       z.object({
         name: z.string().min(1),
@@ -196,6 +181,7 @@ export const collectionsRouter = createTRPCRouter({
     }),
 
   update: ownerAdminProcedure
+    .use(featureGate("collections"))
     .input(
       z.object({
         id: z.string(),
@@ -263,6 +249,7 @@ export const collectionsRouter = createTRPCRouter({
     }),
 
   delete: ownerAdminProcedure
+    .use(featureGate("collections"))
     .input(z.string())
     .mutation(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
@@ -290,6 +277,7 @@ export const collectionsRouter = createTRPCRouter({
     }),
 
   addProduct: ownerAdminProcedure
+    .use(featureGate("collections"))
     .input(
       z.object({
         collectionId: z.string(),
@@ -347,6 +335,7 @@ export const collectionsRouter = createTRPCRouter({
     }),
 
   removeProduct: ownerAdminProcedure
+    .use(featureGate("collections"))
     .input(
       z.object({
         collectionId: z.string(),
@@ -381,6 +370,7 @@ export const collectionsRouter = createTRPCRouter({
     }),
 
   updateProductOrder: ownerAdminProcedure
+    .use(featureGate("collections"))
     .input(
       z.object({
         collectionId: z.string(),
@@ -423,6 +413,7 @@ export const collectionsRouter = createTRPCRouter({
     }),
 
   updateCollectionOrder: ownerAdminProcedure
+    .use(featureGate("collections"))
     .input(z.array(z.string()))
     .mutation(async ({ ctx, input: collectionIds }) => {
       const { businessId } = ctx;

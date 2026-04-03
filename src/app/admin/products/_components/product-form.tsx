@@ -438,7 +438,7 @@ export function ProductForm({ product }: Props) {
                     <InputFormField
                       form={form}
                       name="name"
-                      label="Product Name *"
+                      label="Product Name"
                       onChangeAdditional={handleNameChange}
                       placeholder="e.g., Classic White T-Shirt"
                       required
@@ -448,7 +448,7 @@ export function ProductForm({ product }: Props) {
                     <InputFormField
                       form={form}
                       name="slug"
-                      label="URL Slug *"
+                      label="URL Slug"
                       placeholder="classic-white-t-shirt"
                       onChange={(value) =>
                         form.setValue("slug", sanitizeSlugInput(value), {
@@ -481,7 +481,9 @@ export function ProductForm({ product }: Props) {
                       name="price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Price (USD) *</FormLabel>
+                          <FormLabel>
+                            Price (USD) <span className="text-red-500">*</span>
+                          </FormLabel>
                           <FormControl>
                             <div className="relative">
                               <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">

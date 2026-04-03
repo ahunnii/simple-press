@@ -50,13 +50,13 @@ export function HappyBambooHeroSection({
           </FadeIn> */}
 
           <FadeIn delay={0}>
-            <h1 className="mb-2 text-6xl leading-tight font-bold text-white uppercase md:text-7xl lg:text-8xl">
+            <h1 className="mb-2 text-5xl leading-tight font-bold text-white uppercase md:text-7xl lg:text-7xl">
               {heroWelcome}
             </h1>
           </FadeIn>
 
           <FadeIn delay={0.15}>
-            <p className="text-primary mb-3 text-5xl leading-tight font-extrabold drop-shadow-md md:text-6xl lg:text-7xl">
+            <p className="text-primary mb-3 text-4xl leading-tight font-extrabold drop-shadow-md md:text-5xl lg:text-6xl">
               {heroTitle}
             </p>
           </FadeIn>
@@ -68,7 +68,7 @@ export function HappyBambooHeroSection({
           </FadeIn> */}
 
           <FadeIn delay={0.25}>
-            <p className="mb-4 flex items-center gap-2 text-2xl font-semibold tracking-wide text-white/80 md:text-3xl">
+            <p className="mb-4 flex items-center gap-2 font-serif text-2xl font-semibold tracking-wide text-white/80 md:text-3xl">
               <Leaf className="text-primary h-5 w-5 shrink-0" />
               {heroTagline}
             </p>

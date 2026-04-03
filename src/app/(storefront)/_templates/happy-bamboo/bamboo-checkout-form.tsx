@@ -463,7 +463,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
           </Button>
 
           <p className="text-muted-foreground text-center text-xs">
-            Secure checkout powered by Stripe
+            Secure checkout powered by Stripe. Payments are 100% secured.
           </p>
         </div>
       </div>

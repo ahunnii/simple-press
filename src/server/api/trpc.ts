@@ -12,6 +12,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
 
@@ -222,6 +223,53 @@ export const platformAdminProcedure = t.procedure
     return next({
       ctx: {
         session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
+  });
+
+export const featureGate = (featureKey: string) =>
+  t.middleware(async ({ ctx, next }) => {
+    const businessId = (ctx as unknown as { businessId: string }).businessId;
+    // 1. Get the flags using your existing helper
+    const { isEnabled } = await getBusinessFlags(businessId);
+
+    // 2. Check if the feature is active
+    if (!isEnabled(featureKey)) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: `The ${featureKey} feature is not enabled for this business. To enable it, head to the Features page found in the Settings section of the admin dashboard.`,
+      });
+    }
+
+    return next();
+  });
+
+export const getBusinessProcedure = () =>
+  t.middleware(async ({ ctx, next }) => {
+    const headersList = await headers();
+    const hostname = headersList.get("host") ?? "";
+
+    // Extract subdomain or custom domain
+    const domain = hostname.split(":")[0]; // Remove port
+
+    const business = await ctx.db.business.findFirst({
+      where: {
+        OR: [
+          { customDomain: domain },
+          { subdomain: domain?.split(".")[0] }, // Extract subdomain
+        ],
+      },
+      select: { id: true },
+    });
+
+    if (!business) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        businessId: business.id,
       },
     });
   });

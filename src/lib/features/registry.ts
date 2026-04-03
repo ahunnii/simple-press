@@ -74,6 +74,16 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     dependsOn: ["cart"],
     hidesNav: ["coupons"],
   },
+  collections: {
+    key: "collections",
+    label: "Collections",
+    description: "Create collections of products and display them on your site",
+    category: "ecommerce",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    dependsOn: ["products"],
+    hidesNav: ["collections"],
+  },
 
   // ─── CONTENT ────────────────────────────────────────────────────────────────
   pages: {

@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
-import { HydrateClient } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { AppSidebar } from "~/app/admin/_components/app-sidebar";
 
@@ -36,6 +36,8 @@ export default async function AdminLayout({ children }: Props) {
 
   const businessName = business?.name ?? null;
 
+  const featureData = await api.features.getFlags();
+
   return (
     <HydrateClient>
       <SidebarProvider
@@ -50,6 +52,7 @@ export default async function AdminLayout({ children }: Props) {
           variant="inset"
           session={session}
           businessName={businessName}
+          featureData={featureData}
         />
         <SidebarInset>
           <div className="min-h-screen bg-gray-50">{children}</div>

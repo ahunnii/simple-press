@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import * as React from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import {
   IconDashboard,
@@ -21,6 +21,8 @@ import { Building2, Users } from "lucide-react";
 
 import type { Session } from "~/server/better-auth/config";
 import { env } from "~/env";
+import { api } from "~/trpc/react";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import {
   Sidebar,
   SidebarContent,
@@ -57,6 +59,7 @@ const getNavData = (session: Session | null) => {
       title: "Collections",
       url: "/admin/collections",
       icon: IconFolder,
+      featureKey: "collections",
     },
     {
       title: "Site content",
@@ -133,14 +136,27 @@ const getNavData = (session: Session | null) => {
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   session?: Session | null;
   businessName?: string | null;
+  featureData?: { flags: Record<string, boolean> };
 };
 
 export function AppSidebar({
   session,
   businessName,
+  featureData,
   ...props
 }: AppSidebarProps) {
+  const { isEnabled } = useFeatureFlags({
+    flags: featureData?.flags ?? {},
+  });
+
   const navData = getNavData(session ?? null);
+
+  const filteredNavMain = useMemo(() => {
+    return navData.navMain.filter((item) => {
+      if (!item.featureKey) return true;
+      return isEnabled(item.featureKey);
+    });
+  }, [navData.navMain, isEnabled]);
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -165,7 +181,7 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navData.navMain} />
+        <NavMain items={filteredNavMain} />
         {navData.navPlatformAdmin.length > 0 && (
           <NavMain items={navData.navPlatformAdmin} />
         )}

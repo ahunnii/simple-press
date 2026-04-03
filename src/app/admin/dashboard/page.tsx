@@ -204,3 +204,7 @@ export default async function AdminDashboardPage() {
     </>
   );
 }
+
+export const metadata = {
+  title: "Admin Dashboard",
+};

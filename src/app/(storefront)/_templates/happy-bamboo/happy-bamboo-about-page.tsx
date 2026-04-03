@@ -227,7 +227,7 @@ export function HappyBambooAboutPage({
         <div className="container mx-auto px-4">
           <div className="grid items-start gap-12 lg:grid-cols-5">
             <div className="lg:col-span-3">
-              <FadeIn className="mb-12">
+              <FadeIn className="mb-6">
                 <Badge className="mb-4">
                   <Leaf className="mr-1 h-3 w-3" />
                   The Smart Choice
@@ -240,9 +240,23 @@ export function HappyBambooAboutPage({
                 </p>
               </FadeIn>
 
+              <FadeIn direction="left" className="mb-6 space-y-4">
+                <p className="text-muted-foreground leading-relaxed">
+                  Traditional toilet paper relies on hardwood trees that take
+                  decades to mature and require heavy chemical processing and
+                  high water usage. This contributes to deforestation,
+                  environmental strain, and potential skin irritation.
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  Happy Bamboo Toilet Tissue is made from rapidly renewable
+                  bamboo, which regenerates in just 3 to5 years without
+                  replanting. It is biodegradable, chemical-free, gentle on
+                  sensitive skin, and produced with sustainability in mind.
+                </p>
+              </FadeIn>
               <StaggerContainer
                 staggerDelay={0.1}
-                className="grid gap-6 sm:grid-cols-2"
+                className="grid gap-6 sm:grid-cols-1"
               >
                 {benefitsItems?.map((reason) => (
                   <StaggerItem key={reason.title} className="flex gap-4">
@@ -301,10 +315,10 @@ export function HappyBambooAboutPage({
       </section>
 
       {/* CTA Section with Image */}
-      <section className="relative mx-auto max-w-7xl overflow-hidden">
+      <section className="relative mx-auto max-w-6xl overflow-hidden">
         <FadeIn
           direction="up"
-          className="relative aspect-video w-full overflow-hidden rounded-xl"
+          className="relative aspect-16/7 w-full overflow-hidden rounded-xl"
         >
           <Image
             src={ctaImage ?? "/placeholder.svg"}

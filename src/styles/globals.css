@@ -150,6 +150,7 @@
   --sidebar-ring: oklch(0.723 0.014 214.4);
   --font-sans: "Outfit", "Outfit Fallback";
   --font-heading: "Outfit", "Outfit Fallback";
+  --font-serif: "Spectral", "Spectral Fallback";
 }
 
 .dark.happy-bamboo {
