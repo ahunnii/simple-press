@@ -3,9 +3,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Images, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 import {
   AlertDialog,
@@ -27,24 +29,31 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
-export function GalleriesList() {
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+type Props = {
+  galleries: RouterOutputs["gallery"]["list"];
+};
 
-  const { data: galleries, isLoading } = api.gallery.list.useQuery();
+export function GalleriesList({ galleries }: Props) {
+  const utils = api.useUtils();
+  const router = useRouter();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const deleteMutation = api.gallery.delete.useMutation({
     onSuccess: () => {
+      toast.dismiss();
       toast.success("Gallery deleted");
       setDeleteId(null);
+      void utils.gallery.invalidate();
+      router.refresh();
     },
     onError: (error) => {
+      toast.dismiss();
       toast.error(error.message || "Failed to delete gallery");
     },
+    onMutate: () => {
+      toast.loading("Deleting gallery...");
+    },
   });
-
-  if (isLoading) {
-    return <div>Loading galleries...</div>;
-  }
 
   if (!galleries || galleries.length === 0) {
     return (
@@ -160,9 +169,7 @@ export function GalleriesList() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() =>
-                deleteId && deleteMutation.mutate({ id: deleteId })
-              }
+              onClick={() => deleteId && deleteMutation.mutate(deleteId)}
               className="bg-red-600 hover:bg-red-700"
             >
               Delete

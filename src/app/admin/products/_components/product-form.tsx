@@ -58,6 +58,7 @@ import { VariantManager } from "./variant-manager";
 
 type Props = {
   product?: RouterOutputs["product"]["secureGet"];
+  galleriesEnabled?: boolean;
 };
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
@@ -74,7 +75,7 @@ function parseStoredAdditionalFields(raw: unknown) {
   };
 }
 
-export function ProductForm({ product }: Props) {
+export function ProductForm({ product, galleriesEnabled }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const utils = api.useUtils();
@@ -621,6 +622,7 @@ export function ProductForm({ product }: Props) {
                       editorContentClassName={"p-4 min-h-[400px]"}
                       label="Additional information"
                       description='Shown in the "Additional Information" tab on the product page.'
+                      galleriesEnabled={galleriesEnabled}
                     />
                   </CardContent>
                 </Card>

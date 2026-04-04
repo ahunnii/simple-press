@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
+import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 
 import { TrailHeader } from "../_components/trail-header";
 import { GalleriesList } from "./_components/galleries-list";
 
 export default async function GalleriesPage() {
+  const galleries = await api.gallery.list().catch(rethrowTrpcForErrorBoundary);
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Galleries" }]} />
@@ -25,7 +28,7 @@ export default async function GalleriesPage() {
           </Button>
         </div>
 
-        <GalleriesList />
+        <GalleriesList galleries={galleries ?? []} />
       </div>
     </>
   );

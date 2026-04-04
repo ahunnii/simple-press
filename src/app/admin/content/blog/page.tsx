@@ -1,12 +1,16 @@
 import { notFound } from "next/navigation";
 
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../../_components/trail-header";
 import { BlogPagesList } from "./_components/blog-pages-list";
 
 export default async function BlogListPage() {
-  const business = await api.business.getWith({ includeBlog: true });
+  const business = await api.business
+    .getWith({ includeBlog: true })
+    .catch(rethrowTrpcForErrorBoundary);
+
   if (!business) notFound();
 
   return (

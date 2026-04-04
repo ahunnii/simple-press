@@ -69,7 +69,9 @@ export function GalleryRenderer({
           <MasonryLayout gallery={gallery} onImageClick={handleImageClick} />
         );
       case "carousel":
-        return <CarouselLayout gallery={gallery} />;
+        return (
+          <CarouselLayout gallery={gallery} onImageClick={handleImageClick} />
+        );
       case "collage":
         return (
           <CollageLayout gallery={gallery} onImageClick={handleImageClick} />
@@ -205,13 +207,16 @@ function GridLayout({ gallery, onImageClick }: LayoutProps) {
 function MasonryLayout({ gallery, onImageClick }: LayoutProps) {
   return (
     <div
-      className="columns-1 sm:columns-2 md:columns-3 lg:columns-4"
-      style={{ gap: `${gallery.gap}px` }}
+      style={{
+        columnCount: gallery.columns,
+        columnGap: `${gallery.gap}px`,
+      }}
     >
       {gallery.images.map((image, index: number) => (
         <div
           key={image.id}
-          className="group mb-4 cursor-pointer break-inside-avoid"
+          className="group cursor-pointer break-inside-avoid"
+          style={{ marginBottom: `${gallery.gap}px` }}
           onClick={() => onImageClick(index)}
         >
           <div className="relative overflow-hidden rounded-lg">
@@ -233,7 +238,13 @@ function MasonryLayout({ gallery, onImageClick }: LayoutProps) {
 }
 
 // Carousel Layout
-function CarouselLayout({ gallery }: { gallery: LayoutProps["gallery"] }) {
+function CarouselLayout({
+  gallery,
+  onImageClick,
+}: {
+  gallery: LayoutProps["gallery"];
+  onImageClick: (index: number) => void;
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const next = () =>
@@ -243,67 +254,129 @@ function CarouselLayout({ gallery }: { gallery: LayoutProps["gallery"] }) {
       (currentIndex - 1 + gallery.images.length) % gallery.images.length,
     );
 
+  const currentImage = gallery.images[currentIndex]!;
+
   return (
     <div className="relative">
-      <div className="aspect-video overflow-hidden rounded-lg">
+      <div
+        className={`aspect-video overflow-hidden rounded-lg ${
+          gallery.enableLightbox ? "cursor-pointer" : ""
+        }`}
+        onClick={() => gallery.enableLightbox && onImageClick(currentIndex)}
+      >
         <img
-          src={gallery.images[currentIndex]!.url}
-          alt={gallery.images[currentIndex]!.altText ?? ""}
-          className="h-full w-full object-cover"
+          src={currentImage.url}
+          alt={currentImage.altText ?? ""}
+          className="h-full w-full object-cover transition-transform duration-300"
         />
       </div>
 
-      {gallery.showCaptions && gallery.images[currentIndex]!.caption && (
-        <div className="mt-2 text-center text-gray-700">
-          {gallery.images[currentIndex]!.caption}
+      {gallery.showCaptions && currentImage.caption && (
+        <div className="mt-2 text-center text-sm text-gray-700">
+          {currentImage.caption}
         </div>
       )}
 
-      <button
-        onClick={prev}
-        className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white"
-      >
-        ←
-      </button>
-      <button
-        onClick={next}
-        className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white"
-      >
-        →
-      </button>
-
-      {/* Dots */}
-      <div className="mt-4 flex justify-center gap-2">
-        {gallery.images.map((_, index: number) => (
+      {gallery.images.length > 1 && (
+        <>
           <button
-            key={index}
-            title="Go to image"
-            onClick={() => setCurrentIndex(index)}
-            className={`h-2 w-2 rounded-full ${
-              index === currentIndex ? "bg-black" : "bg-gray-300"
-            }`}
-          />
-        ))}
-      </div>
+            onClick={prev}
+            className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
+          >
+            ←
+          </button>
+          <button
+            onClick={next}
+            className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
+          >
+            →
+          </button>
+
+          <div className="mt-4 flex justify-center gap-2">
+            {gallery.images.map((_, index: number) => (
+              <button
+                key={index}
+                title={`Go to image ${index + 1}`}
+                onClick={() => setCurrentIndex(index)}
+                className={`h-2 w-2 rounded-full transition-colors ${
+                  index === currentIndex ? "bg-gray-900" : "bg-gray-300"
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-// Simplified Collage & Justified layouts
+// Collage Layout — first image spans 2 cols × 2 rows, rest fill in
 function CollageLayout({ gallery, onImageClick }: LayoutProps) {
+  const gap = gallery.gap;
   return (
-    <GridLayout
-      gallery={{ ...gallery, columns: 4 }}
-      onImageClick={onImageClick}
-    />
+    <div
+      className="grid"
+      style={{
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: `${gap}px`,
+      }}
+    >
+      {gallery.images.map((image, index: number) => (
+        <div
+          key={image.id}
+          className="group relative cursor-pointer overflow-hidden rounded-lg"
+          style={
+            index === 0
+              ? { gridColumn: "span 2", gridRow: "span 2", aspectRatio: "2/2" }
+              : { aspectRatio: "1/1" }
+          }
+          onClick={() => onImageClick(index)}
+        >
+          <img
+            src={image.url}
+            alt={image.altText ?? ""}
+            className="h-full w-full object-cover transition-transform group-hover:scale-110"
+          />
+          {gallery.showCaptions && image.caption && (
+            <div className="absolute right-0 bottom-0 left-0 bg-black/70 p-2 text-sm text-white">
+              {image.caption}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
   );
 }
 
+// Justified Layout — flex rows where images share a fixed height and fill the row
 function JustifiedLayout({ gallery, onImageClick }: LayoutProps) {
+  const rowHeight = 220;
+  const gap = gallery.gap;
+
   return (
-    <GridLayout
-      gallery={{ ...gallery, columns: 5 }}
-      onImageClick={onImageClick}
-    />
+    <div
+      className="flex flex-wrap"
+      style={{ gap: `${gap}px` }}
+    >
+      {gallery.images.map((image, index: number) => (
+        <div
+          key={image.id}
+          className="group relative cursor-pointer overflow-hidden rounded-lg"
+          style={{ height: `${rowHeight}px`, flexGrow: 1, minWidth: "150px" }}
+          onClick={() => onImageClick(index)}
+        >
+          <img
+            src={image.url}
+            alt={image.altText ?? ""}
+            className="h-full w-full object-cover transition-transform group-hover:scale-110"
+          />
+          {gallery.showCaptions && image.caption && (
+            <div className="absolute right-0 bottom-0 left-0 bg-black/70 p-2 text-sm text-white">
+              {image.caption}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
   );
 }

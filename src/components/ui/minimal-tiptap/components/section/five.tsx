@@ -73,6 +73,7 @@ interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
   editor: Editor;
   activeActions?: InsertElementAction[];
   mainActionCount?: number;
+  galleriesEnabled?: boolean;
 }
 
 export const SectionFive: React.FC<SectionFiveProps> = ({
@@ -81,20 +82,27 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
   mainActionCount = 0,
   size,
   variant,
+  galleriesEnabled = true,
 }) => {
+  const filteredActions = galleriesEnabled
+    ? activeActions
+    : activeActions.filter((a) => a !== "gallery");
+
   return (
     <>
       <LinkEditPopover editor={editor} size={size} variant={variant} />
       <ImageEditDialog editor={editor} size={size} variant={variant} />
-      <GalleryInsertDialog
-        editor={editor}
-        size={size ?? "default"}
-        variant={variant ?? "default"}
-      />
+      {galleriesEnabled && (
+        <GalleryInsertDialog
+          editor={editor}
+          size={size ?? "default"}
+          variant={variant ?? "default"}
+        />
+      )}
       <ToolbarSection
         editor={editor}
         actions={formatActions}
-        activeActions={activeActions}
+        activeActions={filteredActions}
         mainActionCount={mainActionCount}
         dropdownIcon={
           <>

@@ -1,9 +1,8 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import type { DragEndEvent } from "@dnd-kit/core";
 import type { Gallery, GalleryImage } from "generated/prisma";
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFiles } from "@better-upload/client";
@@ -20,27 +19,40 @@ import {
   rectSortingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import {
-  ArrowLeft,
-  GripVertical,
-  Pencil,
-  Save,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, Save, Trash2, Upload } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { GalleryUpdateData } from "~/lib/validators/gallery";
 import { getStoredPath } from "~/lib/uploads";
 import { cn } from "~/lib/utils";
+import { galleryUpdateSchema } from "~/lib/validators/gallery";
 import { api } from "~/trpc/react";
+import { useDirtyForm } from "~/hooks/use-dirty-form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -51,8 +63,13 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
+import { UploadButton } from "~/components/ui/upload-button";
+import { UploadDropzone } from "~/components/ui/upload-dropzone";
 
 import { ImageEditModal } from "./image-edit-modal";
+import { SortableImage } from "./sortable-image";
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 type GalleryEditorProps = {
   gallery: Gallery & { images: GalleryImage[] };
@@ -61,26 +78,29 @@ type GalleryEditorProps = {
 
 export function GalleryEditor({ gallery }: GalleryEditorProps) {
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Gallery settings
-  const [name, setName] = useState(gallery.name);
-  const [description, setDescription] = useState(gallery.description ?? "");
-  const [layout, setLayout] = useState<
-    "grid" | "masonry" | "carousel" | "collage" | "justified"
-  >(
-    gallery.layout as "grid" | "masonry" | "carousel" | "collage" | "justified",
-  );
-  const [columns, setColumns] = useState(gallery.columns);
-  const [gap, setGap] = useState(gallery.gap);
-  const [showCaptions, setShowCaptions] = useState(gallery.showCaptions);
-  const [enableLightbox, setEnableLightbox] = useState(gallery.enableLightbox);
+  const utils = api.useUtils();
+  const dndId = useId();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [editingImage, setEditingImage] = useState<GalleryImage | null>(null);
-
-  // Images
   const [images, setImages] = useState(gallery.images);
 
-  // Drag and drop
+  const form = useForm<GalleryUpdateData>({
+    resolver: zodResolver(galleryUpdateSchema),
+    defaultValues: {
+      id: gallery.id,
+      name: gallery.name,
+      description: gallery.description ?? "",
+      layout: gallery.layout as GalleryUpdateData["layout"],
+      columns: gallery.columns,
+      gap: gallery.gap,
+      showCaptions: gallery.showCaptions,
+      enableLightbox: gallery.enableLightbox,
+    },
+  });
+
+  const isDirty = form.formState.isDirty;
+  useDirtyForm(isDirty);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -91,64 +111,123 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
   const uploadFiles = useUploadFiles({
     api: "/api/upload",
     route: "images",
-    // onUploadComplete: (data) => {
-    //   const newImages: FormProductImage[] = data.files.map((file, i) => ({
-    //     url: getStoredPath(file),
-    //     altText: null,
-    //     sortOrder: images.length + i,
-    //   }));
-    //   if (newImages.length > 0) {
-    //     onImagesChange([...images, ...newImages]);
-    //   }
-    // },
-    onError: () => {
-      alert("Failed to upload image");
+
+    onBeforeUpload: () => {
+      toast.loading("Uploading images...");
+    },
+    onError: (error) => {
+      toast.dismiss();
+      toast.error(error?.message ?? "Failed to upload images");
+    },
+    onUploadComplete: ({ files }) => {
+      toast.dismiss();
+      toast.success("Images uploaded");
+      addImagesMutation.mutate({
+        galleryId: gallery.id,
+        images: files.map((file) => ({
+          url: getStoredPath(file),
+          altText: file.name,
+          caption: "",
+        })),
+      });
     },
   });
 
   const updateMutation = api.gallery.update.useMutation({
-    onSuccess: () => {
+    onSuccess: ({ data }) => {
+      toast.dismiss();
       toast.success("Gallery updated");
+      void utils.gallery.invalidate();
+      form.reset({
+        id: data.id,
+        name: data.name,
+        description: data.description ?? "",
+        layout: data.layout as GalleryUpdateData["layout"],
+        columns: data.columns,
+        gap: data.gap,
+        showCaptions: data.showCaptions,
+        enableLightbox: data.enableLightbox,
+      });
       router.refresh();
-      setIsSaving(false);
     },
     onError: (error) => {
+      toast.dismiss();
       toast.error(error.message || "Failed to update");
-      setIsSaving(false);
+    },
+    onMutate: () => {
+      toast.loading("Updating gallery...");
     },
   });
 
   const reorderMutation = api.gallery.reorderImages.useMutation({
     onSuccess: () => {
+      toast.dismiss();
       toast.success("Image order saved");
+      void utils.gallery.invalidate();
+      router.refresh();
+    },
+    onError: (error) => {
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to reorder images");
+    },
+    onMutate: () => {
+      toast.loading("Reordering images...");
     },
   });
 
   const addImagesMutation = api.gallery.addImages.useMutation({
-    onSuccess: () => {
+    onSuccess: (result) => {
+      toast.dismiss();
       toast.success("Images added");
+      setImages(result.images);
+      void utils.gallery.invalidate();
       router.refresh();
+    },
+    onError: (error) => {
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to add images");
+    },
+    onMutate: () => {
+      toast.loading("Adding images...");
     },
   });
 
   const deleteImageMutation = api.gallery.deleteImage.useMutation({
     onSuccess: () => {
+      toast.dismiss();
       toast.success("Image deleted");
+      void utils.gallery.invalidate();
       router.refresh();
+    },
+    onError: (error) => {
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to delete image");
+    },
+    onMutate: () => {
+      toast.loading("Deleting image...");
     },
   });
 
-  const handleSave = () => {
-    setIsSaving(true);
+  const deleteGalleryMutation = api.gallery.delete.useMutation({
+    onSuccess: () => {
+      toast.dismiss();
+      toast.success("Gallery deleted");
+      void utils.gallery.invalidate();
+      router.push("/admin/galleries");
+    },
+    onError: (error) => {
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to delete gallery");
+    },
+    onMutate: () => {
+      toast.loading("Deleting gallery...");
+    },
+  });
+
+  const onSubmit = (data: GalleryUpdateData) => {
     updateMutation.mutate({
-      id: gallery.id,
-      name,
-      description,
-      layout,
-      columns,
-      gap,
-      showCaptions,
-      enableLightbox,
+      ...data,
+      description: data.description?.trim() ?? undefined,
     });
   };
 
@@ -161,7 +240,6 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
         const newIndex = items.findIndex((i) => i.id === over.id);
         const newOrder = arrayMove(items, oldIndex, newIndex);
 
-        // Save new order
         reorderMutation.mutate({
           galleryId: gallery.id,
           imageIds: newOrder.map((img) => img.id),
@@ -172,425 +250,355 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    // In production, upload to your storage (S3, etc.)
-    // For now, using placeholder URLs
-
-    const uploadedFiles = await uploadFiles.uploadAsync(files);
-
-    const newImages = uploadedFiles.files.map((file) => ({
-      url: getStoredPath(file), // Replace with actual upload
-      altText: file.name,
-      caption: "",
-    }));
-
-    addImagesMutation.mutate({
-      galleryId: gallery.id,
-      images: newImages,
-    });
-  };
-
   const handleDeleteImage = (imageId: string) => {
     if (confirm("Delete this image?")) {
-      deleteImageMutation.mutate({ id: imageId });
+      deleteImageMutation.mutate(imageId);
       setImages(images.filter((img) => img.id !== imageId));
     }
   };
 
-  const isDirty =
-    name !== gallery.name ||
-    description !== gallery.description ||
-    layout !== gallery.layout ||
-    columns !== gallery.columns ||
-    gap !== gallery.gap ||
-    showCaptions !== gallery.showCaptions ||
-    enableLightbox !== gallery.enableLightbox;
+  const isUploading = uploadFiles.isPending || addImagesMutation.isPending;
+  const isSubmitting = updateMutation.isPending || reorderMutation.isPending;
+  const isDeleting = deleteGalleryMutation.isPending;
+
+  const layout = form.watch("layout");
 
   return (
     <>
-      <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
-        <div className="toolbar-info">
-          <Button variant="ghost" size="sm" asChild className="shrink-0">
-            <Link href="/admin/galleries">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Link>
-          </Button>
-          <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
-          <div className="hidden min-w-0 items-center gap-2 sm:flex">
-            <h1 className="text-base font-medium">{gallery.name} Gallery</h1>
-
-            <Badge variant="outline">{images.length} images</Badge>
-            <span
-              className={`admin-status-badge ${
-                isDirty ? "isDirty" : "isPublished"
-              }`}
-            >
-              {isDirty ? "Unsaved Changes" : "Saved"}
-            </span>
-          </div>
-        </div>
-
-        <div className="toolbar-actions">
-          {/* <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isSaving || !isDirty}
-            onClick={() => form.reset()}
-            className="hidden md:inline-flex"
-          >
-            Reset
-          </Button> */}
-
-          <Button onClick={handleSave} size="sm" disabled={isSaving}>
-            {isSaving ? (
-              <>
-                <span className="saving-indicator" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Save changes</span>
-                <span className="sm:hidden">Save</span>
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-      <div className="admin-container">
-        {/* <div className="mb-8">
-          <div className="mb-4">
-            <Button variant="ghost" size="sm" asChild>
+      <Form {...form}>
+        <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
+          <div className="toolbar-info">
+            <Button variant="ghost" size="sm" asChild className="shrink-0">
               <Link href="/admin/galleries">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Galleries
+                Back
               </Link>
             </Button>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">{gallery.name}</h1>
-              <p className="mt-2 text-gray-600">{images.length} images</p>
-            </div>
-
-            <div className="flex gap-3">
-              <Button variant="outline" asChild>
-                <a href={`/galleries/${gallery.slug}`} target="_blank">
-                  <Eye className="mr-2 h-4 w-4" />
-                  Preview
-                </a>
-              </Button>
-              <Button onClick={handleSave} disabled={isSaving}>
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
+            <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
+            <div className="hidden min-w-0 items-center gap-2 sm:flex">
+              <h1 className="text-base font-medium">{gallery.name} Gallery</h1>
+              <Badge variant="outline">{images.length} images</Badge>
+              <span
+                className={`admin-status-badge ${
+                  isDirty ? "isDirty" : "isPublished"
+                }`}
+              >
+                {isDirty ? "Unsaved Changes" : "Saved"}
+              </span>
             </div>
           </div>
-        </div> */}
 
-        <Tabs defaultValue="images" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="images">Images</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
+          <div className="toolbar-actions">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={isSubmitting || isUploading}
+              onClick={() => setShowDeleteDialog(true)}
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Delete</span>
+            </Button>
 
-          {/* Images Tab */}
-          <TabsContent value="images" className="space-y-6">
-            {/* Upload */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Add Images</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4">
-                  <Input
-                    type="file"
-                    multiple
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isSubmitting || !isDirty}
+              onClick={() => form.reset()}
+              className="hidden md:inline-flex"
+            >
+              Reset
+            </Button>
+
+            <Button
+              type="button"
+              size="sm"
+              disabled={isSubmitting || !isDirty}
+              onClick={(e) => void form.handleSubmit(onSubmit)(e)}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="saving-indicator" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Save changes</span>
+                  <span className="sm:hidden">Save</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        <div className="admin-container">
+          <Tabs defaultValue="images" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="images">Images</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+
+            {/* Images Tab */}
+            <TabsContent value="images" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Add Images</CardTitle>
+                  <p className="text-muted-foreground text-sm">
+                    Images are uploaded immediately. Max 5 MB per image.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <UploadDropzone
+                    control={uploadFiles.control}
                     accept="image/*"
-                    onChange={handleImageUpload}
-                    className="max-w-sm"
                   />
-                  <Button variant="outline" asChild>
-                    <label htmlFor="image-upload" className="cursor-pointer">
-                      <Upload className="mr-2 h-4 w-4" />
-                      Upload Images
-                    </label>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Image Grid with Drag-and-Drop */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Images ({images.length})</CardTitle>
-                <p className="text-sm text-gray-600">
-                  Drag and drop to reorder images
-                </p>
-              </CardHeader>
-              <CardContent>
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={images.map((img) => img.id)}
-                    strategy={rectSortingStrategy}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Images ({images.length})</CardTitle>
+                  <p className="text-sm text-gray-600">
+                    Drag and drop to reorder images
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <DndContext
+                    id={dndId}
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
                   >
-                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
-                      {images.map((image) => (
-                        <SortableImage
-                          key={image.id}
-                          image={image}
-                          onDelete={handleDeleteImage}
-                          onEdit={setEditingImage} // ADD THIS
-                        />
-                      ))}
+                    <SortableContext
+                      items={images.map((img) => img.id)}
+                      strategy={rectSortingStrategy}
+                    >
+                      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+                        {images.map((image) => (
+                          <SortableImage
+                            key={image.id}
+                            image={image}
+                            onDelete={handleDeleteImage}
+                            onEdit={setEditingImage}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+
+                  {images.length === 0 && (
+                    <div className="py-12 text-center text-gray-500">
+                      <p>No images yet. Upload some to get started.</p>
                     </div>
-                  </SortableContext>
-                </DndContext>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-                {images.length === 0 && (
-                  <div className="py-12 text-center text-gray-500">
-                    <p>No images yet. Upload some to get started.</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gallery Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="mt-2"
+            {/* Settings Tab */}
+            <TabsContent value="settings" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Gallery Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
 
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={3}
-                    className="mt-2"
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} rows={3} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Layout Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="layout">Layout Style</Label>
-                  <Select
-                    value={layout}
-                    onValueChange={(v) =>
-                      setLayout(
-                        v as
-                          | "grid"
-                          | "masonry"
-                          | "carousel"
-                          | "collage"
-                          | "justified",
-                      )
-                    }
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="grid">Grid</SelectItem>
-                      <SelectItem value="masonry">Masonry</SelectItem>
-                      <SelectItem value="carousel">Carousel</SelectItem>
-                      <SelectItem value="collage">Collage</SelectItem>
-                      <SelectItem value="justified">Justified</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Layout Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="layout"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Layout Style</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="grid">Grid</SelectItem>
+                            <SelectItem value="masonry">Masonry</SelectItem>
+                            <SelectItem value="carousel">Carousel</SelectItem>
+                            <SelectItem value="collage">Collage</SelectItem>
+                            <SelectItem value="justified">Justified</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {layout === "grid" && (
-                  <>
-                    <div>
-                      <Label htmlFor="columns">Columns</Label>
-                      <Select
-                        value={columns.toString()}
-                        onValueChange={(v) => setColumns(parseInt(v))}
-                      >
-                        <SelectTrigger className="mt-2">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="2">2 columns</SelectItem>
-                          <SelectItem value="3">3 columns</SelectItem>
-                          <SelectItem value="4">4 columns</SelectItem>
-                          <SelectItem value="5">5 columns</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="gap">Gap (px)</Label>
-                      <Input
-                        id="gap"
-                        type="number"
-                        value={gap}
-                        onChange={(e) => setGap(parseInt(e.target.value))}
-                        min={0}
-                        max={64}
-                        className="mt-2"
+                  {(layout === "grid" || layout === "masonry") && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="columns"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Columns</FormLabel>
+                            <Select
+                              value={field.value.toString()}
+                              onValueChange={(v) => field.onChange(parseInt(v))}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="2">2 columns</SelectItem>
+                                <SelectItem value="3">3 columns</SelectItem>
+                                <SelectItem value="4">4 columns</SelectItem>
+                                <SelectItem value="5">5 columns</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                  </>
-                )}
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="captions">Show Captions</Label>
-                  <Switch
-                    id="captions"
-                    checked={showCaptions}
-                    onCheckedChange={setShowCaptions}
+                      <FormField
+                        control={form.control}
+                        name="gap"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Gap (px)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={0}
+                                max={64}
+                                value={field.value}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value) || 0)
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  )}
+
+                  <FormField
+                    control={form.control}
+                    name="showCaptions"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex items-center justify-between">
+                          <FormLabel>Show Captions</FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="lightbox">Enable Lightbox</Label>
-                  <Switch
-                    id="lightbox"
-                    checked={enableLightbox}
-                    onCheckedChange={setEnableLightbox}
+                  <FormField
+                    control={form.control}
+                    name="enableLightbox"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex items-center justify-between">
+                          <FormLabel>Enable Lightbox</FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
 
-        {/* ADD: Edit Modal */}
-        {editingImage && (
-          <ImageEditModal
-            image={editingImage}
-            isOpen={true}
-            onClose={() => setEditingImage(null)}
-            onSuccess={() => router.refresh()}
-          />
-        )}
-      </div>
+          {editingImage && (
+            <ImageEditModal
+              image={editingImage}
+              isOpen={true}
+              onClose={() => setEditingImage(null)}
+              onSuccess={() => router.refresh()}
+            />
+          )}
+        </div>
+      </Form>
+
+      {/* Delete Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete gallery</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this gallery? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                deleteGalleryMutation.mutate(gallery.id);
+              }}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
-  );
-}
-
-// Sortable Image Component
-function SortableImage({
-  image,
-  onDelete,
-  onEdit,
-}: {
-  image: GalleryImage;
-  onDelete: (id: string) => void;
-  onEdit: (image: GalleryImage) => void;
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: image.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="group relative aspect-square overflow-hidden rounded-lg bg-gray-100"
-    >
-      <img
-        src={image.url}
-        alt={image.altText ?? ""}
-        className="h-full w-full object-cover"
-      />
-
-      {/* Drag Handle */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute top-2 left-2 cursor-grab rounded bg-black/50 p-1 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
-      >
-        <GripVertical className="h-4 w-4 text-white" />
-      </div>
-
-      {/* Action Buttons */}
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-        {/* ADD: Edit Button */}
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => onEdit(image)}
-          className="h-8 w-8 p-0"
-        >
-          <Pencil className="h-4 w-4" />
-        </Button>
-
-        {/* Delete Button */}
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onDelete(image.id)}
-          className="h-8 w-8 p-0"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Caption Indicator */}
-      {image.caption && (
-        <div className="absolute right-0 bottom-0 left-0 truncate bg-black/70 p-2 text-xs text-white">
-          {image.caption}
-        </div>
-      )}
-
-      {/* Alt Text Indicator */}
-      {image.altText && (
-        <div className="absolute bottom-0 left-0 rounded-tr bg-blue-600 px-2 py-0.5 text-xs text-white">
-          ALT
-        </div>
-      )}
-    </div>
   );
 }

@@ -6,6 +6,7 @@ import { GalleryNodeView } from "./gallery-node-view";
 
 export interface GalleryOptions {
   businessId?: string;
+  galleriesEnabled?: boolean;
   HTMLAttributes: Record<string, unknown>;
 }
 
@@ -30,6 +31,7 @@ export const Gallery = Node.create<GalleryOptions>({
   addOptions() {
     return {
       businessId: undefined,
+      galleriesEnabled: true,
       HTMLAttributes: {
         class: "gallery-block",
       },

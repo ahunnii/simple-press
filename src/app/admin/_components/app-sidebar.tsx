@@ -72,11 +72,13 @@ const getNavData = (session: Session | null) => {
       title: "Discounts",
       url: "/admin/discounts",
       icon: IconDiscount,
+      featureKey: "coupons",
     },
     {
       title: "Galleries",
       url: "/admin/galleries",
       icon: IconImageInPicture,
+      featureKey: "galleries",
     },
     {
       title: "Testimonials",

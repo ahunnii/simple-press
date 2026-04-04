@@ -7,11 +7,12 @@ import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import { generateHTML } from "@tiptap/html";
+import { Images } from "lucide-react";
 import StarterKit from "@tiptap/starter-kit";
 
-import { GalleryRenderer } from "~/components/gallery-renderer";
-import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
 import { api } from "~/trpc/react";
+import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
+import { GalleryRenderer } from "~/components/gallery-renderer";
 
 /** TipTap document JSON — matches first parameter of generateHTML */
 export type TiptapJSON = Parameters<typeof generateHTML>[0];
@@ -42,19 +43,30 @@ const extensions = [
 
 /** Renders a single gallery by id (for storefront page content). */
 function GalleryBlock({ galleryId }: { galleryId: string }) {
-  const { data: gallery, isLoading } = api.gallery.getByIdPublic.useQuery(
-    { id: galleryId },
-    { enabled: !!galleryId },
+  const { data: gallery, isLoading, error } = api.gallery.getByIdPublic.useQuery(
+    galleryId,
+    { enabled: !!galleryId, retry: false },
   );
 
   if (!galleryId) return null;
+
   if (isLoading) {
     return (
-      <div className="my-6 flex justify-center rounded-lg border border-gray-200 bg-gray-50 py-12">
-        <span className="text-gray-500">Loading gallery…</span>
+      <div className="my-6 animate-pulse rounded-lg border border-gray-200 bg-gray-50 py-16" />
+    );
+  }
+
+  // Gallery feature is disabled for this business — show a tasteful placeholder
+  // so the content layout isn't broken, without exposing technical details.
+  if (error?.data?.code === "FORBIDDEN") {
+    return (
+      <div className="my-6 flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-gray-200 bg-gray-50/50 py-12 text-gray-400">
+        <Images className="h-8 w-8 opacity-40" />
+        <p className="text-sm">Gallery content is not available</p>
       </div>
     );
   }
+
   if (!gallery) return null;
 
   return (
@@ -134,8 +146,12 @@ function sanitizeGeneratedHtml(html: string): string {
   return doc.body.innerHTML;
 }
 
-function isGalleryNode(node: ContentNode): node is ContentNode & { attrs: { galleryId?: string } } {
-  return node.type === "gallery" && node.attrs != null && "galleryId" in node.attrs;
+function isGalleryNode(
+  node: ContentNode,
+): node is ContentNode & { attrs: { galleryId?: string } } {
+  return (
+    node.type === "gallery" && node.attrs != null && "galleryId" in node.attrs
+  );
 }
 
 export function TiptapRenderer({ content, className }: TiptapRendererProps) {
@@ -157,16 +173,14 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
       try {
         const html = sanitizeGeneratedHtml(
           generateHTML(
-          { type: "doc", content: [node] as Parameters<typeof generateHTML>[0]["content"] },
-          extensions,
+            {
+              type: "doc",
+              content: [node] as Parameters<typeof generateHTML>[0]["content"],
+            },
+            extensions,
           ),
         );
-        return (
-          <div
-            key={index}
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
-        );
+        return <div key={index} dangerouslySetInnerHTML={{ __html: html }} />;
       } catch {
         return null;
       }

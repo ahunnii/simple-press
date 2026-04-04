@@ -80,9 +80,10 @@ type BlogPostEditorProps = {
     metaDescription: string | null;
     image: string | null;
   };
+  galleriesEnabled?: boolean;
 };
 
-export function BlogPostEditor({ page }: BlogPostEditorProps) {
+export function BlogPostEditor({ page, galleriesEnabled }: BlogPostEditorProps) {
   const router = useRouter();
   const utils = api.useUtils();
   const formRef = useRef<HTMLFormElement>(null);
@@ -397,6 +398,7 @@ export function BlogPostEditor({ page }: BlogPostEditorProps) {
                       placeholder="Start writing your post content..."
                       output="json"
                       editorContentClassName="min-h-[400px] p-4"
+                      galleriesEnabled={galleriesEnabled}
                       required
                     />
                   </CardContent>

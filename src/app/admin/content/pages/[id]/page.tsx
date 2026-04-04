@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api } from "~/trpc/server";
 import { TrailHeader } from "~/app/admin/_components/trail-header";
 
@@ -11,7 +12,10 @@ type Props = {
 export default async function EditPagePage({ params }: Props) {
   const { id } = await params;
 
-  const page = await api.content.getPageById({ id });
+  const [page, flags] = await Promise.all([
+    api.content.getPageById({ id }),
+    getBusinessFlags(),
+  ]);
 
   if (!page) notFound();
 
@@ -25,7 +29,7 @@ export default async function EditPagePage({ params }: Props) {
         ]}
       />
 
-      <PageEditor page={page} />
+      <PageEditor page={page} galleriesEnabled={flags.isEnabled("galleries")} />
     </>
   );
 }

@@ -26,7 +26,13 @@ export interface MinimalTiptapProps extends Omit<
   editorContentClassName?: string;
 }
 
-const Toolbar = ({ editor }: { editor: Editor }) => (
+const Toolbar = ({
+  editor,
+  galleriesEnabled,
+}: {
+  editor: Editor;
+  galleriesEnabled?: boolean;
+}) => (
   <div className="border-border flex h-12 shrink-0 overflow-x-auto border-b p-2">
     <div className="flex w-max items-center gap-px">
       <SectionOne editor={editor} activeLevels={[1, 2, 3, 4, 5, 6]} />
@@ -64,6 +70,7 @@ const Toolbar = ({ editor }: { editor: Editor }) => (
         editor={editor}
         activeActions={["codeBlock", "blockquote", "horizontalRule", "gallery"]}
         mainActionCount={0}
+        galleriesEnabled={galleriesEnabled}
       />
     </div>
   </div>
@@ -74,11 +81,13 @@ export const MinimalTiptapEditor = ({
   onChange,
   className,
   editorContentClassName,
+  galleriesEnabled,
   ...props
 }: MinimalTiptapProps) => {
   const editor = useMinimalTiptapEditor({
     value,
     onUpdate: onChange,
+    galleriesEnabled,
     ...props,
   });
 
@@ -92,6 +101,7 @@ export const MinimalTiptapEditor = ({
         editor={editor}
         className={className}
         editorContentClassName={editorContentClassName}
+        galleriesEnabled={galleriesEnabled}
       />
     </EditorContext.Provider>
   );
@@ -105,6 +115,7 @@ export const MainMinimalTiptapEditor = ({
   editor: providedEditor,
   className,
   editorContentClassName,
+  galleriesEnabled,
 }: MinimalTiptapProps & { editor: Editor }) => {
   // Use provided editor directly. Do not subscribe to full editor state here,
   // or every transaction (e.g. from gallery) re-renders the whole toolbar and
@@ -124,7 +135,7 @@ export const MainMinimalTiptapEditor = ({
         className,
       )}
     >
-      <Toolbar editor={providedEditor} />
+      <Toolbar editor={providedEditor} galleriesEnabled={galleriesEnabled} />
       <EditorContent
         editor={providedEditor}
         className={cn("minimal-tiptap-editor", editorContentClassName)}

@@ -1,8 +1,11 @@
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { TrailHeader } from "~/app/admin/_components/trail-header";
 
 import { PageEditor } from "../_components/page-editor";
 
 export default async function NewPagePage() {
+  const flags = await getBusinessFlags();
+
   return (
     <>
       <TrailHeader
@@ -12,7 +15,7 @@ export default async function NewPagePage() {
           { label: "New Page" },
         ]}
       />
-      <PageEditor />
+      <PageEditor galleriesEnabled={flags.isEnabled("galleries")} />
     </>
   );
 }

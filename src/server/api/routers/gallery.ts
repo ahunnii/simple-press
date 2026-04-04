@@ -1,35 +1,39 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { checkBusiness } from "~/lib/check-business";
+import {
+  galleryCreateSchema,
+  galleryImageCreateSchema,
+  galleryReorderImagesSchema,
+  galleryUpdateImageSchema,
+  galleryUpdateSchema,
+} from "~/lib/validators/gallery";
 
 import {
   createTRPCRouter,
+  featureGate,
+  getBusinessProcedure,
   ownerAdminProcedure,
   publicProcedure,
 } from "../trpc";
 
 export const galleryRouter = createTRPCRouter({
-  // List galleries
-  list: ownerAdminProcedure.query(async ({ ctx }) => {
-    const { businessId } = ctx;
-    return ctx.db.gallery.findMany({
-      where: { businessId },
-      include: {
-        images: {
-          orderBy: { sortOrder: "asc" },
-          take: 4, // Preview images
+  list: ownerAdminProcedure
+    .use(featureGate("galleries"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+      return ctx.db.gallery.findMany({
+        where: { businessId },
+        include: {
+          images: { orderBy: { sortOrder: "asc" }, take: 4 },
+          _count: { select: { images: true } },
         },
-        _count: {
-          select: { images: true },
-        },
-      },
-      orderBy: { updatedAt: "desc" },
-    });
-  }),
+        orderBy: { updatedAt: "desc" },
+      });
+    }),
 
-  // Get single gallery
   getById: ownerAdminProcedure
+    .use(featureGate("galleries"))
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -49,20 +53,14 @@ export const galleryRouter = createTRPCRouter({
       return gallery;
     }),
 
-  // Get single gallery by id (public, for storefront page content) Not really sure if this is needed yet... maybe public / private galleries?
   getByIdPublic: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const businessId = await checkBusiness();
-      if (!businessId) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
+    .use(getBusinessProcedure())
+    .use(featureGate("galleries"))
+    .input(z.string())
+    .query(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
       const gallery = await ctx.db.gallery.findUnique({
-        where: { id: input.id, businessId: businessId.id },
+        where: { id, businessId },
         include: { images: { orderBy: { sortOrder: "asc" } } },
       });
 
@@ -76,107 +74,49 @@ export const galleryRouter = createTRPCRouter({
       return gallery;
     }),
 
-  // Get by slug (for public display)
-  getBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const businessId = await checkBusiness();
-      if (!businessId) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
-      return ctx.db.gallery.findUnique({
-        where: {
-          businessId_slug: {
-            businessId: businessId.id,
-            slug: input.slug,
-          },
-        },
-        include: { images: { orderBy: { sortOrder: "asc" } } },
-      });
-    }),
-
-  // Create gallery
   create: ownerAdminProcedure
-    .input(
-      z.object({
-        name: z.string().min(1),
-        slug: z.string().min(1),
-        description: z.string().optional(),
-        layout: z.enum(["grid", "masonry", "carousel", "collage", "justified"]),
-        columns: z.number().min(1).max(5).default(3),
-        gap: z.number().default(16),
-        aspectRatio: z.string().optional(),
-        showCaptions: z.boolean().default(true),
-        enableLightbox: z.boolean().default(true),
-      }),
-    )
+    .use(featureGate("galleries"))
+    .input(galleryCreateSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      return ctx.db.gallery.create({
+      const gallery = await ctx.db.gallery.create({
         data: {
           ...input,
           businessId,
         },
       });
+      return { data: gallery, message: "Gallery created successfully!" };
     }),
 
-  // Update gallery
   update: ownerAdminProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string().optional(),
-        description: z.string().optional(),
-        layout: z
-          .enum(["grid", "masonry", "carousel", "collage", "justified"])
-          .optional(),
-        columns: z.number().min(1).max(5).optional(),
-        gap: z.number().optional(),
-        aspectRatio: z.string().optional(),
-        showCaptions: z.boolean().optional(),
-        enableLightbox: z.boolean().optional(),
-      }),
-    )
+    .use(featureGate("galleries"))
+    .input(galleryUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
       const { id, ...data } = input;
 
-      return ctx.db.gallery.update({
+      const gallery = await ctx.db.gallery.update({
         where: { id, businessId },
         data,
       });
+      return { data: gallery, message: "Gallery updated successfully!" };
     }),
 
-  // Delete gallery
   delete: ownerAdminProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .use(featureGate("galleries"))
+    .input(z.string())
+    .mutation(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
-      return ctx.db.gallery.delete({
-        where: { id: input.id, businessId },
+      await ctx.db.gallery.delete({
+        where: { id, businessId },
       });
+      return { data: id, message: "Gallery deleted successfully!" };
     }),
 
   // Add images to gallery
   addImages: ownerAdminProcedure
-    .input(
-      z.object({
-        galleryId: z.string(),
-        images: z.array(
-          z.object({
-            url: z.string(),
-            altText: z.string().optional(),
-            caption: z.string().optional(),
-            width: z.number().optional(),
-            height: z.number().optional(),
-          }),
-        ),
-      }),
-    )
+    .use(featureGate("galleries"))
+    .input(galleryImageCreateSchema)
     .mutation(async ({ ctx, input }) => {
       // Get current max sort order
       const maxSort = await ctx.db.galleryImage.aggregate({
@@ -197,19 +137,21 @@ export const galleryRouter = createTRPCRouter({
         data: images,
       });
 
-      return { success: true, count: images.length };
+      const updatedImages = await ctx.db.galleryImage.findMany({
+        where: { galleryId: input.galleryId },
+        orderBy: { sortOrder: "asc" },
+      });
+
+      return {
+        images: updatedImages,
+        message: "Images added successfully!",
+      };
     }),
 
-  // Update image order
   reorderImages: ownerAdminProcedure
-    .input(
-      z.object({
-        galleryId: z.string(),
-        imageIds: z.array(z.string()), // Ordered array of image IDs
-      }),
-    )
+    .use(featureGate("galleries"))
+    .input(galleryReorderImagesSchema)
     .mutation(async ({ ctx, input }) => {
-      // Update each image's sortOrder based on position in array
       const updates = input.imageIds.map((id, index) =>
         ctx.db.galleryImage.update({
           where: { id },
@@ -218,32 +160,29 @@ export const galleryRouter = createTRPCRouter({
       );
 
       await ctx.db.$transaction(updates);
-      return { success: true };
+      return { success: true, message: "Image order saved successfully!" };
     }),
 
-  // Update single image
   updateImage: ownerAdminProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        altText: z.string().optional(),
-        caption: z.string().optional(),
-      }),
-    )
+    .use(featureGate("galleries"))
+    .input(galleryUpdateImageSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input;
-      return ctx.db.galleryImage.update({
+      const image = await ctx.db.galleryImage.update({
         where: { id },
         data,
       });
+      return { data: image, message: "Image updated successfully!" };
     }),
 
   // Delete image
   deleteImage: ownerAdminProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      return ctx.db.galleryImage.delete({
-        where: { id: input.id },
+    .use(featureGate("galleries"))
+    .input(z.string())
+    .mutation(async ({ ctx, input: id }) => {
+      const image = await ctx.db.galleryImage.delete({
+        where: { id },
       });
+      return { data: image, message: "Image deleted successfully!" };
     }),
 });

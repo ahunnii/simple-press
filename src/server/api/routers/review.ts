@@ -20,8 +20,13 @@ async function assertBusinessOwner(
 ) {
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { memberships: true },
+    select: { memberships: true, platformRole: true },
   });
+
+  if (user?.platformRole === "PLATFORM_ADMIN") {
+    return;
+  }
+
   if (!user?.memberships.some((m) => m.businessId === businessId)) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
   }

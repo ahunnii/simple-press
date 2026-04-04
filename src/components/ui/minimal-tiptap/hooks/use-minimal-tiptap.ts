@@ -33,6 +33,7 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   onBlur?: (content: Content) => void;
   uploader?: (file: File) => Promise<string>;
   businessId?: string;
+  galleriesEnabled?: boolean;
 }
 
 async function fakeuploader(file: File): Promise<string> {
@@ -51,10 +52,12 @@ const createExtensions = ({
   placeholder,
   uploader,
   businessId,
+  galleriesEnabled,
 }: {
   placeholder: string;
   uploader?: (file: File) => Promise<string>;
   businessId?: string;
+  galleriesEnabled?: boolean;
 }) => [
   StarterKit.configure({
     blockquote: { HTMLAttributes: { class: "block-node" } },
@@ -191,7 +194,7 @@ const createExtensions = ({
   ResetMarksOnEnter,
   CodeBlockLowlight,
   Placeholder.configure({ placeholder: () => placeholder }),
-  Gallery.configure({ businessId }), // ADD THIS
+  Gallery.configure({ businessId, galleriesEnabled: galleriesEnabled !== false }),
 ];
 
 export const useMinimalTiptapEditor = ({
@@ -204,6 +207,7 @@ export const useMinimalTiptapEditor = ({
   onBlur,
   uploader,
   businessId,
+  galleriesEnabled,
   ...props
 }: UseMinimalTiptapEditorProps) => {
   // const lastExternalValueRef = React.useRef<Content | undefined>(value);
@@ -247,8 +251,9 @@ export const useMinimalTiptapEditor = ({
         placeholder,
         uploader,
         businessId,
+        galleriesEnabled,
       }) as unknown as Extension[],
-    [placeholder, uploader, businessId],
+    [placeholder, uploader, businessId, galleriesEnabled],
   );
 
   const editorProps = React.useMemo(

@@ -75,9 +75,10 @@ type PageEditorProps = {
     metaTitle: string | null;
     metaDescription: string | null;
   };
+  galleriesEnabled?: boolean;
 };
 
-export function PageEditor({ page }: PageEditorProps) {
+export function PageEditor({ page, galleriesEnabled }: PageEditorProps) {
   const router = useRouter();
   const utils = api.useUtils();
   const formRef = useRef<HTMLFormElement>(null);
@@ -352,6 +353,7 @@ export function PageEditor({ page }: PageEditorProps) {
                       placeholder="Start writing your page content..."
                       output="json"
                       editorContentClassName="min-h-[400px] p-4"
+                      galleriesEnabled={galleriesEnabled}
                       required
                     />
                   </CardContent>

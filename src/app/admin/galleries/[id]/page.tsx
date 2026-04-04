@@ -1,3 +1,4 @@
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
 import { GalleryEditor } from "../_components/galley-editor";
@@ -9,7 +10,9 @@ type Props = {
 export default async function GalleryEditPage({ params }: Props) {
   const { id } = await params;
 
-  const gallery = await api.gallery.getById({ id });
+  const gallery = await api.gallery
+    .getById({ id })
+    .catch(rethrowTrpcForErrorBoundary);
 
   return (
     <>

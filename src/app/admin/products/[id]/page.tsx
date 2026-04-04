@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
@@ -13,9 +14,10 @@ type Props = {
 export default async function EditProductPage({ params }: Props) {
   const { id } = await params;
 
-  const product = await api.product
-    .secureGet(id)
-    .catch(rethrowTrpcForErrorBoundary);
+  const [product, flags] = await Promise.all([
+    api.product.secureGet(id).catch(rethrowTrpcForErrorBoundary),
+    getBusinessFlags(),
+  ]);
 
   if (!product) notFound();
 
@@ -28,7 +30,7 @@ export default async function EditProductPage({ params }: Props) {
         ]}
       />
 
-      <ProductForm product={product} />
+      <ProductForm product={product} galleriesEnabled={flags.isEnabled("galleries")} />
     </>
   );
 }

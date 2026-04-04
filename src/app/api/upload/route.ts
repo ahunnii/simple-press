@@ -139,9 +139,10 @@ const router: Router = {
     }),
     images: route({
       fileTypes: ["image/*"],
-
       multipleFiles: true,
       maxFiles: 10,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
+
       onBeforeUpload: async ({ req }) => {
         const user = await auth.api.getSession({ headers: req.headers });
         if (!user) {

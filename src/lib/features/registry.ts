@@ -51,7 +51,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Allow customers to add items to a cart and check out",
     category: "ecommerce",
     enabledByDefault: true,
-    ownerCanToggle: true,
+    ownerCanToggle: false,
     dependsOn: ["products"],
   },
   inventory: {
@@ -60,7 +60,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Track stock levels and get low-stock alerts",
     category: "ecommerce",
     enabledByDefault: true,
-    ownerCanToggle: true,
+    ownerCanToggle: false,
     dependsOn: ["products"],
     hidesNav: ["inventory"],
   },
@@ -70,7 +70,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Create discount codes and promotional offers",
     category: "ecommerce",
     enabledByDefault: false,
-    ownerCanToggle: true,
+    ownerCanToggle: false,
     dependsOn: ["cart"],
     hidesNav: ["coupons"],
   },
@@ -92,7 +92,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Create custom content pages for your site",
     category: "content",
     enabledByDefault: true,
-    ownerCanToggle: true,
+    ownerCanToggle: false,
     hidesNav: ["pages"],
   },
   galleries: {
@@ -121,7 +121,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Allow customers to create accounts and log in",
     category: "customers",
     enabledByDefault: true,
-    ownerCanToggle: true,
+    ownerCanToggle: false,
     hidesNav: ["customers"],
   },
 
@@ -132,7 +132,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Collect and display customer testimonials",
     category: "marketing",
     enabledByDefault: true,
-    ownerCanToggle: true,
+    ownerCanToggle: false,
     hidesNav: ["testimonials"],
   },
   reviews: {
@@ -141,7 +141,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Allow customers to review products",
     category: "marketing",
     enabledByDefault: true,
-    ownerCanToggle: true,
+    ownerCanToggle: false,
     dependsOn: ["products", "customerAccounts"],
     hidesNav: ["reviews"],
   },
@@ -151,7 +151,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Show a contact form on your site",
     category: "marketing",
     enabledByDefault: true,
-    ownerCanToggle: true,
+    ownerCanToggle: false,
   },
 };
 

@@ -1,7 +1,10 @@
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { ProductForm } from "../_components/product-form";
 import { TrailHeader } from "../../_components/trail-header";
 
 export default async function NewProductPage() {
+  const flags = await getBusinessFlags();
+
   return (
     <>
       <TrailHeader
@@ -11,7 +14,7 @@ export default async function NewProductPage() {
         ]}
       />
 
-      <ProductForm />
+      <ProductForm galleriesEnabled={flags.isEnabled("galleries")} />
     </>
   );
 }

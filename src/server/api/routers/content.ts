@@ -8,6 +8,8 @@ import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
 
 import {
   createTRPCRouter,
+  featureGate,
+  getBusinessProcedure,
   ownerAdminProcedure,
   publicProcedure,
 } from "../trpc";
@@ -175,27 +177,43 @@ export const contentRouter = createTRPCRouter({
       return page;
     }),
 
-  getBlogPages: publicProcedure.query(async ({ ctx }) => {
-    const business = await checkBusiness();
+  getBlogPostBySlug: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("blog"))
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
 
-    if (!business) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
+      const page = await ctx.db.page.findUnique({
+        where: {
+          businessId_slug: {
+            businessId,
+            slug: input.slug,
+          },
+          type: "blog",
+        },
       });
-    }
 
-    const pages = await ctx.db.page.findMany({
-      where: {
-        businessId: business.id,
-        type: "blog",
-        published: true,
-      },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-    });
+      return page;
+    }),
 
-    return pages;
-  }),
+  getBlogPages: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("blog"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+
+      const pages = await ctx.db.page.findMany({
+        where: {
+          businessId,
+          type: "blog",
+          published: true,
+        },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      });
+
+      return pages;
+    }),
 
   // Create page
   createPage: ownerAdminProcedure

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import { Images, Loader2, X } from "lucide-react";
 
+import type { GalleryOptions } from "./index";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -22,19 +23,22 @@ export function GalleryNodeView({
   node,
   updateAttributes,
   deleteNode,
+  extension,
 }: NodeViewProps) {
+  const opts = extension.options as GalleryOptions;
+  const galleriesEnabled = opts.galleriesEnabled !== false;
+
   const [isEditing, setIsEditing] = useState(!node.attrs.galleryId);
-  // const businessId = node.attrs.businessId;
 
   // Get available galleries
   const { data: galleries, isLoading: loadingGalleries } =
-    api.gallery.list.useQuery(undefined);
+    api.gallery.list.useQuery(undefined, { enabled: galleriesEnabled });
 
   // Get selected gallery
   const { data: gallery, isLoading: loadingGallery } =
     api.gallery.getById.useQuery(
       { id: node.attrs.galleryId },
-      { enabled: !!node.attrs.galleryId },
+      { enabled: galleriesEnabled && !!node.attrs.galleryId },
     );
 
   const handleGallerySelect = (galleryId: string) => {
@@ -49,6 +53,18 @@ export function GalleryNodeView({
       deleteNode();
     }
   };
+
+  // Disabled state — preserve the node in the document but show a notice
+  if (!galleriesEnabled) {
+    return (
+      <NodeViewWrapper className="gallery-node my-4">
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-700">
+          Galleries are currently disabled for this business. Re-enable the
+          gallery feature to display this content.
+        </div>
+      </NodeViewWrapper>
+    );
+  }
 
   // Editing/Selection State
   if (isEditing || !node.attrs.galleryId) {

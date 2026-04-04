@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
 import { HappyBambooBlogPostPage } from "../../_templates/happy-bamboo/happy-bamboo-blog-post-page";
@@ -14,11 +15,15 @@ export default async function PageView({ params }: Props) {
   const business = await api.business.simplifiedGet();
   if (!business) notFound();
 
-  const relatedPosts = await api.content.getBlogPages();
-  const page = await api.content.getPageBySlug({
-    slug,
-    type: "blog",
-  });
+  const relatedPosts = await api.content
+    .getBlogPages()
+    .catch(rethrowTrpcForErrorBoundary);
+
+  const page = await api.content
+    .getBlogPostBySlug({
+      slug,
+    })
+    .catch(rethrowTrpcForErrorBoundary);
 
   if (!page) notFound();
 
@@ -33,10 +38,11 @@ export default async function PageView({ params }: Props) {
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
 
-  const page = await api.content.getPageBySlug({
-    slug,
-    type: "blog",
-  });
+  const page = await api.content
+    .getBlogPostBySlug({
+      slug,
+    })
+    .catch(rethrowTrpcForErrorBoundary);
 
   if (!page) return { title: "Page Not Found" };
 

@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 import { TrailHeader } from "~/app/admin/_components/trail-header";
 
@@ -11,7 +13,10 @@ type Props = {
 export default async function EditPagePage({ params }: Props) {
   const { id } = await params;
 
-  const page = await api.content.getPageById({ id });
+  const [page, flags] = await Promise.all([
+    api.content.getPageById({ id }).catch(rethrowTrpcForErrorBoundary),
+    getBusinessFlags(),
+  ]);
 
   if (!page) notFound();
 
@@ -25,16 +30,18 @@ export default async function EditPagePage({ params }: Props) {
         ]}
       />
 
-      <BlogPostEditor page={page} />
+      <BlogPostEditor page={page} galleriesEnabled={flags.isEnabled("galleries")} />
     </>
   );
 }
 
 export const generateMetadata = async ({ params }: Props) => {
   const { id } = await params;
-  const page = await api.content.getPageById({
-    id,
-  });
+  const page = await api.content
+    .getPageById({
+      id,
+    })
+    .catch(rethrowTrpcForErrorBoundary);
   return {
     title: `Edit ${page?.title ?? "Blog Post"}`,
   };

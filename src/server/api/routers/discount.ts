@@ -1,43 +1,35 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { checkBusiness } from "~/lib/check-business";
 import { deactivateExpiredDiscountCodes } from "~/lib/deactivate-expired-discounts";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { discountFormSchema } from "~/lib/validators/discounts";
 import {
   createTRPCRouter,
+  featureGate,
+  getBusinessProcedure,
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
 export const discountRouter = createTRPCRouter({
-  getAll: ownerAdminProcedure.query(async ({ ctx }) => {
-    const currentBusiness = await checkBusiness();
-    if (!currentBusiness) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
+  getAll: ownerAdminProcedure
+    .use(featureGate("coupons"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+      return ctx.db.discountCode.findMany({
+        where: { businessId },
+        orderBy: { createdAt: "desc" },
       });
-    }
-    return ctx.db.discountCode.findMany({
-      where: { businessId: currentBusiness.id },
-      orderBy: { createdAt: "desc" },
-    });
-  }),
+    }),
 
   getById: ownerAdminProcedure
+    .use(featureGate("coupons"))
     .input(z.object({ id: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
-      const currentBusiness = await checkBusiness();
-      if (!currentBusiness) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
       const discount = await ctx.db.discountCode.findFirst({
-        where: { id: input.id, businessId: currentBusiness.id },
+        where: { id: input.id, businessId },
       });
       if (!discount) {
         throw new TRPCError({
@@ -49,6 +41,7 @@ export const discountRouter = createTRPCRouter({
     }),
 
   create: ownerAdminProcedure
+    .use(featureGate("coupons"))
     .input(discountFormSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -89,6 +82,7 @@ export const discountRouter = createTRPCRouter({
     }),
 
   update: ownerAdminProcedure
+    .use(featureGate("coupons"))
     .input(
       discountFormSchema.extend({
         id: z.string().min(1),
@@ -131,54 +125,54 @@ export const discountRouter = createTRPCRouter({
       return { data: discount, message: "Discount code updated successfully" };
     }),
 
-  deactivateExpired: ownerAdminProcedure.mutation(async ({ ctx }) => {
-    const { businessId } = ctx;
-    return deactivateExpiredDiscountCodes(ctx.db, businessId);
-  }),
+  deactivateExpired: ownerAdminProcedure
+    .use(featureGate("coupons"))
+    .mutation(async ({ ctx }) => {
+      const { businessId } = ctx;
+      return deactivateExpiredDiscountCodes(ctx.db, businessId);
+    }),
 
-  getActiveBanner: publicProcedure.query(async ({ ctx }) => {
-    const business = await checkBusiness();
-    if (!business) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
+  getActiveBanner: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("coupons"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+
+      const now = new Date();
+      const codes = await ctx.db.discountCode.findMany({
+        where: {
+          businessId,
+          showAsBanner: true,
+          active: true,
+          AND: [
+            { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+            { OR: [{ expiresAt: null }, { expiresAt: { gte: now } }] },
+          ],
+        },
+        orderBy: { createdAt: "desc" },
+        take: 5,
       });
-    }
-    const { id: businessId } = business;
 
-    const now = new Date();
-    const codes = await ctx.db.discountCode.findMany({
-      where: {
-        businessId,
-        showAsBanner: true,
-        active: true,
-        AND: [
-          { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
-          { OR: [{ expiresAt: null }, { expiresAt: { gte: now } }] },
-        ],
-      },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-    });
-
-    for (const code of codes) {
-      if (code.usageLimit != null && code.usageCount >= code.usageLimit) {
-        continue;
+      for (const code of codes) {
+        if (code.usageLimit != null && code.usageCount >= code.usageLimit) {
+          continue;
+        }
+        const text = code.bannerText?.trim();
+        if (!text) continue;
+        return {
+          id: code.id,
+          code: code.code,
+          bannerText: text,
+          bannerLinkUrl: code.bannerLinkUrl?.trim() ?? null,
+        };
       }
-      const text = code.bannerText?.trim();
-      if (!text) continue;
-      return {
-        id: code.id,
-        code: code.code,
-        bannerText: text,
-        bannerLinkUrl: code.bannerLinkUrl?.trim() ?? null,
-      };
-    }
 
-    return null;
-  }),
+      return null;
+    }),
 
   validate: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("coupons"))
     .input(
       z.object({
         code: z.string().min(1),
@@ -186,15 +180,7 @@ export const discountRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const business = await checkBusiness();
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
-      const { id: businessId } = business;
+      const { businessId } = ctx;
       const { cartTotal } = input;
 
       const discount = await ctx.db.discountCode.findFirst({
@@ -232,6 +218,7 @@ export const discountRouter = createTRPCRouter({
     }),
 
   delete: ownerAdminProcedure
+    .use(featureGate("coupons"))
     .input(z.string())
     .mutation(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
