@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 
 import { formatDate } from "~/lib/format-date";
@@ -12,10 +11,12 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
+import { EditShippingAddressDialog } from "../_components/edit-shipping-address-dialog";
 import { FulfillmentForm } from "../_components/fulfillment-form";
+import { OrderMoreOptions } from "../_components/order-more-options";
 import { OrderNotes } from "../_components/order-notes";
-import { OrderStatusOverride } from "../_components/order-status-override";
 import { RefundHandler } from "../_components/refund-handler";
+import { ShipmentsPanel } from "../_components/shipments-panel";
 import { TrailHeader } from "../../_components/trail-header";
 
 type Props = {
@@ -48,6 +49,19 @@ export default async function OrderDetailPage({ params }: Props) {
     }
   };
 
+  const paymentMethodLabel = (method: string) => {
+    switch (method) {
+      case "card":
+        return "Card";
+      case "cash":
+        return "Cash";
+      case "check":
+        return "Check";
+      default:
+        return "Manual";
+    }
+  };
+
   return (
     <>
       <TrailHeader
@@ -73,9 +87,9 @@ export default async function OrderDetailPage({ params }: Props) {
 
             <Badge variant="outline">{formatDate(order.createdAt)}</Badge>
 
-            <Badge variant={order.status === "paid" ? "default" : "secondary"}>
+            {/* <Badge variant={order.status === "paid" ? "default" : "secondary"}>
               Status: {order.status}
-            </Badge>
+            </Badge> */}
 
             <Badge
               variant={order.paymentStatus === "paid" ? "default" : "secondary"}
@@ -96,7 +110,7 @@ export default async function OrderDetailPage({ params }: Props) {
         </div>
 
         <div className="toolbar-actions">
-          <OrderStatusOverride order={order} />
+          <OrderMoreOptions order={order} />
         </div>
       </div>
 
@@ -228,33 +242,11 @@ export default async function OrderDetailPage({ params }: Props) {
                   </p>
                 )}
 
-                {order.status === "fulfilled" && order.shippedAt && (
-                  <div className="mt-4 space-y-2">
-                    <p className="text-sm text-gray-600">
-                      Shipped{" "}
-                      {formatDistanceToNow(order.shippedAt, {
-                        addSuffix: true,
-                      })}
-                    </p>
-                    {order.trackingNumber && (
-                      <div>
-                        <p className="text-sm text-gray-600">Tracking:</p>
-                        <p className="font-mono text-sm font-medium">
-                          {order.trackingNumber}
-                        </p>
-                        {order.trackingUrl && (
-                          <a
-                            href={order.trackingUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-600 hover:underline"
-                          >
-                            Track Package →
-                          </a>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                {order.fulfillmentStatus === "fulfilled" && (
+                  <ShipmentsPanel
+                    orderId={order.id}
+                    shipments={order.shipments}
+                  />
                 )}
               </CardContent>
             </Card>
@@ -285,12 +277,17 @@ export default async function OrderDetailPage({ params }: Props) {
             </Card>
 
             {/* Shipping Address */}
-            {order.shippingAddress && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Shipping Address</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle>Shipping Address</CardTitle>
+                <EditShippingAddressDialog
+                  orderId={order.id}
+                  address={order.shippingAddress ?? null}
+                  canAdd={!!order.customerId}
+                />
+              </CardHeader>
+              <CardContent>
+                {order.shippingAddress ? (
                   <address className="text-gray-900 not-italic">
                     {order.shippingAddress.firstName}{" "}
                     {order.shippingAddress.lastName}
@@ -308,9 +305,13 @@ export default async function OrderDetailPage({ params }: Props) {
                     <br />
                     {order.shippingAddress.country}
                   </address>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    No shipping address on file.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Notes — always visible and editable */}
             <OrderNotes
@@ -334,9 +335,15 @@ export default async function OrderDetailPage({ params }: Props) {
                 <div>
                   <p className="text-sm text-gray-500">Method</p>
                   <p className="font-medium">
-                    {order.stripePaymentIntentId ? "Card" : "Manual"}
+                    {paymentMethodLabel(order.paymentMethod)}
                   </p>
                 </div>
+                {order.refundReason && (
+                  <div>
+                    <p className="text-sm text-gray-500">Refund Reason</p>
+                    <p className="text-sm font-medium">{order.refundReason}</p>
+                  </div>
+                )}
                 {order.stripePaymentIntentId && (
                   <div>
                     <p className="text-sm text-gray-500">Payment ID</p>

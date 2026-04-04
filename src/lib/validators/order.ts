@@ -17,6 +17,12 @@ const orderItemSchema = z.object({
   total: z.coerce.number(),
 });
 
+export const shipmentInputSchema = z.object({
+  carrier: z.string().optional(),
+  trackingNumber: z.string().optional(),
+  trackingUrl: z.string().optional(),
+});
+
 export const manualOrderFormSchema = z.object({
   customerName: z.string(),
   customerEmail: z.string(),
@@ -30,6 +36,7 @@ export const manualOrderFormSchema = z.object({
   notes: z.string().optional().nullable(),
   status: z.string(),
   paymentStatus: z.string(),
+  paymentMethod: z.string().optional(),
   fulfillmentStatus: z.string(),
   sendConfirmationEmail: z.boolean(),
 });
@@ -37,7 +44,6 @@ export const manualOrderFormSchema = z.object({
 export const updateFulfillmentSchema = z.object({
   orderId: z.string(),
   fulfillmentStatus: z.string(),
-  trackingNumber: z.string().optional(),
 });
 
 export const updateOrderStatusSchema = z.object({
@@ -63,53 +69,74 @@ export const orderFiltersSchema = z
   })
   .optional();
 
-export const markAsFulfilledSchema = z
-  .object({
-    orderId: z.string(),
-    carrier: z.string().optional(),
-    trackingNumber: z.string().optional(),
-    trackingUrl: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    const tn = data.trackingNumber?.trim();
-    if (tn && !data.carrier?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Carrier is required when a tracking number is provided",
-        path: ["carrier"],
-      });
-    }
-  });
+export const markAsFulfilledSchema = z.object({
+  orderId: z.string(),
+  shipments: z.array(shipmentInputSchema).min(1),
+});
+
+export const addShipmentSchema = z.object({
+  orderId: z.string(),
+  carrier: z.string().optional(),
+  trackingNumber: z.string().optional(),
+  trackingUrl: z.string().optional(),
+});
+
+export const updateShipmentSchema = z.object({
+  shipmentId: z.string(),
+  carrier: z.string().optional(),
+  trackingNumber: z.string().optional(),
+  trackingUrl: z.string().optional(),
+});
+
+export const updateShippingAddressSchema = z.object({
+  orderId: z.string(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  company: z.string().optional().nullable(),
+  address1: z.string().min(1),
+  address2: z.string().optional().nullable(),
+  city: z.string().min(1),
+  province: z.string().optional().nullable(),
+  zip: z.string().min(1),
+  country: z.string().min(1),
+  phone: z.string().optional().nullable(),
+});
 
 export const fulfillmentFormSchema = z
   .object({
     hasTracking: z.boolean(),
-    carrier: z.string().optional(),
-    trackingNumber: z.string().optional(),
-    trackingUrl: z
-      .string()
-      .url("Invalid tracking URL")
-      .optional()
-      .or(z.literal("")),
+    packages: z.array(
+      z.object({
+        carrier: z.string().optional(),
+        trackingNumber: z.string().optional(),
+        trackingUrl: z
+          .string()
+          .url("Invalid tracking URL")
+          .optional()
+          .or(z.literal("")),
+      }),
+    ),
   })
   .superRefine((data, ctx) => {
     if (!data.hasTracking) return;
-    if (!data.carrier?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Carrier is required",
-        path: ["carrier"],
-      });
-    }
-    if (!data.trackingNumber?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Tracking number is required",
-        path: ["trackingNumber"],
-      });
-    }
+    data.packages.forEach((pkg, i) => {
+      if (!pkg.carrier?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Carrier is required",
+          path: ["packages", i, "carrier"],
+        });
+      }
+      if (!pkg.trackingNumber?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Tracking number is required",
+          path: ["packages", i, "trackingNumber"],
+        });
+      }
+    });
   });
 
 export type FulfillmentFormValues = z.infer<typeof fulfillmentFormSchema>;
-
+export type ShipmentInput = z.infer<typeof shipmentInputSchema>;
 export type ManualOrderFormSchema = z.infer<typeof manualOrderFormSchema>;

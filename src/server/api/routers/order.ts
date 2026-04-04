@@ -12,6 +12,7 @@ import {
 } from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
 import {
+  addShipmentSchema,
   manualOrderFormSchema,
   markAsFulfilledSchema,
   orderFiltersSchema,
@@ -19,6 +20,8 @@ import {
   updateFulfillmentSchema,
   updateOrderStatusSchema,
   updatePaymentStatusSchema,
+  updateShipmentSchema,
+  updateShippingAddressSchema,
 } from "~/lib/validators/order";
 import {
   createTRPCRouter,
@@ -38,7 +41,7 @@ export const orderRouter = createTRPCRouter({
     .input(markAsFulfilledSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      // Get order with business info
+
       const order = await ctx.db.order.findUnique({
         where: { id: input.orderId, businessId },
         include: {
@@ -55,50 +58,47 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      const hasTracking = Boolean(input.trackingNumber?.trim());
-      const trimmedTrackingUrl = input.trackingUrl?.trim();
-      const trackingUrlToSave =
-        trimmedTrackingUrl && trimmedTrackingUrl.length > 0
-          ? trimmedTrackingUrl
-          : null;
-
-      // Update order
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
         data: {
           status: "fulfilled",
           fulfillmentStatus: "fulfilled",
-          shippedAt: new Date(),
-          ...(hasTracking
-            ? {
-                trackingNumber: input.trackingNumber!.trim(),
-                trackingUrl: trackingUrlToSave,
-              }
-            : {
-                trackingNumber: null,
-                trackingUrl: null,
-              }),
+          shipments: {
+            create: input.shipments.map((s) => ({
+              carrier: s.carrier?.trim() ?? null,
+              trackingNumber: s.trackingNumber?.trim() ?? null,
+              trackingUrl: s.trackingUrl?.trim() ?? null,
+            })),
+          },
         },
+        include: { shipments: { orderBy: { shippedAt: "asc" } } },
       });
 
+      const shipmentsWithTracking = updatedOrder.shipments.filter(
+        (s) => s.trackingNumber,
+      );
+      const anyTracking = shipmentsWithTracking.length > 0;
+
       try {
-        if (hasTracking) {
-          await sendOrderShipped({
-            to: order.customerEmail,
-            orderNumber: order.orderNumber,
-            customerName: order.customerName ?? "Guest",
-            trackingNumber: input.trackingNumber!.trim(),
-            trackingUrl: trackingUrlToSave ?? "",
-            carrier: input.carrier!.trim(),
-            business: {
-              name: order.business.name,
-              ownerEmail: order.business.ownerEmail,
-              siteContent: order.business.siteContent,
-              subdomain: order.business.subdomain,
-            },
-          });
+        if (anyTracking) {
+          for (const shipment of shipmentsWithTracking) {
+            await sendOrderShipped({
+              to: order.customerEmail,
+              orderNumber: order.orderNumber,
+              customerName: order.customerName ?? "Guest",
+              trackingNumber: shipment.trackingNumber!,
+              trackingUrl: shipment.trackingUrl ?? "",
+              carrier: shipment.carrier ?? "",
+              business: {
+                name: order.business.name,
+                ownerEmail: order.business.ownerEmail,
+                siteContent: order.business.siteContent,
+                subdomain: order.business.subdomain,
+              },
+            });
+          }
           console.log(
-            `[Orders] Shipping email sent for order #${order.orderNumber}`,
+            `[Orders] Shipped email(s) sent for order #${order.orderNumber}`,
           );
         } else {
           await sendOrderFulfilled({
@@ -114,15 +114,241 @@ export const orderRouter = createTRPCRouter({
             },
           });
           console.log(
-            `[Orders] Order fulfilled email sent for order #${order.orderNumber}`,
+            `[Orders] Fulfilled email sent for order #${order.orderNumber}`,
           );
         }
       } catch (emailError) {
         console.error("[Orders] Failed to send fulfillment email:", emailError);
-        // Don't fail the mutation if email fails
       }
 
       return updatedOrder;
+    }),
+
+  addShipment: ownerAdminProcedure
+    .use(featureGate("orders"))
+    .input(addShipmentSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const order = await ctx.db.order.findFirst({
+        where: { id: input.orderId, businessId },
+        include: {
+          business: {
+            include: { siteContent: { select: { logoUrl: true } } },
+          },
+        },
+      });
+
+      if (!order) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" });
+      }
+
+      const shipment = await ctx.db.orderShipment.create({
+        data: {
+          orderId: input.orderId,
+          carrier: input.carrier?.trim() ?? null,
+          trackingNumber: input.trackingNumber?.trim() ?? null,
+          trackingUrl: input.trackingUrl?.trim() ?? null,
+        },
+      });
+
+      try {
+        if (shipment.trackingNumber) {
+          await sendOrderShipped({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            trackingNumber: shipment.trackingNumber,
+            trackingUrl: shipment.trackingUrl ?? "",
+            carrier: shipment.carrier ?? "",
+            business: {
+              name: order.business.name,
+              ownerEmail: order.business.ownerEmail,
+              siteContent: order.business.siteContent,
+              subdomain: order.business.subdomain,
+            },
+          });
+          console.log(
+            `[Orders] Additional shipped email sent for order #${order.orderNumber}`,
+          );
+        } else {
+          await sendOrderFulfilled({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            business: {
+              name: order.business.name,
+              ownerEmail: order.business.ownerEmail,
+              siteContent: order.business.siteContent,
+              subdomain: order.business.subdomain,
+              customDomain: order.business.customDomain,
+            },
+          });
+        }
+      } catch (emailError) {
+        console.error("[Orders] Failed to send shipment email:", emailError);
+      }
+
+      return shipment;
+    }),
+
+  updateShipment: ownerAdminProcedure
+    .use(featureGate("orders"))
+    .input(updateShipmentSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // Scope to businessId via the parent order
+      const shipment = await ctx.db.orderShipment.findFirst({
+        where: {
+          id: input.shipmentId,
+          order: { businessId },
+        },
+      });
+
+      if (!shipment) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Shipment not found",
+        });
+      }
+
+      return ctx.db.orderShipment.update({
+        where: { id: input.shipmentId },
+        data: {
+          carrier: input.carrier?.trim() ?? shipment.carrier,
+          trackingNumber:
+            input.trackingNumber?.trim() ?? shipment.trackingNumber,
+          trackingUrl: input.trackingUrl?.trim() ?? shipment.trackingUrl,
+        },
+      });
+    }),
+
+  resendEmail: ownerAdminProcedure
+    .use(featureGate("orders"))
+    .input(
+      z.object({
+        orderId: z.string(),
+        type: z.enum(["confirmation", "shipped", "fulfilled", "refunded"]),
+        shipmentId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const order = await ctx.db.order.findFirst({
+        where: { id: input.orderId, businessId },
+        include: {
+          items: true,
+          shippingAddress: true,
+          shipments: { orderBy: { shippedAt: "asc" } },
+          business: {
+            include: { siteContent: { select: { logoUrl: true } } },
+          },
+        },
+      });
+
+      if (!order) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" });
+      }
+
+      const { business } = order;
+
+      switch (input.type) {
+        case "confirmation": {
+          await sendOrderConfirmation({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            items: order.items,
+            subtotal: order.subtotal,
+            shipping: order.shipping,
+            tax: order.tax,
+            discount: order.discount,
+            total: order.total,
+            shippingAddress: order.shippingAddress,
+            business: {
+              name: business.name,
+              ownerEmail: business.ownerEmail,
+              siteContent: business.siteContent,
+              subdomain: business.subdomain,
+              customDomain: business.customDomain,
+            },
+          });
+          break;
+        }
+        case "shipped": {
+          if (!input.shipmentId) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "shipmentId is required for type 'shipped'",
+            });
+          }
+          const shipment = order.shipments.find(
+            (s) => s.id === input.shipmentId,
+          );
+          if (!shipment) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Shipment not found",
+            });
+          }
+          await sendOrderShipped({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            trackingNumber: shipment.trackingNumber ?? "",
+            trackingUrl: shipment.trackingUrl ?? "",
+            carrier: shipment.carrier ?? "",
+            business: {
+              name: business.name,
+              ownerEmail: business.ownerEmail,
+              siteContent: business.siteContent,
+              subdomain: business.subdomain,
+            },
+          });
+          break;
+        }
+        case "fulfilled": {
+          await sendOrderFulfilled({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            business: {
+              name: business.name,
+              ownerEmail: business.ownerEmail,
+              siteContent: business.siteContent,
+              subdomain: business.subdomain,
+              customDomain: business.customDomain,
+            },
+          });
+          break;
+        }
+        case "refunded": {
+          await sendOrderRefunded({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            refundAmountCents: order.total,
+            orderTotalCents: order.total,
+            isFullRefund: true,
+            reason: order.refundReason ?? null,
+            business: {
+              name: business.name,
+              ownerEmail: business.ownerEmail,
+              siteContent: business.siteContent,
+              subdomain: business.subdomain,
+              customDomain: business.customDomain,
+            },
+          });
+          break;
+        }
+      }
+
+      console.log(
+        `[Orders] Resent '${input.type}' email for order #${order.orderNumber}`,
+      );
+      return { success: true };
     }),
 
   getAll: ownerAdminProcedure
@@ -171,13 +397,13 @@ export const orderRouter = createTRPCRouter({
           items: true,
           shippingAddress: true,
           customer: true,
+          shipments: { orderBy: { shippedAt: "asc" } },
         },
       });
 
       return order;
     }),
 
-  //TODO: Wonder if I need to connect the refund info to the order?
   refund: ownerAdminProcedure
     .use(featureGate("orders"))
     .input(refundOrderSchema)
@@ -245,20 +471,24 @@ export const orderRouter = createTRPCRouter({
         },
       );
 
-      // Update order status
       const isFullRefund = input.amount === order.total;
+      const reasonLabel = input.reason
+        ? (STRIPE_REFUND_REASON_LABEL[input.reason] ?? input.reason)
+        : null;
+
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
         data: {
           status: isFullRefund ? "refunded" : "partial_refund",
           ...(isFullRefund && { paymentStatus: "refunded" }),
+          refundReason: reasonLabel,
         },
         include: {
           items: true,
         },
       });
 
-      // Restore inventory for refunded items (variant-level or product-level for no-variant items)
+      // Restore inventory for refunded items
       if (isFullRefund) {
         try {
           await ctx.db.$transaction(async (tx) => {
@@ -321,14 +551,10 @@ export const orderRouter = createTRPCRouter({
           });
         } catch (invError) {
           console.error("Failed to restore inventory:", invError);
-          // Don't fail the refund if inventory restoration fails
         }
       }
 
       try {
-        const reasonLabel = input.reason
-          ? (STRIPE_REFUND_REASON_LABEL[input.reason] ?? input.reason)
-          : null;
         await sendOrderRefunded({
           to: order.customerEmail,
           orderNumber: order.orderNumber,
@@ -391,12 +617,10 @@ export const orderRouter = createTRPCRouter({
         where: { id: input.orderId },
         data: {
           status: input.status,
-          // If marking as paid, also update payment status
           paymentStatus: isPaid ? "paid" : order.paymentStatus,
         },
       });
 
-      // Update customer metrics if transitioning from unpaid to paid
       if (wasUnpaid && isPaid && order.customerId) {
         try {
           await ctx.db.customer.update({
@@ -457,29 +681,28 @@ export const orderRouter = createTRPCRouter({
       });
     }),
 
-  // TODO: Brainstorm more on the customer / shipping address relationship
   createManual: ownerAdminProcedure
     .use(featureGate("orders"))
     .input(manualOrderFormSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      // Fetch business info upfront (needed for email and order creation)
       const business = await ctx.db.business.findUnique({
         where: { id: businessId },
         include: { siteContent: { select: { logoUrl: true } } },
       });
 
       if (!business) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
       }
 
-      // Parse customer name into first/last
       const nameParts = input.customerName.trim().split(" ");
       const firstName = nameParts[0] ?? "Guest";
       const lastName = nameParts.slice(1).join(" ") || "";
 
-      // Upsert customer first to ensure it exists
       const customer = await ctx.db.customer.upsert({
         where: {
           businessId_email: {
@@ -503,13 +726,13 @@ export const orderRouter = createTRPCRouter({
         `[Manual Order] Customer upserted: ${customer.id} (${customer.email})`,
       );
 
-      // Find or create shipping address (optional)
       let shippingAddressId: string | undefined;
       if (input.shippingAddress) {
         const shippingName = input.shippingName?.trim() ?? input.customerName;
         const shippingNameParts = shippingName.split(" ");
         const shippingFirstName = shippingNameParts[0] ?? firstName;
-        const shippingLastName = shippingNameParts.slice(1).join(" ") || lastName;
+        const shippingLastName =
+          shippingNameParts.slice(1).join(" ") || lastName;
 
         shippingAddressId = await findOrCreateShippingAddress({
           customerId: customer.id,
@@ -523,16 +746,17 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      // Generate order number
       const orderCount = await ctx.db.order.count({
         where: { businessId },
       });
 
-      // Auto-stamp internal note
       const baseNote = input.notes?.trim() ?? "";
       const internalNote = baseNote
         ? `[Manual Order]\n${baseNote}`
         : "[Manual Order]";
+
+      // Derive paymentMethod: use provided value or default based on payment source
+      const paymentMethod = input.paymentMethod?.trim() ?? "manual";
 
       const order = await ctx.db.order.create({
         data: {
@@ -542,23 +766,19 @@ export const orderRouter = createTRPCRouter({
           customerEmail: input.customerEmail,
           customerName: input.customerName,
 
-          // Amounts
           subtotal: input.subtotal,
-          tax: input.tax || 0,
-          shipping: input.shipping || 0,
+          tax: input.tax ?? 0,
+          shipping: input.shipping ?? 0,
           total: input.total,
 
           status: input.status,
           paymentStatus: input.paymentStatus,
+          paymentMethod,
           fulfillmentStatus: input.fulfillmentStatus,
 
-          // Shipping (optional)
           shippingAddressId,
-
-          // Notes
           internalNote,
 
-          // Items
           items: {
             create: input.items.map((item) => ({
               productId: item.productId,
@@ -577,7 +797,6 @@ export const orderRouter = createTRPCRouter({
 
       console.log(`[Manual Order] Order created: ${order.id}`);
 
-      // Optionally send order confirmation email to customer
       if (input.sendConfirmationEmail) {
         try {
           await sendOrderConfirmation({
@@ -609,9 +828,6 @@ export const orderRouter = createTRPCRouter({
         }
       }
 
-      // Note: Customer metrics are NOT updated for manual/pending orders
-      // They will be updated when the order is marked as paid
-
       return order;
     }),
 
@@ -625,7 +841,6 @@ export const orderRouter = createTRPCRouter({
         where: { id: input.orderId, businessId },
         data: {
           fulfillmentStatus: input.fulfillmentStatus,
-          trackingNumber: input.trackingNumber ?? null,
         },
       });
 
@@ -694,18 +909,20 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
+      const reasonLabel = input.reason
+        ? (STRIPE_REFUND_REASON_LABEL[input.reason] ?? input.reason)
+        : null;
+
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
         data: {
           status: "refunded",
           paymentStatus: "refunded",
+          refundReason: reasonLabel,
         },
       });
 
       try {
-        const reasonLabel = input.reason
-          ? (STRIPE_REFUND_REASON_LABEL[input.reason] ?? input.reason)
-          : null;
         await sendOrderRefunded({
           to: order.customerEmail,
           orderNumber: order.orderNumber,
@@ -733,5 +950,54 @@ export const orderRouter = createTRPCRouter({
       }
 
       return updatedOrder;
+    }),
+
+  updateShippingAddress: ownerAdminProcedure
+    .use(featureGate("orders"))
+    .input(updateShippingAddressSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const order = await ctx.db.order.findFirst({
+        where: { id: input.orderId, businessId },
+        select: { id: true, shippingAddressId: true, customerId: true },
+      });
+
+      if (!order) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" });
+      }
+
+      const addressData = {
+        firstName: input.firstName,
+        lastName: input.lastName,
+        company: input.company ?? null,
+        address1: input.address1,
+        address2: input.address2 ?? null,
+        city: input.city,
+        province: input.province ?? null,
+        zip: input.zip,
+        country: input.country,
+        phone: input.phone ?? null,
+      };
+
+      if (order.shippingAddressId) {
+        await ctx.db.shippingAddress.update({
+          where: { id: order.shippingAddressId },
+          data: addressData,
+        });
+      } else if (order.customerId) {
+        const newAddress = await ctx.db.shippingAddress.create({
+          data: { ...addressData, customerId: order.customerId },
+        });
+        await ctx.db.order.update({
+          where: { id: input.orderId },
+          data: { shippingAddressId: newAddress.id },
+        });
+      } else {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot add a shipping address: order has no linked customer",
+        });
+      }
     }),
 });

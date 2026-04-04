@@ -497,13 +497,12 @@ model Order {
   customerLastName  String?
   customerPhone     String?
 
-  // Shipping (direct fields for webhook/manual orders)
-  // shippingName    String?
-  // shippingAddress String? @db.Text // JSON string for simple address storage
-  trackingNumber  String?
-  trackingUrl     String?
-  shippedAt       DateTime?
-  
+  // Payment
+  paymentMethod String @default("card") // card | cash | check | manual
+
+  // Refund
+  refundReason String?
+
   // Notes
   customerNote String? @db.Text
   internalNote String? @db.Text
@@ -521,15 +520,30 @@ model Order {
   discountCodeId String?
   discountCode   DiscountCode? @relation(fields: [discountCodeId], references: [id], onDelete: SetNull)
   
-  items OrderItem[]
+  items            OrderItem[]
   inventoryHistory InventoryHistory[]
-
-    reviews     ProductReview[]
+  reviews          ProductReview[]
+  shipments        OrderShipment[]
   
   @@unique([businessId, orderNumber])
   @@index([businessId, status])
   @@index([businessId, createdAt])
   @@index([customerId])
+}
+
+model OrderShipment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  shippedAt DateTime @default(now())
+
+  carrier        String?
+  trackingNumber String?
+  trackingUrl    String?
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
 }
 
 

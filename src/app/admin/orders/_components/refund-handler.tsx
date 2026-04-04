@@ -18,7 +18,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
   Select,
@@ -50,8 +49,6 @@ function StripeRefundDialog({ order }: { order: Order }) {
   const utils = api.useUtils();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [refundType, setRefundType] = useState<"full" | "partial">("full");
-  const [partialAmount, setPartialAmount] = useState("");
   const [reason, setReason] = useState("");
 
   const refundMutation = api.order.refund.useMutation({
@@ -75,23 +72,9 @@ function StripeRefundDialog({ order }: { order: Order }) {
   });
 
   const handleRefund = () => {
-    let amountToRefund = order.total;
-
-    if (refundType === "partial") {
-      if (!partialAmount || parseFloat(partialAmount) <= 0) {
-        setError("Please enter a valid refund amount");
-        return;
-      }
-      amountToRefund = Math.round(parseFloat(partialAmount) * 100);
-      if (amountToRefund > order.total) {
-        setError("Refund amount cannot exceed order total");
-        return;
-      }
-    }
-
     refundMutation.mutate({
       orderId: order.id,
-      amount: amountToRefund,
+      amount: order.total,
       reason: reason || undefined,
     });
   };
@@ -122,61 +105,10 @@ function StripeRefundDialog({ order }: { order: Order }) {
             </Alert>
           )}
 
-          {/* Refund Type */}
-          <div>
-            <Label>Refund Type</Label>
-            <div className="mt-2 flex gap-4">
-              <label className="flex cursor-pointer items-center gap-2">
-                <input
-                  type="radio"
-                  name="refundType"
-                  value="full"
-                  checked={refundType === "full"}
-                  onChange={() => setRefundType("full")}
-                  className="h-4 w-4"
-                />
-                <span>Full Refund ({formatPrice(order.total)})</span>
-              </label>
-              <label className="flex cursor-pointer items-center gap-2">
-                <input
-                  type="radio"
-                  name="refundType"
-                  value="partial"
-                  checked={refundType === "partial"}
-                  onChange={() => setRefundType("partial")}
-                  className="h-4 w-4"
-                  disabled
-                />
-                <span>Partial Refund</span>
-              </label>
-            </div>
+          <div className="rounded-md border px-4 py-3 text-sm">
+            <span className="text-gray-500">Refund amount: </span>
+            <span className="font-medium">{formatPrice(order.total)}</span>
           </div>
-
-          {/* Partial Amount */}
-          {refundType === "partial" && (
-            <div>
-              <Label htmlFor="partialAmount">Refund Amount (USD)</Label>
-              <div className="relative">
-                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
-                  $
-                </span>
-                <Input
-                  id="partialAmount"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  max={(order.total / 100).toFixed(2)}
-                  value={partialAmount}
-                  onChange={(e) => setPartialAmount(e.target.value)}
-                  placeholder="0.00"
-                  className="pl-7"
-                />
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Maximum: {formatPrice(order.total)}
-              </p>
-            </div>
-          )}
 
           {/* Reason */}
           <div className="space-y-2">

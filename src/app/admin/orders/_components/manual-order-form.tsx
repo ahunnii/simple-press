@@ -79,6 +79,7 @@ export function ManualOrderForm({ products }: Props) {
       notes: "",
       status: "pending",
       paymentStatus: "pending",
+      paymentMethod: undefined,
       fulfillmentStatus: "unfulfilled",
       sendConfirmationEmail: false,
     },
@@ -233,6 +234,7 @@ export function ManualOrderForm({ products }: Props) {
       notes: data.notes,
       status: deriveStatus(data.paymentStatus, data.fulfillmentStatus),
       paymentStatus: data.paymentStatus,
+      paymentMethod: data.paymentMethod,
       fulfillmentStatus: data.fulfillmentStatus,
       sendConfirmationEmail: data.sendConfirmationEmail,
     });
@@ -476,6 +478,35 @@ export function ManualOrderForm({ products }: Props) {
                         </Select>
                         <FormDescription>
                           Whether payment has been collected
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="paymentMethod"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Payment Method</FormLabel>
+                        <Select
+                          value={field.value ?? ""}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Manual (default)" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="card">Card</SelectItem>
+                            <SelectItem value="cash">Cash</SelectItem>
+                            <SelectItem value="check">Check</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          How payment was collected. Defaults to manual if left
+                          blank.
                         </FormDescription>
                       </FormItem>
                     )}

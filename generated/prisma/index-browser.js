@@ -366,15 +366,24 @@ exports.Prisma.OrderScalarFieldEnum = {
   customerFirstName: 'customerFirstName',
   customerLastName: 'customerLastName',
   customerPhone: 'customerPhone',
-  trackingNumber: 'trackingNumber',
-  trackingUrl: 'trackingUrl',
-  shippedAt: 'shippedAt',
+  paymentMethod: 'paymentMethod',
+  refundReason: 'refundReason',
   customerNote: 'customerNote',
   internalNote: 'internalNote',
   businessId: 'businessId',
   customerId: 'customerId',
   shippingAddressId: 'shippingAddressId',
   discountCodeId: 'discountCodeId'
+};
+
+exports.Prisma.OrderShipmentScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  shippedAt: 'shippedAt',
+  carrier: 'carrier',
+  trackingNumber: 'trackingNumber',
+  trackingUrl: 'trackingUrl',
+  orderId: 'orderId'
 };
 
 exports.Prisma.OrderItemScalarFieldEnum = {
@@ -639,6 +648,7 @@ exports.Prisma.ModelName = {
   Customer: 'Customer',
   ShippingAddress: 'ShippingAddress',
   Order: 'Order',
+  OrderShipment: 'OrderShipment',
   OrderItem: 'OrderItem',
   DomainQueue: 'DomainQueue',
   DiscountCode: 'DiscountCode',
