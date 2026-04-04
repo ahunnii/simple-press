@@ -1,7 +1,8 @@
-import { Button } from '~/components/ui/button';
-import type { UploadHookControl } from '@better-upload/client';
-import { Loader2, Upload } from 'lucide-react';
-import { useId } from 'react';
+import type { UploadHookControl } from "@better-upload/client";
+import { useId } from "react";
+import { Loader2, Upload } from "lucide-react";
+
+import { Button } from "~/components/ui/button";
 
 type UploadButtonProps = {
   control: UploadHookControl<false>;
@@ -9,7 +10,7 @@ type UploadButtonProps = {
   accept?: string;
   metadata?: Record<string, unknown>;
   uploadOverride?: (
-    ...args: Parameters<UploadHookControl<false>['upload']>
+    ...args: Parameters<UploadHookControl<false>["upload"]>
   ) => void;
 
   // Add any additional props you need.
@@ -26,10 +27,11 @@ export function UploadButton({
 
   return (
     <Button disabled={isPending} className="relative" type="button">
-      <label htmlFor={_id || id} className="absolute inset-0 cursor-pointer">
+      <label htmlFor={_id ?? id} className="absolute inset-0 cursor-pointer">
         <input
-          id={_id || id}
+          id={_id ?? id}
           disabled={isPending}
+          placeholder="Upload file"
           className="absolute inset-0 size-0 opacity-0"
           type="file"
           accept={accept}
@@ -38,10 +40,10 @@ export function UploadButton({
               if (uploadOverride) {
                 uploadOverride(e.target.files[0], { metadata });
               } else {
-                upload(e.target.files[0], { metadata });
+                void upload(e.target.files[0], { metadata });
               }
             }
-            e.target.value = '';
+            e.target.value = "";
           }}
         />
       </label>
