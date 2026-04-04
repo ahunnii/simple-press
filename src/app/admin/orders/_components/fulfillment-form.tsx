@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CARRIERS } from "~/data/fulfillment-constants";
 import { Loader2, Package } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 
+import type { FulfillmentFormValues } from "~/lib/validators/order";
+import { fulfillmentFormSchema } from "~/lib/validators/order";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -22,77 +24,20 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
-const fulfillmentSchema = z
-  .object({
-    hasTracking: z.boolean(),
-    carrier: z.string().optional(),
-    trackingNumber: z.string().optional(),
-    trackingUrl: z
-      .string()
-      .url("Invalid tracking URL")
-      .optional()
-      .or(z.literal("")),
-  })
-  .superRefine((data, ctx) => {
-    if (!data.hasTracking) return;
-    if (!data.carrier?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Carrier is required",
-        path: ["carrier"],
-      });
-    }
-    if (!data.trackingNumber?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Tracking number is required",
-        path: ["trackingNumber"],
-      });
-    }
-  });
-
-type FulfillmentFormValues = z.infer<typeof fulfillmentSchema>;
-
-const CARRIERS = [
-  {
-    value: "usps",
-    label: "USPS",
-    trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=",
-  },
-  {
-    value: "ups",
-    label: "UPS",
-    trackingUrl: "https://www.ups.com/track?tracknum=",
-  },
-  {
-    value: "fedex",
-    label: "FedEx",
-    trackingUrl: "https://www.fedex.com/fedextrack/?tracknumbers=",
-  },
-  {
-    value: "dhl",
-    label: "DHL",
-    trackingUrl: "https://www.dhl.com/en/express/tracking.html?AWB=",
-  },
-  { value: "other", label: "Other", trackingUrl: "" },
-];
-
-type FulfillmentFormProps = {
+type Props = {
   orderId: string;
   orderNumber: number;
   customerEmail: string;
   customerName: string;
 };
 
-export function FulfillmentForm({
-  orderId,
-  customerEmail,
-}: FulfillmentFormProps) {
+export function FulfillmentForm({ orderId, customerEmail }: Props) {
   const router = useRouter();
   const [selectedCarrier, setSelectedCarrier] = useState<string>("");
+  const utils = api.useUtils();
 
   const form = useForm<FulfillmentFormValues>({
-    resolver: zodResolver(fulfillmentSchema),
+    resolver: zodResolver(fulfillmentFormSchema),
     defaultValues: {
       hasTracking: true,
       carrier: "",
@@ -105,11 +50,17 @@ export function FulfillmentForm({
 
   const markFulfilled = api.order.markAsFulfilled.useMutation({
     onSuccess: () => {
+      toast.dismiss();
       toast.success("Order marked as fulfilled and email sent to customer");
+      void utils.order.invalidate();
       router.refresh();
     },
     onError: (error) => {
+      toast.dismiss();
       toast.error(error.message || "Failed to mark order as fulfilled");
+    },
+    onMutate: () => {
+      toast.loading("Marking order as fulfilled...");
     },
   });
 
@@ -151,10 +102,13 @@ export function FulfillmentForm({
               }
             />
             <div className="grid gap-1">
-              <Label htmlFor="hasTracking" className="cursor-pointer font-medium">
+              <Label
+                htmlFor="hasTracking"
+                className="cursor-pointer font-medium"
+              >
                 Include tracking information
               </Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Uncheck if you&apos;re marking the order fulfilled without a
                 tracking number. The customer will get a different email.
               </p>
@@ -164,7 +118,9 @@ export function FulfillmentForm({
           {hasTracking && (
             <>
               <div>
-                <Label htmlFor="carrier">Carrier *</Label>
+                <Label htmlFor="carrier">
+                  Carrier <span className="text-red-500">*</span>
+                </Label>
                 <Select
                   value={form.watch("carrier")}
                   onValueChange={(value) => {
@@ -191,7 +147,9 @@ export function FulfillmentForm({
               </div>
 
               <div>
-                <Label htmlFor="trackingNumber">Tracking Number *</Label>
+                <Label htmlFor="trackingNumber">
+                  Tracking Number <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="trackingNumber"
                   {...form.register("trackingNumber")}

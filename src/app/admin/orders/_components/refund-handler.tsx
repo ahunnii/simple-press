@@ -4,6 +4,7 @@ import type { Order } from "generated/prisma";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, Loader2, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -31,53 +32,60 @@ type Props = {
   order: Order;
 };
 
-export function RefundHandler({ order }: Props) {
+const formatPrice = (cents: number) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+    cents / 100,
+  );
+
+const REFUND_REASONS = [
+  { value: "requested_by_customer", label: "Customer requested refund" },
+  { value: "duplicate", label: "Duplicate order" },
+  { value: "fraudulent", label: "Fraudulent order" },
+];
+
+// ─── Stripe refund dialog ────────────────────────────────────────────────────
+
+function StripeRefundDialog({ order }: { order: Order }) {
   const router = useRouter();
+  const utils = api.useUtils();
   const [isOpen, setIsOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refundType, setRefundType] = useState<"full" | "partial">("full");
   const [partialAmount, setPartialAmount] = useState("");
   const [reason, setReason] = useState("");
 
-  const canRefund =
-    (order.status === "paid" || order.status === "fulfilled") &&
-    !!order.stripePaymentIntentId;
-
-  const formatPrice = (cents: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(cents / 100);
-  };
-
   const refundMutation = api.order.refund.useMutation({
     onSuccess: () => {
+      toast.dismiss();
       setIsOpen(false);
-    },
-    onError: (error) => {
-      setError(error.message ?? "Failed to process refund");
-    },
-    onSettled: () => {
-      setIsProcessing(false);
+      toast.success("Refund processed successfully");
+      void utils.order.invalidate();
       router.refresh();
+    },
+    onError: (err) => {
+      toast.dismiss();
+      const msg = err.message ?? "Failed to process refund";
+      toast.error(msg);
+      setError(msg);
+    },
+    onMutate: () => {
+      setError(null);
+      toast.loading("Processing refund...");
     },
   });
 
-  const handleRefund = async () => {
-    setError(null);
-    setIsProcessing(true);
-
+  const handleRefund = () => {
     let amountToRefund = order.total;
 
     if (refundType === "partial") {
       if (!partialAmount || parseFloat(partialAmount) <= 0) {
-        throw new Error("Please enter a valid refund amount");
+        setError("Please enter a valid refund amount");
+        return;
       }
       amountToRefund = Math.round(parseFloat(partialAmount) * 100);
-
       if (amountToRefund > order.total) {
-        throw new Error("Refund amount cannot exceed order total");
+        setError("Refund amount cannot exceed order total");
+        return;
       }
     }
 
@@ -88,9 +96,7 @@ export function RefundHandler({ order }: Props) {
     });
   };
 
-  if (!canRefund) {
-    return null;
-  }
+  const isProcessing = refundMutation.isPending;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -115,6 +121,7 @@ export function RefundHandler({ order }: Props) {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+
           {/* Refund Type */}
           <div>
             <Label>Refund Type</Label>
@@ -144,6 +151,7 @@ export function RefundHandler({ order }: Props) {
               </label>
             </div>
           </div>
+
           {/* Partial Amount */}
           {refundType === "partial" && (
             <div>
@@ -172,28 +180,21 @@ export function RefundHandler({ order }: Props) {
 
           {/* Reason */}
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason (Optional)</Label>
+            <Label>Reason (Optional)</Label>
             <Select value={reason} onValueChange={setReason}>
               <SelectTrigger className="w-full bg-white">
                 <SelectValue placeholder="Select a reason" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="requested_by_customer">
-                  Customer requested refund
-                </SelectItem>
-                <SelectItem value="duplicate">Duplicate order</SelectItem>
-                <SelectItem value="fraudulent">Fraudulent order</SelectItem>
+                {REFUND_REASONS.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-            {/* <Textarea
-              id="reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Customer requested refund..."
-              rows={3}
-            /> */}
           </div>
-          {/* Warning */}
+
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
@@ -233,4 +234,135 @@ export function RefundHandler({ order }: Props) {
       </DialogContent>
     </Dialog>
   );
+}
+
+// ─── Manual mark-as-refunded dialog ─────────────────────────────────────────
+
+function ManualRefundDialog({ order }: { order: Order }) {
+  const router = useRouter();
+  const utils = api.useUtils();
+  const [isOpen, setIsOpen] = useState(false);
+  const [reason, setReason] = useState("");
+
+  const markRefundedMutation = api.order.markAsRefunded.useMutation({
+    onSuccess: () => {
+      toast.dismiss();
+      setIsOpen(false);
+      toast.success("Order marked as refunded");
+      void utils.order.invalidate();
+      router.refresh();
+    },
+    onError: (err) => {
+      toast.dismiss();
+      toast.error(err.message ?? "Failed to mark order as refunded");
+    },
+    onMutate: () => {
+      toast.loading("Updating order...");
+    },
+  });
+
+  const isProcessing = markRefundedMutation.isPending;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="w-full" size="sm">
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Mark as Refunded
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Mark as Refunded</DialogTitle>
+          <DialogDescription>
+            Record that this order has been refunded outside of Stripe.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          <div className="rounded-md border px-4 py-3 text-sm">
+            <span className="text-gray-500">Order total: </span>
+            <span className="font-medium">{formatPrice(order.total)}</span>
+          </div>
+
+          {/* Reason */}
+          <div className="space-y-2">
+            <Label>Reason (Optional)</Label>
+            <Select value={reason} onValueChange={setReason}>
+              <SelectTrigger className="w-full bg-white">
+                <SelectValue placeholder="Select a reason" />
+              </SelectTrigger>
+              <SelectContent>
+                {REFUND_REASONS.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              This only updates the order status — no money movement occurs.
+              Make sure any payment has already been returned to the customer
+              through your payment method.
+            </AlertDescription>
+          </Alert>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setIsOpen(false)}
+            disabled={isProcessing}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() =>
+              markRefundedMutation.mutate({
+                orderId: order.id,
+                reason: reason || undefined,
+              })
+            }
+            disabled={isProcessing}
+            variant="destructive"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Mark as Refunded
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Public export ────────────────────────────────────────────────────────────
+
+export function RefundHandler({ order }: Props) {
+  const canStripeRefund =
+    (order.status === "paid" || order.status === "fulfilled") &&
+    !!order.stripePaymentIntentId;
+
+  const canManualRefund =
+    (order.status === "paid" ||
+      order.status === "fulfilled" ||
+      order.paymentStatus === "paid") &&
+    !order.stripePaymentIntentId &&
+    order.status !== "refunded";
+
+  if (canStripeRefund) return <StripeRefundDialog order={order} />;
+  if (canManualRefund) return <ManualRefundDialog order={order} />;
+  return null;
 }

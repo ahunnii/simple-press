@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import {
@@ -21,21 +22,21 @@ type Props = {
   }>;
 };
 
-export const metadata = {
-  title: "Orders Admin",
-};
-
 export default async function OrdersPage({ searchParams }: Props) {
   const params = await searchParams;
 
   // Get all orders for this business
-  const orders = await api.order.getAll({
-    status: params.status,
-    search: params.search,
-  });
+  const orders = await api.order
+    .getAll({
+      status: params.status,
+      search: params.search,
+    })
+    .catch(rethrowTrpcForErrorBoundary);
 
   // Calculate stats
-  const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+  const totalRevenue = orders
+    .filter((order) => order.paymentStatus !== "refunded")
+    .reduce((sum, order) => sum + order.total, 0);
   const totalOrders = orders.length;
   const paidOrders = orders.filter((o) => o.status === "paid").length;
 
@@ -57,33 +58,35 @@ export default async function OrdersPage({ searchParams }: Props) {
         </div>
 
         {/* Stats */}
-        <div className="mb-8 grid gap-6 md:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Total Revenue</CardDescription>
-              <CardTitle className="text-3xl">
-                ${(totalRevenue / 100).toFixed(2)}
-              </CardTitle>
-            </CardHeader>
-          </Card>
+        {!params.status && !params.search && (
+          <div className="mb-8 grid gap-6 md:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardDescription>Total Revenue</CardDescription>
+                <CardTitle className="text-3xl">
+                  ${(totalRevenue / 100).toFixed(2)}
+                </CardTitle>
+              </CardHeader>
+            </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Total Orders</CardDescription>
-              <CardTitle className="text-3xl">{totalOrders}</CardTitle>
-            </CardHeader>
-          </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardDescription>Total Orders</CardDescription>
+                <CardTitle className="text-3xl">{totalOrders}</CardTitle>
+              </CardHeader>
+            </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Paid Orders</CardDescription>
-              <CardTitle className="text-3xl">{paidOrders}</CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardDescription>Paid Orders</CardDescription>
+                <CardTitle className="text-3xl">{paidOrders}</CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
+        )}
 
         {/* Filters */}
-        <OrderFilters />
+        <OrderFilters orderCount={totalOrders} />
 
         {/* Orders List */}
         {orders.length === 0 ? (
@@ -102,3 +105,7 @@ export default async function OrdersPage({ searchParams }: Props) {
     </>
   );
 }
+
+export const metadata = {
+  title: "Orders",
+};

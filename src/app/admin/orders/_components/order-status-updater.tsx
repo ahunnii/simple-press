@@ -4,6 +4,7 @@ import type { Order } from "generated/prisma";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
@@ -22,34 +23,36 @@ type Props = {
 
 export function OrderStatusUpdater({ order }: Props) {
   const router = useRouter();
+  const utils = api.useUtils();
   const [status, setStatus] = useState(order.status);
-  const [isUpdating, setIsUpdating] = useState(false);
 
   const updateStatusMutation = api.order.updateStatus.useMutation({
     onSuccess: () => {
+      toast.dismiss();
+      toast.success("Order status updated successfully");
+      void utils.order.invalidate();
       router.refresh();
     },
     onError: (error) => {
-      console.error("Update status error:", error);
-      alert("Failed to update order status");
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to update order status");
       setStatus(order.status);
     },
-    onSettled: () => {
-      setIsUpdating(false);
-      router.refresh();
+    onMutate: () => {
+      toast.loading("Updating order status...");
     },
   });
 
   const handleUpdate = async () => {
     if (status === order.status) return;
 
-    setIsUpdating(true);
-
     updateStatusMutation.mutate({
       orderId: order.id,
       status,
     });
   };
+
+  const isUpdating = updateStatusMutation.isPending;
 
   return (
     <Card>

@@ -5,12 +5,26 @@ import { z } from "zod";
 
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import {
+  sendOrderConfirmation,
   sendOrderFulfilled,
   sendOrderRefunded,
   sendOrderShipped,
 } from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
-import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
+import {
+  manualOrderFormSchema,
+  markAsFulfilledSchema,
+  orderFiltersSchema,
+  refundOrderSchema,
+  updateFulfillmentSchema,
+  updateOrderStatusSchema,
+  updatePaymentStatusSchema,
+} from "~/lib/validators/order";
+import {
+  createTRPCRouter,
+  featureGate,
+  ownerAdminProcedure,
+} from "~/server/api/trpc";
 
 const STRIPE_REFUND_REASON_LABEL: Record<string, string> = {
   requested_by_customer: "Customer requested refund",
@@ -20,26 +34,8 @@ const STRIPE_REFUND_REASON_LABEL: Record<string, string> = {
 
 export const orderRouter = createTRPCRouter({
   markAsFulfilled: ownerAdminProcedure
-    .input(
-      z
-        .object({
-          orderId: z.string(),
-          carrier: z.string().optional(),
-          trackingNumber: z.string().optional(),
-          trackingUrl: z.string().optional(),
-        })
-        .superRefine((data, ctx) => {
-          const tn = data.trackingNumber?.trim();
-          if (tn && !data.carrier?.trim()) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message:
-                "Carrier is required when a tracking number is provided",
-              path: ["carrier"],
-            });
-          }
-        }),
-    )
+    .use(featureGate("orders"))
+    .input(markAsFulfilledSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
       // Get order with business info
@@ -47,11 +43,7 @@ export const orderRouter = createTRPCRouter({
         where: { id: input.orderId, businessId },
         include: {
           business: {
-            include: {
-              siteContent: {
-                select: { logoUrl: true },
-              },
-            },
+            include: { siteContent: { select: { logoUrl: true } } },
           },
         },
       });
@@ -132,15 +124,10 @@ export const orderRouter = createTRPCRouter({
 
       return updatedOrder;
     }),
+
   getAll: ownerAdminProcedure
-    .input(
-      z
-        .object({
-          status: z.string().optional(),
-          search: z.string().optional(),
-        })
-        .optional(),
-    )
+    .use(featureGate("orders"))
+    .input(orderFiltersSchema)
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
@@ -165,9 +152,7 @@ export const orderRouter = createTRPCRouter({
 
       const orders = await ctx.db.order.findMany({
         where,
-        include: {
-          items: true,
-        },
+        include: { items: true },
         orderBy: { createdAt: "desc" },
       });
 
@@ -175,6 +160,7 @@ export const orderRouter = createTRPCRouter({
     }),
 
   getById: ownerAdminProcedure
+    .use(featureGate("orders"))
     .input(z.string())
     .query(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
@@ -193,13 +179,8 @@ export const orderRouter = createTRPCRouter({
 
   //TODO: Wonder if I need to connect the refund info to the order?
   refund: ownerAdminProcedure
-    .input(
-      z.object({
-        orderId: z.string(),
-        amount: z.number(),
-        reason: z.string().optional(),
-      }),
-    )
+    .use(featureGate("orders"))
+    .input(refundOrderSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
@@ -252,9 +233,7 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      //Reasons: "duplicate" | "fraudulent" | "requested_by_customer"
-
-      const refund = await stripeClient.refunds.create(
+      const stripeRefund = await stripeClient.refunds.create(
         {
           payment_intent: order.stripePaymentIntentId,
           amount: input.amount,
@@ -265,14 +244,6 @@ export const orderRouter = createTRPCRouter({
           stripeAccount: order.business.stripeAccountId!,
         },
       );
-
-      // const isFullRefund = input.amount === order.total;
-      // const updatedOrder = await ctx.db.order.update({
-      //   where: { id: input.orderId },
-      //   data: {
-      //     status: isFullRefund ? "refunded" : "partial_refund",
-      //   },
-      // });
 
       // Update order status
       const isFullRefund = input.amount === order.total;
@@ -387,21 +358,17 @@ export const orderRouter = createTRPCRouter({
       return {
         success: true,
         refund: {
-          id: refund.id,
-          amount: refund.amount,
-          status: refund.status,
+          id: stripeRefund.id,
+          amount: stripeRefund.amount,
+          status: stripeRefund.status,
         },
         order: updatedOrder,
       };
     }),
 
   updateStatus: ownerAdminProcedure
-    .input(
-      z.object({
-        orderId: z.string(),
-        status: z.string(),
-      }),
-    )
+    .use(featureGate("orders"))
+    .input(updateOrderStatusSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
@@ -453,39 +420,59 @@ export const orderRouter = createTRPCRouter({
       return updatedOrder;
     }),
 
-  // TODO: Brainstorm more on the customer / shipping address relationship
-  createManual: ownerAdminProcedure
-    .input(
-      z.object({
-        customerName: z.string(),
-        customerEmail: z.string(),
-        shippingName: z.string(),
-        shippingAddress: z.object({
-          line1: z.string(),
-          city: z.string(),
-          state: z.string(),
-          postal_code: z.string(),
-          country: z.string(),
-        }),
-        items: z.array(
-          z.object({
-            productId: z.string().optional().nullable(),
-            productName: z.string().optional().nullable(),
-            productVariantId: z.string().optional().nullable(),
-            quantity: z.number(),
-            price: z.number(),
-            total: z.number(),
-          }),
-        ),
-        subtotal: z.number(),
-        shipping: z.number(),
-        tax: z.number(),
-        total: z.number(),
-        notes: z.string().optional(),
-      }),
-    )
+  updatePaymentStatus: ownerAdminProcedure
+    .input(updatePaymentStatusSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
+
+      const order = await ctx.db.order.findFirst({
+        where: { id: input.orderId, businessId },
+      });
+
+      if (!order) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Order not found",
+        });
+      }
+
+      const derivedStatus = (() => {
+        if (input.paymentStatus === "refunded") return "refunded";
+        if (input.paymentStatus === "failed") return order.status;
+        if (
+          input.paymentStatus === "paid" &&
+          order.fulfillmentStatus === "fulfilled"
+        )
+          return "fulfilled";
+        if (input.paymentStatus === "paid") return "paid";
+        return "pending";
+      })();
+
+      return ctx.db.order.update({
+        where: { id: input.orderId },
+        data: {
+          paymentStatus: input.paymentStatus,
+          status: derivedStatus,
+        },
+      });
+    }),
+
+  // TODO: Brainstorm more on the customer / shipping address relationship
+  createManual: ownerAdminProcedure
+    .use(featureGate("orders"))
+    .input(manualOrderFormSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // Fetch business info upfront (needed for email and order creation)
+      const business = await ctx.db.business.findUnique({
+        where: { id: businessId },
+        include: { siteContent: { select: { logoUrl: true } } },
+      });
+
+      if (!business) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+      }
 
       // Parse customer name into first/last
       const nameParts = input.customerName.trim().split(" ");
@@ -516,14 +503,14 @@ export const orderRouter = createTRPCRouter({
         `[Manual Order] Customer upserted: ${customer.id} (${customer.email})`,
       );
 
-      // Parse shipping name into first/last
-      const shippingNameParts = input.shippingName.trim().split(" ");
-      const shippingFirstName = shippingNameParts[0] ?? firstName;
-      const shippingLastName = shippingNameParts.slice(1).join(" ") || lastName;
-
-      // Find or create shipping address with deduplication
-      let shippingAddressId: string;
+      // Find or create shipping address (optional)
+      let shippingAddressId: string | undefined;
       if (input.shippingAddress) {
+        const shippingName = input.shippingName?.trim() ?? input.customerName;
+        const shippingNameParts = shippingName.split(" ");
+        const shippingFirstName = shippingNameParts[0] ?? firstName;
+        const shippingLastName = shippingNameParts.slice(1).join(" ") || lastName;
+
         shippingAddressId = await findOrCreateShippingAddress({
           customerId: customer.id,
           firstName: shippingFirstName,
@@ -534,30 +521,18 @@ export const orderRouter = createTRPCRouter({
           zip: input.shippingAddress.postal_code,
           country: input.shippingAddress.country,
         });
-      } else {
-        // If no address provided, try to find default address
-        const defaultAddress = await ctx.db.shippingAddress.findFirst({
-          where: {
-            customerId: customer.id,
-            isDefault: true,
-          },
-        });
-
-        if (!defaultAddress) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message:
-              "No shipping address provided and no default address found",
-          });
-        }
-
-        shippingAddressId = defaultAddress.id;
       }
 
       // Generate order number
       const orderCount = await ctx.db.order.count({
         where: { businessId },
       });
+
+      // Auto-stamp internal note
+      const baseNote = input.notes?.trim() ?? "";
+      const internalNote = baseNote
+        ? `[Manual Order]\n${baseNote}`
+        : "[Manual Order]";
 
       const order = await ctx.db.order.create({
         data: {
@@ -573,14 +548,15 @@ export const orderRouter = createTRPCRouter({
           shipping: input.shipping || 0,
           total: input.total,
 
-          status: "pending", // Manual orders start as pending
-          paymentStatus: "unpaid",
+          status: input.status,
+          paymentStatus: input.paymentStatus,
+          fulfillmentStatus: input.fulfillmentStatus,
 
-          // Shipping
+          // Shipping (optional)
           shippingAddressId,
 
           // Notes
-          internalNote: input.notes,
+          internalNote,
 
           // Items
           items: {
@@ -601,6 +577,38 @@ export const orderRouter = createTRPCRouter({
 
       console.log(`[Manual Order] Order created: ${order.id}`);
 
+      // Optionally send order confirmation email to customer
+      if (input.sendConfirmationEmail) {
+        try {
+          await sendOrderConfirmation({
+            to: input.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: input.customerName,
+            items: order.items,
+            subtotal: order.subtotal,
+            shipping: order.shipping,
+            tax: order.tax,
+            discount: order.discount,
+            total: order.total,
+            business: {
+              name: business.name,
+              ownerEmail: business.ownerEmail,
+              siteContent: business.siteContent,
+              subdomain: business.subdomain,
+              customDomain: business.customDomain ?? undefined,
+            },
+          });
+          console.log(
+            `[Manual Order] Confirmation email sent to ${input.customerEmail}`,
+          );
+        } catch (emailError) {
+          console.error(
+            "[Manual Order] Failed to send confirmation email:",
+            emailError,
+          );
+        }
+      }
+
       // Note: Customer metrics are NOT updated for manual/pending orders
       // They will be updated when the order is marked as paid
 
@@ -608,13 +616,8 @@ export const orderRouter = createTRPCRouter({
     }),
 
   updateFulfillment: ownerAdminProcedure
-    .input(
-      z.object({
-        orderId: z.string(),
-        fulfillmentStatus: z.string(),
-        trackingNumber: z.string().optional(),
-      }),
-    )
+    .use(featureGate("orders"))
+    .input(updateFulfillmentSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
@@ -625,6 +628,109 @@ export const orderRouter = createTRPCRouter({
           trackingNumber: input.trackingNumber ?? null,
         },
       });
+
+      return updatedOrder;
+    }),
+
+  updateNote: ownerAdminProcedure
+    .use(featureGate("orders"))
+    .input(
+      z.object({
+        orderId: z.string(),
+        internalNote: z.string().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const order = await ctx.db.order.findFirst({
+        where: { id: input.orderId, businessId },
+      });
+
+      if (!order) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" });
+      }
+
+      return ctx.db.order.update({
+        where: { id: input.orderId },
+        data: { internalNote: input.internalNote },
+      });
+    }),
+
+  markAsRefunded: ownerAdminProcedure
+    .use(featureGate("orders"))
+    .input(
+      z.object({
+        orderId: z.string(),
+        reason: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const order = await ctx.db.order.findFirst({
+        where: { id: input.orderId, businessId },
+        include: {
+          business: {
+            select: {
+              name: true,
+              ownerEmail: true,
+              subdomain: true,
+              customDomain: true,
+              siteContent: { select: { logoUrl: true } },
+            },
+          },
+        },
+      });
+
+      if (!order) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" });
+      }
+
+      if (order.status === "refunded") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Order is already refunded",
+        });
+      }
+
+      const updatedOrder = await ctx.db.order.update({
+        where: { id: input.orderId },
+        data: {
+          status: "refunded",
+          paymentStatus: "refunded",
+        },
+      });
+
+      try {
+        const reasonLabel = input.reason
+          ? (STRIPE_REFUND_REASON_LABEL[input.reason] ?? input.reason)
+          : null;
+        await sendOrderRefunded({
+          to: order.customerEmail,
+          orderNumber: order.orderNumber,
+          customerName: order.customerName ?? "Guest",
+          refundAmountCents: order.total,
+          orderTotalCents: order.total,
+          isFullRefund: true,
+          reason: reasonLabel,
+          business: {
+            name: order.business.name,
+            ownerEmail: order.business.ownerEmail,
+            siteContent: order.business.siteContent,
+            subdomain: order.business.subdomain,
+            customDomain: order.business.customDomain,
+          },
+        });
+        console.log(
+          `[Orders] Manual refund email sent for order #${order.orderNumber}`,
+        );
+      } catch (emailError) {
+        console.error(
+          "[Orders] Failed to send manual refund email:",
+          emailError,
+        );
+      }
 
       return updatedOrder;
     }),

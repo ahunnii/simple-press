@@ -38,11 +38,12 @@ export default async function AdminDashboardPage() {
     revenueByDay,
     topProducts,
   ] = await Promise.all([
-    // Total revenue (all time, paid orders)
+    // Total revenue (all time, paid orders that are not refunded)
     db.order.aggregate({
       where: {
         businessId: business.id,
         status: "paid",
+        paymentStatus: { not: "refunded" },
       },
       _sum: {
         total: true,
@@ -106,6 +107,7 @@ export default async function AdminDashboardPage() {
       where: {
         businessId: business.id,
         status: "paid",
+        paymentStatus: { not: "refunded" },
         createdAt: {
           gte: thirtyDaysAgo,
         },
@@ -125,6 +127,7 @@ export default async function AdminDashboardPage() {
         order: {
           businessId: business.id,
           status: "paid",
+          paymentStatus: { not: "refunded" },
           createdAt: {
             gte: thirtyDaysAgo,
           },

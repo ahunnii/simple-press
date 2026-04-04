@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Plus, Save, X } from "lucide-react";
+import { ArrowLeft, Mail, MapPin, Package, Plus, Save, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -17,16 +17,25 @@ import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { NumberInput } from "~/components/ui/number-input";
 import {
   Select,
   SelectContent,
@@ -44,9 +53,15 @@ type Props = {
 export function ManualOrderForm({ products }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
+  const utils = api.useUtils();
 
   // Items
   const [items, setItems] = useState<Partial<OrderItem>[]>([]);
+
+  // UI mode toggles
+  const [includeAddress, setIncludeAddress] = useState(false);
+  const [useDirectSubtotal, setUseDirectSubtotal] = useState(false);
+  const [directSubtotal, setDirectSubtotal] = useState<number>(0);
 
   // Initialize form with react-hook-form
   const form = useForm<ManualOrderFormSchema>({
@@ -55,19 +70,17 @@ export function ManualOrderForm({ products }: Props) {
       customerName: "",
       customerEmail: "",
       shippingName: "",
-      shippingAddress: {
-        line1: "",
-        city: "",
-        state: "",
-        postal_code: "",
-        country: "US",
-      },
+      shippingAddress: undefined,
       items: [],
       subtotal: 0,
       shipping: 0,
       tax: 0,
       total: 0,
       notes: "",
+      status: "pending",
+      paymentStatus: "pending",
+      fulfillmentStatus: "unfulfilled",
+      sendConfirmationEmail: false,
     },
   });
 
@@ -139,8 +152,14 @@ export function ManualOrderForm({ products }: Props) {
     );
   };
 
+  const getSubtotal = () => {
+    return useDirectSubtotal
+      ? Math.round(directSubtotal * 100)
+      : calculateSubtotal();
+  };
+
   const calculateTotal = () => {
-    const subtotal = calculateSubtotal();
+    const subtotal = getSubtotal();
     const shipping = shippingCost
       ? Math.round(parseFloat(`${shippingCost}`) * 100)
       : 0;
@@ -150,23 +169,31 @@ export function ManualOrderForm({ products }: Props) {
 
   const createManualOrderMutation = api.order.createManual.useMutation({
     onSuccess: (data) => {
-      router.push(`/admin/orders/${data.id}`);
       toast.dismiss();
       toast.success("Order created successfully");
+      void utils.order.invalidate();
+      router.push(`/admin/orders/${data.id}`);
     },
     onError: (error) => {
       toast.dismiss();
       toast.error(error.message ?? "Failed to create order");
     },
-    onSettled: () => {
-      router.refresh();
-    },
     onMutate: () => {
       toast.loading("Creating order...");
     },
   });
+
+  const deriveStatus = (paymentStatus: string, fulfillmentStatus: string) => {
+    if (paymentStatus === "refunded") return "refunded";
+    if (paymentStatus === "failed") return "pending";
+    if (fulfillmentStatus === "fulfilled" && paymentStatus === "paid")
+      return "fulfilled";
+    if (paymentStatus === "paid") return "paid";
+    return "pending";
+  };
+
   const onSubmit = async (data: ManualOrderFormSchema) => {
-    const subtotal = calculateSubtotal();
+    const subtotal = getSubtotal();
     const shipping = shippingCost
       ? Math.round(parseFloat(`${shippingCost}`) * 100)
       : 0;
@@ -176,32 +203,42 @@ export function ManualOrderForm({ products }: Props) {
     createManualOrderMutation.mutate({
       customerName: data.customerName,
       customerEmail: data.customerEmail,
-      shippingName: data.shippingName || data.customerName,
-      shippingAddress: {
-        line1: data.shippingAddress.line1,
-        city: data.shippingAddress.city,
-        state: data.shippingAddress.state,
-        postal_code: data.shippingAddress.postal_code,
-        country: data.shippingAddress.country,
-      },
-      items: data.items.map((item) => ({
-        productId: item.productId,
-        productName: item.productName,
-        productVariantId: item.productVariantId,
-        quantity: item.quantity ?? 1,
-        price: item.price ?? 0,
-        total: (item.price ?? 0) * (item.quantity ?? 0),
-      })),
+      shippingName: includeAddress
+        ? (data.shippingName ?? data.customerName)
+        : undefined,
+      shippingAddress:
+        includeAddress && data.shippingAddress
+          ? {
+              line1: data.shippingAddress.line1,
+              city: data.shippingAddress.city,
+              state: data.shippingAddress.state,
+              postal_code: data.shippingAddress.postal_code,
+              country: data.shippingAddress.country,
+            }
+          : undefined,
+      items: useDirectSubtotal
+        ? []
+        : items.map((item) => ({
+            productId: item.productId,
+            productName: item.productName,
+            productVariantId: item.productVariantId,
+            quantity: item.quantity ?? 1,
+            price: item.price ?? 0,
+            total: (item.price ?? 0) * (item.quantity ?? 0),
+          })),
       subtotal,
       shipping,
       tax: taxAmount,
       total,
       notes: data.notes,
+      status: deriveStatus(data.paymentStatus, data.fulfillmentStatus),
+      paymentStatus: data.paymentStatus,
+      fulfillmentStatus: data.fulfillmentStatus,
+      sendConfirmationEmail: data.sendConfirmationEmail,
     });
   };
 
   const isSubmitting = createManualOrderMutation.isPending;
-
   const isDirty = form.formState.isDirty;
 
   useKeyboardEnter(form, onSubmit);
@@ -267,98 +304,224 @@ export function ManualOrderForm({ products }: Props) {
 
         <div className="admin-container space-y-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Left column — customer-facing info */}
             <div className="col-span-1 space-y-4">
               {/* Customer Info */}
               <Card>
                 <CardHeader>
                   <CardTitle>Customer Information</CardTitle>
+                  <CardDescription>
+                    The person placing this order
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <InputFormField
                       form={form}
                       name="customerName"
-                      label="Name *"
+                      label="Name"
                       required
                     />
 
                     <InputFormField
                       form={form}
                       name="customerEmail"
-                      label="Email *"
+                      label="Email"
                       type="email"
                       required
                     />
                   </div>
+
+                  <FormField
+                    control={form.control}
+                    name="sendConfirmationEmail"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-2 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="flex cursor-pointer items-center gap-1.5 font-normal">
+                          <Mail className="text-muted-foreground h-3.5 w-3.5" />
+                          Send order confirmation email to customer
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
                 </CardContent>
               </Card>
 
-              {/* Shipping Address */}
+              {/* Shipping Address (optional) */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Shipping Address</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <InputFormField
-                    form={form}
-                    name="shippingName"
-                    label="Recipient Name"
-                    placeholder="Same as customer"
-                  />
-
-                  <InputFormField
-                    form={form}
-                    name="shippingAddress.line1"
-                    label="Address"
-                    placeholder="123 Main St"
-                  />
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <InputFormField
-                      form={form}
-                      name="shippingAddress.city"
-                      label="City"
-                      placeholder="New York"
-                      className="col-span-1"
-                    />
-                    <InputFormField
-                      form={form}
-                      name="shippingAddress.state"
-                      label="State"
-                      placeholder="NY"
-                      className="col-span-1"
-                    />
-                    <InputFormField
-                      form={form}
-                      name="shippingAddress.postal_code"
-                      label="ZIP"
-                      placeholder="10001"
-                      className="col-span-1"
-                    />
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <CardTitle>Shipping Address</CardTitle>
+                      <CardDescription>
+                        Optional — add a delivery address for the order
+                      </CardDescription>
+                    </div>
+                    <Button
+                      type="button"
+                      variant={includeAddress ? "secondary" : "outline"}
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() => setIncludeAddress((v) => !v)}
+                    >
+                      <MapPin className="mr-2 h-3.5 w-3.5" />
+                      {includeAddress ? "Remove" : "Add address"}
+                    </Button>
                   </div>
-                </CardContent>
+                </CardHeader>
+
+                {includeAddress && (
+                  <CardContent className="space-y-4">
+                    <InputFormField
+                      form={form}
+                      name="shippingName"
+                      label="Recipient Name"
+                      placeholder="Same as customer"
+                    />
+
+                    <InputFormField
+                      form={form}
+                      name="shippingAddress.line1"
+                      label="Address"
+                      placeholder="123 Main St"
+                    />
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <InputFormField
+                        form={form}
+                        name="shippingAddress.city"
+                        label="City"
+                        placeholder="New York"
+                        className="col-span-1"
+                      />
+                      <InputFormField
+                        form={form}
+                        name="shippingAddress.state"
+                        label="State"
+                        placeholder="NY"
+                        className="col-span-1"
+                      />
+                      <InputFormField
+                        form={form}
+                        name="shippingAddress.postal_code"
+                        label="ZIP"
+                        placeholder="10001"
+                        className="col-span-1"
+                      />
+                    </div>
+                  </CardContent>
+                )}
               </Card>
-            </div>
-            <div className="col-span-1 space-y-4">
+
               {/* Notes */}
               <Card>
                 <CardHeader>
                   <CardTitle>Notes</CardTitle>
+                  <CardDescription>
+                    Visible to admins only. &ldquo;[Manual Order]&rdquo; is
+                    prepended automatically.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <TextareaFormField
                     form={form}
                     name="notes"
-                    label="Notes"
+                    label="Internal Notes"
                     placeholder="Internal notes about this order..."
                     rows={3}
                   />
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Right column — admin config */}
+            <div className="col-span-1 space-y-4">
+              {/* Payment & Fulfillment */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payment &amp; Fulfillment</CardTitle>
+                  <CardDescription>
+                    Set the payment and fulfillment status. The overall order
+                    state is derived automatically.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="paymentStatus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Payment</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="paid">Paid</SelectItem>
+                            <SelectItem value="failed">Failed</SelectItem>
+                            <SelectItem value="refunded">Refunded</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Whether payment has been collected
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="fulfillmentStatus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fulfillment</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="unfulfilled">
+                              Unfulfilled
+                            </SelectItem>
+                            <SelectItem value="fulfilled">Fulfilled</SelectItem>
+                            <SelectItem value="partially_fulfilled">
+                              Partially Fulfilled
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Whether items have been shipped or delivered
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
               {/* Additional Charges */}
               <Card>
                 <CardHeader>
                   <CardTitle>Additional Charges</CardTitle>
+                  <CardDescription>
+                    Shipping and tax added on top of the item subtotal
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -367,27 +530,22 @@ export function ManualOrderForm({ products }: Props) {
                       name="shipping"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Shipping Cost</FormLabel>
+                          <FormLabel>Shipping</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
                                 $
                               </span>
-                              <Input
+                              <NumberInput
                                 id="shipping"
-                                type="number"
                                 step="0.01"
                                 className="pl-7"
-                                placeholder="0.00"
+                                placeholder="9.99"
                                 {...field}
-                                value={field.value || ""}
-                                onChange={(e) => {
-                                  const value = parseFloat(e.target.value);
-                                  field.onChange(isNaN(value) ? 0 : value);
-                                }}
                               />
                             </div>
                           </FormControl>
+                          <FormDescription>Flat shipping fee</FormDescription>
                         </FormItem>
                       )}
                     />
@@ -403,21 +561,18 @@ export function ManualOrderForm({ products }: Props) {
                               <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
                                 $
                               </span>
-                              <Input
+                              <NumberInput
                                 id="tax"
-                                type="number"
                                 step="0.01"
                                 className="pl-7"
-                                placeholder="0.00"
+                                placeholder="1.06"
                                 {...field}
-                                value={field.value || ""}
-                                onChange={(e) => {
-                                  const value = parseFloat(e.target.value);
-                                  field.onChange(isNaN(value) ? 0 : value);
-                                }}
                               />
                             </div>
                           </FormControl>
+                          <FormDescription>
+                            Manually entered tax amount
+                          </FormDescription>
                         </FormItem>
                       )}
                     />
@@ -426,15 +581,15 @@ export function ManualOrderForm({ products }: Props) {
                   <div className="space-y-2 border-t pt-4">
                     <div className="flex justify-between text-sm">
                       <span>Subtotal</span>
-                      <span>{formatPrice(calculateSubtotal())}</span>
+                      <span>{formatPrice(getSubtotal())}</span>
                     </div>
-                    {shippingCost && (
+                    {!!shippingCost && (
                       <div className="flex justify-between text-sm">
                         <span>Shipping</span>
                         <span>${shippingCost}</span>
                       </div>
                     )}
-                    {tax && (
+                    {!!tax && (
                       <div className="flex justify-between text-sm">
                         <span>Tax</span>
                         <span>${tax}</span>
@@ -449,108 +604,185 @@ export function ManualOrderForm({ products }: Props) {
               </Card>
             </div>
           </div>
+
           {/* Order Items */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Order Items</CardTitle>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addItem}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Item
-                </Button>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <CardTitle>Order Items</CardTitle>
+                  <CardDescription>
+                    Products included in this order
+                  </CardDescription>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Button
+                    type="button"
+                    variant={useDirectSubtotal ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setUseDirectSubtotal((v) => !v);
+                      if (!useDirectSubtotal) setItems([]);
+                    }}
+                  >
+                    {useDirectSubtotal
+                      ? "Select items instead"
+                      : "Enter subtotal directly"}
+                  </Button>
+                  {!useDirectSubtotal && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addItem}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Item
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {items.map((item, index) => {
-                const product = products.find((p) => p.id === item.productId);
+              {useDirectSubtotal ? (
+                <div className="flex flex-col gap-1.5">
+                  <Label>Subtotal</Label>
+                  <div className="relative w-48">
+                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                      $
+                    </span>
+                    <NumberInput
+                      id="directSubtotal"
+                      step="0.01"
+                      className="pl-7"
+                      placeholder="0.00"
+                      value={directSubtotal}
+                      onChange={(value) => setDirectSubtotal(value ?? 0)}
+                    />
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    No individual line items will be recorded for this order.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {items.map((item, index) => {
+                    const product = products.find(
+                      (p) => p.id === item.productId,
+                    );
 
-                return (
-                  <div
-                    key={index}
-                    className="flex items-end gap-4 rounded border p-4"
-                  >
-                    <div className="grid flex-1 grid-cols-4 gap-4">
-                      <div>
-                        <Label>Product</Label>
-                        <Select
-                          value={item?.productId ?? undefined}
-                          onValueChange={(value) => updateItem(index, value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {products.map((product) => (
-                              <SelectItem key={product.id} value={product.id}>
-                                {product.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-start gap-2 rounded border p-4"
+                      >
+                        <div className="grid min-w-0 flex-1 grid-cols-2 gap-3 lg:grid-cols-4">
+                          <div className="col-span-2 min-w-0 lg:col-span-1">
+                            <Label>Product</Label>
+                            <Select
+                              value={item?.productId ?? undefined}
+                              onValueChange={(value) =>
+                                updateItem(index, value)
+                              }
+                            >
+                              <SelectTrigger className="mt-1 w-full">
+                                <SelectValue placeholder="Select..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {products.map((product) => (
+                                  <SelectItem
+                                    key={product.id}
+                                    value={product.id}
+                                  >
+                                    {product.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
 
-                      {product && product.variants.length > 0 && (
-                        <div>
-                          <Label>Variant</Label>
-                          <Select
-                            value={item?.productVariantId ?? undefined}
-                            onValueChange={(value) =>
-                              updateVariant(index, value)
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="None" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {product.variants.map((variant) => (
-                                <SelectItem key={variant.id} value={variant.id}>
-                                  {variant.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          {product && product.variants.length > 0 ? (
+                            <div className="col-span-2 min-w-0 lg:col-span-1">
+                              <Label>Variant</Label>
+                              <Select
+                                value={item?.productVariantId ?? undefined}
+                                onValueChange={(value) =>
+                                  updateVariant(index, value)
+                                }
+                              >
+                                <SelectTrigger className="mt-1 w-full">
+                                  <SelectValue placeholder="None" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {product.variants.map((variant) => (
+                                    <SelectItem
+                                      key={variant.id}
+                                      value={variant.id}
+                                    >
+                                      {variant.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          ) : (
+                            <div className="hidden lg:block" />
+                          )}
+
+                          <div className="min-w-0">
+                            <Label>
+                              Quantity <span className="text-red-500">*</span>
+                            </Label>
+                            <NumberInput
+                              id="quantity"
+                              step="1"
+                              className="mt-1 w-full"
+                              placeholder="1"
+                              value={item.quantity}
+                              onChange={(value) =>
+                                updateQuantity(index, value ?? 1)
+                              }
+                            />
+                          </div>
+
+                          <div className="min-w-0">
+                            <Label>Price</Label>
+                            <Input
+                              className="mt-1"
+                              value={formatPrice(item.price ?? 0)}
+                              disabled
+                            />
+                          </div>
                         </div>
-                      )}
 
-                      <div>
-                        <Label>Quantity</Label>
-                        <Input
-                          type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={(e) =>
-                            updateQuantity(index, parseInt(e.target.value) || 1)
-                          }
-                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="mt-5 shrink-0"
+                          onClick={() => removeItem(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
+                    );
+                  })}
 
-                      <div>
-                        <Label>Price</Label>
-                        <Input value={formatPrice(item.price ?? 0)} disabled />
+                  {items.length === 0 && (
+                    <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-12 text-center">
+                      <Package className="text-muted-foreground/40 h-8 w-8" />
+                      <div className="space-y-1">
+                        <p className="text-muted-foreground text-sm font-medium">
+                          No items added
+                        </p>
+                        <p className="text-muted-foreground/70 text-xs">
+                          Click &quot;Add Item&quot; above to add products to
+                          this order.
+                        </p>
                       </div>
                     </div>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeItem(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                );
-              })}
-
-              {items.length === 0 && (
-                <p className="py-4 text-center text-sm text-gray-500">
-                  No items added. Click &quot;Add Item&quot; to start.
-                </p>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>

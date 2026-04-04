@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
 import { Badge } from "~/components/ui/badge";
@@ -12,6 +13,8 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 import { FulfillmentForm } from "../_components/fulfillment-form";
+import { OrderNotes } from "../_components/order-notes";
+import { OrderStatusOverride } from "../_components/order-status-override";
 import { RefundHandler } from "../_components/refund-handler";
 import { TrailHeader } from "../../_components/trail-header";
 
@@ -19,18 +22,10 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
-export async function generateMetadata({ params }: Props) {
-  const { id } = await params;
-  const order = await api.order.getById(id);
-  return {
-    title: `Order #${order?.id.slice(0, 8)}`,
-  };
-}
-
 export default async function OrderDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const order = await api.order.getById(id);
+  const order = await api.order.getById(id).catch(rethrowTrpcForErrorBoundary);
 
   if (!order) {
     notFound();
@@ -97,43 +92,15 @@ export default async function OrderDetailPage({ params }: Props) {
             >
               Fulfillment: {order.fulfillmentStatus}
             </Badge>
-
-            {/* <span
-              className={`admin-status-badge ${
-                isDirty ? "isDirty" : "isPublished"
-              }`}
-            >
-              {isDirty ? "Unsaved Changes" : "Saved"}
-            </span> */}
           </div>
         </div>
 
-        <div className="toolbar-actions"></div>
+        <div className="toolbar-actions">
+          <OrderStatusOverride order={order} />
+        </div>
       </div>
 
       <div className="admin-container">
-        {/* <div className="mb-8">
-          <Button variant="ghost" asChild className="mb-4">
-            <Link href="/admin/orders">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Orders
-            </Link>
-          </Button>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Order #{order.id.slice(0, 8)}
-              </h1>
-              <p className="mt-1 text-gray-600">
-                {formatDate(order.createdAt)}
-              </p>
-            </div>
-            <Badge variant={order.status === "paid" ? "default" : "secondary"}>
-              {order.status}
-            </Badge>
-          </div>
-        </div> */}
-
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Left Column - Order Details */}
           <div className="space-y-6 lg:col-span-2">
@@ -143,38 +110,44 @@ export default async function OrderDetailPage({ params }: Props) {
                 <CardTitle>Order Items</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {order.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between border-b py-4 last:border-0"
-                    >
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {item.productName}
-                        </p>
-                        {item.variantName && (
-                          <p className="text-sm text-gray-600">
-                            {item.variantName}
+                {order.items.length > 0 ? (
+                  <div className="space-y-4">
+                    {order.items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between border-b py-4 last:border-0"
+                      >
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {item.productName}
                           </p>
-                        )}
-                        {item.sku && (
-                          <p className="mt-1 text-xs text-gray-500">
-                            SKU: {item.sku}
+                          {item.variantName && (
+                            <p className="text-sm text-gray-600">
+                              {item.variantName}
+                            </p>
+                          )}
+                          {item.sku && (
+                            <p className="mt-1 text-xs text-gray-500">
+                              SKU: {item.sku}
+                            </p>
+                          )}
+                          <p className="mt-1 text-sm text-gray-600">
+                            Qty: {item.quantity} × {formatPrice(item.price)}
                           </p>
-                        )}
-                        <p className="mt-1 text-sm text-gray-600">
-                          Qty: {item.quantity} × {formatPrice(item.price)}
-                        </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-gray-900">
+                            {formatPrice(item.total)}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-gray-900">
-                          {formatPrice(item.total)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="py-2 text-sm text-gray-500">
+                    No item breakdown was recorded for this order.
+                  </p>
+                )}
 
                 {/* Totals */}
                 <div className="mt-6 space-y-2 border-t pt-6">
@@ -223,15 +196,16 @@ export default async function OrderDetailPage({ params }: Props) {
               </CardContent>
             </Card>
 
-            {/* Fulfillment Form - Only show if paid */}
-            {order.status === "paid" && (
-              <FulfillmentForm
-                orderId={order.id}
-                orderNumber={order.orderNumber}
-                customerEmail={order.customerEmail}
-                customerName={order.customerName ?? ""}
-              />
-            )}
+            {/* Fulfillment Form — show when payment is confirmed and order not yet fulfilled */}
+            {(order.status === "paid" || order.paymentStatus === "paid") &&
+              order.fulfillmentStatus !== "fulfilled" && (
+                <FulfillmentForm
+                  orderId={order.id}
+                  orderNumber={order.orderNumber}
+                  customerEmail={order.customerEmail}
+                  customerName={order.customerName ?? ""}
+                />
+              )}
           </div>
 
           {/* Right Column - Actions */}
@@ -338,39 +312,14 @@ export default async function OrderDetailPage({ params }: Props) {
               </Card>
             )}
 
+            {/* Notes — always visible and editable */}
+            <OrderNotes
+              orderId={order.id}
+              internalNote={order.internalNote}
+              customerNote={order.customerNote}
+            />
+
             {/* Payment Info */}
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>Payment Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {order.stripePaymentIntentId && (
-                  <div>
-                    <p className="text-sm text-gray-600">Payment Intent</p>
-                    <p className="font-mono text-xs text-gray-900">
-                      {order.stripePaymentIntentId}
-                    </p>
-                  </div>
-                )}
-
-                {order.stripeSessionId && (
-                  <div>
-                    <p className="text-sm text-gray-600">Checkout Session</p>
-                    <p className="font-mono text-xs text-gray-900">
-                      {order.stripeSessionId}
-                    </p>
-                  </div>
-                )}
-
-                <div className="pt-2">
-                  <p className="text-sm text-gray-600">Created</p>
-                  <p className="text-sm text-gray-900">
-                    {new Date(order.createdAt).toLocaleString()}
-                  </p>
-                </div>
-              </CardContent>
-            </Card> */}
-
             <Card>
               <CardHeader>
                 <CardTitle>Payment</CardTitle>
@@ -384,7 +333,9 @@ export default async function OrderDetailPage({ params }: Props) {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Method</p>
-                  <p className="font-medium">Card</p>
+                  <p className="font-medium">
+                    {order.stripePaymentIntentId ? "Card" : "Manual"}
+                  </p>
                 </div>
                 {order.stripePaymentIntentId && (
                   <div>
@@ -405,4 +356,12 @@ export default async function OrderDetailPage({ params }: Props) {
       </div>
     </>
   );
+}
+
+export async function generateMetadata({ params }: Props) {
+  const { id } = await params;
+  const order = await api.order.getById(id);
+  return {
+    title: `Order #${order?.id.slice(0, 8)}`,
+  };
 }

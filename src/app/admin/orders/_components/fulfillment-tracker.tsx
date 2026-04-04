@@ -4,6 +4,7 @@ import type { Order } from "generated/prisma";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Package, Truck } from "lucide-react";
+import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
@@ -18,26 +19,28 @@ type Props = {
 
 export function FulfillmentTracker({ order }: Props) {
   const router = useRouter();
+  const utils = api.useUtils();
   const [trackingNumber, setTrackingNumber] = useState(
     order.trackingNumber ?? "",
   );
-  const [isUpdating, setIsUpdating] = useState(false);
 
   const updateFulfillmentMutation = api.order.updateFulfillment.useMutation({
     onSuccess: () => {
+      toast.dismiss();
+      toast.success("Fulfillment updated successfully");
+      void utils.order.invalidate();
       router.refresh();
     },
     onError: (error) => {
+      toast.dismiss();
       console.error("Update fulfillment error:", error);
-      alert("Failed to update fulfillment");
+      toast.error(error.message ?? "Failed to update fulfillment");
     },
-    onSettled: () => {
-      setIsUpdating(false);
+    onMutate: () => {
+      toast.loading("Updating fulfillment...");
     },
   });
   const handleMarkFulfilled = async () => {
-    setIsUpdating(true);
-
     updateFulfillmentMutation.mutate({
       orderId: order.id,
       fulfillmentStatus: "fulfilled",
@@ -46,7 +49,6 @@ export function FulfillmentTracker({ order }: Props) {
   };
 
   const handleMarkUnfulfilled = async () => {
-    setIsUpdating(true);
     updateFulfillmentMutation.mutate({
       orderId: order.id,
       fulfillmentStatus: "unfulfilled",
@@ -55,6 +57,7 @@ export function FulfillmentTracker({ order }: Props) {
   };
 
   const isFulfilled = order.fulfillmentStatus === "fulfilled";
+  const isUpdating = updateFulfillmentMutation.isPending;
 
   return (
     <Card>
@@ -103,7 +106,7 @@ export function FulfillmentTracker({ order }: Props) {
           <>
             <div>
               <Label htmlFor="tracking" className="text-sm">
-                Tracking Number (Optional)
+                Tracking Number
               </Label>
               <Input
                 id="tracking"
