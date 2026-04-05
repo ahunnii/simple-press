@@ -140,7 +140,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     label: "Product Reviews",
     description: "Allow customers to review products",
     category: "marketing",
-    enabledByDefault: true,
+    enabledByDefault: false,
     ownerCanToggle: false,
     dependsOn: ["products", "customerAccounts"],
     hidesNav: ["reviews"],

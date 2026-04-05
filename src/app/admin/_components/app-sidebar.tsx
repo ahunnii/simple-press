@@ -89,6 +89,7 @@ const getNavData = (session: Session | null) => {
       title: "Reviews",
       url: "/admin/reviews",
       icon: IconStar,
+      featureKey: "reviews",
     },
   ];
 
