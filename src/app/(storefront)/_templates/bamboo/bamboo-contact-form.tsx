@@ -11,7 +11,11 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
+import { PhoneFormField } from "~/components/inputs/phone-form-field";
+import { RadioFormField } from "~/components/inputs/radio-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+
+const IS_IN_PRODUCTION = process.env.NODE_ENV === "production";
 
 export function BambooContactForm() {
   const {
@@ -72,7 +76,7 @@ export function BambooContactForm() {
           <InputFormField
             form={form}
             name="name"
-            label="First Name *"
+            label="Name"
             className="col-span-1 flex flex-col gap-1.5"
             placeholder="Jane"
             required
@@ -81,7 +85,7 @@ export function BambooContactForm() {
           <InputFormField
             form={form}
             name="email"
-            label="Email *"
+            label="Email"
             className="col-span-1 flex flex-col gap-1.5"
             type="email"
             placeholder="jane@example.com"
@@ -89,24 +93,38 @@ export function BambooContactForm() {
           />
         </div>
 
-        <InputFormField
+        <PhoneFormField
           form={form}
           name="phone"
-          label="Phone Number (Optional)"
+          label="Phone Number"
           className="flex flex-col gap-1.5"
-          type="tel"
           placeholder="+1 300 555 0000"
+          autoComplete="tel"
         />
 
         <TextareaFormField
           form={form}
           name="message"
-          label="Message *"
+          label="Message"
           messageLength={messageLength}
           className="flex flex-col gap-1.5"
           maxLength={messageMaxLength}
           placeholder="Tell us how we can help..."
           required
+        />
+
+        <RadioFormField
+          form={form}
+          name="preferredContactMethod"
+          label="Preferred Contact Method"
+          defaultValue="no-preference"
+          options={[
+            { label: "Email", value: "email" },
+            { label: "Phone", value: "phone" },
+            { label: "No Preference", value: "no-preference" },
+          ]}
+          className="flex flex-col gap-1.5"
+          radioGroupClassName="flex flex-col gap-3 pt-1"
         />
 
         {/* hCaptcha */}
@@ -122,7 +140,7 @@ export function BambooContactForm() {
         <Button
           type="submit"
           size="lg"
-          disabled={isSubmitting || !captchaToken}
+          disabled={isSubmitting || (!captchaToken && IS_IN_PRODUCTION)}
         >
           {isSubmitting ? (
             <>

@@ -5,10 +5,10 @@ import { ArrowLeft } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../types";
 import { Button } from "~/components/ui/button";
-
 // import { useCart } from "~/providers/cart-context";
 
-import { FadeIn, PageTransition } from "./bamboo-animations";
+import { FadeIn, PageTransition } from "~/components/page-animations";
+
 import { CheckoutForm } from "./bamboo-checkout-form";
 
 export async function BambooCheckoutPage({

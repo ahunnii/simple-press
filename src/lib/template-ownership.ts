@@ -3,17 +3,14 @@ const AVAILABLE_FREE_TEMPLATES = [
     value: "modern",
     label: "Modern",
   },
-  {
-    value: "dark-trend",
-    label: "Dark Trend",
-  },
-  {
-    value: "pollen",
-    label: "Pollen",
-  },
+
   {
     value: "default",
     label: "Default",
+  },
+  {
+    value: "elegant",
+    label: "Elegant",
   },
 ] as const;
 
@@ -25,6 +22,14 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
   "happy-bamboo": {
     label: "Happy Bamboo",
     subdomains: ["zaires"],
+  },
+  pollen: {
+    label: "Pollen",
+    subdomains: ["dpc"],
+  },
+  "dark-trend": {
+    label: "Dark Trend",
+    subdomains: ["trendanomaly"],
   },
 };
 

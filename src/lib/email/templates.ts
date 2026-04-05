@@ -279,6 +279,8 @@ export async function sendContactFormSubmission(params: {
     react: ContactFormEmail({
       name: params.name,
       email: params.email,
+      phone: params.phone,
+      preferredContactMethod: params.preferredContactMethod ?? "no-preference",
       subject: params.subject,
       message: params.message,
       businessName: params.business.name,

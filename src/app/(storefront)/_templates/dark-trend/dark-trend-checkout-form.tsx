@@ -5,38 +5,54 @@ import Image from "next/image";
 import Link from "next/link";
 import { CreditCard, Loader2 } from "lucide-react";
 
+import type { DefaultCheckoutPageTemplateProps } from "../types";
 import { formatPrice } from "~/lib/prices";
-import { useFeatureFlags } from "~/hooks/use-feature-flags";
+import {
+  calculateShipping,
+  shippingConfigFromBusiness,
+} from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { useCart } from "~/providers/cart-context";
 
 import { DarkTrendDiscountInput } from "./dark-trend-discount-input";
 
-type Business = {
-  id: string;
-  siteContent: {
-    primaryColor: string | null;
-  } | null;
-};
-
 type Props = {
-  business: Business;
+  business: DefaultCheckoutPageTemplateProps["business"];
 };
 
 export function DarkTrendCheckoutForm({ business }: Props) {
-  const { items, total } = useCart();
+  const { items, removeItem, total } = useCart();
+  const shippingConfig = shippingConfigFromBusiness(business);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Form state
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
 
-  // Discount state
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [country, setCountry] = useState<"US" | "CA">("US");
+
+  const [deliveryMethod, setDeliveryMethod] = useState<"ship" | "pickup">(
+    "ship",
+  );
+
   const [appliedDiscount, setAppliedDiscount] = useState<{
     id: string;
     code: string;
@@ -45,7 +61,11 @@ export function DarkTrendCheckoutForm({ business }: Props) {
 
   const subtotal = total;
   const discountAmount = appliedDiscount?.discountAmount ?? 0;
-  const finalTotal = subtotal - discountAmount;
+  const shipping =
+    deliveryMethod === "pickup"
+      ? 0
+      : calculateShipping(subtotal, shippingConfig);
+  const finalTotal = subtotal - discountAmount + shipping;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,9 +73,18 @@ export function DarkTrendCheckoutForm({ business }: Props) {
     setIsProcessing(true);
 
     try {
-      // Validation
-      if (!email || !name) {
-        throw new Error("Please fill in all required fields");
+      if (!email || !name || !phone.trim()) {
+        throw new Error("Please fill in all required contact fields");
+      }
+
+      if (
+        deliveryMethod === "ship" &&
+        (!addressLine1.trim() ||
+          !city.trim() ||
+          !state.trim() ||
+          !postalCode.trim())
+      ) {
+        throw new Error("Please fill in all required shipping fields");
       }
 
       if (items.length === 0) {
@@ -67,9 +96,23 @@ export function DarkTrendCheckoutForm({ business }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items,
+          deliveryMethod,
           customerInfo: {
             email,
             name,
+            phone: phone.trim(),
+            shippingAddress:
+              deliveryMethod === "ship"
+                ? {
+                    line1: addressLine1.trim(),
+                    line2: addressLine2.trim() || null,
+                    city: city.trim(),
+                    state: state.trim(),
+                    postalCode: postalCode.trim(),
+                    country,
+                    phone: phone.trim(),
+                  }
+                : null,
           },
           discountCodeId: appliedDiscount?.id ?? null,
           discountAmount: appliedDiscount?.discountAmount ?? 0,
@@ -79,14 +122,22 @@ export function DarkTrendCheckoutForm({ business }: Props) {
       const data = (await response.json()) as {
         error?: string;
         unavailableItems?: string[];
+        unavailableItemIds?: { productId: string; variantId: string | null }[];
         sessionUrl?: string;
       };
 
       if (!response.ok) {
+        if (data.unavailableItemIds && data.unavailableItemIds.length > 0) {
+          for (const row of data.unavailableItemIds) {
+            removeItem(row.productId, row.variantId);
+          }
+        }
         if (data.unavailableItems && data.unavailableItems.length > 0) {
-          setError(
-            `${data.error ?? "Some items are unavailable."} Remove or update: ${data.unavailableItems.join(", ")}`,
-          );
+          const removedMsg =
+            data.unavailableItemIds && data.unavailableItemIds.length > 0
+              ? `The following items were out of stock or no longer available and have been removed from your cart: ${data.unavailableItems.join(", ")}.`
+              : `${data.error ?? "Some items are unavailable."} Remove or update: ${data.unavailableItems.join(", ")}`;
+          setError(removedMsg);
         } else {
           setError(data.error ?? "Failed to create checkout session");
         }
@@ -101,7 +152,6 @@ export function DarkTrendCheckoutForm({ business }: Props) {
         return;
       }
 
-      // Redirect to Stripe Checkout
       window.location.href = sessionUrl;
     } catch (err: unknown) {
       setError((err as Error).message ?? "Failed to create checkout session");
@@ -148,7 +198,6 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   required
                 />
               </div>
-
               <div>
                 <Label htmlFor="name" className="text-white">
                   Full Name *
@@ -163,21 +212,173 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   required
                 />
               </div>
+              <div>
+                <Label htmlFor="phone" className="text-white">
+                  Phone *
+                </Label>
+                <PhoneInput
+                  id="phone"
+                  autoComplete="tel"
+                  value={phone}
+                  onChange={(val) => setPhone(val)}
+                  placeholder="+1 555 123 4567"
+                  className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
+                  required
+                />
+              </div>
             </CardContent>
           </Card>
 
-          {/* Note about shipping */}
-          <Card className="border-white/20 bg-zinc-900/30">
-            <CardHeader>
-              <CardTitle className="text-white">Shipping Address</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-white/70">
-                You&apos;ll enter your shipping address on the next page (Stripe
-                Checkout)
-              </p>
-            </CardContent>
-          </Card>
+          {/* Delivery Method */}
+          {shippingConfig.offersInStorePickup && (
+            <Card className="border-white/20 bg-zinc-900/30">
+              <CardHeader>
+                <CardTitle className="text-white">Delivery</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => setDeliveryMethod("ship")}
+                    className={
+                      deliveryMethod === "ship"
+                        ? "bg-violet-500 text-white hover:bg-violet-600"
+                        : "border border-white/20 bg-transparent text-white hover:bg-white/10"
+                    }
+                  >
+                    Ship to address
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setDeliveryMethod("pickup")}
+                    className={
+                      deliveryMethod === "pickup"
+                        ? "bg-violet-500 text-white hover:bg-violet-600"
+                        : "border border-white/20 bg-transparent text-white hover:bg-white/10"
+                    }
+                  >
+                    In-store pickup
+                  </Button>
+                </div>
+                <p className="text-sm text-white/70">
+                  {deliveryMethod === "pickup"
+                    ? "No shipping charge. You'll pick up your order at the store."
+                    : "Shipping cost is based on your store's shipping settings."}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Shipping Address */}
+          {deliveryMethod === "ship" && (
+            <Card className="border-white/20 bg-zinc-900/30">
+              <CardHeader>
+                <CardTitle className="text-white">Shipping Address</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-white/70">
+                  This is sent to Stripe Checkout prefilled so you can confirm
+                  or edit your name, phone, and address before paying.
+                </p>
+                <div>
+                  <Label htmlFor="address-line1" className="text-white">
+                    Address line 1 *
+                  </Label>
+                  <Input
+                    id="address-line1"
+                    type="text"
+                    autoComplete="shipping address-line1"
+                    value={addressLine1}
+                    onChange={(e) => setAddressLine1(e.target.value)}
+                    placeholder="Street address, P.O. box"
+                    className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
+                    required={deliveryMethod === "ship"}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="address-line2" className="text-white">
+                    Address line 2
+                  </Label>
+                  <Input
+                    id="address-line2"
+                    type="text"
+                    autoComplete="shipping address-line2"
+                    value={addressLine2}
+                    onChange={(e) => setAddressLine2(e.target.value)}
+                    placeholder="Apartment, suite, etc."
+                    className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
+                  />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <Label htmlFor="city" className="text-white">
+                      City *
+                    </Label>
+                    <Input
+                      id="city"
+                      type="text"
+                      autoComplete="shipping address-level2"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
+                      required={deliveryMethod === "ship"}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state" className="text-white">
+                      State / Province *
+                    </Label>
+                    <Input
+                      id="state"
+                      type="text"
+                      autoComplete="shipping address-level1"
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      placeholder="e.g. CA or ON"
+                      className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
+                      required={deliveryMethod === "ship"}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <Label htmlFor="postal" className="text-white">
+                      ZIP / Postal code *
+                    </Label>
+                    <Input
+                      id="postal"
+                      type="text"
+                      autoComplete="shipping postal-code"
+                      value={postalCode}
+                      onChange={(e) => setPostalCode(e.target.value)}
+                      className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
+                      required={deliveryMethod === "ship"}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="country" className="text-white">
+                      Country *
+                    </Label>
+                    <Select
+                      value={country}
+                      onValueChange={(v) => setCountry(v as "US" | "CA")}
+                    >
+                      <SelectTrigger
+                        id="country"
+                        className="w-full border-white/20 bg-zinc-900/50 text-white"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="US">United States</SelectItem>
+                        <SelectItem value="CA">Canada</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Order Summary */}
@@ -251,12 +452,21 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                 )}
                 <div className="flex justify-between text-sm">
                   <span className="text-white/70">Shipping</span>
-                  <span className="text-white">Calculated at checkout</span>
+                  <span className="text-white">
+                    {deliveryMethod === "pickup"
+                      ? "In-store pickup (free)"
+                      : shipping === 0
+                        ? "Free"
+                        : formatPrice(shipping)}
+                  </span>
                 </div>
                 <div className="flex justify-between border-t border-white/20 pt-2 font-bold text-white">
-                  <span>Total</span>
+                  <span>Estimated total</span>
                   <span>{formatPrice(finalTotal)}</span>
                 </div>
+                <p className="text-xs text-white/60">
+                  Tax and final total are confirmed on Stripe Checkout.
+                </p>
               </div>
 
               {error && (
@@ -290,7 +500,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
               </Button>
 
               <p className="text-center text-xs text-white/60">
-                Secure checkout powered by Stripe
+                All transactions are secure and encrypted via Stripe. 100%
+                Secure and Encrypted Payments.
               </p>
             </CardContent>
           </Card>

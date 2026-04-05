@@ -8,6 +8,7 @@ import { env } from "~/env";
 import { TRPCReactProvider } from "~/trpc/react";
 import { api } from "~/trpc/server";
 import { TooltipProvider } from "~/components/ui/tooltip";
+import { TemplateSelectorDevTool } from "~/components/development/template-selector";
 
 import { Providers } from "../providers/providers";
 
@@ -72,7 +73,9 @@ export default function RootLayout({
             />
           )}
           <TooltipProvider>
-            <TRPCReactProvider>{children}</TRPCReactProvider>
+            <TRPCReactProvider>
+              {children} <TemplateSelectorDevTool />
+            </TRPCReactProvider>
           </TooltipProvider>
         </Providers>
       </body>

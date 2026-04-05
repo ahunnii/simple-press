@@ -23,13 +23,13 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { Spotlight } from "~/components/ui/spotlight-new";
-
 import {
   FadeIn,
   PageTransition,
   StaggerContainer,
   StaggerItem,
-} from "./bamboo-animations";
+} from "~/components/page-animations";
+
 import { BambooVariantSelector } from "./bamboo-variant-selector";
 
 // const productDetails: Record<string, { highlights: string[]; specs: Record<string, string> }> = {

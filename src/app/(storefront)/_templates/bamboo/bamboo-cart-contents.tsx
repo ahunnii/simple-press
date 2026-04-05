@@ -3,22 +3,26 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
-import type { DefaultCartPageTemplateProps } from "../types";
+import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { Button } from "~/components/ui/button";
-import { useCart } from "~/providers/cart-context";
-
 import {
   FadeIn,
   PageTransition,
   StaggerContainer,
   StaggerItem,
-} from "./bamboo-animations";
-import { CartItem } from "./bamboo-cart-item";
-import { CartSummary } from "./bamboo-cart-summary";
+} from "~/components/page-animations";
+import { useCart } from "~/providers/cart-context";
+
+import { BambooCartItem } from "./bamboo-cart-item";
+import { BambooCartSummary } from "./bamboo-cart-summary";
 
 type Props = {
   business: {
     id: string;
+    shippingType: string;
+    shippingFlatRate: number | null;
+    freeShippingThreshold: number | null;
+    offersInStorePickup: boolean;
     siteContent: {
       primaryColor: string | null;
     } | null;
@@ -27,6 +31,7 @@ type Props = {
 
 export function BambooCartContents({ business }: Props) {
   const { items } = useCart();
+  const shippingConfig = shippingConfigFromBusiness(business);
 
   if (items.length === 0) {
     return (
@@ -67,7 +72,7 @@ export function BambooCartContents({ business }: Props) {
           >
             {items.map((item) => (
               <StaggerItem key={item.productId}>
-                <CartItem item={item} />
+                <BambooCartItem item={item} />
               </StaggerItem>
             ))}
             <StaggerItem>
@@ -84,7 +89,7 @@ export function BambooCartContents({ business }: Props) {
             className="w-full shrink-0 lg:w-80"
           >
             <div className="sticky top-20">
-              <CartSummary />
+              <BambooCartSummary shippingConfig={shippingConfig} />
             </div>
           </FadeIn>
         </div>

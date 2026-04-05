@@ -1,49 +1,39 @@
-import {
-  BanknoteArrowDown,
-  CheckCircle,
-  Users,
-} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { BanknoteArrowDown, CheckCircle, Users } from "lucide-react";
 
-import { StaggerContainer, StaggerItem } from "./bamboo-animations";
+import { StaggerContainer, StaggerItem } from "~/components/page-animations";
 
 const DEFAULT_FEATURES = [
   {
     icon: CheckCircle,
-    label: "Premium Quality",
+    title: "Premium Quality",
     description:
       "Experience top-quality household paper products, crafted for comfort and reliability.",
   },
   {
     icon: BanknoteArrowDown,
-    label: "Competitive Prices",
+    title: "Competitive Prices",
     description: "Affordable prices without compromising quality.",
   },
   {
     icon: Users,
-    label: "Customer-Centric Approach",
+    title: "Customer-Centric Approach",
     description: "Your satisfaction comes first in everything we do.",
   },
 ];
 
-type BambooSustainabilityBannerProps = {
-  fields?: Record<string, string> | null;
+type Props = {
+  sustainabilityList: unknown[];
 };
 
-export function BambooSustainabilityBanner({
-  fields,
-}: BambooSustainabilityBannerProps) {
-  const features = DEFAULT_FEATURES.map((defaultFeature, i) => {
-    const n = i + 1;
-    return {
-      icon: defaultFeature.icon,
-      label:
-        fields?.[`bamboo.homepage.sustainability-${n}-label`] ??
-        defaultFeature.label,
-      description:
-        fields?.[`bamboo.homepage.sustainability-${n}-description`] ??
-        defaultFeature.description,
-    };
-  });
+export function BambooSustainabilityBanner({ sustainabilityList }: Props) {
+  const listRows = sustainabilityList as {
+    icon: LucideIcon;
+    title: string;
+    description: string;
+  }[];
+  const features =
+    !listRows || listRows.length === 0 ? DEFAULT_FEATURES : listRows;
 
   return (
     <section className="bg-primary">
@@ -54,14 +44,14 @@ export function BambooSustainabilityBanner({
         >
           {features.map((feature) => (
             <StaggerItem
-              key={feature.label}
+              key={feature.title}
               className="flex flex-col items-center gap-3 text-center"
             >
               <div className="bg-primary-foreground/10 flex size-12 items-center justify-center rounded-full">
                 <feature.icon className="text-primary-foreground size-6" />
               </div>
               <h3 className="text-primary-foreground text-sm font-semibold">
-                {feature.label}
+                {feature.title}
               </h3>
               <p className="text-primary-foreground/70 text-xs">
                 {feature.description}

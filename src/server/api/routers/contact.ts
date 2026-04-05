@@ -9,7 +9,11 @@ import { db } from "~/server/db";
 
 export const contactRouter = createTRPCRouter({
   send: publicProcedure.input(contactSchema).mutation(async ({ input }) => {
-    const isValid = await verifyHCaptcha(input.captchaToken);
+    const isValid =
+      process.env.NODE_ENV === "development"
+        ? true
+        : await verifyHCaptcha(input.captchaToken);
+
     if (!isValid) {
       throw new TRPCError({
         code: "BAD_REQUEST",

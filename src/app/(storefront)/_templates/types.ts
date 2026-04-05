@@ -54,7 +54,7 @@ export type DefaultCartPageTemplateProps = {
 };
 
 export type DefaultCheckoutPageTemplateProps = {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 
 export type DefaultBlogPostPageTemplateProps = {

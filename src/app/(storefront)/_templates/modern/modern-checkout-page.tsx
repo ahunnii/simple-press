@@ -5,7 +5,6 @@ import { ModernCheckoutForm } from "./modern-checkout-form";
 export function ModernCheckoutPage({
   business,
 }: DefaultCheckoutPageTemplateProps) {
-  console.log(business.id);
   return (
     <div>
       <div className="bg-background">
@@ -17,7 +16,7 @@ export function ModernCheckoutPage({
           </div>
         </div>
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-          <ModernCheckoutForm />
+          <ModernCheckoutForm business={business} />
         </div>
       </div>
     </div>

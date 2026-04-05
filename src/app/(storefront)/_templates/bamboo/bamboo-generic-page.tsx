@@ -1,8 +1,7 @@
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
+import { FadeIn, PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
-
-import { FadeIn, PageTransition } from "./bamboo-animations";
 
 type Props = {
   page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;

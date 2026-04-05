@@ -12,12 +12,14 @@ import {
   ArrowLeft,
   ChevronDown,
   ChevronUp,
+  Download,
+  MoreHorizontal,
   Plus,
-  Save,
   Search,
   Trash,
   Trash2,
   Upload,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -49,6 +51,14 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { MinimalTiptapEditor } from "~/components/ui/minimal-tiptap";
@@ -63,11 +73,8 @@ import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
+import { ResetFormButton } from "~/components/shared/reset-form-button";
+import { SaveFormButton } from "~/components/shared/save-form-button";
 
 const EMPTY_TIPTAP_DOC: Content = { type: "doc", content: [] };
 
@@ -111,14 +118,37 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
   const [customFields, setCustomFields] =
     useState<Record<string, unknown>>(initialFields);
 
-  // Store initial state for comparison
-  const [initialState, setInitialState] = useState({
-    fields: { ...initialFields } as Record<string, unknown>,
-    customPairsKeys: new Set<string>(),
+  // Store initial state for comparison — lazy initializer keeps customPairsKeys
+  // in sync with customPairs from the very first render, preventing false dirty.
+  const [initialState, setInitialState] = useState(() => {
+    const allTemplateKeys = new Set(
+      Object.values(groupedByPage)
+        .flat()
+        .map((f) => f.key),
+    );
+    const initialCustomKeys = new Set(
+      Object.entries(initialFields)
+        .filter(
+          ([key, value]) =>
+            !allTemplateKeys.has(key) &&
+            typeof value === "string" &&
+            value !== "",
+        )
+        .map(([key]) => key),
+    );
+    return {
+      fields: { ...initialFields } as Record<string, unknown>,
+      customPairsKeys: initialCustomKeys,
+    };
   });
 
   // Track which fields have been modified
   const [modifiedFields, setModifiedFields] = useState<Set<string>>(new Set());
+
+  // Refs for richtext dirty-state fix and import
+  const dirtyBaselineRef = useRef(false);
+  const savedFieldsRef = useRef<Record<string, unknown>>({});
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   // Custom key-value pairs (organized by page)
   const [customPairs, setCustomPairs] = useState<
@@ -142,6 +172,13 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
       toast.dismiss();
       toast.success("Template fields updated");
       setModifiedFields(new Set());
+      requestAnimationFrame(() => {
+        setModifiedFields(new Set());
+        setInitialState((prev) => ({
+          ...prev,
+          fields: { ...savedFieldsRef.current },
+        }));
+      });
       router.refresh();
     },
     onError: (error) => {
@@ -165,6 +202,7 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
         allFields[pair.key] = pair.value;
       }
     });
+    savedFieldsRef.current = allFields;
 
     updateSiteContent.mutate({
       customFields: allFields,
@@ -182,23 +220,90 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
     setModifiedFields(new Set(modifiedFields).add(key));
   };
 
+  // Re-baseline after TipTap normalizes on mount to prevent false dirty state
+  useEffect(() => {
+    if (dirtyBaselineRef.current) return;
+    dirtyBaselineRef.current = true;
+    const raf = requestAnimationFrame(() => setModifiedFields(new Set()));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const handleExport = () => {
+    const prefix = `${business.templateId}.`;
+    const exportData: Record<string, unknown> = {
+      _templateId: business.templateId,
+    };
+    for (const [key, value] of Object.entries(customFields)) {
+      if (key.startsWith(prefix)) exportData[key] = value;
+    }
+    customPairs.forEach((p) => {
+      if (p.key.startsWith(prefix) && p.value) exportData[p.key] = p.value;
+    });
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${business.templateId}-fields.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target?.result as string) as Record<
+          string,
+          unknown
+        >;
+        const prefix = `${business.templateId}.`;
+        const allTemplateKeys = new Set(
+          Object.values(groupedByPage)
+            .flat()
+            .map((f) => f.key),
+        );
+        const newCustomFields = { ...customFields };
+        const newModified = new Set(modifiedFields);
+        const newCustomPairs = [...customPairs];
+        let count = 0;
+
+        for (const [key, value] of Object.entries(parsed)) {
+          if (key === "_templateId") continue;
+          // Only import keys that belong to this template
+          if (!key.startsWith(prefix)) continue;
+          if (allTemplateKeys.has(key)) {
+            newCustomFields[key] = value;
+            newModified.add(key);
+            count++;
+          } else if (typeof value === "string") {
+            const page = key.split(".")[1] ?? "global";
+            const existing = newCustomPairs.findIndex((p) => p.key === key);
+            if (existing >= 0) newCustomPairs[existing] = { key, value, page };
+            else newCustomPairs.push({ key, value, page });
+            count++;
+          }
+        }
+
+        setCustomFields(newCustomFields);
+        setModifiedFields(newModified);
+        setCustomPairs(newCustomPairs);
+        toast.success(`Imported ${count} field${count !== 1 ? "s" : ""}`);
+      } catch {
+        toast.error("Invalid JSON file");
+      }
+      e.target.value = "";
+    };
+    reader.readAsText(file);
+  };
+
   const addCustomPair = (page: string) => {
     setCustomPairs([...customPairs, { key: "", value: "", page }]);
   };
-
-  // const updateCustomPair = (
-  //   index: number,
-  //   field: "key" | "value" | "page",
-  //   value: string,
-  // ) => {
-  //   const updated = [...customPairs];
-  //   updated[index]![field] = value;
-  //   setCustomPairs(updated);
-  // };
-
-  // const deleteCustomPair = (index: number) => {
-  //   setCustomPairs(customPairs.filter((_, i) => i !== index));
-  // };
 
   // Filter fields by search
   const filterFields = (fields: TemplateField[]) => {
@@ -217,6 +322,17 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
     return { templateFields, customPairs: pageCustomPairs };
   };
 
+  const getPageTabStats = (page: string) => {
+    const meta = PAGE_METADATA[page as keyof typeof PAGE_METADATA];
+    const { templateFields, customPairs: pagePairs } = getFieldsForPage(page);
+    const totalFields = templateFields.length + pagePairs.length;
+    const modifiedCount = [
+      ...templateFields.map((f) => f.key),
+      ...pagePairs.map((p) => p.key),
+    ].filter((key) => modifiedFields.has(key)).length;
+    return { meta, totalFields, modifiedCount };
+  };
+
   // Update initial state when data loads
   useEffect(() => {
     const allTemplateKeys = new Set(
@@ -225,7 +341,14 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
         .map((f) => f.key),
     );
     const initialCustomKeys = new Set(
-      Object.keys(initialFields).filter((key) => !allTemplateKeys.has(key)),
+      Object.entries(initialFields)
+        .filter(
+          ([key, value]) =>
+            !allTemplateKeys.has(key) &&
+            typeof value === "string" &&
+            value !== "",
+        )
+        .map(([key]) => key),
     );
 
     setInitialState({
@@ -237,7 +360,12 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
   // Check if there are unsaved changes
   const hasUnsavedChanges = useCallback(() => {
     // Check modified template fields
-    if (modifiedFields.size > 0) return true;
+    if (modifiedFields.size > 0) {
+      console.log("Unsaved: modifiedFields present", modifiedFields);
+      return true;
+    } else {
+      console.log("No modifiedFields");
+    }
 
     // Check if custom pairs changed
     const currentCustomKeys = new Set(
@@ -246,30 +374,46 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
 
     // Different number of custom fields
     if (currentCustomKeys.size !== initialState.customPairsKeys.size) {
+      console.log(
+        "Unsaved: custom field key count mismatch",
+        { currentCustomKeys: Array.from(currentCustomKeys) },
+        { initialCustomPairsKeys: Array.from(initialState.customPairsKeys) },
+      );
       return true;
+    } else {
+      console.log("Custom field key count matches");
     }
 
     // Check if any custom field keys are different
     for (const key of currentCustomKeys) {
       if (!initialState.customPairsKeys.has(key)) {
+        console.log("Unsaved: Found new custom key", key);
         return true;
       }
     }
+    console.log("No new custom keys");
 
     // Check if any custom field values changed
     for (const pair of customPairs) {
       if (pair.key && pair.value) {
         const initialValue = initialState.fields[pair.key];
         if (initialValue !== pair.value) {
+          console.log("Unsaved: custom value changed", {
+            key: pair.key,
+            initialValue,
+            currentValue: pair.value,
+          });
           return true;
         }
       }
     }
+    console.log("No custom values changed");
 
     return false;
   }, [modifiedFields, customPairs, initialState]);
 
   const isDirty = hasUnsavedChanges();
+  const activeTabStats = getPageTabStats(activeTab);
 
   // Warn before leaving page with unsaved changes
   useEffect(() => {
@@ -296,19 +440,7 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
           </Button>
           <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <h1 className="text-base font-medium">
-                  Template Fields{" "}
-                  {/* <span className="text-muted-foreground hover:text-foreground text-sm">
-                    ?
-                  </span> */}
-                </h1>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Customize content across your site, organized by page</p>
-              </TooltipContent>
-            </Tooltip>
+            <h1 className="text-base font-medium">Template Fields </h1>
 
             <span
               className={`admin-status-badge ${
@@ -317,126 +449,180 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
             >
               {isDirty ? "Unsaved Changes" : "Saved"}
             </span>
-
-            <Badge variant="outline" className="capitalize">
-              {business.templateId} Template
-            </Badge>
           </div>
         </div>
 
         <div className="toolbar-actions">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isSaving || !isDirty}
-            onClick={handleReset}
-            className="hidden md:inline-flex"
-          >
-            Reset
-          </Button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".json"
+            aria-label="Import template fields JSON"
+            className="hidden"
+            onChange={handleImport}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="hidden md:inline-flex"
+                aria-label="More template field actions"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">More</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  queueMicrotask(() => importInputRef.current?.click());
+                }}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Import JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={handleExport}>
+                <Download className="mr-2 h-4 w-4" />
+                Export JSON
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          <Button onClick={handleSave} size="sm" disabled={isSaving}>
-            {isSaving ? (
-              <>
-                <span className="saving-indicator" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Save changes</span>
-                <span className="sm:hidden">Save</span>
-              </>
-            )}
-          </Button>
+          <ResetFormButton
+            disabled={isSaving || !isDirty}
+            handleReset={handleReset}
+          />
+
+          <SaveFormButton
+            disabled={isSaving}
+            handleSave={handleSave}
+            isSaving={isSaving}
+          />
         </div>
       </div>
 
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header
-        <div className="mb-8">
-          <div className="mb-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/admin/content">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Link>
-            </Button>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Template Fields
-              </h1>
-              <p className="mt-2 text-gray-600">
-                Customize content across your site, organized by page
-              </p>
-              <Badge variant="outline" className="mt-2 capitalize">
-                {business.templateId} Template
-              </Badge>
-            </div>
-
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                  {modifiedFields.size > 0 && (
-                    <Badge variant="destructive" className="ml-2">
-                      {modifiedFields.size}
-                    </Badge>
-                  )}
-                </>
-              )}
-            </Button>
-          </div>
-        </div> */}
-
         {/* Main Content */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Template Content</CardTitle>
+            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+              <div className="w-full">
+                <CardTitle className="flex items-center gap-2">
+                  Template Content{" "}
+                  <Badge variant="outline" className="capitalize">
+                    {business.templateId} Template
+                  </Badge>
+                </CardTitle>
                 <CardDescription>
                   Edit content organized by page and grouped by section
                 </CardDescription>
               </div>
 
               {/* Search */}
-              <div className="relative w-64">
-                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <Input
-                  placeholder="Search fields..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+              <div className="flex w-full items-center gap-2 md:w-auto">
+                <div className="relative w-full md:w-64">
+                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    placeholder="Search fields..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear <X className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
 
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-6">
-                {allPages.map((page) => {
-                  const meta =
-                    PAGE_METADATA[page as keyof typeof PAGE_METADATA];
-                  const { templateFields, customPairs: pagePairs } =
-                    getFieldsForPage(page);
-                  const totalFields = templateFields.length + pagePairs.length;
-                  const modifiedCount = [
-                    ...templateFields.map((f) => f.key),
-                    ...pagePairs.map((p) => p.key),
-                  ].filter((key) => modifiedFields.has(key)).length;
+              <div className="mb-6 sm:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-auto min-h-9 w-full justify-between gap-2 px-3 py-2 font-normal"
+                    >
+                      <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
+                        <span className="shrink-0">
+                          {activeTabStats.meta?.icon || "📄"}
+                        </span>
+                        <span className="truncate">
+                          {activeTabStats.meta?.title || activeTab}
+                        </span>
+                        {activeTabStats.totalFields > 0 && (
+                          <Badge
+                            variant={
+                              activeTabStats.modifiedCount > 0
+                                ? "default"
+                                : "secondary"
+                            }
+                            className="ml-auto h-5 w-5 shrink-0 rounded-full p-0 text-xs"
+                          >
+                            {activeTabStats.totalFields}
+                          </Badge>
+                        )}
+                      </span>
+                      <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="max-h-[min(60vh,22rem)] w-(--radix-dropdown-menu-trigger-width) overflow-y-auto"
+                    align="start"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={activeTab}
+                      onValueChange={setActiveTab}
+                    >
+                      {allPages.map((page) => {
+                        const { meta, totalFields, modifiedCount } =
+                          getPageTabStats(page);
+                        return (
+                          <DropdownMenuRadioItem
+                            key={page}
+                            value={page}
+                            className="min-w-0 pr-2"
+                          >
+                            <span className="mr-1 shrink-0">
+                              {meta?.icon || "📄"}
+                            </span>
+                            <span className="min-w-0 flex-1 truncate">
+                              {meta?.title || page}
+                            </span>
+                            {totalFields > 0 && (
+                              <Badge
+                                variant={
+                                  modifiedCount > 0 ? "default" : "secondary"
+                                }
+                                className="ml-auto h-5 w-5 shrink-0 rounded-full p-0 text-xs"
+                              >
+                                {totalFields}
+                              </Badge>
+                            )}
+                          </DropdownMenuRadioItem>
+                        );
+                      })}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
+              <TabsList className="mb-6 hidden max-w-full flex-wrap sm:inline-flex">
+                {allPages.map((page) => {
+                  const { meta, totalFields, modifiedCount } =
+                    getPageTabStats(page);
                   return (
                     <TabsTrigger
                       key={page}
@@ -444,9 +630,7 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
                       className="relative w-fit"
                     >
                       <span className="mr-1">{meta?.icon || "📄"}</span>
-                      <span className="hidden sm:inline">
-                        {meta?.title || page}
-                      </span>
+                      <span>{meta?.title || page}</span>
                       {totalFields > 0 && (
                         <Badge
                           variant={modifiedCount > 0 ? "default" : "secondary"}

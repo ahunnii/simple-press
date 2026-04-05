@@ -72,7 +72,7 @@ export function useContactForm(options: UseContactFormOptions = {}) {
     (form.watch("message") as string | undefined)?.length ?? 0;
 
   const onSubmit = async (data: FormValues) => {
-    if (!captchaToken) {
+    if (!captchaToken && process.env.NODE_ENV === "production") {
       toast.error("Please complete the captcha");
       return;
     }

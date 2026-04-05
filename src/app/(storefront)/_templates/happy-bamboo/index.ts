@@ -81,7 +81,9 @@ const homepageAboutTeaserData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.aboutTeaser",
+    gridColumn: "col-span-full",
     defaultValue: "From Detroit, With Purpose",
+    placeholder: "From Detroit, With Purpose",
   },
   {
     key: "happy-bamboo.homepage-about-body",
@@ -89,6 +91,8 @@ const homepageAboutTeaserData: TemplateField[] = [
     description: "Body text for the about teaser",
     type: "richtext",
     page: "homepage",
+    gridColumn: "col-span-full",
+    placeholder: "We started our business with a simple belief...",
     group: "homepage.aboutTeaser",
   },
   {
@@ -169,8 +173,43 @@ const homepageFeaturedData: TemplateField[] = [
 
 const homepageBenefitsData: TemplateField[] = [
   {
+    key: "happy-bamboo.homepage-benefits-heading",
+    label: "Benefits Section Heading",
+    description: "Main heading for the Why Choose Bamboo Products section",
+    type: "text",
+    page: "homepage",
+    group: "homepage.benefits",
+    gridColumn: "col-span-full",
+    defaultValue: "Why Choose Bamboo Products?",
+    placeholder: "Why Choose Bamboo Products?",
+  },
+  {
+    key: "happy-bamboo.homepage-benefits-intro",
+    label: "Benefits Section Intro",
+    description: "Intro paragraph below the heading",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.benefits",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Bamboo products come with a variety of benefits, making them an appealing option for many consumers.",
+    placeholder: "Bamboo products come with a variety of benefits...",
+  },
+  {
+    key: "happy-bamboo.homepage-benefits-closing",
+    label: "Benefits Section Closing",
+    description: "Closing paragraph below the benefits cards",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.benefits",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Overall, choosing bamboo products can be a responsible and eco-conscious decision that benefits both consumers and the environment.",
+    placeholder: "Overall, choosing bamboo products can be...",
+  },
+  {
     key: "happy-bamboo.homepage-benefits-list",
-    label: "Benefits cards",
+    label: "Benefits Cards",
     description:
       "Cards for the Why Choose Bamboo Products section (icon, title, and description per item).",
     type: "list",
@@ -202,173 +241,19 @@ const homepageBenefitsData: TemplateField[] = [
   },
 ];
 
-// const homepageSustainabilityData: TemplateField[] = [
-//   {
-//     key: "happy-bamboo.homepage.sustainability-1-label",
-//     label: "Sustainability Feature 1 Label",
-//     description: "First feature label (e.g. Premium Quality)",
-//     type: "text",
-//     page: "homepage",
-//     group: "homepage.sustainability",
-//     defaultValue: "Premium Quality",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.sustainability-1-description",
-//     label: "Sustainability Feature 1 Description",
-//     description: "First feature description",
-//     type: "textarea",
-//     page: "homepage",
-//     group: "homepage.sustainability",
-//     defaultValue:
-//       "Experience top-quality household paper products, crafted for comfort and reliability.",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.sustainability-2-label",
-//     label: "Sustainability Feature 2 Label",
-//     description: "Second feature label",
-//     type: "text",
-//     page: "homepage",
-//     group: "homepage.sustainability",
-//     defaultValue: "Competitive Prices",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.sustainability-2-description",
-//     label: "Sustainability Feature 2 Description",
-//     description: "Second feature description",
-//     type: "textarea",
-//     page: "homepage",
-//     group: "homepage.sustainability",
-//     defaultValue: "Affordable prices without compromising quality.",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.sustainability-3-label",
-//     label: "Sustainability Feature 3 Label",
-//     description: "Third feature label",
-//     type: "text",
-//     page: "homepage",
-//     group: "homepage.sustainability",
-//     defaultValue: "Customer-Centric Approach",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.sustainability-3-description",
-//     label: "Sustainability Feature 3 Description",
-//     description: "Third feature description",
-//     type: "textarea",
-//     page: "homepage",
-//     group: "homepage.sustainability",
-//     defaultValue: "Your satisfaction comes first in everything we do.",
-//   },
-// ];
-
-// const homepageLocationData: TemplateField[] = [
-//   {
-//     key: "happy-bamboo.homepage.location-heading",
-//     label: "Location Section Heading",
-//     description: "Heading for the location section on homepage",
-//     type: "text",
-//     page: "homepage",
-//     group: "homepage.location",
-//     defaultValue: "Our Location",
-//   },
-// ];
-
-// const homepageTestimonialsData: TemplateField[] = [
-//   {
-//     key: "happy-bamboo.homepage.testimonial-1-name",
-//     label: "Testimonial 1 Name",
-//     description: "First testimonial author name",
-//     type: "text",
-//     page: "homepage",
-//     group: "homepage.testimonials",
-//     defaultValue: "Sarah M.",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.testimonial-1-location",
-//     label: "Testimonial 1 Location",
-//     description: "First testimonial location",
-//     type: "text",
-//     page: "homepage",
-//     group: "homepage.testimonials",
-//     defaultValue: "Ann Arbor, MI",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.testimonial-1-quote",
-//     label: "Testimonial 1 Quote",
-//     description: "First testimonial quote",
-//     type: "textarea",
-//     page: "homepage",
-//     group: "homepage.testimonials",
-//     defaultValue:
-//       "I never thought I would care this much about toilet paper, but the softness and quality are genuinely impressive. Knowing it is eco-friendly makes it even better.",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.testimonial-2-name",
-//     label: "Testimonial 2 Name",
-//     description: "Second testimonial author name",
-//     type: "text",
-//     page: "homepage",
-//     group: "homepage.testimonials",
-//     defaultValue: "James T.",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.testimonial-2-location",
-//     label: "Testimonial 2 Location",
-//     description: "Second testimonial location",
-//     type: "text",
-//     page: "homepage",
-//     group: "homepage.testimonials",
-//     defaultValue: "Chicago, IL",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.testimonial-2-quote",
-//     label: "Testimonial 2 Quote",
-//     description: "Second testimonial quote",
-//     type: "textarea",
-//     page: "homepage",
-//     group: "homepage.testimonials",
-//     defaultValue:
-//       "We switched our entire household to Finally Results and have not looked back. The starter kit is the perfect way to try everything. Our septic system thanks us too.",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.testimonial-3-name",
-//     label: "Testimonial 3 Name",
-//     description: "Third testimonial author name",
-//     type: "text",
-//     page: "homepage",
-//     group: "homepage.testimonials",
-//     defaultValue: "Angela R.",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.testimonial-3-location",
-//     label: "Testimonial 3 Location",
-//     description: "Third testimonial location",
-//     type: "text",
-//     page: "homepage",
-//     group: "homepage.testimonials",
-//     defaultValue: "Detroit, MI",
-//   },
-//   {
-//     key: "happy-bamboo.homepage.testimonial-3-quote",
-//     label: "Testimonial 3 Quote",
-//     description: "Third testimonial quote",
-//     type: "textarea",
-//     page: "homepage",
-//     group: "homepage.testimonials",
-//     defaultValue:
-//       "Supporting a local Detroit business that actually cares about sustainability? That is a win-win. The product quality is on par with luxury brands at a fraction of the environmental cost.",
-//   },
-// ];
-
+/// ABOUT PAGE
 const aboutHeroData: TemplateField[] = [
-  // {
-  //   key: "happy-bamboo.about-hero-heading",
-  //   label: "About Hero Heading",
-  //   description: "Main heading for the about page",
-  //   type: "text",
-  //   page: "about",
-  //   group: "about.hero",
-  //   defaultValue: "Our Story",
-  // },
+  {
+    key: "happy-bamboo.about-hero-heading",
+    label: "About Hero Heading",
+    description: "Main heading for the about page",
+    type: "text",
+    page: "about",
+    group: "about.hero",
+    defaultValue: "Zaires Visions",
+    placeholder: "Zaires Visions",
+    gridColumn: "col-span-full",
+  },
   {
     key: "happy-bamboo.about-hero-mission",
     label: "About Hero Mission",
@@ -376,7 +261,9 @@ const aboutHeroData: TemplateField[] = [
     type: "textarea",
     page: "about",
     group: "about.hero",
+    gridColumn: "col-span-full",
     placeholder: "To offer eco-friendly, chemical and hypoallergenic free...",
+    defaultValue: "To offer eco-friendly, chemical and hypoallergenic free...",
   },
   {
     key: "happy-bamboo.about-hero-vision",
@@ -385,7 +272,9 @@ const aboutHeroData: TemplateField[] = [
     type: "textarea",
     page: "about",
     group: "about.hero",
+    gridColumn: "col-span-full",
     placeholder: "A world where everyday personal care choices protect...",
+    defaultValue: "A world where everyday personal care choices protect...",
   },
 
   {
@@ -395,7 +284,9 @@ const aboutHeroData: TemplateField[] = [
     type: "textarea",
     page: "about",
     group: "about.hero",
+    gridColumn: "col-span-full",
     placeholder: "By choosing Happy Bamboo...",
+    defaultValue: "By choosing Happy Bamboo...",
   },
   {
     key: "happy-bamboo.about-hero-image",
@@ -405,20 +296,22 @@ const aboutHeroData: TemplateField[] = [
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
   },
 ];
 
-// const aboutMissionData: TemplateField[] = [
-//   {
-//     key: "happy-bamboo.about-mission-banner",
-//     label: "Mission Banner",
-//     description: "Mission banner for the about page",
-//     type: "textarea",
-//     page: "about",
-//     group: "about.mission",
-//     placeholder: "Join us in our mission to make everyday moments...",
-//   },
-// ];
+const aboutMissionData: TemplateField[] = [
+  {
+    key: "happy-bamboo.about-mission-banner",
+    label: "Mission Banner",
+    description: "Mission banner for the about page",
+    type: "richtext",
+    page: "about",
+    group: "about.mission",
+    gridColumn: "col-span-full",
+    placeholder: "Join us in our mission to make everyday moments...",
+  },
+];
 
 const aboutServicesData: TemplateField[] = [
   {
@@ -429,6 +322,8 @@ const aboutServicesData: TemplateField[] = [
     page: "about",
     group: "about.services",
     defaultValue: "Our Services",
+    placeholder: "Our Services",
+    gridColumn: "col-span-full",
   },
   {
     key: "happy-bamboo.about-services-banner",
@@ -436,8 +331,11 @@ const aboutServicesData: TemplateField[] = [
     description: "Mission banner for the about page",
     type: "textarea",
     page: "about",
-    group: "about.mission",
+    group: "about.services",
+    gridColumn: "col-span-full",
     placeholder: "Join us in our mission to make everyday moments...",
+    defaultValue:
+      "We provide premium bamboo personal care products designed for comfort, sustainability, and your well-being.",
   },
   {
     key: "happy-bamboo.about-services-list",
@@ -479,16 +377,32 @@ const aboutBambooData: TemplateField[] = [
     type: "text",
     page: "about",
     group: "about.bamboo",
-    defaultValue: "Why Bamboo?",
+    defaultValue: "Why Bamboo Is Better",
+    placeholder: "Why Bamboo Is Better",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "happy-bamboo.about-bamboo-tagline",
+    label: "Bamboo Tagline",
+    description: "Bamboo tagline for the about page",
+    type: "text",
+    page: "about",
+    group: "about.bamboo",
+    defaultValue: "A Smarter Choice for You and the Planet",
+    placeholder: "A Smarter Choice for You and the Planet",
+    gridColumn: "col-span-full",
   },
   {
     key: "happy-bamboo.about-bamboo-description",
-    label: "Bamboo Intro",
-    description: "Intro line for Bamboo section",
+    label: "Bamboo Description",
+    description: "Description line for Bamboo section",
     type: "textarea",
     page: "about",
     group: "about.bamboo",
+    gridColumn: "col-span-full",
     placeholder: "Bamboo is nature's most remarkable...",
+    defaultValue:
+      "Bamboo is nature's most remarkable renewable resource. Here is why we chose it as the foundation for everything we make.",
   },
   {
     key: "happy-bamboo.about-bamboo-list",
@@ -497,6 +411,7 @@ const aboutBambooData: TemplateField[] = [
     type: "list",
     page: "about",
     group: "about.bamboo",
+    gridColumn: "col-span-full",
     itemSchema: [
       {
         key: "icon",
@@ -528,6 +443,7 @@ const aboutBambooData: TemplateField[] = [
     page: "about",
     group: "about.bamboo",
     gridColumn: "col-span-1",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "happy-bamboo.about-bamboo-image-2",
@@ -537,6 +453,7 @@ const aboutBambooData: TemplateField[] = [
     page: "about",
     group: "about.bamboo",
     gridColumn: "col-span-1",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "happy-bamboo.about-bamboo-image-3",
@@ -546,6 +463,7 @@ const aboutBambooData: TemplateField[] = [
     page: "about",
     group: "about.bamboo",
     gridColumn: "col-span-1",
+    defaultValue: "/placeholder.svg",
   },
 ];
 
@@ -557,10 +475,106 @@ const aboutCTAData: TemplateField[] = [
     type: "image",
     page: "about",
     group: "about.cta",
-    gridColumn: "col-span-1",
+    gridColumn: "col-span-full",
   },
 ];
 
+const aboutConnectWithUsData: TemplateField[] = [
+  {
+    key: "happy-bamboo.about-connect-with-us-heading",
+    label: "Connect With Us Heading",
+    description: "Connect with us heading for the about page",
+    type: "text",
+    page: "about",
+    group: "about.connect-with-us",
+    gridColumn: "col-span-full",
+    defaultValue: "Join the Happy Bamboo Community",
+    placeholder: "Share Your Feedback",
+  },
+  {
+    key: "happy-bamboo.about-connect-with-us-text",
+    label: "Connect With Us Text",
+    description: "Connect with us text for the about page",
+    type: "textarea",
+    page: "about",
+    group: "about.connect-with-us",
+    gridColumn: "col-span-full",
+    placeholder: "Share your experience, leave us a review, and...",
+    defaultValue:
+      "Share your experience, leave us a review, and follow us on social media for tips, updates, and inspiration.",
+  },
+  {
+    key: "happy-bamboo.about-connect-with-us-qr-code",
+    label: "Connect With Us QR Code",
+    description: "Connect with us QR code for the about page",
+    type: "image",
+    page: "about",
+    group: "about.connect-with-us",
+    gridColumn: "col-span-1",
+    defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "happy-bamboo.about-connect-with-us-google-review-link",
+    label: "Connect With Us Google Review Link",
+    description: "Connect with us Google review link for the about page",
+    type: "url",
+    page: "about",
+    group: "about.connect-with-us",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "https://search.google.com/local/writereview?placeid=ChIJ008r2PrRJIgRaaMPENARjUc",
+    placeholder: "https://search.google.com/local/writereview?placeid=",
+  },
+  {
+    key: "happy-bamboo.about-connect-with-us-google-review-header",
+    label: "Connect With Us Google Review Header",
+    description: "Connect with us Google review text for the about page",
+    type: "text",
+    page: "about",
+    group: "about.connect-with-us",
+    gridColumn: "col-span-1",
+    defaultValue: "Share Your Feedback",
+    placeholder: "Share Your Feedback",
+  },
+  {
+    key: "happy-bamboo.about-connect-with-us-google-review-text",
+    label: "Connect With Us Google Review Text",
+    description: "Connect with us Google review text for the about page",
+    type: "textarea",
+    page: "about",
+    group: "about.connect-with-us",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "Your reviews help others discover the comfort and sustainability of Happy Bamboo. Share your experience on Google.",
+    placeholder: "Your reviews help others discover the comfort...",
+  },
+  {
+    key: "happy-bamboo.about-connect-with-us-social-follow-header",
+    label: "Connect With Us Social Follow Header",
+    description: "Connect with us Social follow header for the about page",
+    type: "text",
+    page: "about",
+    group: "about.connect-with-us",
+    gridColumn: "col-span-1",
+    defaultValue: "Follow Our Journey",
+    placeholder: "Follow Our Journey",
+  },
+  {
+    key: "happy-bamboo.about-connect-with-us-social-follow-text",
+    label: "Connect With Us Social Follow Text",
+    description: "Connect with us Social follow text for the about page",
+    type: "textarea",
+    page: "about",
+    group: "about.connect-with-us",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "Stay connected for exclusive updates, eco-tips, behind-the-scenes content, and special offers.",
+    placeholder:
+      "Stay connected for exclusive updates, eco-tips, behind-the-scenes content, and special offers.",
+  },
+];
+
+/// CONTACT PAGE
 const contactPageData: TemplateField[] = [
   {
     key: "happy-bamboo.contact.header",
@@ -569,7 +583,9 @@ const contactPageData: TemplateField[] = [
     type: "text",
     page: "contact",
     group: "contact.info",
-    defaultValue: "Get in Touch",
+    gridColumn: "col-span-full",
+    defaultValue: "Contact Us",
+    placeholder: "Contact Us",
   },
   {
     key: "happy-bamboo.contact.subheader",
@@ -578,45 +594,12 @@ const contactPageData: TemplateField[] = [
     type: "textarea",
     page: "contact",
     group: "contact.info",
+    placeholder: "Have a question, want to partner with us...",
+    gridColumn: "col-span-full",
     defaultValue:
       "Have a question, want to partner with us, or just want to say hello? We would love to hear from you.",
   },
-  {
-    key: "happy-bamboo.contact.email",
-    label: "Contact Email",
-    description: "Email address displayed on contact page",
-    type: "text",
-    page: "contact",
-    group: "contact.info",
-    defaultValue: "happybamboo25@gmail.com",
-  },
-  {
-    key: "happy-bamboo.contact.location",
-    label: "Contact Location",
-    description: "Location text (e.g. city, state)",
-    type: "text",
-    page: "contact",
-    group: "contact.info",
-    defaultValue: "Detroit, Michigan",
-  },
-  {
-    key: "happy-bamboo.contact.phone",
-    label: "Contact Phone",
-    description: "Phone number",
-    type: "text",
-    page: "contact",
-    group: "contact.info",
-    defaultValue: "(313) 555-0199",
-  },
-  {
-    key: "happy-bamboo.contact.hours",
-    label: "Business Hours",
-    description: "Business hours text",
-    type: "text",
-    page: "contact",
-    group: "contact.info",
-    defaultValue: "Mon - Fri, 9am - 5pm EST",
-  },
+
   {
     key: "happy-bamboo.contact-image",
     label: "Contact Image",
@@ -624,15 +607,258 @@ const contactPageData: TemplateField[] = [
     type: "image",
     page: "contact",
     group: "contact.info",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
+  },
+];
+
+const homepageTestimonialsData: TemplateField[] = [
+  {
+    key: "happy-bamboo.homepage-testimonials-heading",
+    label: "Testimonials Section Heading",
+    description: "Heading shown above the testimonials cards",
+    type: "text",
+    page: "homepage",
+    group: "homepage.testimonials",
+    gridColumn: "col-span-full",
+    defaultValue: "What Consumers Say",
+    placeholder: "What Consumers Say",
+  },
+];
+
+const homepageCtaData: TemplateField[] = [
+  {
+    key: "happy-bamboo.homepage-cta-heading",
+    label: "CTA Heading",
+    description: "Main heading for the bottom call-to-action section",
+    type: "text",
+    page: "homepage",
+    group: "homepage.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "Ready to Make the Switch?",
+    placeholder: "Ready to Make the Switch?",
+  },
+  {
+    key: "happy-bamboo.homepage-cta-body",
+    label: "CTA Body Text",
+    description: "Paragraph below the CTA heading",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.cta",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Join thousands of eco-conscious households who have already made the switch to Happy Bamboo. Experience premium quality while making a positive impact on our planet.",
+    placeholder: "Join thousands of eco-conscious households...",
+  },
+  {
+    key: "happy-bamboo.homepage-cta-primary-button-text",
+    label: "Primary Button Text",
+    description: "Text for the primary CTA button",
+    type: "text",
+    page: "homepage",
+    group: "homepage.cta",
     gridColumn: "col-span-1",
+    defaultValue: "Shop Now",
+    placeholder: "Shop Now",
+  },
+  {
+    key: "happy-bamboo.homepage-cta-primary-button-link",
+    label: "Primary Button Link",
+    description: "URL for the primary CTA button",
+    type: "url",
+    page: "homepage",
+    group: "homepage.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "/shop",
+    placeholder: "/shop",
+  },
+  {
+    key: "happy-bamboo.homepage-cta-secondary-button-text",
+    label: "Secondary Button Text",
+    description: "Text for the secondary CTA button",
+    type: "text",
+    page: "homepage",
+    group: "homepage.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Learn More",
+    placeholder: "Learn More",
+  },
+  {
+    key: "happy-bamboo.homepage-cta-secondary-button-link",
+    label: "Secondary Button Link",
+    description: "URL for the secondary CTA button",
+    type: "url",
+    page: "homepage",
+    group: "homepage.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "/about",
+    placeholder: "/about",
+  },
+];
+
+const blogListingData: TemplateField[] = [
+  {
+    key: "happy-bamboo.blog-listing-title",
+    label: "Blog Page Title",
+    description: "Main heading shown at the top of the blog listing page",
+    type: "text",
+    page: "blog",
+    group: "blog.listing",
+    gridColumn: "col-span-full",
+    defaultValue: "The Happy Bamboo Blog",
+    placeholder: "The Happy Bamboo Blog",
+  },
+  {
+    key: "happy-bamboo.blog-listing-intro",
+    label: "Blog Page Intro",
+    description: "Introductory paragraph below the blog page title",
+    type: "textarea",
+    page: "blog",
+    group: "blog.listing",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Tips, stories, and insights on sustainable living, bamboo benefits, and making greener everyday choices.",
+    placeholder: "Tips, stories, and insights on sustainable living...",
+  },
+];
+
+const collectionsListingData: TemplateField[] = [
+  {
+    key: "happy-bamboo.collections-listing-heading",
+    label: "Collections Page Heading",
+    description: "Main heading shown at the top of the collections page",
+    type: "text",
+    page: "collections",
+    group: "collections.listing",
+    gridColumn: "col-span-full",
+    defaultValue: "Our Collections",
+    placeholder: "Our Collections",
+  },
+  {
+    key: "happy-bamboo.collections-listing-intro",
+    label: "Collections Page Intro",
+    description: "Intro paragraph below the collections page heading",
+    type: "textarea",
+    page: "collections",
+    group: "collections.listing",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Explore our curated collections of premium bamboo products. Find the perfect match for your sustainable lifestyle.",
+    placeholder:
+      "Explore our curated collections of premium bamboo products...",
+  },
+];
+
+const collectionsCtaData: TemplateField[] = [
+  {
+    key: "happy-bamboo.collections-cta-heading",
+    label: "Collections CTA Heading",
+    description:
+      "Heading for the bottom call-to-action on the collections page",
+    type: "text",
+    page: "collections",
+    group: "collections.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "Can't Decide?",
+    placeholder: "Can't Decide?",
+  },
+  {
+    key: "happy-bamboo.collections-cta-body",
+    label: "Collections CTA Body",
+    description:
+      "Paragraph for the bottom call-to-action on the collections page",
+    type: "textarea",
+    page: "collections",
+    group: "collections.cta",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Browse our full catalog to discover all of our premium bamboo products, or start with our bestselling trial pack.",
+    placeholder:
+      "Browse our full catalog to discover all of our premium bamboo products...",
+  },
+  {
+    key: "happy-bamboo.collections-cta-button-text",
+    label: "Collections CTA Button Text",
+    description: "Text for the collections CTA button",
+    type: "text",
+    page: "collections",
+    group: "collections.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "View All Products",
+    placeholder: "View All Products",
+  },
+  {
+    key: "happy-bamboo.collections-cta-button-link",
+    label: "Collections CTA Button Link",
+    description: "URL for the collections CTA button",
+    type: "url",
+    page: "collections",
+    group: "collections.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "/shop",
+    placeholder: "/shop",
+  },
+];
+
+const shopListingData: TemplateField[] = [
+  {
+    key: "happy-bamboo.shop-listing-heading",
+    label: "Shop Page Heading",
+    description: "Main heading shown at the top of the shop page",
+    type: "text",
+    page: "shop",
+    group: "shop.listing",
+    gridColumn: "col-span-full",
+    defaultValue: "Shop Happy Bamboo",
+    placeholder: "Shop Happy Bamboo",
+  },
+  {
+    key: "happy-bamboo.shop-listing-intro",
+    label: "Shop Page Intro",
+    description: "Introductory paragraph below the shop page heading",
+    type: "textarea",
+    page: "shop",
+    group: "shop.listing",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Discover our range of premium bamboo toilet paper products. Soft on you, gentle on the planet.",
+    placeholder:
+      "Discover our range of premium bamboo toilet paper products...",
+  },
+];
+
+const contactFaqData: TemplateField[] = [
+  {
+    key: "happy-bamboo.contact-faq-title",
+    label: "FAQ Section Title",
+    description: "Heading shown above the frequently asked questions",
+    type: "text",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-full",
+    defaultValue: "Frequently Asked Questions",
+    placeholder: "Frequently Asked Questions",
+  },
+  {
+    key: "happy-bamboo.contact-faq-subtitle",
+    label: "FAQ Section Subtitle",
+    description: "Subtitle or intro line below the FAQ heading",
+    type: "textarea",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Find quick answers to the questions we hear most often. Still have questions? Use the form to reach us directly.",
+    placeholder: "Find quick answers to the questions we hear most often...",
   },
   {
     key: "happy-bamboo.contact-frequently-asked-questions",
-    label: "Contact Frequently Asked Questions",
-    description: "Contact frequently asked questions for the contact page",
+    label: "Frequently Asked Questions",
+    description: "Frequently asked questions for the contact page",
     type: "list",
     page: "contact",
-    group: "contact.info",
+    group: "contact.faq",
+    gridColumn: "col-span-full",
     itemSchema: [
       {
         key: "question",
@@ -691,10 +917,10 @@ const fieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "homepage.benefits",
-    title: "Benefits",
-    description: "Why choose bamboo — icon cards on the homepage",
+    title: "Benefits Section",
+    description: "Section heading, intro text, closing text, and benefit cards",
     icon: "✨",
-    columns: 1,
+    columns: 2,
   },
   {
     id: "homepage.aboutTeaser",
@@ -703,28 +929,6 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "📄",
     columns: 2,
   },
-  // {
-  //   id: "homepage.sustainability",
-  //   title: "Sustainability Banner",
-  //   description:
-  //     "Three feature highlights (e.g. Premium Quality, Competitive Prices)",
-  //   icon: "🌿",
-  //   columns: 2,
-  // },
-  // {
-  //   id: "homepage.location",
-  //   title: "Location Section",
-  //   description: "Location heading on homepage",
-  //   icon: "📍",
-  //   columns: 2,
-  // },
-  // {
-  //   id: "homepage.testimonials",
-  //   title: "Testimonials",
-  //   description: "Customer testimonials (name, location, quote)",
-  //   icon: "💬",
-  //   columns: 2,
-  // },
   {
     id: "about.hero",
     title: "About Hero",
@@ -732,34 +936,20 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "📖",
     columns: 2,
   },
-  // {
-  //   id: "about.mission",
-  //   title: "Our Mission",
-  //   description: "Mission section heading and paragraphs",
-  //   icon: "🎯",
-  //   columns: 2,
-  // },
-  // {
-  //   id: "about.values",
-  //   title: "What We Stand For",
-  //   description: "Values section with three value cards",
-  //   icon: "❤️",
-  //   columns: 2,
-  // },
-  // {
-  //   id: "about.supplier",
-  //   title: "Supplier",
-  //   description: "Supplier section heading and text",
-  //   icon: "🏪",
-  //   columns: 2,
-  // },
+  {
+    id: "about.mission",
+    title: "Our Mission",
+    description: "Mission section heading and paragraphs",
+    icon: "🎯",
+    columns: 2,
+  },
 
   {
     id: "about.bamboo",
     title: "Why Bamboo",
     description: "Bamboo section and bamboo facts",
     icon: "🎋",
-    columns: 2,
+    columns: 3,
   },
   {
     id: "about.services",
@@ -775,13 +965,71 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "💬",
     columns: 2,
   },
-  // {
-  //   id: "contact.info",
-  //   title: "Contact Info",
-  //   description: "Contact page header and contact details",
-  //   icon: "📧",
-  //   columns: 2,
-  // },
+  {
+    id: "about.connect-with-us",
+    title: "Connect With Us",
+    description: "Connect with us section on the about page",
+    icon: "💬",
+    columns: 2,
+  },
+  {
+    id: "homepage.testimonials",
+    title: "Testimonials",
+    description:
+      "Section heading for the testimonials block (content is pulled from your reviews)",
+    icon: "⭐",
+    columns: 1,
+  },
+  {
+    id: "homepage.cta",
+    title: "Call to Action",
+    description: "Bottom call-to-action banner on the homepage",
+    icon: "🚀",
+    columns: 2,
+  },
+  {
+    id: "blog.listing",
+    title: "Blog Page",
+    description: "Title and intro text for the blog listing page",
+    icon: "✍️",
+    columns: 1,
+  },
+  {
+    id: "collections.listing",
+    title: "Collections Page",
+    description: "Heading and intro text for the collections listing page",
+    icon: "🗂️",
+    columns: 1,
+  },
+  {
+    id: "collections.cta",
+    title: "Collections Call to Action",
+    description: "Bottom call-to-action block on the collections page",
+    icon: "🛒",
+    columns: 2,
+  },
+  {
+    id: "shop.listing",
+    title: "Shop Page",
+    description: "Heading and intro text for the shop page",
+    icon: "🏪",
+    columns: 1,
+  },
+  {
+    id: "contact.info",
+    title: "Contact Info",
+    description: "Contact page header, subheader, image, and contact details",
+    icon: "📧",
+    columns: 2,
+  },
+  {
+    id: "contact.faq",
+    title: "FAQ Section",
+    description:
+      "Heading and subtitle for the frequently asked questions section",
+    icon: "❓",
+    columns: 1,
+  },
   // {
   //   id: "global.location",
   //   title: "Global Location Section",
@@ -797,15 +1045,20 @@ export const happyBambooData = {
     ...homepageFeaturedData,
     ...homepageBenefitsData,
     ...homepageAboutTeaserData,
-    // ...homepageSustainabilityData,
-    // ...homepageLocationData,
-    // ...homepageTestimonialsData,
+    ...homepageTestimonialsData,
+    ...homepageCtaData,
     ...aboutHeroData,
-    // ...aboutMissionData,
+    ...aboutMissionData,
     ...aboutServicesData,
     ...aboutBambooData,
     ...aboutCTAData,
-    // ...contactPageData,
+    ...aboutConnectWithUsData,
+    ...contactPageData,
+    ...contactFaqData,
+    ...blogListingData,
+    ...collectionsListingData,
+    ...collectionsCtaData,
+    ...shopListingData,
     // ...globalLocationData,
   ],
 };
@@ -813,3 +1066,25 @@ export const happyBambooData = {
 export const happyBambooFieldGroups = {
   "happy-bamboo": fieldGroups,
 };
+
+const _bambooFieldMap = new Map(
+  happyBambooData["happy-bamboo"].map((field) => [field.key, field]),
+);
+
+export function resolveFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
+  const raw =
+    customFields != null &&
+    typeof customFields === "object" &&
+    !Array.isArray(customFields)
+      ? (customFields as Record<string, string>)
+      : {};
+  const out: Record<string, string> = {};
+  for (const key of keys) {
+    const custom = raw[key]?.trim();
+    out[key] = custom ?? _bambooFieldMap.get(key)?.defaultValue ?? "";
+  }
+  return out;
+}

@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
+///HOMEPAGE
 const homepageHeroData: TemplateField[] = [
   {
     key: "bamboo.homepage.hero-image",
@@ -9,7 +10,8 @@ const homepageHeroData: TemplateField[] = [
     type: "image",
     page: "homepage",
     group: "homepage.hero",
-    gridColumn: "col-span-full",
+    gridColumn: "col-span-1",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "bamboo.homepage.hero-background",
@@ -19,7 +21,8 @@ const homepageHeroData: TemplateField[] = [
     type: "image",
     page: "homepage",
     group: "homepage.hero",
-    gridColumn: "col-span-full",
+    gridColumn: "col-span-1",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "bamboo.homepage.hero-title",
@@ -30,6 +33,7 @@ const homepageHeroData: TemplateField[] = [
     group: "homepage.hero",
     gridColumn: "col-span-1",
     defaultValue: "Elevate Your Everyday",
+    placeholder: "Elevate Your Everyday",
   },
   {
     key: "bamboo.homepage.hero-tagline",
@@ -39,6 +43,8 @@ const homepageHeroData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
+    defaultValue: "Everyday Essential Household Bamboo Product",
+    placeholder: "Everyday Essential Household Bamboo Product",
   },
   {
     key: "bamboo.homepage.hero-description",
@@ -48,8 +54,9 @@ const homepageHeroData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Luxuriously soft, tree-free bamboo paper products crafted in Detroit. Because what you bring into your home should be as thoughtful as the life you build in it.",
+    placeholder: "Luxuriously soft, tree-free bamboo paper products crafted...",
+    defaultValue: `Luxuriously soft, tree-free bamboo paper products crafted in Detroit.
+    Because what you bring into your home should be as thoughtful as the life you build in it.`,
   },
   {
     key: "bamboo.homepage.hero-primary-button-text",
@@ -60,6 +67,7 @@ const homepageHeroData: TemplateField[] = [
     group: "homepage.hero",
     gridColumn: "col-span-1",
     defaultValue: "Shop Now",
+    placeholder: "Shop Now",
   },
   {
     key: "bamboo.homepage.hero-primary-button-link",
@@ -69,6 +77,7 @@ const homepageHeroData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
+    placeholder: "/shop",
     defaultValue: "/shop",
   },
   {
@@ -79,6 +88,7 @@ const homepageHeroData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
+    placeholder: "Our Story",
     defaultValue: "Our Story",
   },
   {
@@ -89,6 +99,7 @@ const homepageHeroData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
+    placeholder: "/about",
     defaultValue: "/about",
   },
 ];
@@ -102,6 +113,8 @@ const homepageFeaturedData: TemplateField[] = [
     page: "homepage",
     group: "homepage.featured",
     defaultValue: "Our Curated Collection",
+    placeholder: "Our Curated Collection",
+    gridColumn: "col-span-1",
   },
   {
     key: "bamboo.homepage.featured-description",
@@ -110,17 +123,10 @@ const homepageFeaturedData: TemplateField[] = [
     type: "textarea",
     page: "homepage",
     group: "homepage.featured",
+    gridColumn: "col-span-full",
+    placeholder: "Every product is 100% bamboo...",
     defaultValue:
       "Every product is 100% bamboo, tree-free, and crafted to the highest standard. No compromises.",
-  },
-  {
-    key: "bamboo.homepage.featured-button-text",
-    label: "View All Button Text",
-    description: "Text for the View All Products button",
-    type: "text",
-    page: "homepage",
-    group: "homepage.featured",
-    defaultValue: "View All Products",
   },
 ];
 
@@ -133,6 +139,7 @@ const homepageAboutTeaserData: TemplateField[] = [
     page: "homepage",
     group: "homepage.aboutTeaser",
     defaultValue: "From Detroit, With Purpose",
+    placeholder: "From Detroit, With Purpose",
   },
   {
     key: "bamboo.homepage.about-teaser-body",
@@ -141,8 +148,10 @@ const homepageAboutTeaserData: TemplateField[] = [
     type: "textarea",
     page: "homepage",
     group: "homepage.aboutTeaser",
-    defaultValue:
-      "We started Finally Results LLC with a simple belief: the everyday products in your home should be better -- better for your family, and better for the planet. Our roots in Detroit drive everything we do.",
+    placeholder: "We started our business with a simple belief...",
+    defaultValue: `We started our business with a simple belief:
+      the everyday products in your home should be better -- better for your
+      family, and better for the planet. Our roots in Detroit drive everything we do.`,
   },
   {
     key: "bamboo.homepage.about-teaser-button-text",
@@ -157,162 +166,52 @@ const homepageAboutTeaserData: TemplateField[] = [
 
 const homepageSustainabilityData: TemplateField[] = [
   {
-    key: "bamboo.homepage.sustainability-1-label",
-    label: "Sustainability Feature 1 Label",
-    description: "First feature label (e.g. Premium Quality)",
-    type: "text",
+    key: "bamboo.homepage.sustainability-list",
+    label: "Sustainability Cards",
+    description:
+      "Cards for the Sustainability Banner section (icon, title, and description per item).",
+    type: "list",
     page: "homepage",
     group: "homepage.sustainability",
-    defaultValue: "Premium Quality",
-  },
-  {
-    key: "bamboo.homepage.sustainability-1-description",
-    label: "Sustainability Feature 1 Description",
-    description: "First feature description",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.sustainability",
-    defaultValue:
-      "Experience top-quality household paper products, crafted for comfort and reliability.",
-  },
-  {
-    key: "bamboo.homepage.sustainability-2-label",
-    label: "Sustainability Feature 2 Label",
-    description: "Second feature label",
-    type: "text",
-    page: "homepage",
-    group: "homepage.sustainability",
-    defaultValue: "Competitive Prices",
-  },
-  {
-    key: "bamboo.homepage.sustainability-2-description",
-    label: "Sustainability Feature 2 Description",
-    description: "Second feature description",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.sustainability",
-    defaultValue: "Affordable prices without compromising quality.",
-  },
-  {
-    key: "bamboo.homepage.sustainability-3-label",
-    label: "Sustainability Feature 3 Label",
-    description: "Third feature label",
-    type: "text",
-    page: "homepage",
-    group: "homepage.sustainability",
-    defaultValue: "Customer-Centric Approach",
-  },
-  {
-    key: "bamboo.homepage.sustainability-3-description",
-    label: "Sustainability Feature 3 Description",
-    description: "Third feature description",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.sustainability",
-    defaultValue: "Your satisfaction comes first in everything we do.",
+    gridColumn: "col-span-full",
+    itemSchema: [
+      {
+        key: "icon",
+        label: "Icon",
+        type: "icon",
+        description: "Icon shown on the card",
+      },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        description: "Card heading",
+      },
+      {
+        key: "description",
+        label: "Description",
+        type: "textarea",
+        description: "Supporting text",
+      },
+    ],
+    minItems: 0,
+    maxItems: 4,
   },
 ];
 
-const homepageLocationData: TemplateField[] = [
-  {
-    key: "bamboo.homepage.location-heading",
-    label: "Location Section Heading",
-    description: "Heading for the location section on homepage",
-    type: "text",
-    page: "homepage",
-    group: "homepage.location",
-    defaultValue: "Our Location",
-  },
-];
-
-const homepageTestimonialsData: TemplateField[] = [
-  {
-    key: "bamboo.homepage.testimonial-1-name",
-    label: "Testimonial 1 Name",
-    description: "First testimonial author name",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "Sarah M.",
-  },
-  {
-    key: "bamboo.homepage.testimonial-1-location",
-    label: "Testimonial 1 Location",
-    description: "First testimonial location",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "Ann Arbor, MI",
-  },
-  {
-    key: "bamboo.homepage.testimonial-1-quote",
-    label: "Testimonial 1 Quote",
-    description: "First testimonial quote",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue:
-      "I never thought I would care this much about toilet paper, but the softness and quality are genuinely impressive. Knowing it is eco-friendly makes it even better.",
-  },
-  {
-    key: "bamboo.homepage.testimonial-2-name",
-    label: "Testimonial 2 Name",
-    description: "Second testimonial author name",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "James T.",
-  },
-  {
-    key: "bamboo.homepage.testimonial-2-location",
-    label: "Testimonial 2 Location",
-    description: "Second testimonial location",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "Chicago, IL",
-  },
-  {
-    key: "bamboo.homepage.testimonial-2-quote",
-    label: "Testimonial 2 Quote",
-    description: "Second testimonial quote",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue:
-      "We switched our entire household to Finally Results and have not looked back. The starter kit is the perfect way to try everything. Our septic system thanks us too.",
-  },
-  {
-    key: "bamboo.homepage.testimonial-3-name",
-    label: "Testimonial 3 Name",
-    description: "Third testimonial author name",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "Angela R.",
-  },
-  {
-    key: "bamboo.homepage.testimonial-3-location",
-    label: "Testimonial 3 Location",
-    description: "Third testimonial location",
-    type: "text",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue: "Detroit, MI",
-  },
-  {
-    key: "bamboo.homepage.testimonial-3-quote",
-    label: "Testimonial 3 Quote",
-    description: "Third testimonial quote",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.testimonials",
-    defaultValue:
-      "Supporting a local Detroit business that actually cares about sustainability? That is a win-win. The product quality is on par with luxury brands at a fraction of the environmental cost.",
-  },
-];
-
+///ABOUT PAGE
 const aboutHeroData: TemplateField[] = [
+  {
+    key: "bamboo.about.hero-tagline",
+    label: "About Hero Tagline",
+    description: "Tagline for the about page, above the title.",
+    type: "text",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Detroit's Foremost Stationery Store",
+    placeholder: "Detroit's Foremost Stationery Store",
+  },
   {
     key: "bamboo.about.hero-heading",
     label: "About Hero Heading",
@@ -320,7 +219,8 @@ const aboutHeroData: TemplateField[] = [
     type: "text",
     page: "about",
     group: "about.hero",
-    defaultValue: "Our Story",
+    defaultValue: "Finally, Results That Matter",
+    placeholder: "Finally, Results That Matter",
   },
   {
     key: "bamboo.about.hero-intro",
@@ -329,8 +229,8 @@ const aboutHeroData: TemplateField[] = [
     type: "textarea",
     page: "about",
     group: "about.hero",
-    defaultValue:
-      "Finally Results LLC was born from a simple belief: the everyday products in your home should be better -- better for your family, and better for the planet.",
+    defaultValue: `We're a Detroit-based household paper products company built on a simple belief: the everyday essentials in your home should be better -- better for your family, better for the planet, and delivered with the care you deserve.`,
+    placeholder: `We're a Detroit-based household paper products company...`,
   },
   {
     key: "bamboo.about.hero-image",
@@ -340,15 +240,7 @@ const aboutHeroData: TemplateField[] = [
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-1",
-  },
-  {
-    key: "bamboo.about.hero-tagline",
-    label: "About Hero Tagline",
-    description: "Tagline for the about page, above the title.",
-    type: "text",
-    page: "about",
-    group: "about.hero",
-    gridColumn: "col-span-1",
+    defaultValue: "/placeholder.svg",
   },
 ];
 
@@ -361,16 +253,7 @@ const aboutMissionData: TemplateField[] = [
     page: "about",
     group: "about.mission",
     defaultValue: "Why We Started",
-  },
-  {
-    key: "bamboo.about.mission-paragraph",
-    label: "Why We Started Text",
-    description: "Text for the Why We Started section",
-    type: "textarea",
-    page: "about",
-    group: "about.mission",
-    defaultValue:
-      "Welcome to Finally Results LLC, your trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
+    placeholder: "Why We Started",
   },
   {
     key: "bamboo.about.mission-image",
@@ -379,7 +262,23 @@ const aboutMissionData: TemplateField[] = [
     type: "image",
     page: "about",
     group: "about.mission",
+    defaultValue: "/placeholder.svg",
     gridColumn: "col-span-1",
+  },
+  {
+    key: "bamboo.about.mission-paragraph",
+    label: "Why We Started Text",
+    description: "Text for the Why We Started section",
+    type: "textarea",
+    page: "about",
+    group: "about.mission",
+    gridColumn: "col-span-full",
+    placeholder: `We started our business with a simple belief...`,
+    defaultValue: `We started Finally Results LLC with a question that wouldn't go away: why do the most basic products in our homes have to be the most wasteful? Traditional toilet paper relies on virgin wood pulp from forests that take decades to regrow. We knew there had to be a better way.
+
+Bamboo was our answer. As one of the fastest-growing plants on Earth, it can be harvested repeatedly without replanting. It's naturally antibacterial, incredibly soft, and requires no pesticides. When we discovered how remarkable this material was, we built our entire company around it.
+
+Today, every product we make is 100% bamboo, tree-free, septic-safe, and hypoallergenic -- delivering superior absorbency in recycled, plastic-free packaging.`,
   },
 ];
 
@@ -392,63 +291,40 @@ const aboutValuesData: TemplateField[] = [
     page: "about",
     group: "about.values",
     defaultValue: "What We Stand For",
+    placeholder: "What We Stand For",
   },
+
   {
-    key: "bamboo.about.value-1-title",
-    label: "Value 1 Title",
-    description: "First value card title",
-    type: "text",
+    key: "bamboo.about.values-list",
+    label: "Values List",
+    description:
+      "Cards for the Values section (icon, title, and description per item).",
+    type: "list",
     page: "about",
     group: "about.values",
-    defaultValue: "Sustainability First",
-  },
-  {
-    key: "bamboo.about.value-1-description",
-    label: "Value 1 Description",
-    description: "First value card description",
-    type: "textarea",
-    page: "about",
-    group: "about.values",
-    defaultValue:
-      "Every decision we make starts with the planet. From sourcing to packaging, we choose the path that leaves the smallest footprint.",
-  },
-  {
-    key: "bamboo.about.value-2-title",
-    label: "Value 2 Title",
-    description: "Second value card title",
-    type: "text",
-    page: "about",
-    group: "about.values",
-    defaultValue: "Premium Quality",
-  },
-  {
-    key: "bamboo.about.value-2-description",
-    label: "Value 2 Description",
-    description: "Second value card description",
-    type: "textarea",
-    page: "about",
-    group: "about.values",
-    defaultValue:
-      "We refuse to compromise. Our bamboo products match or exceed the softness and strength of traditional premium brands.",
-  },
-  {
-    key: "bamboo.about.value-3-title",
-    label: "Value 3 Title",
-    description: "Third value card title",
-    type: "text",
-    page: "about",
-    group: "about.values",
-    defaultValue: "Community Driven",
-  },
-  {
-    key: "bamboo.about.value-3-description",
-    label: "Value 3 Description",
-    description: "Third value card description",
-    type: "textarea",
-    page: "about",
-    group: "about.values",
-    defaultValue:
-      "Rooted in Detroit, we believe in building something that serves our community and sets an example for responsible business.",
+    gridColumn: "col-span-full",
+    itemSchema: [
+      {
+        key: "icon",
+        label: "Icon",
+        type: "icon",
+        description: "Icon shown on the card",
+      },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        description: "Card heading",
+      },
+      {
+        key: "description",
+        label: "Description",
+        type: "textarea",
+        description: "Supporting text",
+      },
+    ],
+    minItems: 0,
+    maxItems: 4,
   },
 ];
 
@@ -460,7 +336,9 @@ const aboutSupplierData: TemplateField[] = [
     type: "text",
     page: "about",
     group: "about.supplier",
-    defaultValue: "Supplier",
+    defaultValue: "More Than a Supplier",
+    placeholder: "More Than a Supplier",
+    gridColumn: "col-span-full",
   },
   {
     key: "bamboo.about.supplier-text",
@@ -469,8 +347,10 @@ const aboutSupplierData: TemplateField[] = [
     type: "textarea",
     page: "about",
     group: "about.supplier",
-    defaultValue:
-      "We are a trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
+    defaultValue: `At Finally Results LLC, our commitment extends beyond transactions. We take pride in providing top-notch household paper products that cater to a wide spectrum of needs -- from individual households to restaurants, hotels, schools, gas stations, local stores, and businesses of all sizes.
+
+We operate with the ethos of respecting every customer, valuing the relationships we build, and contributing to the collective well-being of the communities we serve. Located in the heart of Detroit, we extend our warmest welcome to you -- every customer is a member of our extended family.`,
+    placeholder: "Here, our commitment extends beyond transactions...",
   },
   {
     key: "bamboo.about.supplier-image",
@@ -480,6 +360,7 @@ const aboutSupplierData: TemplateField[] = [
     page: "about",
     group: "about.supplier",
     gridColumn: "col-span-1",
+    defaultValue: "/placeholder.svg",
   },
 ];
 
@@ -492,6 +373,7 @@ const aboutWhyBambooData: TemplateField[] = [
     page: "about",
     group: "about.whyBamboo",
     defaultValue: "Why Bamboo?",
+    placeholder: "Why Bamboo?",
   },
   {
     key: "bamboo.about.why-bamboo-intro",
@@ -500,65 +382,42 @@ const aboutWhyBambooData: TemplateField[] = [
     type: "textarea",
     page: "about",
     group: "about.whyBamboo",
+    placeholder: "Bamboo is nature's most remarkable renewable resource...",
     defaultValue:
       "Bamboo is nature's most remarkable renewable resource. Here is why we chose it as the foundation for everything we make.",
   },
+
   {
-    key: "bamboo.about.fact-1-title",
-    label: "Bamboo Fact 1 Title",
-    description: "First bamboo fact title",
-    type: "text",
+    key: "bamboo.about.why-bamboo-facts-list",
+    label: "Why Bamboo Facts List",
+    description:
+      "Cards for the Why Bamboo section (icon, title, and description per item).",
+    type: "list",
     page: "about",
     group: "about.whyBamboo",
-    defaultValue: "Rapid Growth",
-  },
-  {
-    key: "bamboo.about.fact-1-description",
-    label: "Bamboo Fact 1 Description",
-    description: "First bamboo fact description",
-    type: "textarea",
-    page: "about",
-    group: "about.whyBamboo",
-    defaultValue:
-      "Bamboo grows up to 35 inches per day and reaches maturity in 3-5 years, compared to 20-50 years for hardwood trees.",
-  },
-  {
-    key: "bamboo.about.fact-2-title",
-    label: "Bamboo Fact 2 Title",
-    description: "Second bamboo fact title",
-    type: "text",
-    page: "about",
-    group: "about.whyBamboo",
-    defaultValue: "No Replanting Needed",
-  },
-  {
-    key: "bamboo.about.fact-2-description",
-    label: "Bamboo Fact 2 Description",
-    description: "Second bamboo fact description",
-    type: "textarea",
-    page: "about",
-    group: "about.whyBamboo",
-    defaultValue:
-      "Bamboo regenerates from its own root system after harvest, which means the soil stays intact and carbon continues to be sequestered.",
-  },
-  {
-    key: "bamboo.about.fact-3-title",
-    label: "Bamboo Fact 3 Title",
-    description: "Third bamboo fact title",
-    type: "text",
-    page: "about",
-    group: "about.whyBamboo",
-    defaultValue: "Water Efficient",
-  },
-  {
-    key: "bamboo.about.fact-3-description",
-    label: "Bamboo Fact 3 Description",
-    description: "Third bamboo fact description",
-    type: "textarea",
-    page: "about",
-    group: "about.whyBamboo",
-    defaultValue:
-      "Bamboo requires significantly less water than traditional tree farming and thrives without pesticides or fertilizers.",
+    gridColumn: "col-span-full",
+    itemSchema: [
+      {
+        key: "icon",
+        label: "Icon",
+        type: "icon",
+        description: "Icon shown on the card",
+      },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        description: "Card heading",
+      },
+      {
+        key: "description",
+        label: "Description",
+        type: "textarea",
+        description: "Supporting text",
+      },
+    ],
+    minItems: 0,
+    maxItems: 3,
   },
 ];
 
@@ -570,7 +429,9 @@ const aboutNationwideData: TemplateField[] = [
     type: "text",
     page: "about",
     group: "about.nationwide",
-    defaultValue: "Nationwide Distribution",
+    gridColumn: "col-span-full",
+    defaultValue: "Nationwide Reach, Personal Touch",
+    placeholder: "Nationwide Reach, Personal Touch",
   },
   {
     key: "bamboo.about.nationwide-text",
@@ -579,8 +440,9 @@ const aboutNationwideData: TemplateField[] = [
     type: "textarea",
     page: "about",
     group: "about.nationwide",
-    defaultValue:
-      "We are a trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
+    gridColumn: "col-span-1",
+    placeholder: `Our commitment to exceptional service extends across...`,
+    defaultValue: `Our commitment to exceptional service extends across the country. We proudly offer nationwide shipping, and our dedicated team ensures a seamless, satisfying experience for every order. Whether you have questions about our products or need help with a delivery, our responsive and knowledgeable representatives are here to help.`,
   },
   {
     key: "bamboo.about.nationwide-image",
@@ -590,66 +452,40 @@ const aboutNationwideData: TemplateField[] = [
     page: "about",
     group: "about.nationwide",
     gridColumn: "col-span-1",
+    defaultValue: "/placeholder.svg",
   },
+
   {
-    key: "bamboo.about.nationwide-fact-1-title",
-    label: "Nationwide Distribution Fact 1 Title",
-    description: "First fact title for the Nationwide Distribution section",
-    type: "text",
-    page: "about",
-    group: "about.nationwide",
-    defaultValue: "Nationwide Shipping",
-  },
-  {
-    key: "bamboo.about.nationwide-fact-1-description",
-    label: "Nationwide Distribution Fact 1 Description",
+    key: "bamboo.about.nationwide-facts-list",
+    label: "Nationwide Distribution Facts List",
     description:
-      "First fact description for the Nationwide Distribution section",
-    type: "textarea",
+      "Cards for the Nationwide Distribution section (icon, title, and description per item).",
+    type: "list",
     page: "about",
     group: "about.nationwide",
-    defaultValue:
-      "We ship our products to customers in all 50 states. We are a trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
-  },
-  {
-    key: "bamboo.about.nationwide-fact-2-title",
-    label: "Nationwide Distribution Fact 2 Title",
-    description: "Second fact title for the Nationwide Distribution section",
-    type: "text",
-    page: "about",
-    group: "about.nationwide",
-    defaultValue: "Nationwide Shipping",
-  },
-  {
-    key: "bamboo.about.nationwide-fact-2-description",
-    label: "Nationwide Distribution Fact 2 Description",
-    description:
-      "Second fact description for the Nationwide Distribution section",
-    type: "textarea",
-    page: "about",
-    group: "about.nationwide",
-    defaultValue:
-      "We ship our products to customers in all 50 states. We are a trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
-  },
-  {
-    key: "bamboo.about.nationwide-fact-3-title",
-    label: "Nationwide Distribution Fact 3 Title",
-    description: "Third fact title for the Nationwide Distribution section",
-    type: "text",
-    page: "about",
-    group: "about.nationwide",
-    defaultValue: "Nationwide Shipping",
-  },
-  {
-    key: "bamboo.about.nationwide-fact-3-description",
-    label: "Nationwide Distribution Fact 3 Description",
-    description:
-      "Third fact description for the Nationwide Distribution section",
-    type: "textarea",
-    page: "about",
-    group: "about.nationwide",
-    defaultValue:
-      "We ship our products to customers in all 50 states. We are a trusted supplier of retail household paper products nationwide. We take pride in offering top-quality items that enhance your everyday life, such as toilet paper. Our commitment to excellence is evident in the careful selection of materials, ensuring that our bathroom toilet tissue is made of 100% recycled virgin pulp, delivering septic-safe properties and superior absorbency.",
+    gridColumn: "col-span-full",
+    itemSchema: [
+      {
+        key: "icon",
+        label: "Icon",
+        type: "icon",
+        description: "Icon shown on the card",
+      },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        description: "Card heading",
+      },
+      {
+        key: "description",
+        label: "Description",
+        type: "textarea",
+        description: "Supporting text",
+      },
+    ],
+    minItems: 0,
+    maxItems: 4,
   },
 ];
 
@@ -662,6 +498,7 @@ const aboutDetroitData: TemplateField[] = [
     page: "about",
     group: "about.detroit",
     defaultValue: "Rooted in Detroit",
+    placeholder: "Rooted in Detroit",
   },
   {
     key: "bamboo.about.detroit-body",
@@ -670,6 +507,8 @@ const aboutDetroitData: TemplateField[] = [
     type: "textarea",
     page: "about",
     group: "about.detroit",
+    gridColumn: "col-span-full",
+    placeholder: `Detroit is a city that understands transformation...`,
     defaultValue:
       "Detroit is a city that understands transformation. From the automotive revolution to its current renaissance in art, technology, and small business, this city teaches you that great things are built through perseverance and purpose. We chose to build Finally Results here because Detroit embodies everything our brand stands for: quality craftsmanship, community, and the belief that you can always do better.",
   },
@@ -683,7 +522,9 @@ const aboutCTAData: TemplateField[] = [
     type: "text",
     page: "about",
     group: "about.cta",
+    placeholder: "Ready to Make the Switch?",
     defaultValue: "Ready to Make the Switch?",
+    gridColumn: "col-span-1",
   },
   {
     key: "bamboo.about.cta-text",
@@ -692,29 +533,60 @@ const aboutCTAData: TemplateField[] = [
     type: "textarea",
     page: "about",
     group: "about.cta",
-    defaultValue:
-      "Join the families, businesses, and communities across the nation who trust Finally Results for their everyday essentials.",
+    placeholder: "Join the families, businesses, and communities...",
+    gridColumn: "col-span-full",
+    defaultValue: `Join the families, businesses, and communities across the nation who trust Finally Results for their everyday essentials.`,
   },
   {
     key: "bamboo.about.cta-button-text",
     label: "CTA Button Text",
-    description: "CTA button text",
+    description: "First button in the CTA section, typically for shopping",
     type: "text",
     page: "about",
     group: "about.cta",
+    gridColumn: "col-span-1",
     defaultValue: "Shop Our Products",
+    placeholder: "Shop Our Products",
   },
   {
     key: "bamboo.about.cta-button-link",
     label: "CTA Button Link",
-    description: "CTA button link",
+    description: "First button in the CTA section, typically for shopping",
     type: "url",
     page: "about",
     group: "about.cta",
+    gridColumn: "col-span-1",
     defaultValue: "/shop",
+    placeholder: "/shop",
+  },
+
+  {
+    key: "bamboo.about.cta-secondary-button-text",
+    label: "CTA Secondary Button Text",
+    description:
+      "Second button in the CTA section, typically for getting in touch",
+    type: "text",
+    page: "about",
+    group: "about.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Get in Touch",
+    placeholder: "Get in Touch",
+  },
+  {
+    key: "bamboo.about.cta-secondary-button-link",
+    label: "CTA Secondary Button Link",
+    description:
+      "Second button in the CTA section, typically for getting in touch",
+    type: "url",
+    page: "about",
+    group: "about.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "/contact",
+    placeholder: "/contact",
   },
 ];
 
+///CONTACT PAGE
 const contactPageData: TemplateField[] = [
   {
     key: "bamboo.contact.header",
@@ -792,10 +664,25 @@ const globalLocationData: TemplateField[] = [
     page: "global",
     group: "global.location",
     gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
   },
 ];
 
 const fieldGroups: TemplateFieldGroup[] = [
+  {
+    id: "contact.info",
+    title: "Contact Info",
+    description: "Contact page header and contact details",
+    icon: "📧",
+    columns: 2,
+  },
+  {
+    id: "global.location",
+    title: "Global Location Section",
+    description: "Global location section on the homepage",
+    icon: "🗺️",
+    columns: 2,
+  },
   {
     id: "homepage.hero",
     title: "Hero Section",
@@ -895,20 +782,6 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "💬",
     columns: 2,
   },
-  {
-    id: "contact.info",
-    title: "Contact Info",
-    description: "Contact page header and contact details",
-    icon: "📧",
-    columns: 2,
-  },
-  {
-    id: "global.location",
-    title: "Global Location Section",
-    description: "Global location section on the homepage",
-    icon: "🗺️",
-    columns: 2,
-  },
 ];
 
 export const bambooData = {
@@ -917,21 +790,41 @@ export const bambooData = {
     ...homepageFeaturedData,
     ...homepageAboutTeaserData,
     ...homepageSustainabilityData,
-    ...homepageLocationData,
-    ...homepageTestimonialsData,
     ...aboutHeroData,
     ...aboutMissionData,
     ...aboutValuesData,
+    ...aboutSupplierData,
     ...aboutWhyBambooData,
+    ...aboutNationwideData,
     ...aboutDetroitData,
+    ...aboutCTAData,
     ...contactPageData,
     ...globalLocationData,
-    ...aboutSupplierData,
-    ...aboutNationwideData,
-    ...aboutCTAData,
   ],
 };
 
 export const bambooFieldGroups = {
   bamboo: fieldGroups,
 };
+
+const _bambooFieldMap = new Map(
+  bambooData.bamboo.map((field) => [field.key, field]),
+);
+
+export function resolveFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
+  const raw =
+    customFields != null &&
+    typeof customFields === "object" &&
+    !Array.isArray(customFields)
+      ? (customFields as Record<string, string>)
+      : {};
+  const out: Record<string, string> = {};
+  for (const key of keys) {
+    const custom = raw[key]?.trim();
+    out[key] = custom ?? _bambooFieldMap.get(key)?.defaultValue ?? "";
+  }
+  return out;
+}

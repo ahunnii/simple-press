@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { api } from "~/trpc/server";
 
 import { DefaultCollectionPage } from "../../_templates/default/default-collection-page";
-import { HappyBambooCollectionPage } from "../../_templates/happy-bamboo/happy-bamboo-collection-page";
+import { HappyBambooCollectionPage } from "../../_templates/happy-bamboo/collections/happy-bamboo-collection-page";
 
 type Props = {
   params: Promise<{ slug: string }>;

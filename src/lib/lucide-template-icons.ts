@@ -1,6 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  BanknoteArrowDown,
   Building2,
+  CheckCircle,
   Droplets,
   Feather,
   Globe,
@@ -13,6 +15,7 @@ import {
   TreeDeciduous,
   TreePine,
   Truck,
+  Users,
   Wind,
 } from "lucide-react";
 
@@ -32,6 +35,9 @@ export const TEMPLATE_LUCIDE_ICON_NAMES = [
   "ShieldCheck",
   "Truck",
   "Building2",
+  "CheckCircle",
+  "BanknoteArrowDown",
+  "Users",
 ] as const;
 
 export type LucideTemplateIconName =
@@ -52,6 +58,9 @@ const iconMap: Record<LucideTemplateIconName, LucideIcon> = {
   ShieldCheck,
   Truck,
   Building2,
+  CheckCircle,
+  BanknoteArrowDown,
+  Users,
 };
 
 export function getLucideTemplateIcon(name: string): LucideIcon | null {

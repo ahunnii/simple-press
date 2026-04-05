@@ -12,9 +12,8 @@ import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Button, buttonVariants } from "~/components/ui/button";
+import { StaggerContainer, StaggerItem } from "~/components/page-animations";
 import { useCart } from "~/providers/cart-context";
-
-import { StaggerContainer, StaggerItem } from "./bamboo-animations";
 
 export function BambooFeaturedProducts({
   featuredProducts,

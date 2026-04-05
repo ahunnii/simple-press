@@ -10,6 +10,7 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
+import { PhoneFormField } from "~/components/inputs/phone-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 export function DefaultContactForm() {
@@ -80,12 +81,12 @@ export function DefaultContactForm() {
           required
         />
 
-        <InputFormField
+        <PhoneFormField
           form={form}
           name="phone"
           label="Phone Number (Optional)"
           inputClassName={"mt-2"}
-          type="tel"
+          // type="tel"
           placeholder="+1 300 555 0000"
         />
 

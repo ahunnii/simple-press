@@ -1,48 +1,202 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Check, ShoppingBag } from "lucide-react";
+import { ArrowRight, Loader2, ShoppingBag } from "lucide-react";
 
+import type { DefaultCheckoutPageTemplateProps } from "../types";
 import { formatPrice } from "~/lib/prices";
+import {
+  calculateShipping,
+  shippingConfigFromBusiness,
+} from "~/lib/shipping-utils";
+import { api } from "~/trpc/react";
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { useCart } from "~/providers/cart-context";
 
-export function ModernCheckoutForm() {
-  const { items, clearCart } = useCart();
+type Props = {
+  business: DefaultCheckoutPageTemplateProps["business"];
+};
 
-  const totalPrice = items.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0,
+export function ModernCheckoutForm({ business }: Props) {
+  const { items, removeItem, subtotal } = useCart();
+  const shippingConfig = shippingConfigFromBusiness(business);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [country, setCountry] = useState<"US" | "CA">("US");
+
+  const [deliveryMethod, setDeliveryMethod] = useState<"ship" | "pickup">(
+    "ship",
   );
-  const [submitted, setSubmitted] = useState(false);
 
-  const shipping = totalPrice >= 150 ? 0 : 12;
-  const total = totalPrice + shipping;
+  const [discountCodeInput, setDiscountCodeInput] = useState("");
+  const [discountCodeId, setDiscountCodeId] = useState<string | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountCodeLabel, setDiscountCodeLabel] = useState<string | null>(
+    null,
+  );
+  const [discountFieldError, setDiscountFieldError] = useState<string | null>(
+    null,
+  );
 
-  if (submitted) {
-    return (
-      <div className="py-20 text-center">
-        <div className="bg-accent/10 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
-          <Check className="text-accent h-8 w-8" />
-        </div>
-        <h2 className="text-foreground mt-6 font-serif text-3xl">
-          Thank you for your order
-        </h2>
-        <p className="text-muted-foreground mx-auto mt-3 max-w-md">
-          Your order has been placed successfully. We will send you an email
-          confirmation with tracking details shortly.
-        </p>
-        <Link
-          href="/products"
-          className="bg-primary text-primary-foreground mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
-        >
-          Continue Shopping
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
-    );
-  }
+  const validateDiscountMutation = api.discount.validate.useMutation({
+    onSuccess: (data) => {
+      setDiscountCodeId(data.discount.id);
+      setDiscountAmount(data.discount.discountAmount);
+      setDiscountCodeLabel(data.discount.code);
+      setDiscountFieldError(null);
+    },
+    onError: (err) => {
+      setDiscountCodeId(null);
+      setDiscountAmount(0);
+      setDiscountCodeLabel(null);
+      setDiscountFieldError(err.message ?? "Invalid code");
+    },
+  });
+
+  useEffect(() => {
+    setDiscountCodeId(null);
+    setDiscountAmount(0);
+    setDiscountCodeLabel(null);
+    setDiscountFieldError(null);
+  }, [subtotal]);
+
+  const shipping =
+    deliveryMethod === "pickup"
+      ? 0
+      : calculateShipping(subtotal, shippingConfig);
+  const finalTotal = subtotal - discountAmount + shipping;
+
+  const handleApplyDiscount = () => {
+    const code = discountCodeInput.trim();
+    if (!code) {
+      setDiscountFieldError("Enter a discount code");
+      return;
+    }
+    if (subtotal <= 0) {
+      setDiscountFieldError("Your cart is empty");
+      return;
+    }
+    setDiscountFieldError(null);
+    validateDiscountMutation.mutate({ code, cartTotal: subtotal });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsProcessing(true);
+
+    try {
+      const name = `${firstName.trim()} ${lastName.trim()}`.trim();
+      if (!email || !name || !phone.trim()) {
+        throw new Error("Please fill in all required contact fields");
+      }
+
+      if (
+        deliveryMethod === "ship" &&
+        (!addressLine1.trim() ||
+          !city.trim() ||
+          !state.trim() ||
+          !postalCode.trim())
+      ) {
+        throw new Error("Please fill in all required shipping fields");
+      }
+
+      if (items.length === 0) {
+        throw new Error("Your cart is empty");
+      }
+
+      const response = await fetch("/api/stripe/create-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items,
+          deliveryMethod,
+          customerInfo: {
+            email,
+            name,
+            phone: phone.trim(),
+            shippingAddress:
+              deliveryMethod === "ship"
+                ? {
+                    line1: addressLine1.trim(),
+                    line2: addressLine2.trim() || null,
+                    city: city.trim(),
+                    state: state.trim(),
+                    postalCode: postalCode.trim(),
+                    country,
+                    phone: phone.trim(),
+                  }
+                : null,
+          },
+          discountCodeId: discountCodeId,
+          discountAmount: discountCodeId != null ? discountAmount : 0,
+        }),
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+        unavailableItems?: string[];
+        unavailableItemIds?: { productId: string; variantId: string | null }[];
+        sessionUrl?: string;
+      };
+
+      if (!response.ok) {
+        if (data.unavailableItemIds && data.unavailableItemIds.length > 0) {
+          for (const row of data.unavailableItemIds) {
+            removeItem(row.productId, row.variantId);
+          }
+        }
+        if (data.unavailableItems && data.unavailableItems.length > 0) {
+          const removedMsg =
+            data.unavailableItemIds && data.unavailableItemIds.length > 0
+              ? `The following items were out of stock or no longer available and have been removed from your cart: ${data.unavailableItems.join(", ")}.`
+              : `${data.error ?? "Some items are unavailable."} Remove or update: ${data.unavailableItems.join(", ")}`;
+          setError(removedMsg);
+        } else {
+          setError(data.error ?? "Failed to create checkout session");
+        }
+        setIsProcessing(false);
+        return;
+      }
+
+      const sessionUrl = data.sessionUrl;
+      if (!sessionUrl) {
+        setError("Failed to create checkout session");
+        setIsProcessing(false);
+        return;
+      }
+
+      window.location.href = sessionUrl;
+    } catch (err: unknown) {
+      setError((err as Error).message ?? "Failed to create checkout session");
+      setIsProcessing(false);
+    }
+  };
+
+  const inputClass =
+    "border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none";
+  const labelClass = "text-muted-foreground block text-sm";
 
   if (items.length === 0) {
     return (
@@ -65,12 +219,6 @@ export function ModernCheckoutForm() {
     );
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    clearCart();
-    setSubmitted(true);
-  }
-
   return (
     <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
       {/* Form */}
@@ -83,190 +231,255 @@ export function ModernCheckoutForm() {
             </h2>
             <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label
-                  htmlFor="firstName"
-                  className="text-muted-foreground block text-sm"
-                >
-                  First Name
+                <label htmlFor="firstName" className={labelClass}>
+                  First Name *
                 </label>
                 <input
                   id="firstName"
                   type="text"
                   required
-                  className="border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className={inputClass}
                   placeholder="Jane"
                 />
               </div>
               <div>
-                <label
-                  htmlFor="lastName"
-                  className="text-muted-foreground block text-sm"
-                >
-                  Last Name
+                <label htmlFor="lastName" className={labelClass}>
+                  Last Name *
                 </label>
                 <input
                   id="lastName"
                   type="text"
                   required
-                  className="border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className={inputClass}
                   placeholder="Doe"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label
-                  htmlFor="email"
-                  className="text-muted-foreground block text-sm"
-                >
-                  Email
+                <label htmlFor="email" className={labelClass}>
+                  Email *
                 </label>
                 <input
                   id="email"
                   type="email"
                   required
-                  className="border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputClass}
                   placeholder="jane@example.com"
                 />
               </div>
-            </div>
-          </div>
-
-          {/* Shipping */}
-          <div className="border-border mt-10 border-t pt-10">
-            <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
-              Shipping Address
-            </h2>
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label
-                  htmlFor="address"
-                  className="text-muted-foreground block text-sm"
-                >
-                  Address
+                <label htmlFor="phone" className={labelClass}>
+                  Phone *
                 </label>
-                <input
-                  id="address"
-                  type="text"
+                <PhoneInput
+                  id="phone"
+                  autoComplete="tel"
+                  value={phone}
+                  onChange={(val) => setPhone(val)}
+                  placeholder="+1 555 123 4567"
+                  className={inputClass}
                   required
-                  className="border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none"
-                  placeholder="123 Main Street"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="city"
-                  className="text-muted-foreground block text-sm"
-                >
-                  City
-                </label>
-                <input
-                  id="city"
-                  type="text"
-                  required
-                  className="border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none"
-                  placeholder="San Francisco"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="state"
-                  className="text-muted-foreground block text-sm"
-                >
-                  State
-                </label>
-                <input
-                  id="state"
-                  type="text"
-                  required
-                  className="border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none"
-                  placeholder="CA"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="zip"
-                  className="text-muted-foreground block text-sm"
-                >
-                  ZIP Code
-                </label>
-                <input
-                  id="zip"
-                  type="text"
-                  required
-                  className="border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none"
-                  placeholder="94102"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="country"
-                  className="text-muted-foreground block text-sm"
-                >
-                  Country
-                </label>
-                <input
-                  id="country"
-                  type="text"
-                  required
-                  defaultValue="United States"
-                  className="border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
-          {/* Payment */}
+          {/* Discount Code */}
           <div className="border-border mt-10 border-t pt-10">
             <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
-              Payment
+              Discount Code
             </h2>
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label
-                  htmlFor="cardNumber"
-                  className="text-muted-foreground block text-sm"
+            <div className="mt-6 flex gap-2">
+              <input
+                type="text"
+                value={discountCodeInput}
+                onChange={(e) =>
+                  setDiscountCodeInput(e.target.value.toUpperCase())
+                }
+                placeholder="SAVE20"
+                autoComplete="off"
+                className={`${inputClass} flex-1`}
+              />
+              <button
+                type="button"
+                onClick={handleApplyDiscount}
+                disabled={
+                  validateDiscountMutation.isPending || items.length === 0
+                }
+                className="border-border bg-card text-foreground hover:bg-muted border px-6 py-3 text-sm font-medium tracking-wide transition-opacity disabled:opacity-50"
+              >
+                {validateDiscountMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Apply"
+                )}
+              </button>
+            </div>
+            {discountFieldError && (
+              <p className="mt-2 text-sm text-red-600">{discountFieldError}</p>
+            )}
+            {discountCodeLabel && discountAmount > 0 && (
+              <p className="mt-2 text-sm text-green-600">
+                Code{" "}
+                <span className="font-mono font-semibold">
+                  {discountCodeLabel}
+                </span>{" "}
+                applied.
+              </p>
+            )}
+          </div>
+
+          {/* Delivery Method */}
+          {shippingConfig.offersInStorePickup && (
+            <div className="border-border mt-10 border-t pt-10">
+              <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+                Delivery
+              </h2>
+              <div className="mt-6 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMethod("ship")}
+                  className={`border px-6 py-3 text-sm font-medium tracking-wide transition-opacity ${
+                    deliveryMethod === "ship"
+                      ? "bg-primary text-primary-foreground border-transparent"
+                      : "border-border text-foreground hover:bg-muted bg-transparent"
+                  }`}
                 >
-                  Card Number
-                </label>
-                <input
-                  id="cardNumber"
-                  type="text"
-                  required
-                  className="border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none"
-                  placeholder="1234 5678 9012 3456"
-                />
+                  Ship to address
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMethod("pickup")}
+                  className={`border px-6 py-3 text-sm font-medium tracking-wide transition-opacity ${
+                    deliveryMethod === "pickup"
+                      ? "bg-primary text-primary-foreground border-transparent"
+                      : "border-border text-foreground hover:bg-muted bg-transparent"
+                  }`}
+                >
+                  In-store pickup
+                </button>
               </div>
-              <div>
-                <label
-                  htmlFor="expiry"
-                  className="text-muted-foreground block text-sm"
-                >
-                  Expiry Date
-                </label>
-                <input
-                  id="expiry"
-                  type="text"
-                  required
-                  className="border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none"
-                  placeholder="MM / YY"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="cvc"
-                  className="text-muted-foreground block text-sm"
-                >
-                  CVC
-                </label>
-                <input
-                  id="cvc"
-                  type="text"
-                  required
-                  className="border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none"
-                  placeholder="123"
-                />
+              <p className="text-muted-foreground mt-3 text-sm">
+                {deliveryMethod === "pickup"
+                  ? "No shipping charge. You'll pick up your order at the store."
+                  : "Shipping cost is based on your store's shipping settings."}
+              </p>
+            </div>
+          )}
+
+          {/* Shipping Address */}
+          {deliveryMethod === "ship" && (
+            <div className="border-border mt-10 border-t pt-10">
+              <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+                Shipping Address
+              </h2>
+              <p className="text-muted-foreground mt-2 text-sm">
+                This is sent to Stripe Checkout prefilled so you can confirm or
+                edit before paying.
+              </p>
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label htmlFor="address" className={labelClass}>
+                    Address line 1 *
+                  </label>
+                  <input
+                    id="address"
+                    type="text"
+                    autoComplete="shipping address-line1"
+                    required={deliveryMethod === "ship"}
+                    value={addressLine1}
+                    onChange={(e) => setAddressLine1(e.target.value)}
+                    className={inputClass}
+                    placeholder="123 Main Street"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="address2" className={labelClass}>
+                    Address line 2
+                  </label>
+                  <input
+                    id="address2"
+                    type="text"
+                    autoComplete="shipping address-line2"
+                    value={addressLine2}
+                    onChange={(e) => setAddressLine2(e.target.value)}
+                    className={inputClass}
+                    placeholder="Apartment, suite, etc."
+                  />
+                </div>
+                <div>
+                  <label htmlFor="city" className={labelClass}>
+                    City *
+                  </label>
+                  <input
+                    id="city"
+                    type="text"
+                    autoComplete="shipping address-level2"
+                    required={deliveryMethod === "ship"}
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className={inputClass}
+                    placeholder="San Francisco"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="state" className={labelClass}>
+                    State / Province *
+                  </label>
+                  <input
+                    id="state"
+                    type="text"
+                    autoComplete="shipping address-level1"
+                    required={deliveryMethod === "ship"}
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    className={inputClass}
+                    placeholder="CA"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="zip" className={labelClass}>
+                    ZIP / Postal code *
+                  </label>
+                  <input
+                    id="zip"
+                    type="text"
+                    autoComplete="shipping postal-code"
+                    required={deliveryMethod === "ship"}
+                    value={postalCode}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                    className={inputClass}
+                    placeholder="94102"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="country" className={labelClass}>
+                    Country *
+                  </label>
+                  <Select
+                    value={country}
+                    onValueChange={(v) => setCountry(v as "US" | "CA")}
+                  >
+                    <SelectTrigger
+                      id="country"
+                      className="border-border bg-card text-foreground focus:border-foreground mt-1 h-auto w-full rounded-none border px-4 py-3 text-sm focus:outline-none"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="US">United States</SelectItem>
+                      <SelectItem value="CA">Canada</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </form>
       </div>
 
@@ -279,8 +492,11 @@ export function ModernCheckoutForm() {
 
           <div className="mt-6 flex flex-col gap-4">
             {items.map((item) => (
-              <div key={item.productId} className="flex gap-4">
-                <div className="bg-muted relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-sm">
+              <div
+                key={`${item.productId}-${item.variantId}`}
+                className="flex gap-4"
+              >
+                <div className="bg-muted relative h-16 w-16 shrink-0 overflow-hidden rounded-sm">
                   <Image
                     src={item.imageUrl ?? "/placeholder.svg"}
                     alt={item.productName}
@@ -294,6 +510,11 @@ export function ModernCheckoutForm() {
                     <p className="text-foreground text-sm font-medium">
                       {item.productName}
                     </p>
+                    {item.variantName && (
+                      <p className="text-muted-foreground text-xs">
+                        {item.variantName}
+                      </p>
+                    )}
                     <p className="text-muted-foreground text-xs">
                       Qty: {item.quantity}
                     </p>
@@ -310,14 +531,22 @@ export function ModernCheckoutForm() {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="text-foreground">
-                  {formatPrice(totalPrice)}
-                </span>
+                <span className="text-foreground">{formatPrice(subtotal)}</span>
               </div>
+              {discountAmount > 0 && discountCodeLabel && (
+                <div className="flex items-center justify-between text-sm text-green-600">
+                  <span>Discount ({discountCodeLabel})</span>
+                  <span>-{formatPrice(discountAmount)}</span>
+                </div>
+              )}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
                 <span className="text-foreground">
-                  {shipping === 0 ? "Free" : formatPrice(shipping)}
+                  {deliveryMethod === "pickup"
+                    ? "In-store pickup (free)"
+                    : shipping === 0
+                      ? "Free"
+                      : formatPrice(shipping)}
                 </span>
               </div>
             </div>
@@ -325,21 +554,47 @@ export function ModernCheckoutForm() {
 
           <div className="border-border mt-4 border-t pt-4">
             <div className="flex items-center justify-between">
-              <span className="text-foreground font-medium">Total</span>
+              <span className="text-foreground font-medium">
+                Estimated total
+              </span>
               <span className="text-foreground text-lg font-medium">
-                {formatPrice(total)}
+                {formatPrice(finalTotal)}
               </span>
             </div>
+            <p className="text-muted-foreground mt-1 text-xs">
+              Tax and final total are confirmed on Stripe Checkout.
+            </p>
           </div>
+
+          {error && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <button
             type="submit"
             form="checkout-form"
-            className="bg-primary text-primary-foreground mt-8 flex w-full items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
+            disabled={isProcessing}
+            className="bg-primary text-primary-foreground mt-8 flex w-full items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            Place Order
-            <ArrowRight className="h-4 w-4" />
+            {isProcessing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                Continue to Payment
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
           </button>
+
+          <p className="text-muted-foreground mt-3 text-center text-xs">
+            All transactions are secure and encrypted via Stripe. 100% Secure
+            and Encrypted Payments.
+          </p>
         </div>
       </div>
     </div>

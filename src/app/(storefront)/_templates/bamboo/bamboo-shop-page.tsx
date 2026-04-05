@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
 import type { DefaultProductsPageTemplateProps } from "../types";
-
 import {
   FadeIn,
   PageTransition,
   StaggerContainer,
   StaggerItem,
-} from "./bamboo-animations";
+} from "~/components/page-animations";
+
 import { BambooProductCard } from "./bamboo-product-card";
 
 export const metadata: Metadata = {

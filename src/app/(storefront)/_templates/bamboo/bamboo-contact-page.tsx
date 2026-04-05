@@ -1,45 +1,36 @@
 "use client";
 
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../types";
+import { FadeIn, PageTransition } from "~/components/page-animations";
 
-import { FadeIn, PageTransition } from "./bamboo-animations";
+import { resolveFields } from ".";
 import { BambooContactForm } from "./bamboo-contact-form";
-
-const DEFAULT_EMAIL = "hello@finallyresults.com";
-const DEFAULT_LOCATION = "Detroit, Michigan";
-const DEFAULT_PHONE = "(313) 555-0199";
-const DEFAULT_HOURS = "Mon - Fri, 9am - 5pm EST";
 
 export function BambooContactPage({
   business,
 }: DefaultContactPageTemplateProps) {
-  const themeSpecificFields = business?.siteContent?.customFields as
-    | Record<string, string>
-    | undefined;
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "bamboo.contact.header",
+    "bamboo.contact.subheader",
+    "bamboo.contact.hours",
+  ]);
 
-  const header =
-    themeSpecificFields?.["bamboo.contact.header"] ?? "Get in Touch";
-  const subheader =
-    themeSpecificFields?.["bamboo.contact.subheader"] ??
-    "Have a question, want to partner with us, or just want to say hello? We would love to hear from you.";
-  const email = themeSpecificFields?.["bamboo.contact.email"] ?? DEFAULT_EMAIL;
-  const locationValue =
-    themeSpecificFields?.["bamboo.contact.location"] ?? DEFAULT_LOCATION;
-  const phone = themeSpecificFields?.["bamboo.contact.phone"] ?? DEFAULT_PHONE;
-  const hours = themeSpecificFields?.["bamboo.contact.hours"] ?? DEFAULT_HOURS;
+  const email = business?.supportEmail?.trim();
+  const location = business?.businessAddress?.trim();
+  const phone = business?.phoneNumber?.trim();
 
   const contactInfo = [
-    { icon: Mail, label: "Email", value: email, href: `mailto:${email}` },
-    { icon: MapPin, label: "Location", value: locationValue, href: undefined },
-    // {
-    //   icon: Phone,
-    //   label: "Phone",
-    //   value: phone,
-    //   href: `tel:${phone.replace(/\D/g, "")}`,
-    // },
-    // { icon: Clock, label: "Business Hours", value: hours, href: undefined },
+    ...(email
+      ? [{ icon: Mail, label: "Email", value: email, href: `mailto:${email}` }]
+      : []),
+    ...(location
+      ? [{ icon: MapPin, label: "Location", value: location, href: undefined }]
+      : []),
+    ...(phone
+      ? [{ icon: Phone, label: "Phone", value: phone, href: `tel:${phone}` }]
+      : []),
   ];
 
   return (
@@ -51,24 +42,12 @@ export function BambooContactPage({
             className="flex flex-1 flex-col items-start gap-6"
           >
             <h1 className="text-foreground font-heading text-4xl leading-tight font-bold tracking-tight md:text-5xl">
-              <span className="text-balance">{header}</span>
+              <span className="text-balance">{f["bamboo.contact.header"]}</span>
             </h1>
             <p className="text-muted-foreground max-w-lg text-lg leading-relaxed">
-              {subheader}
+              {f["bamboo.contact.subheader"]}
             </p>
           </FadeIn>
-          {/* <FadeIn direction="left" delay={0.15} className="relative flex-1">
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-            <Image
-              src="/images/septic-safe.jpg"
-              alt="Illustration showing bamboo toilet paper dissolving safely in a septic system"
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </div>
-        </FadeIn> */}
         </div>
       </section>
 

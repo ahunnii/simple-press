@@ -12,7 +12,7 @@ type Props = {
   item: CartItemType;
 };
 
-export function CartItem({ item }: Props) {
+export function BambooCartItem({ item }: Props) {
   const { updateQuantity, removeItem } = useCart();
   const {
     productId,
@@ -22,8 +22,6 @@ export function CartItem({ item }: Props) {
     price,
     quantity,
     imageUrl,
-    sku,
-    maxInventory,
   } = item;
 
   return (
@@ -43,6 +41,11 @@ export function CartItem({ item }: Props) {
             <h3 className="text-card-foreground font-heading text-sm font-semibold sm:text-base">
               {productName}
             </h3>
+            {variantName && (
+              <p className="text-muted-foreground text-xs sm:text-sm">
+                {variantName}
+              </p>
+            )}
             <p className="text-muted-foreground text-xs sm:text-sm">
               {formatPrice(price)} each
             </p>

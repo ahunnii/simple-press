@@ -1,8 +1,7 @@
 import { Star } from "lucide-react";
 
 import { Card, CardContent } from "~/components/ui/card";
-
-import { StaggerContainer, StaggerItem } from "./bamboo-animations";
+import { StaggerContainer, StaggerItem } from "~/components/page-animations";
 
 const DEFAULT_TESTIMONIALS = [
   {
@@ -35,8 +34,7 @@ export function BambooTestimonials({ fields }: BambooTestimonialsProps) {
   const testimonials = DEFAULT_TESTIMONIALS.map((defaultT, i) => {
     const n = i + 1;
     return {
-      name:
-        fields?.[`bamboo.homepage.testimonial-${n}-name`] ?? defaultT.name,
+      name: fields?.[`bamboo.homepage.testimonial-${n}-name`] ?? defaultT.name,
       location:
         fields?.[`bamboo.homepage.testimonial-${n}-location`] ??
         defaultT.location,

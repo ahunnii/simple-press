@@ -31,6 +31,10 @@ export const businessRouter = createTRPCRouter({
         customDomain: true,
         domainStatus: true,
         subdomain: true,
+        shippingType: true,
+        shippingFlatRate: true,
+        freeShippingThreshold: true,
+        offersInStorePickup: true,
         siteContent: {
           select: {
             logoUrl: true,

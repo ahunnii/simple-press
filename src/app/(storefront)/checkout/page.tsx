@@ -6,16 +6,14 @@ import { BambooCheckoutPage } from "../_templates/bamboo/bamboo-checkout-page";
 import { DarkTrendCheckoutPage } from "../_templates/dark-trend/dark-trend-checkout-page";
 import { DefaultCheckoutPage } from "../_templates/default/default-checkout-page";
 import { DefaultCheckoutUnavailable } from "../_templates/default/default-checkout-unavailable";
-import { HappyBambooCheckoutPage } from "../_templates/happy-bamboo/happy-bamboo-checkout-page";
+import { ElegantCheckoutPage } from "../_templates/elegant/elegant-checkout-page";
+import { HappyBambooCheckoutPage } from "../_templates/happy-bamboo/cart-checkout/happy-bamboo-checkout-page";
 import { ModernCheckoutPage } from "../_templates/modern/modern-checkout-page";
+import { PollenCheckoutPage } from "../_templates/pollen/pollen-checkout-page";
 
 export default async function CheckoutPage() {
-  const business = await api.business.simplifiedGetWithProducts();
+  const business = await api.business.simplifiedGet();
   if (!business) notFound();
-
-  if (business.templateId === "pollen") {
-    notFound();
-  }
 
   const TemplateUnavailableComponent =
     {
@@ -31,6 +29,8 @@ export default async function CheckoutPage() {
       modern: ModernCheckoutPage,
       bamboo: BambooCheckoutPage,
       "happy-bamboo": HappyBambooCheckoutPage,
+      elegant: ElegantCheckoutPage,
+      pollen: PollenCheckoutPage,
     }[business.templateId] ?? DefaultCheckoutPage;
 
   return <TemplateComponent business={business} />;

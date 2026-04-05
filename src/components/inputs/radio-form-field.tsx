@@ -29,6 +29,7 @@ type Props<CurrentForm extends FieldValues> = {
   radioGroupClassName?: string;
   required?: boolean;
   labelClassName?: string;
+  defaultValue?: string;
   onChange?: (value: string) => void;
 };
 
@@ -42,6 +43,7 @@ export const RadioFormField = <CurrentForm extends FieldValues>({
   radioGroupClassName,
   required,
   labelClassName,
+  defaultValue,
   onChange,
 }: Props<CurrentForm>) => {
   return (
@@ -62,6 +64,7 @@ export const RadioFormField = <CurrentForm extends FieldValues>({
                 onChange?.(value);
               }}
               required={required}
+              defaultValue={defaultValue}
             >
               {options.map((opt) => (
                 <label

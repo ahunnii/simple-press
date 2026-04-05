@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
-import { HappyBambooBlogPostPage } from "../../_templates/happy-bamboo/happy-bamboo-blog-post-page";
+import { HappyBambooBlogPostPage } from "../../_templates/happy-bamboo/blog/happy-bamboo-blog-post-page";
 
 type Props = {
   params: Promise<{ slug: string }>;

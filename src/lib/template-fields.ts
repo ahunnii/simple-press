@@ -1,5 +1,9 @@
 import type { JSONContent } from "@tiptap/react";
+import type { LucideIcon } from "lucide-react";
+import { Heart, Leaf, Recycle, Shield } from "lucide-react";
+import { z } from "zod";
 
+import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import {
   bambooData,
   bambooFieldGroups,
@@ -27,6 +31,9 @@ export type TemplatePage =
   | "product"
   | "products"
   | "about"
+  | "blog"
+  | "collections"
+  | "shop"
   | "cart"
   | "checkout"
   | "global";
@@ -124,6 +131,35 @@ export function getListFieldValue(
   if (!isObjectRecord(customFields)) return null;
   const value = customFields[key];
   return Array.isArray(value) ? value : null;
+}
+
+const genericIconRowSchema = z
+  .object({
+    icon: z.string(),
+    title: z.string(),
+    description: z.string(),
+  })
+  .passthrough();
+
+export type GenericIconRow = {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+};
+
+export function parseTemplateIconListRows(raw: unknown) {
+  if (!Array.isArray(raw)) return null;
+
+  const out: GenericIconRow[] = [];
+  for (const row of raw) {
+    const parsed = genericIconRowSchema.safeParse(row);
+    if (!parsed.success) continue;
+    const { icon, title, description } = parsed.data;
+    const Icon = getLucideTemplateIcon(icon) ?? Leaf;
+    out.push({ icon: Icon, title, description });
+  }
+
+  return out.length > 0 ? out : null;
 }
 
 export type TemplateFieldGroup = {
