@@ -4,6 +4,7 @@ import { AuthView } from "@daveyplate/better-auth-ui";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { cn } from "~/lib/utils";
 
 import { DefaultPlatformBadge } from "./default-platform-badge";
 
@@ -21,14 +22,35 @@ export function DefaultSignUpPage({
     | undefined;
 
   const signUpImageUrl =
-    themeSpecificFields?.["global.sign-up.image-url"] ?? "/placeholder.svg";
+    themeSpecificFields?.[
+      `${business.templateId}.global.authentication-image`
+    ]?.trim() ?? "/placeholder.svg";
+
+  const logoSizeWidth =
+    themeSpecificFields?.[
+      `${business.templateId}.global.logo-size-width`
+    ]?.trim() ?? "80";
+
+  const logoSizeHeight =
+    themeSpecificFields?.[
+      `${business.templateId}.global.logo-size-height`
+    ]?.trim() ?? "80";
+
+  const imageOverlayColor =
+    themeSpecificFields?.[
+      `${business.templateId}.global.image-overlay-color`
+    ]?.trim() ?? "#000000";
+
   return (
     <div className="bg-background flex min-h-screen">
       {/* ── Left panel (desktop only) ── */}
       <div className="bg-primary relative hidden overflow-hidden lg:flex lg:w-1/2">
         {signUpImageUrl && (
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-20"
+            className={cn(
+              "absolute inset-0 bg-cover bg-center opacity-20",
+              // `bg-[#${imageOverlayColor}]`,
+            )}
             style={{
               backgroundImage: `url('${signUpImageUrl}')`,
             }}
@@ -45,9 +67,9 @@ export function DefaultSignUpPage({
               <Image
                 src={business.siteContent.logoUrl}
                 alt={business.name}
-                width={60}
-                height={60}
-                className="bg-primary rounded-full"
+                width={parseInt(logoSizeWidth)}
+                height={parseInt(logoSizeHeight)}
+                className="rounded-full"
               />
             ) : (
               <span className="text-xl font-bold">{business.name}</span>
@@ -60,8 +82,8 @@ export function DefaultSignUpPage({
               Join {business.name}
             </h1>
             <p className="text-primary-foreground/80 mb-8 text-lg">
-              Create your SimplePress account to track orders, save favourites,
-              and enjoy a seamless shopping experience.
+              Create your SimplePress account to track orders, engage with the
+              shop, and enjoy a seamless shopping experience.
             </p>
 
             {/* Benefits */}
@@ -69,7 +91,7 @@ export function DefaultSignUpPage({
               {[
                 "Access your orders and account history",
                 "Your account works across all SimplePress stores",
-                "Save your favourite products and categories",
+                "Engage with the shop by leaving product reviews and testimonials",
               ].map((benefit) => (
                 <div key={benefit} className="flex items-start gap-3">
                   <div className="bg-primary-foreground/20 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full">

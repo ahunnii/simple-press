@@ -47,6 +47,9 @@ export function Providers({ children }: { children: ReactNode }) {
           provider: "hcaptcha",
           siteKey: env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
         }}
+        credentials={{
+          forgotPassword: true,
+        }}
       >
         <TooltipProvider>{children}</TooltipProvider>
 

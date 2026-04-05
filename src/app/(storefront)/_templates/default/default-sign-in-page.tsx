@@ -4,6 +4,7 @@ import { AuthView } from "@daveyplate/better-auth-ui";
 import { ArrowLeft } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { cn } from "~/lib/utils";
 
 import { DefaultPlatformBadge } from "./default-platform-badge";
 
@@ -23,16 +24,35 @@ export function DefaultSignInPage({ redirectTo, business }: Props) {
     | undefined;
 
   const signInImageUrl =
-    themeSpecificFields?.["global.sign-in.image-url"] ?? "/placeholder.svg";
+    themeSpecificFields?.[
+      `${business?.templateId}.global.authentication-image`
+    ]?.trim() ?? "/placeholder.svg";
+
+  const logoSizeWidth =
+    themeSpecificFields?.[
+      `${business?.templateId}.global.logo-size-width`
+    ]?.trim() ?? "80";
+
+  const logoSizeHeight =
+    themeSpecificFields?.[
+      `${business?.templateId}.global.logo-size-height`
+    ]?.trim() ?? "80";
+
+  const imageOverlayColor =
+    themeSpecificFields?.[
+      `${business?.templateId}.global.image-overlay-color`
+    ]?.trim() ?? "#000000";
+
   return (
     <div className="bg-background flex min-h-screen">
       {/* ── Left panel (desktop only) ── */}
       <div className="bg-primary relative hidden overflow-hidden lg:flex lg:w-1/2">
         {signInImageUrl && (
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-20"
+            className={cn("absolute inset-0 bg-cover bg-center opacity-20")}
             style={{
               backgroundImage: `url('${signInImageUrl}')`,
+              // backgroundColor: imageOverlayColor,
             }}
           />
         )}
@@ -47,9 +67,9 @@ export function DefaultSignInPage({ redirectTo, business }: Props) {
               <Image
                 src={business.siteContent.logoUrl}
                 alt={business.name}
-                width={40}
-                height={40}
-                className="bg-primary rounded-full"
+                width={parseInt(logoSizeWidth)}
+                height={parseInt(logoSizeHeight)}
+                className="rounded-full"
               />
             ) : (
               <span className="text-xl font-bold">

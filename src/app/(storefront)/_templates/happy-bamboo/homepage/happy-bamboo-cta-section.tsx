@@ -37,7 +37,7 @@ export function HappyBambooCtaSection({
             <Leaf className="text-primary-foreground h-8 w-8" />
           </ScaleIn>
 
-          <h2 className="text-primary-foreground mb-6 font-serif text-4xl font-bold md:text-5xl">
+          <h2 className="text-primary-foreground mb-6 text-4xl font-bold md:text-5xl">
             {heading}
           </h2>
           {body && (

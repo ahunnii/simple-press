@@ -44,13 +44,13 @@ export function HappyBambooAboutSection({
                 Your browser does not support the video tag.
               </video>
             </div>
-            <ScaleIn
+            {/* <ScaleIn
               delay={0.3}
               className="bg-primary text-primary-foreground absolute -right-6 -bottom-6 rounded-xl p-6 shadow-lg md:-right-8 md:-bottom-8"
             >
               <p className="text-3xl font-bold md:text-4xl">100%</p>
               <p className="text-sm font-medium">Sustainable</p>
-            </ScaleIn>
+            </ScaleIn> */}
           </FadeIn>
 
           <FadeIn direction="right" className="space-y-6">

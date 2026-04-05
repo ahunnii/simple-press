@@ -19,7 +19,19 @@ export function DefaultForgotPasswordPage({ redirectTo, business }: Props) {
     | undefined;
 
   const signInImageUrl =
-    themeSpecificFields?.["global.auth.image-url"] ?? "/placeholder.svg";
+    themeSpecificFields?.[
+      `${business?.templateId}.global.authentication-image`
+    ]?.trim() ?? "/placeholder.svg";
+
+  const logoSizeWidth =
+    themeSpecificFields?.[
+      `${business?.templateId}.global.logo-size-width`
+    ]?.trim() ?? "80";
+
+  const logoSizeHeight =
+    themeSpecificFields?.[
+      `${business?.templateId}.global.logo-size-height`
+    ]?.trim() ?? "80";
   return (
     <div className="bg-background flex min-h-screen">
       {/* ── Left panel (desktop only) ── */}
@@ -43,9 +55,9 @@ export function DefaultForgotPasswordPage({ redirectTo, business }: Props) {
               <Image
                 src={business.siteContent.logoUrl}
                 alt={business.name}
-                width={40}
-                height={40}
-                className="bg-primary rounded-full"
+                width={parseInt(logoSizeWidth)}
+                height={parseInt(logoSizeHeight)}
+                className="rounded-full"
               />
             ) : (
               <span className="text-xl font-bold">

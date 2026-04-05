@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { FacebookIcon, TikTokIcon } from "@daveyplate/better-auth-ui";
-import { InstagramLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons";
+import { TwitterLogoIcon } from "@radix-ui/react-icons";
 import { Leaf } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { api } from "~/trpc/server";
 import { Separator } from "~/components/ui/separator";
+import { FacebookIcon } from "~/components/icons/facebook-icon";
+import { InstagramIcon } from "~/components/icons/instagram-icon";
+import { TikTokIcon } from "~/components/icons/tiktok-icon";
 
 const quickLinks = [
   { href: "/", label: "Home" },
@@ -14,18 +16,22 @@ const quickLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-// const customerCare = [
-//   { href: "/shop", label: "Shipping Info" },
-//   { href: "/shop", label: "Returns & Refunds" },
-//   { href: "/contact", label: "FAQs" },
-//   { href: "/contact", label: "Support" },
-// ];
-
 export async function HappyBambooFooter({
   business,
 }: DefaultFooterTemplateProps) {
-  const email = business?.supportEmail ?? "happybamboo25@gmail.com";
-  const phone = business?.phoneNumber ?? "(313) 765-1551";
+  const email = business?.supportEmail;
+  const phone = business?.phoneNumber;
+  const address = business?.businessAddress;
+  const name = business?.name ?? "Business Name";
+  const footerTagline = business?.siteContent?.footerText;
+
+  const navigationItems = business?.siteContent?.navigationItems as
+    | {
+        label: string;
+        href: string;
+      }[]
+    | undefined;
+
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
   });
@@ -40,87 +46,6 @@ export async function HappyBambooFooter({
     | undefined;
 
   return (
-    // <footer className="bg-primary text-primary-foreground">
-    //   <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
-    //     <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
-    //       <div className="flex flex-col gap-4">
-    //         <Link href="/" className="flex items-center gap-2">
-    //           <Leaf className="size-5" />
-    //           <span className="font-heading text-xl font-bold">
-    //             Finally Results LLC
-    //           </span>
-    //         </Link>
-    //         <p className="text-primary-foreground/80 text-sm leading-relaxed">
-    //           Premium bamboo paper products crafted with purpose. Better for
-    //           you, better for the planet.
-    //         </p>
-    //       </div>
-
-    //       <div>
-    //         <h3 className="text-primary-foreground/60 mb-4 text-sm font-semibold tracking-wider uppercase">
-    //           Quick Links
-    //         </h3>
-    //         <nav className="flex flex-col gap-2.5" aria-label="Quick links">
-    //           {quickLinks.map((link) => (
-    //             <Link
-    //               key={link.label}
-    //               href={link.href}
-    //               className="text-primary-foreground/80 hover:text-primary-foreground text-sm transition-colors"
-    //             >
-    //               {link.label}
-    //             </Link>
-    //           ))}
-    //         </nav>
-    //       </div>
-
-    //       <div>
-    //         <h3 className="text-primary-foreground/60 mb-4 text-sm font-semibold tracking-wider uppercase">
-    //           Policies
-    //         </h3>
-    //         <nav
-    //           className="flex flex-col gap-2.5"
-    //           aria-label="Customer care links"
-    //         >
-    //           {policies.map((link) => (
-    //             <Link
-    //               key={link.id}
-    //               href={link.slug}
-    //               className="text-primary-foreground/80 hover:text-primary-foreground text-sm transition-colors"
-    //             >
-    //               {link.title}
-    //             </Link>
-    //           ))}
-    //         </nav>
-    //       </div>
-
-    //       <div>
-    //         <h3 className="text-primary-foreground/60 mb-4 text-sm font-semibold tracking-wider uppercase">
-    //           Connect
-    //         </h3>
-    //         <address className="text-primary-foreground/80 flex flex-col gap-2.5 text-sm not-italic">
-    //           <span>Finally Results LLC</span>
-    //           <span>Detroit, Michigan</span>
-    //           <a
-    //             href={`mailto:${email}`}
-    //             className="hover:text-primary-foreground transition-colors"
-    //           >
-    //             {email}
-    //           </a>
-    //         </address>
-    //       </div>
-    //     </div>
-
-    //     <div className="border-primary-foreground/20 mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row">
-    //       <p className="text-primary-foreground/60 text-xs">
-    //         {"© 2026 Finally Results LLC. All rights reserved."}
-    //       </p>
-    //       <p className="text-primary-foreground/60 text-xs">
-    //         Proudly made in Detroit
-    //       </p>
-    //     </div>
-    //   </div>
-    // </footer>
-
     <footer className="border-border bg-foreground border-t">
       <div className="container mx-auto px-4 py-12">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -128,14 +53,14 @@ export async function HappyBambooFooter({
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
               <Leaf className="text-muted h-8 w-8" />
-              <span className="text-muted text-xl font-bold">
-                Zaires Visions
-              </span>
+              <span className="text-muted text-xl font-bold">{name}</span>
             </Link>
-            <p className="text-muted text-sm leading-relaxed">
-              Transforming everyday personal care into an experience that
-              nurtures both people and the planet.
-            </p>
+            {!!footerTagline && (
+              <p className="text-muted text-sm leading-relaxed">
+                {footerTagline}
+              </p>
+            )}
+
             <div className="flex gap-4">
               {socialLinks?.facebook && (
                 <a
@@ -153,7 +78,7 @@ export async function HappyBambooFooter({
                   className="text-muted hover:text-primary transition-colors"
                   aria-label="Instagram"
                 >
-                  <InstagramLogoIcon className="h-5 w-5" />
+                  <InstagramIcon className="h-5 w-5" />
                 </a>
               )}
               {socialLinks?.twitter && (
@@ -181,7 +106,7 @@ export async function HappyBambooFooter({
           <div>
             <h4 className="text-muted mb-4 font-semibold">Quick Links</h4>
             <ul className="flex flex-col space-y-2">
-              {quickLinks.map((link) => (
+              {(navigationItems ?? quickLinks).map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
@@ -198,20 +123,25 @@ export async function HappyBambooFooter({
             <h4 className="text-muted mb-4 font-semibold">Support</h4>
 
             <address className="text-muted/80 flex flex-col gap-2.5 text-sm not-italic">
-              <span>Zaires Visions LLC</span>
-              <span>Detroit, Michigan</span>
-              <a
-                href={`tel:${phone.replace(/\D/g, "")}`}
-                className="hover:text-primary transition-colors"
-              >
-                {phone}
-              </a>
-              <a
-                href={`mailto:${email}`}
-                className="hover:text-primary transition-colors"
-              >
-                {email}
-              </a>
+              <span>{name}</span>
+              {!!address && <span>{address}</span>}
+
+              {!!phone && (
+                <a
+                  href={`tel:${phone.replace(/\D/g, "")}`}
+                  className="hover:text-primary transition-colors"
+                >
+                  {phone}
+                </a>
+              )}
+              {!!email && (
+                <a
+                  href={`mailto:${email}`}
+                  className="hover:text-primary transition-colors"
+                >
+                  {email}
+                </a>
+              )}
             </address>
           </div>
         </div>
@@ -220,8 +150,7 @@ export async function HappyBambooFooter({
 
         <div className="text-muted flex flex-col items-center justify-between gap-4 text-sm md:flex-row">
           <p>
-            &copy; {new Date().getFullYear()} Zaires Visions LLC. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} {name}. All rights reserved.
           </p>
           <div className="flex gap-4">
             {policies.map((link) => (

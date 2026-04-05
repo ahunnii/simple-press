@@ -878,27 +878,53 @@ const contactFaqData: TemplateField[] = [
   },
 ];
 
-// const globalLocationData: TemplateField[] = [
-//   {
-//     key: "happy-bamboo.global.location-address",
-//     label: "Global Location Address",
-//     description: "Address for the global location section (used for map link)",
-//     type: "text",
-//     page: "global",
-//     group: "global.location",
-//     gridColumn: "col-span-full",
-//     defaultValue: "18058, Detroit, MI 48234",
-//   },
-//   {
-//     key: "happy-bamboo.global.location-map",
-//     label: "Global Location Map",
-//     description: "Map image for the global location section",
-//     type: "image",
-//     page: "global",
-//     group: "global.location",
-//     gridColumn: "col-span-full",
-//   },
-// ];
+const globalAuthenticationData: TemplateField[] = [
+  {
+    key: "happy-bamboo.global.authentication-image",
+    label: "Authentication Image",
+    description: "Image shown in the authentication section",
+    type: "image",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
+  },
+
+  {
+    key: "happy-bamboo.global.logo-size-width",
+    label: "Logo Size Width",
+    description: "Size of the logo in the authentication section",
+    type: "number",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-1",
+    defaultValue: "80",
+    placeholder: "80",
+  },
+  {
+    key: "happy-bamboo.global.logo-size-height",
+    label: "Logo Size Height",
+    description: "Size of the logo in the authentication section",
+    type: "number",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-1",
+    defaultValue: "80",
+    placeholder: "80",
+  },
+
+  {
+    key: "happy-bamboo.global.image-overlay-color",
+    label: "Image Overlay Color",
+    description: "Color of the image overlay in the authentication section",
+    type: "color",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-1",
+    defaultValue: "#000000",
+    placeholder: "#000000",
+  },
+];
 
 const fieldGroups: TemplateFieldGroup[] = [
   {
@@ -1030,13 +1056,13 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "❓",
     columns: 1,
   },
-  // {
-  //   id: "global.location",
-  //   title: "Global Location Section",
-  //   description: "Global location section on the homepage",
-  //   icon: "🗺️",
-  //   columns: 2,
-  // },
+  {
+    id: "global.authentication",
+    title: "Authentication",
+    description: "Authentication settings for your business",
+    icon: "�",
+    columns: 2,
+  },
 ];
 
 export const happyBambooData = {
@@ -1059,7 +1085,7 @@ export const happyBambooData = {
     ...collectionsListingData,
     ...collectionsCtaData,
     ...shopListingData,
-    // ...globalLocationData,
+    ...globalAuthenticationData,
   ],
 };
 

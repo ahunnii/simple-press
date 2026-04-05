@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -42,7 +43,6 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
   const [discountFieldError, setDiscountFieldError] = useState<string | null>(
     null,
   );
-
   const validateDiscountMutation = api.discount.validate.useMutation({
     onSuccess: (data) => {
       setDiscountCodeId(data.discount.id);
@@ -261,17 +261,22 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                 id="discount-code"
                 type="text"
                 value={discountCodeInput}
-                onChange={(e) =>
-                  setDiscountCodeInput(e.target.value.toUpperCase())
-                }
-                placeholder="SAVE20"
+                onChange={(e) => {
+                  setDiscountCodeInput(e.target.value.toUpperCase());
+                  setDiscountFieldError(null);
+                }}
+                placeholder="Discount Code"
                 autoComplete="off"
               />
             </div>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               onClick={handleApplyDiscount}
+              className={cn(
+                discountCodeInput.trim() &&
+                  "bg-primary text-primary-foreground hover:bg-primary/90",
+              )}
               disabled={
                 validateDiscountMutation.isPending || items.length === 0
               }
@@ -382,6 +387,7 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     required={deliveryMethod === "ship"}
+                    placeholder="e.g. San Francisco"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -404,6 +410,7 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                     id="postal"
                     type="text"
                     autoComplete="shipping postal-code"
+                    placeholder="e.g. 94102"
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
                     required={deliveryMethod === "ship"}

@@ -106,13 +106,11 @@ export async function HappyBambooHomepage() {
           ]?.trim()}
           testimonials={testimonials}
         />
-        <HappyBambooCtaSection
+        {/* <HappyBambooCtaSection
           heading={themeSpecificFields?.[
             "happy-bamboo.homepage-cta-heading"
           ]?.trim()}
-          body={themeSpecificFields?.[
-            "happy-bamboo.homepage-cta-body"
-          ]?.trim()}
+          body={themeSpecificFields?.["happy-bamboo.homepage-cta-body"]?.trim()}
           primaryButtonText={themeSpecificFields?.[
             "happy-bamboo.homepage-cta-primary-button-text"
           ]?.trim()}
@@ -125,7 +123,7 @@ export async function HappyBambooHomepage() {
           secondaryButtonLink={themeSpecificFields?.[
             "happy-bamboo.homepage-cta-secondary-button-link"
           ]?.trim()}
-        />
+        /> */}
       </PageTransition>
     </HydrateClient>
   );

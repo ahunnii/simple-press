@@ -51,7 +51,12 @@ export function HappyBambooHeader({
 
   const authActions = (
     <>
-      <Button variant="ghost" size="sm" asChild>
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild
+        className="text-background hover:bg-background/10 hover:text-[#E3CF99]"
+      >
         <Link href="/auth/sign-in">Log in</Link>
       </Button>
     </>
