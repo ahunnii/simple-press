@@ -37,10 +37,12 @@ export async function POST(req: NextRequest) {
     //   return NextResponse.json({ error: "No business found" }, { status: 404 });
     // }
 
+    const normalizedDomain = domain.toLowerCase();
+
     // Check if domain is already taken
     const existingDomain = await db.business.findFirst({
       where: {
-        customDomain: domain,
+        customDomain: normalizedDomain,
         id: { not: currentBusiness?.id },
       },
     });
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest) {
     await db.business.update({
       where: { id: currentBusiness?.id },
       data: {
-        customDomain: domain,
+        customDomain: normalizedDomain,
         domainStatus: "PENDING_DNS",
       },
     });
@@ -64,7 +66,7 @@ export async function POST(req: NextRequest) {
     // Add to domain queue for Coolify
     await db.domainQueue.create({
       data: {
-        domain,
+        domain: normalizedDomain,
         businessId: currentBusiness?.id ?? "",
         status: "pending",
       },
@@ -75,14 +77,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      domain,
+      domain: normalizedDomain,
       status: "PENDING_DNS",
     });
   } catch (error: unknown) {
     console.error("Add domain error:", error);
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to add domain",
+        error: "Failed to add domain. Please try again.",
       },
       { status: 500 },
     );

@@ -57,7 +57,7 @@ export function HappyBambooAboutSection({
             <span className="text-primary text-sm font-semibold tracking-wider uppercase">
               Zaires Visions
             </span>
-            <h2 className="text-4xl leading-tight font-bold md:text-5xl">
+            <h2 className="font-serif text-4xl leading-tight font-bold md:text-5xl">
               {aboutHeading}
             </h2>
             {aboutDescription ? (

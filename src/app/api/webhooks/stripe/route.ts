@@ -792,7 +792,7 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     console.error("[Webhook] Error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Internal server error" },
       { status: 500 },
     );
   }

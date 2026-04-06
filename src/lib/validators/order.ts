@@ -10,11 +10,11 @@ const shippingAddressSchema = z.object({
 
 const orderItemSchema = z.object({
   productId: z.string().optional().nullable(),
-  productName: z.string().optional().nullable(),
+  productName: z.string().max(255).optional().nullable(),
   productVariantId: z.string().optional().nullable(),
-  quantity: z.coerce.number(),
-  price: z.coerce.number(),
-  total: z.coerce.number(),
+  quantity: z.coerce.number().int().positive(),
+  price: z.coerce.number().nonnegative(),
+  total: z.coerce.number().nonnegative(),
 });
 
 export const shipmentInputSchema = z.object({
@@ -24,19 +24,19 @@ export const shipmentInputSchema = z.object({
 });
 
 export const manualOrderFormSchema = z.object({
-  customerName: z.string(),
-  customerEmail: z.string(),
-  shippingName: z.string().optional(),
+  customerName: z.string().min(1).max(255),
+  customerEmail: z.string().email().max(255),
+  shippingName: z.string().max(255).optional(),
   shippingAddress: shippingAddressSchema.optional().nullable(),
-  items: z.array(orderItemSchema),
-  subtotal: z.coerce.number(),
-  shipping: z.coerce.number(),
-  tax: z.coerce.number(),
-  total: z.coerce.number(),
-  notes: z.string().optional().nullable(),
+  items: z.array(orderItemSchema).min(1),
+  subtotal: z.coerce.number().nonnegative(),
+  shipping: z.coerce.number().nonnegative(),
+  tax: z.coerce.number().nonnegative(),
+  total: z.coerce.number().nonnegative(),
+  notes: z.string().max(2000).optional().nullable(),
   status: z.string(),
   paymentStatus: z.string(),
-  paymentMethod: z.string().optional(),
+  paymentMethod: z.string().max(100).optional(),
   fulfillmentStatus: z.string(),
   sendConfirmationEmail: z.boolean(),
 });
@@ -60,15 +60,15 @@ export const updatePaymentStatusSchema = z.object({
 
 export const refundOrderSchema = z.object({
   orderId: z.string(),
-  amount: z.number(),
-  reason: z.string().optional(),
+  amount: z.number().positive(),
+  reason: z.string().max(500).optional(),
   restockItems: z.boolean().default(false),
   sendEmail: z.boolean().default(true),
 });
 
 export const markAsRefundedSchema = z.object({
   orderId: z.string(),
-  reason: z.string().optional(),
+  reason: z.string().max(500).optional(),
   restockItems: z.boolean().default(false),
   sendEmail: z.boolean().default(true),
 });

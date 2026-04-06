@@ -6,6 +6,7 @@ import { api } from "~/trpc/server";
 import { BambooGenericPage } from "../_templates/bamboo/bamboo-generic-page";
 import { DarkTrendGenericPage } from "../_templates/dark-trend/dark-trend-generic-page";
 import { DefaultGenericPage } from "../_templates/default/default-generic-page";
+import { HappyBambooGenericPage } from "../_templates/happy-bamboo/happy-bamboo-generic-page";
 import { PollenGenericPage } from "../_templates/pollen/pollen-generic-page";
 
 type Props = {
@@ -28,6 +29,7 @@ export default async function PageView({ params }: Props) {
       "dark-trend": DarkTrendGenericPage,
       pollen: PollenGenericPage,
       bamboo: BambooGenericPage,
+      "happy-bamboo": HappyBambooGenericPage,
     }[business.templateId] ?? DefaultGenericPage;
 
   return <TemplateComponent business={business} page={page} />;

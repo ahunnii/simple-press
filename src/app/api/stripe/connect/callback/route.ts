@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { decodeOAuthState } from "~/lib/domain";
 import { stripeClient } from "~/lib/stripe/client";
+import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
 
 export async function GET(request: NextRequest) {
@@ -44,6 +45,24 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Verify the requesting user owns this business
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const membership = await db.businessMembership.findFirst({
+      where: {
+        userId: session.user.id,
+        businessId,
+        role: { in: ["OWNER", "MANAGER"] },
+      },
+    });
+
+    if (!membership) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
     // Verify business exists
     const business = await db.business.findUnique({
       where: { id: businessId },
@@ -87,7 +106,7 @@ export async function GET(request: NextRequest) {
     redirectUrl.searchParams.set("stripe_error", "connection_failed");
     redirectUrl.searchParams.set(
       "stripe_error_description",
-      error instanceof Error ? error.message : "Unknown error",
+      "connection_failed",
     );
 
     return NextResponse.redirect(redirectUrl);

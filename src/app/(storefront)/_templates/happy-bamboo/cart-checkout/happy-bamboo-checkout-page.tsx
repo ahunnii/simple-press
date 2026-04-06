@@ -70,7 +70,7 @@ export async function HappyBambooCheckoutPage({
                 Back to Cart
               </Link>
             </Button>
-            <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
+            <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl">
               Checkout
             </h1>
           </div>

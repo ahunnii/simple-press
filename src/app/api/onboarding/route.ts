@@ -2,11 +2,16 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { env } from "~/env";
+import { authLimiter, getClientIp } from "~/lib/rate-limit";
 import { isSubdomainReserved, slugify } from "~/lib/utils";
+import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    await authLimiter.consume(ip);
+
     const formData = (await req.json()) as {
       email: string;
       password: string;
@@ -34,6 +39,15 @@ export async function POST(req: NextRequest) {
       aboutText,
       primaryColor,
     } = formData;
+
+    // Verify the caller is authenticated and owns this email
+    const session = await auth.api.getSession({ headers: req.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (session.user.email !== email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Validation
     if (!email || !password || !name || !businessName || !subdomain) {
@@ -69,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     if (!existingUser) {
       return NextResponse.json(
-        { error: "An account with this email does not exist" },
+        { error: "Unable to complete store setup. Please try again." },
         { status: 400 },
       );
     }
@@ -158,6 +172,12 @@ export async function POST(req: NextRequest) {
       businessId: business.id,
     });
   } catch (error) {
+    if (error instanceof Error && error.constructor.name === "RateLimiterRes") {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 },
+      );
+    }
     console.error("Onboarding error:", error);
     return NextResponse.json(
       { error: "Failed to create your store. Please try again." },

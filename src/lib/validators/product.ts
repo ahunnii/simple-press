@@ -23,22 +23,22 @@ export const productImageSchema = z.object({
 
 export const variantSchema = z.object({
   id: z.string().optional(),
-  name: z.string(),
-  sku: z.string().optional(),
-  price: z.number(),
-  inventoryQty: z.number(),
+  name: z.string().max(255),
+  sku: z.string().max(100).optional(),
+  price: z.number().nonnegative(),
+  inventoryQty: z.number().int().nonnegative(),
   options: z.record(z.string(), z.string()),
 });
 
 export const productFormSchema = z.object({
-  name: z.string(),
-  slug: z.string(),
-  description: z.string().optional(),
-  price: z.number(),
+  name: z.string().min(1).max(255),
+  slug: z.string().max(255),
+  description: z.string().max(10000).optional(),
+  price: z.number().nonnegative(),
   published: z.boolean(),
   trackInventory: z.boolean(),
   allowBackorders: z.boolean(),
-  inventoryQty: z.number().optional(),
+  inventoryQty: z.number().int().nonnegative().optional(),
   variants: z.array(variantSchema).optional(),
   images: z.array(productImageSchema).optional(),
   additionalFields: additionalFieldsSchema,

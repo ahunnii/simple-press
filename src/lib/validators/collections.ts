@@ -7,7 +7,7 @@ export const collectionFormSchema = z.object({
   published: z.boolean(),
   metaTitle: z.string().optional().nullable(),
   metaDescription: z.string().optional().nullable(),
-  imageFile: z.instanceof(File).optional(),
+  imageFile: z.instanceof(File).optional().nullable(),
   productIds: z.array(z.string()),
 });
 

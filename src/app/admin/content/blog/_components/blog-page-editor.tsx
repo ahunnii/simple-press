@@ -62,7 +62,7 @@ const pageFormSchema = z.object({
   published: z.boolean(),
   metaTitle: z.string().optional().nullable(),
   metaDescription: z.string().optional().nullable(),
-  imageFile: z.instanceof(File).optional(),
+  imageFile: z.instanceof(File).optional().nullable(),
   image: z.string().url().optional().nullable(),
 });
 
@@ -146,7 +146,8 @@ export function BlogPostEditor({ page, galleriesEnabled }: BlogPostEditorProps) 
       published: data?.published ?? page?.published ?? false,
       metaTitle: data?.metaTitle ?? page?.metaTitle ?? "",
       metaDescription: data?.metaDescription ?? page?.metaDescription ?? "",
-      image: data?.image ?? page?.image ?? undefined,
+      image:
+        data !== undefined ? (data.image ?? null) : (page?.image ?? undefined),
       imageFile: undefined,
     });
     if (imageFileInputRef.current) imageFileInputRef.current.value = "";
@@ -203,10 +204,11 @@ export function BlogPostEditor({ page, galleriesEnabled }: BlogPostEditorProps) 
   });
 
   const onSubmit = async (data: PageFormValues) => {
-    let imageUrl: string | undefined = data?.image ?? undefined;
-
+    let imageUrl: string | null | undefined;
     const imageFile = data.imageFile;
-    if (imageFile instanceof File) {
+    if (imageFile === null) {
+      imageUrl = null;
+    } else if (imageFile instanceof File) {
       try {
         const response = await imageUploader.upload(imageFile);
         const fileLocation =
@@ -217,6 +219,8 @@ export function BlogPostEditor({ page, galleriesEnabled }: BlogPostEditorProps) 
         toast.error("Failed to upload image.");
         return;
       }
+    } else {
+      imageUrl = data.image ?? undefined;
     }
 
     const pageData = {

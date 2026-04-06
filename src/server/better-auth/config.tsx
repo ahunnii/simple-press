@@ -17,8 +17,37 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // Set to true in production
+    requireEmailVerification: true,
     autoSignIn: true,
+    sendVerificationEmail: async ({
+      user,
+      url,
+    }: {
+      user: { email: string; name: string };
+      url: string;
+    }) => {
+      void resend.emails.send({
+        from: EMAIL_FROM.NOREPLY,
+        to: user.email,
+        subject: "Verify your email",
+        react: EmailTemplate({
+          action: "Verify Email",
+          heading: "Verify your email address",
+          content: (
+            <>
+              <p>{`Hello ${user.name},`}</p>
+              <p>
+                Click the button below to verify your email and activate your
+                account.
+              </p>
+            </>
+          ),
+          siteName: "SimplePress",
+          baseUrl: env.BETTER_AUTH_BASE_URL,
+          url,
+        }),
+      });
+    },
     sendResetPassword: async ({ user, url }) => {
       void resend.emails.send({
         from: EMAIL_FROM.NOREPLY,
@@ -144,7 +173,42 @@ export const auth = betterAuth({
     },
   },
 
-  trustedOrigins: ["*"],
+  trustedOrigins: async () => {
+    const businesses = await db.business.findMany({
+      where: {
+        OR: [
+          // Active businesses with a valid custom domain
+          {
+            domainStatus: "ACTIVE",
+            customDomain: {
+              not: null,
+            },
+          },
+          // Inactive businesses with a valid subdomain
+          {
+            domainStatus: "PENDING_DNS",
+            subdomain: {
+              not: "",
+            },
+          },
+        ],
+      },
+      select: { customDomain: true, subdomain: true },
+    });
+
+    const domains = [
+      env.BETTER_AUTH_BASE_URL,
+      ...businesses.flatMap((b) => [
+        b.customDomain ? `https://${b.customDomain}` : null,
+        `https://${b.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
+        // Allow HTTP for local dev subdomains
+        process.env.NODE_ENV === "development"
+          ? `http://${b.subdomain}.localhost:3000`
+          : null,
+      ]),
+    ].filter((o): o is string => o !== null);
+    return domains;
+  },
 
   session: {
     additionalFields: {

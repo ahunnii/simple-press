@@ -1,11 +1,15 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { getClientIp, subdomainLimiter } from "~/lib/rate-limit";
 import { isSubdomainReserved } from "~/lib/utils";
 import { db } from "~/server/db";
 
 export async function GET(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    await subdomainLimiter.consume(ip);
+
     const { searchParams } = new URL(req.url);
     const subdomain = searchParams.get("subdomain");
 
@@ -29,6 +33,12 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ available: !existing });
   } catch (error) {
+    if (error instanceof Error && error.constructor.name === "RateLimiterRes") {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 },
+      );
+    }
     console.error("Error checking subdomain:", error);
     return NextResponse.json(
       { error: "Something went wrong" },

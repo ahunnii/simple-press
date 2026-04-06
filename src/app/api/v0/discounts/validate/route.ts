@@ -1,10 +1,14 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { discountLimiter, getClientIp } from "~/lib/rate-limit";
 import { db } from "~/server/db";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    await discountLimiter.consume(ip);
+
     const { code, businessId, cartTotal } = (await req.json()) as {
       code: string;
       businessId: string;
@@ -110,6 +114,12 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: unknown) {
+    if (error instanceof Error && error.constructor.name === "RateLimiterRes") {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later.", valid: false },
+        { status: 429 },
+      );
+    }
     console.error("Validate discount error:", error);
     return NextResponse.json(
       { error: "Failed to validate discount code", valid: false },

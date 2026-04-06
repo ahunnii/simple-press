@@ -2,9 +2,13 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { env } from "~/env";
+import { getClientIp, inviteLimiter } from "~/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    await inviteLimiter.consume(ip);
+
     const { invitationCode } = (await req.json()) as {
       invitationCode: string;
     };
@@ -29,6 +33,12 @@ export async function POST(req: NextRequest) {
     // Code is valid
     return NextResponse.json({ valid: true });
   } catch (error) {
+    if (error instanceof Error && error.constructor.name === "RateLimiterRes") {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 },
+      );
+    }
     console.error(error);
     return NextResponse.json(
       { error: "Something went wrong" },

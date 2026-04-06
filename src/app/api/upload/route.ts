@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import path from "path";
 import type { Router } from "@better-upload/server";
 import { RejectUpload, route } from "@better-upload/server";
 import { toRouteHandler } from "@better-upload/server/adapters/next";
@@ -8,6 +9,34 @@ import { checkBusiness } from "~/lib/check-business";
 import { s3Client } from "~/lib/s3/client";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
+
+const ALLOWED_IMAGE_EXTS = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
+  ".svg",
+  ".avif",
+]);
+
+const ALLOWED_VIDEO_EXTS = new Set([".mp4", ".webm", ".mov", ".avi"]);
+
+function safeImageExt(filename: string): string {
+  const ext = path.extname(filename).toLowerCase();
+  if (!ALLOWED_IMAGE_EXTS.has(ext)) throw new RejectUpload("Invalid file type");
+  return ext;
+}
+
+function safeVideoExt(filename: string): string {
+  const ext = path.extname(filename).toLowerCase();
+  if (!ALLOWED_VIDEO_EXTS.has(ext)) throw new RejectUpload("Invalid file type");
+  return ext;
+}
+
+function uniqueKey(businessId: string, prefix: string, ext: string): string {
+  return `${businessId}/${prefix}-${crypto.randomBytes(8).toString("hex")}${ext}`;
+}
 
 const router: Router = {
   client: s3Client,
@@ -26,11 +55,13 @@ const router: Router = {
           throw new RejectUpload("Business not found!");
         }
 
+        const ext = safeImageExt(file.name);
+        const key = uniqueKey(business.id, "image", ext);
         return {
           objectInfo: {
-            key: `${business.id}/${file.name}`,
+            key,
             metadata: {
-              pathname: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${business.id}/${file.name}`,
+              pathname: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${key}`,
             },
           },
         };
@@ -59,11 +90,13 @@ const router: Router = {
           throw new RejectUpload("Business not found!");
         }
 
+        const ext = safeVideoExt(file.name);
+        const key = uniqueKey(business.id, "video", ext);
         return {
           objectInfo: {
-            key: `${business.id}/${file.name}`,
+            key,
             metadata: {
-              pathname: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${business.id}/${file.name}`,
+              pathname: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${key}`,
             },
           },
         };
@@ -89,11 +122,13 @@ const router: Router = {
           throw new RejectUpload("Business not found!");
         }
 
+        const ext = safeImageExt(file.name);
+        const key = `${business.id}/logo${ext}`;
         return {
           objectInfo: {
-            key: `${business.id}/logo.${file.name.split(".")[1]}`,
+            key,
             metadata: {
-              pathName: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${business.id}/logo.${file.name.split(".")[1]}`,
+              pathName: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${key}`,
             },
           },
         };
@@ -119,11 +154,13 @@ const router: Router = {
         if (!business) {
           throw new RejectUpload("Business not found!");
         }
+        const ext = safeImageExt(file.name);
+        const key = `${business.id}/favicon${ext}`;
         return {
           objectInfo: {
-            key: `${business.id}/favicon.${file.name.split(".")[1]}`,
+            key,
             metadata: {
-              pathName: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${business.id}/favicon.${file.name.split(".")[1]}`,
+              pathName: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${key}`,
             },
           },
         };
@@ -157,12 +194,12 @@ const router: Router = {
 
         return {
           generateObjectInfo: ({ file }) => {
-            const key = `${business.id}/${file.name}`;
-
+            const ext = safeImageExt(file.name);
+            const key = uniqueKey(business.id, "image", ext);
             return {
               key,
               metadata: {
-                pathName: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${business.id}/${file.name}`,
+                pathName: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${key}`,
               },
             };
           },

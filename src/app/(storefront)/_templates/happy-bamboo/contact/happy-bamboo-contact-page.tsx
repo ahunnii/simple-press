@@ -83,7 +83,7 @@ export function HappyBambooContactPage({
                 <MessageSquare className="mr-1 h-3 w-3" />
                 Get in Touch
               </Badge>
-              <h1 className="font-heading mb-4 text-4xl font-bold md:text-5xl">
+              <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
                 {f["happy-bamboo.contact.header"]}
               </h1>
               <p className="text-muted-foreground text-lg">
@@ -151,7 +151,7 @@ export function HappyBambooContactPage({
       <section className="bg-muted/50 py-12 md:py-20">
         <div className="container mx-auto px-4">
           <FadeIn className="mb-12 text-center">
-            <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+            <h2 className="mb-4 font-serif text-3xl font-bold md:text-4xl">
               {f["happy-bamboo.contact-faq-title"]}
             </h2>
             {f["happy-bamboo.contact-faq-subtitle"] && (

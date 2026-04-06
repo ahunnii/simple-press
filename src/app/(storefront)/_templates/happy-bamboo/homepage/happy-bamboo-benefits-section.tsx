@@ -36,7 +36,9 @@ export function HappyBambooBenefitsSection({
           <span className="text-primary text-sm font-semibold tracking-wider uppercase">
             Happy Bamboo
           </span>
-          <h2 className="mt-2 text-4xl font-bold md:text-5xl">{heading}</h2>
+          <h2 className="mt-2 font-serif text-4xl font-bold md:text-5xl">
+            {heading}
+          </h2>
           {intro && (
             <p className="text-muted-foreground mx-auto mt-4 max-w-2xl">
               {intro}

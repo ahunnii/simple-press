@@ -314,7 +314,7 @@ export function HappyBambooProductPage({
                   <>
                     {/* Quantity Selector */}
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                      <div className="border-border flex items-center gap-1 rounded-lg border">
+                      <div className="border-border flex items-center justify-between gap-1 rounded-lg border">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -341,7 +341,8 @@ export function HappyBambooProductPage({
                       <Button
                         size="lg"
                         onClick={addToCart}
-                        className="flex-1 gap-2 sm:flex-none"
+                        className="flex"
+                        // className="flex-1 gap-2 sm:flex-none"
                       >
                         {isAdded ? (
                           <>
@@ -351,7 +352,7 @@ export function HappyBambooProductPage({
                         ) : (
                           <>
                             <ShoppingBag className="size-5" />
-                            Add to Cart -- {formatPrice(displayPrice)}
+                            Add to Cart - {formatPrice(displayPrice)}
                           </>
                         )}
                       </Button>

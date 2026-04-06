@@ -7,7 +7,6 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, Leaf, Search, Tag } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
-import { resolveFields } from "../index";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
 import { formatDate } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
@@ -24,6 +23,8 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
+
+import { resolveFields } from "../index";
 
 // const featuredPost = {
 //   slug: "5-reasons-bamboo-toilet-paper-is-better",
@@ -114,7 +115,7 @@ export function HappyBambooBlogPage({ pages, customFields }: Props) {
               <Leaf className="mr-1 h-3 w-3" />
               Stories & Insights
             </Badge>
-            <h1 className="mb-4 text-4xl font-bold md:text-5xl">
+            <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
               {pageTitle}
             </h1>
             {pageIntro && (

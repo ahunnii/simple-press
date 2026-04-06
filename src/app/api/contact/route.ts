@@ -87,8 +87,7 @@ export async function POST(req: NextRequest) {
     console.error("[Contact] Error:", error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Failed to send message",
+        error: "Failed to send message. Please try again.",
       },
       { status: 500 },
     );

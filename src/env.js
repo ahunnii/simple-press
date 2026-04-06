@@ -36,6 +36,7 @@ export const env = createEnv({
 
     SIMPLEPRESS_HASH_SECRET: z.string(),
     ARTISANAL_FUTURES_API_URL: z.string().url(),
+    REDIS_URL: z.string().url().optional(),
   },
 
   /**
@@ -100,6 +101,7 @@ export const env = createEnv({
 
     SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,
     ARTISANAL_FUTURES_API_URL: process.env.ARTISANAL_FUTURES_API_URL,
+    REDIS_URL: process.env.REDIS_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

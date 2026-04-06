@@ -53,7 +53,9 @@ export async function HappyBambooFooter({
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
               <Leaf className="text-muted h-8 w-8" />
-              <span className="text-muted text-xl font-bold">{name}</span>
+              <span className="text-muted font-serif text-xl font-bold">
+                {name}
+              </span>
             </Link>
             {!!footerTagline && (
               <p className="text-muted text-sm leading-relaxed">

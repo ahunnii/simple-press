@@ -42,7 +42,9 @@ export function HappyBambooTestimonialsSection({
           <span className="text-primary text-sm font-semibold tracking-wider uppercase">
             Testimonial
           </span>
-          <h2 className="mt-2 text-4xl font-bold md:text-5xl">{heading}</h2>
+          <h2 className="mt-2 font-serif text-4xl font-bold md:text-5xl">
+            {heading}
+          </h2>
         </FadeIn>
 
         <StaggerContainer

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowRight, Leaf, Sparkles } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
-import { resolveFields } from "../index";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -14,6 +13,8 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
+
+import { resolveFields } from "../index";
 
 type Props = DefaultCollectionsPageTemplateProps & {
   customFields?: Record<string, string>;
@@ -48,7 +49,7 @@ export function HappyBambooCollectionsPage({
               <Leaf className="mr-1 h-3 w-3" />
               Shop by Collection
             </Badge>
-            <h1 className="mb-4 text-4xl font-bold md:text-5xl">
+            <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
               {listingHeading}
             </h1>
             {listingIntro && (

@@ -101,7 +101,7 @@ export function HappyBambooAboutPage({
                 <Leaf className="mr-1 h-3 w-3" />
                 About Us
               </Badge>
-              <h1 className="mb-6 text-4xl leading-tight font-bold md:text-5xl lg:text-6xl">
+              <h1 className="mb-6 font-serif text-4xl leading-tight font-bold md:text-5xl">
                 {f["happy-bamboo.about-hero-heading"]}
               </h1>
 
@@ -187,7 +187,7 @@ export function HappyBambooAboutPage({
               <Heart className="mr-1 h-3 w-3" />
               What We Offer
             </Badge>
-            <h2 className="text-3xl font-bold md:text-4xl">
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">
               {f["happy-bamboo.about-services-heading"]}
             </h2>
             <p className="text-muted-foreground mx-auto mt-4 max-w-2xl">
@@ -227,7 +227,7 @@ export function HappyBambooAboutPage({
                   <Leaf className="mr-1 h-3 w-3" />
                   The Smart Choice
                 </Badge>
-                <h2 className="text-3xl font-bold md:text-4xl">
+                <h2 className="font-serif text-3xl font-bold md:text-4xl">
                   {f["happy-bamboo.about-bamboo-heading"]}
                 </h2>
                 <p className="text-muted-foreground mt-4 text-lg">
@@ -323,7 +323,7 @@ export function HappyBambooAboutPage({
               <Heart className="mr-1 h-3 w-3" />
               Stay Connected
             </Badge>
-            <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+            <h2 className="mb-4 font-serif text-3xl font-bold md:text-4xl">
               {f["happy-bamboo.about-connect-with-us-heading"]}
             </h2>
             <p className="text-muted-foreground mx-auto max-w-2xl leading-relaxed">

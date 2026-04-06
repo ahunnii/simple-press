@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
-import { resolveFields } from "../index";
 import { Badge } from "~/components/ui/badge";
 import {
   FadeIn,
@@ -10,6 +9,7 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
+import { resolveFields } from "../index";
 import { HappyBambooHorizontalProductCard } from "./happy-bamboo-product-card";
 
 export const metadata: Metadata = {
@@ -38,7 +38,9 @@ export function HappyBambooShopPage({
       <section className="mx-auto max-w-7xl py-16 md:py-24">
         <FadeIn className="mx-auto max-w-3xl text-center">
           <Badge className="mb-4">Eco-Friendly Products</Badge>
-          <h1 className="mb-4 text-4xl font-bold md:text-5xl">{shopHeading}</h1>
+          <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
+            {shopHeading}
+          </h1>
           {shopIntro && (
             <p className="text-muted-foreground text-lg">{shopIntro}</p>
           )}

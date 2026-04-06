@@ -189,7 +189,7 @@ export function ModernCheckoutForm({ business }: Props) {
       }
 
       if (data.sessionId) {
-        document.cookie = `pending_session=${data.sessionId}; path=/; SameSite=Lax; max-age=3600`;
+        document.cookie = `pending_session=${data.sessionId}; path=/; SameSite=Strict; Secure; max-age=3600`;
       }
       window.location.href = sessionUrl;
     } catch (err: unknown) {

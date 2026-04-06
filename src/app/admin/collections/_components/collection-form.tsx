@@ -179,10 +179,11 @@ export function CollectionForm({ collection, allProducts }: Props) {
   });
 
   const onSubmit = async (data: CollectionFormData) => {
-    let imageUrl: string | undefined = data?.imageUrl ?? undefined;
-
+    let imageUrl: string | null | undefined;
     const imageFile = data.imageFile;
-    if (imageFile instanceof File) {
+    if (imageFile === null) {
+      imageUrl = null;
+    } else if (imageFile instanceof File) {
       try {
         const response = await imageUploader.upload(imageFile);
         const fileLocation =
@@ -193,6 +194,8 @@ export function CollectionForm({ collection, allProducts }: Props) {
         toast.error("Failed to upload image.");
         return;
       }
+    } else {
+      imageUrl = data.imageUrl ?? undefined;
     }
 
     if (collection?.id) {

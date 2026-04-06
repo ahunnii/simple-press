@@ -84,7 +84,7 @@ export function HappyBambooBlogPostPage({
               </Link>
             </FadeIn>
             <FadeIn delay={0.1}>
-              <h1 className="mb-6 text-3xl leading-tight font-bold md:text-4xl lg:text-5xl">
+              <h1 className="mb-6 font-serif text-3xl leading-tight font-bold md:text-4xl lg:text-5xl">
                 {page.title}
               </h1>
             </FadeIn>
@@ -101,21 +101,23 @@ export function HappyBambooBlogPostPage({
       </section>
 
       {/* Featured Image */}
-      <section className="pb-16">
-        <div className="container mx-auto px-4">
-          <FadeIn delay={0.2} className="mx-auto max-w-4xl">
-            <div className="relative aspect-16/7 overflow-hidden rounded-2xl shadow-lg">
-              <Image
-                src={page.image ?? "/placeholder.svg"}
-                alt={page.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-          </FadeIn>
-        </div>
-      </section>
+      {page.image && (
+        <section className="pb-16">
+          <div className="container mx-auto px-4">
+            <FadeIn delay={0.2} className="mx-auto max-w-4xl">
+              <div className="relative aspect-16/7 overflow-hidden rounded-2xl shadow-lg">
+                <Image
+                  src={page.image ?? "/placeholder.svg"}
+                  alt={page.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </FadeIn>
+          </div>
+        </section>
+      )}
 
       {/* Article Body + Sidebar */}
       <section>

@@ -121,6 +121,7 @@ export async function POST(req: NextRequest) {
             where: { id: { in: variantIds } },
             select: {
               id: true,
+              price: true,
               inventoryQty: true,
               name: true,
               productId: true,
@@ -130,6 +131,7 @@ export async function POST(req: NextRequest) {
                   published: true,
                   trackInventory: true,
                   allowBackorders: true,
+                  price: true,
                 },
               },
             },
@@ -143,6 +145,7 @@ export async function POST(req: NextRequest) {
         select: {
           id: true,
           name: true,
+          price: true,
           published: true,
           trackInventory: true,
           allowBackorders: true,
@@ -320,25 +323,35 @@ export async function POST(req: NextRequest) {
     // Initialize Stripe with platform account
 
     // Create line items for Stripe (metadata so webhook can store product/variant and deduct inventory)
-    // TODO: Fix so that the price is looked up serverside and not client side (variant?.price ?? product.price for unit amount)
-    const lineItems = itemList.map((item) => ({
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: item.productName,
-          description: item.variantName ?? undefined,
-          images: item.imageUrl ? [item.imageUrl] : undefined,
-          metadata: {
-            productId: String(item.productId ?? ""),
-            productVariantId: String(item.variantId ?? ""),
-            variantName: String(item.variantName ?? ""),
-            sku: String(item.sku ?? ""),
+    const lineItems = itemList.map((item) => {
+      // Always use server-fetched prices — never trust client-supplied amounts
+      const serverPrice = item.variantId
+        ? variantMap.get(item.variantId)?.price
+        : productMap.get(item.productId)?.price;
+
+      if (serverPrice == null) {
+        throw new Error(`Price not found for item ${item.productId}`);
+      }
+
+      return {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: item.productName,
+            description: item.variantName ?? undefined,
+            images: item.imageUrl ? [item.imageUrl] : undefined,
+            metadata: {
+              productId: String(item.productId ?? ""),
+              productVariantId: String(item.variantId ?? ""),
+              variantName: String(item.variantName ?? ""),
+              sku: String(item.sku ?? ""),
+            },
           },
+          unit_amount: serverPrice,
         },
-        unit_amount: item.price,
-      },
-      quantity: item.quantity,
-    }));
+        quantity: item.quantity,
+      };
+    });
 
     // Determine success/cancel URLs
     const isDev = process.env.NODE_ENV === "development";
@@ -479,10 +492,7 @@ export async function POST(req: NextRequest) {
     console.error("Create checkout session error:", error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to create checkout session",
+        error: "Failed to create checkout session. Please try again.",
       },
       { status: 500 },
     );

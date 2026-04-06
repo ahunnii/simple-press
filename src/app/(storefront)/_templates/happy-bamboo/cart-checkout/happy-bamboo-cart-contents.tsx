@@ -62,7 +62,7 @@ export function HappyBambooCartContents({ business }: Props) {
     <PageTransition>
       <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
         <FadeIn direction="up">
-          <h1 className="text-foreground font-heading mb-8 text-3xl font-bold tracking-tight md:text-4xl">
+          <h1 className="text-foreground mb-8 font-serif text-3xl font-bold tracking-tight md:text-4xl">
             Your Cart
           </h1>
         </FadeIn>

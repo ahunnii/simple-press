@@ -53,7 +53,8 @@ export async function GET(req: NextRequest) {
     response.cookies.set("pending_session", "", {
       path: "/",
       maxAge: 0,
-      sameSite: "lax",
+      sameSite: "strict",
+      secure: true,
     });
 
     return response;

@@ -86,7 +86,23 @@ export function DiscountForm({ initialDiscount }: Props) {
   });
 
   const handleReset = (data?: DiscountFormSchema) => {
-    form.reset(data ?? defaultValues);
+    form.reset(
+      !!data
+        ? {
+            ...data,
+            value:
+              data.type === "fixed"
+                ? (data.value ?? 0) / 100
+                : (data?.value ?? 0),
+            minPurchase: data?.minPurchase
+              ? data?.minPurchase / 100
+              : undefined,
+            maxDiscount: data?.maxDiscount
+              ? data?.maxDiscount / 100
+              : undefined,
+          }
+        : defaultValues,
+    );
   };
 
   const createDiscountMutation = api.discount.create.useMutation({
