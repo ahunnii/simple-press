@@ -346,7 +346,7 @@ const contactPageQuestionsData: TemplateField[] = [
   },
 ];
 
-const homepageData: TemplateField[] = [
+const homepageHeroData: TemplateField[] = [
   {
     key: "modern.homepage.hero-image",
     label: "Hero Image",
@@ -365,7 +365,8 @@ const homepageData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
-    defaultValue: "Designed for modern living",
+    defaultValue: "Designed with modern in mind",
+    placeholder: "Designed with modern in mind",
   },
   {
     key: "modern.homepage.hero-subtitle",
@@ -376,7 +377,9 @@ const homepageData: TemplateField[] = [
     group: "homepage.hero",
     gridColumn: "col-span-full",
     defaultValue:
-      "Thoughtfully crafted home goods that blend beauty with everyday function.",
+      "Thoughtfully crafted goods that blend beauty with everyday function.",
+    placeholder:
+      "Thoughtfully crafted goods that blend beauty with everyday function.",
   },
   {
     key: "modern.homepage.hero-cta-button-text",
@@ -386,7 +389,8 @@ const homepageData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
-    defaultValue: "Shop Collection",
+    defaultValue: "Shop All",
+    placeholder: "Shop All",
   },
   {
     key: "modern.homepage.hero-cta-button-link",
@@ -397,70 +401,51 @@ const homepageData: TemplateField[] = [
     group: "homepage.hero",
     gridColumn: "col-span-1",
     defaultValue: "/shop",
+    placeholder: "/shop",
   },
+];
+
+const homepageValuesData: TemplateField[] = [
   {
-    key: "modern.homepage.features-title-1",
-    label: "Features Title 1",
-    description: "Title for the features section",
+    key: "modern.homepage.values-list",
+    label: "Values Cards",
+    description:
+      "Cards for the Values section (title, and description per item).",
+    type: "list",
+    page: "homepage",
+    group: "homepage.values",
+    gridColumn: "col-span-full",
+    itemSchema: [
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        description: "Card heading",
+      },
+      {
+        key: "description",
+        label: "Description",
+        type: "textarea",
+        description: "Supporting text",
+      },
+    ],
+    minItems: 0,
+    maxItems: 4,
+  },
+];
+const homepageProductsData: TemplateField[] = [
+  {
+    key: "modern.homepage.products-tagline",
+    label: "Products Tagline",
+    description: "Tagline for the products section",
     type: "text",
     page: "homepage",
-    group: "homepage.features",
+    group: "homepage.products",
     gridColumn: "col-span-1",
-    defaultValue: "What sets your business apart?",
+    placeholder: "Curated Selection",
+    defaultValue: "Curated Selection",
   },
-  {
-    key: "modern.homepage.features-description-1",
-    label: "Features Description",
-    description: "Description for the features section",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.features",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "We are a family-owned business that has been in operation for over 20 years.",
-  },
-  {
-    key: "modern.homepage.features-title-2",
-    label: "Features Title 2",
-    description: "Title for the features section",
-    type: "text",
-    page: "homepage",
-    group: "homepage.features",
-    gridColumn: "col-span-1",
-    defaultValue: "What sets your business apart?",
-  },
-  {
-    key: "modern.homepage.features-description-2",
-    label: "Features Description 2",
-    description: "Description for the features section",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.features",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "We are a family-owned business that has been in operation for over 20 years.",
-  },
-  {
-    key: "modern.homepage.features-title-3",
-    label: "Features Title 3",
-    description: "Title for the features section",
-    type: "text",
-    page: "homepage",
-    group: "homepage.features",
-    gridColumn: "col-span-1",
-    defaultValue: "What sets your business apart?",
-  },
-  {
-    key: "modern.homepage.features-description-3",
-    label: "Features Description 3",
-    description: "Description for the features section",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.features",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "We are a family-owned business that has been in operation for over 20 years.",
-  },
+
   {
     key: "modern.homepage.products-title",
     label: "Products Title",
@@ -469,18 +454,11 @@ const homepageData: TemplateField[] = [
     page: "homepage",
     group: "homepage.products",
     defaultValue: "Featured Products",
+    placeholder: "Featured Products",
     gridColumn: "col-span-1",
   },
-  {
-    key: "modern.homepage.products-subtitle",
-    label: "Products Subtitle",
-    description: "Subtitle for the products section",
-    type: "text",
-    page: "homepage",
-    group: "homepage.products",
-    defaultValue: "Curated Selection",
-    gridColumn: "col-span-1",
-  },
+];
+const homepageAboutData: TemplateField[] = [
   {
     key: "modern.homepage.about-title",
     label: "About Title",
@@ -490,6 +468,7 @@ const homepageData: TemplateField[] = [
     group: "homepage.about",
     gridColumn: "col-span-1",
     defaultValue: "About Us",
+    placeholder: "About Us",
   },
   {
     key: "modern.homepage.about-subtitle",
@@ -500,6 +479,7 @@ const homepageData: TemplateField[] = [
     group: "homepage.about",
     gridColumn: "col-span-1",
     defaultValue: "Our Story",
+    placeholder: "Our Story",
   },
   {
     key: "modern.homepage.about-text",
@@ -508,6 +488,9 @@ const homepageData: TemplateField[] = [
     type: "textarea",
     page: "homepage",
     group: "homepage.about",
+    placeholder: "We work directly with artisans from around the world...",
+    defaultValue:
+      "We work directly with artisans from around the world to bring you pieces that tell a story. Every item in our collection is chosen for its quality, beauty, and the hands that made it.",
   },
   {
     key: "modern.homepage.about-image",
@@ -516,6 +499,7 @@ const homepageData: TemplateField[] = [
     type: "image",
     page: "homepage",
     group: "homepage.about",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "modern.homepage.about-cta-button-text",
@@ -526,6 +510,7 @@ const homepageData: TemplateField[] = [
     group: "homepage.about",
     gridColumn: "col-span-1",
     defaultValue: "Learn More",
+    placeholder: "Learn More",
   },
   {
     key: "modern.homepage.about-cta-button-link",
@@ -534,6 +519,8 @@ const homepageData: TemplateField[] = [
     type: "url",
     page: "homepage",
     group: "homepage.about",
+    defaultValue: "/about",
+    placeholder: "/about",
   },
 ];
 
@@ -665,10 +652,35 @@ export const modernData = {
     ...aboutPageData,
     ...contactPageData,
     ...contactPageQuestionsData,
-    ...homepageData,
+    ...homepageHeroData,
+    ...homepageValuesData,
+    ...homepageProductsData,
+    ...homepageAboutData,
   ],
 };
 
 export const modernFieldGroups = {
   modern: fieldGroups,
 };
+
+const _modernFieldMap = new Map(
+  modernData.modern.map((field) => [field.key, field]),
+);
+
+export function resolveFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
+  const raw =
+    customFields != null &&
+    typeof customFields === "object" &&
+    !Array.isArray(customFields)
+      ? (customFields as Record<string, string>)
+      : {};
+  const out: Record<string, string> = {};
+  for (const key of keys) {
+    const custom = raw[key]?.trim();
+    out[key] = custom ?? _modernFieldMap.get(key)?.defaultValue ?? "";
+  }
+  return out;
+}

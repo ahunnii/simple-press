@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import {
+  sendOrderCancelled,
   sendOrderConfirmation,
   sendOrderFulfilled,
   sendOrderRefunded,
@@ -14,6 +15,7 @@ import { stripeClient } from "~/lib/stripe/client";
 import {
   addShipmentSchema,
   manualOrderFormSchema,
+  markAsRefundedSchema,
   markAsFulfilledSchema,
   orderFiltersSchema,
   refundOrderSchema,
@@ -488,8 +490,8 @@ export const orderRouter = createTRPCRouter({
         },
       });
 
-      // Restore inventory for refunded items
-      if (isFullRefund) {
+      // Restore inventory only when explicitly requested
+      if (input.restockItems) {
         try {
           await ctx.db.$transaction(async (tx) => {
             for (const item of updatedOrder.items) {
@@ -524,7 +526,7 @@ export const orderRouter = createTRPCRouter({
                     newQty,
                     changeQty: item.quantity,
                     reason: "return",
-                    note: `Refund Order #${updatedOrder.id.slice(0, 8)}`,
+                    note: `Refund Order #${updatedOrder.orderNumber}`,
                     orderId: updatedOrder.id,
                   },
                 });
@@ -534,6 +536,7 @@ export const orderRouter = createTRPCRouter({
                   select: {
                     id: true,
                     inventoryQty: true,
+                    businessId: true,
                     trackInventory: true,
                   },
                 });
@@ -546,6 +549,20 @@ export const orderRouter = createTRPCRouter({
                   where: { id: item.productId },
                   data: { inventoryQty: newQty },
                 });
+
+                await tx.inventoryHistory.create({
+                  data: {
+                    productId: item.productId,
+                    businessId: product.businessId,
+                    previousQty: product.inventoryQty,
+                    newQty,
+                    changeQty: item.quantity,
+                    reason: "return",
+                    note: `Refund Order #${updatedOrder.orderNumber}`,
+                    orderId: updatedOrder.id,
+                    variantId: null,
+                  },
+                });
               }
             }
           });
@@ -554,31 +571,33 @@ export const orderRouter = createTRPCRouter({
         }
       }
 
-      try {
-        await sendOrderRefunded({
-          to: order.customerEmail,
-          orderNumber: order.orderNumber,
-          customerName: order.customerName ?? "Guest",
-          refundAmountCents: input.amount,
-          orderTotalCents: order.total,
-          isFullRefund,
-          reason: reasonLabel,
-          business: {
-            name: order.business.name,
-            ownerEmail: order.business.ownerEmail,
-            siteContent: order.business.siteContent,
-            subdomain: order.business.subdomain,
-            customDomain: order.business.customDomain,
-          },
-        });
-        console.log(
-          `[Orders] Refund confirmation email sent for order #${order.orderNumber}`,
-        );
-      } catch (emailError) {
-        console.error(
-          "[Orders] Failed to send refund confirmation email:",
-          emailError,
-        );
+      if (input.sendEmail) {
+        try {
+          await sendOrderRefunded({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            refundAmountCents: input.amount,
+            orderTotalCents: order.total,
+            isFullRefund,
+            reason: reasonLabel,
+            business: {
+              name: order.business.name,
+              ownerEmail: order.business.ownerEmail,
+              siteContent: order.business.siteContent,
+              subdomain: order.business.subdomain,
+              customDomain: order.business.customDomain,
+            },
+          });
+          console.log(
+            `[Orders] Refund confirmation email sent for order #${order.orderNumber}`,
+          );
+        } catch (emailError) {
+          console.error(
+            "[Orders] Failed to send refund confirmation email:",
+            emailError,
+          );
+        }
       }
 
       return {
@@ -598,8 +617,22 @@ export const orderRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
+      const isCancelling = input.status === "cancelled";
+
       const order = await ctx.db.order.findFirst({
         where: { id: input.orderId, businessId },
+        include: {
+          items: true,
+          business: {
+            select: {
+              name: true,
+              ownerEmail: true,
+              subdomain: true,
+              customDomain: true,
+              siteContent: { select: { logoUrl: true } },
+            },
+          },
+        },
       });
 
       if (!order) {
@@ -638,6 +671,113 @@ export const orderRouter = createTRPCRouter({
             "[Order Status] Failed to update customer metrics:",
             error,
           );
+        }
+      }
+
+      // Handle cancellation side-effects
+      if (isCancelling) {
+        const hadInventoryDeducted =
+          order.status === "paid" || order.status === "fulfilled";
+
+        if (input.restockItems && hadInventoryDeducted) {
+          try {
+            await ctx.db.$transaction(async (tx) => {
+              for (const item of order.items) {
+                if (item.productVariantId) {
+                  const variant = await tx.productVariant.findUnique({
+                    where: { id: item.productVariantId },
+                    select: {
+                      id: true,
+                      inventoryQty: true,
+                      productId: true,
+                      product: { select: { businessId: true } },
+                    },
+                  });
+                  if (!variant) continue;
+                  const newQty = variant.inventoryQty + item.quantity;
+                  await tx.productVariant.update({
+                    where: { id: item.productVariantId },
+                    data: { inventoryQty: newQty },
+                  });
+                  await tx.inventoryHistory.create({
+                    data: {
+                      variantId: item.productVariantId,
+                      productId: variant.productId,
+                      businessId: variant.product.businessId,
+                      previousQty: variant.inventoryQty,
+                      newQty,
+                      changeQty: item.quantity,
+                      reason: "return",
+                      note: `Cancelled Order #${order.orderNumber}`,
+                      orderId: order.id,
+                    },
+                  });
+                } else if (item.productId) {
+                  const product = await tx.product.findUnique({
+                    where: { id: item.productId },
+                    select: {
+                      id: true,
+                      inventoryQty: true,
+                      businessId: true,
+                      trackInventory: true,
+                    },
+                  });
+                  if (!product?.trackInventory) continue;
+                  const newQty = product.inventoryQty + item.quantity;
+                  await tx.product.update({
+                    where: { id: item.productId },
+                    data: { inventoryQty: newQty },
+                  });
+                  await tx.inventoryHistory.create({
+                    data: {
+                      productId: item.productId,
+                      businessId: product.businessId,
+                      previousQty: product.inventoryQty,
+                      newQty,
+                      changeQty: item.quantity,
+                      reason: "return",
+                      note: `Cancelled Order #${order.orderNumber}`,
+                      orderId: order.id,
+                      variantId: null,
+                    },
+                  });
+                }
+              }
+            });
+            console.log(
+              `[Order Status] Inventory restocked for cancelled order #${order.orderNumber}`,
+            );
+          } catch (invError) {
+            console.error(
+              "[Order Status] Failed to restock inventory on cancellation:",
+              invError,
+            );
+          }
+        }
+
+        if (input.sendEmail) {
+          try {
+            await sendOrderCancelled({
+              to: order.customerEmail,
+              orderNumber: order.orderNumber,
+              customerName: order.customerName ?? "Guest",
+              business: {
+                name: order.business.name,
+                ownerEmail: order.business.ownerEmail,
+                siteContent: order.business.siteContent,
+                subdomain: order.business.subdomain,
+                customDomain: order.business.customDomain,
+              },
+            });
+            console.log(
+              `[Order Status] Cancellation email sent for order #${order.orderNumber}`,
+            );
+          } catch (emailError) {
+            console.error(
+              "[Order Status] Failed to send cancellation email:",
+              emailError,
+            );
+          }
         }
       }
 
@@ -874,18 +1014,14 @@ export const orderRouter = createTRPCRouter({
 
   markAsRefunded: ownerAdminProcedure
     .use(featureGate("orders"))
-    .input(
-      z.object({
-        orderId: z.string(),
-        reason: z.string().optional(),
-      }),
-    )
+    .input(markAsRefundedSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
       const order = await ctx.db.order.findFirst({
         where: { id: input.orderId, businessId },
         include: {
+          items: true,
           business: {
             select: {
               name: true,
@@ -922,31 +1058,103 @@ export const orderRouter = createTRPCRouter({
         },
       });
 
-      try {
-        await sendOrderRefunded({
-          to: order.customerEmail,
-          orderNumber: order.orderNumber,
-          customerName: order.customerName ?? "Guest",
-          refundAmountCents: order.total,
-          orderTotalCents: order.total,
-          isFullRefund: true,
-          reason: reasonLabel,
-          business: {
-            name: order.business.name,
-            ownerEmail: order.business.ownerEmail,
-            siteContent: order.business.siteContent,
-            subdomain: order.business.subdomain,
-            customDomain: order.business.customDomain,
-          },
-        });
-        console.log(
-          `[Orders] Manual refund email sent for order #${order.orderNumber}`,
-        );
-      } catch (emailError) {
-        console.error(
-          "[Orders] Failed to send manual refund email:",
-          emailError,
-        );
+      if (input.restockItems) {
+        try {
+          await ctx.db.$transaction(async (tx) => {
+            for (const item of order.items) {
+              if (item.productVariantId) {
+                const variant = await tx.productVariant.findUnique({
+                  where: { id: item.productVariantId },
+                  select: {
+                    id: true,
+                    inventoryQty: true,
+                    productId: true,
+                    product: { select: { businessId: true } },
+                  },
+                });
+                if (!variant) continue;
+                const newQty = variant.inventoryQty + item.quantity;
+                await tx.productVariant.update({
+                  where: { id: item.productVariantId },
+                  data: { inventoryQty: newQty },
+                });
+                await tx.inventoryHistory.create({
+                  data: {
+                    variantId: item.productVariantId,
+                    productId: variant.productId,
+                    businessId: variant.product.businessId,
+                    previousQty: variant.inventoryQty,
+                    newQty,
+                    changeQty: item.quantity,
+                    reason: "return",
+                    note: `Manual Refund Order #${order.orderNumber}`,
+                    orderId: order.id,
+                  },
+                });
+              } else if (item.productId) {
+                const product = await tx.product.findUnique({
+                  where: { id: item.productId },
+                  select: {
+                    id: true,
+                    inventoryQty: true,
+                    businessId: true,
+                    trackInventory: true,
+                  },
+                });
+                if (!product?.trackInventory) continue;
+                const newQty = product.inventoryQty + item.quantity;
+                await tx.product.update({
+                  where: { id: item.productId },
+                  data: { inventoryQty: newQty },
+                });
+                await tx.inventoryHistory.create({
+                  data: {
+                    productId: item.productId,
+                    businessId: product.businessId,
+                    previousQty: product.inventoryQty,
+                    newQty,
+                    changeQty: item.quantity,
+                    reason: "return",
+                    note: `Manual Refund Order #${order.orderNumber}`,
+                    orderId: order.id,
+                    variantId: null,
+                  },
+                });
+              }
+            }
+          });
+        } catch (invError) {
+          console.error("[Orders] Failed to restore inventory on manual refund:", invError);
+        }
+      }
+
+      if (input.sendEmail) {
+        try {
+          await sendOrderRefunded({
+            to: order.customerEmail,
+            orderNumber: order.orderNumber,
+            customerName: order.customerName ?? "Guest",
+            refundAmountCents: order.total,
+            orderTotalCents: order.total,
+            isFullRefund: true,
+            reason: reasonLabel,
+            business: {
+              name: order.business.name,
+              ownerEmail: order.business.ownerEmail,
+              siteContent: order.business.siteContent,
+              subdomain: order.business.subdomain,
+              customDomain: order.business.customDomain,
+            },
+          });
+          console.log(
+            `[Orders] Manual refund email sent for order #${order.orderNumber}`,
+          );
+        } catch (emailError) {
+          console.error(
+            "[Orders] Failed to send manual refund email:",
+            emailError,
+          );
+        }
       }
 
       return updatedOrder;

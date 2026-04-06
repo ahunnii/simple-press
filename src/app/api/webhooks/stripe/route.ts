@@ -135,6 +135,18 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ received: true });
         }
 
+        // Idempotency guard — Stripe may retry the same event
+        const existingOrder = await db.order.findUnique({
+          where: { stripeSessionId: session.id },
+          select: { id: true },
+        });
+        if (existingOrder) {
+          console.log(
+            `[Webhook] Duplicate event for session ${session.id} — skipping`,
+          );
+          return NextResponse.json({ received: true });
+        }
+
         // 🔑 Get business with Stripe account
         const business = await db.business.findUnique({
           where: { id: businessId },
@@ -286,14 +298,6 @@ export async function POST(req: NextRequest) {
           select: { orderNumber: true },
         });
         const orderNumber = (lastOrder?.orderNumber ?? 0) + 1;
-
-        const existing = await db.order.findUnique({
-          where: { stripeSessionId: session.id },
-        });
-
-        if (existing) {
-          return NextResponse.json({ received: true });
-        }
 
         const rawMetaDiscountId =
           typeof discountCodeId === "string" ? discountCodeId.trim() : "";

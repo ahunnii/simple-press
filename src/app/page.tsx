@@ -12,7 +12,7 @@ import { ElegantLayout } from "./(storefront)/_templates/elegant/elegant-layout"
 import { HappyBambooHomepage } from "./(storefront)/_templates/happy-bamboo/homepage/happy-bamboo-homepage";
 import { HappyBambooLayout } from "./(storefront)/_templates/happy-bamboo/layout/happy-bamboo-layout";
 import { MinimalTemplate } from "./(storefront)/_templates/minimal-template";
-import { ModernHomePage } from "./(storefront)/_templates/modern/modern-home-page";
+import { ModernHomePage } from "./(storefront)/_templates/modern/homepage/modern-home-page";
 import { ModernLayout } from "./(storefront)/_templates/modern/modern-layout";
 import { PollenHomepage } from "./(storefront)/_templates/pollen/pollen-homepage";
 import { PollenLayout } from "./(storefront)/_templates/pollen/pollen-layout";

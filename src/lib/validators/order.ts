@@ -49,6 +49,8 @@ export const updateFulfillmentSchema = z.object({
 export const updateOrderStatusSchema = z.object({
   orderId: z.string(),
   status: z.string(),
+  restockItems: z.boolean().default(false),
+  sendEmail: z.boolean().default(false),
 });
 
 export const updatePaymentStatusSchema = z.object({
@@ -60,6 +62,15 @@ export const refundOrderSchema = z.object({
   orderId: z.string(),
   amount: z.number(),
   reason: z.string().optional(),
+  restockItems: z.boolean().default(false),
+  sendEmail: z.boolean().default(true),
+});
+
+export const markAsRefundedSchema = z.object({
+  orderId: z.string(),
+  reason: z.string().optional(),
+  restockItems: z.boolean().default(false),
+  sendEmail: z.boolean().default(true),
 });
 
 export const orderFiltersSchema = z
@@ -140,3 +151,4 @@ export const fulfillmentFormSchema = z
 export type FulfillmentFormValues = z.infer<typeof fulfillmentFormSchema>;
 export type ShipmentInput = z.infer<typeof shipmentInputSchema>;
 export type ManualOrderFormSchema = z.infer<typeof manualOrderFormSchema>;
+export type MarkAsRefundedSchema = z.infer<typeof markAsRefundedSchema>;

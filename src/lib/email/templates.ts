@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ContactFormEmail from "~/emails/contact-form";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
+import OrderCancelledEmail from "~/emails/order-cancelled";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderFulfilledEmail from "~/emails/order-fulfilled";
 import OrderRefundedEmail from "~/emails/order-refunded";
@@ -248,6 +249,47 @@ export async function sendOrderRefunded(params: {
     }),
     tags: [
       { name: "category", value: "order_refunded" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
+// Order Cancelled (customer)
+export async function sendOrderCancelled(params: {
+  to: string;
+  orderNumber: number;
+  customerName: string;
+  reason?: string | null;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+  };
+}) {
+  const businessUrl = params.business.customDomain
+    ? `https://${params.business.customDomain}`
+    : `https://${params.business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: `Order #${params.orderNumber} has been cancelled`,
+    react: OrderCancelledEmail({
+      orderNumber: params.orderNumber,
+      customerName: params.customerName,
+      reason: params.reason,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      businessUrl,
+    }),
+    tags: [
+      { name: "category", value: "order_cancelled" },
       { name: "business", value: params.business.subdomain },
     ],
   });

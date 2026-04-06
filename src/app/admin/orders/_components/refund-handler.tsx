@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
   Select,
@@ -50,6 +52,17 @@ function StripeRefundDialog({ order }: { order: Order }) {
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
+  const [restockItems, setRestockItems] = useState(false);
+  const [sendEmail, setSendEmail] = useState(true);
+  const [amountDollars, setAmountDollars] = useState(
+    (order.total / 100).toFixed(2),
+  );
+
+  const maxDollars = order.total / 100;
+  const amountCents = Math.round(parseFloat(amountDollars) * 100);
+  const isValidAmount =
+    !isNaN(amountCents) && amountCents > 0 && amountCents <= order.total;
+  const isPartial = isValidAmount && amountCents < order.total;
 
   const refundMutation = api.order.refund.useMutation({
     onSuccess: () => {
@@ -72,10 +85,13 @@ function StripeRefundDialog({ order }: { order: Order }) {
   });
 
   const handleRefund = () => {
+    if (!isValidAmount) return;
     refundMutation.mutate({
       orderId: order.id,
-      amount: order.total,
+      amount: amountCents,
       reason: reason || undefined,
+      restockItems,
+      sendEmail,
     });
   };
 
@@ -105,9 +121,39 @@ function StripeRefundDialog({ order }: { order: Order }) {
             </Alert>
           )}
 
-          <div className="rounded-md border px-4 py-3 text-sm">
-            <span className="text-gray-500">Refund amount: </span>
-            <span className="font-medium">{formatPrice(order.total)}</span>
+          {/* Amount */}
+          <div className="space-y-2">
+            <Label htmlFor="refund-amount">
+              Refund amount{" "}
+              <span className="text-muted-foreground text-xs font-normal">
+                (max {formatPrice(order.total)})
+              </span>
+            </Label>
+            <div className="relative">
+              <span className="text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 text-sm">
+                $
+              </span>
+              <Input
+                id="refund-amount"
+                type="number"
+                min="0.01"
+                max={maxDollars}
+                step="0.01"
+                className="pl-7"
+                value={amountDollars}
+                onChange={(e) => setAmountDollars(e.target.value)}
+              />
+            </div>
+            {isPartial && (
+              <p className="text-muted-foreground text-xs">
+                Partial refund — customer keeps the difference
+              </p>
+            )}
+            {!isValidAmount && amountDollars !== "" && (
+              <p className="text-destructive text-xs">
+                Enter a valid amount up to {formatPrice(order.total)}
+              </p>
+            )}
           </div>
 
           {/* Reason */}
@@ -127,12 +173,35 @@ function StripeRefundDialog({ order }: { order: Order }) {
             </Select>
           </div>
 
+          {/* Options */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="restock-items"
+                checked={restockItems}
+                onCheckedChange={(v) => setRestockItems(!!v)}
+              />
+              <Label htmlFor="restock-items" className="cursor-pointer font-normal">
+                Return items to inventory
+              </Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="send-refund-email"
+                checked={sendEmail}
+                onCheckedChange={(v) => setSendEmail(!!v)}
+              />
+              <Label htmlFor="send-refund-email" className="cursor-pointer font-normal">
+                Notify customer by email
+              </Label>
+            </div>
+          </div>
+
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               This will process a refund through Stripe. This action cannot be
-              undone. Also, this will not update inventory. Be sure to update
-              inventory manually.
+              undone.
             </AlertDescription>
           </Alert>
         </div>
@@ -147,7 +216,7 @@ function StripeRefundDialog({ order }: { order: Order }) {
           </Button>
           <Button
             onClick={handleRefund}
-            disabled={isProcessing}
+            disabled={isProcessing || !isValidAmount}
             variant="destructive"
           >
             {isProcessing ? (
@@ -158,7 +227,7 @@ function StripeRefundDialog({ order }: { order: Order }) {
             ) : (
               <>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Issue Refund
+                {isPartial ? `Refund ${formatPrice(amountCents)}` : "Issue Full Refund"}
               </>
             )}
           </Button>
@@ -175,6 +244,8 @@ function ManualRefundDialog({ order }: { order: Order }) {
   const utils = api.useUtils();
   const [isOpen, setIsOpen] = useState(false);
   const [reason, setReason] = useState("");
+  const [restockItems, setRestockItems] = useState(false);
+  const [sendEmail, setSendEmail] = useState(true);
 
   const markRefundedMutation = api.order.markAsRefunded.useMutation({
     onSuccess: () => {
@@ -234,6 +305,30 @@ function ManualRefundDialog({ order }: { order: Order }) {
             </Select>
           </div>
 
+          {/* Options */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="manual-restock-items"
+                checked={restockItems}
+                onCheckedChange={(v) => setRestockItems(!!v)}
+              />
+              <Label htmlFor="manual-restock-items" className="cursor-pointer font-normal">
+                Return items to inventory
+              </Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="manual-send-email"
+                checked={sendEmail}
+                onCheckedChange={(v) => setSendEmail(!!v)}
+              />
+              <Label htmlFor="manual-send-email" className="cursor-pointer font-normal">
+                Notify customer by email
+              </Label>
+            </div>
+          </div>
+
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
@@ -257,6 +352,8 @@ function ManualRefundDialog({ order }: { order: Order }) {
               markRefundedMutation.mutate({
                 orderId: order.id,
                 reason: reason || undefined,
+                restockItems,
+                sendEmail,
               })
             }
             disabled={isProcessing}

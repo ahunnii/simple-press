@@ -164,6 +164,7 @@ export function PollenCheckoutForm({ business }: Props) {
         unavailableItems?: string[];
         unavailableItemIds?: { productId: string; variantId: string | null }[];
         sessionUrl?: string;
+        sessionId?: string;
       };
 
       if (!response.ok) {
@@ -192,6 +193,9 @@ export function PollenCheckoutForm({ business }: Props) {
         return;
       }
 
+      if (data.sessionId) {
+        document.cookie = `pending_session=${data.sessionId}; path=/; SameSite=Lax; max-age=3600`;
+      }
       window.location.href = sessionUrl;
     } catch (err: unknown) {
       setError((err as Error).message ?? "Failed to create checkout session");
