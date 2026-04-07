@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 
 import {
   Card,
@@ -36,15 +36,15 @@ function SignupCompleteContent() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Account Created!</CardTitle>
+          <CardTitle>Check your email</CardTitle>
           <CardDescription>
-            Your account has been successfully created. Redirecting to sign
-            in...
+            We&apos;ve sent a verification email to your inbox. Click the link
+            to activate your account, then sign in.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center gap-4">
-            <CheckCircle className="h-12 w-12 text-green-600" />
+            <Mail className="h-12 w-12 text-blue-600" />
             <p className="text-sm text-gray-600">
               Redirecting in {countdown} second{countdown !== 1 ? "s" : ""}...
             </p>
@@ -60,10 +60,10 @@ function SignupCompleteFallback() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Account Created!</CardTitle>
+          <CardTitle>Check your email</CardTitle>
           <CardDescription>
-            Your account has been successfully created. Redirecting to sign
-            in...
+            We&apos;ve sent a verification email to your inbox. Click the link
+            to activate your account, then sign in.
           </CardDescription>
         </CardHeader>
         <CardContent>
