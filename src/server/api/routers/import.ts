@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -159,6 +160,12 @@ export const importRouter = createTRPCRouter({
           errors: result.errors,
         };
       } catch (error) {
+        Sentry.withScope((scope) => {
+          scope.setTag("trpc.procedure", "import.executeImport");
+          scope.setExtra("importId", input.importId);
+          Sentry.captureException(error);
+        });
+
         // Update status to failed
         await ctx.db.productImport.update({
           where: { id: input.importId },

@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
 import { env } from "~/env";
@@ -179,6 +180,7 @@ export async function POST(req: NextRequest) {
       );
     }
     console.error("Onboarding error:", error);
+    Sentry.captureException(error, { tags: { route: "onboarding" } });
     return NextResponse.json(
       { error: "Failed to create your store. Please try again." },
       { status: 500 },

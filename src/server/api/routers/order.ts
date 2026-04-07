@@ -1,5 +1,6 @@
 import type { Prisma } from "generated/prisma";
 import type Stripe from "stripe";
+import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -121,6 +122,12 @@ export const orderRouter = createTRPCRouter({
         }
       } catch (emailError) {
         console.error("[Orders] Failed to send fulfillment email:", emailError);
+        Sentry.captureException(emailError, {
+          tags: {
+            "trpc.procedure": "order.markAsFulfilled",
+            "email.type": "fulfillment",
+          },
+        });
       }
 
       return updatedOrder;
@@ -189,6 +196,12 @@ export const orderRouter = createTRPCRouter({
         }
       } catch (emailError) {
         console.error("[Orders] Failed to send shipment email:", emailError);
+        Sentry.captureException(emailError, {
+          tags: {
+            "trpc.procedure": "order.addShipment",
+            "email.type": "shipment",
+          },
+        });
       }
 
       return shipment;

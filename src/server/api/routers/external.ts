@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -12,14 +13,28 @@ export const externalRouter = createTRPCRouter({
   verifyArtisanToken: publicProcedure
     .input(z.string().min(1))
     .query(async ({ input: aftoken }) => {
-      const fetchToken = await fetch(
-        `${env.ARTISANAL_FUTURES_API_URL}/simplepress?code=${encodeURIComponent(aftoken)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${env.SIMPLEPRESS_HASH_SECRET}`,
+      let fetchToken: Response;
+      try {
+        fetchToken = await fetch(
+          `${env.ARTISANAL_FUTURES_API_URL}/simplepress?code=${encodeURIComponent(aftoken)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${env.SIMPLEPRESS_HASH_SECRET}`,
+            },
           },
-        },
-      );
+        );
+      } catch (err) {
+        Sentry.captureException(err, {
+          tags: {
+            service: "artisanal-futures",
+            "trpc.procedure": "external.verifyArtisanToken",
+          },
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "External API unavailable",
+        });
+      }
 
       if (fetchToken.status !== 200) {
         return { success: false as const, message: "Invalid artisan token" };
@@ -57,23 +72,37 @@ export const externalRouter = createTRPCRouter({
         });
       }
 
-      const updateToken = await fetch(
-        `${env.ARTISANAL_FUTURES_API_URL}/simplepress`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            artisanToken: aftoken,
-            subdomain: business.subdomain,
-            customDomain:
-              business.customDomain ??
-              `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${env.SIMPLEPRESS_HASH_SECRET}`,
+      let updateToken: Response;
+      try {
+        updateToken = await fetch(
+          `${env.ARTISANAL_FUTURES_API_URL}/simplepress`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              artisanToken: aftoken,
+              subdomain: business.subdomain,
+              customDomain:
+                business.customDomain ??
+                `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${env.SIMPLEPRESS_HASH_SECRET}`,
+            },
           },
-        },
-      );
+        );
+      } catch (err) {
+        Sentry.captureException(err, {
+          tags: {
+            service: "artisanal-futures",
+            "trpc.procedure": "external.updateArtisanToken",
+          },
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "External API unavailable",
+        });
+      }
 
       const updateTokenResponse = (await updateToken.json()) as {
         ok: boolean;

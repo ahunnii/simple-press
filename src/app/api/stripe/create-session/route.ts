@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import type Stripe from "stripe";
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
 import { env } from "~/env";
@@ -501,6 +502,10 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: unknown) {
     console.error("Create checkout session error:", error);
+    Sentry.withScope((scope) => {
+      scope.setTag("route", "stripe.create-session");
+      Sentry.captureException(error);
+    });
     return NextResponse.json(
       {
         error: "Failed to create checkout session. Please try again.",

@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { EmailTemplate } from "@daveyplate/better-auth-ui/server";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
@@ -26,7 +27,7 @@ export const auth = betterAuth({
       user: { email: string; name: string };
       url: string;
     }) => {
-      void resend.emails.send({
+      resend.emails.send({
         from: EMAIL_FROM.NOREPLY,
         to: user.email,
         subject: "Verify your email",
@@ -46,10 +47,14 @@ export const auth = betterAuth({
           baseUrl: env.BETTER_AUTH_BASE_URL,
           url,
         }),
+      }).catch((err) => {
+        Sentry.captureException(err, {
+          tags: { "auth.email": "verification" },
+        });
       });
     },
     sendResetPassword: async ({ user, url }) => {
-      void resend.emails.send({
+      resend.emails.send({
         from: EMAIL_FROM.NOREPLY,
         to: user.email,
         subject: "Reset your password",
@@ -68,6 +73,10 @@ export const auth = betterAuth({
 
           url,
         }),
+      }).catch((err) => {
+        Sentry.captureException(err, {
+          tags: { "auth.email": "password-reset" },
+        });
       });
     },
   },

@@ -1,4 +1,5 @@
 import type { RateLimiterAbstract } from "rate-limiter-flexible";
+import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
 
@@ -22,8 +23,12 @@ function makeLazy(opts: LimiterOpts): { consume: (key: string) => Promise<void> 
         enableOfflineQueue: false,
         lazyConnect: true,
       });
-      // Suppress unhandled error events — rate limiter handles them internally
-      client.on("error", () => undefined);
+      // Capture Redis errors in Sentry so outages are visible
+      client.on("error", (err) => {
+        Sentry.captureException(err, {
+          tags: { service: "redis", component: "rate-limiter" },
+        });
+      });
       instance = new RateLimiterRedis({ storeClient: client, ...opts });
     } else {
       instance = new RateLimiterMemory(opts);

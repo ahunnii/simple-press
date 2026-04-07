@@ -1,4 +1,5 @@
 import type { Prisma } from "generated/prisma";
+import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -389,7 +390,13 @@ export const businessRouter = createTRPCRouter({
           status: p.status,
           arrival_date: p.arrival_date,
         }));
-      } catch {
+      } catch (err) {
+        Sentry.captureException(err, {
+          tags: {
+            "trpc.procedure": "business.getPaymentsOverview",
+            service: "stripe",
+          },
+        });
         // Non-fatal — return partial data
       }
     }

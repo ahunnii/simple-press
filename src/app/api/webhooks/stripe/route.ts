@@ -1,6 +1,7 @@
 // app/api/webhooks/stripe/route.ts
 import type { NextRequest } from "next/server";
 import type Stripe from "stripe";
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
@@ -118,6 +119,9 @@ export async function POST(req: NextRequest) {
         "[Webhook] Signature verification failed:",
         err instanceof Error ? err.message : "Unknown error",
       );
+      Sentry.captureException(err, {
+        tags: { "webhook.step": "signature-verification" },
+      });
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
@@ -132,6 +136,10 @@ export async function POST(req: NextRequest) {
 
         if (!businessId) {
           console.error("[Webhook] No businessId in session metadata");
+          Sentry.captureMessage(
+            `[Webhook] Missing businessId in checkout session metadata: ${session.id}`,
+            { level: "warning", tags: { "webhook.step": "metadata-check" } },
+          );
           return NextResponse.json({ received: true });
         }
 
@@ -168,6 +176,16 @@ export async function POST(req: NextRequest) {
         if (!business?.stripeAccountId) {
           console.error(
             `[Webhook] Business ${businessId} not found or no Stripe account`,
+          );
+          Sentry.captureMessage(
+            `[Webhook] Business ${businessId} not found or missing Stripe account`,
+            {
+              level: "error",
+              tags: {
+                "webhook.step": "business-lookup",
+                businessId,
+              },
+            },
           );
           return NextResponse.json({ received: true });
         }
@@ -406,6 +424,11 @@ export async function POST(req: NextRequest) {
               "[Webhook] Failed to update customer metrics:",
               customerError,
             );
+            Sentry.withScope((scope) => {
+              scope.setTag("webhook.step", "customer-metrics");
+              scope.setTag("businessId", businessId);
+              Sentry.captureException(customerError);
+            });
           }
         }
 
@@ -423,6 +446,11 @@ export async function POST(req: NextRequest) {
               "[Webhook] Failed to update discount code:",
               discountError,
             );
+            Sentry.withScope((scope) => {
+              scope.setTag("webhook.step", "discount-increment");
+              scope.setTag("businessId", businessId);
+              Sentry.captureException(discountError);
+            });
           }
         }
 
@@ -625,6 +653,11 @@ export async function POST(req: NextRequest) {
             "[Webhook] Failed to deduct inventory:",
             inventoryError,
           );
+          Sentry.withScope((scope) => {
+            scope.setTag("webhook.step", "inventory-deduction");
+            scope.setTag("businessId", businessId);
+            Sentry.captureException(inventoryError);
+          });
           // Don't fail webhook - order is still created
         }
 
@@ -683,6 +716,11 @@ export async function POST(req: NextRequest) {
             "[Webhook] Failed to send order confirmation email:",
             emailError,
           );
+          Sentry.withScope((scope) => {
+            scope.setTag("webhook.step", "order-confirmation-email");
+            scope.setTag("businessId", businessId);
+            Sentry.captureException(emailError);
+          });
           // Don't fail the webhook if email fails
         }
 
@@ -718,11 +756,21 @@ export async function POST(req: NextRequest) {
             "[Webhook] Failed to send owner new-order notification:",
             ownerEmailError,
           );
+          Sentry.withScope((scope) => {
+            scope.setTag("webhook.step", "owner-notification-email");
+            scope.setTag("businessId", businessId);
+            Sentry.captureException(ownerEmailError);
+          });
         }
 
         return NextResponse.json({ received: true });
       } catch (orderError: unknown) {
         console.error("[Webhook] Error processing order:", orderError);
+        Sentry.withScope((scope) => {
+          scope.setTag("webhook.step", "order-processing");
+          scope.setTag("eventType", event.type);
+          Sentry.captureException(orderError);
+        });
         return NextResponse.json(
           {
             error:
@@ -761,6 +809,9 @@ export async function POST(req: NextRequest) {
         }
       } catch (error) {
         console.error("[Webhook] Error processing account.updated:", error);
+        Sentry.captureException(error, {
+          tags: { "webhook.step": "account-updated" },
+        });
       }
 
       return NextResponse.json({ received: true });
@@ -781,6 +832,9 @@ export async function POST(req: NextRequest) {
         );
       } catch (error) {
         console.error("[Webhook] Error processing deauthorization:", error);
+        Sentry.captureException(error, {
+          tags: { "webhook.step": "account-deauthorized" },
+        });
       }
 
       return NextResponse.json({ received: true });
@@ -791,6 +845,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error: unknown) {
     console.error("[Webhook] Error:", error);
+    Sentry.captureException(error, {
+      tags: { "webhook.step": "handler" },
+    });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

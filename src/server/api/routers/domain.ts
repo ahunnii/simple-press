@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -53,7 +54,13 @@ export const domainRouter = createTRPCRouter({
       });
 
       // Message to slack notifying of new domain to add to Coolify (NEED TO ADD AUTOMATIC PROCESSING TO ADD TO COOLIFY)
-      await notifySlackNewDomain(domain, businessId);
+      try {
+        await notifySlackNewDomain(domain, businessId);
+      } catch (err) {
+        Sentry.captureException(err, {
+          tags: { service: "slack", "trpc.procedure": "domain.add" },
+        });
+      }
 
       return {
         success: true,

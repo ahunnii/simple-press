@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
 import { env } from "~/env";
@@ -83,6 +84,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   } catch (err: unknown) {
     console.error("[Stripe Connect] Error:", err);
+    Sentry.captureException(err, {
+      tags: { "stripe.oauth": "token-exchange", businessId },
+    });
 
     const redirectUrl = new URL(returnUrl);
     redirectUrl.searchParams.set("stripe_error", "connection_failed");
