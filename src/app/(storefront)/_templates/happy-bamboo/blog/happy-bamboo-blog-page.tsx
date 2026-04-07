@@ -213,7 +213,7 @@ export function HappyBambooBlogPage({ pages, customFields }: Props) {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <FadeIn className="mb-12">
-            <h2 className="text-2xl font-bold md:text-3xl">
+            <h2 className="font-serif text-2xl font-bold md:text-3xl">
               {query.trim() !== "" ? "Search Results" : "More Articles"}
             </h2>
           </FadeIn>

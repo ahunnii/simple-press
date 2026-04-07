@@ -8,10 +8,24 @@ import type { DefaultHomepageTemplateProps } from "../types";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 
+import { resolveFields } from ".";
 import { QuickAddButton } from "./default-quick-add-product";
 
 export function DefaultHomePage({ business }: DefaultHomepageTemplateProps) {
   const { data: featuredProducts } = api.product.getFeatured.useQuery();
+
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "default.homepage.hero-image",
+    "default.homepage.hero-description",
+    "default.homepage.hero-button-text",
+    "default.homepage.hero-button-link",
+    "default.homepage.hero-button-2-text",
+    "default.homepage.hero-button-2-link",
+    "default.homepage.featured-products-heading",
+    "default.homepage.cta-heading",
+    "default.homepage.cta-description",
+    "default.homepage.cta-image",
+  ]);
 
   return (
     <>
@@ -25,20 +39,35 @@ export function DefaultHomePage({ business }: DefaultHomepageTemplateProps) {
                   {business.name}
                 </h1>
                 <p className="text-muted-foreground max-w-[600px] md:text-xl">
-                  Take a look around!
+                  {f["default.homepage.hero-description"]}
                 </p>
                 <div className="flex flex-col gap-4 sm:flex-row">
                   <Button size="lg" className="font-medium" asChild>
-                    <Link href="/products">Shop Now</Link>
+                    <Link
+                      href={
+                        f["default.homepage.hero-button-link"] ?? "/products"
+                      }
+                    >
+                      {f["default.homepage.hero-button-text"]}
+                    </Link>
                   </Button>
-                  <Button size="lg" variant="outline" className="font-medium">
-                    View Deals
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="font-medium"
+                    asChild
+                  >
+                    <Link
+                      href={f["default.homepage.hero-button-2-link"] ?? "/shop"}
+                    >
+                      {f["default.homepage.hero-button-2-text"]}
+                    </Link>
                   </Button>
                 </div>
               </div>
               <div className="relative h-[300px] overflow-hidden rounded-xl sm:h-[400px] lg:h-[500px]">
                 <Image
-                  src={"/placeholder.svg"}
+                  src={f["default.homepage.hero-image"] ?? "/placeholder.svg"}
                   alt={business.name ?? "Hero Image"}
                   fill
                   className="object-cover"
@@ -53,7 +82,7 @@ export function DefaultHomePage({ business }: DefaultHomepageTemplateProps) {
         <section className="mx-auto py-12 md:py-16">
           <div className="container mx-auto px-4 md:px-6">
             <h2 className="mb-8 text-center text-2xl font-bold tracking-tight md:text-3xl">
-              Featured Products
+              {f["default.homepage.featured-products-heading"]}
             </h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {featuredProducts?.map((product) => (
@@ -116,14 +145,11 @@ export function DefaultHomePage({ business }: DefaultHomepageTemplateProps) {
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center md:space-y-6">
               <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                About Us
+                {f["default.homepage.cta-heading"]}
               </h2>
               <p className="text-primary-foreground/90 max-w-[600px] md:text-lg">
-                {
-                  "Learn more about our mission, values, and what makes us unique. We are dedicated to providing the best experience for our customers."
-                }
+                {f["default.homepage.cta-description"]}
               </p>
-              {/* You can add more generic CTA or about content here */}
             </div>
           </div>
         </section>

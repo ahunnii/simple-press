@@ -2,15 +2,44 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../types";
 
+import { resolveFields } from ".";
 import { ModernContactForm } from "./modern-contact-form";
 
 export function ModernContactPage({
   business,
 }: DefaultContactPageTemplateProps) {
-  const themeSpecificFields = business?.siteContent?.customFields as Record<
-    string,
-    string
-  >;
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "modern.contact.header-subheader",
+    "modern.contact.header-title",
+    "modern.contact.header-description",
+    "modern.contact.info-title",
+    "modern.contact.info-description",
+    "modern.contact.email-label",
+    "modern.contact.email",
+    "modern.contact.phone-label",
+    "modern.contact.phone",
+    "modern.contact.address-label",
+    "modern.contact.address",
+    "modern.contact.hours-label",
+    "modern.contact.hours",
+    "modern.contact.form-title",
+    "modern.contact.form-description",
+    "modern.contact.faq-enabled",
+    "modern.contact.faq-1-question",
+    "modern.contact.faq-1-answer",
+    "modern.contact.faq-2-question",
+    "modern.contact.faq-2-answer",
+    "modern.contact.faq-3-question",
+    "modern.contact.faq-3-answer",
+    "modern.contact.faq-4-question",
+    "modern.contact.faq-4-answer",
+  ]);
+
+  // Fall back to business record for contact details not set by owner
+  const displayEmail =
+    f["modern.contact.email"] ?? business?.supportEmail ?? "";
+  const displayAddress =
+    f["modern.contact.address"] ?? business?.businessAddress ?? "";
 
   return (
     <div className="bg-background">
@@ -18,16 +47,13 @@ export function ModernContactPage({
       <section className="bg-secondary py-20">
         <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
           <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-            {themeSpecificFields?.["modern.contact.header-subheader"] ??
-              "Get in Touch"}
+            {f["modern.contact.header-subheader"]}
           </p>
           <h1 className="text-foreground mt-2 font-serif text-4xl text-balance md:text-6xl">
-            {themeSpecificFields?.["modern.contact.header-title"] ??
-              "We'd love to hear from you"}
+            {f["modern.contact.header-title"]}
           </h1>
           <p className="text-muted-foreground mx-auto mt-6 max-w-lg text-sm leading-relaxed">
-            {themeSpecificFields?.["modern.contact.header-description"] ??
-              "Whether you have a question about an order, want to learn more about our products, or are interested in a partnership, we're here to help."}
+            {f["modern.contact.header-description"]}
           </p>
         </div>
       </section>
@@ -39,80 +65,76 @@ export function ModernContactPage({
             {/* Contact Details */}
             <div className="lg:col-span-2">
               <h2 className="text-foreground font-serif text-2xl md:text-3xl">
-                {themeSpecificFields?.["modern.contact.info-title"] ??
-                  "Contact Information"}
+                {f["modern.contact.info-title"]}
               </h2>
               <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
-                {themeSpecificFields?.["modern.contact.info-description"] ??
-                  "Reach out through any of these channels and we'll get back to you as soon as possible."}
+                {f["modern.contact.info-description"]}
               </p>
 
               <div className="mt-10 flex flex-col gap-8">
-                <div className="flex items-start gap-4">
-                  <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                    <Mail className="text-accent h-4 w-4" />
+                {displayEmail && (
+                  <div className="flex items-start gap-4">
+                    <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                      <Mail className="text-accent h-4 w-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
+                        {f["modern.contact.email-label"]}
+                      </h3>
+                      <p className="text-muted-foreground mt-1 text-sm">
+                        {displayEmail}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
-                      {themeSpecificFields?.["modern.contact.email-label"] ??
-                        "Email"}
-                    </h3>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      {themeSpecificFields?.["modern.contact.email"] ??
-                        business?.supportEmail ??
-                        "hello@haven.com"}
-                    </p>
-                  </div>
-                </div>
+                )}
 
-                <div className="flex items-start gap-4">
-                  <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                    <Phone className="text-accent h-4 w-4" />
+                {f["modern.contact.phone"] && (
+                  <div className="flex items-start gap-4">
+                    <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                      <Phone className="text-accent h-4 w-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
+                        {f["modern.contact.phone-label"]}
+                      </h3>
+                      <p className="text-muted-foreground mt-1 text-sm">
+                        {f["modern.contact.phone"]}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
-                      {themeSpecificFields?.["modern.contact.phone-label"] ??
-                        "Phone"}
-                    </h3>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      {themeSpecificFields?.["modern.contact.phone"] ??
-                        "+1 (555) 123-4567"}
-                    </p>
-                  </div>
-                </div>
+                )}
 
-                <div className="flex items-start gap-4">
-                  <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                    <MapPin className="text-accent h-4 w-4" />
+                {displayAddress && (
+                  <div className="flex items-start gap-4">
+                    <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                      <MapPin className="text-accent h-4 w-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
+                        {f["modern.contact.address-label"]}
+                      </h3>
+                      <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+                        {displayAddress}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
-                      {themeSpecificFields?.["modern.contact.address-label"] ??
-                        "Address"}
-                    </h3>
-                    <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
-                      {themeSpecificFields?.["modern.contact.address"] ??
-                        business?.businessAddress ??
-                        "247 West 35th Street\nNew York, NY 10001"}
-                    </p>
-                  </div>
-                </div>
+                )}
 
-                <div className="flex items-start gap-4">
-                  <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                    <Clock className="text-accent h-4 w-4" />
+                {f["modern.contact.hours"] && (
+                  <div className="flex items-start gap-4">
+                    <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                      <Clock className="text-accent h-4 w-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
+                        {f["modern.contact.hours-label"]}
+                      </h3>
+                      <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+                        {f["modern.contact.hours"]}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
-                      {themeSpecificFields?.["modern.contact.hours-label"] ??
-                        "Hours"}
-                    </h3>
-                    <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
-                      {themeSpecificFields?.["modern.contact.hours"] ??
-                        "Monday - Friday: 9am - 6pm EST\nSaturday: 10am - 4pm EST\nSunday: Closed"}
-                    </p>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
 
@@ -120,12 +142,10 @@ export function ModernContactPage({
             <div className="lg:col-span-3">
               <div className="border-border bg-card rounded-sm border p-8 md:p-10">
                 <h2 className="text-foreground font-serif text-2xl md:text-3xl">
-                  {themeSpecificFields?.["modern.contact.form-title"] ??
-                    "Send us a message"}
+                  {f["modern.contact.form-title"]}
                 </h2>
                 <p className="text-muted-foreground mt-2 text-sm">
-                  {themeSpecificFields?.["modern.contact.form-description"] ??
-                    "Fill out the form below and we'll respond within 24 hours."}
+                  {f["modern.contact.form-description"]}
                 </p>
                 <ModernContactForm />
               </div>
@@ -135,7 +155,7 @@ export function ModernContactPage({
       </section>
 
       {/* FAQ teaser */}
-      {themeSpecificFields?.["modern.contact.faq-enabled"] === "true" && (
+      {f["modern.contact.faq-enabled"] === "true" && (
         <section className="border-border bg-secondary border-t py-20">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center">
@@ -147,46 +167,46 @@ export function ModernContactPage({
               </h2>
             </div>
             <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
-              <div>
-                <h3 className="text-foreground text-sm font-semibold">
-                  {themeSpecificFields?.["modern.contact.faq-1-question"] ??
-                    "What is your return policy?"}
-                </h3>
-                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                  {themeSpecificFields?.["modern.contact.faq-1-answer"] ??
-                    "We offer a 30-day return policy on all items in their original condition. Simply contact us to initiate a return and we'll provide a prepaid shipping label."}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-foreground text-sm font-semibold">
-                  {themeSpecificFields?.["modern.contact.faq-2-question"] ??
-                    "How long does shipping take?"}
-                </h3>
-                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                  {themeSpecificFields?.["modern.contact.faq-2-answer"] ??
-                    "Standard shipping takes 5-7 business days. We also offer expedited shipping (2-3 business days) at checkout for an additional fee."}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-foreground text-sm font-semibold">
-                  {themeSpecificFields?.["modern.contact.faq-3-question"] ??
-                    "Do you ship internationally?"}
-                </h3>
-                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                  {themeSpecificFields?.["modern.contact.faq-3-answer"] ??
-                    "Yes! We ship to over 40 countries. International shipping typically takes 10-15 business days. Duties and taxes may apply depending on your location."}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-foreground text-sm font-semibold">
-                  {themeSpecificFields?.["modern.contact.faq-4-question"] ??
-                    "Can I modify or cancel an order?"}
-                </h3>
-                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                  {themeSpecificFields?.["modern.contact.faq-4-answer"] ??
-                    "Orders can be modified or cancelled within 2 hours of placement. After that, please contact us and we'll do our best to accommodate your request."}
-                </p>
-              </div>
+              {f["modern.contact.faq-1-question"] && (
+                <div>
+                  <h3 className="text-foreground text-sm font-semibold">
+                    {f["modern.contact.faq-1-question"]}
+                  </h3>
+                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                    {f["modern.contact.faq-1-answer"]}
+                  </p>
+                </div>
+              )}
+              {f["modern.contact.faq-2-question"] && (
+                <div>
+                  <h3 className="text-foreground text-sm font-semibold">
+                    {f["modern.contact.faq-2-question"]}
+                  </h3>
+                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                    {f["modern.contact.faq-2-answer"]}
+                  </p>
+                </div>
+              )}
+              {f["modern.contact.faq-3-question"] && (
+                <div>
+                  <h3 className="text-foreground text-sm font-semibold">
+                    {f["modern.contact.faq-3-question"]}
+                  </h3>
+                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                    {f["modern.contact.faq-3-answer"]}
+                  </p>
+                </div>
+              )}
+              {f["modern.contact.faq-4-question"] && (
+                <div>
+                  <h3 className="text-foreground text-sm font-semibold">
+                    {f["modern.contact.faq-4-question"]}
+                  </h3>
+                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                    {f["modern.contact.faq-4-answer"]}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </section>

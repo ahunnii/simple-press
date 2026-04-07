@@ -8,6 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Spotlight } from "~/components/ui/spotlight-new";
 import { GalleryRenderer } from "~/components/gallery-renderer";
 
+import { resolveFields } from ".";
 import { DarkTrendFeaturedProductsGrid } from "./dark-trend-featured-products-grid";
 import { DarkTrendHeroContent } from "./dark-trend-hero-content";
 import { DarkTrendMotionSection } from "./dark-trend-motion-section";
@@ -15,16 +16,31 @@ import { DarkTrendMotionSection } from "./dark-trend-motion-section";
 export async function DarkTrendHomepage() {
   const homepage = await api.business.getHomepage();
 
-  const themeSpecificFields = homepage?.siteContent?.customFields as Record<
-    string,
-    string
-  >;
+  const f = resolveFields(homepage?.siteContent?.customFields, [
+    "dark-trend.homepage.hero-image",
+    "dark-trend.homepage.hero-title",
+    "dark-trend.homepage.hero-button-text",
+    "dark-trend.homepage.hero-button-link",
+    "dark-trend.homepage.gallery",
+    "dark-trend.first-section-title",
+    "dark-trend.first-section-subheader",
+    "dark-trend.first-section-description",
+    "dark-trend.first-section-image",
+    "dark-trend.first-section-button-text",
+    "dark-trend.first-section-button-link",
+    "dark-trend.second-section-title",
+    "dark-trend.second-section-description",
+    "dark-trend.cta-header",
+    "dark-trend.cta-description",
+    "dark-trend.cta-button-text",
+    "dark-trend.cta-button-link",
+    "dark-trend.cta-image",
+  ]);
 
   const firstProduct = homepage?.products?.[0];
 
   // Get gallery ID from template field
-  const portfolioGalleryId =
-    themeSpecificFields?.["dark-trend.homepage.gallery"];
+  const portfolioGalleryId = f["dark-trend.homepage.gallery"];
 
   // Fetch gallery if set
   const gallery = portfolioGalleryId
@@ -40,10 +56,7 @@ export async function DarkTrendHomepage() {
       <section className="relative overflow-hidden">
         <div className="relative h-[85vh] min-h-[560px]">
           <Image
-            src={
-              themeSpecificFields?.["dark-trend.homepage.hero-image"] ??
-              "/placeholder.svg"
-            }
+            src={f["dark-trend.homepage.hero-image"] ?? "/placeholder.svg"}
             alt={homepage?.name ?? "Business Name"}
             fill
             className="object-cover"
@@ -54,19 +67,10 @@ export async function DarkTrendHomepage() {
           <div className="absolute inset-0 flex items-center">
             <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
               <DarkTrendHeroContent
-                title={
-                  themeSpecificFields?.["dark-trend.homepage.hero-title"] ??
-                  "Hero Title"
-                }
-                buttonText={
-                  themeSpecificFields?.[
-                    "dark-trend.homepage.hero-button-text"
-                  ] ?? "Hero Button Text"
-                }
+                title={f["dark-trend.homepage.hero-title"] ?? ""}
+                buttonText={f["dark-trend.homepage.hero-button-text"] ?? ""}
                 buttonLink={
-                  themeSpecificFields?.[
-                    "dark-trend.homepage.hero-button-link"
-                  ] ?? "#!"
+                  f["dark-trend.homepage.hero-button-link"] ?? "/shop"
                 }
               />
             </div>
@@ -86,32 +90,23 @@ export async function DarkTrendHomepage() {
                 className="absolute top-2 -left-2 overflow-hidden text-6xl leading-none font-bold whitespace-nowrap text-white/5 uppercase md:text-8xl"
                 aria-hidden
               >
-                {themeSpecificFields?.["dark-trend.first-section-title"] ??
-                  "First Section Title"}
+                {f["dark-trend.first-section-title"]}
               </span>
               <h2 className="relative text-3xl font-bold tracking-tight md:text-6xl">
-                {themeSpecificFields?.["dark-trend.first-section-title"] ??
-                  "First Section Title"}
+                {f["dark-trend.first-section-title"]}
               </h2>
             </div>
             <Link
-              href={
-                themeSpecificFields?.["dark-trend.first-section-button-link"] ??
-                "#!"
-              }
+              href={f["dark-trend.first-section-button-link"] ?? "/about"}
               className="rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
             >
-              {themeSpecificFields?.["dark-trend.first-section-button-text"] ??
-                "First Section Button Text"}
+              {f["dark-trend.first-section-button-text"]}
             </Link>
           </div>
           <div className="mt-12 grid grid-cols-1 items-stretch gap-12 lg:grid-cols-2">
             <div className="relative aspect-4/3 overflow-hidden rounded-sm bg-zinc-800">
               <Image
-                src={
-                  themeSpecificFields?.["dark-trend.first-section-image"] ??
-                  "/placeholder.svg"
-                }
+                src={f["dark-trend.first-section-image"] ?? "/placeholder.svg"}
                 alt="Custom embroidery"
                 fill
                 className="object-cover"
@@ -146,14 +141,10 @@ export async function DarkTrendHomepage() {
                 </svg>
               </div>
               <h3 className="text-2xl font-semibold tracking-tight">
-                {themeSpecificFields?.["dark-trend.first-section-subheader"] ??
-                  "First Section Subheader"}
+                {f["dark-trend.first-section-subheader"]}
               </h3>
               <p className="mt-4 text-sm leading-relaxed text-white/80">
-                {themeSpecificFields?.[
-                  "dark-trend.first-section-description"
-                ] ??
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
+                {f["dark-trend.first-section-description"]}
               </p>
             </div>
           </div>
@@ -174,13 +165,10 @@ export async function DarkTrendHomepage() {
                 {businessName.toUpperCase().replace(/\s/g, " ")}
               </span> */}
               <h2 className="relative max-w-md text-3xl font-bold tracking-tight md:text-7xl">
-                {themeSpecificFields?.["dark-trend.second-section-title"] ??
-                  "Second Section Title"}
+                {f["dark-trend.second-section-title"]}
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-white/80">
-                {themeSpecificFields?.[
-                  "dark-trend.second-section-description"
-                ] ?? "Second Section Description"}
+                {f["dark-trend.second-section-description"]}
               </p>
             </div>
             <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-end">
@@ -271,35 +259,25 @@ export async function DarkTrendHomepage() {
                 </span>
 
                 <h2 className="relative text-3xl font-bold tracking-tight md:text-6xl">
-                  {themeSpecificFields?.["dark-trend.cta-header"] ??
-                    "CTA Header"}
+                  {f["dark-trend.cta-header"]}
                 </h2>
               </div>
               <p className="mt-4 text-lg leading-relaxed text-white/80">
-                {themeSpecificFields?.["dark-trend.cta-description"] ??
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
+                {f["dark-trend.cta-description"]}
               </p>
 
               <Button
                 className="w-fit rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
                 asChild
               >
-                <Link
-                  href={
-                    themeSpecificFields?.["dark-trend.cta-button-link"] ?? "#!"
-                  }
-                >
-                  {themeSpecificFields?.["dark-trend.cta-button-text"] ??
-                    "CTA Button Text"}
+                <Link href={f["dark-trend.cta-button-link"] ?? "/contact"}>
+                  {f["dark-trend.cta-button-text"]}
                 </Link>
               </Button>
             </div>
             <div className="relative aspect-4/5 overflow-hidden rounded-sm">
               <Image
-                src={
-                  themeSpecificFields?.["dark-trend.cta-image"] ??
-                  "/placeholder.svg"
-                }
+                src={f["dark-trend.cta-image"] ?? "/placeholder.svg"}
                 alt="CTA Image"
                 fill
                 className="object-cover"

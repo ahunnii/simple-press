@@ -3,8 +3,7 @@ import { BookOpen, Flower2, HandHelping, MapIcon } from "lucide-react";
 import { api } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
-// import { GalleryRenderer } from "~/components/gallery-renderer";
-
+import { resolveFields } from ".";
 import { PollenCallToAction } from "./pollen-cta";
 import { PollenHomepageAbout } from "./pollen-homepage-about";
 import { PollenHomepageGallery } from "./pollen-homepage-gallery";
@@ -13,111 +12,71 @@ import { PollenHero } from "./pollen-homepage-hero";
 export async function PollenHomepage() {
   const homepage = await api.business.getHomepage();
 
-  const themeSpecificFields = homepage?.siteContent?.customFields as Record<
-    string,
-    string
-  >;
+  const f = resolveFields(homepage?.siteContent?.customFields, [
+    "pollen.homepage.hero-image",
+    "pollen.homepage.hero-title",
+    "pollen.homepage.hero-subtitle",
+    "pollen.homepage.hero-description-text",
+    "pollen.homepage.hero-button-text",
+    "pollen.homepage.hero-button-link",
+    "pollen.homepage.about-service-title-1",
+    "pollen.homepage.about-service-description-1",
+    "pollen.homepage.about-service-title-2",
+    "pollen.homepage.about-service-description-2",
+    "pollen.homepage.about-service-title-3",
+    "pollen.homepage.about-service-description-3",
+    "pollen.homepage.about-service-title-4",
+    "pollen.homepage.about-service-description-4",
+    "pollen.global.cta-title",
+    "pollen.global.cta-subtitle",
+    "pollen.global.cta-text",
+    "pollen.global.cta-button-text",
+    "pollen.global.cta-button-link",
+    "pollen.global.cta-image",
+  ]);
 
   const services = [
     {
       icon: Flower2,
-      title:
-        themeSpecificFields?.["pollen.homepage.about-service-title-1"] ??
-        "Service 1",
-      description:
-        themeSpecificFields?.["pollen.homepage.about-service-description-1"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
+      title: f["pollen.homepage.about-service-title-1"] ?? "",
+      description: f["pollen.homepage.about-service-description-1"] ?? "",
     },
     {
       icon: HandHelping,
-      title:
-        themeSpecificFields?.["pollen.homepage.about-service-title-2"] ??
-        "Service 2",
-      description:
-        themeSpecificFields?.["pollen.homepage.about-service-description-2"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
+      title: f["pollen.homepage.about-service-title-2"] ?? "",
+      description: f["pollen.homepage.about-service-description-2"] ?? "",
     },
     {
       icon: MapIcon,
-      title:
-        themeSpecificFields?.["pollen.homepage.about-service-title-3"] ??
-        "Service 3",
-      description:
-        themeSpecificFields?.["pollen.homepage.about-service-description-3"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
+      title: f["pollen.homepage.about-service-title-3"] ?? "",
+      description: f["pollen.homepage.about-service-description-3"] ?? "",
     },
     {
       icon: BookOpen,
-      title:
-        themeSpecificFields?.["pollen.homepage.about-service-title-4"] ??
-        "Service 4",
-      description:
-        themeSpecificFields?.["pollen.homepage.about-service-description-4"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
+      title: f["pollen.homepage.about-service-title-4"] ?? "",
+      description: f["pollen.homepage.about-service-description-4"] ?? "",
     },
   ];
-  // const portfolioGalleryId = themeSpecificFields?.["pollen.global.gallery"];
-
-  // Fetch gallery if set
-  // const gallery = portfolioGalleryId
-  //   ? await db.gallery.findUnique({
-  //       where: { id: portfolioGalleryId },
-  //       include: { images: { orderBy: { sortOrder: "asc" } } },
-  //     })
-  //   : null;
 
   return (
     <PageTransition>
       <PollenHero
-        title={
-          themeSpecificFields?.["pollen.homepage.hero-title"] ?? "Business"
-        }
-        subtitle={
-          themeSpecificFields?.["pollen.homepage.hero-subtitle"] ??
-          "Where Business Business"
-        }
-        descriptionText={
-          themeSpecificFields?.["pollen.homepage.hero-description-text"] ??
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-        }
-        buttonText={
-          themeSpecificFields?.["pollen.homepage.hero-button-text"] ??
-          "Call to Action"
-        }
-        buttonLink={
-          themeSpecificFields?.["pollen.homepage.hero-button-link"] ?? "#!"
-        }
-        imageUrl={
-          themeSpecificFields?.["pollen.homepage.hero-image"] ??
-          "/placeholder.svg"
-        }
+        title={f["pollen.homepage.hero-title"] ?? ""}
+        subtitle={f["pollen.homepage.hero-subtitle"] ?? ""}
+        descriptionText={f["pollen.homepage.hero-description-text"] ?? ""}
+        buttonText={f["pollen.homepage.hero-button-text"] ?? ""}
+        buttonLink={f["pollen.homepage.hero-button-link"] ?? "/contact"}
+        imageUrl={f["pollen.homepage.hero-image"] ?? "/placeholder.svg"}
       />
       <PollenHomepageAbout services={services} />
-
-      {/* {gallery && <GalleryRenderer gallery={gallery} />} */}
-
       <PollenHomepageGallery />
       <PollenCallToAction
-        title={
-          themeSpecificFields?.["pollen.global.cta-title"] ?? "Call to Action"
-        }
-        subtitle={
-          themeSpecificFields?.["pollen.global.cta-subtitle"] ??
-          "Call to Action"
-        }
-        description={
-          themeSpecificFields?.["pollen.global.cta-text"] ?? "Call to Action"
-        }
-        buttonText={
-          themeSpecificFields?.["pollen.global.cta-button-text"] ??
-          "Call to Action"
-        }
-        buttonLink={
-          themeSpecificFields?.["pollen.global.cta-button-link"] ?? "#!"
-        }
-        imageUrl={
-          themeSpecificFields?.["pollen.global.cta-image"] ?? "/placeholder.svg"
-        }
+        title={f["pollen.global.cta-title"] ?? ""}
+        subtitle={f["pollen.global.cta-subtitle"] ?? ""}
+        description={f["pollen.global.cta-text"] ?? ""}
+        buttonText={f["pollen.global.cta-button-text"] ?? ""}
+        buttonLink={f["pollen.global.cta-button-link"] ?? "/contact"}
+        imageUrl={f["pollen.global.cta-image"] ?? "/placeholder.svg"}
       />
     </PageTransition>
   );

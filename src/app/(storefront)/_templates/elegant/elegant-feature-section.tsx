@@ -1,60 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import { Flower2, Globe, Leaf, Recycle } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { getThemeFields, TEMPLATE_FIELDS } from "~/lib/template-fields";
-
-const features = [
-  {
-    icon: Recycle,
-    title: "Eco-Friendly Packaging",
-    description: "Recyclable and biodegradable materials",
-  },
-  {
-    icon: Leaf,
-    title: "100% Natural",
-    description: "No synthetic chemicals or parabens",
-  },
-  {
-    icon: Flower2,
-    title: "Plant-Based",
-    description: "Botanical extracts and essential oils",
-  },
-  {
-    icon: Globe,
-    title: "Ethical Sourcing",
-    description: "Fair trade certified ingredients",
-  },
-];
 
 type Props = {
   homepage: RouterOutputs["business"]["getHomepage"];
+  aboutTitle: string;
+  aboutText: string;
+  features: { title: string; description: string }[];
 };
 
-export function ElegantFeatureSection({ homepage }: Props) {
+export function ElegantFeatureSection({ homepage, aboutTitle, aboutText, features }: Props) {
   const [isVisible, setIsVisible] = useState(false);
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(false);
   const bentoRef = useRef<HTMLDivElement>(null);
   const videoSectionRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-
-  /* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call -- getThemeFields accepts unknown (Prisma JsonValue) */
-  const themeSpecificFields = getThemeFields(
-    "elegant",
-    homepage?.siteContent?.customFields as unknown,
-  );
-
-  const aboutTitle = themeSpecificFields?.["elegant.homepage.about.title"];
-  const aboutText = themeSpecificFields?.["elegant.homepage.about.text"];
-  // const features = homepage?.siteContent?.features as {
-  //   title: string;
-  //   description: string;
-  //   icon: string;
-  // }[];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -277,7 +240,7 @@ export function ElegantFeatureSection({ homepage }: Props) {
                   : {}
               }
             >
-              {!!aboutTitle ? aboutTitle : "About Us"}
+              {aboutTitle}
             </h2>
             <p
               className={`text-muted-foreground mb-10 max-w-md text-lg leading-relaxed ${headerVisible ? "animate-blur-in opacity-0" : "opacity-0"}`}
@@ -287,9 +250,7 @@ export function ElegantFeatureSection({ homepage }: Props) {
                   : {}
               }
             >
-              {!!aboutText
-                ? aboutText
-                : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis nec sollicitudin urna, vitae dictum nisi. Nullam lobortis ut neque eget cursus."}
+              {aboutText}
             </p>
 
             {/* Feature Cards */}

@@ -10,6 +10,7 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
+import { resolveFields } from ".";
 import { PollenContactForm } from "./pollen-contact-form";
 import { PollenGeneralLayout } from "./pollen-general-layout";
 
@@ -19,18 +20,15 @@ const DEFAULT_FORM_IMAGE =
 export function PollenContactPage({
   business,
 }: DefaultContactPageTemplateProps) {
-  const themeSpecificFields = business?.siteContent?.customFields as Record<
-    string,
-    string
-  >;
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "pollen.contact.form-title",
+    "pollen.contact.form-description",
+    "pollen.contact.form-image",
+  ]);
 
-  const formImage =
-    themeSpecificFields?.["pollen.contact.form-image"] ?? DEFAULT_FORM_IMAGE;
-  const formTitle =
-    themeSpecificFields?.["pollen.contact.form-title"] ?? "Send us a message";
-  const formDescription =
-    themeSpecificFields?.["pollen.contact.form-description"] ??
-    "We'd love to hear from you!";
+  const formImage = f["pollen.contact.form-image"] ?? DEFAULT_FORM_IMAGE;
+  const formTitle = f["pollen.contact.form-title"];
+  const formDescription = f["pollen.contact.form-description"];
 
   const physicalAddress = business?.businessAddress ?? "Detroit, MI";
   const contactEmail = business?.supportEmail ?? "hello@example.com";

@@ -22,9 +22,25 @@ const HERO_VIDEO_SRC =
 
 type Props = {
   homepage: RouterOutputs["business"]["getHomepage"];
+  tagline?: string;
+  heroImage?: string;
+  heroTitleLine1?: string;
+  heroTitleLine2?: string;
+  heroDescription?: string;
+  heroButtonText?: string;
+  heroButtonLink?: string;
 };
-export function ElegantHero({ homepage }: Props) {
-  const heroImageUrl = "/placeholder.svg";
+export function ElegantHero({
+  homepage,
+  tagline,
+  heroImage,
+  heroTitleLine1,
+  heroTitleLine2,
+  heroDescription,
+  heroButtonText,
+  heroButtonLink,
+}: Props) {
+  const heroImageUrl = heroImage ?? "";
   const useImage = Boolean(heroImageUrl?.trim());
 
   return (
@@ -68,43 +84,33 @@ export function ElegantHero({ homepage }: Props) {
               className="animate-blur-in mb-6 block text-sm tracking-normal text-black uppercase opacity-0"
               style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}
             >
-              Natural Skincare
+              {tagline ?? "Natural Skincare"}
             </span>
             <h2 className="mb-6 font-serif text-5xl leading-[1.1] text-balance text-black md:text-6xl lg:text-7xl">
-              {(() => {
-                // Get the heroTitle from homepage or fallback text
-                const heroTitle = "Made with care.\nEspecially for you.";
-                // Split heroTitle into lines by newline, defaulting to two lines
-                const [firstLine, secondLine = ""] = heroTitle.split("\n");
-                return (
-                  <>
-                    <span
-                      className="animate-blur-in block font-semibold opacity-0 text-shadow-xs"
-                      style={{
-                        animationDelay: "0.4s",
-                        animationFillMode: "forwards",
-                      }}
-                    >
-                      {firstLine}
-                    </span>
-                    <span
-                      className="animate-blur-in block text-7xl font-semibold opacity-0 text-shadow-xs xl:text-9xl"
-                      style={{
-                        animationDelay: "0.6s",
-                        animationFillMode: "forwards",
-                      }}
-                    >
-                      {secondLine}
-                    </span>
-                  </>
-                );
-              })()}
+              <span
+                className="animate-blur-in block font-semibold opacity-0 text-shadow-xs"
+                style={{
+                  animationDelay: "0.4s",
+                  animationFillMode: "forwards",
+                }}
+              >
+                {heroTitleLine1 ?? "Made with care."}
+              </span>
+              <span
+                className="animate-blur-in block text-7xl font-semibold opacity-0 text-shadow-xs xl:text-9xl"
+                style={{
+                  animationDelay: "0.6s",
+                  animationFillMode: "forwards",
+                }}
+              >
+                {heroTitleLine2 ?? "Especially for you."}
+              </span>
             </h2>
             <p
               className="animate-blur-in mx-auto mb-10 max-w-md text-lg leading-relaxed text-black opacity-0 lg:mx-0"
               style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
             >
-              {"Check out our products!"}
+              {heroDescription ?? "Check out our products!"}
             </p>
 
             <div
@@ -112,10 +118,10 @@ export function ElegantHero({ homepage }: Props) {
               style={{ animationDelay: "1s", animationFillMode: "forwards" }}
             >
               <Link
-                href={"/shop"}
+                href={heroButtonLink ?? "/shop"}
                 className="group bg-primary text-primary-foreground boty-transition hover:bg-primary/90 boty-shadow inline-flex items-center justify-center gap-3 rounded-full px-8 py-4 text-sm tracking-wide"
               >
-                {"Shop Now"}
+                {heroButtonText ?? "Shop Now"}
                 <ArrowRight className="boty-transition h-4 w-4 group-hover:translate-x-1" />
               </Link>
             </div>

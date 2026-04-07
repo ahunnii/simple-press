@@ -24,6 +24,7 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
+import { resolveFields } from ".";
 import { PollenGeneralLayout } from "./pollen-general-layout";
 import { PollenTestimonialsSection } from "./pollen-testimonials-section";
 
@@ -31,78 +32,77 @@ type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 export async function PollenServicesPage({ business }: Props) {
-  const themeSpecificFields = business?.siteContent?.customFields as Record<
-    string,
-    string
-  >;
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "pollen.services.title",
+    "pollen.services.subtitle",
+    "pollen.services.text",
+    "pollen.services.service-1-name",
+    "pollen.services.service-1-description",
+    "pollen.services.service-2-name",
+    "pollen.services.service-2-description",
+    "pollen.services.service-3-name",
+    "pollen.services.service-3-description",
+    "pollen.services.service-4-name",
+    "pollen.services.service-4-description",
+    "pollen.services.faq-description",
+    "pollen.services.faq-image",
+    "pollen.services.faq-question-1",
+    "pollen.services.faq-answer-1",
+    "pollen.services.faq-question-2",
+    "pollen.services.faq-answer-2",
+    "pollen.services.faq-question-3",
+    "pollen.services.faq-answer-3",
+    "pollen.services.resources-title",
+  ]);
 
   const testimonials = (await api.testimonial.listRandom({ limit: 3 })) ?? [];
 
   const services = [
     {
       icon: Flower2,
-      title:
-        themeSpecificFields?.["pollen.services.service-1-name"] ?? "Service 1",
-      description:
-        themeSpecificFields?.["pollen.services.service-1-description"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+      title: f["pollen.services.service-1-name"],
+      description: f["pollen.services.service-1-description"],
     },
     {
       icon: HandHelping,
-      title:
-        themeSpecificFields?.["pollen.services.service-2-name"] ?? "Service 2",
-      description:
-        themeSpecificFields?.["pollen.services.service-2-description"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+      title: f["pollen.services.service-2-name"],
+      description: f["pollen.services.service-2-description"],
     },
     {
       icon: MapIcon,
-      title:
-        themeSpecificFields?.["pollen.services.service-3-name"] ?? "Service 3",
-      description:
-        themeSpecificFields?.["pollen.services.service-3-description"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+      title: f["pollen.services.service-3-name"],
+      description: f["pollen.services.service-3-description"],
     },
     {
       icon: BookOpen,
-      title:
-        themeSpecificFields?.["pollen.services.service-4-name"] ?? "Service 4",
-      description:
-        themeSpecificFields?.["pollen.services.service-4-description"] ??
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+      title: f["pollen.services.service-4-name"],
+      description: f["pollen.services.service-4-description"],
     },
   ];
 
   const faqs = [
     {
-      question:
-        themeSpecificFields?.["pollen.services.faq-question-1"] ??
-        "FAQ Question 1",
-      answer:
-        themeSpecificFields?.["pollen.services.faq-answer-1"] ?? "FAQ Answer 1",
+      question: f["pollen.services.faq-question-1"],
+      answer: f["pollen.services.faq-answer-1"],
     },
     {
-      question:
-        themeSpecificFields?.["pollen.services.faq-question-2"] ??
-        "FAQ Question 2",
-      answer:
-        themeSpecificFields?.["pollen.services.faq-answer-2"] ?? "FAQ Answer 2",
+      question: f["pollen.services.faq-question-2"],
+      answer: f["pollen.services.faq-answer-2"],
     },
     {
-      question:
-        themeSpecificFields?.["pollen.services.faq-question-3"] ??
-        "FAQ Question 3",
-      answer:
-        themeSpecificFields?.["pollen.services.faq-answer-3"] ?? "FAQ Answer 3",
+      question: f["pollen.services.faq-question-3"],
+      answer: f["pollen.services.faq-answer-3"],
     },
-  ];
+  ].filter((faq) => faq.question);
 
+  // Resource links are user-supplied URLs so read raw fields directly
+  const rawFields =
+    (business?.siteContent?.customFields as Record<string, string> | null) ??
+    {};
   const resources: { name: string; url: string }[] = [];
   for (let i = 1; i <= 5; i++) {
-    const name =
-      themeSpecificFields?.[`pollen.services.resource-name-${i}`]?.trim() ?? "";
-    const url =
-      themeSpecificFields?.[`pollen.services.resource-link-${i}`]?.trim() ?? "";
+    const name = rawFields[`pollen.services.resource-name-${i}`]?.trim() ?? "";
+    const url = rawFields[`pollen.services.resource-link-${i}`]?.trim() ?? "";
     if (name && url) resources.push({ name, url });
   }
 
@@ -119,16 +119,13 @@ export async function PollenServicesPage({ business }: Props) {
             <FadeIn direction="up">
               <div className="lg:max-w-lg">
                 <p className="mb-4 text-sm font-semibold tracking-wider text-[#2a351f] uppercase">
-                  {themeSpecificFields?.["pollen.services.subtitle"] ??
-                    "About Our Services"}
+                  {f["pollen.services.subtitle"]}
                 </p>
                 <h2 className="mb-6 text-3xl leading-tight font-bold text-balance text-[#374151] md:text-4xl">
-                  {themeSpecificFields?.["pollen.services.title"] ??
-                    "About Our Services"}
+                  {f["pollen.services.title"]}
                 </h2>
                 <p className="mb-8 leading-relaxed whitespace-pre-line text-[#4b5563]">
-                  {themeSpecificFields?.["pollen.services.text"] ??
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
+                  {f["pollen.services.text"]}
                 </p>
                 <Link
                   href={"/contact"}
@@ -174,10 +171,7 @@ export async function PollenServicesPage({ business }: Props) {
               className="relative aspect-square overflow-hidden rounded-2xl"
             >
               <Image
-                src={
-                  themeSpecificFields?.["pollen.services.faq-image"] ??
-                  "/placeholder.svg"
-                }
+                src={f["pollen.services.faq-image"] ?? "/placeholder.svg"}
                 alt="Potted plant with green leaves"
                 fill
                 className="object-cover"
@@ -194,8 +188,7 @@ export async function PollenServicesPage({ business }: Props) {
                   {"Frequently Asked Questions"}
                 </h2>
                 <p className="mb-8 leading-relaxed text-[#6b7280]">
-                  {themeSpecificFields?.["pollen.services.faq-description"] ??
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
+                  {f["pollen.services.faq-description"]}
                 </p>
 
                 <Accordion type="single" collapsible className="mb-8">
@@ -237,8 +230,7 @@ export async function PollenServicesPage({ business }: Props) {
                 Free for you
               </p>
               <h2 className="mb-12 text-3xl font-bold text-[#374151] md:text-4xl">
-                {themeSpecificFields?.["pollen.services.resources-title"] ??
-                  "Helpful Resources"}
+                {f["pollen.services.resources-title"]}
               </h2>
             </FadeIn>
             <StaggerContainer

@@ -68,7 +68,7 @@ export function HappyBambooFeaturedProducts({
             Happy Bamboo
           </span>
           <h2 className="text-foreground font-serif text-4xl font-bold tracking-tight md:text-5xl">
-            <span className="text-balance">{featuredTitle}</span>
+            <span className="font-serif text-balance">{featuredTitle}</span>
           </h2>
           <p className="text-muted-foreground mx-auto mt-4 max-w-2xl">
             {featuredDescription}

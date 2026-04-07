@@ -158,7 +158,7 @@ export async function HappyBambooFooter({
             {policies.map((link) => (
               <Link
                 key={link.id}
-                href={link.slug}
+                href={`/${link.slug}`}
                 className="hover:text-primary"
               >
                 {link.title}

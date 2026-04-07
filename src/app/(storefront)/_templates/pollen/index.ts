@@ -18,6 +18,8 @@ const globalData: TemplateField[] = [
     page: "global",
     group: "global.cta",
     gridColumn: "col-span-full",
+    defaultValue: "Ready to Get Started?",
+    placeholder: "e.g. Ready to Get Started?",
   },
   {
     key: "pollen.global.cta-subtitle",
@@ -27,6 +29,8 @@ const globalData: TemplateField[] = [
     page: "global",
     group: "global.cta",
     gridColumn: "col-span-full",
+    defaultValue: "Let's work together",
+    placeholder: "Let's work together",
   },
   {
     key: "pollen.global.cta-text",
@@ -36,6 +40,8 @@ const globalData: TemplateField[] = [
     page: "global",
     group: "global.cta",
     gridColumn: "col-span-full",
+    defaultValue: "Reach out and let us know how we can help.",
+    placeholder: "A short invitation to get in touch...",
   },
   {
     key: "pollen.global.cta-button-text",
@@ -45,6 +51,8 @@ const globalData: TemplateField[] = [
     page: "global",
     group: "global.cta",
     gridColumn: "col-span-1",
+    defaultValue: "Get in Touch",
+    placeholder: "Get in Touch",
   },
   {
     key: "pollen.global.cta-button-link",
@@ -54,6 +62,8 @@ const globalData: TemplateField[] = [
     page: "global",
     group: "global.cta",
     gridColumn: "col-span-1",
+    defaultValue: "/contact",
+    placeholder: "/contact",
   },
 ];
 
@@ -66,6 +76,7 @@ const aboutPageData: TemplateField[] = [
     page: "about",
     group: "about.main",
     gridColumn: "col-span-full",
+    defaultValue: "Heya!",
     placeholder: "Heya!",
   },
   {
@@ -76,6 +87,8 @@ const aboutPageData: TemplateField[] = [
     page: "about",
     group: "about.main",
     gridColumn: "col-span-full",
+    defaultValue:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     placeholder: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
   },
   {
@@ -99,6 +112,7 @@ const aboutOwnerData: TemplateField[] = [
     page: "about",
     group: "about.owner",
     gridColumn: "col-span-full",
+    defaultValue: "The Face Behind the Business",
     placeholder: "The Face Behind [Business]",
   },
   {
@@ -109,6 +123,7 @@ const aboutOwnerData: TemplateField[] = [
     page: "about",
     group: "about.owner",
     gridColumn: "col-span-full",
+    defaultValue: "Meet the Owner",
     placeholder: "Meet the Owner",
   },
   {
@@ -119,6 +134,7 @@ const aboutOwnerData: TemplateField[] = [
     page: "about",
     group: "about.owner",
     gridColumn: "col-span-1",
+    defaultValue: "Jane Smith",
     placeholder: "Jane Smith",
   },
   {
@@ -129,6 +145,7 @@ const aboutOwnerData: TemplateField[] = [
     page: "about",
     group: "about.owner",
     gridColumn: "col-span-1",
+    defaultValue: "Owner",
     placeholder: "Owner",
   },
   {
@@ -148,6 +165,7 @@ const aboutOwnerData: TemplateField[] = [
     page: "about",
     group: "about.owner",
     gridColumn: "col-span-full",
+    defaultValue: "A few sentences about the owner and their story.",
     placeholder: "A few sentences about the owner and their story.",
   },
 ];
@@ -161,6 +179,7 @@ const contactPageData: TemplateField[] = [
     page: "contact",
     group: "contact.main",
     gridColumn: "col-span-full",
+    defaultValue: "Send us a message",
     placeholder: "Send Us a Message",
   },
   {
@@ -171,6 +190,7 @@ const contactPageData: TemplateField[] = [
     page: "contact",
     group: "contact.main",
     gridColumn: "col-span-full",
+    defaultValue: "We'd love to hear from you!",
     placeholder: "We'll get back to you as soon as possible.",
   },
   {
@@ -202,6 +222,7 @@ const homepageData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
+    defaultValue: "Welcome to Our Store",
     placeholder: "Welcome to Our Store",
   },
   {
@@ -212,6 +233,7 @@ const homepageData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
+    defaultValue: "Discover our amazing products",
     placeholder: "Discover our amazing products...",
   },
   {
@@ -222,10 +244,11 @@ const homepageData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
+    defaultValue:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     placeholder:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
   },
-
   {
     key: "pollen.homepage.hero-button-text",
     label: "Hero Button Text",
@@ -234,6 +257,7 @@ const homepageData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
+    defaultValue: "Get in Touch",
     placeholder: "Call to Action",
   },
   {
@@ -244,6 +268,7 @@ const homepageData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
+    defaultValue: "/contact",
     placeholder: "/contact",
   },
 ];
@@ -257,6 +282,7 @@ const homepageServicesData: TemplateField[] = [
     page: "homepage",
     group: "homepage.services",
     gridColumn: "col-span-1",
+    defaultValue: "About Our Services",
     placeholder: "About Our Services",
   },
   {
@@ -267,6 +293,7 @@ const homepageServicesData: TemplateField[] = [
     page: "homepage",
     group: "homepage.services",
     gridColumn: "col-span-1",
+    defaultValue: "We offer a range of services tailored to your needs.",
     placeholder: "Our services are ...",
   },
   {
@@ -276,6 +303,8 @@ const homepageServicesData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.services",
+    defaultValue: "Service One",
+    placeholder: "e.g. Landscaping",
   },
   {
     key: "pollen.homepage.about-service-description-1",
@@ -284,6 +313,8 @@ const homepageServicesData: TemplateField[] = [
     type: "textarea",
     page: "homepage",
     group: "homepage.services",
+    defaultValue: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    placeholder: "Brief description of this service...",
   },
   {
     key: "pollen.homepage.about-service-title-2",
@@ -292,6 +323,8 @@ const homepageServicesData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.services",
+    defaultValue: "Service Two",
+    placeholder: "e.g. Pest Control",
   },
   {
     key: "pollen.homepage.about-service-description-2",
@@ -300,6 +333,8 @@ const homepageServicesData: TemplateField[] = [
     type: "textarea",
     page: "homepage",
     group: "homepage.services",
+    defaultValue: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    placeholder: "Brief description of this service...",
   },
   {
     key: "pollen.homepage.about-service-title-3",
@@ -308,6 +343,8 @@ const homepageServicesData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.services",
+    defaultValue: "Service Three",
+    placeholder: "e.g. Irrigation",
   },
   {
     key: "pollen.homepage.about-service-description-3",
@@ -316,6 +353,8 @@ const homepageServicesData: TemplateField[] = [
     type: "textarea",
     page: "homepage",
     group: "homepage.services",
+    defaultValue: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    placeholder: "Brief description of this service...",
   },
   {
     key: "pollen.homepage.about-service-title-4",
@@ -324,6 +363,8 @@ const homepageServicesData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.services",
+    defaultValue: "Service Four",
+    placeholder: "e.g. Consulting",
   },
   {
     key: "pollen.homepage.about-service-description-4",
@@ -332,6 +373,8 @@ const homepageServicesData: TemplateField[] = [
     type: "textarea",
     page: "homepage",
     group: "homepage.services",
+    defaultValue: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    placeholder: "Brief description of this service...",
   },
 ];
 const servicesPageData: TemplateField[] = [
@@ -343,6 +386,7 @@ const servicesPageData: TemplateField[] = [
     page: "products",
     group: "products.main",
     gridColumn: "col-span-1",
+    defaultValue: "About Our Services",
     placeholder: "Our Services",
   },
   {
@@ -353,6 +397,7 @@ const servicesPageData: TemplateField[] = [
     page: "products",
     group: "products.main",
     gridColumn: "col-span-1",
+    defaultValue: "What We Do",
     placeholder: "What We Do",
   },
   {
@@ -363,6 +408,8 @@ const servicesPageData: TemplateField[] = [
     page: "products",
     group: "products.main",
     gridColumn: "col-span-full",
+    defaultValue:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     placeholder:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
   },
@@ -377,6 +424,7 @@ const servicesExpandedPageData: TemplateField[] = [
     page: "products",
     group: "products.services-expanded",
     gridColumn: "col-span-full",
+    defaultValue: "Service One",
     placeholder: "e.g. Landscaping",
   },
   {
@@ -387,10 +435,11 @@ const servicesExpandedPageData: TemplateField[] = [
     page: "products",
     group: "products.services-expanded",
     gridColumn: "col-span-full",
+    defaultValue:
+      "We offer a wide range of services to meet your needs. Contact us to learn more.",
     placeholder:
       "e.g. We offer a wide range of gardening services to meet your needs.",
   },
-
   {
     key: "pollen.services.service-2-name",
     label: "Business Service 2 Name",
@@ -399,6 +448,7 @@ const servicesExpandedPageData: TemplateField[] = [
     page: "products",
     group: "products.services-expanded",
     gridColumn: "col-span-full",
+    defaultValue: "Service Two",
     placeholder: "e.g. Pest Control",
   },
   {
@@ -409,6 +459,8 @@ const servicesExpandedPageData: TemplateField[] = [
     page: "products",
     group: "products.services-expanded",
     gridColumn: "col-span-full",
+    defaultValue:
+      "We offer a wide range of services to meet your needs. Contact us to learn more.",
     placeholder:
       "e.g. We offer a wide range of pest control services to meet your needs.",
   },
@@ -420,9 +472,9 @@ const servicesExpandedPageData: TemplateField[] = [
     page: "products",
     group: "products.services-expanded",
     gridColumn: "col-span-full",
+    defaultValue: "Service Three",
     placeholder: "e.g. Irrigation",
   },
-
   {
     key: "pollen.services.service-3-description",
     label: "Business Service 3 Description",
@@ -431,6 +483,8 @@ const servicesExpandedPageData: TemplateField[] = [
     page: "products",
     group: "products.services-expanded",
     gridColumn: "col-span-full",
+    defaultValue:
+      "We offer a wide range of services to meet your needs. Contact us to learn more.",
     placeholder:
       "e.g. We offer a wide range of irrigation services to meet your needs.",
   },
@@ -442,7 +496,8 @@ const servicesExpandedPageData: TemplateField[] = [
     page: "products",
     group: "products.services-expanded",
     gridColumn: "col-span-full",
-    placeholder: "e.g. Irrigation",
+    defaultValue: "Service Four",
+    placeholder: "e.g. Consulting",
   },
   {
     key: "pollen.services.service-4-description",
@@ -452,8 +507,10 @@ const servicesExpandedPageData: TemplateField[] = [
     page: "products",
     group: "products.services-expanded",
     gridColumn: "col-span-full",
+    defaultValue:
+      "We offer a wide range of services to meet your needs. Contact us to learn more.",
     placeholder:
-      "e.g. We offer a wide range of irrigation services to meet your needs.",
+      "e.g. We offer a wide range of consulting services to meet your needs.",
   },
 ];
 
@@ -466,6 +523,8 @@ const servicesQuestionsData: TemplateField[] = [
     page: "products",
     group: "products.faq",
     gridColumn: "col-span-full",
+    defaultValue:
+      "Have questions? We have answers. Browse our most frequently asked questions below.",
     placeholder:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
   },
@@ -486,6 +545,7 @@ const servicesQuestionsData: TemplateField[] = [
     page: "products",
     group: "products.faq",
     gridColumn: "col-span-1",
+    defaultValue: "How do I get started?",
     placeholder: "What is your return policy?",
   },
   {
@@ -496,6 +556,8 @@ const servicesQuestionsData: TemplateField[] = [
     page: "products",
     group: "products.faq",
     gridColumn: "col-span-full",
+    defaultValue:
+      "Simply reach out through our contact form and we'll get back to you within one business day.",
     placeholder: "We offer a 30-day return policy...",
   },
   {
@@ -506,6 +568,7 @@ const servicesQuestionsData: TemplateField[] = [
     page: "products",
     group: "products.faq",
     gridColumn: "col-span-1",
+    defaultValue: "What areas do you serve?",
     placeholder: "How long does shipping take?",
   },
   {
@@ -516,6 +579,8 @@ const servicesQuestionsData: TemplateField[] = [
     page: "products",
     group: "products.faq",
     gridColumn: "col-span-full",
+    defaultValue:
+      "We serve clients locally and remotely. Contact us to confirm availability in your area.",
     placeholder: "Standard shipping takes 5-7 business days...",
   },
   {
@@ -526,6 +591,7 @@ const servicesQuestionsData: TemplateField[] = [
     page: "products",
     group: "products.faq",
     gridColumn: "col-span-1",
+    defaultValue: "Do you offer free consultations?",
     placeholder: "What is your refund policy?",
   },
   {
@@ -536,6 +602,8 @@ const servicesQuestionsData: TemplateField[] = [
     page: "products",
     group: "products.faq",
     gridColumn: "col-span-full",
+    defaultValue:
+      "Yes! We offer a free 30-minute consultation to discuss your needs and how we can help.",
     placeholder: "We offer a 30-day refund policy...",
   },
 ];
@@ -550,6 +618,7 @@ const servicesResourcesData: TemplateField[] = [
     page: "products",
     group: "products.resources",
     gridColumn: "col-span-full",
+    defaultValue: "Helpful Resources",
     placeholder: "Helpful Resources",
   },
   {
@@ -777,3 +846,25 @@ export const pollenData = {
 export const pollenFieldGroups = {
   pollen: fieldGroups,
 };
+
+const _pollenFieldMap = new Map(
+  pollenData.pollen.map((field) => [field.key, field]),
+);
+
+export function resolveFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
+  const raw =
+    customFields != null &&
+    typeof customFields === "object" &&
+    !Array.isArray(customFields)
+      ? (customFields as Record<string, string>)
+      : {};
+  const out: Record<string, string> = {};
+  for (const key of keys) {
+    const custom = raw[key]?.trim();
+    out[key] = custom ?? _pollenFieldMap.get(key)?.defaultValue ?? "";
+  }
+  return out;
+}

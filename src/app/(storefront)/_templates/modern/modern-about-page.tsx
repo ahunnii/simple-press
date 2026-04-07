@@ -4,13 +4,32 @@ import { ArrowRight } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../types";
 
+import { resolveFields } from ".";
 import { ModernGeneralLayout } from "./modern-general-layout";
 
 export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
-  const themeSpecificFields = business?.siteContent?.customFields as Record<
-    string,
-    string
-  >;
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "modern.about.mission-header",
+    "modern.about.mission-description",
+    "modern.about.values-subheader",
+    "modern.about.values-header",
+    "modern.about.value-1-title",
+    "modern.about.value-1-description",
+    "modern.about.value-2-title",
+    "modern.about.value-2-description",
+    "modern.about.value-3-title",
+    "modern.about.value-3-description",
+    "modern.about.story-subheader",
+    "modern.about.story-header",
+    "modern.about.story-paragraph-1",
+    "modern.about.story-paragraph-2",
+    "modern.about.first-image",
+    "modern.about.cta-header",
+    "modern.about.cta-text",
+    "modern.about.cta-button-text",
+    "modern.about.cta-button-link",
+  ]);
+
   return (
     <ModernGeneralLayout title="About Us" subtitle="Our Story">
       {/* Mission */}
@@ -18,12 +37,10 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-foreground font-serif text-3xl text-balance md:text-4xl">
-              {themeSpecificFields?.["modern.about.mission-header"] ??
-                "We believe your home should tell your story"}
+              {f["modern.about.mission-header"]}
             </h2>
             <p className="text-muted-foreground mt-6 leading-relaxed">
-              {themeSpecificFields?.["modern.about.mission-description"] ??
-                "Haven was founded on a simple idea: that the objects we surround ourselves with should be beautiful, functional, and made with care. We partner directly with artisans and small makers from around the world, bringing you pieces that are as meaningful as they are well-made."}
+              {f["modern.about.mission-description"]}
             </p>
           </div>
         </div>
@@ -34,12 +51,10 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center">
             <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-              {themeSpecificFields?.["modern.about.values-subheader"] ??
-                "What We Stand For"}
+              {f["modern.about.values-subheader"]}
             </p>
             <h2 className="text-foreground mt-2 font-serif text-3xl md:text-4xl">
-              {themeSpecificFields?.["modern.about.values-header"] ??
-                "Our Values"}
+              {f["modern.about.values-header"]}
             </h2>
           </div>
           <div className="mt-16 grid grid-cols-1 gap-12 md:grid-cols-3">
@@ -48,12 +63,10 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 <span className="text-accent font-serif text-lg">01</span>
               </div>
               <h3 className="text-foreground mt-6 text-sm font-semibold tracking-widest uppercase">
-                {themeSpecificFields?.["modern.about.value-1-title"] ??
-                  "Quality First"}
+                {f["modern.about.value-1-title"]}
               </h3>
               <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-                {themeSpecificFields?.["modern.about.value-1-description"] ??
-                  "Every product is selected for its material quality, craftsmanship, and durability. We believe in buying less but buying better."}
+                {f["modern.about.value-1-description"]}
               </p>
             </div>
             <div className="text-center">
@@ -61,12 +74,10 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 <span className="text-accent font-serif text-lg">02</span>
               </div>
               <h3 className="text-foreground mt-6 text-sm font-semibold tracking-widest uppercase">
-                {themeSpecificFields?.["modern.about.value-2-title"] ??
-                  "Sustainably Sourced"}
+                {f["modern.about.value-2-title"]}
               </h3>
               <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-                {themeSpecificFields?.["modern.about.value-2-description"] ??
-                  "We prioritize natural, renewable, and recycled materials. Our packaging is plastic-free and our shipping is carbon-neutral."}
+                {f["modern.about.value-2-description"]}
               </p>
             </div>
             <div className="text-center">
@@ -74,12 +85,10 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 <span className="text-accent font-serif text-lg">03</span>
               </div>
               <h3 className="text-foreground mt-6 text-sm font-semibold tracking-widest uppercase">
-                {themeSpecificFields?.["modern.about.value-3-title"] ??
-                  "Artisan Partnerships"}
+                {f["modern.about.value-3-title"]}
               </h3>
               <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-                {themeSpecificFields?.["modern.about.value-3-description"] ??
-                  "We work directly with makers, ensuring fair wages and preserving traditional techniques that might otherwise be lost."}
+                {f["modern.about.value-3-description"]}
               </p>
             </div>
           </div>
@@ -92,10 +101,7 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
             <div className="relative aspect-4/3 overflow-hidden rounded-sm">
               <Image
-                src={
-                  themeSpecificFields?.["modern.about.first-image"] ??
-                  "/placeholder.svg"
-                }
+                src={f["modern.about.first-image"] ?? "/placeholder.svg"}
                 alt=""
                 fill
                 className="object-cover"
@@ -104,20 +110,16 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
             </div>
             <div>
               <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-                {themeSpecificFields?.["modern.about.story-subheader"] ??
-                  "How It Started"}
+                {f["modern.about.story-subheader"]}
               </p>
               <h2 className="text-foreground mt-2 font-serif text-3xl text-balance md:text-4xl">
-                {themeSpecificFields?.["modern.about.story-header"] ??
-                  "From a small studio to your home"}
+                {f["modern.about.story-header"]}
               </h2>
               <p className="text-muted-foreground mt-6 leading-relaxed">
-                {themeSpecificFields?.["modern.about.story-paragraph-1"] ??
-                  "What began as a personal search for well-made, honest home goods turned into Haven. After years of working in interior design, our founder grew frustrated with the gap between mass production and unreachable luxury."}
+                {f["modern.about.story-paragraph-1"]}
               </p>
               <p className="text-muted-foreground mt-4 leading-relaxed">
-                {themeSpecificFields?.["modern.about.story-paragraph-2"] ??
-                  "Haven bridges that gap. We travel to workshops, visit studios, and build lasting relationships with the people who make our products. The result is a collection that feels personal, because it is."}
+                {f["modern.about.story-paragraph-2"]}
               </p>
             </div>
           </div>
@@ -128,22 +130,16 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
       <section className="bg-primary py-20">
         <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
           <h2 className="text-primary-foreground font-serif text-3xl md:text-4xl">
-            {themeSpecificFields?.["modern.about.cta-header"] ??
-              "Call to Action"}
+            {f["modern.about.cta-header"]}
           </h2>
           <p className="text-primary-foreground/70 mx-auto mt-4 max-w-md text-sm">
-            {themeSpecificFields?.["modern.about.cta-text"] ??
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
+            {f["modern.about.cta-text"]}
           </p>
           <Link
-            href={
-              themeSpecificFields?.["modern.about.cta-button-link"] ??
-              "/products"
-            }
+            href={f["modern.about.cta-button-link"] ?? "/shop"}
             className="bg-primary-foreground text-primary mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
           >
-            {themeSpecificFields?.["modern.about.cta-button-text"] ??
-              "Shop Now"}
+            {f["modern.about.cta-button-text"]}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

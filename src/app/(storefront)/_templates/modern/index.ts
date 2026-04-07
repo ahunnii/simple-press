@@ -24,6 +24,8 @@ const aboutPageData: TemplateField[] = [
     description: "Header for the mission section",
     type: "text",
     page: "about",
+    defaultValue: "We believe your home should tell your story",
+    placeholder: "We believe your home should tell your story",
   },
   {
     key: "modern.about.mission-description",
@@ -31,6 +33,9 @@ const aboutPageData: TemplateField[] = [
     description: "Description for the mission section",
     type: "textarea",
     page: "about",
+    defaultValue:
+      "Haven was founded on a simple idea: that the objects we surround ourselves with should be beautiful, functional, and made with care. We partner directly with artisans and small makers from around the world, bringing you pieces that are as meaningful as they are well-made.",
+    placeholder: "Share your brand's founding story and mission...",
   },
   {
     key: "modern.about.values-subheader",
@@ -38,6 +43,8 @@ const aboutPageData: TemplateField[] = [
     description: "Subheader for the values section",
     type: "text",
     page: "about",
+    defaultValue: "What We Stand For",
+    placeholder: "What We Stand For",
   },
   {
     key: "modern.about.values-header",
@@ -45,6 +52,8 @@ const aboutPageData: TemplateField[] = [
     description: "Header for the values section",
     type: "text",
     page: "about",
+    defaultValue: "Our Values",
+    placeholder: "Our Values",
   },
   {
     key: "modern.about.value-1-title",
@@ -52,6 +61,8 @@ const aboutPageData: TemplateField[] = [
     description: "Title for the first value",
     type: "text",
     page: "about",
+    defaultValue: "Quality First",
+    placeholder: "e.g. Quality First",
   },
   {
     key: "modern.about.value-1-description",
@@ -59,6 +70,9 @@ const aboutPageData: TemplateField[] = [
     description: "Description for the first value",
     type: "textarea",
     page: "about",
+    defaultValue:
+      "Every product is selected for its material quality, craftsmanship, and durability. We believe in buying less but buying better.",
+    placeholder: "Describe what this value means to your business...",
   },
   {
     key: "modern.about.value-2-title",
@@ -66,6 +80,8 @@ const aboutPageData: TemplateField[] = [
     description: "Title for the second value",
     type: "text",
     page: "about",
+    defaultValue: "Sustainably Sourced",
+    placeholder: "e.g. Sustainably Sourced",
   },
   {
     key: "modern.about.value-2-description",
@@ -73,6 +89,9 @@ const aboutPageData: TemplateField[] = [
     description: "Description for the second value",
     type: "textarea",
     page: "about",
+    defaultValue:
+      "We prioritize natural, renewable, and recycled materials. Our packaging is plastic-free and our shipping is carbon-neutral.",
+    placeholder: "Describe what this value means to your business...",
   },
   {
     key: "modern.about.value-3-title",
@@ -80,6 +99,8 @@ const aboutPageData: TemplateField[] = [
     description: "Title for the third value",
     type: "text",
     page: "about",
+    defaultValue: "Artisan Partnerships",
+    placeholder: "e.g. Artisan Partnerships",
   },
   {
     key: "modern.about.value-3-description",
@@ -87,6 +108,9 @@ const aboutPageData: TemplateField[] = [
     description: "Description for the third value",
     type: "textarea",
     page: "about",
+    defaultValue:
+      "We work directly with makers, ensuring fair wages and preserving traditional techniques that might otherwise be lost.",
+    placeholder: "Describe what this value means to your business...",
   },
   {
     key: "modern.about.story-subheader",
@@ -94,6 +118,8 @@ const aboutPageData: TemplateField[] = [
     description: "Subheader for the story section",
     type: "text",
     page: "about",
+    defaultValue: "How It Started",
+    placeholder: "How It Started",
   },
   {
     key: "modern.about.story-header",
@@ -101,6 +127,8 @@ const aboutPageData: TemplateField[] = [
     description: "Header for the story section",
     type: "text",
     page: "about",
+    defaultValue: "From a small studio to your home",
+    placeholder: "e.g. From a small studio to your home",
   },
   {
     key: "modern.about.story-paragraph-1",
@@ -108,6 +136,9 @@ const aboutPageData: TemplateField[] = [
     description: "First paragraph for the story section",
     type: "textarea",
     page: "about",
+    defaultValue:
+      "What began as a personal search for well-made, honest home goods turned into Haven. After years of working in interior design, our founder grew frustrated with the gap between mass production and unreachable luxury.",
+    placeholder: "Share the beginning of your story...",
   },
   {
     key: "modern.about.story-paragraph-2",
@@ -115,6 +146,9 @@ const aboutPageData: TemplateField[] = [
     description: "Second paragraph for the story section",
     type: "textarea",
     page: "about",
+    defaultValue:
+      "Haven bridges that gap. We travel to workshops, visit studios, and build lasting relationships with the people who make our products. The result is a collection that feels personal, because it is.",
+    placeholder: "Continue your story...",
   },
   {
     key: "modern.about.first-image",
@@ -122,6 +156,7 @@ const aboutPageData: TemplateField[] = [
     description: "Image for the story section",
     type: "image",
     page: "about",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "modern.about.cta-header",
@@ -129,6 +164,8 @@ const aboutPageData: TemplateField[] = [
     description: "Header for the CTA section",
     type: "text",
     page: "about",
+    defaultValue: "Ready to find something you love?",
+    placeholder: "e.g. Ready to find something you love?",
   },
   {
     key: "modern.about.cta-text",
@@ -136,6 +173,9 @@ const aboutPageData: TemplateField[] = [
     description: "Text for the CTA section",
     type: "textarea",
     page: "about",
+    defaultValue:
+      "Browse our full collection and discover pieces made with care, sourced with intention.",
+    placeholder: "A short invitation to shop or get in touch...",
   },
   {
     key: "modern.about.cta-button-text",
@@ -143,6 +183,8 @@ const aboutPageData: TemplateField[] = [
     description: "Button text for the CTA section",
     type: "text",
     page: "about",
+    defaultValue: "Shop Now",
+    placeholder: "Shop Now",
   },
   {
     key: "modern.about.cta-button-link",
@@ -150,6 +192,8 @@ const aboutPageData: TemplateField[] = [
     description: "Button link for the CTA section",
     type: "url",
     page: "about",
+    defaultValue: "/shop",
+    placeholder: "/shop",
   },
 ];
 
@@ -160,6 +204,8 @@ const contactPageData: TemplateField[] = [
     description: "Subheader for the header section",
     type: "text",
     page: "contact",
+    defaultValue: "Get in Touch",
+    placeholder: "Get in Touch",
   },
   {
     key: "modern.contact.header-title",
@@ -167,6 +213,8 @@ const contactPageData: TemplateField[] = [
     description: "Title for the header section",
     type: "text",
     page: "contact",
+    defaultValue: "We'd love to hear from you",
+    placeholder: "We'd love to hear from you",
   },
   {
     key: "modern.contact.header-description",
@@ -174,6 +222,9 @@ const contactPageData: TemplateField[] = [
     description: "Description for the header section",
     type: "textarea",
     page: "contact",
+    defaultValue:
+      "Whether you have a question about an order, want to learn more about our products, or are interested in a partnership, we're here to help.",
+    placeholder: "A short intro paragraph for your contact page...",
   },
   {
     key: "modern.contact.info-title",
@@ -181,6 +232,8 @@ const contactPageData: TemplateField[] = [
     description: "Title for the contact information section",
     type: "text",
     page: "contact",
+    defaultValue: "Contact Information",
+    placeholder: "Contact Information",
   },
   {
     key: "modern.contact.info-description",
@@ -188,6 +241,9 @@ const contactPageData: TemplateField[] = [
     description: "Description for the contact information section",
     type: "textarea",
     page: "contact",
+    defaultValue:
+      "Reach out through any of these channels and we'll get back to you as soon as possible.",
+    placeholder: "Short blurb about how to reach you...",
   },
   {
     key: "modern.contact.email-label",
@@ -195,6 +251,8 @@ const contactPageData: TemplateField[] = [
     description: "Label for the email field",
     type: "text",
     page: "contact",
+    defaultValue: "Email",
+    placeholder: "Email",
   },
   {
     key: "modern.contact.email",
@@ -202,6 +260,8 @@ const contactPageData: TemplateField[] = [
     description: "Email address for contact",
     type: "text",
     page: "contact",
+    defaultValue: "",
+    placeholder: "hello@yourbusiness.com",
   },
   {
     key: "modern.contact.phone-label",
@@ -209,6 +269,8 @@ const contactPageData: TemplateField[] = [
     description: "Label for the phone field",
     type: "text",
     page: "contact",
+    defaultValue: "Phone",
+    placeholder: "Phone",
   },
   {
     key: "modern.contact.phone",
@@ -216,6 +278,8 @@ const contactPageData: TemplateField[] = [
     description: "Phone number for contact",
     type: "text",
     page: "contact",
+    defaultValue: "",
+    placeholder: "+1 (555) 123-4567",
   },
   {
     key: "modern.contact.address-label",
@@ -223,6 +287,8 @@ const contactPageData: TemplateField[] = [
     description: "Label for the address field",
     type: "text",
     page: "contact",
+    defaultValue: "Address",
+    placeholder: "Address",
   },
   {
     key: "modern.contact.address",
@@ -230,6 +296,8 @@ const contactPageData: TemplateField[] = [
     description: "Physical address for contact",
     type: "textarea",
     page: "contact",
+    defaultValue: "",
+    placeholder: "123 Main St\nYour City, ST 00000",
   },
   {
     key: "modern.contact.hours-label",
@@ -237,6 +305,8 @@ const contactPageData: TemplateField[] = [
     description: "Label for the hours field",
     type: "text",
     page: "contact",
+    defaultValue: "Hours",
+    placeholder: "Hours",
   },
   {
     key: "modern.contact.hours",
@@ -244,6 +314,8 @@ const contactPageData: TemplateField[] = [
     description: "Business hours for contact",
     type: "textarea",
     page: "contact",
+    defaultValue: "",
+    placeholder: "Monday - Friday: 9am - 6pm\nSaturday: 10am - 4pm\nSunday: Closed",
   },
   {
     key: "modern.contact.form-title",
@@ -251,6 +323,8 @@ const contactPageData: TemplateField[] = [
     description: "Title for the contact form section",
     type: "text",
     page: "contact",
+    defaultValue: "Send us a message",
+    placeholder: "Send us a message",
   },
   {
     key: "modern.contact.form-description",
@@ -258,6 +332,8 @@ const contactPageData: TemplateField[] = [
     description: "Description for the contact form section",
     type: "text",
     page: "contact",
+    defaultValue: "Fill out the form below and we'll respond within 24 hours.",
+    placeholder: "Fill out the form below and we'll respond within 24 hours.",
   },
 ];
 
@@ -278,6 +354,7 @@ const contactPageQuestionsData: TemplateField[] = [
     type: "text",
     page: "contact",
     group: "contact.questions",
+    defaultValue: "What is your return policy?",
     placeholder: "What is your return policy?",
   },
   {
@@ -287,6 +364,8 @@ const contactPageQuestionsData: TemplateField[] = [
     type: "textarea",
     page: "contact",
     group: "contact.questions",
+    defaultValue:
+      "We offer a 30-day return policy on all items in their original condition. Simply contact us to initiate a return and we'll provide a prepaid shipping label.",
     placeholder: "We offer a 30-day return policy...",
   },
   {
@@ -296,6 +375,7 @@ const contactPageQuestionsData: TemplateField[] = [
     type: "text",
     page: "contact",
     group: "contact.questions",
+    defaultValue: "How long does shipping take?",
     placeholder: "How long does shipping take?",
   },
   {
@@ -305,6 +385,8 @@ const contactPageQuestionsData: TemplateField[] = [
     type: "textarea",
     page: "contact",
     group: "contact.questions",
+    defaultValue:
+      "Standard shipping takes 5-7 business days. We also offer expedited shipping (2-3 business days) at checkout for an additional fee.",
     placeholder: "Standard shipping takes 5-7 business days...",
   },
   {
@@ -314,6 +396,7 @@ const contactPageQuestionsData: TemplateField[] = [
     type: "text",
     page: "contact",
     group: "contact.questions",
+    defaultValue: "Do you ship internationally?",
     placeholder: "Do you ship internationally?",
   },
   {
@@ -323,6 +406,8 @@ const contactPageQuestionsData: TemplateField[] = [
     type: "textarea",
     page: "contact",
     group: "contact.questions",
+    defaultValue:
+      "Yes! We ship to over 40 countries. International shipping typically takes 10-15 business days. Duties and taxes may apply depending on your location.",
     placeholder: "Yes, we ship to over 40 countries...",
   },
   {
@@ -332,6 +417,7 @@ const contactPageQuestionsData: TemplateField[] = [
     type: "text",
     page: "contact",
     group: "contact.questions",
+    defaultValue: "Can I modify or cancel an order?",
     placeholder: "Can I modify or cancel an order?",
   },
   {
@@ -341,6 +427,8 @@ const contactPageQuestionsData: TemplateField[] = [
     type: "textarea",
     page: "contact",
     group: "contact.questions",
+    defaultValue:
+      "Orders can be modified or cancelled within 2 hours of placement. After that, please contact us and we'll do our best to accommodate your request.",
     placeholder:
       "Orders can be modified or cancelled within 2 hours of placement...",
   },

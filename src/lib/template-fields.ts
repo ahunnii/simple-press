@@ -13,6 +13,14 @@ import {
   darkTrendFieldGroups,
 } from "~/app/(storefront)/_templates/dark-trend";
 import {
+  defaultTemplateData,
+  defaultTemplateFieldGroups,
+} from "~/app/(storefront)/_templates/default";
+import {
+  elegantData,
+  elegantFieldGroups,
+} from "~/app/(storefront)/_templates/elegant";
+import {
   happyBambooData,
   happyBambooFieldGroups,
 } from "~/app/(storefront)/_templates/happy-bamboo";
@@ -177,74 +185,11 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...darkTrendFieldGroups,
   ...modernFieldGroups,
   ...happyBambooFieldGroups,
+  ...elegantFieldGroups,
+  ...defaultTemplateFieldGroups,
 };
 
 export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
-  elegant: [
-    {
-      key: "elegant.tagline",
-      label: "Tagline",
-      description: "Your store's tagline",
-      type: "text",
-      page: "global",
-    },
-    {
-      key: "elegant.cta.background",
-      label: "CTA Background",
-      description: "Background image for the CTA banner",
-      type: "text",
-      page: "homepage",
-    },
-    {
-      key: "elegant.homepage.about.title",
-      label: "Homepage About Title",
-      description: "Title for the About section on the homepage",
-      type: "text",
-      page: "homepage",
-    },
-    {
-      key: "elegant.homepage.about.text",
-      label: "Homepage About Text",
-      description: "Text for the About section on the homepage",
-      type: "textarea",
-      page: "homepage",
-    },
-    {
-      key: "elegant.homepage.about.image",
-      label: "Homepage About Image",
-      description: "Image for the About section on the homepage",
-      type: "text",
-      page: "homepage",
-    },
-    {
-      key: "elegant.cta.title",
-      label: "CTA Title",
-      description: "Title for the CTA banner",
-      type: "text",
-      page: "homepage",
-    },
-    {
-      key: "elegant.cta.pointone",
-      label: "CTA Point One",
-      description: "First point for the CTA banner",
-      type: "text",
-      page: "homepage",
-    },
-    {
-      key: "elegant.cta.pointtwo",
-      label: "CTA Point Two",
-      description: "Second point for the CTA banner",
-      type: "text",
-      page: "homepage",
-    },
-    {
-      key: "elegant.cta.pointthree",
-      label: "CTA Point Three",
-      description: "Third point for the CTA banner",
-      type: "text",
-      page: "homepage",
-    },
-  ],
   vintage: [
     {
       key: "vintage.tagline",
@@ -290,6 +235,8 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...pollenData,
   ...modernData,
   ...happyBambooData,
+  ...elegantData,
+  ...defaultTemplateData,
 };
 
 /**

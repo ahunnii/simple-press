@@ -9,33 +9,25 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
+import { resolveFields } from ".";
 import { PollenGeneralLayout } from "./pollen-general-layout";
 
 export async function PollenAboutPage({
   business,
 }: DefaultAboutPageTemplateProps) {
-  const themeSpecificFields = business?.siteContent?.customFields as Record<
-    string,
-    string
-  >;
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "pollen.about.title",
+    "pollen.about.text",
+    "pollen.about.image",
+    "pollen.about.owner-subheader",
+    "pollen.about.owner-heading",
+    "pollen.about.owner-name",
+    "pollen.about.owner-role",
+    "pollen.about.owner-image",
+    "pollen.about.owner-blurb",
+  ]);
 
   const testimonials = (await api.testimonial.listRandom({ limit: 3 })) ?? [];
-
-  // Owner section: prefer new owner-* keys, fall back to legacy team-member-1-* for migration
-  const ownerSubheader =
-    themeSpecificFields?.["pollen.about.owner-subheader"] ??
-    "The Face Behind [Business]";
-  const ownerHeading =
-    themeSpecificFields?.["pollen.about.owner-heading"] ?? "Meet the Owner";
-  const ownerName =
-    themeSpecificFields?.["pollen.about.owner-name"] ?? "Jane Doe";
-  const ownerRole = themeSpecificFields?.["pollen.about.owner-role"] ?? "Owner";
-  const ownerImage =
-    themeSpecificFields?.["pollen.about.owner-image"] ?? "/placeholder.svg";
-
-  const ownerBlurb =
-    themeSpecificFields?.["pollen.about.owner-blurb"] ??
-    "A few sentences about the owner and their story.";
 
   return (
     <PollenGeneralLayout
@@ -48,13 +40,10 @@ export async function PollenAboutPage({
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <FadeIn direction="right">
               <h2 className="mb-6 text-4xl font-bold text-[#374151] md:text-5xl">
-                {themeSpecificFields?.["pollen.about.header"] ?? "Heya!"}
+                {f["pollen.about.title"]}
               </h2>
               <div className="space-y-6 leading-relaxed text-[#4b5563]">
-                <p className="whitespace-pre-line">
-                  {themeSpecificFields?.["pollen.about.text"] ??
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit..."}
-                </p>
+                <p className="whitespace-pre-line">{f["pollen.about.text"]}</p>
               </div>
             </FadeIn>
             <FadeIn
@@ -64,7 +53,7 @@ export async function PollenAboutPage({
             >
               <Image
                 src={
-                  themeSpecificFields?.["pollen.about.image"] ??
+                  f["pollen.about.image"] ??
                   "https://images.unsplash.com/photo-1598902108854-10e335adac99?w=800&h=1000&fit=crop"
                 }
                 alt="Lush green plants in a greenhouse or conservatory"
@@ -84,8 +73,8 @@ export async function PollenAboutPage({
             <FadeIn direction="right" className="flex-1">
               <div className="relative aspect-3/4 overflow-hidden rounded-2xl">
                 <Image
-                  src={ownerImage}
-                  alt={ownerName || "Owner"}
+                  src={f["pollen.about.owner-image"] ?? "/placeholder.svg"}
+                  alt={f["pollen.about.owner-name"] ?? "Owner"}
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -93,27 +82,29 @@ export async function PollenAboutPage({
               </div>
             </FadeIn>
             <FadeIn direction="left" delay={0.1} className="flex-1">
-              {ownerSubheader && (
+              {f["pollen.about.owner-subheader"] && (
                 <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
-                  {ownerSubheader}
+                  {f["pollen.about.owner-subheader"]}
                 </p>
               )}
               <h2 className="mb-6 text-3xl font-bold text-[#374151] md:text-4xl">
-                {ownerHeading}
+                {f["pollen.about.owner-heading"]}
               </h2>
-              {ownerName && (
+              {f["pollen.about.owner-name"] && (
                 <h3 className="text-xl font-semibold text-[#374151]">
-                  {ownerName}
+                  {f["pollen.about.owner-name"]}
                 </h3>
               )}
-              {ownerRole && (
+              {f["pollen.about.owner-role"] && (
                 <p className="mb-6 text-sm font-medium tracking-wider text-[#5e8b4a] uppercase">
-                  {ownerRole}
+                  {f["pollen.about.owner-role"]}
                 </p>
               )}
-              {ownerBlurb ? (
+              {f["pollen.about.owner-blurb"] ? (
                 <div className="space-y-4 leading-relaxed text-[#4b5563]">
-                  <p className="whitespace-pre-line">{ownerBlurb}</p>
+                  <p className="whitespace-pre-line">
+                    {f["pollen.about.owner-blurb"]}
+                  </p>
                 </div>
               ) : (
                 <p className="leading-relaxed text-[#4b5563]">

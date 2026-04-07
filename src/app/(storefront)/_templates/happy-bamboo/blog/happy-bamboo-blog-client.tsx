@@ -15,7 +15,6 @@ import {
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { useBlogPosts } from "~/hooks/use-blog-posts";
-// import { formatDate } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -26,6 +25,7 @@ import {
   InputGroupInput,
 } from "~/components/ui/input-group";
 import { Separator } from "~/components/ui/separator";
+// import { formatDate } from "~/lib/utils";
 import {
   FadeIn,
   PageTransition,
@@ -143,7 +143,7 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <FadeIn className="mb-12">
-            <h2 className="text-2xl font-bold md:text-3xl">
+            <h2 className="font-serif text-2xl font-bold md:text-3xl">
               {query.trim() !== "" ? "Search Results" : "More Articles"}
             </h2>
           </FadeIn>

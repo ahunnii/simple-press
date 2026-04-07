@@ -2,10 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../types";
+import { resolveFields } from ".";
 
 export async function DefaultAboutPage({
   business,
 }: DefaultAboutPageTemplateProps) {
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "default.about.heading",
+    "default.about.paragraph-1",
+    "default.about.paragraph-2",
+    "default.about.paragraph-3",
+  ]);
+
   return (
     <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
       <div className="mb-8">
@@ -22,21 +30,17 @@ export async function DefaultAboutPage({
       {/* Hero Section */}
       <div className="mb-16 grid items-center gap-8 md:grid-cols-2">
         <div>
-          <h2 className="mb-4 text-3xl font-bold">Our Story</h2>
+          <h2 className="mb-4 text-3xl font-bold">
+            {f["default.about.heading"]}
+          </h2>
           <p className="text-muted-foreground mb-4">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
-            dictum, metus in cursus pharetra, augue purus consequat ligula, nec
-            faucibus ex nulla eu urna.
+            {f["default.about.paragraph-1"]}
           </p>
           <p className="text-muted-foreground mb-4">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
-            dictum, metus in cursus pharetra, augue purus consequat ligula, nec
-            faucibus ex nulla eu urna.
+            {f["default.about.paragraph-2"]}
           </p>
           <p className="text-muted-foreground">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
-            dictum, metus in cursus pharetra, augue purus consequat ligula, nec
-            faucibus ex nulla eu urna.
+            {f["default.about.paragraph-3"]}
           </p>
         </div>
         <div className="relative h-[300px] overflow-hidden rounded-lg md:h-[400px]">

@@ -487,7 +487,10 @@ export async function POST(req: NextRequest) {
       stripeAccount: business.stripeAccountId, // Connect to store's Stripe account
     });
 
-    return NextResponse.json({ sessionUrl: session.url, sessionId: session.id });
+    return NextResponse.json({
+      sessionUrl: session.url,
+      sessionId: session.id,
+    });
   } catch (error: unknown) {
     console.error("Create checkout session error:", error);
     return NextResponse.json(
