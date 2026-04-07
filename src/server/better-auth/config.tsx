@@ -186,6 +186,12 @@ export const auth = betterAuth({
           },
           // Inactive businesses with a valid subdomain
           {
+            domainStatus: "NONE",
+            subdomain: {
+              not: "",
+            },
+          },
+          {
             domainStatus: "PENDING_DNS",
             subdomain: {
               not: "",
@@ -207,6 +213,7 @@ export const auth = betterAuth({
           : null,
       ]),
     ].filter((o): o is string => o !== null);
+
     return domains;
   },
 
