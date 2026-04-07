@@ -15,7 +15,7 @@ export function ElegantCTABanner({
   const [isVisible, setIsVisible] = useState(false);
   const bannerRef = useRef<HTMLDivElement>(null);
   const customFields = homepage?.siteContent?.customFields;
-  /* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call -- getThemeFields accepts unknown (Prisma JsonValue) */
+   
   const themeSpecificFields: Record<string, string> = getThemeFields(
     "elegant",
     customFields as unknown,

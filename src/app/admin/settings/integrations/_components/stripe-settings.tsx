@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   CheckCircle,
   CreditCard,
@@ -10,7 +11,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { encodeOAuthState, getCallbackUrl } from "~/lib/domain";
+import { api } from "~/trpc/react";
+import { getCallbackUrl } from "~/lib/domain";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -20,16 +23,48 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 
 type Props = {
   businessId: string;
   stripeAccountId: string | null;
+  stripeAutoTaxEnabled: boolean;
 };
 
-export function StripeSettings({ businessId, stripeAccountId }: Props) {
+export function StripeSettings({
+  businessId,
+  stripeAccountId,
+  stripeAutoTaxEnabled: initialAutoTax,
+}: Props) {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [autoTaxEnabled, setAutoTaxEnabled] = useState(initialAutoTax);
 
-  const handleConnect = () => {
+  const [taxError, setTaxError] = useState<string | null>(null);
+
+  const updateStripeSettings = api.business.updateStripeSettings.useMutation({
+    onSuccess() {
+      setTaxError(null);
+      toast.success(
+        autoTaxEnabled
+          ? "Automatic tax collection enabled"
+          : "Automatic tax collection disabled",
+      );
+    },
+    onError(err) {
+      // Revert the optimistic toggle and surface the server's message
+      setAutoTaxEnabled(!autoTaxEnabled);
+      setTaxError(err.message);
+    },
+  });
+
+  const handleAutoTaxToggle = (checked: boolean) => {
+    setTaxError(null);
+    setAutoTaxEnabled(checked);
+    updateStripeSettings.mutate({ stripeAutoTaxEnabled: checked });
+  };
+
+  const handleConnect = async () => {
     const clientId = process.env.NEXT_PUBLIC_STRIPE_CONNECT_CLIENT_ID;
 
     if (!clientId) {
@@ -37,25 +72,34 @@ export function StripeSettings({ businessId, stripeAccountId }: Props) {
       return;
     }
 
-    // Get current URL to return to after OAuth
-    const returnUrl = window.location.href.split("?")[0]; // Remove query params
+    const returnUrl = window.location.href.split("?")[0] ?? "";
 
-    // Encode state
-    const state = encodeOAuthState({
-      businessId,
-      returnUrl: returnUrl ?? "",
-    });
+    // Request a signed state from the server. The session is valid here (same
+    // domain as the admin), so auth succeeds. The callback can then verify the
+    // signature without needing a live session (which would fail across domains).
+    let signedState: string;
+    try {
+      const res = await fetch("/api/stripe/connect/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessId, returnUrl }),
+      });
+      if (!res.ok) throw new Error("Failed to generate state");
+      const data = (await res.json()) as { signedState: string };
+      signedState = data.signedState;
+    } catch {
+      toast.error("Failed to initiate Stripe connection. Please try again.");
+      return;
+    }
 
-    // Build Stripe OAuth URL
     const callbackUrl = getCallbackUrl();
     const stripeUrl = new URL("https://connect.stripe.com/oauth/authorize");
     stripeUrl.searchParams.set("response_type", "code");
     stripeUrl.searchParams.set("client_id", clientId);
     stripeUrl.searchParams.set("scope", "read_write");
     stripeUrl.searchParams.set("redirect_uri", callbackUrl);
-    stripeUrl.searchParams.set("state", state);
+    stripeUrl.searchParams.set("state", signedState);
 
-    // Redirect to Stripe
     window.location.href = stripeUrl.toString();
   };
 
@@ -113,7 +157,7 @@ export function StripeSettings({ businessId, stripeAccountId }: Props) {
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {stripeAccountId ? (
           <>
             <div>
@@ -155,6 +199,67 @@ export function StripeSettings({ businessId, stripeAccountId }: Props) {
                   "Disconnect"
                 )}
               </Button>
+            </div>
+
+            <div className="border-t pt-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="auto-tax-toggle">
+                    Automatic Tax Collection
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically calculate and collect sales tax at checkout
+                    via Stripe Tax. Requires active tax registrations on your
+                    Stripe account.{" "}
+                    <Link
+                      href="/admin/settings/tax"
+                      className="underline underline-offset-2"
+                    >
+                      Set up taxes →
+                    </Link>
+                  </p>
+                </div>
+                <Switch
+                  id="auto-tax-toggle"
+                  checked={autoTaxEnabled}
+                  onCheckedChange={handleAutoTaxToggle}
+                  disabled={updateStripeSettings.isPending}
+                />
+              </div>
+
+              {taxError && (
+                <Alert variant="destructive" className="mt-3">
+                  <AlertDescription className="text-sm">
+                    {taxError}{" "}
+                    <a
+                      href="https://dashboard.stripe.com/tax"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2"
+                    >
+                      Open Stripe Tax Dashboard →
+                    </a>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {autoTaxEnabled && !taxError && (
+                <Alert className="mt-3">
+                  <AlertDescription className="text-sm">
+                    Stripe will collect sales tax only in states where you have
+                    active tax registrations. Customers in other states will not
+                    be charged tax.{" "}
+                    <a
+                      href="https://dashboard.stripe.com/tax/registrations"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2"
+                    >
+                      Manage registrations →
+                    </a>
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           </>
         ) : (

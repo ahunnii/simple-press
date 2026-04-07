@@ -4,6 +4,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import {
+  IconCreditCard,
   IconDashboard,
   IconDiscount,
   IconFolder,
@@ -50,6 +51,11 @@ const getNavData = (session: Session | null) => {
       url: "/admin/orders",
       icon: IconShoppingCart,
       featureKey: "orders",
+    },
+    {
+      title: "Payments",
+      url: "/admin/payments",
+      icon: IconCreditCard,
     },
     {
       title: "Products",

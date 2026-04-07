@@ -146,7 +146,8 @@ model Business {
   taxId           String? // For tax purposes
 
   // Integrations
-  stripeAccountId String? @unique
+  stripeAccountId      String? @unique
+  stripeAutoTaxEnabled Boolean @default(false)
 
   // Analytics
   umamiWebsiteId String? // Each business gets their own website ID

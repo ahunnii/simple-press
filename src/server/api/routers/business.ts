@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import { stripeClient } from "~/lib/stripe/client";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
@@ -308,6 +309,7 @@ export const businessRouter = createTRPCRouter({
       select: {
         id: true,
         stripeAccountId: true,
+        stripeAutoTaxEnabled: true,
         umamiWebsiteId: true,
         umamiEnabled: true,
       },
@@ -320,6 +322,140 @@ export const businessRouter = createTRPCRouter({
     }
     return business;
   }),
+
+  getPaymentsOverview: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    const business = await ctx.db.business.findFirst({
+      where: { id: businessId },
+      select: { stripeAccountId: true },
+    });
+
+    // Annual order stats — current calendar year, exclude refunded/cancelled
+    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+    const orderStats = await ctx.db.order.aggregate({
+      where: {
+        businessId,
+        createdAt: { gte: startOfYear },
+        status: { notIn: ["refunded", "cancelled"] },
+      },
+      _count: { id: true },
+      _sum: { total: true },
+    });
+
+    const annualTransactions = orderStats._count.id;
+    const annualRevenueCents = orderStats._sum.total ?? 0;
+    // INFORM Act: 200+ transactions OR $5,000+ (500000 cents) annual revenue
+    const informActThresholdReached =
+      annualTransactions >= 200 || annualRevenueCents >= 500000;
+
+    let stripeDetailsSubmitted = false;
+    let stripeBalance: {
+      available: { amount: number; currency: string }[];
+      pending: { amount: number; currency: string }[];
+    } | null = null;
+    let recentPayouts: {
+      id: string;
+      amount: number;
+      currency: string;
+      status: string;
+      arrival_date: number;
+    }[] | null = null;
+
+    const accountId = business?.stripeAccountId;
+    if (accountId) {
+      try {
+        const [balance, payouts, account] = await Promise.all([
+          stripeClient.balance.retrieve({ stripeAccount: accountId }),
+          stripeClient.payouts.list({ limit: 5 }, { stripeAccount: accountId }),
+          stripeClient.accounts.retrieve(accountId),
+        ]);
+
+        stripeDetailsSubmitted = account.details_submitted ?? false;
+        stripeBalance = {
+          available: balance.available.map((b) => ({
+            amount: b.amount,
+            currency: b.currency,
+          })),
+          pending: balance.pending.map((b) => ({
+            amount: b.amount,
+            currency: b.currency,
+          })),
+        };
+        recentPayouts = payouts.data.map((p) => ({
+          id: p.id,
+          amount: p.amount,
+          currency: p.currency,
+          status: p.status,
+          arrival_date: p.arrival_date,
+        }));
+      } catch {
+        // Non-fatal — return partial data
+      }
+    }
+
+    return {
+      annualTransactions,
+      annualRevenueCents,
+      informActThresholdReached,
+      stripeDetailsSubmitted,
+      stripeBalance,
+      recentPayouts,
+      isStripeConnected: !!accountId,
+    };
+  }),
+
+  updateStripeSettings: ownerAdminProcedure
+    .input(z.object({ stripeAutoTaxEnabled: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // When enabling, verify Stripe Tax is actually configured on the connected
+      // account before saving. If not active, block and explain what's needed.
+      if (input.stripeAutoTaxEnabled) {
+        const business = await ctx.db.business.findFirst({
+          where: { id: businessId },
+          select: { stripeAccountId: true },
+        });
+
+        if (!business?.stripeAccountId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Connect a Stripe account before enabling automatic tax collection.",
+          });
+        }
+
+        try {
+          const taxSettings = await stripeClient.tax.settings.retrieve({
+            stripeAccount: business.stripeAccountId,
+          });
+
+          if (taxSettings.status !== "active") {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message:
+                "Stripe Tax is not fully configured on your account. Add your business address and at least one active tax registration in the Stripe Tax Dashboard, then try again.",
+            });
+          }
+        } catch (err) {
+          // Re-throw TRPCErrors as-is; wrap Stripe API errors
+          if (err instanceof TRPCError) throw err;
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Could not verify your Stripe Tax setup. Make sure Stripe Tax is configured in your Stripe Dashboard before enabling this.",
+          });
+        }
+      }
+
+      await ctx.db.business.update({
+        where: { id: businessId },
+        data: { stripeAutoTaxEnabled: input.stripeAutoTaxEnabled },
+      });
+
+      return { success: true };
+    }),
 
   getWith: ownerAdminProcedure
     .input(

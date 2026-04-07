@@ -482,6 +482,14 @@ export async function POST(req: NextRequest) {
       ];
     }
 
+    // Enable automatic tax collection only if the owner has opted in.
+    // Requires active tax registrations on their Stripe account — if none are
+    // configured, Stripe will reject the session. The admin toggle warns owners
+    // about this before they enable it.
+    if (business.stripeAutoTaxEnabled) {
+      sessionParams.automatic_tax = { enabled: true };
+    }
+
     // Create Stripe Checkout session
     const session = await stripeClient.checkout.sessions.create(sessionParams, {
       stripeAccount: business.stripeAccountId, // Connect to store's Stripe account

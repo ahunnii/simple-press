@@ -50,6 +50,7 @@ export function IntegrationsSettings({ business }: Props) {
           <StripeSettings
             businessId={business.id}
             stripeAccountId={business.stripeAccountId}
+            stripeAutoTaxEnabled={business.stripeAutoTaxEnabled}
           />
 
           {/* Umami Analytics */}
