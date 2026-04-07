@@ -1,16 +1,18 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { Button } from "~/components/ui/button";
-import { FadeIn, ScaleIn } from "~/components/page-animations";
+import { FadeIn } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type Props = {
   aboutVideoUrl?: string | null;
   aboutVideoPosterUrl?: string | null;
+  aboutImageUrl?: string | null;
   aboutHeading?: string | null;
   aboutDescription?: TiptapJSON | null;
   aboutButtonText?: string | null;
@@ -23,6 +25,7 @@ export function HappyBambooAboutSection({
   aboutDescription,
   aboutVideoUrl,
   aboutVideoPosterUrl,
+  aboutImageUrl,
   aboutHeading = "Our Vision for a Sustainable Future",
   aboutButtonText = "Read More About Us",
   aboutButtonLink = "/about",
@@ -31,19 +34,46 @@ export function HappyBambooAboutSection({
     <section className="py-20 md:py-32">
       <div className="container mx-auto px-4">
         <div className="grid items-center gap-12 lg:grid-cols-2">
-          <FadeIn direction="left" className="relative">
+          <FadeIn
+            direction="left"
+            className="relative flex flex-col gap-4 md:gap-5"
+          >
             <div className="relative aspect-video overflow-hidden rounded-2xl">
-              <video
-                className="absolute inset-0 h-full w-full object-fill"
-                src={aboutVideoUrl ?? DEFAULT_ABOUT_VIDEO_URL}
-                muted
-                playsInline
-                controls
-                poster={aboutVideoPosterUrl ?? "/placeholder.svg"}
-              >
-                Your browser does not support the video tag.
-              </video>
+              {!!aboutVideoUrl ? (
+                <video
+                  className="absolute inset-0 h-full w-full object-fill"
+                  src={aboutVideoUrl ?? DEFAULT_ABOUT_VIDEO_URL}
+                  muted
+                  playsInline
+                  controls
+                  poster={aboutVideoPosterUrl ?? "/placeholder.svg"}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <Image
+                  src={aboutVideoPosterUrl!}
+                  alt="About video poster"
+                  fill
+                  className="object-cover"
+                />
+              )}
             </div>
+
+            <div className="border-border bg-muted/30 relative aspect-4/3 w-full overflow-hidden rounded-2xl border shadow-sm ring-1 ring-black/5">
+              <Image
+                src={aboutImageUrl!}
+                alt={
+                  aboutHeading
+                    ? `${aboutHeading} — additional image`
+                    : "About section image"
+                }
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            </div>
+
             {/* <ScaleIn
               delay={0.3}
               className="bg-primary text-primary-foreground absolute -right-6 -bottom-6 rounded-xl p-6 shadow-lg md:-right-8 md:-bottom-8"

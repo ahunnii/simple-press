@@ -130,7 +130,7 @@ export function HappyBambooAboutPage({
             </FadeIn>
 
             <FadeIn direction="right" delay={0.2} className="relative">
-              <div className="relative aspect-video overflow-hidden rounded-2xl shadow-2xl">
+              <div className="relative aspect-12/9 overflow-hidden rounded-2xl shadow-2xl">
                 <Image
                   src={f["happy-bamboo.about-hero-image"]!}
                   alt="About page hero"

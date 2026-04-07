@@ -82,8 +82,8 @@ const homepageAboutTeaserData: TemplateField[] = [
     page: "homepage",
     group: "homepage.aboutTeaser",
     gridColumn: "col-span-full",
-    defaultValue: "From Detroit, With Purpose",
-    placeholder: "From Detroit, With Purpose",
+    defaultValue: "Our Vision for a Sustainable Future",
+    placeholder: "Our Vision for a Sustainable Future",
   },
   {
     key: "happy-bamboo.homepage-about-body",
@@ -92,7 +92,6 @@ const homepageAboutTeaserData: TemplateField[] = [
     type: "richtext",
     page: "homepage",
     gridColumn: "col-span-full",
-    placeholder: "We started our business with a simple belief...",
     group: "homepage.aboutTeaser",
   },
   {
@@ -102,6 +101,7 @@ const homepageAboutTeaserData: TemplateField[] = [
     type: "video",
     page: "homepage",
     group: "homepage.aboutTeaser",
+    defaultValue: "https://www.w3schools.com/html/mov_bbb.mp4",
   },
   {
     key: "happy-bamboo.homepage-about-video-poster",
@@ -110,6 +110,16 @@ const homepageAboutTeaserData: TemplateField[] = [
     type: "image",
     page: "homepage",
     group: "homepage.aboutTeaser",
+    defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "happy-bamboo.homepage-about-image",
+    label: "About Section Image",
+    description: "Image for the about section, appears below the video",
+    type: "image",
+    page: "homepage",
+    group: "homepage.aboutTeaser",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "happy-bamboo.homepage-about-button-text",
@@ -119,6 +129,7 @@ const homepageAboutTeaserData: TemplateField[] = [
     page: "homepage",
     group: "homepage.aboutTeaser",
     defaultValue: "Learn More",
+    placeholder: "Learn More",
   },
   {
     key: "happy-bamboo.homepage-about-button-link",
@@ -128,6 +139,7 @@ const homepageAboutTeaserData: TemplateField[] = [
     page: "homepage",
     group: "homepage.aboutTeaser",
     defaultValue: "/about",
+    placeholder: "/about",
   },
 ];
 
@@ -719,6 +731,16 @@ const blogListingData: TemplateField[] = [
     defaultValue:
       "Tips, stories, and insights on sustainable living, bamboo benefits, and making greener everyday choices.",
     placeholder: "Tips, stories, and insights on sustainable living...",
+  },
+  {
+    key: "happy-bamboo.blog-listing-image",
+    label: "Blog Listing Image",
+    description: "Image shown at the top of the blog listing page",
+    type: "image",
+    page: "blog",
+    group: "blog.listing",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
   },
 ];
 

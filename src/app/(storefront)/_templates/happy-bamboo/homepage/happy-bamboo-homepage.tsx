@@ -2,6 +2,7 @@ import { getRichTextFieldValue } from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
+import { resolveFields } from "..";
 import { HappyBambooAboutSection } from "./happy-bamboo-about-section";
 import { HappyBambooBenefitsSection } from "./happy-bamboo-benefits-section";
 import { HappyBambooCtaSection } from "./happy-bamboo-cta-section";
@@ -24,6 +25,14 @@ export async function HappyBambooHomepage() {
     "happy-bamboo.homepage-about-body",
   );
 
+  const f = resolveFields(homepage?.siteContent?.customFields, [
+    "happy-bamboo.homepage-about-video",
+    "happy-bamboo.homepage-about-video-poster",
+    "happy-bamboo.homepage-about-image",
+    "happy-bamboo.homepage-about-heading",
+    "happy-bamboo.homepage-about-button-text",
+    "happy-bamboo.homepage-about-button-link",
+  ]);
   return (
     <HydrateClient>
       <PageTransition>
@@ -53,22 +62,13 @@ export async function HappyBambooHomepage() {
         />
 
         <HappyBambooAboutSection
-          aboutVideoUrl={themeSpecificFields?.[
-            "happy-bamboo.homepage-about-video"
-          ]?.trim()}
-          aboutVideoPosterUrl={themeSpecificFields?.[
-            "happy-bamboo.homepage-about-video-poster"
-          ]?.trim()}
-          aboutHeading={themeSpecificFields?.[
-            "happy-bamboo.homepage-about-heading"
-          ]?.trim()}
+          aboutVideoUrl={f["happy-bamboo.homepage-about-video"]}
+          aboutVideoPosterUrl={f["happy-bamboo.homepage-about-video-poster"]}
+          aboutHeading={f["happy-bamboo.homepage-about-heading"]}
           aboutDescription={missionRichContent}
-          aboutButtonText={themeSpecificFields?.[
-            "happy-bamboo.homepage-about-button-text"
-          ]?.trim()}
-          aboutButtonLink={themeSpecificFields?.[
-            "happy-bamboo.homepage-about-button-link"
-          ]?.trim()}
+          aboutButtonText={f["happy-bamboo.homepage-about-button-text"]}
+          aboutButtonLink={f["happy-bamboo.homepage-about-button-link"]}
+          aboutImageUrl={f["happy-bamboo.homepage-about-image"]}
         />
 
         {/* Featured Products */}

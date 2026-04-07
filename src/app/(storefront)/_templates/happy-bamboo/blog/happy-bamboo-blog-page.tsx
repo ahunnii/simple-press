@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import type { Page } from "generated/prisma";
@@ -67,10 +68,12 @@ export function HappyBambooBlogPage({ pages, customFields }: Props) {
   const fields = resolveFields(customFields, [
     "happy-bamboo.blog-listing-title",
     "happy-bamboo.blog-listing-intro",
+    "happy-bamboo.blog-listing-image",
   ]);
 
   const pageTitle = fields["happy-bamboo.blog-listing-title"]!;
   const pageIntro = fields["happy-bamboo.blog-listing-intro"]!;
+  const blogImage = fields["happy-bamboo.blog-listing-image"]!;
 
   const [query, setQuery] = useState("");
 
@@ -110,6 +113,39 @@ export function HappyBambooBlogPage({ pages, customFields }: Props) {
       {/* Page Header */}
       <section className="bg-muted/50 py-16 md:py-24">
         <div className="container mx-auto px-4">
+          <div className="mx-auto flex w-full flex-col items-center justify-center gap-12 md:flex-row">
+            {/* Text content */}
+            <FadeIn className="flex flex-1 flex-col justify-center text-left">
+              <Badge className="mb-4 w-fit">
+                <Leaf className="mr-1 h-3 w-3" />
+                Stories & Insights
+              </Badge>
+              <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
+                {pageTitle}
+              </h1>
+              {pageIntro && (
+                <p className="text-muted-foreground mx-auto max-w-xl text-lg leading-relaxed">
+                  {pageIntro}
+                </p>
+              )}
+            </FadeIn>
+            {/* Aspect-video image on the right */}
+            <FadeIn
+              direction="right"
+              className="flex flex-1 items-center justify-center"
+            >
+              <div className="aspect-video w-full max-w-md overflow-hidden rounded-xl border border-white/20 bg-white/20 shadow-md">
+                <img
+                  src={blogImage}
+                  alt="Blog listing image"
+                  className="h-full w-full object-cover object-center"
+                  loading="lazy"
+                />
+              </div>
+            </FadeIn>
+          </div>
+
+          {/* 
           <FadeIn className="text-center">
             <Badge className="mb-4">
               <Leaf className="mr-1 h-3 w-3" />
@@ -124,8 +160,8 @@ export function HappyBambooBlogPage({ pages, customFields }: Props) {
               </p>
             )}
 
-            {/* Search */}
-            <div className="mx-auto mt-8 max-w-md">
+     
+            <div className="mx-auto mt-8 max-w-lg">
               <InputGroup>
                 <InputGroupAddon>
                   <Search className="text-muted-foreground h-4 w-4" />
@@ -146,20 +182,44 @@ export function HappyBambooBlogPage({ pages, customFields }: Props) {
                 </p>
               )}
             </div>
-          </FadeIn>
+          </FadeIn> */}
         </div>
       </section>
 
+      <FadeIn className="container mx-auto mt-12 px-4 py-4 md:py-8">
+        <div className="mx-auto max-w-lg">
+          <InputGroup>
+            <InputGroupAddon>
+              <Search className="text-muted-foreground h-4 w-4" />
+            </InputGroupAddon>
+            <InputGroupInput
+              type="search"
+              placeholder="Search articles..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search blog posts"
+            />
+          </InputGroup>
+          {query.trim() !== "" && (
+            <p className="text-muted-foreground mt-2 text-sm">
+              {filtered.length === 0
+                ? "No articles found. Try a different keyword."
+                : `${filtered.length} article${filtered.length !== 1 ? "s" : ""} found`}
+            </p>
+          )}
+        </div>
+      </FadeIn>
+
       {/* Featured Post — only shown when not searching */}
       {featuredResult && (
-        <section className="py-16 md:py-24">
+        <section className="pt-8 pb-16 md:pt-12 md:pb-24">
           <div className="container mx-auto px-4">
-            <FadeIn className="mb-8">
+            <FadeIn className="mb-8" delay={0.1}>
               <span className="text-primary text-sm font-semibold tracking-widest uppercase">
                 Latest Post
               </span>
             </FadeIn>
-            <FadeIn delay={0.1}>
+            <FadeIn delay={0.2}>
               <Link
                 href={`/blog/${featuredResult.slug}`}
                 className="group block"
