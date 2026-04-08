@@ -39,6 +39,46 @@ export const customerRouter = createTRPCRouter({
     return customer;
   }),
 
+  // Get a single order for the current user (by orderId, scoped to their customer record)
+  getMyOrderById: protectedProcedure
+    .input(z.object({ orderId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      const user = ctx.session.user;
+
+      const customer = await ctx.db.customer.findFirst({
+        where: {
+          userId: user.id,
+          businessId: business.id,
+        },
+      });
+
+      if (!customer) {
+        return null;
+      }
+
+      const order = await ctx.db.order.findFirst({
+        where: {
+          id: input.orderId,
+          customerId: customer.id,
+        },
+        include: {
+          items: true,
+          shippingAddress: true,
+          shipments: true,
+        },
+      });
+
+      return order ?? null;
+    }),
+
   // Get order history for current user
   getMyOrders: protectedProcedure.query(async ({ ctx }) => {
     const business = await checkBusiness();

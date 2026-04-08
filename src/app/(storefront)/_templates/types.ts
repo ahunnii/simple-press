@@ -65,3 +65,13 @@ export type DefaultBlogPostPageTemplateProps = {
 export type DefaultBlogPageTemplateProps = {
   pages: NonNullable<RouterOutputs["content"]["getBlogPages"]>;
 };
+
+export type OrdersPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  orders: RouterOutputs["customer"]["getMyOrders"];
+};
+
+export type OrderDetailPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  order: NonNullable<RouterOutputs["customer"]["getMyOrderById"]>;
+};
