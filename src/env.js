@@ -60,6 +60,10 @@ export const env = createEnv({
     NEXT_PUBLIC_EMAIL_FROM_ORDERS: z.string(),
     NEXT_PUBLIC_EMAIL_FROM_SUPPORT: z.string(),
     NEXT_PUBLIC_HCAPTCHA_SITE_KEY: z.string(),
+    NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL: z
+      .string()
+      .email()
+      .default("csdt@generativejustice.org"),
   },
 
   /**
@@ -97,6 +101,8 @@ export const env = createEnv({
     SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
     VPS_IP: process.env.VPS_IP,
     NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
+    NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL:
+      process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL,
     HCAPTCHA_SECRET_KEY: process.env.HCAPTCHA_SECRET_KEY,
 
     SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,

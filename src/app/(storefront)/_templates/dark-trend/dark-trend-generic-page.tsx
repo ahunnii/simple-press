@@ -1,6 +1,7 @@
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 
 import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
 
@@ -18,6 +19,7 @@ export function DarkTrendGenericPage({ page }: Props) {
           content={page.content as TiptapJSON}
           className="prose prose-lg prose-invert prose-headings:text-white prose-p:text-white/80 prose-a:text-purple-400 prose-a:no-underline hover:prose-a:text-purple-300 prose-strong:text-white prose-code:text-purple-400 prose-pre:bg-zinc-900/50 prose-pre:border prose-pre:border-white/20 max-w-none"
         />
+        <PlatformPolicyNotice slug={page.slug} />
       </div>
     </DarkTrendGeneralLayout>
   );

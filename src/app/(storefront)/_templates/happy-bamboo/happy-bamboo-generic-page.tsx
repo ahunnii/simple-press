@@ -2,6 +2,7 @@ import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 
 type Props = {
   page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
@@ -31,6 +32,7 @@ export function HappyBambooGenericPage({ page }: Props) {
             content={page.content as TiptapJSON}
             className="prose prose-lg prose-invert prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-primary prose-a:no-underline hover:prose-a:text-primary/80 prose-strong:text-foreground prose-code:text-primary prose-pre:bg-background prose-pre:border prose-pre:border-border max-w-none"
           />
+          <PlatformPolicyNotice slug={page.slug} />
         </FadeIn>
       </section>
     </PageTransition>

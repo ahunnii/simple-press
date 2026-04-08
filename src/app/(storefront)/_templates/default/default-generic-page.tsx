@@ -1,6 +1,7 @@
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 
 export function DefaultGenericPage({
   page,
@@ -19,6 +20,8 @@ export function DefaultGenericPage({
         content={page.content as TiptapJSON}
         className="prose prose-lg max-w-none"
       />
+
+      <PlatformPolicyNotice slug={page.slug} />
     </div>
   );
 }
