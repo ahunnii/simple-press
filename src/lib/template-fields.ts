@@ -25,6 +25,10 @@ import {
   happyBambooFieldGroups,
 } from "~/app/(storefront)/_templates/happy-bamboo";
 import {
+  noiseData,
+  noiseFieldGroups,
+} from "~/app/(storefront)/_templates/noise";
+import {
   modernData,
   modernFieldGroups,
 } from "~/app/(storefront)/_templates/modern";
@@ -185,6 +189,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...darkTrendFieldGroups,
   ...modernFieldGroups,
   ...happyBambooFieldGroups,
+  ...noiseFieldGroups,
   ...elegantFieldGroups,
   ...defaultTemplateFieldGroups,
 };
@@ -235,6 +240,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...pollenData,
   ...modernData,
   ...happyBambooData,
+  ...noiseData,
   ...elegantData,
   ...defaultTemplateData,
 };

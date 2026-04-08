@@ -8,6 +8,7 @@ import { DefaultProductPage } from "../../_templates/default/default-product-pag
 import { ElegantProductPage } from "../../_templates/elegant/elegant-product-page";
 import { HappyBambooProductPage } from "../../_templates/happy-bamboo/products/happy-bamboo-product-page";
 import { ModernProductPage } from "../../_templates/modern/modern-product-page";
+import { NoiseProductPage } from "../../_templates/noise/products/noise-product-page";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -33,6 +34,7 @@ export default async function ProductDetailPage({ params }: Props) {
       bamboo: BambooProductPage,
       "dark-trend": DarkTrendProductPage,
       "happy-bamboo": HappyBambooProductPage,
+      noise: NoiseProductPage,
     }[business.templateId] ?? DefaultProductPage;
 
   return <TemplateComponent product={product} />;

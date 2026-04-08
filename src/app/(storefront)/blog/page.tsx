@@ -4,6 +4,7 @@ import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
 import { HappyBambooBlogPage } from "../_templates/happy-bamboo/blog/happy-bamboo-blog-page";
+import { NoiseBlogPage } from "../_templates/noise/blog/noise-blog-page";
 
 export default async function BlogPage() {
   const business = await api.business
@@ -18,6 +19,10 @@ export default async function BlogPage() {
   const customFields = business.siteContent?.customFields as
     | Record<string, string>
     | undefined;
+
+  if (business.templateId === "noise") {
+    return <NoiseBlogPage pages={pages} customFields={customFields} />;
+  }
 
   if (business.templateId === "happy-bamboo") {
     return <HappyBambooBlogPage pages={pages} customFields={customFields} />;

@@ -7,6 +7,7 @@ import { DarkTrendContactPage } from "../_templates/dark-trend/dark-trend-contac
 import { DefaultContactPage } from "../_templates/default/default-contact-page";
 import { HappyBambooContactPage } from "../_templates/happy-bamboo/contact/happy-bamboo-contact-page";
 import { ModernContactPage } from "../_templates/modern/modern-contact-page";
+import { NoiseContactPage } from "../_templates/noise/contact/noise-contact-page";
 import { PollenContactPage } from "../_templates/pollen/pollen-contact-page";
 
 export default async function ContactPage() {
@@ -19,6 +20,7 @@ export default async function ContactPage() {
       modern: ModernContactPage,
       bamboo: BambooContactPage,
       "happy-bamboo": HappyBambooContactPage,
+      noise: NoiseContactPage,
     }[business.templateId] ?? DefaultContactPage;
 
   return <TemplateComponent business={business} />;

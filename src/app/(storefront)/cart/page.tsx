@@ -7,6 +7,7 @@ import { DarkTrendCartPage } from "../_templates/dark-trend/dark-trend-cart-page
 import { DefaultCartPage } from "../_templates/default/default-cart-page";
 import { HappyBambooCartPage } from "../_templates/happy-bamboo/cart-checkout/happy-bamboo-cart-page";
 import ModernCartPage from "../_templates/modern/modern-cart-page";
+import { NoiseCartPage } from "../_templates/noise/cart-checkout/noise-cart-page";
 
 export default async function CartPage() {
   const business = await api.business.simplifiedGetWithProducts();
@@ -22,6 +23,7 @@ export default async function CartPage() {
       modern: ModernCartPage,
       bamboo: BambooCartPage,
       "happy-bamboo": HappyBambooCartPage,
+      noise: NoiseCartPage,
     }[business.templateId] ?? DefaultCartPage;
 
   return <TemplateComponent business={business} />;

@@ -9,6 +9,7 @@ import { DefaultCheckoutUnavailable } from "../_templates/default/default-checko
 import { ElegantCheckoutPage } from "../_templates/elegant/elegant-checkout-page";
 import { HappyBambooCheckoutPage } from "../_templates/happy-bamboo/cart-checkout/happy-bamboo-checkout-page";
 import { ModernCheckoutPage } from "../_templates/modern/modern-checkout-page";
+import { NoiseCheckoutPage } from "../_templates/noise/cart-checkout/noise-checkout-page";
 import { PollenCheckoutPage } from "../_templates/pollen/pollen-checkout-page";
 
 export default async function CheckoutPage() {
@@ -31,6 +32,7 @@ export default async function CheckoutPage() {
       "happy-bamboo": HappyBambooCheckoutPage,
       elegant: ElegantCheckoutPage,
       pollen: PollenCheckoutPage,
+      noise: NoiseCheckoutPage,
     }[business.templateId] ?? DefaultCheckoutPage;
 
   return <TemplateComponent business={business} />;

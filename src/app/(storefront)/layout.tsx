@@ -9,6 +9,7 @@ import { DefaultLayout } from "./_templates/default/default-layout";
 import { ElegantLayout } from "./_templates/elegant/elegant-layout";
 import { HappyBambooLayout } from "./_templates/happy-bamboo/layout/happy-bamboo-layout";
 import { ModernLayout } from "./_templates/modern/modern-layout";
+import { NoiseLayout } from "./_templates/noise/layout/noise-layout";
 import { PollenLayout } from "./_templates/pollen/pollen-layout";
 
 type Props = {
@@ -28,6 +29,7 @@ export default async function StorefrontLayout({ children }: Props) {
       modern: ModernLayout,
       pollen: PollenLayout,
       "happy-bamboo": HappyBambooLayout,
+      noise: NoiseLayout,
     }[business.templateId] ?? DefaultLayout;
 
   return (

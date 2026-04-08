@@ -31,6 +31,10 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Dark Trend",
     subdomains: ["trendanomaly"],
   },
+  noise: {
+    label: "Noise",
+    subdomains: ["visualnoise"],
+  },
 };
 
 // List all subdomains associated with commercial templates

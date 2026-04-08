@@ -8,6 +8,7 @@ import { DefaultProductsPage } from "../_templates/default/default-products-page
 import { ElegantShopPage } from "../_templates/elegant/elegant-shop-page";
 import { HappyBambooShopPage } from "../_templates/happy-bamboo/products/happy-bamboo-shop-page";
 import { ModernProductsPage } from "../_templates/modern/modern-products-page";
+import { NoiseShopPage } from "../_templates/noise/products/noise-shop-page";
 
 export default async function ProductsPage() {
   const business = await api.business.getWithProducts();
@@ -25,6 +26,7 @@ export default async function ProductsPage() {
       elegant: ElegantShopPage,
       bamboo: BambooShopPage,
       "happy-bamboo": HappyBambooShopPage,
+      noise: NoiseShopPage,
     }[business.templateId] ?? DefaultProductsPage;
 
   return <TemplateComponent business={business} />;

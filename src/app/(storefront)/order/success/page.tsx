@@ -5,6 +5,7 @@ import { api } from "~/trpc/server";
 import { BambooOrderSuccessPage } from "../../_templates/bamboo/bamboo-order-success-page";
 import { DarkTrendOrderSuccessPage } from "../../_templates/dark-trend/dark-trend-order-success-page";
 import { DefaultOrderSuccessPage } from "../../_templates/default/default-order-success-page";
+import { NoiseOrderSuccessPage } from "../../_templates/noise/cart-checkout/noise-order-success-page";
 
 export default async function OrderSuccessPage() {
   const business = await api.business.simplifiedGet();
@@ -17,6 +18,7 @@ export default async function OrderSuccessPage() {
     {
       "dark-trend": DarkTrendOrderSuccessPage,
       bamboo: BambooOrderSuccessPage,
+      noise: NoiseOrderSuccessPage,
     }[business.templateId] ?? DefaultOrderSuccessPage;
 
   return <TemplateComponent business={business} />;

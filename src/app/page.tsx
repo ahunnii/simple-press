@@ -12,6 +12,8 @@ import { ElegantLayout } from "./(storefront)/_templates/elegant/elegant-layout"
 import { HappyBambooHomepage } from "./(storefront)/_templates/happy-bamboo/homepage/happy-bamboo-homepage";
 import { HappyBambooLayout } from "./(storefront)/_templates/happy-bamboo/layout/happy-bamboo-layout";
 import { MinimalTemplate } from "./(storefront)/_templates/minimal-template";
+import { NoiseHomepage } from "./(storefront)/_templates/noise/homepage/noise-homepage";
+import { NoiseLayout } from "./(storefront)/_templates/noise/layout/noise-layout";
 import { ModernHomePage } from "./(storefront)/_templates/modern/homepage/modern-home-page";
 import { ModernLayout } from "./(storefront)/_templates/modern/modern-layout";
 import { PollenHomepage } from "./(storefront)/_templates/pollen/pollen-homepage";
@@ -35,6 +37,7 @@ export default async function PlatformLandingPage() {
       pollen: PollenHomepage,
       bamboo: BambooHomepage,
       "happy-bamboo": HappyBambooHomepage,
+      noise: NoiseHomepage,
     }[business.templateId] ?? DefaultHomePage;
 
   const TemplateLayout =
@@ -46,6 +49,7 @@ export default async function PlatformLandingPage() {
       modern: ModernLayout,
       pollen: PollenLayout,
       "happy-bamboo": HappyBambooLayout,
+      noise: NoiseLayout,
     }[business.templateId] ?? DefaultLayout;
 
   return (

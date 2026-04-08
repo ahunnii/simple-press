@@ -5,6 +5,7 @@ import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
 import { HappyBambooBlogPostPage } from "../../_templates/happy-bamboo/blog/happy-bamboo-blog-post-page";
+import { NoiseBlogPostPage } from "../../_templates/noise/blog/noise-blog-post-page";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -30,6 +31,7 @@ export default async function PageView({ params }: Props) {
   const TemplateComponent =
     {
       "happy-bamboo": HappyBambooBlogPostPage,
+      noise: NoiseBlogPostPage,
     }[business.templateId] ?? HappyBambooBlogPostPage;
 
   return <TemplateComponent page={page} relatedPosts={relatedPosts} />;

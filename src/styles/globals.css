@@ -225,6 +225,47 @@
   --sidebar-ring: oklch(0.45 0.08 270);
 }
 
+.noise {
+  /* Base — cool white body, #303D4B steel blue as the dark tone */
+  --background: oklch(0.99 0.003 225);         /* near-white with faint steel tint */
+  --foreground: oklch(0.27 0.030 237);         /* #303D4B steel blue-grey */
+  --card: oklch(0.99 0.003 225);
+  --card-foreground: oklch(0.27 0.030 237);
+  --popover: oklch(0.99 0.003 225);
+  --popover-foreground: oklch(0.27 0.030 237);
+  --primary: oklch(0.27 0.030 237);            /* #303D4B — matches header */
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.955 0.009 225);         /* light steel-blue section bg */
+  --secondary-foreground: oklch(0.27 0.030 237);
+  --muted: oklch(0.955 0.009 225);
+  --muted-foreground: oklch(0.50 0.020 232);   /* medium steel grey */
+  --accent: oklch(0.84 0.04 72);               /* warm champagne — editorial contrast */
+  --accent-foreground: oklch(0.27 0.030 237);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.88 0.012 225);             /* cool blue-grey border */
+  --input: oklch(0.88 0.012 225);
+  --ring: oklch(0.27 0.030 237);
+  --chart-1: oklch(0.27 0.030 237);
+  --chart-2: oklch(0.84 0.04 72);
+  --chart-3: oklch(0.50 0.020 232);
+  --chart-4: oklch(0.40 0.025 235);
+  --chart-5: oklch(0.70 0.015 225);
+  --radius: 0.15rem;
+  --sidebar: oklch(0.955 0.009 225);
+  --sidebar-foreground: oklch(0.27 0.030 237);
+  --sidebar-primary: oklch(0.27 0.030 237);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.84 0.04 72);
+  --sidebar-accent-foreground: oklch(0.27 0.030 237);
+  --sidebar-border: oklch(0.88 0.012 225);
+  --sidebar-ring: oklch(0.27 0.030 237);
+  --font-sans: "DM Sans", "DM Sans Fallback";
+  --font-heading: "DM Sans", "DM Sans Fallback";
+  --font-serif: "Cormorant Garamond", "Cormorant Garamond Fallback";
+  --noise-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
 @theme inline {
   --font-sans: var(--font-sans);
   --font-heading: var(--font-heading);
@@ -296,6 +337,21 @@
     h5,
     h6 {
       @apply font-heading;
+    }
+  }
+
+  .noise {
+    * {
+      @apply font-sans;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply font-serif;
     }
   }
 }

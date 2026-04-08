@@ -7,6 +7,7 @@ import { DarkTrendAboutPage } from "../_templates/dark-trend/dark-trend-about-pa
 import { DefaultAboutPage } from "../_templates/default/default-about-page";
 import { HappyBambooAboutPage } from "../_templates/happy-bamboo/about/happy-bamboo-about-page";
 import { ModernAboutPage } from "../_templates/modern/modern-about-page";
+import { NoiseAboutPage } from "../_templates/noise/about/noise-about-page";
 import { PollenAboutPage } from "../_templates/pollen/pollen-about-page";
 
 export default async function AboutPage() {
@@ -19,6 +20,7 @@ export default async function AboutPage() {
       modern: ModernAboutPage,
       bamboo: BambooAboutPage,
       "happy-bamboo": HappyBambooAboutPage,
+      noise: NoiseAboutPage,
     }[business.templateId] ?? DefaultAboutPage;
 
   return <TemplateComponent business={business} />;
