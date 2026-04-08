@@ -53,7 +53,7 @@ export function Providers({ children }: { children: ReactNode }) {
       >
         <TooltipProvider>{children}</TooltipProvider>
 
-        <Toaster />
+        <Toaster closeButton />
       </AuthUIProvider>{" "}
     </CartProvider>
     // </ThemeProvider>

@@ -133,6 +133,7 @@ export async function POST(req: NextRequest) {
                   trackInventory: true,
                   allowBackorders: true,
                   price: true,
+                  additionalFields: true,
                 },
               },
             },
@@ -151,6 +152,7 @@ export async function POST(req: NextRequest) {
           trackInventory: true,
           allowBackorders: true,
           inventoryQty: true,
+          additionalFields: true,
           _count: { select: { variants: true } },
         },
       }),
@@ -195,6 +197,12 @@ export async function POST(req: NextRequest) {
           pushUnavailable(name, item.productId, item.variantId);
           continue;
         }
+        const variantProductFields = variant.product
+          .additionalFields as Record<string, unknown> | null;
+        if (variantProductFields?.comingSoon === true) {
+          pushUnavailable(name, item.productId, item.variantId);
+          continue;
+        }
         if (
           variant.product.trackInventory &&
           !variant.product.allowBackorders &&
@@ -210,6 +218,14 @@ export async function POST(req: NextRequest) {
           continue;
         }
         if (product._count.variants > 0) {
+          pushUnavailable(name, item.productId, null);
+          continue;
+        }
+        const productFields = product.additionalFields as Record<
+          string,
+          unknown
+        > | null;
+        if (productFields?.comingSoon === true) {
           pushUnavailable(name, item.productId, null);
           continue;
         }

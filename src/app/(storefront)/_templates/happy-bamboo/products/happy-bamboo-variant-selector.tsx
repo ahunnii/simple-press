@@ -60,7 +60,13 @@ export function HappyBambooVariantSelector({
         <div className="flex flex-wrap gap-3">
           {product.variants.map((variant) => {
             const outOfStock =
-              product.trackInventory && variant.inventoryQty === 0;
+              product.trackInventory &&
+              variant.inventoryQty === 0 &&
+              !product.allowBackorders;
+            const isBackorderVariant =
+              product.trackInventory &&
+              variant.inventoryQty === 0 &&
+              !!product.allowBackorders;
             return (
               <Button
                 key={variant.id}
@@ -80,6 +86,7 @@ export function HappyBambooVariantSelector({
               >
                 {variant.name}
                 {outOfStock && " (Out of Stock)"}
+                {isBackorderVariant && " (Pre-order)"}
               </Button>
             );
           })}
@@ -134,9 +141,11 @@ export function HappyBambooVariantSelector({
           onClick={handleAddToCart}
           disabled={
             !selectedVariant ||
-            (product.trackInventory && selectedVariant.inventoryQty === 0)
+            (product.trackInventory &&
+              selectedVariant.inventoryQty === 0 &&
+              !product.allowBackorders)
           }
-          className={`flex-1 ${!selectedVariant || (product.trackInventory && selectedVariant.inventoryQty === 0) ? "cursor-not-allowed opacity-50" : ""}`}
+          className={`flex-1 ${!selectedVariant || (product.trackInventory && selectedVariant.inventoryQty === 0 && !product.allowBackorders) ? "cursor-not-allowed opacity-50" : ""}`}
         >
           {isAdded ? (
             <>

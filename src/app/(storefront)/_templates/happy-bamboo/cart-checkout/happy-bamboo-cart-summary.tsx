@@ -20,7 +20,7 @@ type CartSummaryProps = {
 };
 
 export function HappyBambooCartSummary({ shippingConfig }: CartSummaryProps) {
-  const { subtotal, itemCount } = useCart();
+  const { subtotal, itemCount, setIsOpen } = useCart();
   const shipping = calculateShipping(subtotal, shippingConfig);
   const estimatedOrderTotal = subtotal + shipping;
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
@@ -72,7 +72,12 @@ export function HappyBambooCartSummary({ shippingConfig }: CartSummaryProps) {
           </span>
         </div>
       </div>
-      <Button className="mt-6 w-full" size="lg" asChild>
+      <Button
+        className="mt-6 w-full"
+        size="lg"
+        asChild
+        onClick={() => setIsOpen(false)}
+      >
         <Link href="/checkout">Proceed to Checkout</Link>
       </Button>
     </div>

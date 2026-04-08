@@ -40,6 +40,9 @@ export function useProduct(
       : UNLIMITED_STOCK;
   const remainingStock = maxInventory - cartQuantity;
   const canAddMore = remainingStock > 0;
+  const tagline =
+    (product.additionalFields as { productTagline?: string })?.productTagline ??
+    null;
 
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -131,7 +134,7 @@ export function useProduct(
       {
         productId: product.id,
         variantId: selectedVariantId,
-        productName: product.name,
+        productName: `${product.name} ${tagline ? `- ${tagline}` : ""}`,
         variantName: selectedVariant?.name ?? null,
         price: displayPrice,
         imageUrl: product.images[0]?.url ?? null,

@@ -68,6 +68,10 @@ export function HappyBambooShopPage({
                   badge: null,
                   category: "",
                   slug: product.slug ?? "",
+                  additionalFields: product.additionalFields,
+                  trackInventory: product.trackInventory,
+                  inventoryQty: product.inventoryQty,
+                  allowBackorders: product.allowBackorders,
                 }}
               />
             </StaggerItem>

@@ -79,7 +79,7 @@ export function HappyBambooFeaturedProducts({
         className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2"
         staggerDelay={0.12}
       >
-        {featuredProducts?.slice(0, 3).map((product) => (
+        {featuredProducts?.slice(0, 4).map((product) => (
           <StaggerItem key={product.id}>
             <HappyBambooFeaturedProductCard product={product} />
           </StaggerItem>

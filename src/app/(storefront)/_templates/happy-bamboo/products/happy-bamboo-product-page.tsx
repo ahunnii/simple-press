@@ -39,6 +39,8 @@ import { HappyBambooVariantSelector } from "./happy-bamboo-variant-selector";
 type ProductAdditionalFields = {
   additionalInformation?: unknown;
   productFeatures?: Array<{ icon: string; text: string }>;
+  comingSoon?: boolean;
+  productTagline?: string;
 } | null;
 
 function parseProductAdditionalFields(raw: unknown): ProductAdditionalFields {
@@ -217,9 +219,8 @@ export function HappyBambooProductPage({
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  const displayTrustBadges = buildDisplayTrustBadges(
-    parseProductAdditionalFields(product.additionalFields),
-  );
+  const additional = parseProductAdditionalFields(product.additionalFields);
+  const displayTrustBadges = buildDisplayTrustBadges(additional);
 
   // const related: (typeof product)[] = [];
   return (
@@ -271,9 +272,11 @@ export function HappyBambooProductPage({
               <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
                 <span className="text-balance">{product.name}</span>
               </h1>
-              {/* <p className="text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line">
-                {product.description}
-              </p> */}
+              {additional?.productTagline && (
+                <p className="text-muted-foreground mt-1 text-xl font-medium">
+                  {additional.productTagline}
+                </p>
+              )}
             </div>
 
             <div className="flex items-baseline gap-3">
@@ -308,6 +311,19 @@ export function HappyBambooProductPage({
                 product={product}
                 setSelectedVariantId={setSelectedVariantId}
               />
+            ) : additional?.comingSoon ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800 dark:bg-amber-950">
+                <p className="font-semibold text-amber-700 dark:text-amber-300">
+                  Coming Soon
+                </p>
+                <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+                  This product isn&apos;t available yet. Check back later!
+                </p>
+              </div>
+            ) : !inStock ? (
+              <Button size="lg" disabled className="flex">
+                Out of Stock
+              </Button>
             ) : (
               <>
                 {canAddMore && (
@@ -357,6 +373,13 @@ export function HappyBambooProductPage({
                         )}
                       </Button>
                     </div>
+                    {product.trackInventory &&
+                      product.allowBackorders &&
+                      (product.inventoryQty ?? 0) === 0 && (
+                        <p className="text-muted-foreground text-sm">
+                          Backordered — ships when available
+                        </p>
+                      )}
                   </>
                 )}
 
