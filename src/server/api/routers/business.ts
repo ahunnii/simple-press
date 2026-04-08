@@ -359,13 +359,15 @@ export const businessRouter = createTRPCRouter({
       available: { amount: number; currency: string }[];
       pending: { amount: number; currency: string }[];
     } | null = null;
-    let recentPayouts: {
-      id: string;
-      amount: number;
-      currency: string;
-      status: string;
-      arrival_date: number;
-    }[] | null = null;
+    let recentPayouts:
+      | {
+          id: string;
+          amount: number;
+          currency: string;
+          status: string;
+          arrival_date: number;
+        }[]
+      | null = null;
 
     const accountId = business?.stripeAccountId;
     if (accountId) {

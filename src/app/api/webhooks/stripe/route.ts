@@ -1,8 +1,8 @@
 // app/api/webhooks/stripe/route.ts
 import type { NextRequest } from "next/server";
 import type Stripe from "stripe";
-import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import {
@@ -239,6 +239,7 @@ export async function POST(req: NextRequest) {
           const existingUser = await db.user.findFirst({
             where: {
               email: customerEmail,
+              emailVerified: true,
               memberships: {
                 some: { businessId: business.id },
               },
@@ -264,7 +265,7 @@ export async function POST(req: NextRequest) {
             update: {
               // firstName,
               // lastName,
-              phone: fullSession.customer_details?.phone ?? null,
+              // phone: fullSession.customer_details?.phone ?? null,
               // Link to user if not already linked and user exists
               userId: existingUser?.id ?? undefined,
             },

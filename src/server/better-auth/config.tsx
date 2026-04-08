@@ -10,6 +10,33 @@ import { resend } from "~/lib/email/resend";
 import { EMAIL_FROM } from "~/lib/email/send";
 import { db } from "~/server/db";
 
+async function linkGuestOrdersToUser(user: {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+}) {
+  if (!user.emailVerified) return;
+  try {
+    const result = await db.customer.updateMany({
+      where: {
+        email: user.email.toLowerCase(),
+        userId: null,
+      },
+      data: { userId: user.id },
+    });
+    if (result.count > 0) {
+      console.log(
+        `[Auth Hook] Linked ${result.count} customer record(s) to user ${user.id}`,
+      );
+    }
+  } catch (err) {
+    Sentry.captureException(err, {
+      tags: { "auth.hook": "link-guest-orders" },
+      extra: { userId: user.id, email: user.email },
+    });
+  }
+}
+
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_BASE_URL,
 
@@ -154,6 +181,18 @@ export const auth = betterAuth({
     }),
   ],
   databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          await linkGuestOrdersToUser(user);
+        },
+      },
+      update: {
+        after: async (user) => {
+          await linkGuestOrdersToUser(user);
+        },
+      },
+    },
     session: {
       create: {
         before: async (session) => {

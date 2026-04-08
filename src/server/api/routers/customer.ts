@@ -195,11 +195,224 @@ export const customerRouter = createTRPCRouter({
   //   return customer;
   // }),
 
-  list: ownerAdminProcedure.query(async ({ ctx }) => {
-    const { businessId } = ctx;
-    const customers = await ctx.db.customer.findMany({
-      where: { businessId },
-    });
-    return customers;
-  }),
+  updateMarketingPreference: protectedProcedure
+    .input(z.object({ acceptsMarketing: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.session.user;
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+      }
+      const customer = await ctx.db.customer.findFirst({
+        where: { userId: user.id, businessId: business.id },
+      });
+      if (!customer) return null;
+      return ctx.db.customer.update({
+        where: { id: customer.id },
+        data: { acceptsMarketing: input.acceptsMarketing },
+      });
+    }),
+
+  addAddress: protectedProcedure
+    .input(
+      z.object({
+        firstName: z.string().min(1),
+        lastName: z.string().min(1),
+        company: z.string().optional(),
+        address1: z.string().min(1),
+        address2: z.string().optional(),
+        city: z.string().min(1),
+        province: z.string().optional(),
+        country: z.string().min(1),
+        zip: z.string().min(1),
+        phone: z.string().optional(),
+        isDefault: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.session.user;
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+      }
+
+      // Upsert customer if they haven't ordered before
+      const customer = await ctx.db.customer.upsert({
+        where: { businessId_email: { businessId: business.id, email: user.email } },
+        create: {
+          email: user.email,
+          firstName: user.name?.split(" ")[0] ?? "",
+          lastName: user.name?.split(" ").slice(1).join(" ") ?? "",
+          userId: user.id,
+          businessId: business.id,
+        },
+        update: {},
+      });
+
+      if (input.isDefault) {
+        await ctx.db.shippingAddress.updateMany({
+          where: { customerId: customer.id },
+          data: { isDefault: false },
+        });
+      }
+
+      return ctx.db.shippingAddress.create({
+        data: {
+          customerId: customer.id,
+          firstName: input.firstName,
+          lastName: input.lastName,
+          company: input.company,
+          address1: input.address1,
+          address2: input.address2,
+          city: input.city,
+          province: input.province,
+          country: input.country,
+          zip: input.zip,
+          phone: input.phone,
+          isDefault: input.isDefault ?? false,
+        },
+      });
+    }),
+
+  updateAddress: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        firstName: z.string().min(1).optional(),
+        lastName: z.string().min(1).optional(),
+        company: z.string().optional(),
+        address1: z.string().min(1).optional(),
+        address2: z.string().optional(),
+        city: z.string().min(1).optional(),
+        province: z.string().optional(),
+        country: z.string().min(1).optional(),
+        zip: z.string().min(1).optional(),
+        phone: z.string().optional(),
+        isDefault: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.session.user;
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+      }
+
+      const address = await ctx.db.shippingAddress.findFirst({
+        where: { id: input.id },
+        include: { customer: true },
+      });
+
+      if (!address || address.customer.userId !== user.id || address.customer.businessId !== business.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Address not found" });
+      }
+
+      if (input.isDefault) {
+        await ctx.db.shippingAddress.updateMany({
+          where: { customerId: address.customerId },
+          data: { isDefault: false },
+        });
+      }
+
+      const { id, ...data } = input;
+      return ctx.db.shippingAddress.update({
+        where: { id },
+        data,
+      });
+    }),
+
+  deleteAddress: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.session.user;
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+      }
+
+      const address = await ctx.db.shippingAddress.findFirst({
+        where: { id: input.id },
+        include: { customer: true },
+      });
+
+      if (!address || address.customer.userId !== user.id || address.customer.businessId !== business.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Address not found" });
+      }
+
+      await ctx.db.shippingAddress.delete({ where: { id: input.id } });
+      return { success: true };
+    }),
+
+  setDefaultAddress: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.session.user;
+      const business = await checkBusiness();
+      if (!business) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+      }
+
+      const address = await ctx.db.shippingAddress.findFirst({
+        where: { id: input.id },
+        include: { customer: true },
+      });
+
+      if (!address || address.customer.userId !== user.id || address.customer.businessId !== business.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Address not found" });
+      }
+
+      await ctx.db.$transaction([
+        ctx.db.shippingAddress.updateMany({
+          where: { customerId: address.customerId },
+          data: { isDefault: false },
+        }),
+        ctx.db.shippingAddress.update({
+          where: { id: input.id },
+          data: { isDefault: true },
+        }),
+      ]);
+
+      return { success: true };
+    }),
+
+  getById: ownerAdminProcedure
+    .input(z.string())
+    .query(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
+      return ctx.db.customer.findFirst({
+        where: { id, businessId },
+        include: {
+          orders: {
+            include: {
+              items: true,
+              shippingAddress: true,
+            },
+            orderBy: { createdAt: "desc" },
+          },
+        },
+      });
+    }),
+
+  list: ownerAdminProcedure
+    .input(z.object({ search: z.string().optional() }))
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const search = input.search?.trim();
+
+      return ctx.db.customer.findMany({
+        where: {
+          businessId,
+          ...(search
+            ? {
+                OR: [
+                  { email: { contains: search, mode: "insensitive" } },
+                  { firstName: { contains: search, mode: "insensitive" } },
+                  { lastName: { contains: search, mode: "insensitive" } },
+                ],
+              }
+            : {}),
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    }),
 });

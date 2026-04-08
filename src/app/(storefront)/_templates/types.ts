@@ -75,3 +75,13 @@ export type OrderDetailPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   order: NonNullable<RouterOutputs["customer"]["getMyOrderById"]>;
 };
+
+export type AccountAddressBookPageProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  customer: RouterOutputs["customer"]["getMyProfile"];
+};
+
+export type AccountPreferencesPageProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  customer: RouterOutputs["customer"]["getMyProfile"];
+};

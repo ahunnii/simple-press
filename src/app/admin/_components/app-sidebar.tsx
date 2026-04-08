@@ -17,6 +17,7 @@ import {
   IconShoppingCart,
   IconStar,
   IconTerminal,
+  IconUsers,
 } from "@tabler/icons-react";
 import { Building2, Users } from "lucide-react";
 
@@ -51,6 +52,11 @@ const getNavData = (session: Session | null) => {
       url: "/admin/orders",
       icon: IconShoppingCart,
       featureKey: "orders",
+    },
+    {
+      title: "Customers",
+      url: "/admin/customers",
+      icon: IconUsers,
     },
     {
       title: "Payments",

@@ -13,6 +13,7 @@ import {
 } from "~/components/page-animations";
 
 import type { OrdersPageTemplateProps } from "../../types";
+import { HappyBambooAccountLayout } from "../account/happy-bamboo-account-layout";
 
 function statusClass(status: string) {
   switch (status) {
@@ -32,31 +33,14 @@ function statusClass(status: string) {
 export function HappyBambooOrdersPage({ orders }: OrdersPageTemplateProps) {
   return (
     <PageTransition>
-      <section className="bg-secondary/40 py-16">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <FadeIn direction="up">
-            <p className="text-primary mb-2 text-sm font-semibold tracking-wider uppercase">
-              Account
-            </p>
-            <h1 className="font-heading text-foreground text-4xl font-bold">
-              My Orders
-            </h1>
-            <div className="text-muted-foreground mt-2 flex items-center text-sm">
-              <Link href="/" className="hover:text-primary">
-                Home
-              </Link>
-              <span className="mx-2">/</span>
-              <Link href="/account/profile" className="hover:text-primary">
-                Account
-              </Link>
-              <span className="mx-2">/</span>
-              <span>Orders</span>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+      <HappyBambooAccountLayout
+        heading="My Orders"
+        breadcrumb={[
+          { label: "Home", href: "/" },
+          { label: "Account", href: "/account/settings" },
+          { label: "Orders" },
+        ]}
+      >
         {orders.length === 0 ? (
           <FadeIn direction="up">
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -137,7 +121,7 @@ export function HappyBambooOrdersPage({ orders }: OrdersPageTemplateProps) {
             ))}
           </StaggerContainer>
         )}
-      </section>
+      </HappyBambooAccountLayout>
     </PageTransition>
   );
 }

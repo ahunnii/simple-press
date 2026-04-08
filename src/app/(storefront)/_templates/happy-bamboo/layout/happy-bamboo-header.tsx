@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
-import { IconLayoutDashboard } from "@tabler/icons-react";
+import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { Leaf, Menu, ShoppingCart } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -93,6 +93,11 @@ export function HappyBambooHeader({
         },
       }}
       additionalLinks={[
+        {
+          icon: <IconPackage className="h-4 w-4" />,
+          label: "Orders",
+          href: "/account/orders",
+        },
         ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
         !!session?.session?.membershipId
           ? [

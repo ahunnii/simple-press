@@ -4,6 +4,8 @@ import { accountViewPaths } from "@daveyplate/better-auth-ui/server";
 
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
+import { HappyBambooAccountSecurityPage } from "../../_templates/happy-bamboo/account/happy-bamboo-account-security-page";
+import { HappyBambooAccountSettingsPage } from "../../_templates/happy-bamboo/account/happy-bamboo-account-settings-page";
 
 export const dynamicParams = false;
 
@@ -19,6 +21,14 @@ export default async function AccountPage({ params }: Props) {
   const { path } = await params;
   const business = await api.business.simplifiedGet();
   if (!business) notFound();
+
+  if (business.templateId === "happy-bamboo") {
+    if (path === accountViewPaths.SECURITY) {
+      return <HappyBambooAccountSecurityPage />;
+    }
+    return <HappyBambooAccountSettingsPage />;
+  }
+
   const templateStyle =
     {
       "dark-trend": "bg-[#424242]",
