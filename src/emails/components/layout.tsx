@@ -5,6 +5,7 @@ import {
   Hr,
   Html,
   Img,
+  Link,
   Section,
   Text,
 } from "@react-email/components";
@@ -15,6 +16,8 @@ type EmailLayoutProps = {
   businessName?: string;
   logoUrl?: string;
   footerText?: string;
+  /** For non-transactional emails (welcome, testimonial invite). Pass the owner's email so recipients can opt out. */
+  ownerEmail?: string;
 };
 
 export function EmailLayout({
@@ -22,6 +25,7 @@ export function EmailLayout({
   businessName,
   logoUrl,
   footerText,
+  ownerEmail,
 }: EmailLayoutProps) {
   return (
     <Html>
@@ -49,6 +53,18 @@ export function EmailLayout({
               {footerText ??
                 `© ${new Date().getFullYear()} ${businessName ?? ""}. All rights reserved.`}
             </Text>
+            {ownerEmail && (
+              <Text style={unsubscribeStyle}>
+                To stop receiving these emails,{" "}
+                <Link
+                  href={`mailto:${ownerEmail}?subject=Unsubscribe`}
+                  style={unsubscribeLink}
+                >
+                  reply with &ldquo;Unsubscribe&rdquo;
+                </Link>{" "}
+                or email {ownerEmail}.
+              </Text>
+            )}
           </Section>
         </Container>
       </Body>
@@ -105,4 +121,16 @@ const footerTextStyle = {
   fontSize: "12px",
   lineHeight: "24px",
   textAlign: "center" as const,
+};
+
+const unsubscribeStyle = {
+  color: "#9ca3af",
+  fontSize: "11px",
+  lineHeight: "20px",
+  textAlign: "center" as const,
+  marginTop: "8px",
+};
+
+const unsubscribeLink = {
+  color: "#9ca3af",
 };

@@ -163,6 +163,7 @@ export async function POST(req: NextRequest) {
             stripeAccountId: true,
             subdomain: true,
             customDomain: true,
+            domainStatus: true,
             name: true,
             ownerEmail: true,
             siteContent: {
@@ -705,6 +706,7 @@ export async function POST(req: NextRequest) {
               siteContent: business.siteContent,
               subdomain: business.subdomain,
               customDomain: business.customDomain,
+              domainStatus: business.domainStatus,
             },
           });
 
@@ -746,6 +748,8 @@ export async function POST(req: NextRequest) {
               name: business.name,
               siteContent: business.siteContent,
               subdomain: business.subdomain,
+              customDomain: business.customDomain,
+              domainStatus: business.domainStatus,
             },
           });
           console.log(

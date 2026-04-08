@@ -424,6 +424,7 @@ export const testimonialRouter = createTRPCRouter({
         where: { id: businessId },
         select: {
           name: true,
+          ownerEmail: true,
           subdomain: true,
           customDomain: true,
           domainStatus: true,
@@ -471,6 +472,7 @@ export const testimonialRouter = createTRPCRouter({
         businessName: business.name,
         inviteUrl,
         logoUrl: business.siteContent?.logoUrl ?? undefined,
+        ownerEmail: business.ownerEmail,
       });
 
       return invite;

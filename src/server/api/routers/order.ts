@@ -114,6 +114,7 @@ export const orderRouter = createTRPCRouter({
               siteContent: order.business.siteContent,
               subdomain: order.business.subdomain,
               customDomain: order.business.customDomain,
+              domainStatus: order.business.domainStatus,
             },
           });
           console.log(
@@ -191,6 +192,7 @@ export const orderRouter = createTRPCRouter({
               siteContent: order.business.siteContent,
               subdomain: order.business.subdomain,
               customDomain: order.business.customDomain,
+              domainStatus: order.business.domainStatus,
             },
           });
         }
@@ -288,6 +290,7 @@ export const orderRouter = createTRPCRouter({
               siteContent: business.siteContent,
               subdomain: business.subdomain,
               customDomain: business.customDomain,
+              domainStatus: business.domainStatus,
             },
           });
           break;
@@ -335,6 +338,7 @@ export const orderRouter = createTRPCRouter({
               siteContent: business.siteContent,
               subdomain: business.subdomain,
               customDomain: business.customDomain,
+              domainStatus: business.domainStatus,
             },
           });
           break;
@@ -354,6 +358,7 @@ export const orderRouter = createTRPCRouter({
               siteContent: business.siteContent,
               subdomain: business.subdomain,
               customDomain: business.customDomain,
+              domainStatus: business.domainStatus,
             },
           });
           break;
@@ -438,6 +443,7 @@ export const orderRouter = createTRPCRouter({
               ownerEmail: true,
               subdomain: true,
               customDomain: true,
+              domainStatus: true,
               siteContent: {
                 select: { logoUrl: true },
               },
@@ -600,6 +606,7 @@ export const orderRouter = createTRPCRouter({
               siteContent: order.business.siteContent,
               subdomain: order.business.subdomain,
               customDomain: order.business.customDomain,
+              domainStatus: order.business.domainStatus,
             },
           });
           console.log(
@@ -642,6 +649,7 @@ export const orderRouter = createTRPCRouter({
               ownerEmail: true,
               subdomain: true,
               customDomain: true,
+              domainStatus: true,
               siteContent: { select: { logoUrl: true } },
             },
           },
@@ -780,6 +788,7 @@ export const orderRouter = createTRPCRouter({
                 siteContent: order.business.siteContent,
                 subdomain: order.business.subdomain,
                 customDomain: order.business.customDomain,
+              domainStatus: order.business.domainStatus,
               },
             });
             console.log(
@@ -968,6 +977,7 @@ export const orderRouter = createTRPCRouter({
               siteContent: business.siteContent,
               subdomain: business.subdomain,
               customDomain: business.customDomain ?? undefined,
+              domainStatus: business.domainStatus,
             },
           });
           console.log(
@@ -1041,6 +1051,7 @@ export const orderRouter = createTRPCRouter({
               ownerEmail: true,
               subdomain: true,
               customDomain: true,
+              domainStatus: true,
               siteContent: { select: { logoUrl: true } },
             },
           },
@@ -1157,6 +1168,7 @@ export const orderRouter = createTRPCRouter({
               siteContent: order.business.siteContent,
               subdomain: order.business.subdomain,
               customDomain: order.business.customDomain,
+              domainStatus: order.business.domainStatus,
             },
           });
           console.log(

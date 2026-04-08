@@ -10,7 +10,7 @@ import OrderShippedEmail from "~/emails/order-shipped";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import WelcomeEmail from "~/emails/welcome";
 
-import { env } from "~/env";
+import { getBusinessUrl } from "~/lib/business-url";
 
 import { EMAIL_FROM, sendEmail } from "./send";
 
@@ -34,11 +34,10 @@ export async function sendOrderConfirmation(params: {
     } | null;
     subdomain: string;
     customDomain?: string | null;
+    domainStatus?: string | null;
   };
 }) {
-  const businessUrl = params.business.customDomain
-    ? `https://${params.business.customDomain}`
-    : `https://${params.business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  const businessUrl = getBusinessUrl(params.business);
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
@@ -92,11 +91,10 @@ export async function sendNewOrderNotification(params: {
     } | null;
     subdomain: string;
     customDomain?: string | null;
+    domainStatus?: string | null;
   };
 }) {
-  const adminOrderUrl = params.business.customDomain
-    ? `https://${params.business.customDomain}/admin/orders/${params.orderId}`
-    : `https://${params.business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/admin/orders/${params.orderId}`;
+  const adminOrderUrl = `${getBusinessUrl(params.business)}/admin/orders/${params.orderId}`;
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
@@ -179,11 +177,10 @@ export async function sendOrderFulfilled(params: {
     } | null;
     subdomain: string;
     customDomain?: string | null;
+    domainStatus?: string | null;
   };
 }) {
-  const businessUrl = params.business.customDomain
-    ? `https://${params.business.customDomain}`
-    : `https://${params.business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  const businessUrl = getBusinessUrl(params.business);
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
@@ -222,11 +219,10 @@ export async function sendOrderRefunded(params: {
     } | null;
     subdomain: string;
     customDomain?: string | null;
+    domainStatus?: string | null;
   };
 }) {
-  const businessUrl = params.business.customDomain
-    ? `https://${params.business.customDomain}`
-    : `https://${params.business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  const businessUrl = getBusinessUrl(params.business);
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
@@ -268,11 +264,10 @@ export async function sendOrderCancelled(params: {
     } | null;
     subdomain: string;
     customDomain?: string | null;
+    domainStatus?: string | null;
   };
 }) {
-  const businessUrl = params.business.customDomain
-    ? `https://${params.business.customDomain}`
-    : `https://${params.business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  const businessUrl = getBusinessUrl(params.business);
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
@@ -338,27 +333,29 @@ export async function sendWelcomeEmail(params: {
   name: string;
   business: {
     name: string;
+    ownerEmail: string;
     subdomain: string;
     customDomain?: string | null;
+    domainStatus?: string | null;
     siteContent?: {
       logoUrl?: string | null;
     } | null;
   };
 }) {
-  const businessUrl = params.business.customDomain
-    ? `https://${params.business.customDomain}`
-    : `https://${params.business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  const businessUrl = getBusinessUrl(params.business);
 
   return sendEmail({
     from: EMAIL_FROM.NOREPLY,
     fromName: params.business.name,
     to: params.to,
+    replyTo: params.business.ownerEmail,
     subject: `Welcome to ${params.business.name}!`,
     react: WelcomeEmail({
       name: params.name,
       businessName: params.business.name,
       businessUrl,
       logoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      ownerEmail: params.business.ownerEmail,
     }),
     tags: [
       { name: "category", value: "welcome" },
@@ -372,17 +369,20 @@ export async function sendTestimonialInviteEmail({
   businessName,
   inviteUrl,
   logoUrl,
+  ownerEmail,
 }: {
   to: string;
   businessName: string;
   inviteUrl: string;
   logoUrl?: string;
+  ownerEmail?: string;
 }) {
   return sendEmail({
     from: EMAIL_FROM.NOREPLY,
     fromName: businessName,
     to,
+    replyTo: ownerEmail,
     subject: `Share your experience with ${businessName}`,
-    react: TestimonialInviteEmail({ businessName, inviteUrl, logoUrl }),
+    react: TestimonialInviteEmail({ businessName, inviteUrl, logoUrl, ownerEmail }),
   });
 }

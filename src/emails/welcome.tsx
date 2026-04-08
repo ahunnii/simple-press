@@ -7,6 +7,7 @@ type WelcomeEmailProps = {
   businessName: string;
   businessUrl: string;
   logoUrl?: string;
+  ownerEmail?: string;
 };
 
 export default function WelcomeEmail({
@@ -14,12 +15,14 @@ export default function WelcomeEmail({
   businessName,
   businessUrl,
   logoUrl,
+  ownerEmail,
 }: WelcomeEmailProps) {
   return (
     <EmailLayout
       previewText={`Welcome to ${businessName}!`}
       businessName={businessName}
       logoUrl={logoUrl}
+      ownerEmail={ownerEmail}
     >
       <Text style={heading}>Welcome to {businessName}! 🎉</Text>
 

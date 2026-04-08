@@ -146,25 +146,33 @@ export async function HappyBambooFooter({
               )}
             </address>
           </div>
+
+          {/* Policies */}
+          {policies.length > 0 && (
+            <div>
+              <h4 className="text-muted mb-4 font-semibold">Policies</h4>
+              <ul className="flex flex-col space-y-2">
+                {policies.map((link) => (
+                  <li key={link.id}>
+                    <Link
+                      href={`/${link.slug}`}
+                      className="text-muted hover:text-primary text-sm transition-colors"
+                    >
+                      {link.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <Separator className="my-8" />
 
-        <div className="text-muted flex flex-col items-center justify-between gap-4 text-sm md:flex-row">
+        <div className="text-muted text-center text-sm md:text-left">
           <p>
             &copy; {new Date().getFullYear()} {name}. All rights reserved.
           </p>
-          <div className="flex gap-4">
-            {policies.map((link) => (
-              <Link
-                key={link.id}
-                href={`/${link.slug}`}
-                className="hover:text-primary"
-              >
-                {link.title}
-              </Link>
-            ))}
-          </div>
         </div>
       </div>
     </footer>

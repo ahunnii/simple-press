@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -42,6 +42,25 @@ export function HappyBambooHeader({
   // const { data: session, isPending } = authClient.useSession();
 
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Announce cart changes to screen readers. Skip the initial hydration value
+  // so we don't announce on every page load.
+  const [cartAnnouncement, setCartAnnouncement] = useState("");
+  const prevItemCount = useRef<number | null>(null);
+  useEffect(() => {
+    if (prevItemCount.current === null) {
+      prevItemCount.current = itemCount;
+      return;
+    }
+    if (itemCount !== prevItemCount.current) {
+      setCartAnnouncement(
+        itemCount === 0
+          ? "Cart is now empty."
+          : `Cart updated. ${itemCount} ${itemCount === 1 ? "item" : "items"} in cart.`,
+      );
+      prevItemCount.current = itemCount;
+    }
+  }, [itemCount]);
 
   const links =
     (business?.siteContent?.navigationItems as {
@@ -225,6 +244,14 @@ export function HappyBambooHeader({
       <HappyBambooCartDrawer
         shippingConfig={shippingConfigFromBusiness(business)}
       />
+      <span
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {cartAnnouncement}
+      </span>
     </>
   );
 }

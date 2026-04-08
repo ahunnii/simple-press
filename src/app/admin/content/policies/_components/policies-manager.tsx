@@ -174,42 +174,62 @@ You may not use our site:
 Questions about the Terms of Service should be sent to us at [your email].`),
   },
   refund: {
-    title: "Refund Policy",
+    title: "Returns & Refunds",
     slug: "refund-policy",
     getContent: () =>
-      markdownToTiptap(`# Refund Policy
+      markdownToTiptap(`# Returns & Refunds
 
 Last updated: ${new Date().toLocaleDateString()}
 
+## Our Commitment
+
+Every item from [Your Business Name] is [handmade with care / carefully sourced], and we want you to love what you receive. Please read this policy before purchasing so you know exactly what to expect.
+
 ## Return Window
 
-You may return most items within 30 days of delivery for a full refund.
+We accept returns within [X] days of delivery. To start a return, contact us at [your email] before sending anything back — we'll walk you through the process.
 
 ## Eligible Items
 
-Items must be:
+To be eligible for a return, items must be:
 
-- Unused and in original condition
-- In original packaging
-- Accompanied by proof of purchase
+- Unused and in their original condition
+- Returned in original packaging where applicable
+- Accompanied by your order confirmation or proof of purchase
 
 ## Non-Returnable Items
 
-The following items cannot be returned:
+The following cannot be returned or refunded:
 
+- Custom, made-to-order, or personalized items
+- [Any other categories specific to your shop, e.g. perishables, intimate goods]
+- Sale or final-sale items
+- Digital downloads
 - Gift cards
-- Downloadable products
-- Custom or personalized items
+
+## Exchanges
+
+We're happy to exchange items for a different [size / color / variation] when available. Contact us within [X] days of delivery to arrange an exchange. Customers are responsible for return shipping on exchanges.
+
+## Damaged or Defective Items
+
+If your order arrives damaged or defective, please contact us within [X] days with a photo of the issue. We will replace or refund the item at no cost to you.
 
 ## Refund Process
 
-1. Contact us to initiate a return
-2. Ship the item back to us
-3. Refund processed within 5-10 business days after receipt
+Once we receive and inspect your return:
+
+- You'll be notified whether your return is approved
+- Approved refunds are processed within 5–10 business days
+- Refunds are issued to your original payment method
+
+## Return Shipping
+
+[Who pays for return shipping? e.g., "Customers are responsible for return shipping costs unless the item arrived damaged or we made an error."]
 
 ## Contact Us
 
-For return questions, please email us at [your email].`),
+Questions about a return or refund? Reach us at [your email] or through our contact page.`),
   },
   shipping: {
     title: "Shipping Policy",
@@ -454,7 +474,7 @@ export function PoliciesManager({ business }: Props) {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
             <TabsTrigger value="terms">Terms</TabsTrigger>
-            <TabsTrigger value="refund">Refund</TabsTrigger>
+            <TabsTrigger value="refund">Returns</TabsTrigger>
             <TabsTrigger value="shipping">Shipping</TabsTrigger>
           </TabsList>
 

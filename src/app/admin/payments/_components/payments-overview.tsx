@@ -80,6 +80,12 @@ export function PaymentsOverview({ data }: { data: Data }) {
     100,
   );
 
+  // Warn at 75% of either metric so owners can verify before being required to
+  const isApproachingThreshold =
+    !informActThresholdReached &&
+    !stripeDetailsSubmitted &&
+    (transactionPct >= 75 || revenuePct >= 75);
+
   const availableTotal = (stripeBalance?.available ?? []).reduce(
     (sum, b) => sum + b.amount,
     0,
@@ -95,6 +101,38 @@ export function PaymentsOverview({ data }: { data: Data }) {
 
   return (
     <div className="admin-container space-y-6">
+      {/* INFORM Act warning — shown at 75% so owners can verify before being required to */}
+      {isApproachingThreshold && (
+        <Alert className="border-amber-200 bg-amber-50 text-amber-900">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertTitle>Approaching INFORM Act Threshold</AlertTitle>
+          <AlertDescription className="mt-1 space-y-2">
+            <p>
+              You&apos;re getting close to the limit that requires seller
+              identity verification under the{" "}
+              <strong>INFORM Consumers Act</strong>. Complete your Stripe
+              account verification now so you&apos;re ready before it&apos;s
+              required.
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              asChild
+              className="border-amber-300 bg-white text-amber-900 hover:bg-amber-50"
+            >
+              <a
+                href="https://dashboard.stripe.com/settings/identity"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Start Verification
+                <ExternalLink className="ml-2 h-3 w-3" />
+              </a>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* INFORM Act alert — shown when threshold crossed and not yet verified */}
       {informActThresholdReached && !stripeDetailsSubmitted && (
         <Alert variant="destructive">

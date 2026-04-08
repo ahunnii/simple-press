@@ -6,18 +6,21 @@ interface TestimonialInviteEmailProps {
   businessName: string;
   inviteUrl: string;
   logoUrl?: string;
+  ownerEmail?: string;
 }
 
 export function TestimonialInviteEmail({
   businessName,
   inviteUrl,
   logoUrl,
+  ownerEmail,
 }: TestimonialInviteEmailProps) {
   return (
     <EmailLayout
       previewText={`Share your experience with ${businessName}`}
       businessName={businessName}
       logoUrl={logoUrl}
+      ownerEmail={ownerEmail}
     >
       <Text style={heading}>We&apos;d love your feedback!</Text>
 
