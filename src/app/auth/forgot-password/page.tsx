@@ -1,5 +1,5 @@
 import { api } from "~/trpc/server";
-import { DefaultForgotPasswordPage } from "~/app/(storefront)/_templates/default/default-forgot-password-page";
+import { DefaultForgotPasswordPage } from "~/app/(storefront)/_templates/default/auth/default-forgot-password-page";
 
 type Props = {
   searchParams: Promise<{ redirectTo: string }>;

@@ -95,6 +95,7 @@ const getNavData = (session: Session | null) => {
       title: "Testimonials",
       url: "/admin/testimonials",
       icon: IconStar,
+      featureKey: "testimonials",
     },
     {
       title: "Reviews",

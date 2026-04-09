@@ -144,8 +144,25 @@ export async function BambooTestimonialsPage({
             </StaggerContainer>
           )}
 
+          <FadeIn className="mt-14 text-center">
+            <div className="bg-secondary/50 mx-auto max-w-2xl rounded-2xl px-8 py-12">
+              <h2 className="font-heading text-2xl font-bold">
+                Share Your Experience
+              </h2>
+              <p className="text-muted-foreground mt-2">
+                Loved shopping with us? We&apos;d love to hear from you.
+              </p>
+              <Link
+                href="/testimonials/submit"
+                className="bg-primary text-primary-foreground mt-6 inline-block rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
+              >
+                Write a Testimonial
+              </Link>
+            </div>
+          </FadeIn>
+
           {testimonials.length > 0 ? (
-            <FadeIn className="mt-14 text-center">
+            <FadeIn className="mt-10 text-center">
               <Link
                 href="/shop"
                 className="text-primary font-semibold hover:underline"

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
-import { DefaultSignUpPage } from "~/app/(storefront)/_templates/default/default-sign-up-page";
+import { DefaultSignUpPage } from "~/app/(storefront)/_templates/default/auth/default-sign-up-page";
 
 export const metadata = {
   title: "Sign Up",

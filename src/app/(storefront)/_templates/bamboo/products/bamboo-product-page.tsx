@@ -1,5 +1,6 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,70 +17,18 @@ import {
 } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
+import type { RouterOutputs } from "~/trpc/react";
+import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { FadeIn, PageTransition } from "~/components/page-animations";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { resolveFields } from "..";
 import { BambooVariantSelector } from "./bamboo-variant-selector";
-
-// const productDetails: Record<string, { highlights: string[]; specs: Record<string, string> }> = {
-//   'bamboo-luxe-12': {
-//     highlights: [
-//       'Ultra-soft 3-ply sheets for a premium feel',
-//       '300 sheets per roll -- lasts longer than standard rolls',
-//       'Breaks down easily in all septic systems',
-//       'Free from chlorine bleach, dyes, inks, and fragrances',
-//       'Wrapped in plastic-free, recyclable paper packaging',
-//     ],
-//     specs: {
-//       'Material': '100% Bamboo Fiber',
-//       'Ply Count': '3-Ply',
-//       'Sheets Per Roll': '300',
-//       'Roll Count': '12',
-//       'Septic Safe': 'Yes',
-//       'Hypoallergenic': 'Yes',
-//       'Packaging': 'Plastic-free, recyclable paper',
-//     },
-//   },
-//   'bamboo-luxe-24': {
-//     highlights: [
-//       'Same ultra-soft 3-ply bamboo sheets in a bulk-size value pack',
-//       'Ideal for families or stocking up for the quarter',
-//       'Reduces order frequency and shipping footprint',
-//       'Free from chlorine bleach, dyes, inks, and fragrances',
-//       'Wrapped in plastic-free, recyclable paper packaging',
-//     ],
-//     specs: {
-//       'Material': '100% Bamboo Fiber',
-//       'Ply Count': '3-Ply',
-//       'Sheets Per Roll': '300',
-//       'Roll Count': '24',
-//       'Septic Safe': 'Yes',
-//       'Hypoallergenic': 'Yes',
-//       'Packaging': 'Plastic-free, recyclable paper',
-//     },
-//   },
-//   'bamboo-starter-kit': {
-//     highlights: [
-//       'Curated bundle: 6 rolls of toilet paper + 4 rolls of paper towels',
-//       'The perfect introduction to bamboo household essentials',
-//       'Makes a thoughtful, eco-conscious gift',
-//       'All products are tree-free and sustainably sourced',
-//       'Packaged in a premium, recyclable gift-style box',
-//     ],
-//     specs: {
-//       'Material': '100% Bamboo Fiber',
-//       'Toilet Paper Ply': '3-Ply',
-//       'Paper Towel Ply': '2-Ply',
-//       'Toilet Paper Rolls': '6',
-//       'Paper Towel Rolls': '4',
-//       'Septic Safe': 'Yes',
-//       'Packaging': 'Recyclable gift box',
-//     },
-//   },
-// }
 
 const trustBadges = [
   { icon: Leaf, label: "100% Tree-Free" },
@@ -87,6 +36,35 @@ const trustBadges = [
   { icon: Shield, label: "Hypoallergenic" },
   { icon: Sparkles, label: "Premium Quality" },
 ];
+
+type ProductAdditionalFields = {
+  additionalInformation?: unknown;
+  productFeatures?: Array<{ icon: string; text: string }>;
+  comingSoon?: boolean;
+  productTagline?: string;
+} | null;
+
+function buildDisplayTrustBadges(
+  additional: ProductAdditionalFields,
+): Array<{ Icon: LucideIcon; label: string }> {
+  const features = additional?.productFeatures ?? [];
+  const fromDb = features
+    .map((f) => {
+      const Icon = getLucideTemplateIcon(f.icon);
+      if (!Icon || !f.text?.trim()) return null;
+      return { Icon, label: f.text.trim() };
+    })
+    .filter((b): b is { Icon: LucideIcon; label: string } => b !== null);
+  if (fromDb.length > 0) return fromDb;
+  return trustBadges.map((b) => ({ Icon: b.icon, label: b.label }));
+}
+
+function parseProductAdditionalFields(raw: unknown): ProductAdditionalFields {
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
+    return null;
+  }
+  return raw as ProductAdditionalFields;
+}
 
 export function BambooProductPage({
   product,
@@ -106,6 +84,8 @@ export function BambooProductPage({
   } = useProduct(product);
 
   const [isAdded, setIsAdded] = useState(false);
+  const additional = parseProductAdditionalFields(product.additionalFields);
+  const displayTrustBadges = buildDisplayTrustBadges(additional);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -264,12 +244,12 @@ export function BambooProductPage({
 
             {/* Trust badges */}
             <div className="grid grid-cols-2 gap-3">
-              {trustBadges.map((badge) => (
+              {displayTrustBadges?.map((badge) => (
                 <div
                   key={badge.label}
                   className="bg-secondary/60 flex items-center gap-2 rounded-lg px-3 py-2"
                 >
-                  <badge.icon className="text-primary size-4" />
+                  <badge.Icon className="text-primary size-4" />
                   <span className="text-secondary-foreground text-xs font-medium">
                     {badge.label}
                   </span>
@@ -278,7 +258,7 @@ export function BambooProductPage({
             </div>
           </FadeIn>
         </div>
-
+        <BambooProductDetailsTabs product={product} />
         {/* Highlights & Specs */}
         {/* {details && (
           <div className="mt-16 flex flex-col gap-12 lg:flex-row lg:gap-16">
@@ -381,5 +361,54 @@ export function BambooProductPage({
         </FadeIn> */}
       </section>
     </PageTransition>
+  );
+}
+
+export function BambooProductDetailsTabs({
+  product,
+}: {
+  product: NonNullable<RouterOutputs["product"]["get"]>;
+}) {
+  const additional = parseProductAdditionalFields(product.additionalFields);
+
+  return (
+    <Tabs
+      defaultValue="overview"
+      className="mx-auto w-full max-w-7xl py-12 md:py-20"
+    >
+      <TabsList variant="line" className="mx-auto">
+        <TabsTrigger value="overview">Description</TabsTrigger>
+        <TabsTrigger value="analytics">Additional Information</TabsTrigger>
+      </TabsList>
+      <TabsContent value="overview">
+        <Card>
+          <CardHeader>
+            <CardTitle>Description</CardTitle>
+          </CardHeader>
+          <CardContent className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line">
+              {product?.description}
+            </p>
+          </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="analytics">
+        <Card>
+          <CardHeader>
+            <CardTitle>Additional Information</CardTitle>
+          </CardHeader>
+          <CardContent className="text-muted-foreground text-sm">
+            {additional?.additionalInformation ? (
+              <TiptapRenderer
+                content={additional.additionalInformation as TiptapJSON}
+                className="prose prose-sm dark:prose-invert max-w-none"
+              />
+            ) : (
+              <p>No additional information available.</p>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
   );
 }

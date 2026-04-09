@@ -1,10 +1,10 @@
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { FadeIn } from "~/components/page-animations";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { PollenGeneralLayout } from "./pollen-general-layout";
+import { PollenGeneralLayout } from "./layout/pollen-general-layout";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;

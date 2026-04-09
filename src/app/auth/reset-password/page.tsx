@@ -1,5 +1,5 @@
 import { api } from "~/trpc/server";
-import { DefaultResetPasswordPage } from "~/app/(storefront)/_templates/default/default-reset-password-page";
+import { DefaultResetPasswordPage } from "~/app/(storefront)/_templates/default/auth/default-reset-password-page";
 
 type Props = {
   searchParams: Promise<{ redirectTo: string }>;

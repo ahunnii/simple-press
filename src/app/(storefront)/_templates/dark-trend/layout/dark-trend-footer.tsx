@@ -9,6 +9,13 @@ export async function DarkTrendFooter({
   business,
 }: DefaultFooterTemplateProps) {
   const currentYear = new Date().getFullYear();
+  const email = business?.supportEmail;
+  const phone = business?.phoneNumber;
+  const address = business?.businessAddress;
+
+  const navigationItems = business?.siteContent?.navigationItems as
+    | { label: string; href: string }[]
+    | undefined;
 
   const policies = await api.content.getSimplifiedPages({
     type: "policy",
@@ -55,50 +62,57 @@ export async function DarkTrendFooter({
 
           <div>
             <h3 className="text-xs font-semibold tracking-widest text-white uppercase">
-              Store
+              Navigate
             </h3>
             <ul className="mt-4 flex flex-col gap-3">
-              <li>
-                <Link
-                  href="/about"
-                  className="text-sm text-white/70 transition-colors hover:text-white"
-                >
-                  Shop
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-sm text-white/70 transition-colors hover:text-white"
-                >
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="text-sm text-white/70 transition-colors hover:text-white"
-                >
-                  About
-                </Link>
-              </li>
+              {(navigationItems ?? [
+                { href: "/shop", label: "Shop" },
+                { href: "/contact", label: "Contact" },
+                { href: "/about", label: "About" },
+              ]).map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-white/70 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-xs font-semibold tracking-widest text-white uppercase">
-              Reach out at:
-            </h3>
-            <ul className="mt-4 flex flex-col gap-3 text-sm text-white/70">
-              <li>
-                <a
-                  href={`mailto:${business?.supportEmail ?? ""}`}
-                  className="transition-colors hover:text-white"
-                >
-                  {business?.supportEmail ?? ""}
-                </a>
-              </li>
-            </ul>
+            {(email ?? phone ?? address) && (
+              <>
+                <h3 className="text-xs font-semibold tracking-widest text-white uppercase">
+                  Reach Out
+                </h3>
+                <ul className="mt-4 flex flex-col gap-3 text-sm text-white/70">
+                  {!!address && <li>{address}</li>}
+                  {!!phone && (
+                    <li>
+                      <a
+                        href={`tel:${phone.replace(/\D/g, "")}`}
+                        className="transition-colors hover:text-white"
+                      >
+                        {phone}
+                      </a>
+                    </li>
+                  )}
+                  {!!email && (
+                    <li>
+                      <a
+                        href={`mailto:${email}`}
+                        className="transition-colors hover:text-white"
+                      >
+                        {email}
+                      </a>
+                    </li>
+                  )}
+                </ul>
+              </>
+            )}
 
             <h3 className="text-xs font-semibold tracking-widest text-white uppercase">
               Follow Us On

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
-import { DefaultSignInPage } from "~/app/(storefront)/_templates/default/default-sign-in-page";
+import { DefaultSignInPage } from "~/app/(storefront)/_templates/default/auth/default-sign-in-page";
 
 type Props = {
   searchParams: Promise<{ redirectTo: string }>;

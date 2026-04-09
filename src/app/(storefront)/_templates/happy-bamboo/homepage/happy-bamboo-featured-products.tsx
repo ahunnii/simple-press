@@ -10,7 +10,8 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
-import { useCart } from "~/providers/cart-context";
+
+// import { useCart } from "~/providers/cart-context";
 
 import { HappyBambooFeaturedProductCard } from "../products/happy-bamboo-product-card";
 
@@ -30,7 +31,7 @@ export function HappyBambooFeaturedProducts({
   featuredButtonText = "View All Products",
   featuredButtonLink = "/shop",
 }: Props) {
-  const { addItem } = useCart();
+  // const { addItem } = useCart();
   // const router = useRouter();
 
   // const handleAdd = (

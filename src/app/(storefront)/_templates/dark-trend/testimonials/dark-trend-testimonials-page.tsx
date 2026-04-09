@@ -72,7 +72,21 @@ export async function DarkTrendTestimonialsPage({
               </article>
             ))}
           </div>
-          <div className="mt-12 text-center">
+          <div className="mt-12 rounded-xl border border-white/10 bg-[#1F1F1F] px-8 py-12 text-center">
+            <h2 className="text-xl font-bold text-white">
+              Share Your Experience
+            </h2>
+            <p className="mt-2 text-white/60">
+              Loved shopping with us? We&apos;d love to hear from you.
+            </p>
+            <Link
+              href="/testimonials/submit"
+              className="mt-6 inline-block rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            >
+              Write a Testimonial
+            </Link>
+          </div>
+          <div className="mt-8 text-center">
             <Link
               href="/about"
               className="font-semibold text-purple-400 hover:text-purple-300"

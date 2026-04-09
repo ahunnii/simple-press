@@ -4,12 +4,12 @@ import { api } from "~/trpc/server";
 
 import { BambooTestimonialsPage } from "../_templates/bamboo/testimonials/bamboo-testimonials-page";
 import { DarkTrendTestimonialsPage } from "../_templates/dark-trend/testimonials/dark-trend-testimonials-page";
-import { DefaultTestimonialsPage } from "../_templates/default/default-testimonials-page";
-import { ElegantTestimonialsPage } from "../_templates/elegant/elegant-testimonials-page";
-import { HappyBambooTestimonialsPage } from "../_templates/happy-bamboo/happy-bamboo-testimonials-page";
-import { ModernTestimonialsPage } from "../_templates/modern/modern-testimonials-page";
-import { NoiseTestimonialsPage } from "../_templates/noise/noise-testimonials-page";
-import { PollenTestimonialsPage } from "../_templates/pollen/pollen-testimonials-page";
+import { DefaultTestimonialsPage } from "../_templates/default/testimonials/default-testimonials-page";
+import { ElegantTestimonialsPage } from "../_templates/elegant/testimonials/elegant-testimonials-page";
+import { HappyBambooTestimonialsPage } from "../_templates/happy-bamboo/testimonials/happy-bamboo-testimonials-page";
+import { ModernTestimonialsPage } from "../_templates/modern/testimonials/modern-testimonials-page";
+import { NoiseTestimonialsPage } from "../_templates/noise/testimonials/noise-testimonials-page";
+import { PollenTestimonialsPage } from "../_templates/pollen/testimonials/pollen-testimonials-page";
 
 export default async function TestimonialsPage() {
   const business = await api.business.simplifiedGet();

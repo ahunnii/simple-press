@@ -4,11 +4,12 @@ import { api } from "~/trpc/server";
 
 import { BambooProductPage } from "../../_templates/bamboo/products/bamboo-product-page";
 import { DarkTrendProductPage } from "../../_templates/dark-trend/products/dark-trend-product-page";
-import { DefaultProductPage } from "../../_templates/default/default-product-page";
-import { ElegantProductPage } from "../../_templates/elegant/elegant-product-page";
+import { DefaultProductPage } from "../../_templates/default/products/default-product-page";
+import { ElegantProductPage } from "../../_templates/elegant/products/elegant-product-page";
 import { HappyBambooProductPage } from "../../_templates/happy-bamboo/products/happy-bamboo-product-page";
-import { ModernProductPage } from "../../_templates/modern/modern-product-page";
+import { ModernProductPage } from "../../_templates/modern/products/modern-product-page";
 import { NoiseProductPage } from "../../_templates/noise/products/noise-product-page";
+import { PollenProductPage } from "../../_templates/pollen/products/pollen-product-page";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -35,6 +36,7 @@ export default async function ProductDetailPage({ params }: Props) {
       "dark-trend": DarkTrendProductPage,
       "happy-bamboo": HappyBambooProductPage,
       noise: NoiseProductPage,
+      pollen: PollenProductPage,
     }[business.templateId] ?? DefaultProductPage;
 
   return <TemplateComponent product={product} />;

@@ -1,11 +1,11 @@
 import Image from "next/image";
 import { Mail, MapPin } from "lucide-react";
 
-import type { DefaultContactPageTemplateProps } from "../types";
+import type { DefaultContactPageTemplateProps } from "../../types";
 
-import { resolveFields } from ".";
+import { resolveFields } from "..";
 import { DarkTrendContactForm } from "./dark-trend-contact-form";
-import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
+import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 
 export function DarkTrendContactPage({
   business,

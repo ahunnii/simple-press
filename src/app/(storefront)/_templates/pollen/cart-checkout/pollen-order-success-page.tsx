@@ -2,8 +2,8 @@ import { Suspense } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
 
-import { DefaultOrderConfirmation } from "../../default/default-order-confirmation";
-import { PollenGeneralLayout } from "../pollen-general-layout";
+import { DefaultOrderConfirmation } from "../../default/cart-checkout/default-order-confirmation";
+import { PollenGeneralLayout } from "../layout/pollen-general-layout";
 
 export function PollenOrderSuccessPage({
   business,

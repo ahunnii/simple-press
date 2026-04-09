@@ -724,6 +724,56 @@ const servicesResourcesData: TemplateField[] = [
   },
 ];
 
+const shopPageData: TemplateField[] = [
+  {
+    key: "pollen.shop.listing-title",
+    label: "Shop Page Heading",
+    description: "Heading shown at the top of the shop/products page",
+    type: "text",
+    page: "products",
+    group: "products.shop",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Products",
+    placeholder: "Our Products",
+  },
+  {
+    key: "pollen.shop.listing-intro",
+    label: "Shop Page Intro",
+    description: "Short intro below the shop heading",
+    type: "textarea",
+    page: "products",
+    group: "products.shop",
+    gridColumn: "col-span-full",
+    defaultValue: "Browse our selection of quality products.",
+    placeholder: "Browse our selection...",
+  },
+];
+
+const collectionsPageData: TemplateField[] = [
+  {
+    key: "pollen.collections.listing-title",
+    label: "Collections Page Heading",
+    description: "Heading shown at the top of the collections page",
+    type: "text",
+    page: "collections",
+    group: "collections.main",
+    gridColumn: "col-span-1",
+    defaultValue: "Our Collections",
+    placeholder: "Our Collections",
+  },
+  {
+    key: "pollen.collections.listing-intro",
+    label: "Collections Page Intro",
+    description: "Short intro below the collections heading",
+    type: "textarea",
+    page: "collections",
+    group: "collections.main",
+    gridColumn: "col-span-full",
+    defaultValue: "Browse our curated collections.",
+    placeholder: "Browse our curated collections...",
+  },
+];
+
 const blogPageData: TemplateField[] = [
   {
     key: "pollen.blog.listing-title",
@@ -864,6 +914,20 @@ const fieldGroups: TemplateFieldGroup[] = [
     columns: 1,
   },
   {
+    id: "products.shop",
+    title: "Shop Page",
+    description: "Heading and intro text for the shop/products listing page",
+    icon: "🛍️",
+    columns: 2,
+  },
+  {
+    id: "collections.main",
+    title: "Collections Page",
+    description: "Heading and intro text for the collections listing page",
+    icon: "📦",
+    columns: 2,
+  },
+  {
     id: "blog.header",
     title: "Blog",
     description: "Heading, intro, and optional hero image on the blog index",
@@ -884,6 +948,8 @@ export const pollenData = {
     ...servicesQuestionsData,
     ...servicesResourcesData,
     ...servicesExpandedPageData,
+    ...shopPageData,
+    ...collectionsPageData,
     ...blogPageData,
   ],
 };

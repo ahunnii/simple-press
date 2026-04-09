@@ -9,7 +9,7 @@ import {
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
-import { FeaturedProductsGrid } from "../modern-featured-products-grid";
+import { FeaturedProductsGrid } from "./modern-featured-products-grid";
 
 export async function ModernHomePage() {
   const homepage = await api.business.getHomepage();

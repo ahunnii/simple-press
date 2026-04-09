@@ -8,7 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Spotlight } from "~/components/ui/spotlight-new";
 import { GalleryRenderer } from "~/components/gallery-renderer";
 
-import { resolveFields } from ".";
+import { resolveFields } from "..";
 import { DarkTrendFeaturedProductsGrid } from "./dark-trend-featured-products-grid";
 import { DarkTrendHeroContent } from "./dark-trend-hero-content";
 import { DarkTrendMotionSection } from "./dark-trend-motion-section";

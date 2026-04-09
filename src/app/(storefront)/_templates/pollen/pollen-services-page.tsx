@@ -25,8 +25,8 @@ import {
 } from "~/components/page-animations";
 
 import { resolveFields } from ".";
-import { PollenGeneralLayout } from "./pollen-general-layout";
-import { PollenTestimonialsSection } from "./pollen-testimonials-section";
+import { PollenGeneralLayout } from "./layout/pollen-general-layout";
+import { PollenTestimonialsSection } from "./testimonials/pollen-testimonials-section";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;

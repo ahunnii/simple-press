@@ -132,7 +132,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Collect and display customer testimonials",
     category: "marketing",
     enabledByDefault: true,
-    ownerCanToggle: false,
+    ownerCanToggle: true,
     hidesNav: ["testimonials"],
   },
   reviews: {
