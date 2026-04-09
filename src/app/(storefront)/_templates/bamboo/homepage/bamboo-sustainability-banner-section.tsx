@@ -1,40 +1,11 @@
-import type { LucideIcon } from "lucide-react";
-import { BanknoteArrowDown, CheckCircle, Users } from "lucide-react";
-
+import type { GenericIconRow } from "~/lib/template-fields";
 import { StaggerContainer, StaggerItem } from "~/components/page-animations";
 
-const DEFAULT_FEATURES = [
-  {
-    icon: CheckCircle,
-    title: "Premium Quality",
-    description:
-      "Experience top-quality household paper products, crafted for comfort and reliability.",
-  },
-  {
-    icon: BanknoteArrowDown,
-    title: "Competitive Prices",
-    description: "Affordable prices without compromising quality.",
-  },
-  {
-    icon: Users,
-    title: "Customer-Centric Approach",
-    description: "Your satisfaction comes first in everything we do.",
-  },
-];
-
 type Props = {
-  sustainabilityList: unknown[];
+  sustainabilityList: GenericIconRow[];
 };
 
 export function BambooSustainabilityBanner({ sustainabilityList }: Props) {
-  const listRows = sustainabilityList as {
-    icon: LucideIcon;
-    title: string;
-    description: string;
-  }[];
-  const features =
-    !listRows || listRows.length === 0 ? DEFAULT_FEATURES : listRows;
-
   return (
     <section className="bg-primary">
       <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
@@ -42,7 +13,7 @@ export function BambooSustainabilityBanner({ sustainabilityList }: Props) {
           className="grid grid-cols-2 gap-8 lg:grid-cols-3"
           staggerDelay={0.1}
         >
-          {features.map((feature) => (
+          {sustainabilityList.map((feature) => (
             <StaggerItem
               key={feature.title}
               className="flex flex-col items-center gap-3 text-center"

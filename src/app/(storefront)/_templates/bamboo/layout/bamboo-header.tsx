@@ -13,7 +13,7 @@ import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
-import { MobileNav } from "./bamboo-mobile-nav";
+import { BambooMobileNav } from "./bamboo-mobile-nav";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -26,8 +26,6 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
-
-  console.log(session);
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -147,7 +145,7 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
         </div>
       </div>
 
-      <MobileNav
+      <BambooMobileNav
         open={mobileOpen}
         onOpenChange={setMobileOpen}
         business={business}

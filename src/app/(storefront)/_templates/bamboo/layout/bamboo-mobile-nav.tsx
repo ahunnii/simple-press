@@ -23,7 +23,11 @@ type MobileNavProps = {
   onOpenChange: (open: boolean) => void;
 } & DefaultHeaderTemplateProps;
 
-export function MobileNav({ open, onOpenChange, business }: MobileNavProps) {
+export function BambooMobileNav({
+  open,
+  onOpenChange,
+  business,
+}: MobileNavProps) {
   const pathname = usePathname();
 
   const links =

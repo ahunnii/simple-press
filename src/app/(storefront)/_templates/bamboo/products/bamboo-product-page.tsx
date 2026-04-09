@@ -21,6 +21,7 @@ import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
+import { resolveFields } from "..";
 import { BambooVariantSelector } from "./bamboo-variant-selector";
 
 // const productDetails: Record<string, { highlights: string[]; specs: Record<string, string> }> = {
@@ -360,7 +361,7 @@ export function BambooProductPage({
         </div> */}
 
         {/* Septic Info CTA */}
-        <FadeIn direction="up" delay={0.1} className="mt-16">
+        {/* <FadeIn direction="up" delay={0.1} className="mt-16">
           <div className="bg-secondary flex flex-col items-center gap-4 rounded-2xl p-8 text-center md:p-12">
             <Droplets className="text-primary size-8" />
             <h2 className="text-foreground font-heading text-2xl font-bold">
@@ -377,7 +378,7 @@ export function BambooProductPage({
               </Link>
             </Button>
           </div>
-        </FadeIn>
+        </FadeIn> */}
       </section>
     </PageTransition>
   );

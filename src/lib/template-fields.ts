@@ -49,7 +49,8 @@ export type TemplatePage =
   | "shop"
   | "cart"
   | "checkout"
-  | "global";
+  | "global"
+  | "testimonials";
 
 export type TemplateListItemField = {
   key: string;
@@ -357,6 +358,21 @@ export const PAGE_METADATA = {
     title: "About",
     description: "About page content",
     icon: "ℹ️",
+  },
+  blog: {
+    title: "Blog",
+    description: "Blog page content",
+    icon: "📝",
+  },
+  testimonials: {
+    title: "Testimonials",
+    description: "Testimonials page content",
+    icon: "💬",
+  },
+  collections: {
+    title: "Collections",
+    description: "Collections page content",
+    icon: "📂",
   },
 } as const;
 

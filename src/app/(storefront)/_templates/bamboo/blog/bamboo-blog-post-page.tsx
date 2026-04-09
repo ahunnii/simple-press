@@ -2,12 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, CalendarDays, Leaf, Tag } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Leaf } from "lucide-react";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { formatDate } from "~/lib/utils";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -36,16 +35,16 @@ export function BambooBlogPostPage({
     "bamboo.blog.post-cta-button-link",
   ]);
 
-  const ctaHeading = f["bamboo.blog.post-cta-heading"] ?? "";
-  const ctaBody = f["bamboo.blog.post-cta-body"] ?? "";
-  const ctaButtonText = f["bamboo.blog.post-cta-button-text"] ?? "Shop now";
-  const ctaHref = f["bamboo.blog.post-cta-button-link"] ?? "/shop";
+  const ctaHeading = f["bamboo.blog.post-cta-heading"];
+  const ctaBody = f["bamboo.blog.post-cta-body"];
+  const ctaButtonText = f["bamboo.blog.post-cta-button-text"];
+  const ctaHref = f["bamboo.blog.post-cta-button-link"];
 
   const others = relatedPosts.filter((p) => p.slug !== page.slug);
 
   return (
     <PageTransition>
-      <section className="bg-secondary pt-12 pb-0 md:pt-16">
+      <section className="bg-secondary mb-6 pt-12 pb-6">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="mx-auto max-w-4xl">
             <FadeIn>
@@ -58,10 +57,6 @@ export function BambooBlogPostPage({
               </Link>
             </FadeIn>
             <FadeIn delay={0.1}>
-              <Badge variant="secondary" className="mb-4">
-                <Tag className="mr-1 h-3 w-3" />
-                Article
-              </Badge>
               <h1 className="text-foreground font-heading text-3xl leading-tight font-bold tracking-tight md:text-4xl lg:text-5xl">
                 {page.title}
               </h1>
@@ -78,11 +73,11 @@ export function BambooBlogPostPage({
         </div>
       </section>
 
-      {page.image && (
+      {page?.image && (
         <section className="pb-16">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn delay={0.2} className="mx-auto max-w-4xl">
-              <div className="relative aspect-16/7 overflow-hidden rounded-2xl border border-border/60 shadow-lg">
+              <div className="border-border/60 relative aspect-16/7 overflow-hidden rounded-2xl border shadow-lg">
                 <Image
                   src={page.image ?? "/placeholder.svg"}
                   alt={page.title}
@@ -105,7 +100,7 @@ export function BambooBlogPostPage({
                 <TiptapRenderer content={page.content as TiptapJSON} />
               </article>
 
-              {(ctaHeading || ctaBody) && (
+              {(ctaHeading ?? ctaBody) && (
                 <FadeIn delay={0.1} className="mt-10">
                   <div className="border-border/60 bg-muted/50 rounded-2xl border p-6 md:p-8">
                     <div className="flex items-start gap-4">
@@ -124,7 +119,7 @@ export function BambooBlogPostPage({
                           </p>
                         ) : null}
                         <Button asChild className="group">
-                          <Link href={ctaHref || "/shop"}>
+                          <Link href={ctaHref!}>
                             {ctaButtonText}
                             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                           </Link>

@@ -4,20 +4,26 @@ import { ArrowRight } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
 
+import { resolveFields } from "../index";
+
 export function BambooCollectionsPage({
+  business,
   collections,
 }: DefaultCollectionsPageTemplateProps) {
   const list = collections ?? [];
-
+  const f = resolveFields(business.siteContent?.customFields, [
+    "bamboo.collections.listing-title",
+    "bamboo.collections.listing-intro",
+  ]);
   return (
     <div className="bg-background">
       {/* Header */}
       <div className="bg-secondary/30 border-border border-b px-4 py-16 text-center sm:px-6 lg:px-8">
         <h1 className="font-heading text-foreground text-4xl font-bold md:text-5xl">
-          Collections
+          {f["bamboo.collections.listing-title"]}
         </h1>
         <p className="text-muted-foreground mx-auto mt-4 max-w-lg text-base">
-          Explore our thoughtfully curated product collections.
+          {f["bamboo.collections.listing-intro"]}
         </p>
       </div>
 

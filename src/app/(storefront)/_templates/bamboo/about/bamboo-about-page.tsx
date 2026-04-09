@@ -21,8 +21,8 @@ import {
   DEFAULT_BAMBOO_NATIONWIDE_FACTS,
   DEFAULT_BAMBOO_VALUES,
   DEFAULT_BAMBOO_WHY_BAMBOO_FACTS,
-  resolveFields,
-} from "..";
+} from ".";
+import { resolveFields } from "..";
 
 export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const f = resolveFields(business?.siteContent?.customFields, [

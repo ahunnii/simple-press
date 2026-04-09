@@ -32,15 +32,15 @@ type Props = DefaultBlogPageTemplateProps & {
 };
 
 export function BambooBlogPage({ pages, customFields }: Props) {
-  const fields = resolveFields(customFields, [
+  const f = resolveFields(customFields, [
     "bamboo.blog.listing-title",
     "bamboo.blog.listing-intro",
     "bamboo.blog.listing-image",
   ]);
 
-  const pageTitle = fields["bamboo.blog.listing-title"] ?? "";
-  const pageIntro = fields["bamboo.blog.listing-intro"] ?? "";
-  const blogImage = fields["bamboo.blog.listing-image"] ?? "/placeholder.svg";
+  const pageTitle = f["bamboo.blog.listing-title"];
+  const pageIntro = f["bamboo.blog.listing-intro"];
+  const blogImage = f["bamboo.blog.listing-image"];
 
   const [query, setQuery] = useState("");
 
@@ -82,7 +82,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn className="text-center">
               <h1 className="text-foreground font-heading text-4xl font-bold tracking-tight md:text-5xl">
-                {pageTitle || "Blog"}
+                {pageTitle ?? "Blog"}
               </h1>
               {pageIntro ? (
                 <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg leading-relaxed">
@@ -120,7 +120,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
                 Stories &amp; Insights
               </Badge>
               <h1 className="text-foreground font-heading text-4xl font-bold tracking-tight md:text-5xl">
-                {pageTitle || "Blog"}
+                {pageTitle ?? "Blog"}
               </h1>
               {pageIntro ? (
                 <p className="text-muted-foreground mt-4 max-w-xl text-lg leading-relaxed">
@@ -132,7 +132,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
               direction="right"
               className="flex flex-1 items-center justify-center"
             >
-              <div className="aspect-video w-full max-w-md overflow-hidden rounded-2xl border border-border/60 bg-card shadow-md">
+              <div className="border-border/60 bg-card aspect-video w-full max-w-md overflow-hidden rounded-2xl border shadow-md">
                 <img
                   src={blogImage}
                   alt=""
@@ -182,7 +182,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
                 href={`/blog/${featuredResult.slug}`}
                 className="group block"
               >
-                <div className="grid overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-lg lg:grid-cols-2">
+                <div className="border-border/60 bg-card grid overflow-hidden rounded-2xl border shadow-sm transition-shadow hover:shadow-lg lg:grid-cols-2">
                   <div className="relative aspect-4/3 lg:aspect-auto">
                     <Image
                       src={featuredResult.image ?? "/placeholder.svg"}

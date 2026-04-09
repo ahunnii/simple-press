@@ -3,14 +3,14 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookUser, Bell, Lock, Package, Settings } from "lucide-react";
+import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 import { FadeIn } from "~/components/page-animations";
 
 const NAV_ITEMS = [
-  { href: "/account/orders", label: "Orders", icon: Package },
   { href: "/account/settings", label: "Settings", icon: Settings },
+  { href: "/account/orders", label: "Orders", icon: Package },
   { href: "/account/security", label: "Security", icon: Lock },
   { href: "/account/address-book", label: "Address Book", icon: BookUser },
   { href: "/account/preferences", label: "Preferences", icon: Bell },
@@ -77,10 +77,10 @@ export function BambooAccountLayout({ children, heading }: Props) {
                     <Link
                       href={href}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg border-l-2 py-2.5 pl-3 pr-4 text-sm font-medium transition-colors",
+                        "flex items-center gap-3 rounded-lg border-l-2 py-2.5 pr-4 pl-3 text-sm font-medium transition-colors",
                         active
                           ? "border-primary bg-primary/10 text-primary"
-                          : "border-transparent text-foreground/70 hover:bg-secondary/60 hover:text-foreground",
+                          : "text-foreground/70 hover:bg-secondary/60 hover:text-foreground border-transparent",
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0" aria-hidden />

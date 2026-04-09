@@ -1,8 +1,8 @@
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { FadeIn, PageTransition } from "~/components/page-animations";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type Props = {
   page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
@@ -23,18 +23,6 @@ export function BambooGenericPage({ page }: Props) {
               {page.excerpt}
             </p>
           </FadeIn>
-          {/* <FadeIn direction="left" delay={0.15} className="relative flex-1">
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-              <Image
-                src="/images/septic-safe.jpg"
-                alt="Illustration showing bamboo toilet paper dissolving safely in a septic system"
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-            </div>
-          </FadeIn> */}
         </div>
       </section>
 

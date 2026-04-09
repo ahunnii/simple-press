@@ -1,12 +1,8 @@
-// "use client";
-
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { Button } from "~/components/ui/button";
-// import { useCart } from "~/providers/cart-context";
-
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { CheckoutForm } from "./bamboo-checkout-form";
@@ -14,8 +10,6 @@ import { CheckoutForm } from "./bamboo-checkout-form";
 export async function BambooCheckoutPage({
   business,
 }: DefaultCheckoutPageTemplateProps) {
-  //   const { items } = useCart();
-  // Check if Stripe is connected
   if (!business.isStripeConnected) {
     return (
       <PageTransition>
@@ -33,26 +27,6 @@ export async function BambooCheckoutPage({
       </PageTransition>
     );
   }
-
-  //   if (items.length === 0) {
-  //     return (
-  //       <PageTransition>
-  //         <section className="mx-auto flex max-w-7xl flex-col items-center justify-center px-4 py-24 text-center lg:px-8">
-  //           <FadeIn direction="up">
-  //             <h1 className="text-foreground font-heading text-2xl font-bold">
-  //               Nothing to checkout
-  //             </h1>
-  //             <p className="text-muted-foreground mt-2">
-  //               Add some products to your cart before proceeding to checkout.
-  //             </p>
-  //             <Button className="mt-6" asChild>
-  //               <Link href="/shop">Browse Products</Link>
-  //             </Button>
-  //           </FadeIn>
-  //         </section>
-  //       </PageTransition>
-  //     );
-  //   }
 
   return (
     <PageTransition>

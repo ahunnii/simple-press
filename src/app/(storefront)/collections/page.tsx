@@ -16,21 +16,9 @@ export default async function CollectionsPage() {
 
   const collections = await api.collections.getAllPublic();
 
-  const customFields = business.siteContent?.customFields as
-    | Record<string, string>
-    | undefined;
-
-  if (business.templateId === "happy-bamboo") {
-    return (
-      <HappyBambooCollectionsPage
-        collections={collections}
-        customFields={customFields}
-      />
-    );
-  }
-
   const TemplateComponent =
     {
+      "happy-bamboo": HappyBambooCollectionsPage,
       bamboo: BambooCollectionsPage,
       "dark-trend": DarkTrendCollectionsPage,
       elegant: ElegantCollectionsPage,
@@ -38,7 +26,7 @@ export default async function CollectionsPage() {
       noise: NoiseCollectionsPage,
     }[business.templateId] ?? DefaultCollectionsPage;
 
-  return <TemplateComponent collections={collections} />;
+  return <TemplateComponent collections={collections} business={business} />;
 }
 
 export const metadata = {

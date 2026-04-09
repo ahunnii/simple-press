@@ -16,15 +16,10 @@ import {
 
 import { resolveFields } from "../index";
 
-type Props = DefaultCollectionsPageTemplateProps & {
-  customFields?: Record<string, string>;
-};
+type Props = DefaultCollectionsPageTemplateProps;
 
-export function HappyBambooCollectionsPage({
-  collections,
-  customFields,
-}: Props) {
-  const fields = resolveFields(customFields, [
+export function HappyBambooCollectionsPage({ collections, business }: Props) {
+  const fields = resolveFields(business.siteContent?.customFields, [
     "happy-bamboo.collections-listing-heading",
     "happy-bamboo.collections-listing-intro",
     "happy-bamboo.collections-cta-heading",

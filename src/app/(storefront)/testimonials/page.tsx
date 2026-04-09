@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { BambooTestimonialsPage } from "../_templates/bamboo/bamboo-testimonials-page";
+import { BambooTestimonialsPage } from "../_templates/bamboo/testimonials/bamboo-testimonials-page";
 import { DarkTrendTestimonialsPage } from "../_templates/dark-trend/dark-trend-testimonials-page";
 import { DefaultTestimonialsPage } from "../_templates/default/default-testimonials-page";
 import { ElegantTestimonialsPage } from "../_templates/elegant/elegant-testimonials-page";

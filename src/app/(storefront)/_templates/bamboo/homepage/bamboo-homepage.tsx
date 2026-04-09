@@ -11,15 +11,17 @@ import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import { FadeIn, PageTransition, ScaleIn } from "~/components/page-animations";
 
+import { DEFAULT_BAMBOO_FEATURES } from ".";
 import { resolveFields } from "..";
-import { BambooFeaturedProducts } from "./bamboo-featured-products";
-import { BambooSustainabilityBanner } from "./bamboo-sustainability-banner";
+import { BambooFeaturedProductsSection } from "./bamboo-featured-products-section";
+import { BambooSustainabilityBanner } from "./bamboo-sustainability-banner-section";
 
 export async function BambooHomepage() {
   const homepage = await api.business.getHomepage();
 
+  const address = homepage?.businessAddress;
+
   const f = resolveFields(homepage?.siteContent?.customFields, [
-    "bamboo.global.location-address",
     "bamboo.global.location-map",
     "bamboo.homepage.hero-background",
     "bamboo.homepage.hero-image",
@@ -40,7 +42,9 @@ export async function BambooHomepage() {
     "bamboo.homepage.location-heading",
   ]);
 
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(f["bamboo.global.location-address"]!)}`;
+  const mapsUrl = address
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+    : null;
   const heroBackground = f["bamboo.homepage.hero-background"];
 
   const sustainabilityList = parseTemplateIconListRows(
@@ -48,6 +52,7 @@ export async function BambooHomepage() {
       homepage?.siteContent?.customFields,
       "bamboo.homepage.sustainability-list",
     ),
+    DEFAULT_BAMBOO_FEATURES,
   );
 
   return (
@@ -135,7 +140,9 @@ export async function BambooHomepage() {
               </p>
             </div>
           </FadeIn>
-          <BambooFeaturedProducts featuredProducts={homepage?.products ?? []} />
+          <BambooFeaturedProductsSection
+            featuredProducts={homepage?.products ?? []}
+          />
           <FadeIn direction="up" delay={0.3}>
             <div className="mt-12 text-center">
               <Button variant="outline" size="lg" asChild>
@@ -189,7 +196,7 @@ export async function BambooHomepage() {
             </FadeIn>
 
             <a
-              href={mapsUrl}
+              href={mapsUrl ?? "#!"}
               target="_blank"
               rel="noopener noreferrer"
               className="group relative block aspect-video w-full overflow-hidden rounded-lg bg-slate-100"

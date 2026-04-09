@@ -10,13 +10,12 @@ import { formatPrice } from "~/lib/prices";
 import { Button } from "~/components/ui/button";
 import { StaggerContainer, StaggerItem } from "~/components/page-animations";
 
-export function BambooFeaturedProducts({
-  featuredProducts,
-}: {
+type Props = {
   featuredProducts: NonNullable<
     RouterOutputs["business"]["getHomepage"]
   >["products"];
-}) {
+};
+export function BambooFeaturedProductsSection({ featuredProducts }: Props) {
   const router = useRouter();
 
   return (
@@ -38,11 +37,6 @@ export function BambooFeaturedProducts({
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
-              {/* {product.badge && (
-                <Badge className="bg-primary text-primary-foreground absolute top-3 left-3">
-                  {product.badge}
-                </Badge>
-              )} */}
             </div>
             <div className="flex flex-1 flex-col gap-3 p-5">
               <h3 className="text-card-foreground group-hover:text-primary font-heading text-lg font-semibold transition-colors">
@@ -60,7 +54,6 @@ export function BambooFeaturedProducts({
                   size="sm"
                   className="gap-2"
                   onClick={() => router.push(`/shop/${product.slug}`)}
-                  //   onClick={(e) => handleAdd(e, product)}
                 >
                   <Eye className="size-4" />
                   View Product
@@ -73,3 +66,5 @@ export function BambooFeaturedProducts({
     </StaggerContainer>
   );
 }
+
+//TODO: Add ability to quick add to cart, especially if product doesn't have variants

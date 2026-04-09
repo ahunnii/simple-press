@@ -37,6 +37,7 @@ export type DefaultAboutPageTemplateProps = {
 
 export type DefaultCollectionsPageTemplateProps = {
   collections: RouterOutputs["collections"]["getAllPublic"];
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 
 export type DefaultCollectionPageTemplateProps = {

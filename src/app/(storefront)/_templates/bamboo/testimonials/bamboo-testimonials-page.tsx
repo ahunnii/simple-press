@@ -2,8 +2,8 @@
 import Link from "next/link";
 import { Quote, Star } from "lucide-react";
 
-import type { DefaultTestimonialsPageTemplateProps } from "../types";
-import { resolveFields } from ".";
+import type { DefaultTestimonialsPageTemplateProps } from "../../types";
+import { api } from "~/trpc/server";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -12,7 +12,8 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
-import { api } from "~/trpc/server";
+
+import { resolveFields } from "../";
 
 function getInitials(name: string): string {
   return name

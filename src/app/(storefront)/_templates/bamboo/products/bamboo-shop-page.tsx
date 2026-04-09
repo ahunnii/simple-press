@@ -8,6 +8,7 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
+import { resolveFields } from "..";
 import { BambooProductCard } from "./bamboo-product-card";
 
 export const metadata: Metadata = {
@@ -16,18 +17,26 @@ export const metadata: Metadata = {
     "Browse our collection of premium bamboo toilet paper and household paper products. Septic-safe, hypoallergenic, and sustainably crafted.",
 };
 
-export function BambooShopPage({ business }: DefaultProductsPageTemplateProps) {
+export async function BambooShopPage({
+  business,
+}: DefaultProductsPageTemplateProps) {
+  const f = resolveFields(business.siteContent?.customFields, [
+    "bamboo.products.listing-title",
+    "bamboo.products.listing-intro",
+  ]);
+
   return (
     <PageTransition>
       <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
         <FadeIn direction="up">
           <div className="mb-12">
             <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
-              <span className="text-balance">Our Collection</span>
+              <span className="text-balance">
+                {f["bamboo.products.listing-title"]}
+              </span>
             </h1>
             <p className="text-muted-foreground mt-3 max-w-2xl font-sans">
-              Every product is 100% bamboo, tree-free, and crafted to the
-              highest standard. Choose the option that fits your home.
+              {f["bamboo.products.listing-intro"]}
             </p>
           </div>
         </FadeIn>
