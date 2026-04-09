@@ -1,6 +1,5 @@
 "use client";
 
-import type { Order } from "generated/prisma";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

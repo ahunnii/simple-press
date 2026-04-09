@@ -2,6 +2,7 @@ import { Geist } from "next/font/google";
 
 import "~/styles/globals.css";
 
+import type { Metadata } from "next";
 import Script from "next/script";
 
 import { env } from "~/env";
@@ -33,6 +34,7 @@ export async function generateMetadata() {
       business.siteContent?.metaKeywords
         ?.split(",")
         .map((keyword: string) => keyword.trim()) ?? [],
+
     openGraph: {
       title: business.siteContent?.metaTitle ?? business.name,
       description: business.siteContent?.metaDescription ?? "",
@@ -50,7 +52,7 @@ export async function generateMetadata() {
     icons: [
       { rel: "icon", url: business.siteContent?.faviconUrl ?? "/favicon.ico" },
     ],
-  };
+  } as Metadata;
 }
 
 const geist = Geist({

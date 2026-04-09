@@ -2,7 +2,15 @@ import { notFound, redirect } from "next/navigation";
 
 import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
+
+import { BambooPreferencesPage } from "../../_templates/bamboo/account/bamboo-preferences-page";
+import { DarkTrendPreferencesPage } from "../../_templates/dark-trend/account/dark-trend-preferences-page";
+import { DefaultPreferencesFallback } from "../../_templates/default/account/default-preferences-fallback";
+import { ElegantPreferencesPage } from "../../_templates/elegant/account/elegant-preferences-page";
 import { HappyBambooPreferencesPage } from "../../_templates/happy-bamboo/account/happy-bamboo-preferences-page";
+import { ModernPreferencesPage } from "../../_templates/modern/account/modern-preferences-page";
+import { NoisePreferencesPage } from "../../_templates/noise/account/noise-preferences-page";
+import { PollenPreferencesPage } from "../../_templates/pollen/account/pollen-preferences-page";
 
 export const metadata = {
   title: "Preferences",
@@ -21,17 +29,16 @@ export default async function PreferencesPage() {
 
   if (!business) notFound();
 
-  if (business.templateId === "happy-bamboo") {
-    return <HappyBambooPreferencesPage business={business} customer={customer} />;
-  }
+  const TemplateComponent =
+    {
+      "happy-bamboo": HappyBambooPreferencesPage,
+      bamboo: BambooPreferencesPage,
+      "dark-trend": DarkTrendPreferencesPage,
+      noise: NoisePreferencesPage,
+      modern: ModernPreferencesPage,
+      elegant: ElegantPreferencesPage,
+      pollen: PollenPreferencesPage,
+    }[business.templateId] ?? DefaultPreferencesFallback;
 
-  // Generic fallback for other templates
-  return (
-    <div className="mx-auto max-w-xl py-20 px-4">
-      <h1 className="mb-6 text-2xl font-bold">Preferences</h1>
-      <p className="text-muted-foreground text-sm">
-        Preference management is not yet available for this template.
-      </p>
-    </div>
-  );
+  return <TemplateComponent business={business} customer={customer} />;
 }

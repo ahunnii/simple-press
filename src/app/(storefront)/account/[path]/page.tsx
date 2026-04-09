@@ -1,11 +1,23 @@
 import { notFound } from "next/navigation";
-import { AccountView } from "@daveyplate/better-auth-ui";
 import { accountViewPaths } from "@daveyplate/better-auth-ui/server";
 
-import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
+import { BambooAccountSecurityPage } from "../../_templates/bamboo/account/bamboo-account-security-page";
+import { BambooAccountSettingsPage } from "../../_templates/bamboo/account/bamboo-account-settings-page";
+import { DarkTrendAccountSecurityPage } from "../../_templates/dark-trend/account/dark-trend-account-security-page";
+import { DarkTrendAccountSettingsPage } from "../../_templates/dark-trend/account/dark-trend-account-settings-page";
+import { DefaultAccountSecurityPage } from "../../_templates/default/account/default-account-security-page";
+import { DefaultAccountSettingsPage } from "../../_templates/default/account/default-account-settings-page";
+import { ElegantAccountSecurityPage } from "../../_templates/elegant/account/elegant-account-security-page";
+import { ElegantAccountSettingsPage } from "../../_templates/elegant/account/elegant-account-settings-page";
 import { HappyBambooAccountSecurityPage } from "../../_templates/happy-bamboo/account/happy-bamboo-account-security-page";
 import { HappyBambooAccountSettingsPage } from "../../_templates/happy-bamboo/account/happy-bamboo-account-settings-page";
+import { ModernAccountSecurityPage } from "../../_templates/modern/account/modern-account-security-page";
+import { ModernAccountSettingsPage } from "../../_templates/modern/account/modern-account-settings-page";
+import { NoiseAccountSecurityPage } from "../../_templates/noise/account/noise-account-security-page";
+import { NoiseAccountSettingsPage } from "../../_templates/noise/account/noise-account-settings-page";
+import { PollenAccountSecurityPage } from "../../_templates/pollen/account/pollen-account-security-page";
+import { PollenAccountSettingsPage } from "../../_templates/pollen/account/pollen-account-settings-page";
 
 export const dynamicParams = false;
 
@@ -22,22 +34,32 @@ export default async function AccountPage({ params }: Props) {
   const business = await api.business.simplifiedGet();
   if (!business) notFound();
 
-  if (business.templateId === "happy-bamboo") {
-    if (path === accountViewPaths.SECURITY) {
-      return <HappyBambooAccountSecurityPage />;
-    }
-    return <HappyBambooAccountSettingsPage />;
-  }
+  const isSecurity = path === accountViewPaths.SECURITY;
 
-  const templateStyle =
+  const SecurityComponent =
     {
-      "dark-trend": "bg-[#424242]",
-      pollen: "py-24 md:py-36",
-    }[business.templateId] ?? "";
+      "happy-bamboo": HappyBambooAccountSecurityPage,
+      bamboo: BambooAccountSecurityPage,
+      noise: NoiseAccountSecurityPage,
+      modern: ModernAccountSecurityPage,
+      elegant: ElegantAccountSecurityPage,
+      pollen: PollenAccountSecurityPage,
+      "dark-trend": DarkTrendAccountSecurityPage,
+    }[business.templateId] ?? DefaultAccountSecurityPage;
 
-  return (
-    <div className={cn("py-20", templateStyle)}>
-      <AccountView path={path} className="mx-auto max-w-7xl" classNames={{}} />
-    </div>
-  );
+  const SettingsComponent =
+    {
+      "happy-bamboo": HappyBambooAccountSettingsPage,
+      bamboo: BambooAccountSettingsPage,
+      noise: NoiseAccountSettingsPage,
+      modern: ModernAccountSettingsPage,
+      elegant: ElegantAccountSettingsPage,
+      pollen: PollenAccountSettingsPage,
+      "dark-trend": DarkTrendAccountSettingsPage,
+    }[business.templateId] ?? DefaultAccountSettingsPage;
+
+  if (isSecurity) {
+    return <SecurityComponent />;
+  }
+  return <SettingsComponent />;
 }

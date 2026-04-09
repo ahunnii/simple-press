@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 
-import { HydrateClient } from "~/trpc/server";
 import {
   Drawer,
   DrawerClose,

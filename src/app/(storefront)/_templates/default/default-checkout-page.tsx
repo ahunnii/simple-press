@@ -1,5 +1,4 @@
 import type { DefaultCheckoutPageTemplateProps } from "../types";
-import type { RouterOutputs } from "~/trpc/react";
 
 import { DefaultCheckoutForm } from "./default-checkout-form";
 

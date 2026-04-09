@@ -3,7 +3,11 @@ import { ExternalLink, Heart, Leaf, Star } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { getListFieldValue } from "~/lib/template-fields";
+import {
+  getListFieldValue,
+  isContentEmpty,
+  parseTemplateIconListRows,
+} from "~/lib/template-fields";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -18,14 +22,20 @@ import {
 } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { resolveFields } from "..";
-import { parseHappyBambooBambooList } from "./happy-bamboo-bamboo-data";
-import { parseHappyBambooServicesList } from "./happy-bamboo-services-data";
+import {
+  DEFAULT_HAPPY_BAMBOO_BAMBOO_LIST,
+  DEFAULT_HAPPY_BAMBOO_SERVICES_LIST,
+  resolveFields,
+} from "..";
 
 export function HappyBambooAboutPage({
   business,
 }: DefaultAboutPageTemplateProps) {
-  const f = resolveFields(business?.siteContent?.customFields, [
+  const themeSpecificFields = business?.siteContent?.customFields as
+    | Record<string, string>
+    | undefined;
+
+  const f = resolveFields(themeSpecificFields, [
     "happy-bamboo.about-hero-heading",
     "happy-bamboo.about-hero-image",
     "happy-bamboo.about-hero-mission",
@@ -54,10 +64,6 @@ export function HappyBambooAboutPage({
     "happy-bamboo.about-connect-with-us-social-follow-text",
   ]);
 
-  const themeSpecificFields = business?.siteContent?.customFields as
-    | Record<string, string>
-    | undefined;
-
   const aboutMissionBanner = themeSpecificFields?.[
     "happy-bamboo.about-mission-banner"
   ] as unknown as TiptapJSON;
@@ -65,20 +71,24 @@ export function HappyBambooAboutPage({
   const aboutMissionCheck = isContentEmpty(aboutMissionBanner);
 
   //////
-  const servicesListRaw = getListFieldValue(
-    themeSpecificFields as unknown,
-    "happy-bamboo.about-services-list",
+
+  const servicesItems = parseTemplateIconListRows(
+    getListFieldValue(
+      themeSpecificFields as unknown,
+      "happy-bamboo.about-services-list",
+    ),
+    DEFAULT_HAPPY_BAMBOO_SERVICES_LIST,
   );
-  const servicesItems = parseHappyBambooServicesList(servicesListRaw);
 
   //////
 
-  const benefitsListRaw = getListFieldValue(
-    themeSpecificFields as unknown,
-    "happy-bamboo.about-bamboo-list",
+  const benefitsItems = parseTemplateIconListRows(
+    getListFieldValue(
+      themeSpecificFields as unknown,
+      "happy-bamboo.about-bamboo-list",
+    ),
+    DEFAULT_HAPPY_BAMBOO_BAMBOO_LIST,
   );
-  const benefitsItems = parseHappyBambooBambooList(benefitsListRaw);
-
   //////
 
   const socialLinks = business?.siteContent?.socialLinks as
@@ -459,25 +469,4 @@ export function HappyBambooAboutPage({
       </section>
     </PageTransition>
   );
-}
-
-export function isContentEmpty(content: TiptapJSON): boolean {
-  if (content === null) {
-    return true;
-  }
-
-  if (typeof content === "string") {
-    return content === "";
-  }
-
-  if (Array.isArray(content)) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return content.every((item) => isContentEmpty(item));
-  }
-
-  if (!content.content) {
-    return true;
-  }
-
-  return content.content.every((item) => !item.content);
 }

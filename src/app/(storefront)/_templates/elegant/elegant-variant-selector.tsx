@@ -5,7 +5,6 @@ import { Check } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
 
@@ -31,7 +30,7 @@ type VariantSelectorProps = {
 
 export function ElegantVariantSelector({
   product,
-  selectedVariantId,
+
   setSelectedVariantId,
 }: VariantSelectorProps) {
   const { addItem } = useCart();

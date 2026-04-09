@@ -228,7 +228,7 @@ export const platformAdminProcedure = t.procedure
   });
 
 export const featureGate = (featureKey: string) =>
-  t.middleware(async ({ ctx, next }) => {
+  t.middleware(async ({ next }) => {
     // const businessId = (ctx as unknown as { businessId: string }).businessId;
     // 1. Get the flags using your existing helper
     const { isEnabled, disabledByDependency } = await getBusinessFlags();

@@ -1,4 +1,5 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
+import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 const homepageData: TemplateField[] = [
   {
@@ -9,6 +10,7 @@ const homepageData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "default.homepage.hero-description",
@@ -103,6 +105,7 @@ const homepageData: TemplateField[] = [
     page: "homepage",
     group: "homepage.cta",
     gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
   },
 ];
 
@@ -153,6 +156,32 @@ const aboutPageData: TemplateField[] = [
     defaultValue:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc dictum, metus in cursus pharetra, augue purus consequat ligula, nec faucibus ex nulla eu urna.",
     placeholder: "Finish your story...",
+  },
+];
+
+const blogPageData: TemplateField[] = [
+  {
+    key: "default.blog.listing-title",
+    label: "Blog listing title",
+    description: "Heading shown at the top of the blog index",
+    type: "text",
+    page: "blog",
+    group: "blog.header",
+    gridColumn: "col-span-full",
+    defaultValue: "Blog",
+    placeholder: "Blog",
+  },
+  {
+    key: "default.blog.listing-intro",
+    label: "Blog listing intro",
+    description: "Short text below the blog heading",
+    type: "textarea",
+    page: "blog",
+    group: "blog.header",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "News, tips, and updates from our team. Use the search box to find a topic.",
+    placeholder: "Intro paragraph for your blog...",
   },
 ];
 
@@ -218,10 +247,22 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "📧",
     columns: 1,
   },
+  {
+    id: "blog.header",
+    title: "Blog listing",
+    description: "Heading and intro on the blog index",
+    icon: "📝",
+    columns: 1,
+  },
 ];
 
 export const defaultTemplateData = {
-  default: [...homepageData, ...aboutPageData, ...contactPageData],
+  default: [
+    ...homepageData,
+    ...aboutPageData,
+    ...contactPageData,
+    ...blogPageData,
+  ],
 };
 
 export const defaultTemplateFieldGroups = {
@@ -232,20 +273,6 @@ const _defaultFieldMap = new Map(
   defaultTemplateData.default.map((field) => [field.key, field]),
 );
 
-export function resolveFields(
-  customFields: unknown,
-  keys: string[],
-): Record<string, string> {
-  const raw =
-    customFields != null &&
-    typeof customFields === "object" &&
-    !Array.isArray(customFields)
-      ? (customFields as Record<string, string>)
-      : {};
-  const out: Record<string, string> = {};
-  for (const key of keys) {
-    const custom = raw[key]?.trim();
-    out[key] = custom ?? _defaultFieldMap.get(key)?.defaultValue ?? "";
-  }
-  return out;
+export function resolveFields(customFields: unknown, keys: string[]): Record<string, string> {
+  return resolveTemplateFields(customFields, keys, _defaultFieldMap);
 }

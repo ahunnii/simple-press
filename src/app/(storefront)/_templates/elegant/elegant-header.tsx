@@ -3,16 +3,82 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { UserButton } from "@daveyplate/better-auth-ui";
+import {
+  LayoutDashboardIcon,
+  Menu,
+  Search,
+  ShoppingBag,
+  User,
+  X,
+} from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../types";
+import { cn } from "~/lib/utils";
+import { authClient } from "~/server/better-auth/client";
+import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
 import { ElegantCartDrawer } from "./elegant-cart-drawer";
 
+const NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/shop", label: "Shop" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+] as const;
+
 export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { setIsOpen, itemCount } = useCart();
+
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user;
+
+  const pathname = usePathname();
+
+  const links =
+    (business?.siteContent?.navigationItems as {
+      label: string;
+      href: string;
+    }[]) ?? NAV_LINKS;
+
+  const authActions = (
+    <>
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/auth/sign-in">Log in</Link>
+      </Button>
+      <Button size="sm" asChild>
+        <Link href="/join">Join Us</Link>
+      </Button>
+    </>
+  );
+
+  const userMenu = user && (
+    <UserButton
+      size="icon"
+      classNames={{
+        trigger: {
+          base: "border-primary border",
+          avatar: {
+            base: "size-10",
+          },
+        },
+      }}
+      additionalLinks={[
+        ...(user.platformRole === "PLATFORM_ADMIN"
+          ? [
+              {
+                icon: <LayoutDashboardIcon className="h-4 w-4" />,
+                label: "Admin",
+                href: "/admin",
+              },
+            ]
+          : []),
+      ]}
+    />
+  );
 
   return (
     <>
@@ -38,24 +104,20 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
 
             {/* Desktop Navigation - Left */}
             <div className="hidden items-center gap-8 lg:flex">
-              <Link
-                href="/shop"
-                className="text-foreground/70 hover:text-foreground boty-transition text-sm tracking-wide"
-              >
-                Shop
-              </Link>
-              <Link
-                href="/about"
-                className="text-foreground/70 hover:text-foreground boty-transition text-sm tracking-wide"
-              >
-                About
-              </Link>
-              <Link
-                href="/contact"
-                className="text-foreground/70 hover:text-foreground boty-transition text-sm tracking-wide"
-              >
-                Contact
-              </Link>
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "text-foreground/70 hover:text-foreground boty-transition text-sm tracking-wide",
+                    pathname === link.href
+                      ? "text-primary"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
 
             {/* Logo */}
@@ -84,13 +146,13 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
               >
                 <Search className="h-5 w-5" />
               </button>
-              <Link
-                href="/cart"
-                className="text-foreground/70 hover:text-foreground boty-transition hidden p-2 sm:block"
-                aria-label="Cart page"
-              >
-                <User className="h-5 w-5" />
-              </Link>
+              {isPending ? (
+                <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+              ) : user ? (
+                userMenu
+              ) : (
+                authActions
+              )}
               <button
                 type="button"
                 onClick={() => setIsOpen(true)}
@@ -116,30 +178,20 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
             }`}
           >
             <div className="border-border/50 flex flex-col gap-4 border-t pt-4">
-              <Link
-                href="/shop"
-                className="text-foreground/70 hover:text-foreground boty-transition text-sm tracking-wide"
-              >
-                Shop
-              </Link>
-              <Link
-                href="/about"
-                className="text-foreground/70 hover:text-foreground boty-transition text-sm tracking-wide"
-              >
-                About
-              </Link>
-              <Link
-                href="/ingredients"
-                className="text-foreground/70 hover:text-foreground boty-transition text-sm tracking-wide"
-              >
-                Ingredients
-              </Link>
-              <Link
-                href="/cart"
-                className="text-foreground/70 hover:text-foreground boty-transition text-sm tracking-wide"
-              >
-                Cart
-              </Link>
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "text-foreground/70 hover:text-foreground boty-transition text-sm tracking-wide",
+                    pathname === link.href
+                      ? "text-primary"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </div>
         </nav>

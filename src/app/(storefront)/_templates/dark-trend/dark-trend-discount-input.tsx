@@ -21,7 +21,6 @@ type Props = {
 };
 
 export function DarkTrendDiscountInput({
-  businessId,
   cartTotal,
   onDiscountApplied,
 }: Props) {

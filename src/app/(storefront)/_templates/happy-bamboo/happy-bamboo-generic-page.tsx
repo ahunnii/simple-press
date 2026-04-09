@@ -1,12 +1,13 @@
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { FadeIn, PageTransition } from "~/components/page-animations";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type Props = {
   page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 };
+
 export function HappyBambooGenericPage({ page }: Props) {
   return (
     <PageTransition>

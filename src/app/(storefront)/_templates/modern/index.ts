@@ -1,3 +1,4 @@
+import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 export const globalData: TemplateField[] = [
@@ -612,6 +613,32 @@ const homepageAboutData: TemplateField[] = [
   },
 ];
 
+const blogPageData: TemplateField[] = [
+  {
+    key: "modern.blog.listing-title",
+    label: "Blog listing title",
+    description: "Heading shown at the top of the blog index",
+    type: "text",
+    page: "blog",
+    group: "blog.header",
+    gridColumn: "col-span-full",
+    defaultValue: "Blog",
+    placeholder: "Blog",
+  },
+  {
+    key: "modern.blog.listing-intro",
+    label: "Blog listing intro",
+    description: "Short text below the blog heading",
+    type: "textarea",
+    page: "blog",
+    group: "blog.header",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "News, tips, and updates from our team. Use the search box to find a topic.",
+    placeholder: "Intro paragraph for your blog...",
+  },
+];
+
 const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.hero",
@@ -732,6 +759,13 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "💬",
     columns: 1,
   },
+  {
+    id: "blog.header",
+    title: "Blog listing",
+    description: "Heading and intro on the blog index",
+    icon: "📝",
+    columns: 1,
+  },
 ];
 
 export const modernData = {
@@ -744,6 +778,7 @@ export const modernData = {
     ...homepageValuesData,
     ...homepageProductsData,
     ...homepageAboutData,
+    ...blogPageData,
   ],
 };
 
@@ -755,20 +790,6 @@ const _modernFieldMap = new Map(
   modernData.modern.map((field) => [field.key, field]),
 );
 
-export function resolveFields(
-  customFields: unknown,
-  keys: string[],
-): Record<string, string> {
-  const raw =
-    customFields != null &&
-    typeof customFields === "object" &&
-    !Array.isArray(customFields)
-      ? (customFields as Record<string, string>)
-      : {};
-  const out: Record<string, string> = {};
-  for (const key of keys) {
-    const custom = raw[key]?.trim();
-    out[key] = custom ?? _modernFieldMap.get(key)?.defaultValue ?? "";
-  }
-  return out;
+export function resolveFields(customFields: unknown, keys: string[]): Record<string, string> {
+  return resolveTemplateFields(customFields, keys, _modernFieldMap);
 }

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
-import type { DefaultCartPageTemplateProps } from "../../types";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { Button } from "~/components/ui/button";
 import {
@@ -47,7 +46,7 @@ export function HappyBambooCartContents({ business }: Props) {
             </h1>
             <p className="text-muted-foreground mx-auto mt-2 max-w-md">
               Looks like you have not added anything to your cart yet. Explore
-              our collection of premium bamboo products.
+              our collection of premium products.
             </p>
             <Button className="mt-8" size="lg" asChild>
               <Link href="/shop">Continue Shopping</Link>

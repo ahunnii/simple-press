@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Clock, Mail, MapPin, MessageSquare, Phone } from "lucide-react";
+import { Mail, MapPin, MessageSquare, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { getListFieldValue } from "~/lib/template-fields";

@@ -1,8 +1,9 @@
 import type { JSONContent } from "@tiptap/react";
 import type { LucideIcon } from "lucide-react";
-import { Heart, Leaf, Recycle, Shield } from "lucide-react";
+import { Leaf } from "lucide-react";
 import { z } from "zod";
 
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import {
   bambooData,
@@ -25,13 +26,13 @@ import {
   happyBambooFieldGroups,
 } from "~/app/(storefront)/_templates/happy-bamboo";
 import {
-  noiseData,
-  noiseFieldGroups,
-} from "~/app/(storefront)/_templates/noise";
-import {
   modernData,
   modernFieldGroups,
 } from "~/app/(storefront)/_templates/modern";
+import {
+  noiseData,
+  noiseFieldGroups,
+} from "~/app/(storefront)/_templates/noise";
 import {
   pollenData,
   pollenFieldGroups,
@@ -159,7 +160,10 @@ export type GenericIconRow = {
   description: string;
 };
 
-export function parseTemplateIconListRows(raw: unknown) {
+export function parseTemplateIconListRows(
+  raw: unknown,
+  defaultList?: GenericIconRow[],
+) {
   if (!Array.isArray(raw)) return null;
 
   const out: GenericIconRow[] = [];
@@ -171,7 +175,7 @@ export function parseTemplateIconListRows(raw: unknown) {
     out.push({ icon: Icon, title, description });
   }
 
-  return out.length > 0 ? out : null;
+  return out.length > 0 ? out : (defaultList ?? null);
 }
 
 export type TemplateFieldGroup = {
@@ -355,3 +359,26 @@ export const PAGE_METADATA = {
     icon: "ℹ️",
   },
 } as const;
+
+export { resolveTemplateFields } from "~/lib/resolve-template-fields";
+
+export function isContentEmpty(content: TiptapJSON): boolean {
+  if (content === null) {
+    return true;
+  }
+
+  if (typeof content === "string") {
+    return content === "";
+  }
+
+  if (Array.isArray(content)) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    return content.every((item) => isContentEmpty(item));
+  }
+
+  if (!content.content) {
+    return true;
+  }
+
+  return content.content.every((item) => !item.content);
+}

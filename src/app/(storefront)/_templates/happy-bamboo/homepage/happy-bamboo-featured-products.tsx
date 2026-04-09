@@ -1,13 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowRight, Eye, ShoppingCart } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowRight } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { formatPrice } from "~/lib/prices";
 import { Button } from "~/components/ui/button";
 import {
   FadeIn,
@@ -16,10 +12,7 @@ import {
 } from "~/components/page-animations";
 import { useCart } from "~/providers/cart-context";
 
-import {
-  HappyBambooFeaturedProductCard,
-  HappyBambooHorizontalProductCard,
-} from "../products/happy-bamboo-product-card";
+import { HappyBambooFeaturedProductCard } from "../products/happy-bamboo-product-card";
 
 type Props = {
   featuredProducts: NonNullable<
@@ -38,27 +31,27 @@ export function HappyBambooFeaturedProducts({
   featuredButtonLink = "/shop",
 }: Props) {
   const { addItem } = useCart();
-  const router = useRouter();
+  // const router = useRouter();
 
-  const handleAdd = (
-    e: React.MouseEvent,
-    product: NonNullable<
-      RouterOutputs["business"]["getHomepage"]
-    >["products"][number],
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addItem({
-      productId: product.id,
-      variantId: null,
-      productName: product.name,
-      variantName: null,
-      price: product.price,
-      imageUrl: product.images[0]?.url ?? "/placeholder.svg",
-      sku: null,
-    });
-    toast.success(`${product.name} added to cart`);
-  };
+  // const handleAdd = (
+  //   e: React.MouseEvent,
+  //   product: NonNullable<
+  //     RouterOutputs["business"]["getHomepage"]
+  //   >["products"][number],
+  // ) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   addItem({
+  //     productId: product.id,
+  //     variantId: null,
+  //     productName: product.name,
+  //     variantName: null,
+  //     price: product.price,
+  //     imageUrl: product.images[0]?.url ?? "/placeholder.svg",
+  //     sku: null,
+  //   });
+  //   toast.success(`${product.name} added to cart`);
+  // };
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">

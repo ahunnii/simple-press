@@ -38,10 +38,10 @@ export function DefaultSignInPage({ redirectTo, business }: Props) {
       `${business?.templateId}.global.logo-size-height`
     ]?.trim() ?? "80";
 
-  const imageOverlayColor =
-    themeSpecificFields?.[
-      `${business?.templateId}.global.image-overlay-color`
-    ]?.trim() ?? "#000000";
+  // const imageOverlayColor =
+  //   themeSpecificFields?.[
+  //     `${business?.templateId}.global.image-overlay-color`
+  //   ]?.trim() ?? "#000000";
 
   return (
     <div className="bg-background flex min-h-screen">

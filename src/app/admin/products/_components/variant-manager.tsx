@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { GripVertical, Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 
 import type { FormVariant, FormVariantOption } from "../_validators/schema";
 import { Button } from "~/components/ui/button";

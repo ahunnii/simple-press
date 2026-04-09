@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { BambooCheckoutPage } from "../_templates/bamboo/bamboo-checkout-page";
+import { BambooCheckoutPage } from "../_templates/bamboo/cart-checkout/bamboo-checkout-page";
 import { DarkTrendCheckoutPage } from "../_templates/dark-trend/dark-trend-checkout-page";
 import { DefaultCheckoutPage } from "../_templates/default/default-checkout-page";
 import { DefaultCheckoutUnavailable } from "../_templates/default/default-checkout-unavailable";
@@ -21,8 +21,7 @@ export default async function CheckoutPage() {
       modern: DefaultCheckoutUnavailable,
     }[business.templateId] ?? DefaultCheckoutUnavailable;
 
-  if (!business.isStripeConnected)
-    return <TemplateUnavailableComponent business={business} />;
+  if (!business.isStripeConnected) return <TemplateUnavailableComponent />;
 
   const TemplateComponent =
     {

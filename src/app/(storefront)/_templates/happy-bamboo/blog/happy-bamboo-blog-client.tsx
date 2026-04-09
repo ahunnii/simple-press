@@ -1,34 +1,21 @@
 "use client";
 
-import type { Page } from "generated/prisma";
-import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  CalendarDays,
-  Clock,
-  Leaf,
-  Search,
-  Tag,
-} from "lucide-react";
+import { ArrowRight, CalendarDays, Leaf, Search, Tag } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { useBlogPosts } from "~/hooks/use-blog-posts";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "~/components/ui/input-group";
 import { Separator } from "~/components/ui/separator";
-// import { formatDate } from "~/lib/utils";
 import {
   FadeIn,
-  PageTransition,
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";

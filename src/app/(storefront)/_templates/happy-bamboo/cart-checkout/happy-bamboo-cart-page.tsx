@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import type { DefaultCartPageTemplateProps } from "../../types";
 
 import { HappyBambooCartContents } from "./happy-bamboo-cart-contents";

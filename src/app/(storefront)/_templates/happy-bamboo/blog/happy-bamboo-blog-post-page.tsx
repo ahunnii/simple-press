@@ -2,25 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  CheckCircle2,
-  Clock,
-  Leaf,
-  Share2,
-  Tag,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Leaf } from "lucide-react";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { formatDate } from "~/lib/utils";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import { Separator } from "~/components/ui/separator";
 import {
   FadeIn,
   PageTransition,
@@ -28,14 +16,6 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
-
-const keyTakeaways = [
-  "Bamboo grows up to 3 feet per day and needs no replanting",
-  "Making bamboo pulp uses up to 30% less water than tree pulp",
-  "Bamboo absorbs 35% more CO₂ than equivalent trees",
-  "No bleach or harsh chemicals in Happy Bamboo tissue",
-  "Our packaging is 100% plastic-free and fully recyclable",
-];
 
 // const relatedPosts = [
 //   {

@@ -1,8 +1,4 @@
-import type { DefaultCheckoutPageTemplateProps } from "../types";
-
-export function DefaultCheckoutUnavailable({
-  business,
-}: DefaultCheckoutPageTemplateProps) {
+export function DefaultCheckoutUnavailable() {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       {/* <DefaultHeader business={business} /> */}

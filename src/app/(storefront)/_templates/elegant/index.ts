@@ -1,4 +1,5 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
+import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 const globalData: TemplateField[] = [
   {
@@ -21,6 +22,7 @@ const homepageHeroData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "elegant.homepage.hero-title-line-1",
@@ -111,6 +113,7 @@ const homepageAboutData: TemplateField[] = [
     page: "homepage",
     group: "homepage.about",
     gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
   },
 ];
 
@@ -206,6 +209,7 @@ const homepageCtaData: TemplateField[] = [
     page: "homepage",
     group: "homepage.cta",
     gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "elegant.cta.title",
@@ -250,6 +254,32 @@ const homepageCtaData: TemplateField[] = [
   },
 ];
 
+const blogPageData: TemplateField[] = [
+  {
+    key: "elegant.blog.listing-title",
+    label: "Blog listing title",
+    description: "Heading shown at the top of the blog index",
+    type: "text",
+    page: "blog",
+    group: "blog.header",
+    gridColumn: "col-span-full",
+    defaultValue: "Journal",
+    placeholder: "Journal",
+  },
+  {
+    key: "elegant.blog.listing-intro",
+    label: "Blog listing intro",
+    description: "Short text below the blog heading",
+    type: "textarea",
+    page: "blog",
+    group: "blog.header",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "News, tips, and updates from our team. Use the search box to find a topic.",
+    placeholder: "Intro paragraph for your blog...",
+  },
+];
+
 const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.hero",
@@ -279,6 +309,13 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "📣",
     columns: 1,
   },
+  {
+    id: "blog.header",
+    title: "Blog listing",
+    description: "Heading and intro on the blog index",
+    icon: "📝",
+    columns: 1,
+  },
 ];
 
 export const elegantData = {
@@ -288,6 +325,7 @@ export const elegantData = {
     ...homepageAboutData,
     ...homepageFeaturesData,
     ...homepageCtaData,
+    ...blogPageData,
   ],
 };
 
@@ -299,20 +337,6 @@ const _elegantFieldMap = new Map(
   elegantData.elegant.map((field) => [field.key, field]),
 );
 
-export function resolveFields(
-  customFields: unknown,
-  keys: string[],
-): Record<string, string> {
-  const raw =
-    customFields != null &&
-    typeof customFields === "object" &&
-    !Array.isArray(customFields)
-      ? (customFields as Record<string, string>)
-      : {};
-  const out: Record<string, string> = {};
-  for (const key of keys) {
-    const custom = raw[key]?.trim();
-    out[key] = custom ?? _elegantFieldMap.get(key)?.defaultValue ?? "";
-  }
-  return out;
+export function resolveFields(customFields: unknown, keys: string[]): Record<string, string> {
+  return resolveTemplateFields(customFields, keys, _elegantFieldMap);
 }

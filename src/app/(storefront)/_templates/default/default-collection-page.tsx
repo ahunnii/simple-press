@@ -6,7 +6,6 @@ import type { DefaultCollectionPageTemplateProps } from "../types";
 import { DefaultProductCard } from "./default-product-card";
 
 export function DefaultCollectionPage({
-  business,
   collection,
   additionalCollections,
 }: DefaultCollectionPageTemplateProps) {

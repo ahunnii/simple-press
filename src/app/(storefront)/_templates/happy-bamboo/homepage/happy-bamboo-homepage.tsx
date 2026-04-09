@@ -5,7 +5,6 @@ import { PageTransition } from "~/components/page-animations";
 import { resolveFields } from "..";
 import { HappyBambooAboutSection } from "./happy-bamboo-about-section";
 import { HappyBambooBenefitsSection } from "./happy-bamboo-benefits-section";
-import { HappyBambooCtaSection } from "./happy-bamboo-cta-section";
 import { HappyBambooFeaturedProducts } from "./happy-bamboo-featured-products";
 import { HappyBambooHeroSection } from "./happy-bamboo-hero-section";
 import { HappyBambooTestimonialsSection } from "./happy-bamboo-testimonials-section";

@@ -21,7 +21,6 @@ type DiscountInputProps = {
 };
 
 export function DiscountDiscountInput({
-  businessId,
   cartTotal,
   onDiscountApplied,
 }: DiscountInputProps) {

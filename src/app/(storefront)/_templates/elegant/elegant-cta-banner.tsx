@@ -5,7 +5,8 @@ import Image from "next/image";
 import { Flower2, Globe, Leaf } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { getThemeFields } from "~/lib/template-fields";
+
+import { resolveFields } from ".";
 
 export function ElegantCTABanner({
   homepage,
@@ -15,12 +16,20 @@ export function ElegantCTABanner({
   const [isVisible, setIsVisible] = useState(false);
   const bannerRef = useRef<HTMLDivElement>(null);
   const customFields = homepage?.siteContent?.customFields;
-   
-  const themeSpecificFields: Record<string, string> = getThemeFields(
-    "elegant",
-    customFields as unknown,
-  );
 
+  // const themeSpecificFields: Record<string, string> = getThemeFields(
+  //   "elegant",
+  //   customFields as unknown,
+  // );
+
+  const f = resolveFields(customFields, [
+    "elegant.cta.title",
+    "elegant.cta.pointone",
+    "elegant.cta.pointtwo",
+    "elegant.cta.pointthree",
+  ]);
+
+  console.log(f["elegant.cta.title"]);
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {

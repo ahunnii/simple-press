@@ -12,8 +12,6 @@ import { motion } from "motion/react";
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
-import { authClient } from "~/server/better-auth/client";
-import { HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import {
   Sheet,

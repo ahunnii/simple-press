@@ -3,20 +3,37 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { LayoutDashboardIcon, Menu, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../types";
+import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 
 import { DefaultCartBadge } from "./default-cart-badge";
+
+const NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/shop", label: "Shop" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+] as const;
 
 export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
+
+  const pathname = usePathname();
+
+  const links =
+    (business?.siteContent?.navigationItems as {
+      label: string;
+      href: string;
+    }[]) ?? NAV_LINKS;
 
   const authActions = (
     <>
@@ -73,24 +90,20 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
               )}
             </Link>
             <nav className="hidden gap-6 md:flex">
-              <Link
-                href="/"
-                className="hover:text-primary text-sm font-medium transition-colors"
-              >
-                Home
-              </Link>
-              <Link
-                href="/products"
-                className="hover:text-primary text-sm font-medium transition-colors"
-              >
-                Shop
-              </Link>
-              <Link
-                href="/about"
-                className="hover:text-primary text-sm font-medium transition-colors"
-              >
-                About
-              </Link>
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "hover:text-primary text-sm font-medium transition-colors",
+                    pathname === link.href
+                      ? "text-primary"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
             </nav>
           </div>
           <div className="flex items-center gap-4">
@@ -121,25 +134,20 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
         {mobileMenuOpen && (
           <div className="bg-background space-y-4 border-t p-4 md:hidden">
             <nav className="flex flex-col space-y-4">
-              <Link
-                href="/"
-                className="hover:text-primary text-sm font-medium transition-colors"
-              >
-                Home
-              </Link>
-              <Link
-                href="/products"
-                className="hover:text-primary text-sm font-medium transition-colors"
-              >
-                Shop
-              </Link>
-
-              <Link
-                href="/about"
-                className="hover:text-primary text-sm font-medium transition-colors"
-              >
-                About
-              </Link>
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "hover:text-primary text-sm font-medium transition-colors",
+                    pathname === link.href
+                      ? "text-primary"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
             </nav>
           </div>
         )}

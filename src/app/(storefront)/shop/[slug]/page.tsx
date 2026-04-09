@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { BambooProductPage } from "../../_templates/bamboo/bamboo-product-page";
+import { BambooProductPage } from "../../_templates/bamboo/products/bamboo-product-page";
 import { DarkTrendProductPage } from "../../_templates/dark-trend/dark-trend-product-page";
 import { DefaultProductPage } from "../../_templates/default/default-product-page";
 import { ElegantProductPage } from "../../_templates/elegant/elegant-product-page";

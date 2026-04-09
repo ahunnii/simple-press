@@ -23,7 +23,6 @@ import { Building2, Users } from "lucide-react";
 
 import type { Session } from "~/server/better-auth/config";
 import { env } from "~/env";
-import { api } from "~/trpc/react";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import {
   Sidebar,

@@ -4,13 +4,7 @@ import Link from "next/link";
 
 import { api } from "~/trpc/react";
 
-type BambooAnnouncementBarProps = {
-  businessId: string;
-};
-
-export function HappyBambooAnnouncementBar({
-  businessId,
-}: BambooAnnouncementBarProps) {
+export function HappyBambooAnnouncementBar() {
   const { data, isLoading } = api.discount.getActiveBanner.useQuery(undefined, {
     staleTime: 60_000,
   });

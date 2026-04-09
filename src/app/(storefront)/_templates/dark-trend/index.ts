@@ -1,21 +1,22 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
+import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 const aboutPageData: TemplateField[] = [
   {
     key: "dark-trend.about.first-image",
     label: "About First Image",
     description: "Image for the first section of the about page",
-    type: "url",
+    type: "image",
     page: "about",
-    placeholder: "https://...",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "dark-trend.about.second-image",
     label: "About Second Image",
     description: "Image for the second section of the about page",
-    type: "url",
+    type: "image",
     page: "about",
-    placeholder: "https://...",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "dark-trend.about.header",
@@ -163,9 +164,9 @@ const homepageData: TemplateField[] = [
     key: "dark-trend.first-section-image",
     label: "First Section Image",
     description: "Image for the first section",
-    type: "url",
+    type: "image",
     page: "homepage",
-    placeholder: "https://...",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "dark-trend.first-section-button-text",
@@ -227,9 +228,9 @@ const homepageData: TemplateField[] = [
     key: "dark-trend.second-section-image",
     label: "Second Section Image",
     description: "Image for the second section",
-    type: "url",
+    type: "image",
     page: "homepage",
-    placeholder: "https://...",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "dark-trend.cta-header",
@@ -272,9 +273,9 @@ const homepageData: TemplateField[] = [
     key: "dark-trend.cta-image",
     label: "CTA Image",
     description: "Image for the CTA section",
-    type: "url",
+    type: "image",
     page: "homepage",
-    placeholder: "https://...",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "dark-trend.homepage.gallery",
@@ -361,9 +362,35 @@ const contactPageData: TemplateField[] = [
     key: "dark-trend.contact.image",
     label: "Contact Image",
     description: "Image for the contact page",
-    type: "url",
+    type: "image",
     page: "contact",
-    placeholder: "https://...",
+    defaultValue: "/placeholder.svg",
+  },
+];
+
+const blogPageData: TemplateField[] = [
+  {
+    key: "dark-trend.blog.listing-title",
+    label: "Blog Listing Title",
+    description: "Main heading on the blog index page",
+    type: "text",
+    page: "blog",
+    group: "blog.listing",
+    gridColumn: "col-span-full",
+    defaultValue: "Journal",
+    placeholder: "e.g. Journal",
+  },
+  {
+    key: "dark-trend.blog.listing-intro",
+    label: "Blog Listing Intro",
+    description: "Optional subtitle below the blog index heading",
+    type: "textarea",
+    page: "blog",
+    group: "blog.listing",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "News, tips, and updates from our team. Use the search box to find a topic.",
+    placeholder: "A short introduction to your blog...",
   },
 ];
 
@@ -375,10 +402,22 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "🎯",
     columns: 2,
   },
+  {
+    id: "blog.listing",
+    title: "Blog listing",
+    description: "Heading and intro for the blog index page",
+    icon: "📝",
+    columns: 1,
+  },
 ];
 
 export const darkTrendData = {
-  "dark-trend": [...aboutPageData, ...homepageData, ...contactPageData],
+  "dark-trend": [
+    ...aboutPageData,
+    ...homepageData,
+    ...contactPageData,
+    ...blogPageData,
+  ],
 };
 
 export const darkTrendFieldGroups = {
@@ -389,20 +428,6 @@ const _darkTrendFieldMap = new Map(
   darkTrendData["dark-trend"].map((field) => [field.key, field]),
 );
 
-export function resolveFields(
-  customFields: unknown,
-  keys: string[],
-): Record<string, string> {
-  const raw =
-    customFields != null &&
-    typeof customFields === "object" &&
-    !Array.isArray(customFields)
-      ? (customFields as Record<string, string>)
-      : {};
-  const out: Record<string, string> = {};
-  for (const key of keys) {
-    const custom = raw[key]?.trim();
-    out[key] = custom ?? _darkTrendFieldMap.get(key)?.defaultValue ?? "";
-  }
-  return out;
+export function resolveFields(customFields: unknown, keys: string[]): Record<string, string> {
+  return resolveTemplateFields(customFields, keys, _darkTrendFieldMap);
 }

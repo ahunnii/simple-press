@@ -2,9 +2,10 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { BambooAboutPage } from "../_templates/bamboo/bamboo-about-page";
+import { BambooAboutPage } from "../_templates/bamboo/about/bamboo-about-page";
 import { DarkTrendAboutPage } from "../_templates/dark-trend/dark-trend-about-page";
 import { DefaultAboutPage } from "../_templates/default/default-about-page";
+import { ElegantAboutPage } from "../_templates/elegant/elegant-about-page";
 import { HappyBambooAboutPage } from "../_templates/happy-bamboo/about/happy-bamboo-about-page";
 import { ModernAboutPage } from "../_templates/modern/modern-about-page";
 import { NoiseAboutPage } from "../_templates/noise/about/noise-about-page";
@@ -16,6 +17,7 @@ export default async function AboutPage() {
   const TemplateComponent =
     {
       "dark-trend": DarkTrendAboutPage,
+      elegant: ElegantAboutPage,
       pollen: PollenAboutPage,
       modern: ModernAboutPage,
       bamboo: BambooAboutPage,

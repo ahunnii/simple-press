@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ShoppingBag, SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
 
 import type { DefaultProductsPageTemplateProps } from "../types";
-import type { RouterOutputs } from "~/trpc/react";
 
 import { ElegantProductCard } from "./elegant-product-card";
 

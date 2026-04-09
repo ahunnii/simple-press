@@ -21,7 +21,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -63,13 +63,10 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
-import { UploadButton } from "~/components/ui/upload-button";
 import { UploadDropzone } from "~/components/ui/upload-dropzone";
 
 import { ImageEditModal } from "./image-edit-modal";
 import { SortableImage } from "./sortable-image";
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 type GalleryEditorProps = {
   gallery: Gallery & { images: GalleryImage[] };

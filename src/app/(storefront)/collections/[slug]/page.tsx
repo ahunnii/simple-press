@@ -2,8 +2,13 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
+import { BambooCollectionPage } from "../../_templates/bamboo/collections/bamboo-collection-page";
+import { DarkTrendCollectionPage } from "../../_templates/dark-trend/collections/dark-trend-collection-page";
 import { DefaultCollectionPage } from "../../_templates/default/default-collection-page";
+import { ElegantCollectionPage } from "../../_templates/elegant/collections/elegant-collection-page";
 import { HappyBambooCollectionPage } from "../../_templates/happy-bamboo/collections/happy-bamboo-collection-page";
+import { ModernCollectionPage } from "../../_templates/modern/collections/modern-collection-page";
+import { NoiseCollectionPage } from "../../_templates/noise/collections/noise-collection-page";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -27,6 +32,11 @@ export default async function CollectionPage({ params }: Props) {
   const TemplateComponent =
     {
       "happy-bamboo": HappyBambooCollectionPage,
+      bamboo: BambooCollectionPage,
+      "dark-trend": DarkTrendCollectionPage,
+      elegant: ElegantCollectionPage,
+      modern: ModernCollectionPage,
+      noise: NoiseCollectionPage,
     }[business.templateId] ?? DefaultCollectionPage;
 
   return (

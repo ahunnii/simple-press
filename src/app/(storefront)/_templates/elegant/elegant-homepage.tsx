@@ -1,15 +1,9 @@
 import { api } from "~/trpc/server";
-import { resolveFields } from ".";
 
-import { ElegantCTABanner } from "./elegant-cta-banner";
+import { resolveFields } from ".";
 import { ElegantFeatureSection } from "./elegant-feature-section";
-import { ElegantFooter } from "./elegant-footer";
-import { ElegantHeader } from "./elegant-header";
 import { ElegantHero } from "./elegant-hero";
-import { ElegantNewsletter } from "./elegant-newsletter";
 import { ElegantProductGrid } from "./elegant-product-grid";
-import { ElegantTestimonials } from "./elegant-testimonials";
-import { ElegantTrustBadges } from "./elegant-trust-badges";
 
 export async function ElegantHomePage() {
   const homepage = await api.business.getHomepage();

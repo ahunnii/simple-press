@@ -2,7 +2,15 @@ import { notFound, redirect } from "next/navigation";
 
 import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
+
+import { BambooAddressBookPage } from "../../_templates/bamboo/account/bamboo-address-book-page";
+import { DarkTrendAddressBookPage } from "../../_templates/dark-trend/account/dark-trend-address-book-page";
+import { DefaultAddressBookFallback } from "../../_templates/default/account/default-address-book-fallback";
+import { ElegantAddressBookPage } from "../../_templates/elegant/account/elegant-address-book-page";
 import { HappyBambooAddressBookPage } from "../../_templates/happy-bamboo/account/happy-bamboo-address-book-page";
+import { ModernAddressBookPage } from "../../_templates/modern/account/modern-address-book-page";
+import { NoiseAddressBookPage } from "../../_templates/noise/account/noise-address-book-page";
+import { PollenAddressBookPage } from "../../_templates/pollen/account/pollen-address-book-page";
 
 export const metadata = {
   title: "Address Book",
@@ -21,17 +29,16 @@ export default async function AddressBookPage() {
 
   if (!business) notFound();
 
-  if (business.templateId === "happy-bamboo") {
-    return <HappyBambooAddressBookPage business={business} customer={customer} />;
-  }
+  const TemplateComponent =
+    {
+      "happy-bamboo": HappyBambooAddressBookPage,
+      bamboo: BambooAddressBookPage,
+      "dark-trend": DarkTrendAddressBookPage,
+      noise: NoiseAddressBookPage,
+      modern: ModernAddressBookPage,
+      elegant: ElegantAddressBookPage,
+      pollen: PollenAddressBookPage,
+    }[business.templateId] ?? DefaultAddressBookFallback;
 
-  // Generic fallback for other templates
-  return (
-    <div className="mx-auto max-w-xl py-20 px-4">
-      <h1 className="mb-6 text-2xl font-bold">Address Book</h1>
-      <p className="text-muted-foreground text-sm">
-        Address management is not yet available for this template.
-      </p>
-    </div>
-  );
+  return <TemplateComponent business={business} customer={customer} />;
 }

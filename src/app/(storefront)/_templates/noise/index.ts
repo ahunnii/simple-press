@@ -1,3 +1,4 @@
+import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 // ─── Homepage: Hero ───────────────────────────────────────────────────────────
@@ -623,20 +624,6 @@ const _noiseFieldMap = new Map(
   noiseData.noise.map((field) => [field.key, field]),
 );
 
-export function resolveFields(
-  customFields: unknown,
-  keys: string[],
-): Record<string, string> {
-  const raw =
-    customFields != null &&
-    typeof customFields === "object" &&
-    !Array.isArray(customFields)
-      ? (customFields as Record<string, string>)
-      : {};
-  const out: Record<string, string> = {};
-  for (const key of keys) {
-    const custom = raw[key]?.trim();
-    out[key] = custom ?? _noiseFieldMap.get(key)?.defaultValue ?? "";
-  }
-  return out;
+export function resolveFields(customFields: unknown, keys: string[]): Record<string, string> {
+  return resolveTemplateFields(customFields, keys, _noiseFieldMap);
 }

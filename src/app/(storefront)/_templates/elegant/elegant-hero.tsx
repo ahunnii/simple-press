@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import Link from "next/link";
@@ -31,7 +32,6 @@ type Props = {
   heroButtonLink?: string;
 };
 export function ElegantHero({
-  homepage,
   tagline,
   heroImage,
   heroTitleLine1,

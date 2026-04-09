@@ -136,20 +136,14 @@ const products = [
   },
 ];
 
-const categories = [
-  { value: "cream" as Category, label: "Cream" },
-  { value: "oil" as Category, label: "Oil" },
-  { value: "serum" as Category, label: "Serum" },
-];
-
 export function ElegantProductGrid({
   homepage,
 }: {
   homepage: RouterOutputs["business"]["getHomepage"];
 }) {
-  const [selectedCategory, setSelectedCategory] = useState<Category>("cream");
+  const [selectedCategory] = useState<Category>("cream");
   const [isVisible, setIsVisible] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isTransitioning] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -160,18 +154,6 @@ export function ElegantProductGrid({
   // );
 
   const filteredProducts = homepage?.products ?? [];
-
-  const handleCategoryChange = (category: Category) => {
-    if (category !== selectedCategory) {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setSelectedCategory(category);
-        setTimeout(() => {
-          setIsTransitioning(false);
-        }, 50);
-      }, 300);
-    }
-  };
 
   // Preload all product images on mount
   useEffect(() => {

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, SlidersHorizontal, X } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 
 // const products = [
 //   // Serums

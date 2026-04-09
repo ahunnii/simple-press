@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -11,8 +12,13 @@ type Props = {
   features: { title: string; description: string }[];
 };
 
-export function ElegantFeatureSection({ homepage, aboutTitle, aboutText, features }: Props) {
-  const [isVisible, setIsVisible] = useState(false);
+export function ElegantFeatureSection({
+  homepage,
+  aboutTitle,
+  aboutText,
+  features,
+}: Props) {
+  const [, setIsVisible] = useState(false);
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(false);
   const bentoRef = useRef<HTMLDivElement>(null);

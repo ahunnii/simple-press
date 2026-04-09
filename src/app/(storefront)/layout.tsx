@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { api, HydrateClient } from "~/trpc/server";
 import { TemplateSelectorDevTool } from "~/components/development/template-selector";
 
-import { BambooLayout } from "./_templates/bamboo/bamboo-general-layout";
+import { BambooLayout } from "./_templates/bamboo/layout/bamboo-general-layout";
 import { DarkTrendLayout } from "./_templates/dark-trend/dark-trend-layout";
 import { DefaultLayout } from "./_templates/default/default-layout";
 import { ElegantLayout } from "./_templates/elegant/elegant-layout";
