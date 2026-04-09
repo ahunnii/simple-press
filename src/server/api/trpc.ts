@@ -266,7 +266,6 @@ export const getBusinessProcedure = () =>
       throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
     }
 
-    console.log(business, "business");
     return next({
       ctx: {
         ...ctx,

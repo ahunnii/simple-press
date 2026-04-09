@@ -2,42 +2,42 @@ import { Button, Section, Text } from "@react-email/components";
 
 import { EmailLayout } from "./components/layout";
 
-type ResetPasswordEmailProps = {
+type VerifyEmailProps = {
   name: string;
   businessName: string;
-  resetUrl: string;
+  verifyUrl: string;
   logoUrl?: string;
 };
 
-export default function ResetPasswordEmail({
+export default function VerifyEmail({
   name,
   businessName,
-  resetUrl,
+  verifyUrl,
   logoUrl,
-}: ResetPasswordEmailProps) {
+}: VerifyEmailProps) {
   return (
     <EmailLayout
-      previewText={`Reset your password for ${businessName}`}
+      previewText={`Verify your email address for ${businessName}`}
       businessName={businessName}
       logoUrl={logoUrl}
     >
-      <Text style={heading}>Reset your password</Text>
+      <Text style={heading}>Verify your email address</Text>
 
       <Text style={paragraph}>Hi {name},</Text>
 
       <Text style={paragraph}>
-        We received a request to reset your password for your SimplePress
-        account.
+        Thank you for creating an account with {businessName}. To complete your
+        registration, please verify your email address.
       </Text>
 
       <Text style={paragraph}>
-        Click the button below to set a new password. If you didn&apos;t request
-        a password reset, you can safely ignore this email.
+        Click the button below to verify your email address. If you did not sign
+        up for a SimplePress account, you can safely ignore this email.
       </Text>
 
       <Section style={buttonSection}>
-        <Button href={resetUrl} style={button}>
-          Reset Password
+        <Button href={verifyUrl} style={button}>
+          Verify Email
         </Button>
       </Section>
 

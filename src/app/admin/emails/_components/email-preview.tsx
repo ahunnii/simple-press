@@ -7,7 +7,9 @@ import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderFulfilledEmail from "~/emails/order-fulfilled";
 import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
+import ResetPasswordEmail from "~/emails/reset-password";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
+import VerifyEmail from "~/emails/verify-email";
 import WelcomeEmail from "~/emails/welcome";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -91,20 +93,19 @@ export function EmailPreview({ business, sampleOrder }: Props) {
         orderNumber: sampleOrder?.orderNumber ?? 1001,
         customerName: "John Doe",
         customerEmail: "john@example.com",
-        items:
-          sampleOrder?.items?.map((item) => ({
-            productName: item.productName,
-            variantName: item.variantName,
-            quantity: item.quantity,
-            total: Math.round(item.total),
-          })) ?? [
-            {
-              productName: "Sample Product",
-              variantName: "Medium / Blue",
-              quantity: 2,
-              total: 5998,
-            },
-          ],
+        items: sampleOrder?.items?.map((item) => ({
+          productName: item.productName,
+          variantName: item.variantName,
+          quantity: item.quantity,
+          total: Math.round(item.total),
+        })) ?? [
+          {
+            productName: "Sample Product",
+            variantName: "Medium / Blue",
+            quantity: 2,
+            total: 5998,
+          },
+        ],
         subtotal: sampleOrder?.subtotal ?? 5998,
         shipping: sampleOrder?.shipping ?? 500,
         tax: sampleOrder?.tax ?? 540,
@@ -195,6 +196,31 @@ export function EmailPreview({ business, sampleOrder }: Props) {
     setHtml(rendered);
     setIsLoading(false);
   };
+  const previewVerifyEmail = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      VerifyEmail({
+        name: "John Doe",
+        businessName: business.name,
+        verifyUrl: "https://example.com/verify?code=sample",
+        logoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewResetPassword = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      ResetPasswordEmail({
+        name: "John Doe",
+        businessName: business.name,
+        resetUrl: "https://example.com/reset?code=sample",
+        logoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+  };
 
   return (
     <div className="admin-container">
@@ -274,6 +300,22 @@ export function EmailPreview({ business, sampleOrder }: Props) {
               className="w-full justify-start"
             >
               Testimonial Invite
+            </Button>
+            <Button
+              onClick={previewVerifyEmail}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Verify Email
+            </Button>
+            <Button
+              onClick={previewResetPassword}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Reset Password
             </Button>
           </CardContent>
         </Card>

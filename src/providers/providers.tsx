@@ -33,7 +33,7 @@ export function Providers({ children }: { children: ReactNode }) {
           router.refresh();
         }}
         signUp={{
-          fields: ["terms"],
+          fields: ["name", "terms"],
         }}
         additionalFields={{
           terms: {

@@ -1,11 +1,13 @@
 import * as Sentry from "@sentry/nextjs";
-import { EmailTemplate } from "@daveyplate/better-auth-ui/server";
+import ResetPasswordEmail from "~/emails/reset-password";
+import VerifyEmail from "~/emails/verify-email";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { captcha, organization } from "better-auth/plugins";
 
 import { env } from "~/env";
-import { checkBusiness } from "~/lib/check-business";
+import { getBusinessUrl } from "~/lib/business-url";
+import { checkBusiness, checkBusinessForEmail } from "~/lib/check-business";
 import { resend } from "~/lib/email/resend";
 import { EMAIL_FROM } from "~/lib/email/send";
 import { db } from "~/server/db";
@@ -38,15 +40,57 @@ async function linkGuestOrdersToUser(user: {
 }
 
 export const auth = betterAuth({
-  baseURL: env.BETTER_AUTH_BASE_URL,
+  baseURL: {
+    allowedHosts: [
+      "*.localhost:3000", // custom domains (wildcard)
+      "localhost:3000", // local dev
+      `${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
+      `*.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
+    ],
+    protocol: process.env.NODE_ENV === "development" ? "http" : "https",
+  },
 
   database: prismaAdapter(db, {
     provider: "postgresql", // or "sqlite" or "mysql"
   }),
+
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
     autoSignIn: true,
+
+    resetPasswordTokenExpiresIn: 3600, // 1 hour
+
+    sendResetPassword: async ({ user, url }) => {
+      const business = await checkBusinessForEmail();
+      const domain = getBusinessUrl({
+        subdomain: business?.subdomain ?? "",
+        customDomain: business?.customDomain ?? null,
+        domainStatus: business?.domainStatus ?? "NONE",
+      });
+
+      const updatedResetUrl = url.replace(env.BETTER_AUTH_BASE_URL, domain);
+
+      resend.emails
+        .send({
+          from: `${business?.name} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+          to: user.email,
+          subject: "Reset your SimplePress password",
+          react: ResetPasswordEmail({
+            name: user.name,
+            businessName: business?.name ?? "",
+            resetUrl: updatedResetUrl,
+            logoUrl: business?.siteContent?.logoUrl ?? undefined,
+          }),
+        })
+        .catch((err) => {
+          Sentry.captureException(err, {
+            tags: { "auth.email": "password-reset" },
+          });
+        });
+    },
+  },
+  emailVerification: {
     sendVerificationEmail: async ({
       user,
       url,
@@ -54,58 +98,36 @@ export const auth = betterAuth({
       user: { email: string; name: string };
       url: string;
     }) => {
-      resend.emails.send({
-        from: EMAIL_FROM.NOREPLY,
-        to: user.email,
-        subject: "Verify your email",
-        react: EmailTemplate({
-          action: "Verify Email",
-          heading: "Verify your email address",
-          content: (
-            <>
-              <p>{`Hello ${user.name},`}</p>
-              <p>
-                Click the button below to verify your email and activate your
-                account.
-              </p>
-            </>
-          ),
-          siteName: "SimplePress",
-          baseUrl: env.BETTER_AUTH_BASE_URL,
-          url,
-        }),
-      }).catch((err) => {
-        Sentry.captureException(err, {
-          tags: { "auth.email": "verification" },
-        });
-      });
-    },
-    sendResetPassword: async ({ user, url }) => {
-      resend.emails.send({
-        from: EMAIL_FROM.NOREPLY,
-        to: user.email,
-        subject: "Reset your password",
-        // html: `Click the link to reset your password: ${url}`,
-        react: EmailTemplate({
-          action: "Reset Password",
-          heading: "Reset Password",
-          content: (
-            <>
-              <p>{`Hello ${user.name},`}</p>
-              <p>Click the button below to reset your password.</p>
-            </>
-          ),
-          siteName: "SimplePress",
-          baseUrl: env.BETTER_AUTH_BASE_URL,
+      const business = await checkBusinessForEmail();
 
-          url,
-        }),
-      }).catch((err) => {
-        Sentry.captureException(err, {
-          tags: { "auth.email": "password-reset" },
-        });
+      const domain = getBusinessUrl({
+        subdomain: business?.subdomain ?? "",
+        customDomain: business?.customDomain ?? null,
+        domainStatus: business?.domainStatus ?? "NONE",
       });
+
+      const updatedVerifyUrl = url.replace(env.BETTER_AUTH_BASE_URL, domain);
+      resend.emails
+        .send({
+          from: `${business?.name} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+          to: user.email,
+          subject: "Verify your email",
+          react: VerifyEmail({
+            name: user.name,
+            businessName: business?.name ?? "",
+            verifyUrl: updatedVerifyUrl,
+            logoUrl: business?.siteContent?.logoUrl ?? undefined,
+          }),
+        })
+        .catch((err) => {
+          Sentry.captureException(err, {
+            tags: { "auth.email": "verification" },
+          });
+        });
     },
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    expiresIn: 3600, // 1 hour
   },
 
   socialProviders: {
@@ -132,37 +154,6 @@ export const auth = betterAuth({
       },
     },
   },
-
-  // hooks: {
-  //   after: createAuthMiddleware(async (ctx) => {
-  //     const business = await checkBusiness();
-
-  //     const membership = await db.businessMembership.findFirst({
-  //       where: {
-  //         userId: ctx.context.session?.user.id,
-  //         businessId: business?.id,
-  //       },
-  //       select: {
-  //         businessId: true,
-  //         role: true,
-  //       },
-  //     });
-
-  //     return {
-  //       context: {
-  //         ...ctx.context,
-  //         session: {
-  //           ...ctx.context.session,
-  //           user: {
-  //             ...ctx.context.session?.user,
-  //             businessId: membership?.businessId ?? null,
-  //             businessRole: membership?.role ?? null,
-  //           },
-  //         },
-  //       },
-  //     };
-  //   }),
-  // },
 
   plugins: [
     organization({
