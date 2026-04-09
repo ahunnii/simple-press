@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { api } from "~/trpc/server";
 
 import { BambooCheckoutPage } from "../_templates/bamboo/cart-checkout/bamboo-checkout-page";
-import { DarkTrendCheckoutPage } from "../_templates/dark-trend/dark-trend-checkout-page";
+import { DarkTrendCheckoutPage } from "../_templates/dark-trend/cart-checkout/dark-trend-checkout-page";
 import { DefaultCheckoutPage } from "../_templates/default/default-checkout-page";
 import { DefaultCheckoutUnavailable } from "../_templates/default/default-checkout-unavailable";
 import { ElegantCheckoutPage } from "../_templates/elegant/elegant-checkout-page";

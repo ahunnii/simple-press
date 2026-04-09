@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { api } from "~/trpc/server";
 
 import { BambooShopPage } from "../_templates/bamboo/products/bamboo-shop-page";
-import { DarkTrendProductsPage } from "../_templates/dark-trend/dark-trend-products-page";
+import { DarkTrendProductsPage } from "../_templates/dark-trend/products/dark-trend-products-page";
 import { DefaultProductsPage } from "../_templates/default/default-products-page";
 import { ElegantShopPage } from "../_templates/elegant/elegant-shop-page";
 import { HappyBambooShopPage } from "../_templates/happy-bamboo/products/happy-bamboo-shop-page";

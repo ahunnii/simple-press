@@ -11,17 +11,13 @@ import { formatDate } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 
 import { resolveFields } from "..";
-import { DarkTrendGeneralLayout } from "../dark-trend-general-layout";
+import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 
 type Props = DefaultBlogPageTemplateProps & {
   customFields?: Record<string, string>;
 };
 
-function BlogPostCard({
-  post,
-}: {
-  post: Props["pages"][number];
-}) {
+function BlogPostCard({ post }: { post: Props["pages"][number] }) {
   return (
     <Link href={`/blog/${post.slug}`} className="group block">
       <div className="overflow-hidden rounded-xl bg-[#1F1F1F] transition-transform group-hover:scale-[1.02]">

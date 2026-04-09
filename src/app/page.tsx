@@ -4,7 +4,7 @@ import { PlatformLandingPageComponent } from "./_components/platform-specific/pl
 import { BambooHomepage } from "./(storefront)/_templates/bamboo/homepage/bamboo-homepage";
 import { BambooLayout } from "./(storefront)/_templates/bamboo/layout/bamboo-general-layout";
 import { DarkTrendHomepage } from "./(storefront)/_templates/dark-trend/dark-trend-homepage";
-import { DarkTrendLayout } from "./(storefront)/_templates/dark-trend/dark-trend-layout";
+import { DarkTrendLayout } from "./(storefront)/_templates/dark-trend/layout/dark-trend-layout";
 import { DefaultHomePage } from "./(storefront)/_templates/default/default-homepage";
 import { DefaultLayout } from "./(storefront)/_templates/default/default-layout";
 import { ElegantHomePage } from "./(storefront)/_templates/elegant/elegant-homepage";

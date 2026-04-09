@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CreditCard, Loader2 } from "lucide-react";
 
-import type { DefaultCheckoutPageTemplateProps } from "../types";
+import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
 import {
   calculateShipping,

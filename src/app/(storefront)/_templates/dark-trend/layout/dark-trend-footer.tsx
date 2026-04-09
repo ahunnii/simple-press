@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import type { DefaultFooterTemplateProps } from "../types";
+import type { DefaultFooterTemplateProps } from "../../types";
 import { api } from "~/trpc/server";
 
 export async function DarkTrendFooter({

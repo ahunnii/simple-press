@@ -1,154 +1,8 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
-const aboutPageData: TemplateField[] = [
-  {
-    key: "dark-trend.about.first-image",
-    label: "About First Image",
-    description: "Image for the first section of the about page",
-    type: "image",
-    page: "about",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dark-trend.about.second-image",
-    label: "About Second Image",
-    description: "Image for the second section of the about page",
-    type: "image",
-    page: "about",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dark-trend.about.header",
-    label: "About Header",
-    description: "Header for the about page",
-    type: "text",
-    page: "about",
-    defaultValue: "About Us",
-    placeholder: "About Us",
-  },
-  {
-    key: "dark-trend.about.subheader",
-    label: "About Subheader",
-    description: "Subheader for the about page",
-    type: "text",
-    page: "about",
-    defaultValue: "Our Story",
-    placeholder: "Our Story",
-  },
-  {
-    key: "dark-trend.about.button",
-    label: "About Button",
-    description: "Button for the about page",
-    type: "text",
-    page: "about",
-    defaultValue: "Learn More",
-    placeholder: "Learn More",
-  },
-  {
-    key: "dark-trend.about.button-link",
-    label: "About Button Link",
-    description: "Button link for the about page",
-    type: "url",
-    page: "about",
-    defaultValue: "/shop",
-    placeholder: "/shop",
-  },
-  {
-    key: "dark-trend.about.cta-header",
-    label: "About CTA Header",
-    description: "CTA header for the about page",
-    type: "text",
-    page: "about",
-    defaultValue: "Ready to Work Together?",
-    placeholder: "e.g. Ready to Work Together?",
-  },
-  {
-    key: "dark-trend.about.feature-1-header",
-    label: "About Feature 1 Header",
-    description: "Feature 1 header for the about page",
-    type: "text",
-    page: "about",
-    defaultValue: "Premium Quality",
-    placeholder: "e.g. Premium Quality",
-  },
-  {
-    key: "dark-trend.about.feature-1-description",
-    label: "About Feature 1 Description",
-    description: "Feature 1 description for the about page",
-    type: "textarea",
-    page: "about",
-    defaultValue:
-      "Every piece is crafted with attention to detail and a commitment to excellence.",
-    placeholder: "Describe what makes this feature stand out...",
-  },
-  {
-    key: "dark-trend.about.feature-2-header",
-    label: "About Feature 2 Header",
-    description: "Feature 2 header for the about page",
-    type: "text",
-    page: "about",
-    defaultValue: "Custom Designs",
-    placeholder: "e.g. Custom Designs",
-  },
-  {
-    key: "dark-trend.about.feature-2-description",
-    label: "About Feature 2 Description",
-    description: "Feature 2 description for the about page",
-    type: "textarea",
-    page: "about",
-    defaultValue:
-      "We work closely with each client to bring their unique vision to life.",
-    placeholder: "Describe what makes this feature stand out...",
-  },
-  {
-    key: "dark-trend.about.feature-3-header",
-    label: "About Feature 3 Header",
-    description: "Feature 3 header for the about page",
-    type: "text",
-    page: "about",
-    defaultValue: "Fast Turnaround",
-    placeholder: "e.g. Fast Turnaround",
-  },
-  {
-    key: "dark-trend.about.feature-3-description",
-    label: "About Feature 3 Description",
-    description: "Feature 3 description for the about page",
-    type: "textarea",
-    page: "about",
-    defaultValue:
-      "We deliver on time, every time — without compromising on quality.",
-    placeholder: "Describe what makes this feature stand out...",
-  },
-  {
-    key: "dark-trend.about.cta-description",
-    label: "About CTA Description",
-    description: "CTA description for the about page",
-    type: "textarea",
-    page: "about",
-    defaultValue:
-      "Let's create something extraordinary together. Reach out and we'll make it happen.",
-    placeholder: "A short invitation to shop or get in touch...",
-  },
-  {
-    key: "dark-trend.about.cta-button-text",
-    label: "About CTA Button Text",
-    description: "CTA button text for the about page",
-    type: "text",
-    page: "about",
-    defaultValue: "Get Started",
-    placeholder: "Get Started",
-  },
-  {
-    key: "dark-trend.about.cta-button-link",
-    label: "About CTA Button Link",
-    description: "CTA button link for the about page",
-    type: "url",
-    page: "about",
-    defaultValue: "/contact",
-    placeholder: "/contact",
-  },
-];
+import { aboutDarkTrendFieldGroups, aboutDarkTrendPageData } from "./about";
+import { darkTrendBlogData, darkTrendBlogFieldGroups } from "./blog";
 
 const homepageData: TemplateField[] = [
   {
@@ -368,32 +222,6 @@ const contactPageData: TemplateField[] = [
   },
 ];
 
-const blogPageData: TemplateField[] = [
-  {
-    key: "dark-trend.blog.listing-title",
-    label: "Blog Listing Title",
-    description: "Main heading on the blog index page",
-    type: "text",
-    page: "blog",
-    group: "blog.listing",
-    gridColumn: "col-span-full",
-    defaultValue: "Journal",
-    placeholder: "e.g. Journal",
-  },
-  {
-    key: "dark-trend.blog.listing-intro",
-    label: "Blog Listing Intro",
-    description: "Optional subtitle below the blog index heading",
-    type: "textarea",
-    page: "blog",
-    group: "blog.listing",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "News, tips, and updates from our team. Use the search box to find a topic.",
-    placeholder: "A short introduction to your blog...",
-  },
-];
-
 const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.hero",
@@ -402,21 +230,17 @@ const fieldGroups: TemplateFieldGroup[] = [
     icon: "🎯",
     columns: 2,
   },
-  {
-    id: "blog.listing",
-    title: "Blog listing",
-    description: "Heading and intro for the blog index page",
-    icon: "📝",
-    columns: 1,
-  },
+
+  ...aboutDarkTrendFieldGroups,
+  ...darkTrendBlogFieldGroups,
 ];
 
 export const darkTrendData = {
   "dark-trend": [
-    ...aboutPageData,
+    ...aboutDarkTrendPageData,
     ...homepageData,
     ...contactPageData,
-    ...blogPageData,
+    ...darkTrendBlogData,
   ],
 };
 
@@ -428,6 +252,9 @@ const _darkTrendFieldMap = new Map(
   darkTrendData["dark-trend"].map((field) => [field.key, field]),
 );
 
-export function resolveFields(customFields: unknown, keys: string[]): Record<string, string> {
+export function resolveFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
   return resolveTemplateFields(customFields, keys, _darkTrendFieldMap);
 }

@@ -8,7 +8,7 @@ import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard } from "@tabler/icons-react";
 import { Menu, ShoppingBag, X } from "lucide-react";
 
-import type { DefaultHeaderTemplateProps } from "../types";
+import type { DefaultHeaderTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";

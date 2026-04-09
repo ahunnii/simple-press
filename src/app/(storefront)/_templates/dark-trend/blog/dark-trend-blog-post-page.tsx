@@ -2,15 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { formatDate } from "~/lib/utils";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { DarkTrendGeneralLayout } from "../dark-trend-general-layout";
+import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 
 export function DarkTrendBlogPostPage({
   page,
@@ -26,14 +25,7 @@ export function DarkTrendBlogPostPage({
         parentBreadcrumb={{ label: "Blog", href: "/blog" }}
         topContent={
           <>
-            <Link
-              href="/blog"
-              className="inline-flex items-center gap-2 text-sm font-medium text-white/70 transition-colors hover:text-purple-400"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to blog
-            </Link>
-            <p className="mt-4 text-sm font-medium tracking-wider text-purple-400 uppercase">
+            <p className="mt-4 text-center text-sm font-medium tracking-wider text-purple-400 uppercase">
               {formatDate(page.createdAt)}
             </p>
           </>

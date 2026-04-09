@@ -1,4 +1,4 @@
-import type { DefaultLayoutTemplateProps } from "../types";
+import type { DefaultLayoutTemplateProps } from "../../types";
 
 import { DarkTrendFooter } from "./dark-trend-footer";
 import { DarkTrendHeader } from "./dark-trend-header";

@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-import type { DefaultTestimonialsPageTemplateProps } from "../types";
+import type { DefaultTestimonialsPageTemplateProps } from "../../types";
 import { api } from "~/trpc/server";
 
-import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
+import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 
 export async function DarkTrendTestimonialsPage({
   business: _business,
@@ -35,7 +35,7 @@ export async function DarkTrendTestimonialsPage({
                 key={t.id}
                 className="flex flex-col rounded-xl border border-white/10 bg-[#1F1F1F] p-6"
               >
-                <p className="flex-1 text-white/85 leading-relaxed">
+                <p className="flex-1 leading-relaxed text-white/85">
                   &ldquo;{t.text}&rdquo;
                 </p>
                 <div className="mt-6 flex items-center gap-3 border-t border-white/10 pt-6">

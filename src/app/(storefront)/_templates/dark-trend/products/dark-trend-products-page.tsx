@@ -1,6 +1,6 @@
-import type { DefaultProductsPageTemplateProps } from "../types";
+import type { DefaultProductsPageTemplateProps } from "../../types";
 
-import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
+import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 import { DarkTrendProductCard } from "./dark-trend-product-card";
 
 export function DarkTrendProductsPage({

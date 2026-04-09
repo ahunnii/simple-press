@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check, ChevronLeft, Minus, Plus } from "lucide-react";
 
-import type { DefaultProductPageTemplateProps } from "../types";
+import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
 import { Spotlight } from "~/components/ui/spotlight-new";
 

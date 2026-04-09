@@ -1,9 +1,9 @@
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
+import { DarkTrendGeneralLayout } from "./layout/dark-trend-general-layout";
 
 type Props = {
   page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;

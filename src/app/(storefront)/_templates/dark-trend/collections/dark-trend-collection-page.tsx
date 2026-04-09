@@ -4,7 +4,8 @@ import { ArrowLeft } from "lucide-react";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
-import { DarkTrendGeneralLayout } from "../dark-trend-general-layout";
+
+import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 
 export function DarkTrendCollectionPage({
   collection,

@@ -155,8 +155,20 @@ const genericIconRowSchema = z
   })
   .passthrough();
 
+export const genericTextRowSchema = z
+  .object({
+    title: z.string(),
+    description: z.string(),
+  })
+  .passthrough();
+
 export type GenericIconRow = {
   icon: LucideIcon;
+  title: string;
+  description: string;
+};
+
+export type GenericTextRow = {
   title: string;
   description: string;
 };
@@ -165,7 +177,7 @@ export function parseTemplateIconListRows(
   raw: unknown,
   defaultList?: GenericIconRow[],
 ) {
-  if (!Array.isArray(raw)) return null;
+  if (!Array.isArray(raw)) return defaultList ?? [];
 
   const out: GenericIconRow[] = [];
   for (const row of raw) {
@@ -174,6 +186,23 @@ export function parseTemplateIconListRows(
     const { icon, title, description } = parsed.data;
     const Icon = getLucideTemplateIcon(icon) ?? Leaf;
     out.push({ icon: Icon, title, description });
+  }
+
+  return out.length > 0 ? out : (defaultList ?? null);
+}
+
+export function parseTemplateTextListRows(
+  raw: unknown,
+  defaultList?: GenericTextRow[],
+) {
+  if (!Array.isArray(raw)) return defaultList ?? [];
+
+  const out: GenericTextRow[] = [];
+  for (const row of raw) {
+    const parsed = genericTextRowSchema.safeParse(row);
+    if (!parsed.success) continue;
+    const { title, description } = parsed.data;
+    out.push({ title, description });
   }
 
   return out.length > 0 ? out : (defaultList ?? null);

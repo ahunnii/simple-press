@@ -1,7 +1,7 @@
-import type { DefaultCartPageTemplateProps } from "../types";
+import type { DefaultCartPageTemplateProps } from "../../types";
 
+import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 import { DarkTrendCartContents } from "./dark-trend-cart-contents";
-import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
 
 export async function DarkTrendCartPage({
   business,

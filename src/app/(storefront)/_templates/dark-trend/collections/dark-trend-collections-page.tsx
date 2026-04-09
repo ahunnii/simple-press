@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
 
-import { DarkTrendGeneralLayout } from "../dark-trend-general-layout";
+import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 
 export function DarkTrendCollectionsPage({
   collections,

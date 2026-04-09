@@ -1,7 +1,7 @@
-import type { DefaultCheckoutPageTemplateProps } from "../types";
+import type { DefaultCheckoutPageTemplateProps } from "../../types";
 
+import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 import { DarkTrendCheckoutForm } from "./dark-trend-checkout-form";
-import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
 
 export async function DarkTrendCheckoutPage({
   business,

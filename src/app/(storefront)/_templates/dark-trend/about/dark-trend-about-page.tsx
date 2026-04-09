@@ -1,11 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import type { DefaultAboutPageTemplateProps } from "../types";
+import type { DefaultAboutPageTemplateProps } from "../../types";
+import {
+  getListFieldValue,
+  parseTemplateTextListRows,
+} from "~/lib/template-fields";
 import { Button } from "~/components/ui/button";
 
-import { resolveFields } from ".";
-import { DarkTrendGeneralLayout } from "./dark-trend-general-layout";
+import { DEFAULT_DARK_TREND_FEATURES } from ".";
+import { resolveFields } from "..";
+import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
 
 export function DarkTrendAboutPage({
   business,
@@ -17,17 +22,20 @@ export function DarkTrendAboutPage({
     "dark-trend.about.subheader",
     "dark-trend.about.button",
     "dark-trend.about.button-link",
-    "dark-trend.about.feature-1-header",
-    "dark-trend.about.feature-1-description",
-    "dark-trend.about.feature-2-header",
-    "dark-trend.about.feature-2-description",
-    "dark-trend.about.feature-3-header",
-    "dark-trend.about.feature-3-description",
+
     "dark-trend.about.cta-header",
     "dark-trend.about.cta-description",
     "dark-trend.about.cta-button-text",
     "dark-trend.about.cta-button-link",
   ]);
+
+  const featuresList = parseTemplateTextListRows(
+    getListFieldValue(
+      business?.siteContent?.customFields,
+      "dark-trend.about.features-list",
+    ),
+    DEFAULT_DARK_TREND_FEATURES,
+  );
 
   return (
     <DarkTrendGeneralLayout title="About Us">
@@ -37,7 +45,7 @@ export function DarkTrendAboutPage({
           {/* Image */}
           <div className="relative aspect-square overflow-hidden rounded-sm bg-linear-to-br from-purple-600 to-blue-500">
             <Image
-              src={f["dark-trend.about.first-image"] ?? "/placeholder.svg"}
+              src={f["dark-trend.about.first-image"]!}
               alt="About Us"
               fill
               className="object-cover"
@@ -58,54 +66,28 @@ export function DarkTrendAboutPage({
 
             {/* Feature List */}
             <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-purple-500/20">
-                  <span className="text-xl font-bold text-purple-500">#1</span>
+              {featuresList?.map((feature, index) => (
+                <div className="flex gap-4" key={index}>
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-purple-500/20">
+                    <span className="text-xl font-bold text-purple-500">
+                      #{index + 1}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="mb-2 text-xl font-semibold text-white">
+                      {feature?.title}
+                    </h3>
+                    <p className="text-white/70">{feature.description}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="mb-2 text-xl font-semibold text-white">
-                    {f["dark-trend.about.feature-1-header"]}
-                  </h3>
-                  <p className="text-white/70">
-                    {f["dark-trend.about.feature-1-description"]}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-purple-500/20">
-                  <span className="text-xl font-bold text-purple-500">#2</span>
-                </div>
-                <div>
-                  <h3 className="mb-2 text-xl font-semibold text-white">
-                    {f["dark-trend.about.feature-2-header"]}
-                  </h3>
-                  <p className="text-white/70">
-                    {f["dark-trend.about.feature-2-description"]}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-purple-500/20">
-                  <span className="text-xl font-bold text-purple-500">#3</span>
-                </div>
-                <div>
-                  <h3 className="mb-2 text-xl font-semibold text-white">
-                    {f["dark-trend.about.feature-3-header"]}
-                  </h3>
-                  <p className="text-white/70">
-                    {f["dark-trend.about.feature-3-description"]}
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
 
             <Button
               asChild
               className="bg-violet-500 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-600"
             >
-              <Link href={f["dark-trend.about.button-link"] ?? "/shop"}>
+              <Link href={f["dark-trend.about.button-link"]!}>
                 {f["dark-trend.about.button"]}
               </Link>
             </Button>
@@ -128,7 +110,7 @@ export function DarkTrendAboutPage({
               asChild
               className="bg-violet-500 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-600"
             >
-              <Link href={f["dark-trend.about.cta-button-link"] ?? "/contact"}>
+              <Link href={f["dark-trend.about.cta-button-link"]!}>
                 {f["dark-trend.about.cta-button-text"]}
               </Link>
             </Button>
@@ -136,7 +118,7 @@ export function DarkTrendAboutPage({
 
           <div className="relative aspect-4/5 overflow-hidden rounded-sm bg-zinc-900">
             <Image
-              src={f["dark-trend.about.second-image"] ?? "/placeholder.svg"}
+              src={f["dark-trend.about.second-image"]!}
               alt="Custom Work"
               fill
               className="object-cover"
