@@ -19,6 +19,7 @@ export function HappyBambooShopPage({
     | undefined;
 
   const fields = resolveFields(customFields, [
+    "happy-bamboo.sale-badge-format",
     "happy-bamboo.shop-listing-heading",
     "happy-bamboo.shop-listing-intro",
   ]);
@@ -26,6 +27,7 @@ export function HappyBambooShopPage({
   return (
     <HappyBambooShopClient
       products={business.products ?? []}
+      saleBadgeFormat={fields["happy-bamboo.sale-badge-format"] ?? "true"}
       shopHeading={fields["happy-bamboo.shop-listing-heading"] ?? ""}
       shopIntro={fields["happy-bamboo.shop-listing-intro"] ?? ""}
     />

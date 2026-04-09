@@ -70,7 +70,7 @@ export function HappyBambooFeaturedProducts({
         </div>
       </FadeIn>
       <StaggerContainer
-        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2"
+        className="grid grid-cols-1 gap-6 md:grid-cols-2"
         staggerDelay={0.12}
       >
         {featuredProducts?.slice(0, 4).map((product) => (

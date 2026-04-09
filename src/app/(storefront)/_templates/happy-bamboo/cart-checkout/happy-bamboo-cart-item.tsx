@@ -20,9 +20,13 @@ export function HappyBambooCartItem({ item }: Props) {
     productName,
     variantName,
     price,
+    compareAtPrice,
     quantity,
     imageUrl,
   } = item;
+
+  const isOnSale =
+    compareAtPrice != null && compareAtPrice > 0 && compareAtPrice > price;
 
   return (
     <div className="border-border bg-card flex gap-4 rounded-lg border p-4">
@@ -47,7 +51,19 @@ export function HappyBambooCartItem({ item }: Props) {
               </p>
             )}
             <p className="text-muted-foreground text-xs sm:text-sm">
-              {formatPrice(price)} each
+              {isOnSale ? (
+                <>
+                  <span className="text-muted-foreground/60 mr-1 line-through">
+                    {formatPrice(compareAtPrice ?? 0)}
+                  </span>
+                  <span className="text-primary font-medium">
+                    {formatPrice(price)}
+                  </span>
+                  {" each"}
+                </>
+              ) : (
+                <>{formatPrice(price)} each</>
+              )}
             </p>
           </div>
           <Button

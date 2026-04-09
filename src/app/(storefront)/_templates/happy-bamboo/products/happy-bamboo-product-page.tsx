@@ -20,8 +20,10 @@ import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
+import { computeSavingsLabel } from "~/lib/prices";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
+import { resolveFields } from "../index";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
@@ -194,6 +196,7 @@ export function HappyBambooProductPage({
     inStock,
     variantOptions,
     displayPrice,
+    displayCompareAtPrice,
     handleAddToCart,
 
     canAddMore,
@@ -202,6 +205,16 @@ export function HappyBambooProductPage({
     quantity,
     setSelectedVariantId,
   } = useProduct(product);
+
+  const customFields = product.business?.siteContent?.customFields;
+  const fields = resolveFields(customFields, ["happy-bamboo.sale-badge-format"]);
+  const saleBadgeFormat = fields["happy-bamboo.sale-badge-format"] ?? "true";
+
+  const isOnSale =
+    displayCompareAtPrice != null &&
+    displayCompareAtPrice > 0 &&
+    displayCompareAtPrice > displayPrice;
+
 
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
@@ -279,10 +292,22 @@ export function HappyBambooProductPage({
               )}
             </div>
 
-            <div className="flex items-baseline gap-3">
-              <span className="text-foreground text-3xl font-bold">
-                {formatPrice(displayPrice)}
-              </span>
+            <div className="flex flex-wrap items-baseline gap-3">
+              {isOnSale && displayCompareAtPrice && (
+                <span className="inline-flex items-center rounded-full bg-black px-3 py-1 text-sm font-semibold text-white">
+                  {computeSavingsLabel(displayPrice, displayCompareAtPrice, saleBadgeFormat)}
+                </span>
+              )}
+              <div className="flex items-baseline gap-2">
+                <span className="text-foreground text-3xl font-bold">
+                  {formatPrice(displayPrice)}
+                </span>
+                {isOnSale && displayCompareAtPrice && (
+                  <span className="text-muted-foreground text-xl line-through">
+                    {formatPrice(displayCompareAtPrice)}
+                  </span>
+                )}
+              </div>
               {product.id === "bamboo-luxe-24" && (
                 <span className="text-primary text-sm font-medium">
                   Best value per roll
@@ -458,35 +483,58 @@ export function HappyBambooProductPage({
             className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2"
             staggerDelay={0.12}
           >
-            {relatedProducts?.map((p) => (
-              <StaggerItem key={p.id}>
-                <Link
-                  href={`/shop/${p.slug}`}
-                  className="group border-border bg-card flex gap-4 rounded-xl border p-4 transition-shadow hover:shadow-lg"
-                >
-                  <div className="bg-secondary relative size-24 shrink-0 overflow-hidden rounded-lg">
-                    <Image
-                      src={p.images[0]?.url ?? "/placeholder.svg"}
-                      alt={p.name}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="96px"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <h3 className="text-card-foreground group-hover:text-primary font-heading text-base font-semibold transition-colors">
-                      {p.name}
-                    </h3>
-                    <p className="text-muted-foreground line-clamp-2 text-sm">
-                      {p.description}
-                    </p>
-                    <span className="text-foreground mt-auto text-lg font-bold">
-                      {formatPrice(p.price)}
-                    </span>
-                  </div>
-                </Link>
-              </StaggerItem>
-            ))}
+            {relatedProducts?.map((p) => {
+              const relatedEffectivePrice =
+                p.variants.length > 0
+                  ? (p.variants[0]?.price ?? p.price)
+                  : p.price;
+              const relatedCompareAtPrice =
+                p.variants.length > 0
+                  ? (p.variants[0]?.compareAtPrice ??
+                    p.compareAtPrice ??
+                    null)
+                  : (p.compareAtPrice ?? null);
+              const relatedIsOnSale =
+                relatedCompareAtPrice != null &&
+                relatedCompareAtPrice > 0 &&
+                relatedCompareAtPrice > relatedEffectivePrice;
+              return (
+                <StaggerItem key={p.id}>
+                  <Link
+                    href={`/shop/${p.slug}`}
+                    className="group border-border bg-card flex gap-4 rounded-xl border p-4 transition-shadow hover:shadow-lg"
+                  >
+                    <div className="bg-secondary relative size-24 shrink-0 overflow-hidden rounded-lg">
+                      <Image
+                        src={p.images[0]?.url ?? "/placeholder.svg"}
+                        alt={p.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="96px"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-card-foreground group-hover:text-primary font-heading text-base font-semibold transition-colors">
+                        {p.name}
+                      </h3>
+                      <p className="text-muted-foreground line-clamp-2 text-sm">
+                        {p.description}
+                      </p>
+                      <div className="mt-auto flex items-baseline gap-2">
+                        <span className="text-foreground text-lg font-bold">
+                          {formatPrice(relatedEffectivePrice)}
+                        </span>
+                        {relatedIsOnSale && relatedCompareAtPrice && (
+                          <span className="text-muted-foreground text-sm line-through">
+                            {formatPrice(relatedCompareAtPrice)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                </StaggerItem>
+              );
+            })}
             {relatedProducts?.length === 0 && (
               <div className="col-span-full text-center">
                 <p className="text-muted-foreground">

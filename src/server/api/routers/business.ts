@@ -166,6 +166,7 @@ export const businessRouter = createTRPCRouter({
             name: true,
             slug: true,
             price: true,
+            compareAtPrice: true,
             description: true,
             variants: true,
             images: {

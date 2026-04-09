@@ -152,7 +152,8 @@ export type CartItem = {
   variantId: string | null;
   productName: string;
   variantName: string | null;
-  price: number; // in cents
+  price: number; // in cents (the actual sale/current price)
+  compareAtPrice?: number | null; // in cents (the original price, for strikethrough display)
   quantity: number;
   imageUrl: string | null;
   sku: string | null;
@@ -285,7 +286,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           return currentItems;
         }
 
-        toast.success(`Added to cart`);
+        toast.success(`${newItem.productName} added to cart`);
         setIsOpen(true);
         return [...currentItems, { ...newItem, quantity }];
       });

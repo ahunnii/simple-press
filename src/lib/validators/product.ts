@@ -26,6 +26,7 @@ export const variantSchema = z.object({
   name: z.string().max(255),
   sku: z.string().max(100).optional(),
   price: z.number().nonnegative(),
+  compareAtPrice: z.number().nonnegative().optional(),
   inventoryQty: z.number().int().nonnegative(),
   options: z.record(z.string(), z.string()),
 });
@@ -35,6 +36,7 @@ export const productFormSchema = z.object({
   slug: z.string().max(255),
   description: z.string().max(10000).optional(),
   price: z.number().nonnegative(),
+  compareAtPrice: z.number().nonnegative().optional(),
   published: z.boolean(),
   trackInventory: z.boolean(),
   allowBackorders: z.boolean(),

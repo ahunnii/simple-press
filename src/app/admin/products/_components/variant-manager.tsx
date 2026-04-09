@@ -409,7 +409,7 @@ export function VariantManager({
 
                   {/* <GripVertical className="h-4 w-4 shrink-0 text-gray-400" /> */}
 
-                  <div className="grid flex-1 grid-cols-1 items-center gap-3 md:grid-cols-4">
+                  <div className="grid flex-1 grid-cols-1 items-center gap-3 md:grid-cols-5">
                     <div>
                       <Label className="text-xs text-gray-500">Name</Label>
                       <p className="text-sm font-medium">{variant.name}</p>
@@ -458,6 +458,36 @@ export function VariantManager({
                           )
                         }
                         placeholder={(basePrice / 100).toFixed(2)}
+                        className="h-8"
+                      />
+                    </div>
+
+                    <div>
+                      <Label
+                        htmlFor={`compare-at-price-${index}`}
+                        className="text-xs text-gray-500"
+                      >
+                        Compare At ($)
+                      </Label>
+                      <Input
+                        id={`compare-at-price-${index}`}
+                        type="number"
+                        step="0.01"
+                        value={
+                          variant.compareAtPrice
+                            ? (variant.compareAtPrice / 100).toFixed(2)
+                            : ""
+                        }
+                        onChange={(e) =>
+                          updateVariant(
+                            index,
+                            "compareAtPrice",
+                            e.target.value
+                              ? Math.round(parseFloat(e.target.value) * 100)
+                              : undefined,
+                          )
+                        }
+                        placeholder="Optional"
                         className="h-8"
                       />
                     </div>

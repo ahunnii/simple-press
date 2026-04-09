@@ -103,6 +103,7 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
       slug: product?.slug ?? "",
       description: product?.description ?? undefined,
       price: product?.price ? product.price / 100 : 0, // Convert cents to dollars
+      compareAtPrice: product?.compareAtPrice ? product.compareAtPrice / 100 : undefined,
       published: product?.published ?? false,
       trackInventory: product?.trackInventory ?? false,
       inventoryQty: product?.inventoryQty ?? 0,
@@ -233,6 +234,9 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
   const onSubmit = async (data: ProductFormSchema) => {
     // Convert price to cents
     const priceInCents = Math.round(data.price * 100);
+    const compareAtPriceInCents = data.compareAtPrice
+      ? Math.round(data.compareAtPrice * 100)
+      : undefined;
 
     if (product) {
       // Update existing product
@@ -244,6 +248,7 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
         slug: data.slug,
         description: data.description ?? undefined,
         price: priceInCents,
+        compareAtPrice: compareAtPriceInCents,
         published: data.published,
         trackInventory: data.trackInventory,
         allowBackorders: data.allowBackorders,
@@ -253,6 +258,7 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
           name: v.name,
           sku: v.sku ?? undefined,
           price: v.price ?? priceInCents,
+          compareAtPrice: v.compareAtPrice ?? undefined,
           inventoryQty: v.inventoryQty,
           options: v.options,
         })),
@@ -287,10 +293,12 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
         trackInventory: data.trackInventory,
         allowBackorders: data.allowBackorders,
         inventoryQty: data.inventoryQty ?? 0,
+        compareAtPrice: compareAtPriceInCents,
         variants: variants?.map((v) => ({
           name: v.name,
           sku: v.sku ?? undefined,
           price: v.price ?? priceInCents,
+          compareAtPrice: v.compareAtPrice ?? undefined,
           inventoryQty: v.inventoryQty,
           options: v.options,
         })),
@@ -497,33 +505,63 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
                             section below.
                           </p>
                         ) : (
-                          <FormField
-                            control={form.control}
-                            name="price"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Price (USD)</FormLabel>
-                                <FormControl>
-                                  <div className="relative">
-                                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
-                                      $
-                                    </span>
-                                    <NumberInput
-                                      step="0.01"
-                                      min="0"
-                                      placeholder="19.99"
-                                      className="pl-7"
-                                      {...field}
-                                    />
-                                  </div>
-                                </FormControl>
-                                <FormDescription>
-                                  Base price in USD (variant prices can override
-                                  this)
-                                </FormDescription>
-                              </FormItem>
-                            )}
-                          />
+                          <div className="space-y-4">
+                            <FormField
+                              control={form.control}
+                              name="price"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Price (USD)</FormLabel>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                                        $
+                                      </span>
+                                      <NumberInput
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="19.99"
+                                        className="pl-7"
+                                        {...field}
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormDescription>
+                                    Base price in USD (variant prices can
+                                    override this)
+                                  </FormDescription>
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="compareAtPrice"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Compare At Price (USD)</FormLabel>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                                        $
+                                      </span>
+                                      <NumberInput
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="24.99"
+                                        className="pl-7"
+                                        {...field}
+                                        value={field.value}
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormDescription>
+                                    Original price shown crossed out. Leave
+                                    blank to disable the sale display.
+                                  </FormDescription>
+                                </FormItem>
+                              )}
+                            />
+                          </div>
                         )}
                       </CardContent>
                     </Card>

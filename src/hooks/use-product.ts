@@ -28,6 +28,12 @@ export function useProduct(
       ? selectedVariant.price
       : product.price;
 
+  // Calculate compare-at price for sale display (variant overrides product)
+  const displayCompareAtPrice =
+    selectedVariant?.price != null && selectedVariant.price !== 0
+      ? (selectedVariant.compareAtPrice ?? null)
+      : (product.compareAtPrice ?? null);
+
   // Get current cart quantity for this variant
   const cartQuantity = getItemQuantity(product.id, selectedVariantId);
 
@@ -137,6 +143,10 @@ export function useProduct(
         productName: `${product.name} ${tagline ? `- ${tagline}` : ""}`,
         variantName: selectedVariant?.name ?? null,
         price: displayPrice,
+        compareAtPrice:
+          displayCompareAtPrice && displayCompareAtPrice > displayPrice
+            ? displayCompareAtPrice
+            : null,
         imageUrl: product.images[0]?.url ?? null,
         sku: selectedVariant?.sku ?? null,
         maxInventory, // Pass max for validation
@@ -182,6 +192,7 @@ export function useProduct(
     canAddMore,
     selectedVariant,
     displayPrice,
+    displayCompareAtPrice,
     setQuantity,
     setSelectedVariantId,
   };

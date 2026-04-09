@@ -4,10 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Clock, Eye, ShoppingCart } from "lucide-react";
-import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { formatPrice } from "~/lib/prices";
+import { computeSavingsLabel, formatPrice } from "~/lib/prices";
+import { parseCardAdditionalFields } from "~/lib/products";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
@@ -19,34 +19,25 @@ type Props = {
     name: string;
     description: string;
     price: number;
-    originalPrice: number | null;
+    compareAtPrice: number | null;
     image: string;
     badge: string | null;
     category: string;
     slug: string;
+    hasVariants?: boolean;
     additionalFields?: unknown;
     trackInventory?: boolean | null;
     inventoryQty?: number | null;
     allowBackorders?: boolean | null;
   };
+  saleBadgeFormat?: string;
   index: number;
 };
 
-function parseCardAdditionalFields(raw: unknown): {
-  comingSoon?: boolean;
-  productTagline?: string;
-} {
-  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return {};
-  const obj = raw as Record<string, unknown>;
-  return {
-    comingSoon:
-      typeof obj.comingSoon === "boolean" ? obj.comingSoon : undefined,
-    productTagline:
-      typeof obj.productTagline === "string" ? obj.productTagline : undefined,
-  };
-}
-
-export function HappyBambooProductCard({ product }: Props) {
+export function HappyBambooProductCard({
+  product,
+  saleBadgeFormat = "true",
+}: Props) {
   const { addItem } = useCart();
 
   const { comingSoon, productTagline } = parseCardAdditionalFields(
@@ -60,7 +51,12 @@ export function HappyBambooProductCard({ product }: Props) {
     !!product.trackInventory &&
     !!product.allowBackorders &&
     (product.inventoryQty ?? 0) === 0;
-  const disableCart = !!comingSoon || isOutOfStock;
+  const disableCart = !!comingSoon || isOutOfStock || !!product.hasVariants;
+
+  const isOnSale =
+    product.compareAtPrice != null &&
+    product.compareAtPrice > 0 &&
+    product.compareAtPrice > product.price;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -72,10 +68,10 @@ export function HappyBambooProductCard({ product }: Props) {
       productName: product.name,
       variantName: null,
       price: product.price,
+      compareAtPrice: isOnSale ? product.compareAtPrice : null,
       imageUrl: product.image,
       sku: null,
     });
-    toast.success(`${product.name} added to cart`);
   };
 
   const router = useRouter();
@@ -95,7 +91,16 @@ export function HappyBambooProductCard({ product }: Props) {
               Coming Soon
             </Badge>
           )}
-          {!comingSoon && isOutOfStock && (
+          {!comingSoon && isOnSale && (
+            <Badge className="absolute top-3 left-3 bg-black text-white hover:bg-black/90">
+              {computeSavingsLabel(
+                product.price,
+                product.compareAtPrice!,
+                saleBadgeFormat,
+              )}
+            </Badge>
+          )}
+          {!comingSoon && !isOnSale && isOutOfStock && (
             <Badge
               variant="secondary"
               className="absolute top-3 left-3 bg-black/60 text-white"
@@ -103,7 +108,7 @@ export function HappyBambooProductCard({ product }: Props) {
               Out of Stock
             </Badge>
           )}
-          {!comingSoon && isBackorder && (
+          {!comingSoon && !isOnSale && isBackorder && (
             <Badge className="absolute top-3 left-3 bg-blue-500 text-white hover:bg-blue-600">
               Pre-order
             </Badge>
@@ -125,36 +130,55 @@ export function HappyBambooProductCard({ product }: Props) {
             <span className="text-primary text-xl font-bold">
               {formatPrice(product.price)}
             </span>
+            {isOnSale && (
+              <span className="text-muted-foreground text-sm line-through">
+                {formatPrice(product.compareAtPrice!)}
+              </span>
+            )}
           </div>
         </CardContent>
         <CardFooter className="p-4 pt-0">
-          <Button
-            className="gap-2"
-            onClick={handleAddToCart}
-            disabled={disableCart}
-          >
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            {comingSoon
-              ? "Coming Soon"
-              : isOutOfStock
-                ? "Out of Stock"
-                : "Add to Cart"}
-          </Button>
-
-          <Button
-            onClick={() => router.push(`/shop/${product.slug}`)}
-            className="gap-2"
-          >
-            <Eye className="size-4" />
-            View Product
-          </Button>
+          {product.hasVariants ? (
+            <Button
+              onClick={() => router.push(`/shop/${product.slug}`)}
+              className="gap-2"
+            >
+              <Eye className="size-4" />
+              View Product
+            </Button>
+          ) : (
+            <>
+              <Button
+                className="gap-2"
+                onClick={handleAddToCart}
+                disabled={disableCart}
+              >
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                {comingSoon
+                  ? "Coming Soon"
+                  : isOutOfStock
+                    ? "Out of Stock"
+                    : "Add to Cart"}
+              </Button>
+              <Button
+                onClick={() => router.push(`/shop/${product.slug}`)}
+                className="gap-2"
+              >
+                <Eye className="size-4" />
+                View Product
+              </Button>
+            </>
+          )}
         </CardFooter>
       </Card>
     </Link>
   );
 }
 
-export function HappyBambooHorizontalProductCard({ product }: Props) {
+export function HappyBambooHorizontalProductCard({
+  product,
+  saleBadgeFormat = "true",
+}: Props) {
   const { addItem } = useCart();
 
   const { comingSoon, productTagline } = parseCardAdditionalFields(
@@ -168,7 +192,12 @@ export function HappyBambooHorizontalProductCard({ product }: Props) {
     !!product.trackInventory &&
     !!product.allowBackorders &&
     (product.inventoryQty ?? 0) === 0;
-  const disableCart = !!comingSoon || isOutOfStock;
+  const disableCart = !!comingSoon || isOutOfStock || !!product.hasVariants;
+
+  const isOnSale =
+    product.compareAtPrice != null &&
+    product.compareAtPrice > 0 &&
+    product.compareAtPrice > product.price;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -180,10 +209,10 @@ export function HappyBambooHorizontalProductCard({ product }: Props) {
       productName: product.name,
       variantName: null,
       price: product.price,
+      compareAtPrice: isOnSale ? product.compareAtPrice : null,
       imageUrl: product.image,
       sku: null,
     });
-    toast.success(`${product.name} added to cart`);
   };
 
   const productHref = `/shop/${product.slug}`;
@@ -194,7 +223,7 @@ export function HappyBambooHorizontalProductCard({ product }: Props) {
         {/* Image */}
         <Link
           href={productHref}
-          className="bg-secondary relative aspect-5/3 w-full shrink-0 overflow-hidden rounded-t-xl sm:aspect-auto sm:min-h-[160px] sm:w-44 sm:rounded-t-none sm:rounded-l-xl md:w-52"
+          className="bg-secondary relative aspect-5/3 w-full flex-none shrink-0 overflow-hidden rounded-t-xl sm:aspect-auto sm:min-h-[160px] sm:w-44 sm:rounded-t-none sm:rounded-l-xl md:w-52 md:flex-1"
           aria-label={`View ${product.name}`}
           tabIndex={-1}
         >
@@ -211,7 +240,16 @@ export function HappyBambooHorizontalProductCard({ product }: Props) {
               Coming Soon
             </Badge>
           )}
-          {!comingSoon && isOutOfStock && (
+          {!comingSoon && isOnSale && (
+            <Badge className="absolute top-2 left-2 bg-black text-white hover:bg-black/90">
+              {computeSavingsLabel(
+                product.price,
+                product.compareAtPrice!,
+                saleBadgeFormat,
+              )}
+            </Badge>
+          )}
+          {!comingSoon && !isOnSale && isOutOfStock && (
             <Badge
               variant="secondary"
               className="absolute top-2 left-2 bg-black/60 text-white"
@@ -219,7 +257,7 @@ export function HappyBambooHorizontalProductCard({ product }: Props) {
               Out of Stock
             </Badge>
           )}
-          {!comingSoon && isBackorder && (
+          {!comingSoon && !isOnSale && isBackorder && (
             <Badge className="absolute top-2 left-2 bg-blue-500 text-white hover:bg-blue-600">
               Pre-order
             </Badge>
@@ -248,25 +286,34 @@ export function HappyBambooHorizontalProductCard({ product }: Props) {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-            <p className="text-primary text-lg font-bold tabular-nums">
-              {formatPrice(product.price)}
-            </p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-primary text-lg font-bold tabular-nums">
+                {formatPrice(product.price)}
+              </p>
+              {isOnSale && (
+                <p className="text-muted-foreground text-sm tabular-nums line-through">
+                  {formatPrice(product.compareAtPrice!)}
+                </p>
+              )}
+            </div>
             <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                size="sm"
-                className="gap-1.5"
-                onClick={handleAddToCart}
-                disabled={disableCart}
-                aria-label={`Add ${product.name} to cart`}
-              >
-                <ShoppingCart className="h-4 w-4 shrink-0" />
-                {comingSoon
-                  ? "Coming Soon"
-                  : isOutOfStock
-                    ? "Out of Stock"
-                    : "Add to cart"}
-              </Button>
+              {!product.hasVariants && (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleAddToCart}
+                  disabled={disableCart}
+                  aria-label={`Add ${product.name} to cart`}
+                >
+                  <ShoppingCart className="h-4 w-4 shrink-0" />
+                  {comingSoon
+                    ? "Coming Soon"
+                    : isOutOfStock
+                      ? "Out of Stock"
+                      : "Add to cart"}
+                </Button>
+              )}
               <Button variant="outline" size="sm" className="gap-1.5" asChild>
                 <Link href={productHref}>
                   <Eye className="size-4 shrink-0" aria-hidden />
@@ -284,10 +331,12 @@ export function HappyBambooHorizontalProductCard({ product }: Props) {
 
 export function HappyBambooFeaturedProductCard({
   product,
+  saleBadgeFormat = "true",
 }: {
   product: NonNullable<
     NonNullable<RouterOutputs["business"]["getHomepage"]>["products"]
   >[number];
+  saleBadgeFormat?: string;
 }) {
   const { addItem } = useCart();
 
@@ -302,7 +351,19 @@ export function HappyBambooFeaturedProductCard({
     !!product.trackInventory &&
     !!product.allowBackorders &&
     (product.inventoryQty ?? 0) === 0;
-  const disableCart = !!comingSoon || isOutOfStock;
+  const hasVariants = product.variants.length > 0;
+  const disableCart = !!comingSoon || isOutOfStock || hasVariants;
+
+  const effectivePrice = hasVariants
+    ? (product.variants[0]?.price ?? product.price)
+    : product.price;
+  const effectiveCompareAtPrice = hasVariants
+    ? (product.variants[0]?.compareAtPrice ?? product.compareAtPrice ?? null)
+    : (product.compareAtPrice ?? null);
+  const isOnSale =
+    effectiveCompareAtPrice != null &&
+    effectiveCompareAtPrice > 0 &&
+    effectiveCompareAtPrice > effectivePrice;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -313,11 +374,11 @@ export function HappyBambooFeaturedProductCard({
       variantId: null,
       productName: product.name,
       variantName: null,
-      price: product.price,
+      price: effectivePrice,
+      compareAtPrice: isOnSale ? effectiveCompareAtPrice : null,
       imageUrl: product.images[0]?.url ?? "/placeholder.svg",
       sku: null,
     });
-    toast.success(`${product.name} added to cart`);
   };
 
   const productHref = `/shop/${product.slug}`;
@@ -328,7 +389,7 @@ export function HappyBambooFeaturedProductCard({
         {/* Image */}
         <Link
           href={productHref}
-          className="bg-secondary relative aspect-5/3 w-full shrink-0 overflow-hidden rounded-t-xl sm:aspect-auto sm:min-h-[160px] sm:w-44 sm:rounded-t-none sm:rounded-l-xl md:w-52"
+          className="bg-secondary relative aspect-5/3 w-full flex-none shrink-0 overflow-hidden rounded-t-xl sm:aspect-auto sm:min-h-[160px] sm:w-44 sm:rounded-t-none sm:rounded-l-xl md:w-52 md:flex-1"
           aria-label={`View ${product.name}`}
           tabIndex={-1}
         >
@@ -345,7 +406,16 @@ export function HappyBambooFeaturedProductCard({
               Coming Soon
             </Badge>
           )}
-          {!comingSoon && isOutOfStock && (
+          {!comingSoon && isOnSale && effectiveCompareAtPrice && (
+            <Badge className="absolute top-2 left-2 bg-black text-white hover:bg-black/90">
+              {computeSavingsLabel(
+                effectivePrice,
+                effectiveCompareAtPrice,
+                saleBadgeFormat,
+              )}
+            </Badge>
+          )}
+          {!comingSoon && !isOnSale && isOutOfStock && (
             <Badge
               variant="secondary"
               className="absolute top-2 left-2 bg-black/60 text-white"
@@ -353,7 +423,7 @@ export function HappyBambooFeaturedProductCard({
               Out of Stock
             </Badge>
           )}
-          {!comingSoon && isBackorder && (
+          {!comingSoon && !isOnSale && isBackorder && (
             <Badge className="absolute top-2 left-2 bg-blue-500 text-white hover:bg-blue-600">
               Pre-order
             </Badge>
@@ -382,25 +452,34 @@ export function HappyBambooFeaturedProductCard({
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-            <p className="text-primary text-lg font-bold tabular-nums">
-              {formatPrice(product.price)}
-            </p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-primary text-lg font-bold tabular-nums">
+                {formatPrice(effectivePrice)}
+              </p>
+              {isOnSale && effectiveCompareAtPrice && (
+                <p className="text-muted-foreground text-sm tabular-nums line-through">
+                  {formatPrice(effectiveCompareAtPrice)}
+                </p>
+              )}
+            </div>
             <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                size="sm"
-                className="gap-1.5"
-                onClick={handleAddToCart}
-                disabled={disableCart}
-                aria-label={`Add ${product.name} to cart`}
-              >
-                <ShoppingCart className="h-4 w-4 shrink-0" />
-                {comingSoon
-                  ? "Coming Soon"
-                  : isOutOfStock
-                    ? "Out of Stock"
-                    : "Add to cart"}
-              </Button>
+              {!hasVariants && (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleAddToCart}
+                  disabled={disableCart}
+                  aria-label={`Add ${product.name} to cart`}
+                >
+                  <ShoppingCart className="h-4 w-4 shrink-0" />
+                  {comingSoon
+                    ? "Coming Soon"
+                    : isOutOfStock
+                      ? "Out of Stock"
+                      : "Add to cart"}
+                </Button>
+              )}
               <Button variant="outline" size="sm" className="gap-1.5" asChild>
                 <Link href={productHref}>
                   <Eye className="size-4 shrink-0" aria-hidden />

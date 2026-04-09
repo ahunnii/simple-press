@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Leaf, Package } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { resolveFields } from "../index";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
@@ -18,14 +19,20 @@ import {
 import { HappyBambooProductCard } from "../products/happy-bamboo-product-card";
 
 export function HappyBambooCollectionPage({
+  business,
   collection,
   additionalCollections,
 }: {
+  business: { siteContent?: { customFields?: unknown } | null };
   collection: NonNullable<RouterOutputs["collections"]["getBySlug"]>;
   additionalCollections: NonNullable<
     RouterOutputs["collections"]["getAllPublic"]
   >;
 }) {
+  const fields = resolveFields(business.siteContent?.customFields, [
+    "happy-bamboo.sale-badge-format",
+  ]);
+  const saleBadgeFormat = fields["happy-bamboo.sale-badge-format"] ?? "true";
   const products = collection?.collectionProducts;
   const otherCollections = additionalCollections
     ?.filter((c) => c.slug !== collection.slug)
@@ -100,11 +107,18 @@ export function HappyBambooCollectionPage({
               {products.map((product, index) => (
                 <StaggerItem key={product.id}>
                   <HappyBambooProductCard
+                    saleBadgeFormat={saleBadgeFormat}
                     product={{
                       ...product.product,
                       image:
                         product.product.images[0]?.url ?? "/placeholder.svg",
-                      originalPrice: null,
+                      compareAtPrice:
+                        product.product.variants.length > 0
+                          ? (product.product.variants[0]?.compareAtPrice ??
+                            product.product.compareAtPrice ??
+                            null)
+                          : (product.product.compareAtPrice ?? null),
+                      hasVariants: product.product.variants.length > 0,
                       badge: null,
                       category: "",
                       slug: product.product.slug ?? "",

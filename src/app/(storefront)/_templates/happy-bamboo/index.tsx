@@ -838,6 +838,17 @@ const collectionsCtaData: TemplateField[] = [
 
 const shopListingData: TemplateField[] = [
   {
+    key: "happy-bamboo.sale-badge-format",
+    label: "Show savings as percentage",
+    description:
+      "When enabled, sale badges show the percentage saved (e.g. 'Save 20%'). When disabled, they show the dollar amount saved (e.g. 'Save $5.00').",
+    type: "boolean",
+    page: "shop",
+    group: "shop.listing",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
+  {
     key: "happy-bamboo.shop-listing-heading",
     label: "Shop Page Heading",
     description: "Main heading shown at the top of the shop page",

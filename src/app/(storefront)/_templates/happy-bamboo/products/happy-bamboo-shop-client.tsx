@@ -31,14 +31,23 @@ function getEffectivePrice(product: Product): number {
     : product.price;
 }
 
+function getEffectiveCompareAtPrice(product: Product): number | null {
+  if (product.variants.length > 0) {
+    return product.variants[0]?.compareAtPrice ?? product.compareAtPrice ?? null;
+  }
+  return product.compareAtPrice ?? null;
+}
+
 interface Props {
   products: Product[];
+  saleBadgeFormat: string;
   shopHeading: string;
   shopIntro: string;
 }
 
 export function HappyBambooShopClient({
   products,
+  saleBadgeFormat,
   shopHeading,
   shopIntro,
 }: Props) {
@@ -199,12 +208,14 @@ export function HappyBambooShopClient({
             <HappyBambooHorizontalProductCard
               key={product.id}
               index={index}
+              saleBadgeFormat={saleBadgeFormat}
               product={{
                 id: product.id,
                 name: product.name,
                 description: product.description ?? "No description available",
                 price: getEffectivePrice(product),
-                originalPrice: null,
+                compareAtPrice: getEffectiveCompareAtPrice(product),
+                hasVariants: product.variants.length > 0,
                 image: product.images[0]?.url ?? "/placeholder.svg",
                 badge: null,
                 category: "",
