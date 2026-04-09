@@ -4,6 +4,7 @@ import type { Customer } from "generated/prisma";
 import Link from "next/link";
 import { Eye } from "lucide-react";
 
+import { formatPrice } from "~/lib/prices";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -13,12 +14,6 @@ type Props = {
 };
 
 export function CustomersTable({ customers }: Props) {
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-
   const formatDate = (date: Date) =>
     new Intl.DateTimeFormat("en-US", {
       month: "short",
@@ -76,7 +71,7 @@ export function CustomersTable({ customers }: Props) {
                     {customer.orderCount}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {formatCurrency(customer.totalSpent)}
+                    {formatPrice(customer.totalSpent)}
                   </td>
                   <td className="px-6 py-4">
                     <Badge
