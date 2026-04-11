@@ -73,6 +73,20 @@ export const inviteLimiter = makeLazy({
   keyPrefix: "rl:invite",
 });
 
+// 5 attempts per 15 minutes per IP — for testimonial invite submissions
+export const testimonialSubmitLimiter = makeLazy({
+  points: 5,
+  duration: 900,
+  keyPrefix: "rl:testimonial-submit",
+});
+
+// 10 attempts per minute per IP — for review votes
+export const reviewVoteLimiter = makeLazy({
+  points: 10,
+  duration: 60,
+  keyPrefix: "rl:review-vote",
+});
+
 /**
  * Extracts a best-effort client IP from Next.js request headers.
  * Falls back to a generic key so rate limiting always applies.
@@ -81,6 +95,18 @@ export function getClientIp(req: Request): string {
   return (
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     req.headers.get("x-real-ip") ??
+    "unknown"
+  );
+}
+
+/**
+ * Same as getClientIp but accepts a Headers object directly.
+ * Use this in tRPC procedures where ctx.headers is Headers, not Request.
+ */
+export function getClientIpFromHeaders(headers: Headers): string {
+  return (
+    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    headers.get("x-real-ip") ??
     "unknown"
   );
 }

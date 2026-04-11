@@ -29,7 +29,7 @@ export const env = createEnv({
     INVITATION_CODE: z.string(),
     RESEND_API_KEY: z.string(),
 
-    SLACK_WEBHOOK_URL: z.string().url(),
+    DISCORD_WEBHOOK_URL: z.string().url(),
     VPS_IP: z.string(),
 
     HCAPTCHA_SECRET_KEY: z.string(),
@@ -98,7 +98,7 @@ export const env = createEnv({
     NEXT_PUBLIC_EMAIL_FROM_NOREPLY: process.env.NEXT_PUBLIC_EMAIL_FROM_NOREPLY,
     NEXT_PUBLIC_EMAIL_FROM_ORDERS: process.env.NEXT_PUBLIC_EMAIL_FROM_ORDERS,
     NEXT_PUBLIC_EMAIL_FROM_SUPPORT: process.env.NEXT_PUBLIC_EMAIL_FROM_SUPPORT,
-    SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
+    DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
     VPS_IP: process.env.VPS_IP,
     NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
     NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL:

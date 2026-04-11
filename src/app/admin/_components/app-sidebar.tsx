@@ -19,7 +19,7 @@ import {
   IconTerminal,
   IconUsers,
 } from "@tabler/icons-react";
-import { Building2, Users } from "lucide-react";
+import { Building2, Globe, Users } from "lucide-react";
 
 import type { Session } from "~/server/better-auth/config";
 import { env } from "~/env";
@@ -123,6 +123,11 @@ const getNavData = (session: Session | null) => {
             title: "Platform Businesses",
             url: "/admin/platform/businesses",
             icon: Building2,
+          },
+          {
+            title: "Platform Domains",
+            url: "/admin/platform/domains",
+            icon: Globe,
           },
         ]
       : [];

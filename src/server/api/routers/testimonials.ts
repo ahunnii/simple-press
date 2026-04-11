@@ -7,6 +7,10 @@ import { env } from "~/env";
 import { verifyHCaptcha } from "~/lib/captcha/verify-hcaptcha";
 import { checkBusiness } from "~/lib/check-business";
 import { sendTestimonialInviteEmail } from "~/lib/email/templates";
+import {
+  getClientIpFromHeaders,
+  testimonialSubmitLimiter,
+} from "~/lib/rate-limit";
 
 import {
   createTRPCRouter,
@@ -208,6 +212,16 @@ export const testimonialRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const ip = getClientIpFromHeaders(ctx.headers);
+      try {
+        await testimonialSubmitLimiter.consume(ip);
+      } catch {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many submissions. Please try again later.",
+        });
+      }
+
       const isValid = await verifyHCaptcha(input.captchaToken);
       if (!isValid) {
         throw new TRPCError({

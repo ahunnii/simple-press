@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Check, Copy, ExternalLink, Globe, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { env } from "~/env";
 import { isValidDomain } from "~/lib/utils";
+import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -19,90 +21,61 @@ type Business = {
 
 type DomainSetupProps = {
   business: Business;
+  vpsIp: string;
 };
 
-export function DomainSetup({ business }: DomainSetupProps) {
+export function DomainSetup({ business, vpsIp }: DomainSetupProps) {
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(!business.customDomain);
   const [domain, setDomain] = useState(business.customDomain ?? "");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const subdomainUrl = `${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
-  const vpsIp = process.env.NEXT_PUBLIC_VPS_IP ?? "127.0.0.1";
 
-  const handleSubmit = async () => {
+  const addDomainMutation = api.domain.add.useMutation({
+    onSuccess: () => {
+      router.refresh();
+      setIsEditing(false);
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err.message ?? "Failed to add domain");
+    },
+  });
+
+  const verifyDomainMutation = api.domain.verify.useMutation({
+    onSuccess: (data) => {
+      if (data.verified) {
+        router.refresh();
+      } else {
+        setError(
+          data.message ??
+            "DNS not configured correctly yet. Please wait a few minutes and try again.",
+        );
+      }
+    },
+    onError: (err) => {
+      setError(err.message ?? "Failed to verify domain");
+    },
+  });
+
+  const handleSubmit = () => {
     setError(null);
-
     if (!isValidDomain(domain)) {
       setError("Please enter a valid domain (e.g., example.com)");
       return;
     }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch("/api/domain/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain }),
-      });
-
-      if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
-        throw new Error(data.error ?? "Failed to add domain");
-      }
-
-      setIsEditing(false);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to add domain");
-    } finally {
-      setIsSubmitting(false);
-    }
+    addDomainMutation.mutate(domain.trim().toLowerCase());
   };
 
-  const handleVerify = async () => {
-    setIsVerifying(true);
+  const handleVerify = () => {
     setError(null);
-
-    try {
-      const response = await fetch("/api/domain/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain: business.customDomain }),
-      });
-
-      const data = (await response.json()) as {
-        error?: string;
-        verified?: boolean;
-        message?: string;
-      };
-
-      if (!response.ok) {
-        throw new Error(data.error ?? "Failed to verify domain");
-      }
-
-      if (data.verified) {
-        // Refresh the page to show updated status
-        window.location.reload();
-      } else {
-        setError(
-          "DNS not configured correctly yet. Please wait a few minutes and try again.",
-        );
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to verify domain");
-    } finally {
-      setIsVerifying(false);
-    }
+    if (!business.customDomain) return;
+    verifyDomainMutation.mutate(business.customDomain);
   };
-
-  // const copyToClipboard = (text: string) => {
-  //   void navigator.clipboard.writeText(text);
-  // };
 
   // Already has active custom domain
-  if (business.customDomain && business.domainStatus === "active") {
+  if (business.customDomain && business.domainStatus === "ACTIVE") {
     return (
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-green-600">
@@ -123,7 +96,7 @@ export function DomainSetup({ business }: DomainSetupProps) {
   }
 
   // Has custom domain but DNS pending
-  if (business.customDomain && business.domainStatus === "pending_dns") {
+  if (business.customDomain && business.domainStatus === "PENDING_DNS") {
     return (
       <div className="space-y-4">
         <Alert>
@@ -134,14 +107,20 @@ export function DomainSetup({ business }: DomainSetupProps) {
           </AlertDescription>
         </Alert>
 
-        <DNSInstructions domain={business.customDomain} vpsIp={vpsIp} />
+        <DNSInstructions vpsIp={vpsIp} />
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <Button
           onClick={handleVerify}
-          disabled={isVerifying}
+          disabled={verifyDomainMutation.isPending}
           className="w-full"
         >
-          {isVerifying ? (
+          {verifyDomainMutation.isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Checking DNS...
@@ -153,12 +132,6 @@ export function DomainSetup({ business }: DomainSetupProps) {
             </>
           )}
         </Button>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
       </div>
     );
   }
@@ -189,8 +162,11 @@ export function DomainSetup({ business }: DomainSetupProps) {
         )}
 
         <div className="flex gap-2">
-          <Button onClick={handleSubmit} disabled={isSubmitting || !domain}>
-            {isSubmitting ? (
+          <Button
+            onClick={handleSubmit}
+            disabled={addDomainMutation.isPending || !domain}
+          >
+            {addDomainMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Adding...
@@ -232,7 +208,7 @@ export function DomainSetup({ business }: DomainSetupProps) {
   );
 }
 
-function DNSInstructions({ vpsIp }: { domain: string; vpsIp: string }) {
+function DNSInstructions({ vpsIp }: { vpsIp: string }) {
   const copyToClipboard = (text: string) => {
     void navigator.clipboard.writeText(text);
   };
@@ -247,7 +223,12 @@ function DNSInstructions({ vpsIp }: { domain: string; vpsIp: string }) {
 
       <div className="space-y-2">
         <DNSRecord type="A" name="@" value={vpsIp} onCopy={copyToClipboard} />
-        <DNSRecord type="A" name="www" value={vpsIp} onCopy={copyToClipboard} />
+        <DNSRecord
+          type="A"
+          name="www"
+          value={vpsIp}
+          onCopy={copyToClipboard}
+        />
       </div>
 
       <p className="mt-3 text-xs text-gray-500">

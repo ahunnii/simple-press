@@ -3,7 +3,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { env } from "~/env";
-import { notifySlackNewDomain } from "~/lib/slack/notification";
+import {
+  notifyDiscordDomainRemoved,
+  notifyDiscordNewDomain,
+} from "~/lib/discord/notification";
 import { isValidDomain } from "~/lib/utils";
 import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
 
@@ -35,6 +38,23 @@ export const domainRouter = createTRPCRouter({
         });
       }
 
+      // Fetch business details for notification
+      const business = await ctx.db.business.findUnique({
+        where: { id: businessId },
+        select: {
+          name: true,
+          subdomain: true,
+          ownerEmail: true,
+        },
+      });
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       // Update business with custom domain
       await ctx.db.business.update({
         where: { id: businessId },
@@ -53,12 +73,18 @@ export const domainRouter = createTRPCRouter({
         },
       });
 
-      // Message to slack notifying of new domain to add to Coolify (NEED TO ADD AUTOMATIC PROCESSING TO ADD TO COOLIFY)
+      // Notify Discord with full business context
       try {
-        await notifySlackNewDomain(domain, businessId);
+        await notifyDiscordNewDomain({
+          domain,
+          businessName: business.name,
+          businessId,
+          subdomain: business.subdomain,
+          ownerEmail: business.ownerEmail,
+        });
       } catch (err) {
         Sentry.captureException(err, {
-          tags: { service: "slack", "trpc.procedure": "domain.add" },
+          tags: { service: "discord", "trpc.procedure": "domain.add" },
         });
       }
 
@@ -74,7 +100,6 @@ export const domainRouter = createTRPCRouter({
     .mutation(async ({ ctx, input: domain }) => {
       const { businessId } = ctx;
 
-      // Check DNS records
       const vpsIp = env.VPS_IP;
 
       if (!vpsIp) {
@@ -84,7 +109,6 @@ export const domainRouter = createTRPCRouter({
         });
       }
 
-      // Use DNS lookup to check if domain points to our VPS
       const dns = await import("dns").then((m) => m.promises);
 
       try {
@@ -92,19 +116,13 @@ export const domainRouter = createTRPCRouter({
         const pointsToUs = addresses.includes(vpsIp);
 
         if (pointsToUs) {
-          // DNS is configured correctly!
-          // Update business status
           await ctx.db.business.update({
             where: { id: businessId },
             data: { domainStatus: "ACTIVE" },
           });
 
-          // Update domain queue
           await ctx.db.domainQueue.updateMany({
-            where: {
-              domain,
-              businessId,
-            },
+            where: { domain, businessId },
             data: { status: "completed" },
           });
 
@@ -119,7 +137,6 @@ export const domainRouter = createTRPCRouter({
           };
         }
       } catch (dnsError: unknown) {
-        // DNS lookup failed - domain not configured yet
         console.error("DNS lookup failed:", dnsError);
         return {
           verified: false,
@@ -127,4 +144,66 @@ export const domainRouter = createTRPCRouter({
         };
       }
     }),
+
+  remove: ownerAdminProcedure.mutation(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    const business = await ctx.db.business.findUnique({
+      where: { id: businessId },
+      select: {
+        name: true,
+        subdomain: true,
+        ownerEmail: true,
+        customDomain: true,
+      },
+    });
+
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
+    if (!business.customDomain) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "No custom domain is configured",
+      });
+    }
+
+    const removedDomain = business.customDomain;
+
+    // Clear the domain and reset status
+    await ctx.db.business.update({
+      where: { id: businessId },
+      data: {
+        customDomain: null,
+        domainStatus: "NONE",
+      },
+    });
+
+    // Mark the queue entry as failed (domain released)
+    await ctx.db.domainQueue.updateMany({
+      where: { domain: removedDomain, businessId },
+      data: { status: "failed" },
+    });
+
+    // Notify Discord so admin knows to remove it from Coolify
+    try {
+      await notifyDiscordDomainRemoved({
+        domain: removedDomain,
+        businessName: business.name,
+        businessId,
+        subdomain: business.subdomain,
+        ownerEmail: business.ownerEmail,
+      });
+    } catch (err) {
+      Sentry.captureException(err, {
+        tags: { service: "discord", "trpc.procedure": "domain.remove" },
+      });
+    }
+
+    return { success: true };
+  }),
 });

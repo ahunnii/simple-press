@@ -3,6 +3,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import {
+  getClientIpFromHeaders,
+  reviewVoteLimiter,
+} from "~/lib/rate-limit";
 
 import {
   createTRPCRouter,
@@ -168,11 +172,19 @@ export const reviewRouter = createTRPCRouter({
       z.object({
         reviewId: z.string(),
         isHelpful: z.boolean(),
-        userId: z.string().optional(),
-        ipAddress: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const ip = getClientIpFromHeaders(ctx.headers);
+      try {
+        await reviewVoteLimiter.consume(ip);
+      } catch {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many votes. Please try again later.",
+        });
+      }
+
       const business = await checkBusiness();
       if (!business) {
         throw new TRPCError({
@@ -181,20 +193,15 @@ export const reviewRouter = createTRPCRouter({
         });
       }
 
-      if (!input.userId && !input.ipAddress) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "userId or ipAddress required",
-        });
-      }
+      const userId = ctx.session?.user.id ?? null;
 
       const existing = await ctx.db.reviewVote.findFirst({
         where: {
           reviewId: input.reviewId,
           review: { product: { businessId: business.id } },
           OR: [
-            ...(input.userId ? [{ userId: input.userId }] : []),
-            ...(input.ipAddress ? [{ ipAddress: input.ipAddress }] : []),
+            ...(userId ? [{ userId }] : []),
+            { ipAddress: ip },
           ],
         },
       });
@@ -214,8 +221,8 @@ export const reviewRouter = createTRPCRouter({
         data: {
           reviewId: input.reviewId,
           isHelpful: input.isHelpful,
-          userId: input.userId,
-          ipAddress: input.ipAddress,
+          userId,
+          ipAddress: ip,
         },
       });
       await updateVoteCounts(ctx.db, input.reviewId);

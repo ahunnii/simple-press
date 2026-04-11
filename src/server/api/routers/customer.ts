@@ -119,42 +119,42 @@ export const customerRouter = createTRPCRouter({
   }),
 
   // Get orders by email (for guest checkout that later signs in)
-  getOrdersByEmail: publicProcedure
-    .input(z.object({ email: z.string().email() }))
-    .query(async ({ ctx, input }) => {
-      // This is a public endpoint but requires knowing the exact email
-      // Used for "check order status" type features
+  // getOrdersByEmail: publicProcedure
+  //   .input(z.object({ email: z.string().email() }))
+  //   .query(async ({ ctx, input }) => {
+  //     // This is a public endpoint but requires knowing the exact email
+  //     // Used for "check order status" type features
 
-      // Get the current business from the domain
-      const business = await checkBusiness();
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+  //     // Get the current business from the domain
+  //     const business = await checkBusiness();
+  //     if (!business) {
+  //       throw new TRPCError({
+  //         code: "NOT_FOUND",
+  //         message: "Business not found",
+  //       });
+  //     }
 
-      const orders = await ctx.db.order.findMany({
-        where: {
-          customerEmail: input.email.toLowerCase(),
-          businessId: business.id,
-        },
-        include: {
-          items: true,
-          shippingAddress: {
-            select: {
-              city: true,
-              province: true,
-              zip: true,
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-        take: 10, // Limit to last 10 orders
-      });
+  //     const orders = await ctx.db.order.findMany({
+  //       where: {
+  //         customerEmail: input.email.toLowerCase(),
+  //         businessId: business.id,
+  //       },
+  //       include: {
+  //         items: true,
+  //         shippingAddress: {
+  //           select: {
+  //             city: true,
+  //             province: true,
+  //             zip: true,
+  //           },
+  //         },
+  //       },
+  //       orderBy: { createdAt: "desc" },
+  //       take: 10, // Limit to last 10 orders
+  //     });
 
-      return orders;
-    }),
+  //     return orders;
+  //   }),
 
   // Link customer account to authenticated user (Need to rethink)
   // linkToUser: protectedProcedure.mutation(async ({ ctx }) => {
@@ -201,7 +201,10 @@ export const customerRouter = createTRPCRouter({
       const user = ctx.session.user;
       const business = await checkBusiness();
       if (!business) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
       }
       const customer = await ctx.db.customer.findFirst({
         where: { userId: user.id, businessId: business.id },
@@ -233,12 +236,17 @@ export const customerRouter = createTRPCRouter({
       const user = ctx.session.user;
       const business = await checkBusiness();
       if (!business) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
       }
 
       // Upsert customer if they haven't ordered before
       const customer = await ctx.db.customer.upsert({
-        where: { businessId_email: { businessId: business.id, email: user.email } },
+        where: {
+          businessId_email: { businessId: business.id, email: user.email },
+        },
         create: {
           email: user.email,
           firstName: user.name?.split(" ")[0] ?? "",
@@ -295,7 +303,10 @@ export const customerRouter = createTRPCRouter({
       const user = ctx.session.user;
       const business = await checkBusiness();
       if (!business) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
       }
 
       const address = await ctx.db.shippingAddress.findFirst({
@@ -303,8 +314,15 @@ export const customerRouter = createTRPCRouter({
         include: { customer: true },
       });
 
-      if (!address || address.customer.userId !== user.id || address.customer.businessId !== business.id) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Address not found" });
+      if (
+        !address ||
+        address.customer.userId !== user.id ||
+        address.customer.businessId !== business.id
+      ) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Address not found",
+        });
       }
 
       if (input.isDefault) {
@@ -327,7 +345,10 @@ export const customerRouter = createTRPCRouter({
       const user = ctx.session.user;
       const business = await checkBusiness();
       if (!business) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
       }
 
       const address = await ctx.db.shippingAddress.findFirst({
@@ -335,8 +356,15 @@ export const customerRouter = createTRPCRouter({
         include: { customer: true },
       });
 
-      if (!address || address.customer.userId !== user.id || address.customer.businessId !== business.id) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Address not found" });
+      if (
+        !address ||
+        address.customer.userId !== user.id ||
+        address.customer.businessId !== business.id
+      ) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Address not found",
+        });
       }
 
       await ctx.db.shippingAddress.delete({ where: { id: input.id } });
@@ -349,7 +377,10 @@ export const customerRouter = createTRPCRouter({
       const user = ctx.session.user;
       const business = await checkBusiness();
       if (!business) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
       }
 
       const address = await ctx.db.shippingAddress.findFirst({
@@ -357,8 +388,15 @@ export const customerRouter = createTRPCRouter({
         include: { customer: true },
       });
 
-      if (!address || address.customer.userId !== user.id || address.customer.businessId !== business.id) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Address not found" });
+      if (
+        !address ||
+        address.customer.userId !== user.id ||
+        address.customer.businessId !== business.id
+      ) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Address not found",
+        });
       }
 
       await ctx.db.$transaction([

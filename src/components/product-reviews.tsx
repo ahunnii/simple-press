@@ -206,11 +206,9 @@ function ReviewCard({
   });
 
   const handleVote = (isHelpful: boolean) => {
-    // In production, pass userId if authenticated or ipAddress
     voteMutation.mutate({
       reviewId: review.id,
       isHelpful,
-      ipAddress: "placeholder", // Get from request in production
     });
   };
 

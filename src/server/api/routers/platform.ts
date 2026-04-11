@@ -402,4 +402,85 @@ export const platformRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  // Domain Management
+  listDomainQueue: platformAdminProcedure.query(async ({ ctx }) => {
+    const entries = await ctx.db.domainQueue.findMany({
+      where: {
+        status: { in: ["pending", "processing", "failed"] },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    const businessIds = [...new Set(entries.map((e) => e.businessId))];
+
+    const businesses = await ctx.db.business.findMany({
+      where: { id: { in: businessIds } },
+      select: {
+        id: true,
+        name: true,
+        subdomain: true,
+        ownerEmail: true,
+        customDomain: true,
+        domainStatus: true,
+      },
+    });
+
+    const businessMap = Object.fromEntries(businesses.map((b) => [b.id, b]));
+
+    return entries.map((entry) => ({
+      ...entry,
+      business: businessMap[entry.businessId] ?? null,
+    }));
+  }),
+
+  updateDomainStatus: platformAdminProcedure
+    .input(
+      z.object({
+        businessId: z.string(),
+        domainStatus: z.enum(["ACTIVE", "PENDING_DNS", "NONE"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const business = await ctx.db.business.findUnique({
+        where: { id: input.businessId },
+        select: { id: true, customDomain: true },
+      });
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      if (input.domainStatus === "NONE") {
+        // Remove the domain entirely
+        await ctx.db.business.update({
+          where: { id: input.businessId },
+          data: { customDomain: null, domainStatus: "NONE" },
+        });
+
+        if (business.customDomain) {
+          await ctx.db.domainQueue.updateMany({
+            where: { businessId: input.businessId, domain: business.customDomain },
+            data: { status: "failed" },
+          });
+        }
+      } else {
+        await ctx.db.business.update({
+          where: { id: input.businessId },
+          data: { domainStatus: input.domainStatus },
+        });
+
+        if (input.domainStatus === "ACTIVE" && business.customDomain) {
+          await ctx.db.domainQueue.updateMany({
+            where: { businessId: input.businessId, domain: business.customDomain },
+            data: { status: "completed" },
+          });
+        }
+      }
+
+      return { success: true };
+    }),
 });

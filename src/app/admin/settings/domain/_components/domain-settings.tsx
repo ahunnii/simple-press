@@ -10,12 +10,23 @@ import {
   ExternalLink,
   Globe,
   Loader2,
+  Trash2,
   XCircle,
 } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -31,9 +42,10 @@ import { Label } from "~/components/ui/label";
 
 type DomainSettingsProps = {
   business: NonNullable<RouterOutputs["business"]["getWith"]>;
+  vpsIp: string;
 };
 
-export function DomainSettings({ business }: DomainSettingsProps) {
+export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
   const router = useRouter();
   const [isAdding, setIsAdding] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -50,14 +62,14 @@ export function DomainSettings({ business }: DomainSettingsProps) {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "active":
+      case "ACTIVE":
         return (
           <Badge variant="default" className="gap-1">
             <CheckCircle className="h-3 w-3" />
             Active
           </Badge>
         );
-      case "pending_dns":
+      case "PENDING_DNS":
         return (
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
@@ -89,9 +101,13 @@ export function DomainSettings({ business }: DomainSettingsProps) {
   });
 
   const verifyDomainMutation = api.domain.verify.useMutation({
-    onSuccess: () => {
-      router.refresh();
-      setSuccess("Domain verified successfully!");
+    onSuccess: (data) => {
+      if (data.verified) {
+        router.refresh();
+        setSuccess("Domain verified successfully!");
+      } else {
+        setError(data.message ?? "Domain not yet pointing to our server.");
+      }
     },
     onError: (error) => {
       setError(error.message ?? "Failed to verify domain");
@@ -101,75 +117,39 @@ export function DomainSettings({ business }: DomainSettingsProps) {
     },
   });
 
-  const handleAddDomain = async (e: React.FormEvent) => {
+  const removeDomainMutation = api.domain.remove.useMutation({
+    onSuccess: () => {
+      router.refresh();
+      setSuccess("Custom domain removed. Your store is back on its subdomain.");
+    },
+    onError: (error) => {
+      setError(error.message ?? "Failed to remove domain");
+    },
+  });
+
+  const handleAddDomain = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    setIsAdding(true);
-
-    // try {
     if (!customDomain.trim()) {
-      throw new Error("Please enter a domain");
+      setError("Please enter a domain");
+      return;
     }
-
+    setIsAdding(true);
     addDomainMutation.mutate(customDomain.trim().toLowerCase());
-
-    //   if (!response.ok) {
-    //     const data = await response.json();
-    //     throw new Error(data.error || "Failed to add domain");
-    //   }
-
-    //   setSuccess("Domain added! Configure DNS and verify below.");
-    //   setCustomDomain("");
-    //   router.refresh();
-    // } catch (err: any) {
-    //   setError(err.message);
-    // } finally {
-    //   setIsAdding(false);
-    // }
   };
 
-  const handleVerifyDomain = async () => {
+  const handleVerifyDomain = () => {
     setError(null);
     setSuccess(null);
+    if (!business.customDomain) return;
     setIsVerifying(true);
-
-    if (!business.customDomain) {
-      throw new Error("No custom domain found");
-    }
     verifyDomainMutation.mutate(business.customDomain);
-    // try {
-    //   const response = await fetch("/api/domain/verify", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({
-    //       businessId: business.id,
-    //     }),
-    //   });
-
-    //   if (!response.ok) {
-    //     const data = await response.json();
-    //     throw new Error(data.error || "Failed to verify domain");
-    //   }
-
-    //   const data = await response.json();
-
-    //   if (data.verified) {
-    //     setSuccess("Domain verified successfully!");
-    //     router.refresh();
-    //   } else {
-    //     setError("Domain not verified yet. Please check your DNS settings.");
-    //   }
-    // } catch (err: any) {
-    //   setError(err.message);
-    // } finally {
-    //   setIsVerifying(false);
-    // }
   };
-  const isDirty = false;
+
   return (
     <>
-      <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
+      <div className="admin-form-toolbar">
         <div className="toolbar-info">
           <Button variant="ghost" size="sm" asChild className="shrink-0">
             <Link href="/admin/settings">
@@ -180,14 +160,6 @@ export function DomainSettings({ business }: DomainSettingsProps) {
           <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
             <h1 className="text-base font-medium">Domain Settings</h1>
-
-            <span
-              className={`admin-status-badge ${
-                isDirty ? "isDirty" : "isPublished"
-              }`}
-            >
-              {isDirty ? "Unsaved Changes" : "Saved"}
-            </span>
           </div>
         </div>
 
@@ -277,42 +249,49 @@ export function DomainSettings({ business }: DomainSettingsProps) {
                       <div className="space-y-1 rounded border bg-white p-3 font-mono text-sm">
                         <div>Type: A</div>
                         <div>Name: @</div>
-                        <div>
-                          Value:{" "}
-                          {process.env.NEXT_PUBLIC_VPS_IP ?? "YOUR_VPS_IP"}
-                        </div>
+                        <div>Value: {vpsIp}</div>
                         <div className="mt-2 border-t pt-2">Type: A</div>
                         <div>Name: www</div>
-                        <div>
-                          Value:{" "}
-                          {process.env.NEXT_PUBLIC_VPS_IP ?? "YOUR_VPS_IP"}
-                        </div>
+                        <div>Value: {vpsIp}</div>
                       </div>
-                      <Button
-                        onClick={handleVerifyDomain}
-                        disabled={isVerifying}
-                        className="mt-4"
-                        size="sm"
-                      >
-                        {isVerifying ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Verifying...
-                          </>
-                        ) : (
-                          "Verify DNS"
-                        )}
-                      </Button>
+                      <div className="mt-4 flex items-center gap-2">
+                        <Button
+                          onClick={handleVerifyDomain}
+                          disabled={isVerifying}
+                          size="sm"
+                        >
+                          {isVerifying ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Verifying...
+                            </>
+                          ) : (
+                            "Verify DNS"
+                          )}
+                        </Button>
+                        <RemoveDomainDialog
+                          domain={business.customDomain ?? ""}
+                          isPending={removeDomainMutation.isPending}
+                          onConfirm={() => removeDomainMutation.mutate()}
+                        />
+                      </div>
                     </div>
                   )}
 
                   {business.domainStatus === "ACTIVE" && (
-                    <Alert>
-                      <CheckCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        Your custom domain is active and working!
-                      </AlertDescription>
-                    </Alert>
+                    <div className="space-y-3">
+                      <Alert>
+                        <CheckCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          Your custom domain is active and working!
+                        </AlertDescription>
+                      </Alert>
+                      <RemoveDomainDialog
+                        domain={business.customDomain ?? ""}
+                        isPending={removeDomainMutation.isPending}
+                        onConfirm={() => removeDomainMutation.mutate()}
+                      />
+                    </div>
                   )}
                 </>
               ) : (
@@ -354,5 +333,52 @@ export function DomainSettings({ business }: DomainSettingsProps) {
         </div>
       </div>
     </>
+  );
+}
+
+function RemoveDomainDialog({
+  domain,
+  isPending,
+  onConfirm,
+}: {
+  domain: string;
+  isPending: boolean;
+  onConfirm: () => void;
+}) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline" size="sm" disabled={isPending}>
+          {isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="mr-2 h-4 w-4" />
+          )}
+          Remove Domain
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Remove Custom Domain?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will remove <strong>{domain}</strong> from your store. Your
+            store will fall back to its permanent subdomain immediately. The
+            platform team will be notified to remove the domain from the server.
+            <br />
+            <br />
+            You can add a new custom domain at any time.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={onConfirm}
+          >
+            Remove Domain
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

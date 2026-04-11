@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { env } from "~/env";
 import { checkBusiness } from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
 import { db } from "~/server/db";
@@ -59,6 +60,7 @@ export default async function AdminWelcomePage() {
               setupSteps={setupSteps}
               completedSteps={completedSteps}
               totalSteps={totalSteps}
+              vpsIp={env.VPS_IP}
             />
           </div>
 

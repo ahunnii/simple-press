@@ -1,3 +1,4 @@
+import { env } from "~/env";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../../_components/trail-header";
@@ -15,7 +16,7 @@ export default async function DomainSettingsPage() {
         ]}
       />
 
-      <DomainSettings business={business} />
+      <DomainSettings business={business} vpsIp={env.VPS_IP} />
     </>
   );
 }

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { checkBusiness } from "~/lib/check-business";
 import {
   createTRPCRouter,
+  getBusinessProcedure,
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
@@ -111,80 +112,81 @@ export const inventoryRouter = createTRPCRouter({
     }),
 
   // Deduct inventory (called when order is placed)
-  deductInventory: publicProcedure
-    .input(
-      z.object({
-        items: z.array(
-          z.object({
-            productId: z.string(),
-            variantId: z.string().nullable(),
-            quantity: z.number().int().positive(),
-          }),
-        ),
-        orderId: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const business = await checkBusiness();
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+  // deductInventory: publicProcedure
+  //   .use(getBusinessProcedure())
+  //   .input(
+  //     z.object({
+  //       items: z.array(
+  //         z.object({
+  //           productId: z.string(),
+  //           variantId: z.string().nullable(),
+  //           quantity: z.number().int().positive(),
+  //         }),
+  //       ),
+  //       orderId: z.string(),
+  //     }),
+  //   )
+  //   .mutation(async ({ ctx, input }) => {
+  //     const business = await checkBusiness();
+  //     if (!business) {
+  //       throw new TRPCError({
+  //         code: "NOT_FOUND",
+  //         message: "Business not found",
+  //       });
+  //     }
 
-      // Process inventory deduction in transaction
-      await ctx.db.$transaction(async (tx) => {
-        for (const item of input.items) {
-          if (!item.variantId) continue; // Skip if no variant
+  //     // Process inventory deduction in transaction
+  //     await ctx.db.$transaction(async (tx) => {
+  //       for (const item of input.items) {
+  //         if (!item.variantId) continue; // Skip if no variant
 
-          // Get current inventory
-          const variant = await tx.productVariant.findUnique({
-            where: { id: item.variantId, product: { businessId: business.id } },
-            select: {
-              id: true,
-              inventoryQty: true,
-              productId: true,
-              product: {
-                select: {
-                  businessId: true,
-                  name: true,
-                },
-              },
-            },
-          });
+  //         // Get current inventory
+  //         const variant = await tx.productVariant.findUnique({
+  //           where: { id: item.variantId, product: { businessId: business.id } },
+  //           select: {
+  //             id: true,
+  //             inventoryQty: true,
+  //             productId: true,
+  //             product: {
+  //               select: {
+  //                 businessId: true,
+  //                 name: true,
+  //               },
+  //             },
+  //           },
+  //         });
 
-          if (!variant) continue;
+  //         if (!variant) continue;
 
-          const newQty = variant.inventoryQty - item.quantity;
+  //         const newQty = variant.inventoryQty - item.quantity;
 
-          // Update inventory
-          await tx.productVariant.update({
-            where: { id: item.variantId, product: { businessId: business.id } },
-            data: {
-              inventoryQty: newQty,
-            },
-          });
+  //         // Update inventory
+  //         await tx.productVariant.update({
+  //           where: { id: item.variantId, product: { businessId: business.id } },
+  //           data: {
+  //             inventoryQty: newQty,
+  //           },
+  //         });
 
-          // Create history record
-          await tx.inventoryHistory.create({
-            data: {
-              variantId: item.variantId,
-              productId: variant.productId,
-              businessId: business.id,
-              previousQty: variant.inventoryQty,
-              newQty,
-              changeQty: -item.quantity,
-              reason: "sale",
-              note: `Order #${input.orderId}`,
-              orderId: input.orderId,
-            },
-          });
-        }
-      });
+  //         // Create history record
+  //         await tx.inventoryHistory.create({
+  //           data: {
+  //             variantId: item.variantId,
+  //             productId: variant.productId,
+  //             businessId: business.id,
+  //             previousQty: variant.inventoryQty,
+  //             newQty,
+  //             changeQty: -item.quantity,
+  //             reason: "sale",
+  //             note: `Order #${input.orderId}`,
+  //             orderId: input.orderId,
+  //           },
+  //         });
+  //       }
+  //     });
 
-      return { success: true };
-    }),
+  //     return { success: true };
+  //   }),
 
   // Restore inventory (called when order is refunded/cancelled)
   restoreInventory: ownerAdminProcedure
