@@ -46,7 +46,9 @@ export const auth = betterAuth({
       "localhost:3000", // local dev
       `${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
       `*.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
+      "zairesvisions.org",
     ],
+
     protocol: process.env.NODE_ENV === "development" ? "http" : "https",
   },
 
