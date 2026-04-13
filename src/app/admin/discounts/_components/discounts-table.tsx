@@ -8,17 +8,6 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 
-// type Discount = {
-//   id: string;
-//   code: string;
-//   type: string;
-//   value: number;
-//   active: boolean;
-//   usageLimit: number | null;
-//   usageCount: number;
-//   expiresAt: Date | null;
-// };
-
 type DiscountsTableProps = {
   discounts: DiscountCode[];
 };
@@ -46,10 +35,10 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
   };
 
   return (
-    <Card>
+    <Card className="bg-linear-to-b from-gray-50 to-white">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="border-b bg-gray-50">
+          <thead className="border-b">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Code
@@ -71,13 +60,16 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y bg-white">
+          <tbody className="divide-y divide-gray-200 bg-white">
             {discounts.map((discount) => (
               <tr key={discount.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
-                  <span className="font-mono font-semibold text-gray-900">
+                  <Link
+                    href={`/admin/discounts/${discount.id}`}
+                    className="font-mono font-semibold text-gray-900 hover:underline"
+                  >
                     {discount.code}
-                  </span>
+                  </Link>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
                   {formatValue(discount.type, discount.value)}

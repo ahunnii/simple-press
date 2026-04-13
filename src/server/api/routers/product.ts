@@ -78,7 +78,11 @@ export const productRouter = createTRPCRouter({
           images: { orderBy: { sortOrder: "asc" } },
           variants: { orderBy: { createdAt: "asc" } },
           business: {
-            select: { siteContent: { select: { primaryColor: true, customFields: true } } },
+            select: {
+              siteContent: {
+                select: { primaryColor: true, customFields: true },
+              },
+            },
           },
         },
       });
@@ -110,6 +114,7 @@ export const productRouter = createTRPCRouter({
         where: { businessId },
         include: {
           images: { orderBy: { sortOrder: "asc" }, take: 1 },
+          variants: { select: { price: true, compareAtPrice: true } },
           _count: { select: { variants: true } },
         },
         orderBy: { createdAt: "desc" },
