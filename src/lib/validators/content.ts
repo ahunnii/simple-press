@@ -74,12 +74,10 @@ export const pageSchema = z.object({
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   metaKeywords: z.string().optional(),
-  ogImage: z.string().url().optional().or(z.literal("")),
+  ogImage: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
   published: z.boolean().default(true),
   sortOrder: z.number().int().default(0),
   type: z.enum(["page", "policy", "blog", "custom"]).default("page"),
   template: z.enum(["default", "sidebar", "full-width"]).default("default"),
-  image: z
-    .union([z.string().url(), z.literal(""), z.null()])
-    .optional(),
+  image: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
 });

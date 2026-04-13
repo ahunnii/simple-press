@@ -26,47 +26,28 @@ export default async function BlogPage() {
     | Record<string, string>
     | undefined;
 
-  if (business.templateId === "noise") {
-    return <NoiseBlogPage pages={pages} customFields={customFields} />;
-  }
+  const TemplateComponent =
+    {
+      "dark-trend": DarkTrendBlogPage,
+      modern: ModernBlogPage,
+      elegant: ElegantBlogPage,
+      pollen: PollenBlogPage,
+      bamboo: BambooBlogPage,
+      "happy-bamboo": HappyBambooBlogPage,
+      noise: NoiseBlogPage,
+    }[business.templateId] ?? DefaultBlogPage;
 
-  if (business.templateId === "dark-trend") {
-    return <DarkTrendBlogPage pages={pages} customFields={customFields} />;
-  }
-
-  if (business.templateId === "happy-bamboo") {
-    return <HappyBambooBlogPage pages={pages} customFields={customFields} />;
-  }
-
-  if (business.templateId === "default") {
-    return <DefaultBlogPage pages={pages} customFields={customFields} />;
-  }
-
-  if (business.templateId === "elegant") {
-    return <ElegantBlogPage pages={pages} customFields={customFields} />;
-  }
-
-  if (business.templateId === "modern") {
-    return <ModernBlogPage pages={pages} customFields={customFields} />;
-  }
-
-  if (business.templateId === "pollen") {
-    return (
-      <PollenBlogPage
-        pages={pages}
-        customFields={customFields}
-        business={business}
-      />
-    );
-  }
-
-  if (business.templateId === "bamboo") {
-    return <BambooBlogPage pages={pages} customFields={customFields} />;
-  }
-
-  return <HappyBambooBlogPage pages={pages} />;
+  return (
+    <TemplateComponent
+      pages={pages}
+      customFields={customFields}
+      business={business}
+    />
+  );
 }
 
 export const metadata = {
   title: "Blog",
 };
+
+//TODO: Metadata for the blog listing page 'should' allow for the business owner to edit them

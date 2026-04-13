@@ -38,46 +38,32 @@ export default async function PageView({ params }: Props) {
     | Record<string, string>
     | undefined;
 
-  if (business.templateId === "pollen") {
-    return (
-      <PollenBlogPostPage
-        page={page}
-        relatedPosts={relatedPosts}
-        business={business}
-      />
-    );
-  }
-
-  if (business.templateId === "bamboo") {
-    return (
-      <BambooBlogPostPage
-        page={page}
-        relatedPosts={relatedPosts}
-        customFields={customFields}
-      />
-    );
-  }
-
   const TemplateComponent =
     {
       "happy-bamboo": HappyBambooBlogPostPage,
       noise: NoiseBlogPostPage,
       "dark-trend": DarkTrendBlogPostPage,
-      default: DefaultBlogPostPage,
       elegant: ElegantBlogPostPage,
       modern: ModernBlogPostPage,
-    }[business.templateId] ?? HappyBambooBlogPostPage;
+      pollen: PollenBlogPostPage,
+      bamboo: BambooBlogPostPage,
+    }[business.templateId] ?? DefaultBlogPostPage;
 
-  return <TemplateComponent page={page} relatedPosts={relatedPosts} />;
+  return (
+    <TemplateComponent
+      page={page}
+      relatedPosts={relatedPosts}
+      customFields={customFields}
+      business={business}
+    />
+  );
 }
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
 
   const page = await api.content
-    .getBlogPostBySlug({
-      slug,
-    })
+    .getBlogPostBySlug({ slug })
     .catch(rethrowTrpcForErrorBoundary);
 
   if (!page) return { title: "Page Not Found" };
@@ -87,3 +73,5 @@ export async function generateMetadata({ params }: Props) {
     description: !!page.metaDescription ? page.metaDescription : page.excerpt,
   } as Metadata;
 }
+
+//TODO: Open Graph metadata for the blog post page

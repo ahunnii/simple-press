@@ -15,6 +15,7 @@ import {
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { NumberInput } from "~/components/ui/number-input";
 
 type Props = {
   variants: FormVariant[];
@@ -48,8 +49,8 @@ export function VariantManager({
   );
 
   // Bulk edit inputs
-  const [bulkPriceInput, setBulkPriceInput] = useState("");
-  const [bulkQtyInput, setBulkQtyInput] = useState("");
+  const [bulkPriceInput, setBulkPriceInput] = useState<number | null>(null);
+  const [bulkQtyInput, setBulkQtyInput] = useState<number | null>(null);
 
   // Reset selection when the number of variants changes
   useEffect(() => {
@@ -74,26 +75,26 @@ export function VariantManager({
   };
 
   const applyBulkPrice = () => {
-    const dollars = parseFloat(bulkPriceInput);
-    if (isNaN(dollars) || dollars < 0) return;
+    const dollars = bulkPriceInput;
+    if (dollars === null || isNaN(dollars) || dollars < 0) return;
     const cents = Math.round(dollars * 100);
     onChange(
       variants.map((v, i) =>
         selectedIndices.has(i) ? { ...v, price: cents } : v,
       ),
     );
-    setBulkPriceInput("");
+    setBulkPriceInput(null);
   };
 
   const applyBulkQty = () => {
-    const qty = parseInt(bulkQtyInput);
-    if (isNaN(qty) || qty < 0) return;
+    const qty = bulkQtyInput;
+    if (qty === null || isNaN(qty) || qty < 0) return;
     onChange(
       variants.map((v, i) =>
         selectedIndices.has(i) ? { ...v, inventoryQty: qty } : v,
       ),
     );
-    setBulkQtyInput("");
+    setBulkQtyInput(null);
   };
 
   const deleteSelected = () => {
@@ -336,23 +337,21 @@ export function VariantManager({
                 </span>
 
                 <div className="flex items-center gap-1">
-                  <Input
-                    type="number"
+                  <NumberInput
                     step="0.01"
                     min="0"
                     placeholder="Price ($)"
                     value={bulkPriceInput}
-                    onChange={(e) => setBulkPriceInput(e.target.value)}
+                    onChange={(e) => setBulkPriceInput(e)}
                     className="h-8 w-28"
                     onKeyDown={(e) => e.key === "Enter" && applyBulkPrice()}
                   />
                   <Button
                     type="button"
                     size="sm"
-                    // variant="secondary"
                     className="h-8"
                     onClick={applyBulkPrice}
-                    disabled={bulkPriceInput === ""}
+                    disabled={bulkPriceInput === null}
                   >
                     Set Price
                   </Button>
@@ -360,12 +359,12 @@ export function VariantManager({
 
                 {trackInventory && (
                   <div className="flex items-center gap-1">
-                    <Input
-                      type="number"
+                    <NumberInput
+                      step="1"
                       min="0"
                       placeholder="Qty"
                       value={bulkQtyInput}
-                      onChange={(e) => setBulkQtyInput(e.target.value)}
+                      onChange={(e) => setBulkQtyInput(e)}
                       className="h-8 w-20"
                       onKeyDown={(e) => e.key === "Enter" && applyBulkQty()}
                     />
@@ -375,7 +374,7 @@ export function VariantManager({
                       // variant="outline"
                       className="h-8"
                       onClick={applyBulkQty}
-                      disabled={bulkQtyInput === ""}
+                      disabled={bulkQtyInput === null}
                     >
                       Set Qty
                     </Button>
@@ -441,20 +440,15 @@ export function VariantManager({
                       >
                         Price ($)
                       </Label>
-                      <Input
+                      <NumberInput
                         id={`price-${index}`}
-                        type="number"
                         step="0.01"
-                        value={
-                          variant.price ? (variant.price / 100).toFixed(2) : ""
-                        }
+                        value={variant.price ? variant.price / 100 : 0}
                         onChange={(e) =>
                           updateVariant(
                             index,
                             "price",
-                            e.target.value
-                              ? Math.round(parseFloat(e.target.value) * 100)
-                              : undefined,
+                            e ? Math.round(e * 100) : undefined,
                           )
                         }
                         placeholder={(basePrice / 100).toFixed(2)}
@@ -469,22 +463,19 @@ export function VariantManager({
                       >
                         Compare At ($)
                       </Label>
-                      <Input
+                      <NumberInput
                         id={`compare-at-price-${index}`}
-                        type="number"
                         step="0.01"
                         value={
                           variant.compareAtPrice
-                            ? (variant.compareAtPrice / 100).toFixed(2)
-                            : ""
+                            ? variant.compareAtPrice / 100
+                            : 0
                         }
                         onChange={(e) =>
                           updateVariant(
                             index,
                             "compareAtPrice",
-                            e.target.value
-                              ? Math.round(parseFloat(e.target.value) * 100)
-                              : undefined,
+                            e ? Math.round(e * 100) : undefined,
                           )
                         }
                         placeholder="Optional"
@@ -500,17 +491,13 @@ export function VariantManager({
                         >
                           Stock
                         </Label>
-                        <Input
+                        <NumberInput
                           id={`qty-${index}`}
-                          type="number"
+                          step="1"
                           min="0"
                           value={variant.inventoryQty}
                           onChange={(e) =>
-                            updateVariant(
-                              index,
-                              "inventoryQty",
-                              parseInt(e.target.value) || 0,
-                            )
+                            updateVariant(index, "inventoryQty", e ?? 0)
                           }
                           className="h-8"
                         />

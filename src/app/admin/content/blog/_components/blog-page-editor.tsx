@@ -64,6 +64,8 @@ const pageFormSchema = z.object({
   metaDescription: z.string().optional().nullable(),
   imageFile: z.instanceof(File).optional().nullable(),
   image: z.string().url().optional().nullable(),
+  ogImage: z.string().url().optional().nullable(),
+  ogImageFile: z.instanceof(File).optional().nullable(),
 });
 
 type PageFormValues = z.infer<typeof pageFormSchema>;
@@ -79,15 +81,20 @@ type BlogPostEditorProps = {
     metaTitle: string | null;
     metaDescription: string | null;
     image: string | null;
+    ogImage: string | null;
   };
   galleriesEnabled?: boolean;
 };
 
-export function BlogPostEditor({ page, galleriesEnabled }: BlogPostEditorProps) {
+export function BlogPostEditor({
+  page,
+  galleriesEnabled,
+}: BlogPostEditorProps) {
   const router = useRouter();
   const utils = api.useUtils();
   const formRef = useRef<HTMLFormElement>(null);
   const imageFileInputRef = useRef<HTMLInputElement | null>(null);
+  const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   // Initialize form with TipTap content
@@ -103,6 +110,8 @@ export function BlogPostEditor({ page, galleriesEnabled }: BlogPostEditorProps) 
       metaDescription: page?.metaDescription ?? "",
       image: page?.image ?? undefined,
       imageFile: undefined,
+      ogImage: page?.ogImage ?? undefined,
+      ogImageFile: undefined,
     },
   });
 
@@ -205,6 +214,7 @@ export function BlogPostEditor({ page, galleriesEnabled }: BlogPostEditorProps) 
 
   const onSubmit = async (data: PageFormValues) => {
     let imageUrl: string | null | undefined;
+    let ogImageUrl: string | null | undefined;
     const imageFile = data.imageFile;
     if (imageFile === null) {
       imageUrl = null;
@@ -223,11 +233,30 @@ export function BlogPostEditor({ page, galleriesEnabled }: BlogPostEditorProps) 
       imageUrl = data.image ?? undefined;
     }
 
+    const ogImageFile = data.ogImageFile;
+    if (ogImageFile === null) {
+      ogImageUrl = null;
+    } else if (ogImageFile instanceof File) {
+      try {
+        const response = await imageUploader.upload(ogImageFile);
+        const fileLocation =
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          "";
+        if (fileLocation) ogImageUrl = fileLocation;
+      } catch {
+        toast.error("Failed to upload Open Graph image.");
+        return;
+      }
+    } else {
+      ogImageUrl = data.ogImage ?? undefined;
+    }
+
     const pageData = {
       title: data.title,
       slug: data.slug,
       content: data.content, // TipTap JSON
       image: imageUrl,
+      ogImage: ogImageUrl,
       excerpt: data.excerpt ?? "",
       published: data.published,
       metaTitle: data.metaTitle ?? "",
@@ -438,6 +467,16 @@ export function BlogPostEditor({ page, galleriesEnabled }: BlogPostEditorProps) 
                       descriptionClassName="text-xs text-gray-500"
                       description={`${form.watch("metaDescription")?.length ?? 0}/160 characters`}
                       rows={3}
+                    />
+
+                    {/* Open Graph Image */}
+                    <ImageUploadFormField
+                      form={form}
+                      name="ogImageFile"
+                      label="Open Graph Image"
+                      description="This is the image that will be used for the Open Graph image"
+                      existingPreviewUrl={page?.ogImage ?? undefined}
+                      inputRef={ogImageFileInputRef}
                     />
                   </CardContent>
                 </Card>
