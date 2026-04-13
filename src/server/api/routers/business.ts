@@ -160,7 +160,23 @@ export const businessRouter = createTRPCRouter({
           },
         },
         products: {
-          where: { published: true },
+          where: {
+            published: true,
+            OR: [
+              {
+                additionalFields: {
+                  path: ["comingSoon"],
+                  equals: "false",
+                },
+              },
+              {
+                additionalFields: {
+                  path: ["comingSoon"],
+                  equals: false,
+                },
+              },
+            ],
+          },
           select: {
             id: true,
             name: true,
@@ -289,9 +305,7 @@ export const businessRouter = createTRPCRouter({
       },
       include: {
         siteContent: true,
-
         images: true,
-
         products: {
           where: { published: true },
           include: {
@@ -312,6 +326,26 @@ export const businessRouter = createTRPCRouter({
         },
       },
     });
+
+    if (business && business.products && Array.isArray(business.products)) {
+      // Move products with additionalFields.comingSoon === true to the bottom
+      business.products = [
+        ...business.products.filter(
+          (p) =>
+            !(
+              p.additionalFields &&
+              (p.additionalFields as Record<string, unknown>).comingSoon ===
+                true
+            ),
+        ),
+        ...business.products.filter(
+          (p) =>
+            p.additionalFields &&
+            (p.additionalFields as Record<string, unknown>).comingSoon === true,
+        ),
+      ];
+    }
+
     return business;
   }),
 
