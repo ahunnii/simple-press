@@ -1,6 +1,7 @@
 // app/api/webhooks/stripe/route.ts
 import type { NextRequest } from "next/server";
 import type Stripe from "stripe";
+import { Prisma } from "generated/prisma";
 import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
@@ -223,6 +224,18 @@ export async function POST(req: NextRequest) {
           session.customer_details?.email ??
           "unknown@example.com";
 
+        if (customerEmail === "unknown@example.com") {
+          Sentry.withScope((scope) => {
+            scope.setTag("webhook.step", "customer-email-missing");
+            scope.setTag("businessId", businessId);
+            scope.setExtra("stripeSessionId", session.id);
+            Sentry.captureMessage(
+              "Stripe checkout session completed with no customer email — order created without customer record or confirmation email",
+              "warning",
+            );
+          });
+        }
+
         if (customerEmail !== "unknown@example.com") {
           console.log(
             "[Webhook] customer_details:",
@@ -263,10 +276,11 @@ export async function POST(req: NextRequest) {
               userId: existingUser?.id ?? null, // Link to user if exists
             },
             update: {
-              // firstName,
-              // lastName,
-              // phone: fullSession.customer_details?.phone ?? null,
-              // Link to user if not already linked and user exists
+              // firstName, lastName, phone intentionally not updated on repeat orders.
+              // A customer may purchase on behalf of someone else and provide the
+              // recipient's name/phone at Stripe checkout while using their own email.
+              // Overwriting those fields would corrupt the primary customer record.
+              // Only the userId link is kept current.
               userId: existingUser?.id ?? undefined,
             },
           });
@@ -311,14 +325,6 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        // Generate order number
-        const lastOrder = await db.order.findFirst({
-          where: { businessId: business.id },
-          orderBy: { orderNumber: "desc" },
-          select: { orderNumber: true },
-        });
-        const orderNumber = (lastOrder?.orderNumber ?? 0) + 1;
-
         const rawMetaDiscountId =
           typeof discountCodeId === "string" ? discountCodeId.trim() : "";
         let verifiedDiscountCodeId: string | null = null;
@@ -333,76 +339,114 @@ export async function POST(req: NextRequest) {
           verifiedDiscountCodeId = dc?.id ?? null;
         }
 
-        // Create order
-        const order = await db.order.create({
-          data: {
-            businessId: business.id,
-            orderNumber,
-            customerId: customer?.id ?? null,
-            shippingAddressId,
+        // Generate order number and create order. Retry up to 3 times on a
+        // unique-constraint conflict for orderNumber — two concurrent webhook
+        // deliveries for different sessions can race and produce the same number.
+        const getNextOrderNumber = async () => {
+          const lastOrder = await db.order.findFirst({
+            where: { businessId: business.id },
+            orderBy: { orderNumber: "desc" },
+            select: { orderNumber: true },
+          });
+          return (lastOrder?.orderNumber ?? 0) + 1;
+        };
 
-            customerEmail,
-            customerName: session.customer_details?.name ?? "Unknown",
+        let orderNumber = await getNextOrderNumber();
 
-            // Amounts in cents
-            subtotal: session.amount_subtotal ?? 0,
-            tax: fullSession.total_details?.amount_tax ?? 0,
-            shipping: fullSession.total_details?.amount_shipping ?? 0,
-            discount: discountAmount,
-            total: session.amount_total ?? 0,
+        // Wrap in a retry loop: two concurrent webhook deliveries for different
+        // sessions can race and produce the same orderNumber. On P2002, re-query
+        // and retry (max 3 attempts). The create is not inside an inventory
+        // transaction, so a rolled-back create has no side effects to undo.
+        const order = await (async () => {
+          for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+              return await db.order.create({
+                data: {
+                  businessId: business.id,
+                  orderNumber,
+                  customerId: customer?.id ?? null,
+                  shippingAddressId,
 
-            // currency: session.currency ?? "usd",
-            status: "paid",
-            paymentStatus: session.payment_status ?? "paid",
-            fulfillmentStatus: "unfulfilled",
+                  customerEmail,
+                  customerName: session.customer_details?.name ?? "Unknown",
 
-            // Stripe reference
-            stripeSessionId: session.id,
-            stripePaymentIntentId: session.payment_intent as string,
+                  // Amounts in cents
+                  subtotal: session.amount_subtotal ?? 0,
+                  tax: fullSession.total_details?.amount_tax ?? 0,
+                  shipping: fullSession.total_details?.amount_shipping ?? 0,
+                  discount: discountAmount,
+                  total: session.amount_total ?? 0,
 
-            ...(verifiedDiscountCodeId
-              ? {
-                  discountCodeId: verifiedDiscountCodeId,
-                }
-              : {}),
+                  // currency: session.currency ?? "usd",
+                  status: "paid",
+                  paymentStatus: session.payment_status ?? "paid",
+                  fulfillmentStatus: "unfulfilled",
 
-            // Order items
-            items: {
-              create:
-                fullSession.line_items?.data.map((item) => {
-                  const product = item.price?.product;
-                  const metadata =
-                    product &&
-                    typeof product === "object" &&
-                    !("deleted" in product && product.deleted) &&
-                    "metadata" in product
-                      ? (product as { metadata: Record<string, string> })
-                          .metadata
-                      : {};
+                  // Stripe reference
+                  stripeSessionId: session.id,
+                  stripePaymentIntentId:
+                    typeof session.payment_intent === "string"
+                      ? session.payment_intent
+                      : null,
 
-                  const productId = metadata.productId?.trim() ?? null;
-                  const productVariantId =
-                    metadata.productVariantId?.trim() ?? null;
-                  const variantName = metadata.variantName?.trim() ?? null;
-                  const sku = metadata.sku?.trim() ?? null;
+                  ...(verifiedDiscountCodeId
+                    ? { discountCodeId: verifiedDiscountCodeId }
+                    : {}),
 
-                  return {
-                    productName: item.description ?? "Unknown Product",
-                    variantName,
-                    sku,
-                    productId,
-                    productVariantId,
-                    quantity: item.quantity ?? 1,
-                    price: item.price?.unit_amount ?? 0,
-                    total: item.amount_total,
-                  };
-                }) ?? [],
-            },
-          },
-          include: {
-            items: true,
-          },
-        });
+                  // Order items
+                  items: {
+                    create:
+                      fullSession.line_items?.data.map((item) => {
+                        const product = item.price?.product;
+                        const metadata =
+                          product &&
+                          typeof product === "object" &&
+                          !("deleted" in product && product.deleted) &&
+                          "metadata" in product
+                            ? (product as { metadata: Record<string, string> })
+                                .metadata
+                            : {};
+
+                        const productId = metadata.productId?.trim() ?? null;
+                        const productVariantId =
+                          metadata.productVariantId?.trim() ?? null;
+                        const variantName = metadata.variantName?.trim() ?? null;
+                        const sku = metadata.sku?.trim() ?? null;
+
+                        return {
+                          productName: item.description ?? "Unknown Product",
+                          variantName,
+                          sku,
+                          productId,
+                          productVariantId,
+                          quantity: item.quantity ?? 1,
+                          price: item.price?.unit_amount ?? 0,
+                          total: item.amount_total,
+                        };
+                      }) ?? [],
+                  },
+                },
+                include: { items: true },
+              });
+            } catch (createErr: unknown) {
+              const isOrderNumberConflict =
+                createErr instanceof Prisma.PrismaClientKnownRequestError &&
+                createErr.code === "P2002" &&
+                (createErr.meta?.target as string[] | undefined)?.some(
+                  (f) =>
+                    f === "orderNumber" ||
+                    f === "Order_businessId_orderNumber_key",
+                );
+              if (attempt < 2 && isOrderNumberConflict) {
+                orderNumber = await getNextOrderNumber();
+                continue;
+              }
+              throw createErr;
+            }
+          }
+          // unreachable — loop always returns or throws
+          throw new Error("[Webhook] Order creation retry exhausted");
+        })();
 
         console.log(
           `[Webhook] Order created: ${order.id} for business ${business.id}`,
@@ -434,11 +478,23 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // Increment discount code usage
+        // Increment discount code usage.
+        // Use updateMany with a WHERE guard so two concurrent webhooks racing
+        // on the last available slot can't both increment past usageLimit.
+        // The conditional UPDATE is evaluated atomically by the DB.
         if (verifiedDiscountCodeId) {
           try {
-            await db.discountCode.update({
+            const dc = await db.discountCode.findUnique({
               where: { id: verifiedDiscountCodeId },
+              select: { usageLimit: true },
+            });
+            await db.discountCode.updateMany({
+              where: {
+                id: verifiedDiscountCodeId,
+                ...(dc?.usageLimit != null
+                  ? { usageCount: { lt: dc.usageLimit } }
+                  : {}),
+              },
               data: {
                 usageCount: { increment: 1 },
               },
@@ -663,8 +719,12 @@ export async function POST(req: NextRequest) {
           // Don't fail webhook - order is still created
         }
 
-        // Send order confirmation email
-        try {
+        // Send order confirmation email (skip if customer email is unknown)
+        if (customerEmail === "unknown@example.com") {
+          console.warn(
+            `[Webhook] Skipping order confirmation email for order #${order.orderNumber} — no customer email`,
+          );
+        } else try {
           // Fetch shipping address for email if available
           let shippingAddressForEmail = undefined;
           if (shippingAddressId) {
@@ -770,6 +830,22 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ received: true });
       } catch (orderError: unknown) {
+        // Two simultaneous deliveries of the same event can race past the idempotency
+        // check and both attempt db.order.create. The second will hit the unique
+        // constraint on stripeSessionId — return 200 so Stripe doesn't retry.
+        if (
+          orderError instanceof Prisma.PrismaClientKnownRequestError &&
+          orderError.code === "P2002" &&
+          (orderError.meta?.target as string[] | undefined)?.some(
+            (f) => f === "stripeSessionId" || f === "Order_stripeSessionId_key",
+          )
+        ) {
+          console.log(
+            "[Webhook] Duplicate checkout.session.completed event detected — idempotency guard (P2002 on stripeSessionId)",
+          );
+          return NextResponse.json({ received: true });
+        }
+
         console.error("[Webhook] Error processing order:", orderError);
         Sentry.withScope((scope) => {
           scope.setTag("webhook.step", "order-processing");

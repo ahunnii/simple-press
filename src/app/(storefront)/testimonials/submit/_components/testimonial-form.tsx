@@ -57,9 +57,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
   });
 
   // Check if user can submit
-  const { data: canSubmitData } = api.testimonial.canSubmit.useQuery({
-    businessId: business.id,
-  });
+  const { data: canSubmitData } = api.testimonial.canSubmit.useQuery();
 
   const submitMutation = api.testimonial.submit.useMutation({
     onSuccess: () => {
@@ -95,7 +93,6 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
       return;
     }
     submitMutation.mutate({
-      businessId: business.id,
       text: text.trim(),
       photoUrls,
       captchaToken,

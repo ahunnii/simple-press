@@ -3,12 +3,18 @@ import { TRPCError } from "@trpc/server";
 import { verifyHCaptcha } from "~/lib/captcha/verify-hcaptcha";
 import { checkBusiness } from "~/lib/check-business";
 import { sendContactFormSubmission } from "~/lib/email/templates";
+import {
+  contactLimiter,
+  getClientIpFromHeaders,
+} from "~/lib/rate-limit";
 import { contactSchema } from "~/lib/validators/contact";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
 
 export const contactRouter = createTRPCRouter({
-  send: publicProcedure.input(contactSchema).mutation(async ({ input }) => {
+  send: publicProcedure.input(contactSchema).mutation(async ({ ctx, input }) => {
+    await contactLimiter.consume(getClientIpFromHeaders(ctx.headers));
+
     const isValid =
       process.env.NODE_ENV === "development"
         ? true

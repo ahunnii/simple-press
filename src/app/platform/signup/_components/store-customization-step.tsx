@@ -6,7 +6,6 @@ import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 import type { SignupFormData } from "./wizard-client";
 import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
 import { authClient } from "~/server/better-auth/client";
-import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -29,8 +28,6 @@ export function StoreCustomizationStep({
   formData,
   onBack,
 }: StoreCustomizationStepProps) {
-  const updateArtisanToken = api.external.updateArtisanToken.useMutation();
-
   const captchaRef = useRef<HCaptchaHandle>(null);
   const [captchaToken, setCaptchaToken] = useState("");
   const [heroTitle, setHeroTitle] = useState(
@@ -95,17 +92,6 @@ export function StoreCustomizationStep({
       if (!response.ok) {
         setError(data.error ?? "Failed to create your store");
         return;
-      }
-
-      if (formData.artisanFlow && formData.aftoken && data.businessId) {
-        try {
-          await updateArtisanToken.mutateAsync({
-            aftoken: formData.aftoken,
-            businessId: data.businessId,
-          });
-        } catch (err) {
-          console.error("Failed to update artisan token (non-blocking)", err);
-        }
       }
 
       window.location.href = data.redirectUrl ?? "";

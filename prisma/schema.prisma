@@ -502,7 +502,8 @@ model Order {
   paymentMethod String @default("card") // card | cash | check | manual
 
   // Refund
-  refundReason String?
+  refundReason      String?
+  refundAmountCents Int?    // cumulative refunded amount in cents (partial or full)
 
   // Notes
   customerNote String? @db.Text

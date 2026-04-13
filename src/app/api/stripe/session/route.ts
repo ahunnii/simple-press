@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
     // Clear the cookie now that it has been consumed
     response.cookies.set("pending_session", "", {
       path: "/",
+      httpOnly: true,
       maxAge: 0,
       sameSite: "strict",
       secure: true,

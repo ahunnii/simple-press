@@ -1,13 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { checkBusiness } from "~/lib/check-business";
-import {
-  createTRPCRouter,
-  getBusinessProcedure,
-  ownerAdminProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
 
 export const inventoryRouter = createTRPCRouter({
   // Get inventory levels for a product
@@ -188,73 +182,6 @@ export const inventoryRouter = createTRPCRouter({
   //     return { success: true };
   //   }),
 
-  // Restore inventory (called when order is refunded/cancelled)
-  restoreInventory: ownerAdminProcedure
-    .input(z.object({ orderId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-      // Get order with items
-      const order = await ctx.db.order.findUnique({
-        where: { id: input.orderId, businessId },
-        include: { items: true },
-      });
-
-      if (!order) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Order not found",
-        });
-      }
-
-      // Restore inventory in transaction
-      await ctx.db.$transaction(async (tx) => {
-        for (const item of order.items) {
-          if (!item.productVariantId) continue;
-
-          const variant = await tx.productVariant.findUnique({
-            where: { id: item.productVariantId, product: { businessId } },
-            select: {
-              id: true,
-              inventoryQty: true,
-              productId: true,
-              product: {
-                select: { businessId: true },
-              },
-            },
-          });
-
-          if (!variant) continue;
-
-          const newQty = variant.inventoryQty + item.quantity;
-
-          // Update inventory
-          await tx.productVariant.update({
-            where: { id: item.productVariantId, product: { businessId } },
-            data: {
-              inventoryQty: newQty,
-            },
-          });
-
-          // Create history record
-          await tx.inventoryHistory.create({
-            data: {
-              variantId: item.productVariantId,
-              productId: variant.productId,
-              businessId,
-              previousQty: variant.inventoryQty,
-              newQty,
-              changeQty: item.quantity,
-              reason: "return",
-              note: `Refund/Cancel Order #${input.orderId}`,
-              orderId: input.orderId,
-            },
-          });
-        }
-      });
-
-      return { success: true };
-    }),
-
   // Get low stock alerts
   getLowStockAlerts: ownerAdminProcedure
     .input(z.object({ threshold: z.number().int().default(10) }))
@@ -298,6 +225,7 @@ export const inventoryRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const where: Record<string, string> = {};
 
       if (input.variantId) {
@@ -310,7 +238,10 @@ export const inventoryRouter = createTRPCRouter({
 
       // Get history records
       const history = await ctx.db.inventoryHistory.findMany({
-        where,
+        where: {
+          ...where,
+          businessId,
+        },
         include: {
           variant: {
             select: {

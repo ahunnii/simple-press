@@ -8,6 +8,37 @@ import { isSubdomainReserved, slugify } from "~/lib/utils";
 import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
 
+/**
+ * Notify Artisanal Futures that an artisan token was successfully used.
+ * Non-blocking — a failure here should never prevent store creation.
+ * Called server-side so SIMPLEPRESS_HASH_SECRET is never exposed to the client.
+ */
+async function notifyArtisanalFutures(
+  aftoken: string,
+  subdomain: string,
+  customDomain: string | null,
+): Promise<void> {
+  const storeUrl =
+    customDomain ??
+    `https://${subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  try {
+    const res = await fetch(`${env.ARTISANAL_FUTURES_API_URL}/simplepress`, {
+      method: "POST",
+      body: JSON.stringify({ artisanToken: aftoken, subdomain, customDomain: storeUrl }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.SIMPLEPRESS_HASH_SECRET}`,
+      },
+    });
+    if (!res.ok) {
+      console.warn("[Onboarding] AF token update returned non-OK status", res.status);
+    }
+  } catch (err) {
+    Sentry.captureException(err, { tags: { route: "onboarding", step: "af-token-update" } });
+    console.error("[Onboarding] Failed to notify Artisanal Futures (non-blocking)", err);
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
@@ -25,6 +56,8 @@ export async function POST(req: NextRequest) {
       heroSubtitle: string;
       aboutText: string;
       primaryColor: string;
+      /** Artisanal Futures token — present only for the artisan onboarding flow. */
+      aftoken?: string | null;
     };
 
     const {
@@ -39,6 +72,7 @@ export async function POST(req: NextRequest) {
       heroSubtitle,
       aboutText,
       primaryColor,
+      aftoken,
     } = formData;
 
     // Verify the caller is authenticated and owns this email
@@ -158,6 +192,11 @@ export async function POST(req: NextRequest) {
 
       return newBusiness;
     });
+
+    // Notify Artisanal Futures that this token was consumed (non-blocking).
+    if (aftoken) {
+      void notifyArtisanalFutures(aftoken, business.subdomain, business.customDomain);
+    }
 
     // Redirect to signup completion page with token
     const isDev = process.env.NODE_ENV === "development";

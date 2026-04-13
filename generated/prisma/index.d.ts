@@ -21652,6 +21652,7 @@ export namespace Prisma {
     shipping: number | null
     discount: number | null
     total: number | null
+    refundAmountCents: number | null
   }
 
   export type OrderSumAggregateOutputType = {
@@ -21661,6 +21662,7 @@ export namespace Prisma {
     shipping: number | null
     discount: number | null
     total: number | null
+    refundAmountCents: number | null
   }
 
   export type OrderMinAggregateOutputType = {
@@ -21685,6 +21687,7 @@ export namespace Prisma {
     customerPhone: string | null
     paymentMethod: string | null
     refundReason: string | null
+    refundAmountCents: number | null
     customerNote: string | null
     internalNote: string | null
     businessId: string | null
@@ -21715,6 +21718,7 @@ export namespace Prisma {
     customerPhone: string | null
     paymentMethod: string | null
     refundReason: string | null
+    refundAmountCents: number | null
     customerNote: string | null
     internalNote: string | null
     businessId: string | null
@@ -21745,6 +21749,7 @@ export namespace Prisma {
     customerPhone: number
     paymentMethod: number
     refundReason: number
+    refundAmountCents: number
     customerNote: number
     internalNote: number
     businessId: number
@@ -21762,6 +21767,7 @@ export namespace Prisma {
     shipping?: true
     discount?: true
     total?: true
+    refundAmountCents?: true
   }
 
   export type OrderSumAggregateInputType = {
@@ -21771,6 +21777,7 @@ export namespace Prisma {
     shipping?: true
     discount?: true
     total?: true
+    refundAmountCents?: true
   }
 
   export type OrderMinAggregateInputType = {
@@ -21795,6 +21802,7 @@ export namespace Prisma {
     customerPhone?: true
     paymentMethod?: true
     refundReason?: true
+    refundAmountCents?: true
     customerNote?: true
     internalNote?: true
     businessId?: true
@@ -21825,6 +21833,7 @@ export namespace Prisma {
     customerPhone?: true
     paymentMethod?: true
     refundReason?: true
+    refundAmountCents?: true
     customerNote?: true
     internalNote?: true
     businessId?: true
@@ -21855,6 +21864,7 @@ export namespace Prisma {
     customerPhone?: true
     paymentMethod?: true
     refundReason?: true
+    refundAmountCents?: true
     customerNote?: true
     internalNote?: true
     businessId?: true
@@ -21972,6 +21982,7 @@ export namespace Prisma {
     customerPhone: string | null
     paymentMethod: string
     refundReason: string | null
+    refundAmountCents: number | null
     customerNote: string | null
     internalNote: string | null
     businessId: string
@@ -22021,6 +22032,7 @@ export namespace Prisma {
     customerPhone?: boolean
     paymentMethod?: boolean
     refundReason?: boolean
+    refundAmountCents?: boolean
     customerNote?: boolean
     internalNote?: boolean
     businessId?: boolean
@@ -22060,6 +22072,7 @@ export namespace Prisma {
     customerPhone?: boolean
     paymentMethod?: boolean
     refundReason?: boolean
+    refundAmountCents?: boolean
     customerNote?: boolean
     internalNote?: boolean
     businessId?: boolean
@@ -22094,6 +22107,7 @@ export namespace Prisma {
     customerPhone?: boolean
     paymentMethod?: boolean
     refundReason?: boolean
+    refundAmountCents?: boolean
     customerNote?: boolean
     internalNote?: boolean
     businessId?: boolean
@@ -22128,6 +22142,7 @@ export namespace Prisma {
     customerPhone?: boolean
     paymentMethod?: boolean
     refundReason?: boolean
+    refundAmountCents?: boolean
     customerNote?: boolean
     internalNote?: boolean
     businessId?: boolean
@@ -22136,7 +22151,7 @@ export namespace Prisma {
     discountCodeId?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "paymentMethod" | "refundReason" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "paymentMethod" | "refundReason" | "refundAmountCents" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Order$customerArgs<ExtArgs>
@@ -22195,6 +22210,7 @@ export namespace Prisma {
       customerPhone: string | null
       paymentMethod: string
       refundReason: string | null
+      refundAmountCents: number | null
       customerNote: string | null
       internalNote: string | null
       businessId: string
@@ -22653,6 +22669,7 @@ export namespace Prisma {
     readonly customerPhone: FieldRef<"Order", 'String'>
     readonly paymentMethod: FieldRef<"Order", 'String'>
     readonly refundReason: FieldRef<"Order", 'String'>
+    readonly refundAmountCents: FieldRef<"Order", 'Int'>
     readonly customerNote: FieldRef<"Order", 'String'>
     readonly internalNote: FieldRef<"Order", 'String'>
     readonly businessId: FieldRef<"Order", 'String'>
@@ -40333,6 +40350,7 @@ export namespace Prisma {
     customerPhone: 'customerPhone',
     paymentMethod: 'paymentMethod',
     refundReason: 'refundReason',
+    refundAmountCents: 'refundAmountCents',
     customerNote: 'customerNote',
     internalNote: 'internalNote',
     businessId: 'businessId',
@@ -42267,6 +42285,7 @@ export namespace Prisma {
     customerPhone?: StringNullableFilter<"Order"> | string | null
     paymentMethod?: StringFilter<"Order"> | string
     refundReason?: StringNullableFilter<"Order"> | string | null
+    refundAmountCents?: IntNullableFilter<"Order"> | number | null
     customerNote?: StringNullableFilter<"Order"> | string | null
     internalNote?: StringNullableFilter<"Order"> | string | null
     businessId?: StringFilter<"Order"> | string
@@ -42305,6 +42324,7 @@ export namespace Prisma {
     customerPhone?: SortOrderInput | SortOrder
     paymentMethod?: SortOrder
     refundReason?: SortOrderInput | SortOrder
+    refundAmountCents?: SortOrderInput | SortOrder
     customerNote?: SortOrderInput | SortOrder
     internalNote?: SortOrderInput | SortOrder
     businessId?: SortOrder
@@ -42347,6 +42367,7 @@ export namespace Prisma {
     customerPhone?: StringNullableFilter<"Order"> | string | null
     paymentMethod?: StringFilter<"Order"> | string
     refundReason?: StringNullableFilter<"Order"> | string | null
+    refundAmountCents?: IntNullableFilter<"Order"> | number | null
     customerNote?: StringNullableFilter<"Order"> | string | null
     internalNote?: StringNullableFilter<"Order"> | string | null
     businessId?: StringFilter<"Order"> | string
@@ -42385,6 +42406,7 @@ export namespace Prisma {
     customerPhone?: SortOrderInput | SortOrder
     paymentMethod?: SortOrder
     refundReason?: SortOrderInput | SortOrder
+    refundAmountCents?: SortOrderInput | SortOrder
     customerNote?: SortOrderInput | SortOrder
     internalNote?: SortOrderInput | SortOrder
     businessId?: SortOrder
@@ -42423,6 +42445,7 @@ export namespace Prisma {
     customerPhone?: StringNullableWithAggregatesFilter<"Order"> | string | null
     paymentMethod?: StringWithAggregatesFilter<"Order"> | string
     refundReason?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    refundAmountCents?: IntNullableWithAggregatesFilter<"Order"> | number | null
     customerNote?: StringNullableWithAggregatesFilter<"Order"> | string | null
     internalNote?: StringNullableWithAggregatesFilter<"Order"> | string | null
     businessId?: StringWithAggregatesFilter<"Order"> | string
@@ -45493,6 +45516,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -45527,6 +45551,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -45561,6 +45586,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -45595,6 +45621,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -45629,6 +45656,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -45659,6 +45687,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -45685,6 +45714,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -48627,6 +48657,7 @@ export namespace Prisma {
     customerPhone?: SortOrder
     paymentMethod?: SortOrder
     refundReason?: SortOrder
+    refundAmountCents?: SortOrder
     customerNote?: SortOrder
     internalNote?: SortOrder
     businessId?: SortOrder
@@ -48642,6 +48673,7 @@ export namespace Prisma {
     shipping?: SortOrder
     discount?: SortOrder
     total?: SortOrder
+    refundAmountCents?: SortOrder
   }
 
   export type OrderMaxOrderByAggregateInput = {
@@ -48666,6 +48698,7 @@ export namespace Prisma {
     customerPhone?: SortOrder
     paymentMethod?: SortOrder
     refundReason?: SortOrder
+    refundAmountCents?: SortOrder
     customerNote?: SortOrder
     internalNote?: SortOrder
     businessId?: SortOrder
@@ -48696,6 +48729,7 @@ export namespace Prisma {
     customerPhone?: SortOrder
     paymentMethod?: SortOrder
     refundReason?: SortOrder
+    refundAmountCents?: SortOrder
     customerNote?: SortOrder
     internalNote?: SortOrder
     businessId?: SortOrder
@@ -48711,6 +48745,7 @@ export namespace Prisma {
     shipping?: SortOrder
     discount?: SortOrder
     total?: SortOrder
+    refundAmountCents?: SortOrder
   }
 
   export type OrderScalarRelationFilter = {
@@ -53351,6 +53386,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     customer?: CustomerCreateNestedOneWithoutOrdersInput
@@ -53384,6 +53420,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     customerId?: string | null
@@ -54026,6 +54063,7 @@ export namespace Prisma {
     customerPhone?: StringNullableFilter<"Order"> | string | null
     paymentMethod?: StringFilter<"Order"> | string
     refundReason?: StringNullableFilter<"Order"> | string | null
+    refundAmountCents?: IntNullableFilter<"Order"> | number | null
     customerNote?: StringNullableFilter<"Order"> | string | null
     internalNote?: StringNullableFilter<"Order"> | string | null
     businessId?: StringFilter<"Order"> | string
@@ -56353,6 +56391,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -56386,6 +56425,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -56893,6 +56933,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -56926,6 +56967,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -57729,6 +57771,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -57762,6 +57805,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -57811,6 +57855,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -57844,6 +57889,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -57985,6 +58031,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -58018,6 +58065,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -58187,6 +58235,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -58220,6 +58269,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -58342,6 +58392,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -58375,6 +58426,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -58726,6 +58778,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -58759,6 +58812,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -59060,6 +59114,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -59093,6 +59148,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -60530,6 +60586,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     business: BusinessCreateNestedOneWithoutOrdersInput
@@ -60563,6 +60620,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -60764,6 +60822,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -60797,6 +60856,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -61593,6 +61653,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     customerId?: string | null
@@ -61916,6 +61977,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     customer?: CustomerUpdateOneWithoutOrdersNestedInput
@@ -61949,6 +62011,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -61982,6 +62045,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -62950,6 +63014,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -63048,6 +63113,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -63081,6 +63147,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -63114,6 +63181,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -63354,6 +63422,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -63383,6 +63452,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -63416,6 +63486,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -63449,6 +63520,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -63712,6 +63784,7 @@ export namespace Prisma {
     customerPhone?: string | null
     paymentMethod?: string
     refundReason?: string | null
+    refundAmountCents?: number | null
     customerNote?: string | null
     internalNote?: string | null
     businessId: string
@@ -63741,6 +63814,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutOrdersNestedInput
@@ -63774,6 +63848,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -63807,6 +63882,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
+    refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
     internalNote?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string

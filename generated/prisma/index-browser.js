@@ -369,6 +369,7 @@ exports.Prisma.OrderScalarFieldEnum = {
   customerPhone: 'customerPhone',
   paymentMethod: 'paymentMethod',
   refundReason: 'refundReason',
+  refundAmountCents: 'refundAmountCents',
   customerNote: 'customerNote',
   internalNote: 'internalNote',
   businessId: 'businessId',

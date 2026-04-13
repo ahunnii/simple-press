@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import { env } from "~/env";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-
 export const externalRouter = createTRPCRouter({
   /**
    * Verify Artisan Token
@@ -52,68 +51,4 @@ export const externalRouter = createTRPCRouter({
       };
     }),
 
-  updateArtisanToken: publicProcedure
-    .input(
-      z.object({
-        aftoken: z.string(),
-        businessId: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input: { aftoken, businessId } }) => {
-      const business = await ctx.db.business.findUnique({
-        where: { id: businessId },
-        select: { subdomain: true, customDomain: true },
-      });
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
-      let updateToken: Response;
-      try {
-        updateToken = await fetch(
-          `${env.ARTISANAL_FUTURES_API_URL}/simplepress`,
-          {
-            method: "POST",
-            body: JSON.stringify({
-              artisanToken: aftoken,
-              subdomain: business.subdomain,
-              customDomain:
-                business.customDomain ??
-                `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
-            }),
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${env.SIMPLEPRESS_HASH_SECRET}`,
-            },
-          },
-        );
-      } catch (err) {
-        Sentry.captureException(err, {
-          tags: {
-            service: "artisanal-futures",
-            "trpc.procedure": "external.updateArtisanToken",
-          },
-        });
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "External API unavailable",
-        });
-      }
-
-      const updateTokenResponse = (await updateToken.json()) as {
-        ok: boolean;
-      };
-      if (!updateTokenResponse.ok) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Failed to update artisan token",
-        });
-      }
-
-      return { success: true };
-    }),
 });

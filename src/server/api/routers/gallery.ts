@@ -152,9 +152,10 @@ export const galleryRouter = createTRPCRouter({
     .use(featureGate("galleries"))
     .input(galleryReorderImagesSchema)
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const updates = input.imageIds.map((id, index) =>
         ctx.db.galleryImage.update({
-          where: { id },
+          where: { id, gallery: { businessId } },
           data: { sortOrder: index },
         }),
       );
@@ -167,9 +168,10 @@ export const galleryRouter = createTRPCRouter({
     .use(featureGate("galleries"))
     .input(galleryUpdateImageSchema)
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const { id, ...data } = input;
       const image = await ctx.db.galleryImage.update({
-        where: { id },
+        where: { id, gallery: { businessId } },
         data,
       });
       return { data: image, message: "Image updated successfully!" };
@@ -180,8 +182,9 @@ export const galleryRouter = createTRPCRouter({
     .use(featureGate("galleries"))
     .input(z.string())
     .mutation(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
       const image = await ctx.db.galleryImage.delete({
-        where: { id },
+        where: { id, gallery: { businessId } },
       });
       return { data: image, message: "Image deleted successfully!" };
     }),

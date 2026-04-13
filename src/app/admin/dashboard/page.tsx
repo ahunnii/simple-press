@@ -38,7 +38,9 @@ export default async function AdminDashboardPage() {
     revenueByDay,
     topProducts,
   ] = await Promise.all([
-    // Total revenue (all time, paid orders that are not refunded)
+    // Total revenue (all time, paid orders that are not fully refunded)
+    // Subtract refundAmountCents from partial-refund orders so the stat
+    // matches what the orders list page reports.
     db.order.aggregate({
       where: {
         businessId: business.id,
@@ -47,6 +49,7 @@ export default async function AdminDashboardPage() {
       },
       _sum: {
         total: true,
+        refundAmountCents: true,
       },
     }),
 
@@ -76,29 +79,39 @@ export default async function AdminDashboardPage() {
       },
     }),
 
-    // Low stock products
-    db.productVariant.findMany({
-      where: {
-        product: {
+    // Low stock products — variants first, then base products without variants.
+    Promise.all([
+      db.productVariant.findMany({
+        where: {
+          product: { businessId: business.id, published: true, trackInventory: true },
+          inventoryQty: { lte: 10, gte: 0 },
+        },
+        orderBy: { inventoryQty: "asc" },
+        take: 10,
+        include: { product: { select: { name: true } } },
+      }),
+      db.product.findMany({
+        where: {
           businessId: business.id,
           published: true,
+          trackInventory: true,
+          inventoryQty: { lte: 10, gte: 0 },
+          variants: { none: {} },
         },
-        inventoryQty: {
-          lte: 10,
-          gte: 0,
-        },
-      },
-      orderBy: {
-        inventoryQty: "asc",
-      },
-      take: 5,
-      include: {
-        product: {
-          select: {
-            name: true,
-          },
-        },
-      },
+        orderBy: { inventoryQty: "asc" },
+        take: 10,
+        select: { id: true, name: true, inventoryQty: true },
+      }),
+    ]).then(([variants, baseProducts]) => {
+      const baseAsVariants = baseProducts.map((p) => ({
+        id: p.id,
+        name: "",
+        inventoryQty: p.inventoryQty,
+        product: { name: p.name },
+      }));
+      return [...variants, ...baseAsVariants]
+        .sort((a, b) => a.inventoryQty - b.inventoryQty)
+        .slice(0, 5);
     }),
 
     // Revenue by day (last 30 days)
@@ -185,7 +198,7 @@ export default async function AdminDashboardPage() {
       <DashboardContent
         business={businessData!}
         stats={{
-          totalRevenue: totalRevenue._sum.total ?? 0,
+          totalRevenue: (totalRevenue._sum.total ?? 0) - (totalRevenue._sum.refundAmountCents ?? 0),
           totalOrders,
           totalProducts: businessData!._count.products,
           totalCustomers: businessData!._count.customers,

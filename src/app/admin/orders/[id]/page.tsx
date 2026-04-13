@@ -38,6 +38,8 @@ export default async function OrderDetailPage({ params }: Props) {
         return "bg-yellow-100 text-yellow-800";
       case "paid":
         return "bg-blue-100 text-blue-800";
+      case "processing":
+        return "bg-indigo-100 text-indigo-800";
       case "fulfilled":
         return "bg-green-100 text-green-800";
       case "cancelled":
@@ -210,8 +212,10 @@ export default async function OrderDetailPage({ params }: Props) {
               </CardContent>
             </Card>
 
-            {/* Fulfillment Form — show when payment is confirmed and order not yet fulfilled */}
-            {(order.status === "paid" || order.paymentStatus === "paid") &&
+            {/* Fulfillment Form — show when payment is confirmed and order not yet fulfilled.
+                Keyed on paymentStatus rather than order.status so the form reappears
+                if fulfillmentStatus is manually reset to unfulfilled via the override. */}
+            {order.paymentStatus === "paid" &&
               order.fulfillmentStatus !== "fulfilled" && (
                 <FulfillmentForm
                   orderId={order.id}

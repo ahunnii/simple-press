@@ -1,4 +1,4 @@
-import type { Prisma } from "generated/prisma";
+import { Prisma } from "generated/prisma";
 import type Stripe from "stripe";
 import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
@@ -181,7 +181,11 @@ export const orderRouter = createTRPCRouter({
           console.log(
             `[Orders] Additional shipped email sent for order #${order.orderNumber}`,
           );
-        } else {
+        } else if (order.fulfillmentStatus !== "fulfilled") {
+          // Only send "fulfilled" email if this is the first time the order is
+          // being marked fulfilled. Calling addShipment on an already-fulfilled
+          // order (e.g. to add a second package with no tracking) would otherwise
+          // send a duplicate "your order has been fulfilled" email.
           await sendOrderFulfilled({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
@@ -344,13 +348,15 @@ export const orderRouter = createTRPCRouter({
           break;
         }
         case "refunded": {
+          const storedRefund = order.refundAmountCents ?? order.total;
+          const isFullRefundResend = storedRefund >= order.total;
           await sendOrderRefunded({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
-            refundAmountCents: order.total,
+            refundAmountCents: storedRefund,
             orderTotalCents: order.total,
-            isFullRefund: true,
+            isFullRefund: isFullRefundResend,
             reason: order.refundReason ?? null,
             business: {
               name: business.name,
@@ -473,10 +479,16 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      if (input.amount > order.total) {
+      const alreadyRefunded = order.refundAmountCents ?? 0;
+      const maxRefundable = order.total - alreadyRefunded;
+
+      if (input.amount > maxRefundable) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Refund amount cannot exceed order total",
+          message:
+            alreadyRefunded > 0
+              ? `Refund amount cannot exceed the remaining refundable amount ($${(maxRefundable / 100).toFixed(2)})`
+              : "Refund amount cannot exceed order total",
         });
       }
 
@@ -492,7 +504,8 @@ export const orderRouter = createTRPCRouter({
         },
       );
 
-      const isFullRefund = input.amount === order.total;
+      const newTotalRefunded = alreadyRefunded + input.amount;
+      const isFullRefund = newTotalRefunded >= order.total;
       const reasonLabel = input.reason
         ? (STRIPE_REFUND_REASON_LABEL[input.reason] ?? input.reason)
         : null;
@@ -503,6 +516,7 @@ export const orderRouter = createTRPCRouter({
           status: isFullRefund ? "refunded" : "partial_refund",
           ...(isFullRefund && { paymentStatus: "refunded" }),
           refundReason: reasonLabel,
+          refundAmountCents: newTotalRefunded,
         },
         include: {
           items: true,
@@ -522,12 +536,13 @@ export const orderRouter = createTRPCRouter({
                     inventoryQty: true,
                     productId: true,
                     product: {
-                      select: { businessId: true },
+                      select: { businessId: true, trackInventory: true },
                     },
                   },
                 });
 
                 if (!variant) continue;
+                if (!variant.product.trackInventory) continue;
 
                 const newQty = variant.inventoryQty + item.quantity;
 
@@ -711,10 +726,11 @@ export const orderRouter = createTRPCRouter({
                       id: true,
                       inventoryQty: true,
                       productId: true,
-                      product: { select: { businessId: true } },
+                      product: { select: { businessId: true, trackInventory: true } },
                     },
                   });
                   if (!variant) continue;
+                  if (!variant.product.trackInventory) continue;
                   const newQty = variant.inventoryQty + item.quantity;
                   await tx.productVariant.update({
                     where: { id: item.productVariantId },
@@ -807,6 +823,7 @@ export const orderRouter = createTRPCRouter({
     }),
 
   updatePaymentStatus: ownerAdminProcedure
+    .use(featureGate("orders"))
     .input(updatePaymentStatusSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -908,10 +925,6 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      const orderCount = await ctx.db.order.count({
-        where: { businessId },
-      });
-
       const baseNote = input.notes?.trim() ?? "";
       const internalNote = baseNote
         ? `[Manual Order]\n${baseNote}`
@@ -920,42 +933,73 @@ export const orderRouter = createTRPCRouter({
       // Derive paymentMethod: use provided value or default based on payment source
       const paymentMethod = input.paymentMethod?.trim() ?? "manual";
 
-      const order = await ctx.db.order.create({
-        data: {
-          orderNumber: orderCount + 1,
-          businessId,
-          customerId: customer.id,
-          customerEmail: input.customerEmail,
-          customerName: input.customerName,
+      // Retry up to 3 times on orderNumber unique-constraint conflict — concurrent
+      // manual order creation can race and produce the same number.
+      const getNextOrderNumber = async () => {
+        const lastOrder = await ctx.db.order.findFirst({
+          where: { businessId },
+          orderBy: { orderNumber: "desc" },
+          select: { orderNumber: true },
+        });
+        return (lastOrder?.orderNumber ?? 0) + 1;
+      };
 
-          subtotal: input.subtotal,
-          tax: input.tax ?? 0,
-          shipping: input.shipping ?? 0,
-          total: input.total,
+      let orderNumber = await getNextOrderNumber();
+      const order = await (async () => {
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            return await ctx.db.order.create({
+              data: {
+                orderNumber,
+                businessId,
+                customerId: customer.id,
+                customerEmail: input.customerEmail,
+                customerName: input.customerName,
 
-          status: input.status,
-          paymentStatus: input.paymentStatus,
-          paymentMethod,
-          fulfillmentStatus: input.fulfillmentStatus,
+                subtotal: input.subtotal,
+                tax: input.tax ?? 0,
+                shipping: input.shipping ?? 0,
+                total: input.total,
 
-          shippingAddressId,
-          internalNote,
+                status: input.status,
+                paymentStatus: input.paymentStatus,
+                paymentMethod,
+                fulfillmentStatus: input.fulfillmentStatus,
 
-          items: {
-            create: input.items.map((item) => ({
-              productId: item.productId,
-              productName: item.productName ?? "Unknown Product",
-              productVariantId: item.productVariantId,
-              quantity: item.quantity,
-              price: item.price,
-              total: item.total,
-            })),
-          },
-        },
-        include: {
-          items: true,
-        },
-      });
+                shippingAddressId,
+                internalNote,
+
+                items: {
+                  create: input.items.map((item) => ({
+                    productId: item.productId,
+                    productName: item.productName ?? "Unknown Product",
+                    productVariantId: item.productVariantId,
+                    quantity: item.quantity,
+                    price: item.price,
+                    total: item.total,
+                  })),
+                },
+              },
+              include: { items: true },
+            });
+          } catch (createErr: unknown) {
+            const isOrderNumberConflict =
+              createErr instanceof Prisma.PrismaClientKnownRequestError &&
+              createErr.code === "P2002" &&
+              (createErr.meta?.target as string[] | undefined)?.some(
+                (f) =>
+                  f === "orderNumber" ||
+                  f === "Order_businessId_orderNumber_key",
+              );
+            if (attempt < 2 && isOrderNumberConflict) {
+              orderNumber = await getNextOrderNumber();
+              continue;
+            }
+            throw createErr;
+          }
+        }
+        throw new Error("[createManual] Order creation retry exhausted");
+      })();
 
       console.log(`[Manual Order] Order created: ${order.id}`);
 
@@ -1079,6 +1123,7 @@ export const orderRouter = createTRPCRouter({
           status: "refunded",
           paymentStatus: "refunded",
           refundReason: reasonLabel,
+          refundAmountCents: order.total,
         },
       });
 
@@ -1093,10 +1138,11 @@ export const orderRouter = createTRPCRouter({
                     id: true,
                     inventoryQty: true,
                     productId: true,
-                    product: { select: { businessId: true } },
+                    product: { select: { businessId: true, trackInventory: true } },
                   },
                 });
                 if (!variant) continue;
+                if (!variant.product.trackInventory) continue;
                 const newQty = variant.inventoryQty + item.quantity;
                 await tx.productVariant.update({
                   where: { id: item.productVariantId },

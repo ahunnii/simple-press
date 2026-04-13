@@ -102,8 +102,10 @@ export const testimonialRouter = createTRPCRouter({
   // ─── CUSTOMER SUBMITTED ───────────────────────────────────────────────────
 
   canSubmit: protectedProcedure
-    .input(z.object({ businessId: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx }) => {
+      const business = await checkBusiness();
+      if (!business) return { canSubmit: false, reason: "Business not found" };
+
       const user = await ctx.db.user.findUnique({
         where: { id: ctx.session.user.id },
         select: { email: true },
@@ -113,7 +115,7 @@ export const testimonialRouter = createTRPCRouter({
 
       const existing = await ctx.db.testimonial.findFirst({
         where: {
-          businessId: input.businessId,
+          businessId: business.id,
           customerEmail: user.email,
           source: "customer",
         },
@@ -130,13 +132,16 @@ export const testimonialRouter = createTRPCRouter({
   submit: protectedProcedure
     .input(
       z.object({
-        businessId: z.string(),
         text: z.string().min(10).max(1000),
         photoUrls: z.array(z.string().url()).max(5).default([]),
         captchaToken: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+      if (!business)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+
       if (input.captchaToken) {
         const isValid = await verifyHCaptcha(input.captchaToken);
         if (!isValid) {
@@ -160,7 +165,7 @@ export const testimonialRouter = createTRPCRouter({
 
       const existing = await ctx.db.testimonial.findFirst({
         where: {
-          businessId: input.businessId,
+          businessId: business.id,
           customerEmail: user.email,
           source: "customer",
         },
@@ -175,10 +180,10 @@ export const testimonialRouter = createTRPCRouter({
 
       const customer = await ctx.db.customer.upsert({
         where: {
-          businessId_email: { businessId: input.businessId, email: user.email },
+          businessId_email: { businessId: business.id, email: user.email },
         },
         create: {
-          businessId: input.businessId,
+          businessId: business.id,
           email: user.email,
           firstName: user.name?.split(" ")[0],
           lastName: user.name?.split(" ").slice(1).join(" "),
@@ -189,7 +194,7 @@ export const testimonialRouter = createTRPCRouter({
       return ctx.db.testimonial.create({
         data: {
           source: "customer",
-          businessId: input.businessId,
+          businessId: business.id,
           customerId: customer.id,
           customerEmail: user.email,
           customerName: user.name ?? "Anonymous",

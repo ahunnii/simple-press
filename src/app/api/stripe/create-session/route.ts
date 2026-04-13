@@ -1,11 +1,12 @@
 import type { NextRequest } from "next/server";
 import type Stripe from "stripe";
-import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { checkoutLimiter, getClientIp } from "~/lib/rate-limit";
 import {
   calculateShipping,
   shippingConfigFromBusiness,
@@ -62,7 +63,6 @@ export async function POST(req: NextRequest) {
         } | null;
       };
       discountCodeId?: string | null;
-      discountAmount?: number;
       deliveryMethod?: "ship" | "pickup";
     };
 
@@ -72,6 +72,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
+      );
+    }
+
+    // Rate limit: 10 checkout session attempts per minute per IP
+    try {
+      await checkoutLimiter.consume(getClientIp(req));
+    } catch {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 },
       );
     }
 
@@ -105,6 +115,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const MAX_QUANTITY_PER_ITEM = 100;
+    if (
+      itemList.some(
+        (i) =>
+          !Number.isInteger(i.quantity) ||
+          i.quantity < 1 ||
+          i.quantity > MAX_QUANTITY_PER_ITEM,
+      )
+    ) {
+      return NextResponse.json(
+        { error: "Invalid item quantity." },
+        { status: 400 },
+      );
+    }
+
     const variantIds = [
       ...new Set(
         itemList
@@ -119,7 +144,7 @@ export async function POST(req: NextRequest) {
     const [variantsWithProduct, productsNoVariant] = await Promise.all([
       variantIds.length > 0
         ? db.productVariant.findMany({
-            where: { id: { in: variantIds } },
+            where: { id: { in: variantIds }, product: { businessId: business.id } },
             select: {
               id: true,
               price: true,
@@ -158,11 +183,7 @@ export async function POST(req: NextRequest) {
       }),
     ]);
 
-    const variantMap = new Map(
-      variantsWithProduct
-        .filter((v) => v.product.businessId === business.id)
-        .map((v) => [v.id, v]),
-    );
+    const variantMap = new Map(variantsWithProduct.map((v) => [v.id, v]));
     const productMap = new Map(productsNoVariant.map((p) => [p.id, p]));
 
     const unavailableItems: string[] = [];
@@ -197,8 +218,10 @@ export async function POST(req: NextRequest) {
           pushUnavailable(name, item.productId, item.variantId);
           continue;
         }
-        const variantProductFields = variant.product
-          .additionalFields as Record<string, unknown> | null;
+        const variantProductFields = variant.product.additionalFields as Record<
+          string,
+          unknown
+        > | null;
         if (variantProductFields?.comingSoon === true) {
           pushUnavailable(name, item.productId, item.variantId);
           continue;
@@ -282,10 +305,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const subtotalCents = itemList.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
+    // Always use server-fetched prices for subtotal — never trust client-supplied amounts.
+    // This ensures discounts and free-shipping thresholds are computed against real prices.
+    const subtotalCents = itemList.reduce((sum, item) => {
+      const serverPrice = item.variantId
+        ? (variantMap.get(item.variantId)?.price ?? 0)
+        : (productMap.get(item.productId)?.price ?? 0);
+      return sum + serverPrice * item.quantity;
+    }, 0);
 
     const rawDiscountId =
       typeof discountCodeId === "string" && discountCodeId.trim() !== ""
@@ -512,10 +539,18 @@ export async function POST(req: NextRequest) {
       stripeAccount: business.stripeAccountId, // Connect to store's Stripe account
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       sessionUrl: session.url,
       sessionId: session.id,
     });
+    response.cookies.set("pending_session", session.id, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+      maxAge: 3600,
+    });
+    return response;
   } catch (error: unknown) {
     console.error("Create checkout session error:", error);
     Sentry.withScope((scope) => {

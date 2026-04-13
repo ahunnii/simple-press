@@ -87,6 +87,20 @@ export const reviewVoteLimiter = makeLazy({
   keyPrefix: "rl:review-vote",
 });
 
+// 5 contact form submissions per 10 minutes per IP
+export const contactLimiter = makeLazy({
+  points: 5,
+  duration: 600,
+  keyPrefix: "rl:contact",
+});
+
+// 10 checkout session attempts per minute per IP
+export const checkoutLimiter = makeLazy({
+  points: 10,
+  duration: 60,
+  keyPrefix: "rl:checkout",
+});
+
 /**
  * Extracts a best-effort client IP from Next.js request headers.
  * Falls back to a generic key so rate limiting always applies.
