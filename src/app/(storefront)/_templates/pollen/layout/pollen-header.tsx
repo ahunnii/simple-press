@@ -15,6 +15,7 @@ import { motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { authClient } from "~/server/better-auth/client";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { HamburgerIcon } from "~/components/layout/hamburger-icon";
 import { useCart } from "~/providers/cart-context";
@@ -30,6 +31,9 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
+  const { isEnabled, isDisabledByDependency } = useFeatureFlags({
+    flags: (business?.featureFlags as Record<string, boolean>) ?? {},
+  });
   const { itemCount } = useCart();
   const user = session?.user;
 
@@ -143,18 +147,21 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
 
             <div className="flex items-center gap-3">
               {/* Cart icon */}
-              <Link
-                href="/cart"
-                className="relative flex items-center p-2 text-[#4c566a] transition-colors hover:text-[#215935]"
-                aria-label={`Shopping cart with ${itemCount} items`}
-              >
-                <ShoppingBag className="size-5" />
-                {itemCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[#215935] text-[10px] font-bold text-white">
-                    {itemCount}
-                  </span>
-                )}
-              </Link>
+
+              {isEnabled("cart") && (
+                <Link
+                  href="/cart"
+                  className="relative flex items-center p-2 text-[#4c566a] transition-colors hover:text-[#215935]"
+                  aria-label={`Shopping cart with ${itemCount} items`}
+                >
+                  <ShoppingBag className="size-5" />
+                  {itemCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[#215935] text-[10px] font-bold text-white">
+                      {itemCount}
+                    </span>
+                  )}
+                </Link>
+              )}
 
               <div className="hidden items-center gap-3 md:flex">
                 <Button
@@ -220,7 +227,7 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
             className="mb-12 flex shrink-0 items-center justify-center"
           >
             <Image
-              src="/dpc-logo.png"
+              src={business.siteContent?.logoUrl ?? "/placeholder.svg"}
               alt="Detroit Pollinator Company"
               width={140}
               height={140}

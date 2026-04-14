@@ -61,6 +61,7 @@ const getNavData = (session: Session | null) => {
       title: "Payments",
       url: "/admin/payments",
       icon: IconCreditCard,
+      featureKey: "payments",
     },
     {
       title: "Products",

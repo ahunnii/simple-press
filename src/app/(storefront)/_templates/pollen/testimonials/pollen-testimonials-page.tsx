@@ -20,7 +20,7 @@ export async function PollenTestimonialsPage({
       <PollenTestimonialsWall testimonials={testimonials} />
       <section className="bg-[#f5f2ee] py-16">
         <div className="mx-auto max-w-2xl px-4 text-center">
-          <h2 className="font-serif text-2xl font-bold text-[#2a351f]">
+          <h2 className="text-2xl font-bold text-[#2a351f]">
             Share Your Experience
           </h2>
           <p className="mt-2 text-[#4c566a]">

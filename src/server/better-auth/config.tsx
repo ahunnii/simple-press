@@ -47,6 +47,7 @@ export const auth = betterAuth({
       `${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
       `*.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
       "zairesvisions.org",
+      "detroitpollinatorcompany.com",
     ],
 
     protocol: process.env.NODE_ENV === "development" ? "http" : "https",

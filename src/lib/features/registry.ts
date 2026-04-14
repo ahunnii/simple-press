@@ -51,7 +51,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Allow customers to add items to a cart and check out",
     category: "ecommerce",
     enabledByDefault: true,
-    ownerCanToggle: false,
+    ownerCanToggle: true,
     dependsOn: ["products"],
   },
   inventory: {
@@ -83,6 +83,24 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     dependsOn: ["products"],
     hidesNav: ["collections"],
+  },
+  checkout: {
+    key: "checkout",
+    label: "Checkout",
+    description: "Allow customers to checkout and complete their purchase",
+    category: "ecommerce",
+    enabledByDefault: true,
+    ownerCanToggle: true,
+    dependsOn: ["products", "cart"],
+  },
+  payments: {
+    key: "payments",
+    label: "Payments",
+    description: "Allow customers to pay for their purchase",
+    category: "ecommerce",
+    enabledByDefault: true,
+    ownerCanToggle: true,
+    dependsOn: ["orders", "cart"],
   },
 
   // ─── CONTENT ────────────────────────────────────────────────────────────────

@@ -3,15 +3,16 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookUser, Bell, Lock, Package, Settings } from "lucide-react";
+import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
 
 import { cn } from "~/lib/utils";
+import { PageTransition } from "~/components/page-animations";
 
 const NAV_ITEMS = [
-  { href: "/account/orders", label: "Orders", icon: Package },
+  // { href: "/account/orders", label: "Orders", icon: Package },
   { href: "/account/settings", label: "Settings", icon: Settings },
   { href: "/account/security", label: "Security", icon: Lock },
-  { href: "/account/address-book", label: "Address Book", icon: BookUser },
+  // { href: "/account/address-book", label: "Address Book", icon: BookUser },
   { href: "/account/preferences", label: "Preferences", icon: Bell },
 ] as const;
 
@@ -24,8 +25,8 @@ export function PollenAccountLayout({ children, heading }: Props) {
   const pathname = usePathname();
 
   return (
-    <>
-      <section className="bg-[#f0f7ec] py-16">
+    <PageTransition>
+      <section className="bg-[#f0f7ec] pt-44 pb-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p className="mb-2 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
             Account
@@ -72,7 +73,7 @@ export function PollenAccountLayout({ children, heading }: Props) {
                     <Link
                       href={href}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg border-l-2 py-2.5 pl-3 pr-4 text-sm font-medium transition-colors",
+                        "flex items-center gap-3 rounded-lg border-l-2 py-2.5 pr-4 pl-3 text-sm font-medium transition-colors",
                         active
                           ? "border-[#5e8b4a] bg-[#5e8b4a]/10 text-[#5e8b4a]"
                           : "border-transparent text-[#4b5563] hover:bg-gray-100 hover:text-[#374151]",
@@ -90,6 +91,6 @@ export function PollenAccountLayout({ children, heading }: Props) {
           <div className="min-w-0">{children}</div>
         </div>
       </section>
-    </>
+    </PageTransition>
   );
 }

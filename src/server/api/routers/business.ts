@@ -81,6 +81,7 @@ export const businessRouter = createTRPCRouter({
         id: true,
         name: true,
         templateId: true,
+        featureFlags: true,
         businessAddress: true,
         stripeAccountId: true,
         supportEmail: true,
