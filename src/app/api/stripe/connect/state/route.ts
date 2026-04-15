@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  if (!membership) {
+  if (!membership && session.user.platformRole !== "PLATFORM_ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

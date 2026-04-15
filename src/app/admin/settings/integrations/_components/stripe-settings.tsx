@@ -12,7 +12,6 @@ import {
 import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
-import { getCallbackUrl } from "~/lib/domain";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -25,6 +24,10 @@ import {
 } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
+import {
+  buildStripeConnectAuthorizeUrl,
+  requestSignedStripeOAuthState,
+} from "~/app/admin/_components/payment/stripe-connect-utils";
 
 type Props = {
   businessId: string;
@@ -74,33 +77,18 @@ export function StripeSettings({
 
     const returnUrl = window.location.href.split("?")[0] ?? "";
 
-    // Request a signed state from the server. The session is valid here (same
-    // domain as the admin), so auth succeeds. The callback can then verify the
-    // signature without needing a live session (which would fail across domains).
-    let signedState: string;
     try {
-      const res = await fetch("/api/stripe/connect/state", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ businessId, returnUrl }),
+      const signedState = await requestSignedStripeOAuthState({
+        businessId,
+        returnUrl,
       });
-      if (!res.ok) throw new Error("Failed to generate state");
-      const data = (await res.json()) as { signedState: string };
-      signedState = data.signedState;
+      window.location.href = buildStripeConnectAuthorizeUrl({
+        clientId,
+        signedState,
+      });
     } catch {
       toast.error("Failed to initiate Stripe connection. Please try again.");
-      return;
     }
-
-    const callbackUrl = getCallbackUrl();
-    const stripeUrl = new URL("https://connect.stripe.com/oauth/authorize");
-    stripeUrl.searchParams.set("response_type", "code");
-    stripeUrl.searchParams.set("client_id", clientId);
-    stripeUrl.searchParams.set("scope", "read_write");
-    stripeUrl.searchParams.set("redirect_uri", callbackUrl);
-    stripeUrl.searchParams.set("state", signedState);
-
-    window.location.href = stripeUrl.toString();
   };
 
   const handleDisconnect = async () => {
@@ -116,6 +104,8 @@ export function StripeSettings({
     try {
       const response = await fetch("/api/stripe/connect/disconnect", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessId }),
       });
 
       if (!response.ok) {
