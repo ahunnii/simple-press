@@ -268,9 +268,6 @@ export async function POST(req: NextRequest) {
             where: {
               email: customerEmail,
               emailVerified: true,
-              memberships: {
-                some: { businessId: business.id },
-              },
             },
             select: { id: true },
           });

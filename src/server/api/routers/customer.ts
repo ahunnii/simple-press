@@ -91,7 +91,17 @@ export const customerRouter = createTRPCRouter({
 
     const user = ctx.session.user;
 
-    // Find customer linked to this user
+    // Link any unlinked customer records for this email (self-heal for orders
+    // placed before the userId was set correctly on the Customer record)
+    await ctx.db.customer.updateMany({
+      where: {
+        email: user.email.toLowerCase(),
+        businessId: business.id,
+        userId: null,
+      },
+      data: { userId: user.id },
+    });
+
     const customer = await ctx.db.customer.findFirst({
       where: {
         userId: user.id,
