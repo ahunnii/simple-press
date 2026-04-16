@@ -53,18 +53,9 @@ export const inventoryRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      // Get variant with product and business
       const variant = await ctx.db.productVariant.findUnique({
         where: { id: input.variantId, product: { businessId } },
-        include: {
-          product: {
-            include: {
-              business: {
-                select: { id: true },
-              },
-            },
-          },
-        },
+        select: { id: true, inventoryQty: true, productId: true },
       });
 
       if (!variant) {
@@ -74,35 +65,123 @@ export const inventoryRouter = createTRPCRouter({
         });
       }
 
-      // Update inventory in transaction with history
+      const newQty = input.quantity;
+
       const result = await ctx.db.$transaction(async (tx) => {
-        // Update variant inventory
         const updated = await tx.productVariant.update({
           where: { id: input.variantId, product: { businessId } },
-          data: {
-            inventoryQty: input.quantity,
-          },
+          data: { inventoryQty: newQty },
         });
 
-        // Create inventory history record
         await tx.inventoryHistory.create({
           data: {
             variantId: input.variantId,
             productId: variant.productId,
             businessId,
             previousQty: variant.inventoryQty,
-            newQty: input.quantity,
-            changeQty: input.quantity - variant.inventoryQty,
+            newQty,
+            changeQty: newQty - variant.inventoryQty,
             reason: input.reason ?? "adjustment",
             note: input.note,
             userId: ctx.session.user.id,
           },
         });
 
+        // Reset alert flags atomically within the same transaction
+        const parent = await tx.product.findUnique({
+          where: { id: variant.productId },
+          select: { lowInventoryThreshold: true, lowInventoryAlertSent: true, outOfStockAlertSent: true },
+        });
+        if (parent) {
+          const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
+          if (parent.outOfStockAlertSent && newQty > 0) resetData.outOfStockAlertSent = false;
+          if (
+            parent.lowInventoryAlertSent &&
+            parent.lowInventoryThreshold !== null &&
+            newQty > parent.lowInventoryThreshold
+          ) {
+            resetData.lowInventoryAlertSent = false;
+          }
+          if (Object.keys(resetData).length > 0) {
+            await tx.product.update({ where: { id: variant.productId }, data: resetData });
+          }
+        }
+
         return updated;
       });
 
       return result;
+    }),
+
+  // Update inventory for a base product (no variants)
+  updateProductInventory: ownerAdminProcedure
+    .input(
+      z.object({
+        productId: z.string(),
+        quantity: z.number().int(),
+        reason: z
+          .enum(["restock", "adjustment", "correction", "damage", "return"])
+          .optional(),
+        note: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const product = await ctx.db.product.findUnique({
+        where: { id: input.productId, businessId, variants: { none: {} } },
+        select: {
+          id: true,
+          inventoryQty: true,
+          lowInventoryThreshold: true,
+          lowInventoryAlertSent: true,
+          outOfStockAlertSent: true,
+        },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found or has variants — use variant inventory update instead",
+        });
+      }
+
+      const newQty = input.quantity;
+
+      await ctx.db.$transaction(async (tx) => {
+        await tx.product.update({
+          where: { id: product.id },
+          data: { inventoryQty: newQty },
+        });
+
+        await tx.inventoryHistory.create({
+          data: {
+            productId: product.id,
+            businessId,
+            previousQty: product.inventoryQty,
+            newQty,
+            changeQty: newQty - product.inventoryQty,
+            reason: input.reason ?? "adjustment",
+            note: input.note,
+            userId: ctx.session.user.id,
+          },
+        });
+
+        // Reset alert flags atomically
+        const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
+        if (product.outOfStockAlertSent && newQty > 0) resetData.outOfStockAlertSent = false;
+        if (
+          product.lowInventoryAlertSent &&
+          product.lowInventoryThreshold !== null &&
+          newQty > product.lowInventoryThreshold
+        ) {
+          resetData.lowInventoryAlertSent = false;
+        }
+        if (Object.keys(resetData).length > 0) {
+          await tx.product.update({ where: { id: product.id }, data: resetData });
+        }
+      });
+
+      return { message: "Inventory updated successfully" };
     }),
 
   // Deduct inventory (called when order is placed)
@@ -182,37 +261,36 @@ export const inventoryRouter = createTRPCRouter({
   //     return { success: true };
   //   }),
 
-  // Get low stock alerts
+  // Get low stock alerts (variants + base products)
   getLowStockAlerts: ownerAdminProcedure
     .input(z.object({ threshold: z.number().int().default(10) }))
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      // Get variants with low stock
-      const lowStockVariants = await ctx.db.productVariant.findMany({
-        where: {
-          product: {
-            businessId,
-          },
-          inventoryQty: {
-            lte: input.threshold,
-            gte: 0,
-          },
-        },
-        include: {
-          product: {
-            select: {
-              id: true,
-              name: true,
-              published: true,
-            },
-          },
-        },
-        orderBy: {
-          inventoryQty: "asc",
-        },
-      });
 
-      return lowStockVariants;
+      const [lowStockVariants, lowStockBaseProducts] = await Promise.all([
+        ctx.db.productVariant.findMany({
+          where: {
+            product: { businessId, trackInventory: true },
+            inventoryQty: { lte: input.threshold, gte: 0 },
+          },
+          include: {
+            product: { select: { id: true, name: true, published: true } },
+          },
+          orderBy: { inventoryQty: "asc" },
+        }),
+        ctx.db.product.findMany({
+          where: {
+            businessId,
+            trackInventory: true,
+            variants: { none: {} },
+            inventoryQty: { lte: input.threshold, gte: 0 },
+          },
+          select: { id: true, name: true, sku: true, inventoryQty: true, published: true },
+          orderBy: { inventoryQty: "asc" },
+        }),
+      ]);
+
+      return { variants: lowStockVariants, baseProducts: lowStockBaseProducts };
     }),
 
   // Get inventory history
@@ -294,50 +372,94 @@ export const inventoryRouter = createTRPCRouter({
       // Process each update
       for (const update of input.updates) {
         try {
-          // Find variant by SKU
+          // Try variant SKU first
           const variant = await ctx.db.productVariant.findFirst({
-            where: {
-              sku: update.sku,
-              product: { businessId },
-            },
-            include: {
-              product: {
-                select: {
-                  businessId: true,
+            where: { sku: update.sku, product: { businessId } },
+            select: { id: true, inventoryQty: true, productId: true },
+          });
+
+          if (variant) {
+            await ctx.db.$transaction(async (tx) => {
+              await tx.productVariant.update({
+                where: { id: variant.id, product: { businessId } },
+                data: { inventoryQty: update.quantity },
+              });
+              await tx.inventoryHistory.create({
+                data: {
+                  variantId: variant.id,
+                  productId: variant.productId,
+                  businessId,
+                  previousQty: variant.inventoryQty,
+                  newQty: update.quantity,
+                  changeQty: update.quantity - variant.inventoryQty,
+                  reason: "adjustment",
+                  note: "Bulk update via CSV",
+                  userId: ctx.session.user.id,
                 },
-              },
+              });
+              // Reset alert flags atomically
+              const parent = await tx.product.findUnique({
+                where: { id: variant.productId },
+                select: { lowInventoryThreshold: true, lowInventoryAlertSent: true, outOfStockAlertSent: true },
+              });
+              if (parent) {
+                const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
+                if (parent.outOfStockAlertSent && update.quantity > 0) resetData.outOfStockAlertSent = false;
+                if (parent.lowInventoryAlertSent && parent.lowInventoryThreshold !== null && update.quantity > parent.lowInventoryThreshold) {
+                  resetData.lowInventoryAlertSent = false;
+                }
+                if (Object.keys(resetData).length > 0) {
+                  await tx.product.update({ where: { id: variant.productId }, data: resetData });
+                }
+              }
+            });
+            results.success++;
+            continue;
+          }
+
+          // Fall back to base product SKU (no variants)
+          const baseProduct = await ctx.db.product.findFirst({
+            where: { sku: update.sku, businessId, variants: { none: {} } },
+            select: {
+              id: true,
+              inventoryQty: true,
+              lowInventoryThreshold: true,
+              lowInventoryAlertSent: true,
+              outOfStockAlertSent: true,
             },
           });
 
-          if (!variant) {
+          if (!baseProduct) {
             results.failed++;
             results.errors.push(`SKU ${update.sku} not found`);
             continue;
           }
 
           await ctx.db.$transaction(async (tx) => {
-            // Update inventory
-            await tx.productVariant.update({
-              where: { id: variant.id, product: { businessId } },
-              data: {
-                inventoryQty: update.quantity,
-              },
+            await tx.product.update({
+              where: { id: baseProduct.id },
+              data: { inventoryQty: update.quantity },
             });
-
-            // Create history
             await tx.inventoryHistory.create({
               data: {
-                variantId: variant.id,
-                productId: variant.productId,
+                productId: baseProduct.id,
                 businessId,
-                previousQty: variant.inventoryQty,
+                previousQty: baseProduct.inventoryQty,
                 newQty: update.quantity,
-                changeQty: update.quantity - variant.inventoryQty,
+                changeQty: update.quantity - baseProduct.inventoryQty,
                 reason: "adjustment",
                 note: "Bulk update via CSV",
                 userId: ctx.session.user.id,
               },
             });
+            const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
+            if (baseProduct.outOfStockAlertSent && update.quantity > 0) resetData.outOfStockAlertSent = false;
+            if (baseProduct.lowInventoryAlertSent && baseProduct.lowInventoryThreshold !== null && update.quantity > baseProduct.lowInventoryThreshold) {
+              resetData.lowInventoryAlertSent = false;
+            }
+            if (Object.keys(resetData).length > 0) {
+              await tx.product.update({ where: { id: baseProduct.id }, data: resetData });
+            }
           });
 
           results.success++;

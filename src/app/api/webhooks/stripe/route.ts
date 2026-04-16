@@ -6,12 +6,27 @@ import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
+import { getBusinessUrl } from "~/lib/business-url";
 import {
+  sendBackorderAlert,
+  sendLowInventoryAlert,
   sendNewOrderNotification,
   sendOrderConfirmation,
+  sendOutOfStockAlert,
 } from "~/lib/email/templates";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
+
+type NotificationCandidate = {
+  productId: string;
+  productName: string;
+  variantId?: string;
+  variantName?: string;
+  newQty: number;
+  previousQty: number;
+  allowBackorders: boolean;
+  lowInventoryThreshold: number | null;
+};
 
 /** Prefer shipping collected on Checkout; fall back to PI shipping or session metadata (storefront pre-filled address). */
 function resolveCheckoutShipping(fullSession: Stripe.Checkout.Session): {
@@ -513,6 +528,8 @@ export async function POST(req: NextRequest) {
         }
 
         // Deduct inventory
+        const notificationCandidates: NotificationCandidate[] = [];
+
         try {
           await db.$transaction(async (tx) => {
             for (const item of order.items) {
@@ -524,6 +541,7 @@ export async function POST(req: NextRequest) {
                   where: { id: item.productVariantId },
                   select: {
                     id: true,
+                    name: true,
                     inventoryQty: true,
                     productId: true,
                     product: {
@@ -531,6 +549,8 @@ export async function POST(req: NextRequest) {
                         businessId: true,
                         trackInventory: true,
                         allowBackorders: true,
+                        name: true,
+                        lowInventoryThreshold: true,
                       },
                     },
                   },
@@ -567,6 +587,16 @@ export async function POST(req: NextRequest) {
                       note: `Order #${orderNumber}`,
                       orderId: order.id,
                     },
+                  });
+                  notificationCandidates.push({
+                    productId: variant.productId,
+                    productName: variant.product.name,
+                    variantId: variant.id,
+                    variantName: variant.name,
+                    newQty,
+                    previousQty,
+                    allowBackorders: variant.product.allowBackorders,
+                    lowInventoryThreshold: variant.product.lowInventoryThreshold,
                   });
                 } else {
                   const result = await tx.productVariant.updateMany({
@@ -611,6 +641,16 @@ export async function POST(req: NextRequest) {
                       orderId: order.id,
                     },
                   });
+                  notificationCandidates.push({
+                    productId: variant.productId,
+                    productName: variant.product.name,
+                    variantId: variant.id,
+                    variantName: variant.name,
+                    newQty,
+                    previousQty,
+                    allowBackorders: variant.product.allowBackorders,
+                    lowInventoryThreshold: variant.product.lowInventoryThreshold,
+                  });
                 }
               }
               // Handle product inventory (no variant)
@@ -619,10 +659,12 @@ export async function POST(req: NextRequest) {
                   where: { id: item.productId },
                   select: {
                     id: true,
+                    name: true,
                     inventoryQty: true,
                     businessId: true,
                     trackInventory: true,
                     allowBackorders: true,
+                    lowInventoryThreshold: true,
                   },
                 });
 
@@ -656,6 +698,14 @@ export async function POST(req: NextRequest) {
                       orderId: order.id,
                       variantId: null,
                     },
+                  });
+                  notificationCandidates.push({
+                    productId: product.id,
+                    productName: product.name,
+                    newQty,
+                    previousQty,
+                    allowBackorders: product.allowBackorders,
+                    lowInventoryThreshold: product.lowInventoryThreshold,
                   });
                 } else {
                   const result = await tx.product.updateMany({
@@ -700,6 +750,14 @@ export async function POST(req: NextRequest) {
                       variantId: null,
                     },
                   });
+                  notificationCandidates.push({
+                    productId: product.id,
+                    productName: product.name,
+                    newQty,
+                    previousQty,
+                    allowBackorders: product.allowBackorders,
+                    lowInventoryThreshold: product.lowInventoryThreshold,
+                  });
                 }
               }
             }
@@ -717,6 +775,74 @@ export async function POST(req: NextRequest) {
             Sentry.captureException(inventoryError);
           });
           // Don't fail webhook - order is still created
+        }
+
+        // Send inventory alert notifications
+        if (notificationCandidates.length > 0) {
+          try {
+            const businessUrl = getBusinessUrl(business);
+            const alertedProductIds = new Set<string>();
+            for (const candidate of notificationCandidates) {
+              const {
+                productId,
+                productName,
+                variantName,
+                newQty,
+                previousQty,
+                allowBackorders,
+                lowInventoryThreshold,
+              } = candidate;
+
+              // One alert per product per order — skip subsequent variants of the same product
+              if (alertedProductIds.has(productId)) continue;
+
+              const adminProductUrl = `${businessUrl}/admin/products/${productId}`;
+
+              if (newQty <= 0) {
+                // Atomic flag set — count > 0 means we won the race and should send the email
+                const flagged = await db.product.updateMany({
+                  where: { id: productId, outOfStockAlertSent: false },
+                  data: { outOfStockAlertSent: true, lowInventoryAlertSent: true },
+                });
+                if (flagged.count > 0) {
+                  alertedProductIds.add(productId);
+                  if (allowBackorders) {
+                    await sendBackorderAlert({ productName, variantName, adminProductUrl, business });
+                  } else {
+                    await sendOutOfStockAlert({ productName, variantName, adminProductUrl, business });
+                  }
+                }
+              } else if (
+                lowInventoryThreshold !== null &&
+                newQty <= lowInventoryThreshold &&
+                previousQty > lowInventoryThreshold
+              ) {
+                const flagged = await db.product.updateMany({
+                  where: { id: productId, lowInventoryAlertSent: false },
+                  data: { lowInventoryAlertSent: true },
+                });
+                if (flagged.count > 0) {
+                  alertedProductIds.add(productId);
+                  await sendLowInventoryAlert({
+                    productName,
+                    variantName,
+                    currentQty: newQty,
+                    threshold: lowInventoryThreshold,
+                    adminProductUrl,
+                    business,
+                  });
+                }
+              }
+            }
+            console.log(`[Webhook] Inventory notifications processed for order ${order.id}`);
+          } catch (notifyError) {
+            console.error("[Webhook] Failed to send inventory notification:", notifyError);
+            Sentry.withScope((scope) => {
+              scope.setTag("webhook.step", "inventory-notification");
+              scope.setTag("businessId", businessId);
+              Sentry.captureException(notifyError);
+            });
+          }
         }
 
         // Send order confirmation email (skip if customer email is unknown)

@@ -149,6 +149,7 @@ export const productRouter = createTRPCRouter({
         trackInventory,
         allowBackorders,
         inventoryQty,
+        lowInventoryThreshold,
         variants,
         additionalFields,
       } = input;
@@ -181,6 +182,7 @@ export const productRouter = createTRPCRouter({
           trackInventory,
           allowBackorders,
           inventoryQty,
+          lowInventoryThreshold: lowInventoryThreshold ?? null,
           additionalFields: additionalFields
             ? (JSON.parse(
                 JSON.stringify(additionalFields),
@@ -222,6 +224,7 @@ export const productRouter = createTRPCRouter({
         trackInventory,
         allowBackorders,
         inventoryQty,
+        lowInventoryThreshold,
         variants,
         additionalFields,
       } = input;
@@ -242,6 +245,27 @@ export const productRouter = createTRPCRouter({
         });
       }
 
+      // Fetch current state to compute alert flag resets and audit history
+      const currentProduct = await ctx.db.product.findUnique({
+        where: { id, businessId },
+        select: { inventoryQty: true, lowInventoryThreshold: true },
+      });
+
+      // Fetch existing variant quantities for audit trail
+      const existingVariants = await ctx.db.productVariant.findMany({
+        where: { productId: id },
+        select: { id: true, inventoryQty: true },
+      });
+      const existingVariantQtyMap = new Map(
+        existingVariants.map((v) => [v.id, v.inventoryQty]),
+      );
+
+      const prevQty = currentProduct?.inventoryQty ?? 0;
+      const effectiveThreshold =
+        lowInventoryThreshold ?? currentProduct?.lowInventoryThreshold ?? null;
+      const inventoryIncreased =
+        inventoryQty !== undefined && inventoryQty > prevQty;
+
       const product = await ctx.db.product.update({
         where: { id, businessId },
         data: {
@@ -254,13 +278,44 @@ export const productRouter = createTRPCRouter({
           trackInventory,
           allowBackorders,
           inventoryQty,
+          lowInventoryThreshold: lowInventoryThreshold ?? null,
           additionalFields: additionalFields
             ? (JSON.parse(
                 JSON.stringify(additionalFields),
               ) as Prisma.InputJsonValue)
             : undefined,
+          // Reset alert flags when inventory is manually increased above threshold/zero
+          ...(inventoryIncreased && inventoryQty > 0
+            ? { outOfStockAlertSent: false }
+            : {}),
+          ...(inventoryIncreased &&
+          effectiveThreshold !== null &&
+          inventoryQty > effectiveThreshold
+            ? { lowInventoryAlertSent: false }
+            : {}),
         },
       });
+
+      // Write InventoryHistory for base product qty change
+      if (
+        trackInventory &&
+        inventoryQty !== undefined &&
+        inventoryQty !== prevQty
+      ) {
+        await ctx.db.inventoryHistory.create({
+          data: {
+            productId: product.id,
+            businessId,
+            previousQty: prevQty,
+            newQty: inventoryQty,
+            changeQty: inventoryQty - prevQty,
+            reason: "adjustment",
+            note: "Updated via product form",
+            userId: ctx.session.user.id,
+          },
+        });
+      }
+
       if (variants) {
         await ctx.db.$transaction(async (tx) => {
           const variantIds = variants
@@ -285,8 +340,25 @@ export const productRouter = createTRPCRouter({
                   options: v.options,
                 },
               });
+              // Write history if qty changed
+              const prevVariantQty = existingVariantQtyMap.get(v.id) ?? 0;
+              if (trackInventory && v.inventoryQty !== prevVariantQty) {
+                await tx.inventoryHistory.create({
+                  data: {
+                    variantId: v.id,
+                    productId: product.id,
+                    businessId,
+                    previousQty: prevVariantQty,
+                    newQty: v.inventoryQty,
+                    changeQty: v.inventoryQty - prevVariantQty,
+                    reason: "adjustment",
+                    note: "Updated via product form",
+                    userId: ctx.session.user.id,
+                  },
+                });
+              }
             } else {
-              await tx.productVariant.create({
+              const created = await tx.productVariant.create({
                 data: {
                   productId: product.id,
                   name: v.name,
@@ -297,6 +369,22 @@ export const productRouter = createTRPCRouter({
                   options: v.options,
                 },
               });
+              // Write history for new variant with initial stock
+              if (trackInventory && v.inventoryQty > 0) {
+                await tx.inventoryHistory.create({
+                  data: {
+                    variantId: created.id,
+                    productId: product.id,
+                    businessId,
+                    previousQty: 0,
+                    newQty: v.inventoryQty,
+                    changeQty: v.inventoryQty,
+                    reason: "adjustment",
+                    note: "Initial stock via product form",
+                    userId: ctx.session.user.id,
+                  },
+                });
+              }
             }
           }
         });

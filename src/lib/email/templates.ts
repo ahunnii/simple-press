@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
+import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import OrderCancelledEmail from "~/emails/order-cancelled";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderFulfilledEmail from "~/emails/order-fulfilled";
 import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
+import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import WelcomeEmail from "~/emails/welcome";
 
@@ -359,6 +362,97 @@ export async function sendWelcomeEmail(params: {
     }),
     tags: [
       { name: "category", value: "welcome" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
+type InventoryAlertBusiness = {
+  name: string;
+  ownerEmail: string;
+  subdomain: string;
+  customDomain?: string | null;
+  domainStatus?: string | null;
+  siteContent?: { logoUrl?: string | null } | null;
+};
+
+// Low inventory threshold alert (to owner)
+export async function sendLowInventoryAlert(params: {
+  productName: string;
+  variantName?: string;
+  currentQty: number;
+  threshold: number;
+  adminProductUrl: string;
+  business: InventoryAlertBusiness;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    subject: `Low inventory alert: ${params.productName}`,
+    react: LowInventoryAlertEmail({
+      productName: params.productName,
+      variantName: params.variantName,
+      currentQty: params.currentQty,
+      threshold: params.threshold,
+      adminProductUrl: params.adminProductUrl,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+    }),
+    tags: [
+      { name: "category", value: "low_inventory_alert" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
+// Out of stock alert — backorders disabled (to owner)
+export async function sendOutOfStockAlert(params: {
+  productName: string;
+  variantName?: string;
+  adminProductUrl: string;
+  business: InventoryAlertBusiness;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    subject: `Out of stock: ${params.productName}`,
+    react: OutOfStockAlertEmail({
+      productName: params.productName,
+      variantName: params.variantName,
+      adminProductUrl: params.adminProductUrl,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+    }),
+    tags: [
+      { name: "category", value: "out_of_stock_alert" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
+// Out of stock alert — backorders enabled (to owner)
+export async function sendBackorderAlert(params: {
+  productName: string;
+  variantName?: string;
+  adminProductUrl: string;
+  business: InventoryAlertBusiness;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    subject: `Out of stock (backorders on): ${params.productName}`,
+    react: BackorderAlertEmail({
+      productName: params.productName,
+      variantName: params.variantName,
+      adminProductUrl: params.adminProductUrl,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+    }),
+    tags: [
+      { name: "category", value: "backorder_alert" },
       { name: "business", value: params.business.subdomain },
     ],
   });

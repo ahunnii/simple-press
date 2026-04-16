@@ -108,6 +108,7 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
       trackInventory: product?.trackInventory ?? false,
       inventoryQty: product?.inventoryQty ?? 0,
       allowBackorders: product?.allowBackorders ?? false,
+      lowInventoryThreshold: product?.lowInventoryThreshold ?? undefined,
       additionalFields: {
         additionalInformation: (storedAdditional?.additionalInformation as
           | Record<string, unknown>
@@ -253,6 +254,7 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
         trackInventory: data.trackInventory,
         allowBackorders: data.allowBackorders,
         inventoryQty: data.inventoryQty ?? 0,
+        lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
         variants: variants?.map((v) => ({
           id: v.id,
           name: v.name,
@@ -293,6 +295,7 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
         trackInventory: data.trackInventory,
         allowBackorders: data.allowBackorders,
         inventoryQty: data.inventoryQty ?? 0,
+        lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
         compareAtPrice: compareAtPriceInCents,
         variants: variants?.map((v) => ({
           name: v.name,
@@ -625,6 +628,30 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
                               )}
                             />
                           )}
+
+                        {form.watch("trackInventory") && (
+                          <FormField
+                            control={form.control}
+                            name="lowInventoryThreshold"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Low Inventory Threshold</FormLabel>
+                                <FormControl>
+                                  <NumberInput
+                                    step="1"
+                                    min="1"
+                                    placeholder="e.g. 5"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Get an email alert when stock reaches this
+                                  level. Leave blank to disable.
+                                </FormDescription>
+                              </FormItem>
+                            )}
+                          />
+                        )}
                       </CardContent>
                     </Card>
                   </div>

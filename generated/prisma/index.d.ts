@@ -12787,6 +12787,7 @@ export namespace Prisma {
     compareAtPrice: number | null
     cost: number | null
     inventoryQty: number | null
+    lowInventoryThreshold: number | null
     weight: number | null
     sortOrder: number | null
     averageRating: number | null
@@ -12798,6 +12799,7 @@ export namespace Prisma {
     compareAtPrice: number | null
     cost: number | null
     inventoryQty: number | null
+    lowInventoryThreshold: number | null
     weight: number | null
     sortOrder: number | null
     averageRating: number | null
@@ -12819,6 +12821,9 @@ export namespace Prisma {
     trackInventory: boolean | null
     inventoryQty: number | null
     allowBackorders: boolean | null
+    lowInventoryThreshold: number | null
+    lowInventoryAlertSent: boolean | null
+    outOfStockAlertSent: boolean | null
     weight: number | null
     weightUnit: string | null
     published: boolean | null
@@ -12846,6 +12851,9 @@ export namespace Prisma {
     trackInventory: boolean | null
     inventoryQty: number | null
     allowBackorders: boolean | null
+    lowInventoryThreshold: number | null
+    lowInventoryAlertSent: boolean | null
+    outOfStockAlertSent: boolean | null
     weight: number | null
     weightUnit: string | null
     published: boolean | null
@@ -12873,6 +12881,9 @@ export namespace Prisma {
     trackInventory: number
     inventoryQty: number
     allowBackorders: number
+    lowInventoryThreshold: number
+    lowInventoryAlertSent: number
+    outOfStockAlertSent: number
     weight: number
     weightUnit: number
     published: number
@@ -12893,6 +12904,7 @@ export namespace Prisma {
     compareAtPrice?: true
     cost?: true
     inventoryQty?: true
+    lowInventoryThreshold?: true
     weight?: true
     sortOrder?: true
     averageRating?: true
@@ -12904,6 +12916,7 @@ export namespace Prisma {
     compareAtPrice?: true
     cost?: true
     inventoryQty?: true
+    lowInventoryThreshold?: true
     weight?: true
     sortOrder?: true
     averageRating?: true
@@ -12925,6 +12938,9 @@ export namespace Prisma {
     trackInventory?: true
     inventoryQty?: true
     allowBackorders?: true
+    lowInventoryThreshold?: true
+    lowInventoryAlertSent?: true
+    outOfStockAlertSent?: true
     weight?: true
     weightUnit?: true
     published?: true
@@ -12952,6 +12968,9 @@ export namespace Prisma {
     trackInventory?: true
     inventoryQty?: true
     allowBackorders?: true
+    lowInventoryThreshold?: true
+    lowInventoryAlertSent?: true
+    outOfStockAlertSent?: true
     weight?: true
     weightUnit?: true
     published?: true
@@ -12979,6 +12998,9 @@ export namespace Prisma {
     trackInventory?: true
     inventoryQty?: true
     allowBackorders?: true
+    lowInventoryThreshold?: true
+    lowInventoryAlertSent?: true
+    outOfStockAlertSent?: true
     weight?: true
     weightUnit?: true
     published?: true
@@ -13094,6 +13116,9 @@ export namespace Prisma {
     trackInventory: boolean
     inventoryQty: number
     allowBackorders: boolean
+    lowInventoryThreshold: number | null
+    lowInventoryAlertSent: boolean
+    outOfStockAlertSent: boolean
     weight: number | null
     weightUnit: string | null
     published: boolean
@@ -13141,6 +13166,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: boolean
     allowBackorders?: boolean
+    lowInventoryThreshold?: boolean
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: boolean
     weightUnit?: boolean
     published?: boolean
@@ -13177,6 +13205,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: boolean
     allowBackorders?: boolean
+    lowInventoryThreshold?: boolean
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: boolean
     weightUnit?: boolean
     published?: boolean
@@ -13206,6 +13237,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: boolean
     allowBackorders?: boolean
+    lowInventoryThreshold?: boolean
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: boolean
     weightUnit?: boolean
     published?: boolean
@@ -13235,6 +13269,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: boolean
     allowBackorders?: boolean
+    lowInventoryThreshold?: boolean
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: boolean
     weightUnit?: boolean
     published?: boolean
@@ -13248,7 +13285,7 @@ export namespace Prisma {
     additionalFields?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "allowBackorders" | "weight" | "weightUnit" | "published" | "featured" | "sortOrder" | "metaTitle" | "metaDescription" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "allowBackorders" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "weight" | "weightUnit" | "published" | "featured" | "sortOrder" | "metaTitle" | "metaDescription" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     images?: boolean | Product$imagesArgs<ExtArgs>
@@ -13292,6 +13329,9 @@ export namespace Prisma {
       trackInventory: boolean
       inventoryQty: number
       allowBackorders: boolean
+      lowInventoryThreshold: number | null
+      lowInventoryAlertSent: boolean
+      outOfStockAlertSent: boolean
       weight: number | null
       weightUnit: string | null
       published: boolean
@@ -13747,6 +13787,9 @@ export namespace Prisma {
     readonly trackInventory: FieldRef<"Product", 'Boolean'>
     readonly inventoryQty: FieldRef<"Product", 'Int'>
     readonly allowBackorders: FieldRef<"Product", 'Boolean'>
+    readonly lowInventoryThreshold: FieldRef<"Product", 'Int'>
+    readonly lowInventoryAlertSent: FieldRef<"Product", 'Boolean'>
+    readonly outOfStockAlertSent: FieldRef<"Product", 'Boolean'>
     readonly weight: FieldRef<"Product", 'Float'>
     readonly weightUnit: FieldRef<"Product", 'String'>
     readonly published: FieldRef<"Product", 'Boolean'>
@@ -40212,6 +40255,9 @@ export namespace Prisma {
     trackInventory: 'trackInventory',
     inventoryQty: 'inventoryQty',
     allowBackorders: 'allowBackorders',
+    lowInventoryThreshold: 'lowInventoryThreshold',
+    lowInventoryAlertSent: 'lowInventoryAlertSent',
+    outOfStockAlertSent: 'outOfStockAlertSent',
     weight: 'weight',
     weightUnit: 'weightUnit',
     published: 'published',
@@ -41553,6 +41599,9 @@ export namespace Prisma {
     trackInventory?: BoolFilter<"Product"> | boolean
     inventoryQty?: IntFilter<"Product"> | number
     allowBackorders?: BoolFilter<"Product"> | boolean
+    lowInventoryThreshold?: IntNullableFilter<"Product"> | number | null
+    lowInventoryAlertSent?: BoolFilter<"Product"> | boolean
+    outOfStockAlertSent?: BoolFilter<"Product"> | boolean
     weight?: FloatNullableFilter<"Product"> | number | null
     weightUnit?: StringNullableFilter<"Product"> | string | null
     published?: BoolFilter<"Product"> | boolean
@@ -41588,6 +41637,9 @@ export namespace Prisma {
     trackInventory?: SortOrder
     inventoryQty?: SortOrder
     allowBackorders?: SortOrder
+    lowInventoryThreshold?: SortOrderInput | SortOrder
+    lowInventoryAlertSent?: SortOrder
+    outOfStockAlertSent?: SortOrder
     weight?: SortOrderInput | SortOrder
     weightUnit?: SortOrderInput | SortOrder
     published?: SortOrder
@@ -41627,6 +41679,9 @@ export namespace Prisma {
     trackInventory?: BoolFilter<"Product"> | boolean
     inventoryQty?: IntFilter<"Product"> | number
     allowBackorders?: BoolFilter<"Product"> | boolean
+    lowInventoryThreshold?: IntNullableFilter<"Product"> | number | null
+    lowInventoryAlertSent?: BoolFilter<"Product"> | boolean
+    outOfStockAlertSent?: BoolFilter<"Product"> | boolean
     weight?: FloatNullableFilter<"Product"> | number | null
     weightUnit?: StringNullableFilter<"Product"> | string | null
     published?: BoolFilter<"Product"> | boolean
@@ -41662,6 +41717,9 @@ export namespace Prisma {
     trackInventory?: SortOrder
     inventoryQty?: SortOrder
     allowBackorders?: SortOrder
+    lowInventoryThreshold?: SortOrderInput | SortOrder
+    lowInventoryAlertSent?: SortOrder
+    outOfStockAlertSent?: SortOrder
     weight?: SortOrderInput | SortOrder
     weightUnit?: SortOrderInput | SortOrder
     published?: SortOrder
@@ -41698,6 +41756,9 @@ export namespace Prisma {
     trackInventory?: BoolWithAggregatesFilter<"Product"> | boolean
     inventoryQty?: IntWithAggregatesFilter<"Product"> | number
     allowBackorders?: BoolWithAggregatesFilter<"Product"> | boolean
+    lowInventoryThreshold?: IntNullableWithAggregatesFilter<"Product"> | number | null
+    lowInventoryAlertSent?: BoolWithAggregatesFilter<"Product"> | boolean
+    outOfStockAlertSent?: BoolWithAggregatesFilter<"Product"> | boolean
     weight?: FloatNullableWithAggregatesFilter<"Product"> | number | null
     weightUnit?: StringNullableWithAggregatesFilter<"Product"> | string | null
     published?: BoolWithAggregatesFilter<"Product"> | boolean
@@ -44689,6 +44750,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -44723,6 +44787,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -44757,6 +44824,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -44791,6 +44861,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -44825,6 +44898,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -44853,6 +44929,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -44880,6 +44959,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -48119,6 +48201,9 @@ export namespace Prisma {
     trackInventory?: SortOrder
     inventoryQty?: SortOrder
     allowBackorders?: SortOrder
+    lowInventoryThreshold?: SortOrder
+    lowInventoryAlertSent?: SortOrder
+    outOfStockAlertSent?: SortOrder
     weight?: SortOrder
     weightUnit?: SortOrder
     published?: SortOrder
@@ -48137,6 +48222,7 @@ export namespace Prisma {
     compareAtPrice?: SortOrder
     cost?: SortOrder
     inventoryQty?: SortOrder
+    lowInventoryThreshold?: SortOrder
     weight?: SortOrder
     sortOrder?: SortOrder
     averageRating?: SortOrder
@@ -48158,6 +48244,9 @@ export namespace Prisma {
     trackInventory?: SortOrder
     inventoryQty?: SortOrder
     allowBackorders?: SortOrder
+    lowInventoryThreshold?: SortOrder
+    lowInventoryAlertSent?: SortOrder
+    outOfStockAlertSent?: SortOrder
     weight?: SortOrder
     weightUnit?: SortOrder
     published?: SortOrder
@@ -48185,6 +48274,9 @@ export namespace Prisma {
     trackInventory?: SortOrder
     inventoryQty?: SortOrder
     allowBackorders?: SortOrder
+    lowInventoryThreshold?: SortOrder
+    lowInventoryAlertSent?: SortOrder
+    outOfStockAlertSent?: SortOrder
     weight?: SortOrder
     weightUnit?: SortOrder
     published?: SortOrder
@@ -48202,6 +48294,7 @@ export namespace Prisma {
     compareAtPrice?: SortOrder
     cost?: SortOrder
     inventoryQty?: SortOrder
+    lowInventoryThreshold?: SortOrder
     weight?: SortOrder
     sortOrder?: SortOrder
     averageRating?: SortOrder
@@ -53263,6 +53356,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -53296,6 +53392,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -53975,6 +54074,9 @@ export namespace Prisma {
     trackInventory?: BoolFilter<"Product"> | boolean
     inventoryQty?: IntFilter<"Product"> | number
     allowBackorders?: BoolFilter<"Product"> | boolean
+    lowInventoryThreshold?: IntNullableFilter<"Product"> | number | null
+    lowInventoryAlertSent?: BoolFilter<"Product"> | boolean
+    outOfStockAlertSent?: BoolFilter<"Product"> | boolean
     weight?: FloatNullableFilter<"Product"> | number | null
     weightUnit?: StringNullableFilter<"Product"> | string | null
     published?: BoolFilter<"Product"> | boolean
@@ -55228,6 +55330,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -55261,6 +55366,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -55382,6 +55490,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -55415,6 +55526,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -55737,6 +55851,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -55770,6 +55887,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -55860,6 +55980,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -55893,6 +56016,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -55926,6 +56052,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -55959,6 +56088,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -56097,6 +56229,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -56130,6 +56265,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -57916,6 +58054,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -57949,6 +58090,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -58108,6 +58252,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -58141,6 +58288,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -58611,6 +58761,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -58644,6 +58797,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -58935,6 +59091,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -58968,6 +59127,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -60465,6 +60627,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -60498,6 +60663,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -60689,6 +60857,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -60722,6 +60893,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -61605,6 +61779,9 @@ export namespace Prisma {
     trackInventory?: boolean
     inventoryQty?: number
     allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
     weight?: number | null
     weightUnit?: string | null
     published?: boolean
@@ -61833,6 +62010,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -61866,6 +62046,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -61899,6 +62082,9 @@ export namespace Prisma {
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     weight?: NullableFloatFieldUpdateOperationsInput | number | null
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean

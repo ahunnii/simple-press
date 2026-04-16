@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
+import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderFulfilledEmail from "~/emails/order-fulfilled";
 import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
+import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
 import ResetPasswordEmail from "~/emails/reset-password";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import VerifyEmail from "~/emails/verify-email";
@@ -222,6 +225,53 @@ export function EmailPreview({ business, sampleOrder }: Props) {
     );
   };
 
+  const previewLowInventoryAlert = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      LowInventoryAlertEmail({
+        productName: "Sample T-Shirt",
+        variantName: "Medium / Blue",
+        currentQty: 3,
+        threshold: 5,
+        adminProductUrl: `https://${business.subdomain}.yourdomain.com/admin/products/sample`,
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewOutOfStockAlert = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      OutOfStockAlertEmail({
+        productName: "Sample T-Shirt",
+        variantName: "Medium / Blue",
+        adminProductUrl: `https://${business.subdomain}.yourdomain.com/admin/products/sample`,
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewBackorderAlert = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      BackorderAlertEmail({
+        productName: "Sample T-Shirt",
+        variantName: "Medium / Blue",
+        adminProductUrl: `https://${business.subdomain}.yourdomain.com/admin/products/sample`,
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
   return (
     <div className="admin-container">
       <div className="admin-header">
@@ -316,6 +366,30 @@ export function EmailPreview({ business, sampleOrder }: Props) {
               className="w-full justify-start"
             >
               Reset Password
+            </Button>
+            <Button
+              onClick={previewLowInventoryAlert}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Low Inventory Alert (owner)
+            </Button>
+            <Button
+              onClick={previewOutOfStockAlert}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Out of Stock Alert (owner)
+            </Button>
+            <Button
+              onClick={previewBackorderAlert}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Out of Stock — Backorders On (owner)
             </Button>
           </CardContent>
         </Card>
