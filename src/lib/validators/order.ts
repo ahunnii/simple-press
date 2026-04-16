@@ -28,7 +28,7 @@ export const manualOrderFormSchema = z.object({
   customerEmail: z.string().email().max(255),
   shippingName: z.string().max(255).optional(),
   shippingAddress: shippingAddressSchema.optional().nullable(),
-  items: z.array(orderItemSchema).min(1),
+  items: z.array(orderItemSchema),
   subtotal: z.coerce.number().nonnegative(),
   shipping: z.coerce.number().nonnegative(),
   tax: z.coerce.number().nonnegative(),

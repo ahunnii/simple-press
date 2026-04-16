@@ -159,6 +159,11 @@ export async function POST(req: NextRequest) {
                   allowBackorders: true,
                   price: true,
                   additionalFields: true,
+                  images: {
+                    select: { url: true },
+                    orderBy: { sortOrder: "asc" },
+                    take: 1,
+                  },
                 },
               },
             },
@@ -179,6 +184,11 @@ export async function POST(req: NextRequest) {
           inventoryQty: true,
           additionalFields: true,
           _count: { select: { variants: true } },
+          images: {
+            select: { url: true },
+            orderBy: { sortOrder: "asc" },
+            take: 1,
+          },
         },
       }),
     ]);
@@ -369,13 +379,26 @@ export async function POST(req: NextRequest) {
     // Create line items for Stripe (metadata so webhook can store product/variant and deduct inventory)
     const lineItems = itemList.map((item) => {
       // Always use server-fetched prices — never trust client-supplied amounts
-      const serverPrice = item.variantId
-        ? variantMap.get(item.variantId)?.price
-        : productMap.get(item.productId)?.price;
+      const variantRecord = item.variantId ? variantMap.get(item.variantId) : undefined;
+      const productRecord = productMap.get(item.productId);
+      const serverPrice = variantRecord?.price ?? productRecord?.price;
 
       if (serverPrice == null) {
         throw new Error(`Price not found for item ${item.productId}`);
       }
+
+      // Use server-fetched image URL — never trust client-supplied imageUrl.
+      // Client URLs may be relative paths or malformed, which causes Stripe to
+      // reject the session with "Not a valid URL".
+      const rawImageUrl =
+        variantRecord?.product.images[0]?.url ??
+        productRecord?.images[0]?.url ??
+        business.siteContent?.logoUrl ??
+        null;
+      const imageUrl =
+        rawImageUrl?.startsWith("https://") || rawImageUrl?.startsWith("http://")
+          ? rawImageUrl
+          : null;
 
       return {
         price_data: {
@@ -383,7 +406,7 @@ export async function POST(req: NextRequest) {
           product_data: {
             name: item.productName,
             description: item.variantName ?? undefined,
-            images: item.imageUrl ? [item.imageUrl] : undefined,
+            images: imageUrl ? [imageUrl] : undefined,
             metadata: {
               productId: String(item.productId ?? ""),
               productVariantId: String(item.variantId ?? ""),

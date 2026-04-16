@@ -70,7 +70,7 @@ export function ManualOrderForm({ products }: Props) {
       customerName: "",
       customerEmail: "",
       shippingName: "",
-      shippingAddress: undefined,
+      shippingAddress: { line1: "", city: "", state: "", postal_code: "", country: "US" },
       items: [],
       subtotal: 0,
       shipping: 0,
@@ -194,6 +194,11 @@ export function ManualOrderForm({ products }: Props) {
   };
 
   const onSubmit = async (data: ManualOrderFormSchema) => {
+    if (!useDirectSubtotal && items.length === 0) {
+      toast.error("Add at least one item, or enter a subtotal directly.");
+      return;
+    }
+
     const subtotal = getSubtotal();
     const shipping = shippingCost
       ? Math.round(parseFloat(`${shippingCost}`) * 100)
@@ -251,6 +256,7 @@ export function ManualOrderForm({ products }: Props) {
       <form
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+        onChange={() => console.log(form.formState.errors)}
         className="min-h-screen bg-gray-50"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
@@ -417,6 +423,30 @@ export function ManualOrderForm({ products }: Props) {
                         className="col-span-1"
                       />
                     </div>
+
+                    <FormField
+                      control={form.control}
+                      name="shippingAddress.country"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Country</FormLabel>
+                          <Select
+                            value={field.value ?? "US"}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="US">United States</SelectItem>
+                              <SelectItem value="CA">Canada</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
                   </CardContent>
                 )}
               </Card>
