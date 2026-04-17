@@ -73,7 +73,7 @@ export function PollenContactForm({
         <InputFormField
           form={form}
           name="name"
-          label="First Name *"
+          label="Name"
           labelClassName={labelClassName}
           inputClassName={inputClassName}
           placeholder="e.g. John"
@@ -83,7 +83,7 @@ export function PollenContactForm({
         <InputFormField
           form={form}
           name="email"
-          label="Email Address *"
+          label="Email Address"
           labelClassName={labelClassName}
           inputClassName={inputClassName}
           type="email"
@@ -104,7 +104,7 @@ export function PollenContactForm({
         <TextareaFormField
           form={form}
           name="message"
-          label="Message *"
+          label="Message"
           messageLength={messageLength}
           labelClassName={labelClassName}
           textareaClassName={`resize-y ${inputClassName} min-h-[120px]`}

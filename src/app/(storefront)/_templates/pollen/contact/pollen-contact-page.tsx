@@ -21,6 +21,8 @@ export function PollenContactPage({
   business,
 }: DefaultContactPageTemplateProps) {
   const f = resolveFields(business?.siteContent?.customFields, [
+    "pollen.contact.page-title",
+    "pollen.contact.page-subtitle",
     "pollen.contact.form-title",
     "pollen.contact.form-description",
     "pollen.contact.form-image",
@@ -58,8 +60,8 @@ export function PollenContactPage({
   return (
     <PollenGeneralLayout
       business={business}
-      title="Contact Us"
-      subtitle="Let's Talk"
+      title={f["pollen.contact.page-title"] ?? "Contact Us"}
+      subtitle={f["pollen.contact.page-subtitle"] ?? "Let's Talk"}
     >
       <div className="mx-auto max-w-7xl px-4 py-20 pb-20 sm:px-6 md:py-20 lg:px-8">
         <StaggerContainer className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">

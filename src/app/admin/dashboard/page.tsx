@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { checkBusiness } from "~/lib/check-business";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { db } from "~/server/db";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { DashboardContent } from "~/app/admin/dashboard/_components/dashboard-content";
 
 import { SiteHeader } from "../_components/site-header";
@@ -12,6 +14,8 @@ export default async function AdminDashboardPage() {
   if (!business) {
     notFound();
   }
+
+  const flags = await getBusinessFlags();
 
   const businessData = await db.business.findUnique({
     where: { id: business.id },
@@ -84,7 +88,11 @@ export default async function AdminDashboardPage() {
     Promise.all([
       db.productVariant.findMany({
         where: {
-          product: { businessId: business.id, published: true, trackInventory: true },
+          product: {
+            businessId: business.id,
+            published: true,
+            trackInventory: true,
+          },
           inventoryQty: { lte: 10, gte: 0 },
         },
         orderBy: { inventoryQty: "asc" },
@@ -123,7 +131,12 @@ export default async function AdminDashboardPage() {
       },
       orderBy: { inventoryQty: "asc" },
       take: 5,
-      select: { id: true, name: true, inventoryQty: true, lowInventoryThreshold: true },
+      select: {
+        id: true,
+        name: true,
+        inventoryQty: true,
+        lowInventoryThreshold: true,
+      },
     }),
 
     // Revenue by day (last 30 days)
@@ -207,10 +220,23 @@ export default async function AdminDashboardPage() {
   return (
     <>
       <SiteHeader title="Dashboard" />
+
+      {!flags.isEnabled("cart") && (
+        <Alert className="mx-auto my-4 w-full max-w-5xl">
+          <AlertTitle>Cart is disabled</AlertTitle>
+          <AlertDescription>
+            The cart feature is disabled for this business. Please enable it in
+            the settings to use the dashboard. You can enable it in the settings
+            to allow customers to add products to their cart and checkout.
+          </AlertDescription>
+        </Alert>
+      )}
       <DashboardContent
         business={businessData!}
         stats={{
-          totalRevenue: (totalRevenue._sum.total ?? 0) - (totalRevenue._sum.refundAmountCents ?? 0),
+          totalRevenue:
+            (totalRevenue._sum.total ?? 0) -
+            (totalRevenue._sum.refundAmountCents ?? 0),
           totalOrders,
           totalProducts: businessData!._count.products,
           totalCustomers: businessData!._count.customers,

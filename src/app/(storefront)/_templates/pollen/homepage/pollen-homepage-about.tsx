@@ -8,12 +8,16 @@ import {
 
 export function PollenHomepageAbout({
   services,
+  sectionLabel,
+  sectionHeading,
 }: {
   services: {
     icon: LucideIcon;
     title: string;
     description: string;
   }[];
+  sectionLabel: string;
+  sectionHeading: string;
 }) {
   return (
     <section
@@ -30,11 +34,10 @@ export function PollenHomepageAbout({
         <FadeIn direction="up">
           <div className="mx-auto mb-16 max-w-3xl text-center">
             <p className="mb-4 text-sm font-medium tracking-wider text-white/70 uppercase">
-              About Our Services
+              {sectionLabel}
             </p>
             <h2 className="text-3xl leading-tight font-bold text-balance text-white md:text-4xl">
-              We&apos;re passionate about creating pollinator-friendly spaces
-              that bring your vision to life
+              {sectionHeading}
             </h2>
           </div>
         </FadeIn>

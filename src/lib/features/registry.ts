@@ -60,7 +60,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Track stock levels and get low-stock alerts",
     category: "ecommerce",
     enabledByDefault: true,
-    ownerCanToggle: false,
+    ownerCanToggle: true,
     dependsOn: ["products"],
     hidesNav: ["inventory"],
   },

@@ -13,9 +13,17 @@ import {
 
 type Props = {
   testimonials: RouterOutputs["testimonial"]["list"];
+  sectionLabel?: string;
+  sectionHeading?: string;
+  viewAllText?: string;
 };
 
-export function PollenTestimonialsSection({ testimonials }: Props) {
+export function PollenTestimonialsSection({
+  testimonials,
+  sectionLabel = "Testimonials",
+  sectionHeading = "Hear From Our Clients",
+  viewAllText = "View all testimonials",
+}: Props) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState<string[]>([]);
   const [lightboxStartIndex, setLightboxStartIndex] = useState(0);
@@ -45,10 +53,10 @@ export function PollenTestimonialsSection({ testimonials }: Props) {
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <FadeIn direction="up">
             <p className="mb-4 text-center text-sm font-medium tracking-wider text-[#A8D081] uppercase">
-              Testimonials
+              {sectionLabel}
             </p>
             <h2 className="mb-12 text-center text-3xl font-bold text-white md:text-4xl">
-              Hear From Our Clients
+              {sectionHeading}
             </h2>
           </FadeIn>
 
@@ -68,7 +76,7 @@ export function PollenTestimonialsSection({ testimonials }: Props) {
               href="/testimonials"
               className="inline-flex items-center font-semibold text-[#A8D081] transition-colors hover:text-[#c5e8a8] hover:underline focus:ring-2 focus:ring-[#A8D081] focus:ring-offset-2 focus:ring-offset-[#2a351f] focus:outline-none"
             >
-              View all testimonials
+              {viewAllText}
             </Link>
           </div>
         </div>

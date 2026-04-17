@@ -74,6 +74,7 @@ const getNavData = (session: Session | null) => {
       title: "Inventory",
       url: "/admin/inventory",
       icon: IconPackages,
+      featureKey: "inventory",
     },
     {
       title: "Collections",

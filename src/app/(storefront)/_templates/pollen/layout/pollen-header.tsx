@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
+import { IconLayoutDashboard } from "@tabler/icons-react";
 import {
   LayoutDashboardIcon,
   MessageSquare,
@@ -79,10 +80,11 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
         },
       }}
       additionalLinks={[
-        ...(user.platformRole === "PLATFORM_ADMIN"
+        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
+        !!session?.session?.membershipId
           ? [
               {
-                icon: <LayoutDashboardIcon className="h-4 w-4" />,
+                icon: <IconLayoutDashboard className="h-4 w-4" />,
                 label: "Admin",
                 href: "/admin",
               },

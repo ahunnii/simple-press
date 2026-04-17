@@ -23,6 +23,11 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
+import {
+  getListFieldValue,
+  parseTemplateIconListRows,
+  parseTemplateListRows,
+} from "~/lib/template-fields";
 
 import { resolveFields } from ".";
 import { PollenGeneralLayout } from "./layout/pollen-general-layout";
@@ -31,74 +36,101 @@ import { PollenTestimonialsSection } from "./testimonials/pollen-testimonials-se
 type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
+
+const DEFAULT_SERVICES = [
+  {
+    icon: Flower2,
+    title: "Service One",
+    description:
+      "We offer a wide range of services to meet your needs. Contact us to learn more.",
+  },
+  {
+    icon: HandHelping,
+    title: "Service Two",
+    description:
+      "We offer a wide range of services to meet your needs. Contact us to learn more.",
+  },
+  {
+    icon: MapIcon,
+    title: "Service Three",
+    description:
+      "We offer a wide range of services to meet your needs. Contact us to learn more.",
+  },
+  {
+    icon: BookOpen,
+    title: "Service Four",
+    description:
+      "We offer a wide range of services to meet your needs. Contact us to learn more.",
+  },
+];
+
+const DEFAULT_FAQS = [
+  {
+    question: "How do I get started?",
+    answer:
+      "Simply reach out through our contact form and we'll get back to you within one business day.",
+  },
+  {
+    question: "What areas do you serve?",
+    answer:
+      "We serve clients locally and remotely. Contact us to confirm availability in your area.",
+  },
+  {
+    question: "Do you offer free consultations?",
+    answer:
+      "Yes! We offer a free 30-minute consultation to discuss your needs and how we can help.",
+  },
+];
+
 export async function PollenServicesPage({ business }: Props) {
-  const f = resolveFields(business?.siteContent?.customFields, [
+  const customFields = business?.siteContent?.customFields;
+
+  const f = resolveFields(customFields, [
+    "pollen.services.page-title",
+    "pollen.services.page-subtitle",
     "pollen.services.title",
     "pollen.services.subtitle",
     "pollen.services.text",
-    "pollen.services.service-1-name",
-    "pollen.services.service-1-description",
-    "pollen.services.service-2-name",
-    "pollen.services.service-2-description",
-    "pollen.services.service-3-name",
-    "pollen.services.service-3-description",
-    "pollen.services.service-4-name",
-    "pollen.services.service-4-description",
+    "pollen.services.contact-button-text",
+    "pollen.services.faq-label",
+    "pollen.services.faq-heading",
     "pollen.services.faq-description",
     "pollen.services.faq-image",
-    "pollen.services.faq-question-1",
-    "pollen.services.faq-answer-1",
-    "pollen.services.faq-question-2",
-    "pollen.services.faq-answer-2",
-    "pollen.services.faq-question-3",
-    "pollen.services.faq-answer-3",
+    "pollen.services.faq-contact-button-text",
+    "pollen.services.resources-label",
     "pollen.services.resources-title",
+    "pollen.testimonials.section-label",
+    "pollen.testimonials.section-heading",
+    "pollen.testimonials.view-all-text",
   ]);
 
   const testimonials = (await api.testimonial.listRandom({ limit: 3 })) ?? [];
 
-  const services = [
-    {
-      icon: Flower2,
-      title: f["pollen.services.service-1-name"],
-      description: f["pollen.services.service-1-description"],
-    },
-    {
-      icon: HandHelping,
-      title: f["pollen.services.service-2-name"],
-      description: f["pollen.services.service-2-description"],
-    },
-    {
-      icon: MapIcon,
-      title: f["pollen.services.service-3-name"],
-      description: f["pollen.services.service-3-description"],
-    },
-    {
-      icon: BookOpen,
-      title: f["pollen.services.service-4-name"],
-      description: f["pollen.services.service-4-description"],
-    },
-  ];
+  const services =
+    parseTemplateIconListRows(
+      getListFieldValue(customFields, "pollen.services.services-list"),
+      DEFAULT_SERVICES,
+    ) ?? DEFAULT_SERVICES;
 
-  const faqs = [
-    {
-      question: f["pollen.services.faq-question-1"],
-      answer: f["pollen.services.faq-answer-1"],
-    },
-    {
-      question: f["pollen.services.faq-question-2"],
-      answer: f["pollen.services.faq-answer-2"],
-    },
-    {
-      question: f["pollen.services.faq-question-3"],
-      answer: f["pollen.services.faq-answer-3"],
-    },
-  ].filter((faq) => faq.question);
+  const rawFaqRows = parseTemplateListRows(
+    getListFieldValue(customFields, "pollen.services.faq-list"),
+  );
+  const faqs =
+    rawFaqRows.length > 0
+      ? rawFaqRows
+          .filter(
+            (row): row is { question: string; answer: string } =>
+              typeof row.question === "string" && !!row.question,
+          )
+          .map((row) => ({
+            question: row.question,
+            answer: typeof row.answer === "string" ? row.answer : "",
+          }))
+      : DEFAULT_FAQS;
 
-  // Resource links are user-supplied URLs so read raw fields directly
+  // Resource links are user-supplied URLs — read raw to preserve URLs as-is
   const rawFields =
-    (business?.siteContent?.customFields as Record<string, string> | null) ??
-    {};
+    (customFields as Record<string, string> | null) ?? {};
   const resources: { name: string; url: string }[] = [];
   for (let i = 1; i <= 5; i++) {
     const name = rawFields[`pollen.services.resource-name-${i}`]?.trim() ?? "";
@@ -109,8 +141,8 @@ export async function PollenServicesPage({ business }: Props) {
   return (
     <PollenGeneralLayout
       business={business}
-      title="Services"
-      subtitle="What We Do"
+      title={f["pollen.services.page-title"] ?? "Services"}
+      subtitle={f["pollen.services.page-subtitle"] ?? "What We Do"}
     >
       {/* Services Overview */}
       <section className="bg-[#d4e8d4] py-20 md:py-32">
@@ -135,7 +167,7 @@ export async function PollenServicesPage({ business }: Props) {
                       "gap-2 bg-[#2a351f]! text-white hover:bg-[#3d4d2f]!",
                   })}
                 >
-                  {"Get in Touch"}
+                  {f["pollen.services.contact-button-text"] ?? "Get in Touch"}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -182,10 +214,10 @@ export async function PollenServicesPage({ business }: Props) {
             <FadeIn direction="left" delay={0.1}>
               <div>
                 <p className="mb-4 text-sm font-semibold tracking-wider text-[#2a351f] uppercase">
-                  {"You Have Questions?"}
+                  {f["pollen.services.faq-label"]}
                 </p>
                 <h2 className="mb-4 text-3xl font-bold text-[#374151] md:text-4xl">
-                  {"Frequently Asked Questions"}
+                  {f["pollen.services.faq-heading"]}
                 </h2>
                 <p className="mb-8 leading-relaxed text-[#6b7280]">
                   {f["pollen.services.faq-description"]}
@@ -213,7 +245,7 @@ export async function PollenServicesPage({ business }: Props) {
                       "border-[#374151] text-[#374151] hover:bg-[#374151]",
                   })}
                 >
-                  Contact Us
+                  {f["pollen.services.faq-contact-button-text"] ?? "Contact Us"}
                 </Link>
               </div>
             </FadeIn>
@@ -227,7 +259,7 @@ export async function PollenServicesPage({ business }: Props) {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <FadeIn direction="up">
               <p className="mb-4 text-sm font-semibold tracking-wider text-[#2a351f] uppercase">
-                Free for you
+                {f["pollen.services.resources-label"]}
               </p>
               <h2 className="mb-12 text-3xl font-bold text-[#374151] md:text-4xl">
                 {f["pollen.services.resources-title"]}
@@ -263,7 +295,12 @@ export async function PollenServicesPage({ business }: Props) {
       )}
 
       {/* Testimonials Section */}
-      <PollenTestimonialsSection testimonials={testimonials} />
+      <PollenTestimonialsSection
+        testimonials={testimonials}
+        sectionLabel={f["pollen.testimonials.section-label"]}
+        sectionHeading={f["pollen.testimonials.section-heading"]}
+        viewAllText={f["pollen.testimonials.view-all-text"]}
+      />
     </PollenGeneralLayout>
   );
 }
