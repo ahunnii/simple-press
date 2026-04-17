@@ -175,7 +175,7 @@ export const reviewRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const ip = getClientIpFromHeaders(ctx.headers);
+      const ip = `${getClientIpFromHeaders(ctx.headers)}:${ctx.headers.get("host") ?? ""}`;
       try {
         await reviewVoteLimiter.consume(ip);
       } catch {

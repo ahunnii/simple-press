@@ -13,7 +13,14 @@ import { db } from "~/server/db";
 
 export const contactRouter = createTRPCRouter({
   send: publicProcedure.input(contactSchema).mutation(async ({ ctx, input }) => {
-    await contactLimiter.consume(getClientIpFromHeaders(ctx.headers));
+    try {
+      await contactLimiter.consume(`${getClientIpFromHeaders(ctx.headers)}:${ctx.headers.get("host") ?? ""}`);
+    } catch {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Too many submissions. Please try again later.",
+      });
+    }
 
     const isValid =
       process.env.NODE_ENV === "development"

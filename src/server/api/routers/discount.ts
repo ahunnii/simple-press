@@ -184,7 +184,14 @@ export const discountRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await discountLimiter.consume(getClientIpFromHeaders(ctx.headers));
+      try {
+        await discountLimiter.consume(`${getClientIpFromHeaders(ctx.headers)}:${ctx.businessId}`);
+      } catch {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many requests. Please try again later.",
+        });
+      }
 
       const { businessId } = ctx;
       const { cartTotal } = input;

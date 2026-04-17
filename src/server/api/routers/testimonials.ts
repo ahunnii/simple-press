@@ -217,7 +217,7 @@ export const testimonialRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const ip = getClientIpFromHeaders(ctx.headers);
+      const ip = `${getClientIpFromHeaders(ctx.headers)}:${ctx.headers.get("host") ?? ""}`;
       try {
         await testimonialSubmitLimiter.consume(ip);
       } catch {

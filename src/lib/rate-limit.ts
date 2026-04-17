@@ -8,16 +8,21 @@ type LimiterOpts = { points: number; duration: number; keyPrefix: string };
 // Lazily initialize limiters on first use so that Redis connections are
 // never attempted during Next.js static generation / build time.
 function makeLazy(opts: LimiterOpts): { consume: (key: string) => Promise<void> } {
-  let instance: RateLimiterAbstract | null = null;
+  let redisInstance: RateLimiterAbstract | null = null;
+  let memoryInstance: RateLimiterAbstract | null = null;
+
+  const getMemory = async (): Promise<RateLimiterAbstract> => {
+    if (memoryInstance) return memoryInstance;
+    const { RateLimiterMemory } = await import("rate-limiter-flexible");
+    memoryInstance = new RateLimiterMemory(opts);
+    return memoryInstance;
+  };
 
   const getOrCreate = async (): Promise<RateLimiterAbstract> => {
-    if (instance) return instance;
-
-    const { RateLimiterMemory, RateLimiterRedis } = await import(
-      "rate-limiter-flexible"
-    );
+    if (redisInstance) return redisInstance;
 
     if (env.REDIS_URL) {
+      const { RateLimiterRedis } = await import("rate-limiter-flexible");
       const { default: Redis } = await import("ioredis");
       const client = new Redis(env.REDIS_URL, {
         enableOfflineQueue: false,
@@ -29,18 +34,30 @@ function makeLazy(opts: LimiterOpts): { consume: (key: string) => Promise<void> 
           tags: { service: "redis", component: "rate-limiter" },
         });
       });
-      instance = new RateLimiterRedis({ storeClient: client, ...opts });
-    } else {
-      instance = new RateLimiterMemory(opts);
+      redisInstance = new RateLimiterRedis({ storeClient: client, ...opts });
+      return redisInstance;
     }
 
-    return instance;
+    return getMemory();
   };
 
   return {
     consume: async (key: string) => {
       const limiter = await getOrCreate();
-      await limiter.consume(key);
+      try {
+        await limiter.consume(key);
+      } catch (err) {
+        // RateLimiterRes = limit genuinely exceeded — always re-throw
+        const { RateLimiterRes } = await import("rate-limiter-flexible");
+        if (err instanceof RateLimiterRes) throw err;
+
+        // Redis connection error — reset so next request retries, fall back to memory
+        redisInstance = null;
+        Sentry.captureException(err, {
+          tags: { service: "redis", component: "rate-limiter-fallback" },
+        });
+        await (await getMemory()).consume(key);
+      }
     },
   };
 }

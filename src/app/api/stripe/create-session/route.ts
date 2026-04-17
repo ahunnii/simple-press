@@ -75,9 +75,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Rate limit: 10 checkout session attempts per minute per IP
-
-    // if (process.env.NODE_ENV === "production") {
     try {
       await checkoutLimiter.consume(getClientIp(req));
     } catch {
@@ -86,7 +83,6 @@ export async function POST(req: NextRequest) {
         { status: 429 },
       );
     }
-    // }
 
     const domain = getCurrentDomain(req.headers);
     const business = await getBusinessByDomain(domain);
