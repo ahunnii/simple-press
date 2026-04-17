@@ -35,6 +35,7 @@ export default async function AdminDashboardPage() {
     totalOrders,
     recentOrders,
     lowStockProducts,
+    lowStockPools,
     revenueByDay,
     topProducts,
   ] = await Promise.all([
@@ -112,6 +113,17 @@ export default async function AdminDashboardPage() {
       return [...variants, ...baseAsVariants]
         .sort((a, b) => a.inventoryQty - b.inventoryQty)
         .slice(0, 5);
+    }),
+
+    // Low stock pools — pools with inventory at or near zero
+    db.baseInventoryUnit.findMany({
+      where: {
+        businessId: business.id,
+        inventoryQty: { lte: 10 },
+      },
+      orderBy: { inventoryQty: "asc" },
+      take: 5,
+      select: { id: true, name: true, inventoryQty: true, lowInventoryThreshold: true },
     }),
 
     // Revenue by day (last 30 days)
@@ -214,6 +226,7 @@ export default async function AdminDashboardPage() {
           }>
         }
         lowStockProducts={lowStockProducts}
+        lowStockPools={lowStockPools}
         revenueByDay={revenueByDay}
         topProducts={topProductsWithDetails}
       />

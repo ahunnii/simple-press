@@ -42,6 +42,8 @@ export const productFormSchema = z.object({
   allowBackorders: z.boolean(),
   inventoryQty: z.coerce.number().int().nonnegative().optional(),
   lowInventoryThreshold: z.coerce.number().int().positive().optional(),
+  baseInventoryUnitId: z.string().nullable().optional(),
+  baseUnitsConsumed: z.coerce.number().int().positive().nullable().optional(),
   variants: z.array(variantSchema).optional(),
   images: z.array(productImageSchema).optional(),
   additionalFields: additionalFieldsSchema,

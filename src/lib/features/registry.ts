@@ -70,7 +70,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Create discount codes and promotional offers",
     category: "ecommerce",
     enabledByDefault: false,
-    ownerCanToggle: false,
+    ownerCanToggle: true,
     dependsOn: ["cart"],
     hidesNav: ["coupons"],
   },

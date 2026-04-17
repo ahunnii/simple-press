@@ -224,6 +224,12 @@ export function HappyBambooShopClient({
                 trackInventory: product.trackInventory,
                 inventoryQty: product.inventoryQty,
                 allowBackorders: product.allowBackorders,
+                poolEffectiveMaxQty: product.baseInventoryUnit
+                  ? Math.floor(
+                      product.baseInventoryUnit.inventoryQty /
+                        (product.baseUnitsConsumed ?? 1),
+                    )
+                  : null,
               }}
             />
           ))}

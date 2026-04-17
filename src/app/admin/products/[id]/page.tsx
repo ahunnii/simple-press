@@ -14,9 +14,10 @@ type Props = {
 export default async function EditProductPage({ params }: Props) {
   const { id } = await params;
 
-  const [product, flags] = await Promise.all([
+  const [product, flags, pools] = await Promise.all([
     api.product.secureGet(id).catch(rethrowTrpcForErrorBoundary),
     getBusinessFlags(),
+    api.baseInventoryUnit.list(),
   ]);
 
   if (!product) notFound();
@@ -30,7 +31,7 @@ export default async function EditProductPage({ params }: Props) {
         ]}
       />
 
-      <ProductForm product={product} galleriesEnabled={flags.isEnabled("galleries")} />
+      <ProductForm product={product} galleriesEnabled={flags.isEnabled("galleries")} pools={pools} />
     </>
   );
 }

@@ -255,6 +255,8 @@ exports.Prisma.ProductScalarFieldEnum = {
   lowInventoryThreshold: 'lowInventoryThreshold',
   lowInventoryAlertSent: 'lowInventoryAlertSent',
   outOfStockAlertSent: 'outOfStockAlertSent',
+  baseInventoryUnitId: 'baseInventoryUnitId',
+  baseUnitsConsumed: 'baseUnitsConsumed',
   weight: 'weight',
   weightUnit: 'weightUnit',
   published: 'published',
@@ -439,6 +441,7 @@ exports.Prisma.InventoryHistoryScalarFieldEnum = {
   createdAt: 'createdAt',
   variantId: 'variantId',
   productId: 'productId',
+  baseInventoryUnitId: 'baseInventoryUnitId',
   businessId: 'businessId',
   previousQty: 'previousQty',
   newQty: 'newQty',
@@ -447,6 +450,20 @@ exports.Prisma.InventoryHistoryScalarFieldEnum = {
   note: 'note',
   orderId: 'orderId',
   userId: 'userId'
+};
+
+exports.Prisma.BaseInventoryUnitScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  name: 'name',
+  description: 'description',
+  inventoryQty: 'inventoryQty',
+  lowInventoryThreshold: 'lowInventoryThreshold',
+  lowInventoryAlertSent: 'lowInventoryAlertSent',
+  outOfStockAlertSent: 'outOfStockAlertSent',
+  allowBackorders: 'allowBackorders',
+  businessId: 'businessId'
 };
 
 exports.Prisma.PageScalarFieldEnum = {
@@ -658,6 +675,7 @@ exports.Prisma.ModelName = {
   DomainQueue: 'DomainQueue',
   DiscountCode: 'DiscountCode',
   InventoryHistory: 'InventoryHistory',
+  BaseInventoryUnit: 'BaseInventoryUnit',
   Page: 'Page',
   ProductImport: 'ProductImport',
   Gallery: 'Gallery',

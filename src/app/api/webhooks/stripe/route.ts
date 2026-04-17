@@ -13,7 +13,10 @@ import {
   sendNewOrderNotification,
   sendOrderConfirmation,
   sendOutOfStockAlert,
+  sendPoolLowInventoryAlert,
+  sendPoolOutOfStockAlert,
 } from "~/lib/email/templates";
+import { deductPoolInventory, type PoolDeductionResult } from "~/lib/inventory";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
 
@@ -526,9 +529,19 @@ export async function POST(req: NextRequest) {
 
         // Deduct inventory
         const notificationCandidates: NotificationCandidate[] = [];
+        const poolNotificationCandidates: PoolDeductionResult[] = [];
 
         try {
           await db.$transaction(async (tx) => {
+            // Group pool-based items by poolId for aggregate deduction
+            const poolGroups = new Map<
+              string,
+              {
+                items: { productId: string; quantity: number }[];
+                unitsConsumedMap: Record<string, number>;
+              }
+            >();
+
             for (const item of order.items) {
               const qty = item.quantity;
 
@@ -662,11 +675,26 @@ export async function POST(req: NextRequest) {
                     trackInventory: true,
                     allowBackorders: true,
                     lowInventoryThreshold: true,
+                    baseInventoryUnitId: true,
+                    baseUnitsConsumed: true,
                   },
                 });
 
                 if (!product) {
                   console.warn(`[Webhook] Product ${item.productId} not found`);
+                  continue;
+                }
+
+                // Pool-based product — accumulate for aggregate deduction
+                if (product.baseInventoryUnitId) {
+                  const poolId = product.baseInventoryUnitId;
+                  if (!poolGroups.has(poolId)) {
+                    poolGroups.set(poolId, { items: [], unitsConsumedMap: {} });
+                  }
+                  const group = poolGroups.get(poolId)!;
+                  group.items.push({ productId: product.id, quantity: qty });
+                  group.unitsConsumedMap[product.id] =
+                    product.baseUnitsConsumed ?? 1;
                   continue;
                 }
 
@@ -758,6 +786,19 @@ export async function POST(req: NextRequest) {
                 }
               }
             }
+
+            // Deduct pool inventory (aggregate per pool)
+            for (const [poolId, group] of poolGroups) {
+              const result = await deductPoolInventory(tx, {
+                poolId,
+                items: group.items,
+                unitsConsumedMap: group.unitsConsumedMap,
+                orderId: order.id,
+                orderNumber,
+                businessId,
+              });
+              if (result) poolNotificationCandidates.push(result);
+            }
           });
 
           console.log(`[Webhook] Inventory deducted for order ${order.id}`);
@@ -840,6 +881,65 @@ export async function POST(req: NextRequest) {
               Sentry.captureException(notifyError);
             });
           }
+        }
+
+        // Send pool inventory alert notifications
+        if (poolNotificationCandidates.length > 0) {
+            try {
+              const businessUrl = getBusinessUrl(business);
+              const alertedPoolIds = new Set<string>();
+              for (const candidate of poolNotificationCandidates) {
+                if (candidate.wasOversell) continue;
+                if (alertedPoolIds.has(candidate.poolId)) continue;
+
+                const adminInventoryUrl = `${businessUrl}/admin/inventory`;
+
+                if (candidate.newQty <= 0) {
+                  const flagged = await db.baseInventoryUnit.updateMany({
+                    where: { id: candidate.poolId, outOfStockAlertSent: false },
+                    data: {
+                      outOfStockAlertSent: true,
+                      lowInventoryAlertSent: true,
+                    },
+                  });
+                  if (flagged.count > 0) {
+                    alertedPoolIds.add(candidate.poolId);
+                    await sendPoolOutOfStockAlert({
+                      poolName: candidate.poolName,
+                      adminUrl: adminInventoryUrl,
+                      business,
+                    });
+                  }
+                } else if (
+                  candidate.lowInventoryThreshold !== null &&
+                  candidate.newQty <= candidate.lowInventoryThreshold &&
+                  candidate.previousQty > candidate.lowInventoryThreshold
+                ) {
+                  const flagged = await db.baseInventoryUnit.updateMany({
+                    where: { id: candidate.poolId, lowInventoryAlertSent: false },
+                    data: { lowInventoryAlertSent: true },
+                  });
+                  if (flagged.count > 0) {
+                    alertedPoolIds.add(candidate.poolId);
+                    await sendPoolLowInventoryAlert({
+                      poolName: candidate.poolName,
+                      currentQty: candidate.newQty,
+                      threshold: candidate.lowInventoryThreshold,
+                      adminUrl: adminInventoryUrl,
+                      business,
+                    });
+                  }
+                }
+              }
+              console.log(`[Webhook] Pool notifications processed for order ${order.id}`);
+            } catch (poolNotifyError) {
+              console.error("[Webhook] Failed to send pool inventory notification:", poolNotifyError);
+              Sentry.withScope((scope) => {
+                scope.setTag("webhook.step", "pool-inventory-notification");
+                scope.setTag("businessId", businessId);
+                Sentry.captureException(poolNotifyError);
+              });
+            }
         }
 
         // Send order confirmation email (skip if customer email is unknown)

@@ -76,6 +76,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Rate limit: 10 checkout session attempts per minute per IP
+
+    // if (process.env.NODE_ENV === "production") {
     try {
       await checkoutLimiter.consume(getClientIp(req));
     } catch {
@@ -84,6 +86,7 @@ export async function POST(req: NextRequest) {
         { status: 429 },
       );
     }
+    // }
 
     const domain = getCurrentDomain(req.headers);
     const business = await getBusinessByDomain(domain);
@@ -144,7 +147,10 @@ export async function POST(req: NextRequest) {
     const [variantsWithProduct, productsNoVariant] = await Promise.all([
       variantIds.length > 0
         ? db.productVariant.findMany({
-            where: { id: { in: variantIds }, product: { businessId: business.id } },
+            where: {
+              id: { in: variantIds },
+              product: { businessId: business.id },
+            },
             select: {
               id: true,
               price: true,
@@ -183,6 +189,8 @@ export async function POST(req: NextRequest) {
           allowBackorders: true,
           inventoryQty: true,
           additionalFields: true,
+          baseInventoryUnitId: true,
+          baseUnitsConsumed: true,
           _count: { select: { variants: true } },
           images: {
             select: { url: true },
@@ -195,6 +203,31 @@ export async function POST(req: NextRequest) {
 
     const variantMap = new Map(variantsWithProduct.map((v) => [v.id, v]));
     const productMap = new Map(productsNoVariant.map((p) => [p.id, p]));
+
+    // Aggregate base units demanded per pool across the whole cart
+    const poolDemand = new Map<string, number>();
+    for (const item of itemList) {
+      if (!item.variantId) {
+        const p = productMap.get(item.productId);
+        if (p?.baseInventoryUnitId) {
+          const cur = poolDemand.get(p.baseInventoryUnitId) ?? 0;
+          poolDemand.set(
+            p.baseInventoryUnitId,
+            cur + (p.baseUnitsConsumed ?? 1) * (Number(item.quantity) || 1),
+          );
+        }
+      }
+    }
+
+    const poolIds = [...poolDemand.keys()];
+    const pools =
+      poolIds.length > 0
+        ? await db.baseInventoryUnit.findMany({
+            where: { id: { in: poolIds }, businessId: business.id },
+            select: { id: true, inventoryQty: true, allowBackorders: true },
+          })
+        : [];
+    const poolMap = new Map(pools.map((p) => [p.id, p]));
 
     const unavailableItems: string[] = [];
     const unavailableItemIds: {
@@ -262,12 +295,34 @@ export async function POST(req: NextRequest) {
           pushUnavailable(name, item.productId, null);
           continue;
         }
-        if (
-          product.trackInventory &&
-          !product.allowBackorders &&
-          product.inventoryQty < qty
-        ) {
-          pushUnavailable(name, item.productId, null);
+        // Pool inventory check — pool demand is validated in aggregate after the loop
+        if (!product.baseInventoryUnitId) {
+          if (
+            product.trackInventory &&
+            !product.allowBackorders &&
+            product.inventoryQty < qty
+          ) {
+            pushUnavailable(name, item.productId, null);
+          }
+        }
+      }
+    }
+
+    // Aggregate pool check: compare total pool demand vs available qty
+    for (const [poolId, demand] of poolDemand) {
+      const pool = poolMap.get(poolId);
+      if (!pool || (!pool.allowBackorders && pool.inventoryQty < demand)) {
+        // Mark all items drawing from this pool as unavailable
+        for (const item of itemList) {
+          if (!item.variantId) {
+            const p = productMap.get(item.productId);
+            if (p?.baseInventoryUnitId === poolId) {
+              const n = item.variantName
+                ? `${item.productName} (${item.variantName})`
+                : item.productName;
+              pushUnavailable(n, item.productId, null);
+            }
+          }
         }
       }
     }
@@ -379,7 +434,9 @@ export async function POST(req: NextRequest) {
     // Create line items for Stripe (metadata so webhook can store product/variant and deduct inventory)
     const lineItems = itemList.map((item) => {
       // Always use server-fetched prices — never trust client-supplied amounts
-      const variantRecord = item.variantId ? variantMap.get(item.variantId) : undefined;
+      const variantRecord = item.variantId
+        ? variantMap.get(item.variantId)
+        : undefined;
       const productRecord = productMap.get(item.productId);
       const serverPrice = variantRecord?.price ?? productRecord?.price;
 
@@ -396,7 +453,8 @@ export async function POST(req: NextRequest) {
         business.siteContent?.logoUrl ??
         null;
       const imageUrl =
-        rawImageUrl?.startsWith("https://") || rawImageUrl?.startsWith("http://")
+        rawImageUrl?.startsWith("https://") ||
+        rawImageUrl?.startsWith("http://")
           ? rawImageUrl
           : null;
 

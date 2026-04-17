@@ -84,6 +84,9 @@ export const productRouter = createTRPCRouter({
               },
             },
           },
+          baseInventoryUnit: {
+            select: { inventoryQty: true, allowBackorders: true },
+          },
         },
       });
       return product;
@@ -150,6 +153,8 @@ export const productRouter = createTRPCRouter({
         allowBackorders,
         inventoryQty,
         lowInventoryThreshold,
+        baseInventoryUnitId,
+        baseUnitsConsumed,
         variants,
         additionalFields,
       } = input;
@@ -179,10 +184,13 @@ export const productRouter = createTRPCRouter({
           price,
           compareAtPrice: compareAtPrice ?? null,
           published,
-          trackInventory,
+          // When pool is set, force trackInventory off — pool manages stock
+          trackInventory: baseInventoryUnitId ? false : trackInventory,
           allowBackorders,
           inventoryQty,
           lowInventoryThreshold: lowInventoryThreshold ?? null,
+          baseInventoryUnitId: baseInventoryUnitId ?? null,
+          baseUnitsConsumed: baseUnitsConsumed ?? null,
           additionalFields: additionalFields
             ? (JSON.parse(
                 JSON.stringify(additionalFields),
@@ -225,6 +233,8 @@ export const productRouter = createTRPCRouter({
         allowBackorders,
         inventoryQty,
         lowInventoryThreshold,
+        baseInventoryUnitId,
+        baseUnitsConsumed,
         variants,
         additionalFields,
       } = input;
@@ -275,10 +285,13 @@ export const productRouter = createTRPCRouter({
           price,
           compareAtPrice: compareAtPrice ?? null,
           published,
-          trackInventory,
+          // When pool is set, force trackInventory off — pool manages stock
+          trackInventory: baseInventoryUnitId ? false : trackInventory,
           allowBackorders,
           inventoryQty,
           lowInventoryThreshold: lowInventoryThreshold ?? null,
+          baseInventoryUnitId: baseInventoryUnitId ?? null,
+          baseUnitsConsumed: baseUnitsConsumed ?? null,
           additionalFields: additionalFields
             ? (JSON.parse(
                 JSON.stringify(additionalFields),

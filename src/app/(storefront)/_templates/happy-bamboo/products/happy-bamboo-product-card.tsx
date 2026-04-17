@@ -29,6 +29,7 @@ type Props = {
     trackInventory?: boolean | null;
     inventoryQty?: number | null;
     allowBackorders?: boolean | null;
+    poolEffectiveMaxQty?: number | null;
   };
   saleBadgeFormat?: string;
   index: number;
@@ -44,13 +45,17 @@ export function HappyBambooProductCard({
     product.additionalFields,
   );
   const isOutOfStock =
-    !!product.trackInventory &&
-    !product.allowBackorders &&
-    (product.inventoryQty ?? 0) === 0;
+    product.poolEffectiveMaxQty !== undefined && product.poolEffectiveMaxQty !== null
+      ? product.poolEffectiveMaxQty <= 0
+      : !!product.trackInventory &&
+        !product.allowBackorders &&
+        (product.inventoryQty ?? 0) === 0;
   const isBackorder =
-    !!product.trackInventory &&
-    !!product.allowBackorders &&
-    (product.inventoryQty ?? 0) === 0;
+    product.poolEffectiveMaxQty === undefined || product.poolEffectiveMaxQty === null
+      ? !!product.trackInventory &&
+        !!product.allowBackorders &&
+        (product.inventoryQty ?? 0) === 0
+      : false;
   const disableCart = !!comingSoon || isOutOfStock || !!product.hasVariants;
 
   const isOnSale =
@@ -71,6 +76,7 @@ export function HappyBambooProductCard({
       compareAtPrice: isOnSale ? product.compareAtPrice : null,
       imageUrl: product.image,
       sku: null,
+      maxInventory: product.poolEffectiveMaxQty ?? undefined,
     });
   };
 
@@ -185,13 +191,17 @@ export function HappyBambooHorizontalProductCard({
     product.additionalFields,
   );
   const isOutOfStock =
-    !!product.trackInventory &&
-    !product.allowBackorders &&
-    (product.inventoryQty ?? 0) === 0;
+    product.poolEffectiveMaxQty !== undefined && product.poolEffectiveMaxQty !== null
+      ? product.poolEffectiveMaxQty <= 0
+      : !!product.trackInventory &&
+        !product.allowBackorders &&
+        (product.inventoryQty ?? 0) === 0;
   const isBackorder =
-    !!product.trackInventory &&
-    !!product.allowBackorders &&
-    (product.inventoryQty ?? 0) === 0;
+    product.poolEffectiveMaxQty === undefined || product.poolEffectiveMaxQty === null
+      ? !!product.trackInventory &&
+        !!product.allowBackorders &&
+        (product.inventoryQty ?? 0) === 0
+      : false;
   const disableCart = !!comingSoon || isOutOfStock || !!product.hasVariants;
 
   const isOnSale =
@@ -212,6 +222,7 @@ export function HappyBambooHorizontalProductCard({
       compareAtPrice: isOnSale ? product.compareAtPrice : null,
       imageUrl: product.image,
       sku: null,
+      maxInventory: product.poolEffectiveMaxQty ?? undefined,
     });
   };
 
@@ -343,14 +354,23 @@ export function HappyBambooFeaturedProductCard({
   const { comingSoon, productTagline } = parseCardAdditionalFields(
     product.additionalFields,
   );
+  const poolEffectiveMaxQty = product.baseInventoryUnit
+    ? Math.floor(
+        product.baseInventoryUnit.inventoryQty / (product.baseUnitsConsumed ?? 1),
+      )
+    : null;
   const isOutOfStock =
-    !!product.trackInventory &&
-    !product.allowBackorders &&
-    (product.inventoryQty ?? 0) === 0;
+    poolEffectiveMaxQty !== null
+      ? poolEffectiveMaxQty <= 0
+      : !!product.trackInventory &&
+        !product.allowBackorders &&
+        (product.inventoryQty ?? 0) === 0;
   const isBackorder =
-    !!product.trackInventory &&
-    !!product.allowBackorders &&
-    (product.inventoryQty ?? 0) === 0;
+    poolEffectiveMaxQty === null
+      ? !!product.trackInventory &&
+        !!product.allowBackorders &&
+        (product.inventoryQty ?? 0) === 0
+      : false;
   const hasVariants = product.variants.length > 0;
   const disableCart = !!comingSoon || isOutOfStock || hasVariants;
 
@@ -378,6 +398,7 @@ export function HappyBambooFeaturedProductCard({
       compareAtPrice: isOnSale ? effectiveCompareAtPrice : null,
       imageUrl: product.images[0]?.url ?? "/placeholder.svg",
       sku: null,
+      maxInventory: poolEffectiveMaxQty ?? undefined,
     });
   };
 

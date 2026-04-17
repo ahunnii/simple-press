@@ -13,6 +13,7 @@ import {
   IconLanguage,
   IconMail,
   IconPackage,
+  IconPackages,
   IconSettings,
   IconShoppingCart,
   IconStar,
@@ -68,6 +69,11 @@ const getNavData = (session: Session | null) => {
       url: "/admin/products",
       icon: IconPackage,
       featureKey: "products",
+    },
+    {
+      title: "Inventory",
+      url: "/admin/inventory",
+      icon: IconPackages,
     },
     {
       title: "Collections",

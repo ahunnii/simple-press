@@ -186,7 +186,8 @@ model Business {
   images      Image[]
   discountCodes DiscountCode[]
   inventoryHistory InventoryHistory[]
-  pages         Page[] 
+  baseInventoryUnits BaseInventoryUnit[]
+  pages         Page[]
   productImports ProductImport[]
   galleries     Gallery[]
   testimonials         Testimonial[]
@@ -272,7 +273,12 @@ model Product {
   lowInventoryThreshold  Int?
   lowInventoryAlertSent  Boolean @default(false)
   outOfStockAlertSent    Boolean @default(false)
-  
+
+  // Base inventory unit (pool) opt-in — when set, per-product trackInventory is disabled
+  baseInventoryUnitId String?
+  baseInventoryUnit   BaseInventoryUnit? @relation(fields: [baseInventoryUnitId], references: [id], onDelete: SetNull)
+  baseUnitsConsumed   Int?
+
   // Physical attributes
   weight      Float? // in lbs or kg
   weightUnit  String?  @default("lb") // lb | kg
@@ -655,10 +661,13 @@ model InventoryHistory {
   // What changed
   variantId   String?
   variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  
-  productId   String
-  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
+
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  baseInventoryUnitId String?
+  baseInventoryUnit   BaseInventoryUnit? @relation(fields: [baseInventoryUnitId], references: [id], onDelete: Cascade)
+
   businessId  String
   business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
@@ -680,9 +689,37 @@ model InventoryHistory {
 
   @@index([variantId])
   @@index([productId])
+  @@index([baseInventoryUnitId])
   @@index([businessId])
   @@index([orderId])
   @@index([createdAt])
+}
+
+// ============================================
+// BASE INVENTORY UNITS (POOL INVENTORY)
+// ============================================
+
+model BaseInventoryUnit {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  description String? @db.Text
+
+  inventoryQty          Int     @default(0)
+  lowInventoryThreshold Int?
+  lowInventoryAlertSent Boolean @default(false)
+  outOfStockAlertSent   Boolean @default(false)
+  allowBackorders       Boolean @default(false)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  products         Product[]
+  inventoryHistory InventoryHistory[]
+
+  @@index([businessId])
 }
 
 model Page {

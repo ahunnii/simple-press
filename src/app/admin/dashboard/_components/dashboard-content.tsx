@@ -52,6 +52,12 @@ type DashboardContentProps = {
       name: string;
     };
   }>;
+  lowStockPools: Array<{
+    id: string;
+    name: string;
+    inventoryQty: number;
+    lowInventoryThreshold: number | null;
+  }>;
   revenueByDay: Array<{
     createdAt: Date;
     _sum: {
@@ -72,6 +78,7 @@ export function DashboardContent({
   stats,
   recentOrders,
   lowStockProducts,
+  lowStockPools,
   revenueByDay,
   topProducts,
 }: DashboardContentProps) {
@@ -274,7 +281,7 @@ export function DashboardContent({
               </Button>
             </CardHeader>
             <CardContent>
-              {lowStockProducts.length === 0 ? (
+              {lowStockProducts.length === 0 && lowStockPools.length === 0 ? (
                 <div className="py-8 text-center">
                   <Package className="mx-auto mb-3 h-12 w-12 text-green-400" />
                   <p className="text-gray-500">All stock levels are good!</p>
@@ -306,6 +313,26 @@ export function DashboardContent({
                         </p>
                       </div>
                     </div>
+                  ))}
+                  {lowStockPools.map((pool) => (
+                    <Link key={pool.id} href="/admin/inventory">
+                      <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 transition-colors hover:bg-amber-100">
+                        <div className="flex items-center gap-3">
+                          <AlertTriangle className={`h-5 w-5 shrink-0 ${pool.inventoryQty === 0 ? "text-red-600" : "text-amber-600"}`} />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {pool.name}
+                            </p>
+                            <p className="text-xs text-gray-600">Inventory pool</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`text-sm font-semibold ${pool.inventoryQty === 0 ? "text-red-700" : "text-amber-700"}`}>
+                            {pool.inventoryQty} left
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               )}

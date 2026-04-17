@@ -44,6 +44,13 @@ import {
 } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { NumberInput } from "~/components/ui/number-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { InputFormField } from "~/components/inputs/input-form-field";
@@ -59,6 +66,7 @@ import { VariantManager } from "./variant-manager";
 type Props = {
   product?: RouterOutputs["product"]["secureGet"];
   galleriesEnabled?: boolean;
+  pools?: RouterOutputs["baseInventoryUnit"]["list"];
 };
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
@@ -75,7 +83,7 @@ function parseStoredAdditionalFields(raw: unknown) {
   };
 }
 
-export function ProductForm({ product, galleriesEnabled }: Props) {
+export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const utils = api.useUtils();
@@ -109,6 +117,8 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
       inventoryQty: product?.inventoryQty ?? 0,
       allowBackorders: product?.allowBackorders ?? false,
       lowInventoryThreshold: product?.lowInventoryThreshold ?? undefined,
+      baseInventoryUnitId: product?.baseInventoryUnitId ?? null,
+      baseUnitsConsumed: product?.baseUnitsConsumed ?? null,
       additionalFields: {
         additionalInformation: (storedAdditional?.additionalInformation as
           | Record<string, unknown>
@@ -255,6 +265,8 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
         allowBackorders: data.allowBackorders,
         inventoryQty: data.inventoryQty ?? 0,
         lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
+        baseInventoryUnitId: data.baseInventoryUnitId ?? null,
+        baseUnitsConsumed: data.baseUnitsConsumed ?? null,
         variants: variants?.map((v) => ({
           id: v.id,
           name: v.name,
@@ -297,6 +309,8 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
         inventoryQty: data.inventoryQty ?? 0,
         lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
         compareAtPrice: compareAtPriceInCents,
+        baseInventoryUnitId: data.baseInventoryUnitId ?? null,
+        baseUnitsConsumed: data.baseUnitsConsumed ?? null,
         variants: variants?.map((v) => ({
           name: v.name,
           sku: v.sku ?? undefined,
@@ -586,71 +600,156 @@ export function ProductForm({ product, galleriesEnabled }: Props) {
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <SwitchFormField
-                          form={form}
-                          name="trackInventory"
-                          label="Track Inventory"
-                          description="Enable inventory tracking for this product"
-                        />
-
-                        {form.watch("trackInventory") && (
-                          <SwitchFormField
-                            form={form}
-                            name="allowBackorders"
-                            label="Allow Backorders"
-                            description="Allow customers to order when out of stock"
-                          />
-                        )}
-
-                        {form.watch("trackInventory") &&
-                          variants.length === 0 && (
+                        {/* Base Unit pool selector (shown when pools exist and no variants) */}
+                        {pools.length > 0 && variants.length === 0 && (
+                          <div className="rounded-lg border p-4 space-y-3">
+                            <div>
+                              <Label className="text-sm font-medium">Base Unit</Label>
+                              <p className="text-sm text-muted-foreground mt-0.5">
+                                Link this product to a shared inventory pool. For example,
+                                if your base unit is a &ldquo;4-pack Roll&rdquo; and this
+                                product is a 24-pack, set units consumed to 6.
+                              </p>
+                            </div>
                             <FormField
                               control={form.control}
-                              name="inventoryQty"
+                              name="baseInventoryUnitId"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Inventory Quantity</FormLabel>
-                                  <FormControl>
-                                    <div className="relative">
-                                      <NumberInput
-                                        step="1"
-                                        min="0"
-                                        placeholder="10"
-                                        {...field}
-                                      />
-                                    </div>
-                                  </FormControl>
-                                  <FormDescription>
-                                    Stock for this product when it has no
-                                    variants.
-                                  </FormDescription>
+                                  <FormLabel>Pool</FormLabel>
+                                  <Select
+                                    onValueChange={(val) =>
+                                      field.onChange(val === "__none__" ? null : val)
+                                    }
+                                    value={field.value ?? "__none__"}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="None — use individual inventory" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="__none__">
+                                        None — use individual inventory
+                                      </SelectItem>
+                                      {pools.map((pool) => (
+                                        <SelectItem key={pool.id} value={pool.id}>
+                                          {pool.name} ({pool.inventoryQty} units)
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
                                 </FormItem>
                               )}
                             />
-                          )}
-
-                        {form.watch("trackInventory") && (
-                          <FormField
-                            control={form.control}
-                            name="lowInventoryThreshold"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Low Inventory Threshold</FormLabel>
-                                <FormControl>
-                                  <NumberInput
-                                    step="1"
-                                    min="1"
-                                    placeholder="e.g. 5"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  Get an email alert when stock reaches this
-                                  level. Leave blank to disable.
-                                </FormDescription>
-                              </FormItem>
+                            {form.watch("baseInventoryUnitId") && (
+                              <FormField
+                                control={form.control}
+                                name="baseUnitsConsumed"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Units consumed per purchase</FormLabel>
+                                    <FormControl>
+                                      <NumberInput
+                                        step="1"
+                                        min="1"
+                                        placeholder="e.g. 6"
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                      />
+                                    </FormControl>
+                                    <FormDescription>
+                                      How many base units this product uses per item sold.
+                                    </FormDescription>
+                                  </FormItem>
+                                )}
+                              />
                             )}
-                          />
+                          </div>
+                        )}
+
+                        {/* Individual inventory controls — hidden when pool is selected */}
+                        {!form.watch("baseInventoryUnitId") && (
+                          <>
+                            <SwitchFormField
+                              form={form}
+                              name="trackInventory"
+                              label="Track Inventory"
+                              description="Enable inventory tracking for this product"
+                            />
+
+                            {form.watch("trackInventory") && (
+                              <SwitchFormField
+                                form={form}
+                                name="allowBackorders"
+                                label="Allow Backorders"
+                                description="Allow customers to order when out of stock"
+                              />
+                            )}
+
+                            {form.watch("trackInventory") &&
+                              variants.length === 0 && (
+                                <FormField
+                                  control={form.control}
+                                  name="inventoryQty"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Inventory Quantity</FormLabel>
+                                      <FormControl>
+                                        <div className="relative">
+                                          <NumberInput
+                                            step="1"
+                                            min="0"
+                                            placeholder="10"
+                                            {...field}
+                                          />
+                                        </div>
+                                      </FormControl>
+                                      <FormDescription>
+                                        Stock for this product when it has no
+                                        variants.
+                                      </FormDescription>
+                                    </FormItem>
+                                  )}
+                                />
+                              )}
+
+                            {form.watch("trackInventory") && (
+                              <FormField
+                                control={form.control}
+                                name="lowInventoryThreshold"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Low Inventory Threshold</FormLabel>
+                                    <FormControl>
+                                      <NumberInput
+                                        step="1"
+                                        min="1"
+                                        placeholder="e.g. 5"
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormDescription>
+                                      Get an email alert when stock reaches this
+                                      level. Leave blank to disable.
+                                    </FormDescription>
+                                  </FormItem>
+                                )}
+                              />
+                            )}
+                          </>
+                        )}
+
+                        {/* Informational note when pool is active */}
+                        {form.watch("baseInventoryUnitId") && (
+                          <p className="text-sm text-muted-foreground">
+                            Individual inventory tracking is disabled while a base unit pool is
+                            selected. Manage pool stock from the{" "}
+                            <Link href="/admin/inventory" className="underline">
+                              Inventory
+                            </Link>{" "}
+                            page.
+                          </p>
                         )}
                       </CardContent>
                     </Card>

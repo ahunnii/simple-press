@@ -194,6 +194,10 @@ export const businessRouter = createTRPCRouter({
             trackInventory: true,
             inventoryQty: true,
             allowBackorders: true,
+            baseUnitsConsumed: true,
+            baseInventoryUnit: {
+              select: { inventoryQty: true, allowBackorders: true },
+            },
           },
           take: 4,
         },
@@ -321,6 +325,9 @@ export const businessRouter = createTRPCRouter({
                   select: { id: true, name: true, slug: true },
                 },
               },
+            },
+            baseInventoryUnit: {
+              select: { inventoryQty: true, allowBackorders: true },
             },
           },
           orderBy: { createdAt: "desc" },

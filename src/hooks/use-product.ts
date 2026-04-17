@@ -39,11 +39,19 @@ export function useProduct(
 
   // Calculate remaining stock and max inventory
   const hasVariants = product.variants.length > 0;
+  const poolEffectiveMaxQty =
+    !hasVariants && product.baseInventoryUnit
+      ? Math.floor(
+          product.baseInventoryUnit.inventoryQty /
+            (product.baseUnitsConsumed ?? 1),
+        )
+      : null;
   const maxInventory = hasVariants
     ? (selectedVariant?.inventoryQty ?? 0)
-    : product.trackInventory && !product.allowBackorders
-      ? (product.inventoryQty ?? 0)
-      : UNLIMITED_STOCK;
+    : (poolEffectiveMaxQty ??
+      (product.trackInventory && !product.allowBackorders
+        ? (product.inventoryQty ?? 0)
+        : UNLIMITED_STOCK));
   const remainingStock = maxInventory - cartQuantity;
   const canAddMore = remainingStock > 0;
   const tagline =
@@ -166,9 +174,11 @@ export function useProduct(
     ? selectedVariant
       ? selectedVariant.inventoryQty > 0
       : false
-    : !product.trackInventory ||
-      (product.allowBackorders ?? false) ||
-      (product.inventoryQty ?? 0) > 0;
+    : poolEffectiveMaxQty !== null
+      ? poolEffectiveMaxQty > 0
+      : !product.trackInventory ||
+        (product.allowBackorders ?? false) ||
+        (product.inventoryQty ?? 0) > 0;
 
   const showLowStockWarning = remainingStock > 0 && remainingStock < 10;
 

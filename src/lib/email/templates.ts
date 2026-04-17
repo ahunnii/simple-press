@@ -10,6 +10,8 @@ import OrderFulfilledEmail from "~/emails/order-fulfilled";
 import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
+import PoolLowInventoryAlertEmail from "~/emails/pool-low-inventory-alert";
+import PoolOutOfStockAlertEmail from "~/emails/pool-out-of-stock-alert";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import WelcomeEmail from "~/emails/welcome";
 
@@ -453,6 +455,58 @@ export async function sendBackorderAlert(params: {
     }),
     tags: [
       { name: "category", value: "backorder_alert" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
+// Pool (base inventory unit) low-stock alert
+export async function sendPoolLowInventoryAlert(params: {
+  poolName: string;
+  currentQty: number;
+  threshold: number;
+  adminUrl: string;
+  business: InventoryAlertBusiness;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    subject: `Low base unit stock: ${params.poolName}`,
+    react: PoolLowInventoryAlertEmail({
+      poolName: params.poolName,
+      currentQty: params.currentQty,
+      threshold: params.threshold,
+      adminUrl: params.adminUrl,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+    }),
+    tags: [
+      { name: "category", value: "pool_low_inventory_alert" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
+// Pool (base inventory unit) out-of-stock alert
+export async function sendPoolOutOfStockAlert(params: {
+  poolName: string;
+  adminUrl: string;
+  business: InventoryAlertBusiness;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    subject: `Base unit out of stock: ${params.poolName}`,
+    react: PoolOutOfStockAlertEmail({
+      poolName: params.poolName,
+      adminUrl: params.adminUrl,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+    }),
+    tags: [
+      { name: "category", value: "pool_out_of_stock_alert" },
       { name: "business", value: params.business.subdomain },
     ],
   });
