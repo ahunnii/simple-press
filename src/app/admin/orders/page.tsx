@@ -36,9 +36,12 @@ export default async function OrdersPage({ searchParams }: Props) {
   // Calculate stats — exclude fully refunded orders; subtract partial refund amounts from partial-refund orders.
   const totalRevenue = orders
     .filter((order) => order.paymentStatus !== "refunded")
-    .reduce((sum, order) => sum + order.total - (order.refundAmountCents ?? 0), 0);
+    .reduce(
+      (sum, order) => sum + order.total - (order.refundAmountCents ?? 0),
+      0,
+    );
   const totalOrders = orders.length;
-  const paidOrders = orders.filter((o) => o.status === "paid").length;
+  const paidOrders = orders.filter((o) => o.paymentStatus === "paid").length;
 
   return (
     <>

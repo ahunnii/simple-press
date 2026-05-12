@@ -186,11 +186,11 @@ export function ManualOrderForm({ products }: Props) {
 
   const deriveStatus = (paymentStatus: string, fulfillmentStatus: string) => {
     if (paymentStatus === "refunded") return "refunded";
-    if (paymentStatus === "failed") return "pending";
+    if (paymentStatus === "failed") return "open";
     if (fulfillmentStatus === "fulfilled" && paymentStatus === "paid")
-      return "fulfilled";
-    if (paymentStatus === "paid") return "paid";
-    return "pending";
+      return "completed";
+    if (paymentStatus === "paid") return "open";
+    return "open";
   };
 
   const onSubmit = async (data: ManualOrderFormSchema) => {

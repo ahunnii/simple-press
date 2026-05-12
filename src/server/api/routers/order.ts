@@ -65,7 +65,7 @@ export const orderRouter = createTRPCRouter({
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
         data: {
-          status: "fulfilled",
+          status: order.paymentStatus === "paid" ? "completed" : "open",
           fulfillmentStatus: "fulfilled",
           shipments: {
             create: input.shipments.map((s) => ({
@@ -514,7 +514,7 @@ export const orderRouter = createTRPCRouter({
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
         data: {
-          status: isFullRefund ? "refunded" : "partial_refund",
+          status: isFullRefund ? "refunded" : order.fulfillmentStatus === "fulfilled" ? "completed" : "open",
           ...(isFullRefund && { paymentStatus: "refunded" }),
           refundReason: reasonLabel,
           refundAmountCents: newTotalRefunded,
@@ -704,18 +704,18 @@ export const orderRouter = createTRPCRouter({
       }
 
       const wasUnpaid =
-        order.paymentStatus === "unpaid" || order.status === "pending";
-      const isPaid = input.status === "paid";
+        order.paymentStatus === "unpaid" || order.paymentStatus === "pending";
+      const isCompleted = input.status === "completed";
 
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
         data: {
           status: input.status,
-          paymentStatus: isPaid ? "paid" : order.paymentStatus,
+          paymentStatus: isCompleted ? "paid" : order.paymentStatus,
         },
       });
 
-      if (wasUnpaid && isPaid && order.customerId) {
+      if (wasUnpaid && isCompleted && order.customerId) {
         try {
           await ctx.db.customer.update({
             where: { id: order.customerId },
@@ -738,7 +738,7 @@ export const orderRouter = createTRPCRouter({
       // Handle cancellation side-effects
       if (isCancelling) {
         const hadInventoryDeducted =
-          order.status === "paid" || order.status === "fulfilled";
+          order.status === "open" || order.status === "completed";
 
         if (input.restockItems && hadInventoryDeducted) {
           try {
@@ -893,9 +893,9 @@ export const orderRouter = createTRPCRouter({
           input.paymentStatus === "paid" &&
           order.fulfillmentStatus === "fulfilled"
         )
-          return "fulfilled";
-        if (input.paymentStatus === "paid") return "paid";
-        return "pending";
+          return "completed";
+        if (input.paymentStatus === "paid") return "open";
+        return "open";
       })();
 
       return ctx.db.order.update({
@@ -1091,10 +1091,27 @@ export const orderRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
+      const order = await ctx.db.order.findFirst({
+        where: { id: input.orderId, businessId },
+        select: { paymentStatus: true, status: true },
+      });
+
+      if (!order) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" });
+      }
+
+      let derivedStatus: string | undefined;
+      if (input.fulfillmentStatus === "fulfilled" && order.paymentStatus === "paid") {
+        derivedStatus = "completed";
+      } else if (input.fulfillmentStatus !== "fulfilled" && order.status === "completed") {
+        derivedStatus = "open";
+      }
+
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId, businessId },
         data: {
           fulfillmentStatus: input.fulfillmentStatus,
+          ...(derivedStatus !== undefined && { status: derivedStatus }),
         },
       });
 

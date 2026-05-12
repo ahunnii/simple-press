@@ -9,9 +9,9 @@ import { DarkTrendAccountLayout } from "./dark-trend-account-layout";
 
 function statusClass(status: string) {
   switch (status) {
-    case "paid":
+    case "open":
       return "bg-blue-900/40 text-blue-300";
-    case "fulfilled":
+    case "completed":
       return "bg-green-900/40 text-green-300";
     case "cancelled":
       return "bg-red-900/40 text-red-300";

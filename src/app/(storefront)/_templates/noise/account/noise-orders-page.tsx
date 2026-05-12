@@ -11,9 +11,9 @@ import { NoiseAccountLayout } from "./noise-account-layout";
 
 function statusClass(status: string) {
   switch (status) {
-    case "paid":
+    case "open":
       return "border-blue-500/40 text-blue-400";
-    case "fulfilled":
+    case "completed":
       return "border-green-500/40 text-green-400";
     case "cancelled":
       return "border-red-500/40 text-red-400";

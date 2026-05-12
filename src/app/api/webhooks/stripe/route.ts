@@ -393,7 +393,7 @@ export async function POST(req: NextRequest) {
                   total: session.amount_total ?? 0,
 
                   // currency: session.currency ?? "usd",
-                  status: "paid",
+                  status: "open",
                   paymentStatus: session.payment_status ?? "paid",
                   fulfillmentStatus: "unfulfilled",
 

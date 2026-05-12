@@ -40,7 +40,7 @@ export function OrderStatusUpdater({ order }: Props) {
   const [sendEmail, setSendEmail] = useState(false);
 
   const hadInventoryDeducted =
-    order.status === "paid" || order.status === "fulfilled";
+    order.status === "open" || order.status === "completed";
 
   const updateStatusMutation = api.order.updateStatus.useMutation({
     onSuccess: () => {
@@ -94,11 +94,9 @@ export function OrderStatusUpdater({ order }: Props) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="open">Open</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
-              <SelectItem value="refunded">Refunded</SelectItem>
             </SelectContent>
           </Select>
 

@@ -34,13 +34,9 @@ export default async function OrderDetailPage({ params }: Props) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "paid":
+      case "open":
         return "bg-blue-100 text-blue-800";
-      case "processing":
-        return "bg-indigo-100 text-indigo-800";
-      case "fulfilled":
+      case "completed":
         return "bg-green-100 text-green-800";
       case "cancelled":
         return "bg-red-100 text-red-800";
@@ -240,11 +236,12 @@ export default async function OrderDetailPage({ params }: Props) {
                   {order.status.toUpperCase()}
                 </Badge>
 
-                {order.status === "paid" && (
-                  <p className="mt-4 text-sm text-gray-600">
-                    Payment received. Ready to fulfill.
-                  </p>
-                )}
+                {order.paymentStatus === "paid" &&
+                  order.fulfillmentStatus !== "fulfilled" && (
+                    <p className="mt-4 text-sm text-gray-600">
+                      Payment received. Ready to fulfill.
+                    </p>
+                  )}
 
                 {order.fulfillmentStatus === "fulfilled" && (
                   <ShipmentsPanel

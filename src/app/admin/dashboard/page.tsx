@@ -49,8 +49,7 @@ export default async function AdminDashboardPage() {
     db.order.aggregate({
       where: {
         businessId: business.id,
-        status: "paid",
-        paymentStatus: { not: "refunded" },
+        paymentStatus: "paid",
       },
       _sum: {
         total: true,
@@ -144,8 +143,7 @@ export default async function AdminDashboardPage() {
       by: ["createdAt"],
       where: {
         businessId: business.id,
-        status: "paid",
-        paymentStatus: { not: "refunded" },
+        paymentStatus: "paid",
         createdAt: {
           gte: thirtyDaysAgo,
         },
@@ -164,8 +162,7 @@ export default async function AdminDashboardPage() {
       where: {
         order: {
           businessId: business.id,
-          status: "paid",
-          paymentStatus: { not: "refunded" },
+          paymentStatus: "paid",
           createdAt: {
             gte: thirtyDaysAgo,
           },
@@ -174,6 +171,7 @@ export default async function AdminDashboardPage() {
           not: null,
         },
       },
+
       _sum: {
         total: true,
         quantity: true,
