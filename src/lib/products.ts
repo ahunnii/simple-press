@@ -1,6 +1,7 @@
 export function parseCardAdditionalFields(raw: unknown): {
   comingSoon?: boolean;
   productTagline?: string;
+  additionalInformation?: unknown;
 } {
   if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return {};
   const obj = raw as Record<string, unknown>;
@@ -9,5 +10,9 @@ export function parseCardAdditionalFields(raw: unknown): {
       typeof obj.comingSoon === "boolean" ? obj.comingSoon : undefined,
     productTagline:
       typeof obj.productTagline === "string" ? obj.productTagline : undefined,
+    additionalInformation:
+      typeof obj.additionalInformation === "object"
+        ? obj.additionalInformation
+        : undefined,
   };
 }

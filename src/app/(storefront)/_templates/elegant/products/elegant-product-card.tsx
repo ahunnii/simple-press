@@ -1,178 +1,67 @@
 "use client";
 
+import type {
+  BaseInventoryUnit,
+  Product,
+  Image as ProductImage,
+  ProductVariant,
+} from "generated/prisma";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { Eye, ShoppingBag } from "lucide-react";
 
-// const products = [
-//   // Serums
-//   {
-//     id: "radiance-serum",
-//     name: "Radiance Serum",
-//     description: "Vitamin C brightening formula",
-//     price: 68,
-//     originalPrice: null,
-//     image: "/images/products/serum-bottles-1.png",
-//     badge: "Bestseller",
-//     category: "serums",
-//   },
-//   {
-//     id: "hydrating-serum",
-//     name: "Hydrating Serum",
-//     description: "Hyaluronic acid moisture boost",
-//     price: 62,
-//     originalPrice: null,
-//     image: "/images/products/eye-serum-bottles.png",
-//     badge: null,
-//     category: "serums",
-//   },
-//   {
-//     id: "age-defense-serum",
-//     name: "Age Defense Serum",
-//     description: "Retinol & peptide complex",
-//     price: 78,
-//     originalPrice: null,
-//     image: "/images/products/amber-dropper-bottles.png",
-//     badge: "New",
-//     category: "serums",
-//   },
-//   {
-//     id: "glow-serum",
-//     name: "Glow Serum",
-//     description: "Niacinamide brightening boost",
-//     price: 58,
-//     originalPrice: 68,
-//     image: "/images/products/spray-bottles.png",
-//     badge: "Sale",
-//     category: "serums",
-//   },
-//   // Creams
-//   {
-//     id: "hydra-cream",
-//     name: "Hydra Cream",
-//     description: "Deep moisture with hyaluronic acid",
-//     price: 54,
-//     originalPrice: null,
-//     image: "/images/products/cream-jars-colored.png",
-//     badge: null,
-//     category: "moisturizers",
-//   },
-//   {
-//     id: "gentle-cleanser",
-//     name: "Gentle Cleanser",
-//     description: "Soothing botanical wash",
-//     price: 38,
-//     originalPrice: 48,
-//     image: "/images/products/tube-bottles.png",
-//     badge: "Sale",
-//     category: "cleansers",
-//   },
-//   {
-//     id: "night-cream",
-//     name: "Night Cream",
-//     description: "Restorative overnight treatment",
-//     price: 64,
-//     originalPrice: null,
-//     image: "/images/products/jars-wooden-lid.png",
-//     badge: "Bestseller",
-//     category: "moisturizers",
-//   },
-//   {
-//     id: "day-cream-spf",
-//     name: "Day Cream SPF 30",
-//     description: "Protection & hydration",
-//     price: 58,
-//     originalPrice: null,
-//     image: "/images/products/pump-bottles-lavender.png",
-//     badge: null,
-//     category: "moisturizers",
-//   },
-//   // Oils
-//   {
-//     id: "renewal-oil",
-//     name: "Renewal Oil",
-//     description: "Nourishing facial oil blend",
-//     price: 72,
-//     originalPrice: null,
-//     image: "/images/products/amber-dropper-bottles.png",
-//     badge: "New",
-//     category: "oils",
-//   },
-//   {
-//     id: "rosehip-oil",
-//     name: "Rosehip Oil",
-//     description: "Pure organic rosehip extract",
-//     price: 48,
-//     originalPrice: null,
-//     image: "/images/products/serum-bottles-1.png",
-//     badge: null,
-//     category: "oils",
-//   },
-//   {
-//     id: "jojoba-oil",
-//     name: "Jojoba Oil",
-//     description: "Balancing & lightweight",
-//     price: 42,
-//     originalPrice: null,
-//     image: "/images/products/spray-bottles.png",
-//     badge: null,
-//     category: "oils",
-//   },
-//   {
-//     id: "argan-oil",
-//     name: "Argan Oil",
-//     description: "Moroccan beauty elixir",
-//     price: 56,
-//     originalPrice: null,
-//     image: "/images/products/pump-bottles-cream.png",
-//     badge: "Bestseller",
-//     category: "oils",
-//   },
-//   // Masks & Toners (original products)
-//   {
-//     id: "glow-mask",
-//     name: "Glow Mask",
-//     description: "Weekly brightening treatment",
-//     price: 45,
-//     originalPrice: null,
-//     image: "/images/products/mask.jpg",
-//     badge: null,
-//     category: "masks",
-//   },
-//   {
-//     id: "balance-toner",
-//     name: "Balance Toner",
-//     description: "pH restoring mist",
-//     price: 32,
-//     originalPrice: null,
-//     image: "/images/products/toner.jpg",
-//     badge: "New",
-//     category: "toners",
-//   },
-// ];
+import { computeSavingsLabel, formatPrice } from "~/lib/prices";
+import { useProductCard } from "~/hooks/use-product-card";
+import { Badge } from "~/components/ui/badge";
+import { useCart } from "~/providers/cart-context";
 
-type CardProduct = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice: number | null;
-  image: string;
-  badge: string | null;
-  category: string;
-  slug: string;
+type Props = {
+  product: Product & { variants: ProductVariant[] } & {
+    baseInventoryUnit: Partial<BaseInventoryUnit> | null;
+  } & { images: ProductImage[] };
+  index: number;
+  isVisible: boolean;
+  saleBadgeFormat?: string;
 };
+
 export function ElegantProductCard({
   product,
   index,
   isVisible,
-}: {
-  product: CardProduct;
-  index: number;
-  isVisible: boolean;
-}) {
+  saleBadgeFormat = "true",
+}: Props) {
+  const { addItem } = useCart();
+  const {
+    isOnSale,
+    isOutOfStock,
+    isBackorder,
+    comingSoon,
+    disableCart,
+    hasVariants,
+    poolEffectiveMaxQty,
+    displayPrice,
+    displayCompareAtPrice,
+  } = useProductCard(product);
+
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (disableCart) return;
+    addItem({
+      productId: product.id,
+      variantId: null,
+      productName: product.name,
+      variantName: null,
+      price: displayPrice,
+      compareAtPrice: isOnSale ? displayCompareAtPrice : null,
+      imageUrl: product.images[0]?.url ?? "/placeholder.svg",
+      sku: null,
+      maxInventory: poolEffectiveMaxQty ?? undefined,
+    });
+  };
 
   return (
     <Link
@@ -187,13 +76,13 @@ export function ElegantProductCard({
         <div className="bg-muted relative aspect-square overflow-hidden">
           {/* Skeleton */}
           <div
-            className={`from-muted via-muted/50 to-muted absolute inset-0 animate-pulse bg-gradient-to-br transition-opacity duration-500 ${
+            className={`from-muted via-muted/50 to-muted absolute inset-0 animate-pulse bg-linear-to-br transition-opacity duration-500 ${
               imageLoaded ? "opacity-0" : "opacity-100"
             }`}
           />
 
           <Image
-            src={product.image || "/placeholder.svg"}
+            src={product.images[0]?.url ?? "/placeholder.svg"}
             alt={product.name}
             fill
             className={`boty-transition object-cover transition-opacity duration-500 group-hover:scale-105 ${
@@ -201,31 +90,53 @@ export function ElegantProductCard({
             }`}
             onLoad={() => setImageLoaded(true)}
           />
-          {/* Badge */}
-          {product.badge && (
-            <span
-              className={`absolute top-4 left-4 rounded-full px-3 py-1 text-xs tracking-wide ${
-                product.badge === "Sale"
-                  ? "bg-destructive/10 text-destructive"
-                  : product.badge === "New"
-                    ? "bg-primary/10 text-primary"
-                    : "bg-accent text-accent-foreground"
-              }`}
+
+          {comingSoon && (
+            <Badge className="absolute top-4 left-4 rounded-full bg-amber-500 px-3 py-1 text-xs tracking-wide text-white hover:bg-amber-600">
+              Coming Soon
+            </Badge>
+          )}
+          {!comingSoon && isOnSale && (
+            <Badge className="absolute top-4 left-4 rounded-full bg-black px-3 py-1 text-xs tracking-wide text-white hover:bg-black/90">
+              {computeSavingsLabel(
+                product.price,
+                product.compareAtPrice!,
+                saleBadgeFormat,
+              )}
+            </Badge>
+          )}
+          {!comingSoon && !isOnSale && isOutOfStock && (
+            <Badge
+              variant="secondary"
+              className="absolute top-4 left-4 rounded-full bg-black/60 px-3 py-1 text-xs tracking-wide text-white"
             >
-              {product.badge}
-            </span>
+              Out of Stock
+            </Badge>
+          )}
+          {!comingSoon && !isOnSale && isBackorder && (
+            <Badge className="absolute top-4 left-4 rounded-full bg-blue-500 px-3 py-1 text-xs tracking-wide text-white hover:bg-blue-600">
+              Pre-order
+            </Badge>
           )}
           {/* Quick add button */}
-          <button
-            type="button"
-            className="bg-background/90 boty-transition boty-shadow absolute right-4 bottom-4 flex h-12 w-12 translate-y-2 items-center justify-center rounded-full opacity-0 backdrop-blur-sm group-hover:translate-y-0 group-hover:opacity-100"
-            onClick={(e) => {
-              e.preventDefault();
-            }}
-            aria-label="Add to cart"
-          >
-            <ShoppingBag className="text-foreground h-5 w-5" />
-          </button>
+          {hasVariants ? (
+            <Link
+              href={`/shop/${product.slug}`}
+              className="bg-background/90 boty-transition boty-shadow absolute right-4 bottom-4 flex h-12 w-12 translate-y-2 items-center justify-center rounded-full opacity-0 backdrop-blur-sm group-hover:translate-y-0 group-hover:opacity-100"
+            >
+              <Eye className="text-foreground h-5 w-5" />
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="bg-background/90 boty-transition boty-shadow absolute right-4 bottom-4 flex h-12 w-12 translate-y-2 items-center justify-center rounded-full opacity-0 backdrop-blur-sm group-hover:translate-y-0 group-hover:opacity-100"
+              onClick={handleAddToCart}
+              disabled={disableCart}
+              aria-label="Add to cart"
+            >
+              <ShoppingBag className="text-foreground h-5 w-5" />
+            </button>
+          )}
         </div>
 
         {/* Info */}
@@ -238,11 +149,11 @@ export function ElegantProductCard({
           </p>
           <div className="flex items-center gap-2">
             <span className="text-foreground text-lg font-medium">
-              ${product.price}
+              {formatPrice(displayPrice)}
             </span>
-            {product.originalPrice && (
+            {isOnSale && (
               <span className="text-muted-foreground text-sm line-through">
-                ${product.originalPrice}
+                {formatPrice(displayCompareAtPrice!)}
               </span>
             )}
           </div>

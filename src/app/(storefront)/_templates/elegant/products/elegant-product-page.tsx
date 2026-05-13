@@ -6,18 +6,11 @@ import Link from "next/link";
 import { Check, ChevronLeft, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { parseCardAdditionalFields } from "~/lib/products";
 import { useProduct } from "~/hooks/use-product";
 
+import { ElegantProductDetailsAccordion } from "./elegant-product-details-accordion";
 import { ElegantVariantSelector } from "./elegant-variant-selector";
-
-// const benefits = [
-//   { icon: Leaf, label: "100% Natural" },
-//   { icon: Heart, label: "Cruelty-Free" },
-//   { icon: Recycle, label: "Eco-Friendly" },
-//   { icon: Award, label: "Expert Approved" },
-// ];
-
-// type AccordionSection = "details" | "howToUse" | "ingredients" | "delivery";
 
 export function ElegantProductPage({
   product,
@@ -25,36 +18,24 @@ export function ElegantProductPage({
   const {
     formatPrice,
     inStock,
-
     variantOptions,
-
     displayPrice,
+    displayCompareAtPrice,
+    isOnSale,
     handleAddToCart,
     remainingStock,
     canAddMore,
     handleDecrement,
-
     handleIncrement,
     quantity,
-
     selectedVariantId,
     setSelectedVariantId,
   } = useProduct(product);
 
-  //   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
-  //   const [quantity, setQuantity] = useState(1);
-  //   const [openAccordion, setOpenAccordion] = useState<AccordionSection | null>(
-  //     "details",
-  //   );
   const [isAdded, setIsAdded] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [product.slug]);
-
-  //   const toggleAccordion = (section: AccordionSection) => {
-  //     setOpenAccordion(openAccordion === section ? null : section);
-  //   };
+  const additional = parseCardAdditionalFields(product.additionalFields);
 
   const addToCart = () => {
     handleAddToCart();
@@ -62,16 +43,10 @@ export function ElegantProductPage({
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  //   const accordionItems: {
-  //     key: AccordionSection;
-  //     title: string;
-  //     content: string;
-  //   }[] = [
-  //     { key: "details", title: "Details", content: product.details },
-  //     { key: "howToUse", title: "How to Use", content: product.howToUse },
-  //     { key: "ingredients", title: "Ingredients", content: product.ingredients },
-  //     { key: "delivery", title: "Delivery & Returns", content: product.delivery },
-  //   ];
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    setSelectedImageIndex(0);
+  }, [product.slug]);
 
   return (
     <div className="pt-28 pb-20">
@@ -86,15 +61,44 @@ export function ElegantProductPage({
         </Link>
 
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
-          {/* Product Image */}
-          <div className="bg-card boty-shadow relative aspect-square overflow-hidden rounded-3xl">
-            <Image
-              src={product?.images[0]?.url ?? "/placeholder.svg"}
-              alt={product.name}
-              fill
-              className="object-cover"
-              priority
-            />
+          {/* Product Images */}
+          <div className="flex flex-col gap-4">
+            <div className="bg-card boty-shadow relative aspect-square overflow-hidden rounded-3xl">
+              <Image
+                src={
+                  product.images[selectedImageIndex]?.url ?? "/placeholder.svg"
+                }
+                alt={product.name}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+
+            {product.images.length > 1 && (
+              <div className="flex gap-3 overflow-x-auto pb-1">
+                {product.images.map((image, index) => (
+                  <button
+                    key={image.url}
+                    type="button"
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`boty-shadow relative aspect-square w-20 flex-none overflow-hidden rounded-2xl transition-all duration-200 ${
+                      selectedImageIndex === index
+                        ? "ring-primary ring-2"
+                        : "opacity-50 hover:opacity-80"
+                    }`}
+                    aria-label={`View image ${index + 1}`}
+                  >
+                    <Image
+                      src={image.url}
+                      alt={`${product.name} image ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product Info */}
@@ -107,25 +111,12 @@ export function ElegantProductPage({
               <h1 className="text-foreground mb-3 font-serif text-4xl md:text-5xl">
                 {product.name}
               </h1>
-              <p className="text-muted-foreground mb-4 text-lg italic">
-                {/* {product.tagline} */}
-                Tagline goes here
-              </p>
 
-              {/* Rating */}
-              {/* <div className="mb-4 flex items-center gap-2">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="fill-primary text-primary h-4 w-4"
-                    />
-                  ))}
-                </div>
-                <span className="text-muted-foreground text-sm">
-                  (128 reviews)
-                </span>
-              </div> */}
+              {additional?.productTagline && (
+                <p className="text-muted-foreground mb-4 text-lg italic">
+                  {additional.productTagline}
+                </p>
+              )}
 
               <p className="text-foreground/80 leading-relaxed">
                 {product.description}
@@ -137,11 +128,12 @@ export function ElegantProductPage({
               <span className="text-foreground text-3xl font-medium">
                 {formatPrice(displayPrice)}
               </span>
-              {/* {product.originalPrice && (
+
+              {isOnSale && displayCompareAtPrice && (
                 <span className="text-muted-foreground text-xl line-through">
-                  ${product.originalPrice}
+                  {formatPrice(displayCompareAtPrice)}
                 </span>
-              )} */}
+              )}
             </div>
 
             {Object.keys(variantOptions).length > 0 ? (
@@ -227,74 +219,8 @@ export function ElegantProductPage({
                 )}
               </>
             )}
-            {/* Size Selector */}
-            {/* <div className="mb-6">
-              <label className="text-foreground mb-3 block text-sm font-medium">
-                Size
-              </label>
-              <div className="flex gap-3">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    onClick={() => setSelectedSize(size)}
-                    className={`boty-transition boty-shadow rounded-full px-6 py-3 text-sm ${
-                      selectedSize === size
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-card text-foreground hover:bg-card/80"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div> */}
 
-            {/* Benefits */}
-            {/* <div className="mb-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
-              {benefits.map((benefit) => (
-                <div
-                  key={benefit.label}
-                  className="boty-shadow flex flex-col items-center gap-2 rounded-md bg-transparent p-4 shadow-none"
-                >
-                  <benefit.icon className="text-primary h-5 w-5" />
-                  <span className="text-muted-foreground text-center text-xs">
-                    {benefit.label}
-                  </span>
-                </div>
-              ))}
-            </div> */}
-
-            {/* Accordion */}
-            {/* <div className="border-border/50 border-t">
-              {accordionItems.map((item) => (
-                <div key={item.key} className="border-border/50 border-b">
-                  <button
-                    type="button"
-                    onClick={() => toggleAccordion(item.key)}
-                    className="flex w-full items-center justify-between py-5 text-left"
-                  >
-                    <span className="text-foreground font-medium">
-                      {item.title}
-                    </span>
-                    <ChevronDown
-                      className={`text-muted-foreground boty-transition h-5 w-5 ${
-                        openAccordion === item.key ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  <div
-                    className={`boty-transition overflow-hidden ${
-                      openAccordion === item.key ? "max-h-96 pb-5" : "max-h-0"
-                    }`}
-                  >
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      {item.content}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div> */}
+            <ElegantProductDetailsAccordion product={product} />
           </div>
         </div>
       </div>

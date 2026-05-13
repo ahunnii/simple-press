@@ -5,6 +5,7 @@ import {
   CheckCircle,
   Droplets,
   Feather,
+  Flower2,
   Globe,
   Heart,
   Leaf,
@@ -38,6 +39,7 @@ export const TEMPLATE_LUCIDE_ICON_NAMES = [
   "CheckCircle",
   "BanknoteArrowDown",
   "Users",
+  "Flower2",
 ] as const;
 
 export type LucideTemplateIconName =
@@ -61,6 +63,7 @@ const iconMap: Record<LucideTemplateIconName, LucideIcon> = {
   CheckCircle,
   BanknoteArrowDown,
   Users,
+  Flower2,
 };
 
 export function getLucideTemplateIcon(name: string): LucideIcon | null {

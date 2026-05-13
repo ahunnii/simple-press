@@ -1,3 +1,5 @@
+import type { RouterOutputs } from "~/trpc/react";
+
 export const formatPrice = (cents: number) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -30,4 +32,28 @@ export function computeSavingsLabel(
   }
   const pct = Math.round(((compareAtPrice - price) / compareAtPrice) * 100);
   return `Save ${pct}%`;
+}
+
+type Product = {
+  variants: {
+    price: number | null;
+    compareAtPrice: number | null;
+  }[];
+  price: number;
+  compareAtPrice: number | null;
+};
+
+export function getEffectivePrice(product: Product): number {
+  return product.variants.length > 0
+    ? (product.variants[0]?.price ?? product.price)
+    : product.price;
+}
+
+export function getEffectiveCompareAtPrice(product: Product): number | null {
+  if (product.variants.length > 0) {
+    return (
+      product.variants[0]?.compareAtPrice ?? product.compareAtPrice ?? null
+    );
+  }
+  return product.compareAtPrice ?? null;
 }

@@ -319,6 +319,7 @@ export const businessRouter = createTRPCRouter({
               take: 1,
             },
             variants: true,
+
             collectionProducts: {
               include: {
                 collection: {

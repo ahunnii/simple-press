@@ -139,8 +139,18 @@ const products = [
 
 export function ElegantProductGrid({
   homepage,
+  productsTagline,
+  productsTitle,
+  productsDescription,
+  productsButtonText,
+  productsButtonLink,
 }: {
   homepage: RouterOutputs["business"]["getHomepage"];
+  productsTagline?: string;
+  productsTitle?: string;
+  productsDescription?: string;
+  productsButtonText?: string;
+  productsButtonLink?: string;
 }) {
   const [selectedCategory] = useState<Category>("cream");
   const [isVisible, setIsVisible] = useState(false);
@@ -202,7 +212,7 @@ export function ElegantProductGrid({
   }, []);
 
   return (
-    <section className="bg-card py-24">
+    <section className="bg-[#EDE5DC] py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Header */}
         <div ref={headerRef} className="mb-16 text-center">
@@ -214,7 +224,7 @@ export function ElegantProductGrid({
                 : {}
             }
           >
-            Our Products
+            {productsTagline ?? "Our Products"}
           </span>
           <h2
             className={`text-foreground mb-4 font-serif text-7xl leading-tight text-balance ${headerVisible ? "animate-blur-in opacity-0" : "opacity-0"}`}
@@ -224,7 +234,7 @@ export function ElegantProductGrid({
                 : {}
             }
           >
-            Featured
+            {productsTitle}
           </h2>
           <p
             className={`text-muted-foreground mx-auto max-w-md text-lg ${headerVisible ? "animate-blur-in opacity-0" : "opacity-0"}`}
@@ -234,7 +244,7 @@ export function ElegantProductGrid({
                 : {}
             }
           >
-            Thoughtfully crafted products, made by hand
+            {productsDescription}
           </p>
         </div>
 
@@ -356,10 +366,10 @@ export function ElegantProductGrid({
         {/* View All Button */}
         <div className="mt-12 text-center">
           <Link
-            href="/shop"
+            href={productsButtonLink ?? "/shop"}
             className="border-foreground/20 text-foreground boty-transition hover:bg-foreground/5 inline-flex items-center justify-center gap-2 rounded-full border bg-transparent px-8 py-4 text-sm tracking-wide"
           >
-            View All Products
+            {productsButtonText ?? "View All Products"}
           </Link>
         </div>
       </div>

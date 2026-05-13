@@ -182,6 +182,11 @@ export function useProduct(
 
   const showLowStockWarning = remainingStock > 0 && remainingStock < 10;
 
+  const isOnSale =
+    displayCompareAtPrice != null &&
+    displayCompareAtPrice > 0 &&
+    displayCompareAtPrice > displayPrice;
+
   return {
     selectedVariantId,
     quantity,
@@ -205,5 +210,6 @@ export function useProduct(
     displayCompareAtPrice,
     setQuantity,
     setSelectedVariantId,
+    isOnSale,
   };
 }

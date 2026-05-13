@@ -25,15 +25,18 @@ type Props = {
   homepage: RouterOutputs["business"]["getHomepage"];
   tagline?: string;
   heroImage?: string;
+  heroVideo?: string;
   heroTitleLine1?: string;
   heroTitleLine2?: string;
   heroDescription?: string;
   heroButtonText?: string;
   heroButtonLink?: string;
+  heroTagline?: string;
 };
 export function ElegantHero({
   tagline,
   heroImage,
+  heroVideo,
   heroTitleLine1,
   heroTitleLine2,
   heroDescription,
@@ -41,7 +44,7 @@ export function ElegantHero({
   heroButtonLink,
 }: Props) {
   const heroImageUrl = heroImage ?? "";
-  const useImage = Boolean(heroImageUrl?.trim());
+  const useVideo = !!heroVideo?.trim();
 
   return (
     <section
@@ -53,7 +56,7 @@ export function ElegantHero({
         className="border-border/50 border-b p-6 py-2"
         style={{ backgroundColor: "#e3e1e2" }}
       >
-        {useImage ? (
+        {!useVideo ? (
           <>
             <img
               src={heroImageUrl}
@@ -69,7 +72,7 @@ export function ElegantHero({
           </>
         ) : (
           <video autoPlay muted loop playsInline style={heroMediaStyle}>
-            <source src={HERO_VIDEO_SRC} type="video/mp4" />
+            <source src={heroVideo ?? HERO_VIDEO_SRC} type="video/mp4" />
           </video>
         )}
         {/* Bottom fade gradient */}
@@ -84,7 +87,7 @@ export function ElegantHero({
               className="animate-blur-in mb-6 block text-sm tracking-normal text-black uppercase opacity-0"
               style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}
             >
-              {tagline ?? "Natural Skincare"}
+              {tagline}
             </span>
             <h2 className="mb-6 font-serif text-5xl leading-[1.1] text-balance text-black md:text-6xl lg:text-7xl">
               <span

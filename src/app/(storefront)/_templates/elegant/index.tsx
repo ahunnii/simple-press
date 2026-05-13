@@ -1,5 +1,53 @@
+import { Droplets, Flower2, Leaf, Sparkles } from "lucide-react";
+
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
+
+export const DEFAULT_ELEGANT_TRUST_BADGES = [
+  {
+    icon: Leaf,
+    title: "Organic Certified",
+    description: "100% organic ingredients",
+  },
+  {
+    icon: Droplets,
+    title: "Natural Extracts",
+    description: "Pure botanical formulas",
+  },
+  {
+    icon: Sparkles,
+    title: "Clean Beauty",
+    description: "No toxic chemicals",
+  },
+  {
+    icon: Flower2,
+    title: "Vegan Formula",
+    description: "Plant-powered skincare",
+  },
+];
+
+export const DEFAULT_ELEGANT_ABOUT_FEATURES = [
+  {
+    icon: Leaf,
+    title: "Eco-Friendly Packaging",
+    description: "Recyclable and biodegradable materials",
+  },
+  {
+    icon: Droplets,
+    title: "Natural Extracts",
+    description: "Pure botanical formulas",
+  },
+  {
+    icon: Sparkles,
+    title: "Clean Beauty",
+    description: "No toxic chemicals",
+  },
+  {
+    icon: Flower2,
+    title: "Vegan Formula",
+    description: "Plant-powered skincare",
+  },
+];
 
 const globalData: TemplateField[] = [
   {
@@ -13,6 +61,40 @@ const globalData: TemplateField[] = [
   },
 ];
 
+const homepageTrustBadgesData: TemplateField[] = [
+  {
+    key: "elegant.homepage.trust-badges-list",
+    label: "Trust Badges",
+    description: "Trust badges shown on the homepage",
+    type: "list",
+    page: "homepage",
+    group: "homepage.trust-badges",
+    gridColumn: "col-span-full",
+    itemSchema: [
+      {
+        key: "icon",
+        label: "Icon",
+        type: "icon",
+        description: "Icon shown on the card",
+      },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        description: "Card heading",
+      },
+      {
+        key: "description",
+        label: "Description",
+        type: "textarea",
+        description: "Supporting text",
+      },
+    ],
+    minItems: 0,
+    maxItems: 4,
+  },
+];
+
 const homepageHeroData: TemplateField[] = [
   {
     key: "elegant.homepage.hero-image",
@@ -23,6 +105,27 @@ const homepageHeroData: TemplateField[] = [
     group: "homepage.hero",
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "elegant.homepage.hero-video",
+    label: "Hero Video",
+    description: "Main hero video",
+    type: "video",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+  },
+
+  {
+    key: "elegant.homepage.hero-tagline",
+    label: "Hero Tagline",
+    description: "Tagline for the hero section",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Natural Skincare",
+    placeholder: "e.g. Natural Skincare",
   },
   {
     key: "elegant.homepage.hero-title-line-1",
@@ -81,7 +184,76 @@ const homepageHeroData: TemplateField[] = [
   },
 ];
 
+const homepageProductsData: TemplateField[] = [
+  {
+    key: "elegant.homepage.products-tagline",
+    label: "Products Tagline",
+    description: "Tagline for the products section",
+    type: "text",
+    page: "homepage",
+    group: "homepage.products",
+    gridColumn: "col-span-full",
+    defaultValue: "Our Products",
+    placeholder: "e.g. Our Products",
+  },
+  {
+    key: "elegant.homepage.products-title",
+    label: "Products Title",
+    description: "Title for the products section",
+    type: "text",
+    page: "homepage",
+    group: "homepage.products",
+    gridColumn: "col-span-full",
+    defaultValue: "Featured",
+    placeholder: "e.g. Featured",
+  },
+  {
+    key: "elegant.homepage.products-description",
+    label: "Products Description",
+    description: "Description for the products section",
+    type: "text",
+    page: "homepage",
+    group: "homepage.products",
+    gridColumn: "col-span-full",
+    defaultValue: "Explore our collection of premium products",
+    placeholder: "e.g. Explore our collection of premium products",
+  },
+  {
+    key: "elegant.homepage.products-button-text",
+    label: "Products Button Text",
+    description: "Text for the products CTA button",
+    type: "text",
+    page: "homepage",
+    group: "homepage.products",
+    gridColumn: "col-span-1",
+    defaultValue: "View All Products",
+    placeholder: "e.g. View All Products",
+  },
+  {
+    key: "elegant.homepage.products-button-link",
+    label: "Products Button Link",
+    description: "URL for the products CTA button",
+    type: "url",
+    page: "homepage",
+    group: "homepage.products",
+    gridColumn: "col-span-1",
+    defaultValue: "/shop",
+    placeholder: "/shop",
+  },
+];
+
 const homepageAboutData: TemplateField[] = [
+  {
+    key: "elegant.homepage.about.tagline",
+    label: "About Tagline",
+    description: "Tagline for the About section on the homepage",
+    type: "text",
+    page: "homepage",
+    group: "homepage.about",
+    gridColumn: "col-span-full",
+    defaultValue: "About Us",
+    placeholder: "About Us",
+  },
   {
     key: "elegant.homepage.about.title",
     label: "About Title",
@@ -114,6 +286,46 @@ const homepageAboutData: TemplateField[] = [
     group: "homepage.about",
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "elegant.homepage.about.video",
+    label: "About Video",
+    description: "Video for the About section on the homepage",
+    type: "video",
+    page: "homepage",
+    group: "homepage.about",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "elegant.homepage.about-features-list",
+    label: "About Features List",
+    description: "Features shown on the about section",
+    type: "list",
+    page: "homepage",
+    group: "homepage.about",
+    gridColumn: "col-span-full",
+    itemSchema: [
+      {
+        key: "icon",
+        label: "Icon",
+        type: "icon",
+        description: "Icon shown on the card",
+      },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        description: "Card heading",
+      },
+      {
+        key: "description",
+        label: "Description",
+        type: "textarea",
+        description: "Supporting text",
+      },
+    ],
+    minItems: 0,
+    maxItems: 4,
   },
 ];
 
@@ -289,6 +501,20 @@ const fieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
   {
+    id: "homepage.trust-badges",
+    title: "Trust Badges",
+    description: "Trust badges shown on the homepage",
+    icon: "🔒",
+    columns: 1,
+  },
+  {
+    id: "homepage.products",
+    title: "Products Section",
+    description: "Products section on the homepage",
+    icon: "📦",
+    columns: 2,
+  },
+  {
     id: "homepage.about",
     title: "About Section",
     description: "About blurb and image shown below the product grid",
@@ -404,7 +630,8 @@ const contactPageData: TemplateField[] = [
   {
     key: "elegant.contact.email",
     label: "Contact Email Override",
-    description: "Override the contact email shown on this page (defaults to support email)",
+    description:
+      "Override the contact email shown on this page (defaults to support email)",
     type: "text",
     page: "contact",
     group: "contact.info",
@@ -529,12 +756,14 @@ export const elegantData = {
   elegant: [
     ...globalData,
     ...homepageHeroData,
+    ...homepageProductsData,
     ...homepageAboutData,
     ...homepageFeaturesData,
     ...homepageCtaData,
     ...blogPageData,
     ...contactPageData,
     ...aboutPageData,
+    ...homepageTrustBadgesData,
   ],
 };
 
@@ -546,6 +775,9 @@ const _elegantFieldMap = new Map(
   elegantData.elegant.map((field) => [field.key, field]),
 );
 
-export function resolveFields(customFields: unknown, keys: string[]): Record<string, string> {
+export function resolveFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
   return resolveTemplateFields(customFields, keys, _elegantFieldMap);
 }

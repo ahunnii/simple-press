@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 
+import { formatPrice } from "~/lib/prices";
 import {
   Drawer,
   DrawerClose,
@@ -39,7 +39,7 @@ export function ElegantCartDrawer() {
     <>
       <Drawer open={isOpen} onOpenChange={setIsOpen} direction="right">
         <DrawerContent className="h-full w-full sm:max-w-[440px]">
-          <DrawerHeader className="border-border/50 border-b p-6 py-2.5">
+          <DrawerHeader className="border-border/50 border-b p-6 py-4">
             <DrawerTitle className="font-serif text-2xl">Cart</DrawerTitle>
             <DrawerDescription>
               {itemCount} {itemCount === 1 ? "item" : "items"}
@@ -136,7 +136,7 @@ export function ElegantCartDrawer() {
                     {/* Price */}
                     <div className="text-right">
                       <p className="text-foreground font-medium">
-                        ${item.price * item.quantity}
+                        {formatPrice(item.price * item.quantity)}
                       </p>
                     </div>
                   </div>
@@ -151,15 +151,15 @@ export function ElegantCartDrawer() {
               <div className="space-y-2 text-sm">
                 <div className="text-muted-foreground flex justify-between">
                   <span>Subtotal</span>
-                  <span>${subtotal}</span>
+                  <span>{formatPrice(subtotal)}</span>
                 </div>
                 <div className="text-muted-foreground flex justify-between">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? "Free" : `$${shipping}`}</span>
+                  <span>{shipping === 0 ? "Free" : formatPrice(shipping)}</span>
                 </div>
                 <div className="text-foreground border-border/50 flex justify-between border-t pt-2 text-base font-medium">
                   <span>Total</span>
-                  <span>${total}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
               </div>
 

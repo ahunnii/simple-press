@@ -8,7 +8,7 @@ export function ElegantLayout({
   children,
 }: DefaultLayoutTemplateProps) {
   return (
-    <main className="min-h-screen">
+    <main className="elegant bg-background min-h-screen">
       <ElegantHeader business={business} />
       {children}
       <ElegantFooter business={business} />
