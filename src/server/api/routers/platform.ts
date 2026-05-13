@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { isSubdomainReserved, slugify } from "~/lib/utils";
 import { createTRPCRouter, platformAdminProcedure } from "~/server/api/trpc";
 
 export const platformRouter = createTRPCRouter({
@@ -401,6 +402,71 @@ export const platformRouter = createTRPCRouter({
       });
 
       return { success: true };
+    }),
+
+  createBusiness: platformAdminProcedure
+    .input(
+      z.object({
+        name: z.string().min(1).max(100),
+        subdomain: z
+          .string()
+          .min(3)
+          .max(63)
+          .regex(/^[a-z0-9-]+$/, "Subdomain may only contain lowercase letters, numbers, and hyphens"),
+        templateId: z.string().default("modern"),
+        ownerEmail: z.string().email().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (isSubdomainReserved(input.subdomain)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This subdomain is reserved",
+        });
+      }
+
+      const existing = await ctx.db.business.findUnique({
+        where: { subdomain: input.subdomain },
+        select: { id: true },
+      });
+
+      if (existing) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "This subdomain is already taken",
+        });
+      }
+
+      const business = await ctx.db.$transaction(async (tx) => {
+        const newBusiness = await tx.business.create({
+          data: {
+            name: input.name,
+            slug: slugify(input.name),
+            subdomain: input.subdomain,
+            templateId: input.templateId,
+            ownerEmail: input.ownerEmail ?? "",
+            status: "active",
+            onboardingComplete: false,
+            domainStatus: "NONE",
+          },
+        });
+
+        await tx.siteContent.create({
+          data: {
+            businessId: newBusiness.id,
+            heroTitle: `Welcome to ${input.name}`,
+            heroSubtitle: "",
+            aboutText: "",
+            primaryColor: "#3b82f6",
+            secondaryColor: "#ffffff",
+            accentColor: "#3b82f6",
+          },
+        });
+
+        return newBusiness;
+      });
+
+      return { id: business.id, name: business.name, subdomain: business.subdomain };
     }),
 
   // Domain Management

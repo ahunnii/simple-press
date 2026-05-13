@@ -485,7 +485,7 @@ model Order {
   orderNumber Int
   
   // Status
-  status            String @default("pending") // pending | paid | fulfilled | cancelled | refunded
+  status            String @default("open") // open | completed | cancelled | refunded 
   paymentStatus     String @default("pending") // pending | paid | failed | refunded
   fulfillmentStatus String @default("unfulfilled") // unfulfilled | fulfilled | partially_fulfilled
   

@@ -9,6 +9,7 @@ import {
 
 import { TrailHeader } from "../../_components/trail-header";
 import { BusinessesTable } from "../_components/businesses-table";
+import { CreateBusinessButton } from "../_components/create-business-button";
 
 export default async function BusinessesPage() {
   const { businesses } = await api.platform.listBusinesses();
@@ -27,6 +28,7 @@ export default async function BusinessesPage() {
             <h1>Platform Businesses</h1>
             <p>Manage all businesses across the platform</p>
           </div>
+          <CreateBusinessButton />
         </div>
 
         {businesses.length === 0 ? (
