@@ -1,7 +1,9 @@
 import { useState } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { parseCardAdditionalFields } from "~/lib/products";
 import { useCart } from "~/providers/cart-context";
+import { buildLucideIconsWithLabels } from "~/app/(storefront)/_templates/bamboo/products";
 
 const UNLIMITED_STOCK = 999;
 
@@ -187,6 +189,14 @@ export function useProduct(
     displayCompareAtPrice > 0 &&
     displayCompareAtPrice > displayPrice;
 
+  const additionalFields = parseCardAdditionalFields(product.additionalFields);
+
+  const displayTrustBadges =
+    !!additionalFields?.productFeatures &&
+    additionalFields?.productFeatures?.length > 0
+      ? buildLucideIconsWithLabels(additionalFields)
+      : [];
+
   return {
     selectedVariantId,
     quantity,
@@ -211,5 +221,7 @@ export function useProduct(
     setQuantity,
     setSelectedVariantId,
     isOnSale,
+    additionalFields,
+    displayTrustBadges,
   };
 }

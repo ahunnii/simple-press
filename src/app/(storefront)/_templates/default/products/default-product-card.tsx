@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { formatPrice } from "~/lib/prices";
 import { Card, CardContent } from "~/components/ui/card";
 
 type Product = {
@@ -16,15 +17,8 @@ type ProductCardProps = {
 };
 
 export function DefaultProductCard({ product }: ProductCardProps) {
-  const formatPrice = (cents: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(cents / 100);
-  };
-
   return (
-    <Link href={`/products/${product.slug}`}>
+    <Link href={`/shop/${product.slug}`}>
       <Card className="group overflow-hidden transition-shadow hover:shadow-lg">
         <div className="relative aspect-square bg-gray-100">
           {product.images[0] ? (

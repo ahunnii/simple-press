@@ -7,9 +7,12 @@ import { Check, ChevronLeft, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import { useProduct } from "~/hooks/use-product";
+import { api } from "~/trpc/react";
 
 import { ElegantProductDetailsAccordion } from "./elegant-product-details-accordion";
+import { ElegantRelatedProductsSection } from "./elegant-related-products-section";
 import { ElegantVariantSelector } from "./elegant-variant-selector";
 
 export function ElegantProductPage({
@@ -37,6 +40,10 @@ export function ElegantProductPage({
 
   const additional = parseCardAdditionalFields(product.additionalFields);
 
+  const { data: relatedProducts } = api.product.getRelated.useQuery({
+    productId: product.id,
+  });
+
   const addToCart = () => {
     handleAddToCart();
     setIsAdded(true);
@@ -49,6 +56,7 @@ export function ElegantProductPage({
   }, [product.slug]);
 
   return (
+    <>
     <div className="pt-28 pb-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Back Link */}
@@ -220,10 +228,38 @@ export function ElegantProductPage({
               </>
             )}
 
+            {/* Product features */}
+            {additional?.productFeatures &&
+              additional.productFeatures.length > 0 && (
+                <div className="mb-8">
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {additional.productFeatures.map((feature, index) => {
+                      const Icon = getLucideTemplateIcon(feature.icon);
+                      return (
+                        <div
+                          key={index}
+                          className="boty-shadow bg-card flex flex-col items-center gap-3 rounded-2xl px-4 py-6"
+                        >
+                          {Icon && (
+                            <Icon className="text-foreground/50 h-7 w-7" />
+                          )}
+                          <span className="text-foreground/70 text-center text-sm">
+                            {feature.text}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
             <ElegantProductDetailsAccordion product={product} />
           </div>
         </div>
       </div>
     </div>
+
+    <ElegantRelatedProductsSection relatedProducts={relatedProducts ?? []} />
+    </>
   );
 }

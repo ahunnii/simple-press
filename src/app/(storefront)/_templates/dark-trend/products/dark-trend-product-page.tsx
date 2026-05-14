@@ -4,11 +4,16 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Check, ChevronLeft, Minus, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { Spotlight } from "~/components/ui/spotlight-new";
+import { buildLucideIconsWithLabels } from "~/app/(storefront)/_templates/happy-bamboo/products/index";
 
+import { DarkTrendProductDetails } from "./dark-trend-product-details";
+import { DarkTrendRelatedProducts } from "./dark-trend-related-products";
 import { DarkTrendVariantSelector } from "./dark-trend-variant-selector";
 
 export function DarkTrendProductPage({
@@ -26,12 +31,25 @@ export function DarkTrendProductPage({
     handleIncrement,
     quantity,
     setSelectedVariantId,
+    additionalFields,
   } = useProduct(product);
 
+  const { data: relatedProducts } = api.product.getRelated.useQuery({
+    productId: product.id,
+  });
+
+  const trustBadges =
+    !!additionalFields?.productFeatures &&
+    additionalFields?.productFeatures?.length > 0
+      ? buildLucideIconsWithLabels(additionalFields)
+      : [];
+
   const [isAdded, setIsAdded] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    setSelectedImage(0);
   }, [product.slug]);
 
   const addToCart = () => {
@@ -40,8 +58,10 @@ export function DarkTrendProductPage({
     setTimeout(() => setIsAdded(false), 2000);
   };
 
+  const hasMultipleImages = product.images.length > 1;
+
   return (
-    <div className="relative min-h-screen bg-[#1A1A1A] pt-28 pb-20 text-white">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#1A1A1A] pt-16 pb-20 text-white">
       <Spotlight />
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         {/* Back Link */}
@@ -54,15 +74,58 @@ export function DarkTrendProductPage({
         </Link>
 
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Product Image */}
-          <div className="relative aspect-square overflow-hidden rounded-sm bg-zinc-900/50">
-            <Image
-              src={product?.images[0]?.url ?? "/placeholder.svg"}
-              alt={product.name}
-              fill
-              className="object-cover"
-              priority
-            />
+          {/* Product Image + Gallery */}
+          <div className="flex gap-3">
+            {/* Thumbnail Strip */}
+            {hasMultipleImages && (
+              <div className="flex flex-col gap-2">
+                {product.images.map((img, i) => (
+                  <button
+                    key={img.url}
+                    type="button"
+                    onClick={() => setSelectedImage(i)}
+                    aria-label={`View image ${i + 1}`}
+                    className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-sm border transition-all duration-200 ${
+                      selectedImage === i
+                        ? "border-purple-500 opacity-100"
+                        : "border-white/10 opacity-50 hover:opacity-80"
+                    }`}
+                  >
+                    <Image
+                      src={img.url}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Main Image */}
+            <div className="relative aspect-square min-w-0 flex-1 overflow-hidden rounded-sm bg-zinc-900/50">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedImage}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={
+                      product.images[selectedImage]?.url ?? "/placeholder.svg"
+                    }
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Product Info */}
@@ -70,7 +133,7 @@ export function DarkTrendProductPage({
             {/* Header */}
             <div className="mb-8">
               <span className="mb-2 block text-sm font-semibold tracking-[0.2em] text-purple-500 uppercase">
-                Product
+                {additionalFields?.productTagline ?? "Product"}
               </span>
               <h1 className="mb-3 text-4xl font-bold tracking-tight text-white md:text-5xl">
                 {product.name}
@@ -170,9 +233,28 @@ export function DarkTrendProductPage({
                 )}
               </>
             )}
+
+            {/* Trust badges */}
+            {trustBadges.length > 0 && (
+              <div className="mt-8 flex flex-wrap gap-4 border-t border-white/10 pt-8">
+                {trustBadges.map((badge, i) => (
+                  <div
+                    key={`${badge.label}-${i}`}
+                    className="flex items-center gap-2 text-sm text-white/60"
+                  >
+                    <badge.Icon className="h-4 w-4 text-purple-500" />
+                    <span>{badge.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
+
+        <DarkTrendProductDetails product={product} />
       </div>
+
+      <DarkTrendRelatedProducts relatedProducts={relatedProducts ?? []} />
     </div>
   );
 }

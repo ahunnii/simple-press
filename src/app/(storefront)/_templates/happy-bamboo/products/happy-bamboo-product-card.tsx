@@ -8,6 +8,7 @@ import { ArrowRight, Clock, Eye, ShoppingCart } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { computeSavingsLabel, formatPrice } from "~/lib/prices";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { useProductCard } from "~/hooks/use-product-card";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
@@ -45,13 +46,15 @@ export function HappyBambooProductCard({
     product.additionalFields,
   );
   const isOutOfStock =
-    product.poolEffectiveMaxQty !== undefined && product.poolEffectiveMaxQty !== null
+    product.poolEffectiveMaxQty !== undefined &&
+    product.poolEffectiveMaxQty !== null
       ? product.poolEffectiveMaxQty <= 0
       : !!product.trackInventory &&
         !product.allowBackorders &&
         (product.inventoryQty ?? 0) === 0;
   const isBackorder =
-    product.poolEffectiveMaxQty === undefined || product.poolEffectiveMaxQty === null
+    product.poolEffectiveMaxQty === undefined ||
+    product.poolEffectiveMaxQty === null
       ? !!product.trackInventory &&
         !!product.allowBackorders &&
         (product.inventoryQty ?? 0) === 0
@@ -191,13 +194,15 @@ export function HappyBambooHorizontalProductCard({
     product.additionalFields,
   );
   const isOutOfStock =
-    product.poolEffectiveMaxQty !== undefined && product.poolEffectiveMaxQty !== null
+    product.poolEffectiveMaxQty !== undefined &&
+    product.poolEffectiveMaxQty !== null
       ? product.poolEffectiveMaxQty <= 0
       : !!product.trackInventory &&
         !product.allowBackorders &&
         (product.inventoryQty ?? 0) === 0;
   const isBackorder =
-    product.poolEffectiveMaxQty === undefined || product.poolEffectiveMaxQty === null
+    product.poolEffectiveMaxQty === undefined ||
+    product.poolEffectiveMaxQty === null
       ? !!product.trackInventory &&
         !!product.allowBackorders &&
         (product.inventoryQty ?? 0) === 0
@@ -356,7 +361,8 @@ export function HappyBambooFeaturedProductCard({
   );
   const poolEffectiveMaxQty = product.baseInventoryUnit
     ? Math.floor(
-        product.baseInventoryUnit.inventoryQty / (product.baseUnitsConsumed ?? 1),
+        product.baseInventoryUnit.inventoryQty /
+          (product.baseUnitsConsumed ?? 1),
       )
     : null;
   const isOutOfStock =

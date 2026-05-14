@@ -29,6 +29,7 @@ import {
 } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { NoiseProductImageGallery } from "./noise-product-image-gallery";
 import { NoiseVariantSelector } from "./noise-variant-selector";
 
 type ProductAdditionalFields = {
@@ -148,18 +149,12 @@ export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
 
         {/* Product Main */}
         <div className="flex flex-col gap-12 lg:flex-row lg:gap-20">
-          {/* Image */}
+          {/* Image Gallery */}
           <FadeIn direction="left" className="flex-1">
-            <div className="relative aspect-square w-full overflow-hidden bg-secondary">
-              <Image
-                src={product.images[0]?.url ?? "/placeholder.svg"}
-                alt={product.name}
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-            </div>
+            <NoiseProductImageGallery
+              images={product.images}
+              productName={product.name}
+            />
           </FadeIn>
 
           {/* Details */}

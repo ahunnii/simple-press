@@ -3,7 +3,6 @@ const AVAILABLE_FREE_TEMPLATES = [
     value: "modern",
     label: "Modern",
   },
-
   {
     value: "default",
     label: "Default",

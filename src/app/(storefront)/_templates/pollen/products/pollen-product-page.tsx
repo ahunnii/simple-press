@@ -1,31 +1,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { FadeIn, PageTransition } from "~/components/page-animations";
+import { buildLucideIconsWithLabels } from "~/app/(storefront)/_templates/happy-bamboo/products/index";
 
+import { PollenProductDetailsTabs } from "./pollen-product-details-tabs";
+import { PollenProductImageGallery } from "./pollen-product-image-gallery";
+import { PollenRelatedProductsSection } from "./pollen-related-products-section";
 import { PollenVariantSelector } from "./pollen-variant-selector";
 
-export function PollenProductPage({ product }: DefaultProductPageTemplateProps) {
+export function PollenProductPage({
+  product,
+}: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
     inStock,
     variantOptions,
     displayPrice,
+    displayCompareAtPrice,
     handleAddToCart,
     canAddMore,
     handleDecrement,
     handleIncrement,
     quantity,
     setSelectedVariantId,
+    additionalFields,
+    isOnSale,
   } = useProduct(product);
+
+  const { data: relatedProducts } = api.product.getRelated.useQuery({
+    productId: product.id,
+  });
 
   const [isAdded, setIsAdded] = useState(false);
 
@@ -39,9 +52,15 @@ export function PollenProductPage({ product }: DefaultProductPageTemplateProps) 
     setTimeout(() => setIsAdded(false), 2000);
   };
 
+  const displayTrustBadges =
+    additionalFields?.productFeatures &&
+    additionalFields.productFeatures.length > 0
+      ? buildLucideIconsWithLabels(additionalFields)
+      : [];
+
   return (
     <PageTransition>
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <section className="mx-auto mt-28 max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <FadeIn direction="none" duration={0.3}>
           <Button
             variant="ghost"
@@ -57,18 +76,12 @@ export function PollenProductPage({ product }: DefaultProductPageTemplateProps) 
         </FadeIn>
 
         <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
-          {/* Image */}
+          {/* Image Gallery */}
           <FadeIn direction="left" className="flex-1">
-            <div className="relative aspect-square overflow-hidden rounded-md bg-[#f5f2ee]">
-              <Image
-                src={product.images[0]?.url ?? "/placeholder.svg"}
-                alt={product.name}
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-            </div>
+            <PollenProductImageGallery
+              images={product.images}
+              productName={product.name}
+            />
           </FadeIn>
 
           {/* Details */}
@@ -81,15 +94,28 @@ export function PollenProductPage({ product }: DefaultProductPageTemplateProps) 
               <h1 className="text-3xl font-bold text-[#2a351f] md:text-4xl">
                 {product.name}
               </h1>
-              <p className="mt-3 whitespace-pre-line text-lg leading-relaxed text-[#4c566a]">
-                {product.description}
-              </p>
+              {additionalFields?.productTagline && (
+                <p className="mt-1 text-lg font-medium text-[#5e7747]">
+                  {additionalFields.productTagline}
+                </p>
+              )}
             </div>
 
-            <div>
+            {/* Price */}
+            <div className="flex flex-wrap items-baseline gap-3">
+              {isOnSale && displayCompareAtPrice && (
+                <span className="inline-flex items-center rounded-full bg-[#215935] px-3 py-1 text-sm font-semibold text-white">
+                  Sale
+                </span>
+              )}
               <span className="text-3xl font-bold text-[#215935]">
                 {formatPrice(displayPrice)}
               </span>
+              {isOnSale && displayCompareAtPrice && (
+                <span className="text-xl text-[#4c566a] line-through">
+                  {formatPrice(displayCompareAtPrice)}
+                </span>
+              )}
             </div>
 
             <Separator />
@@ -160,8 +186,29 @@ export function PollenProductPage({ product }: DefaultProductPageTemplateProps) 
                 )}
               </>
             )}
+
+            {/* Trust Badges */}
+            {displayTrustBadges.length > 0 && (
+              <div className="grid grid-cols-2 gap-3">
+                {displayTrustBadges.map((badge, i) => (
+                  <div
+                    key={`${badge.label}-${i}`}
+                    className="flex items-center gap-2 rounded-md bg-[#f5f2ee] px-3 py-2"
+                  >
+                    <badge.Icon className="size-4 text-[#215935]" />
+                    <span className="text-xs font-medium text-[#2a351f]">
+                      {badge.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </FadeIn>
         </div>
+
+        <PollenProductDetailsTabs product={product} />
+
+        <PollenRelatedProductsSection relatedProducts={relatedProducts ?? []} />
       </section>
     </PageTransition>
   );

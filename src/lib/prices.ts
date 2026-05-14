@@ -25,7 +25,7 @@ export function centsToDollarsString(c: number | null): string {
 export function computeSavingsLabel(
   price: number,
   compareAtPrice: number,
-  format: string,
+  format = "true",
 ): string {
   if (format === "false") {
     return `Save ${formatPrice(compareAtPrice - price)}`;

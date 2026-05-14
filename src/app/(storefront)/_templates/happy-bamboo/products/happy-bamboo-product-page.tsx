@@ -1,192 +1,22 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Check,
-  Droplets,
-  Leaf,
-  Minus,
-  Plus,
-  Shield,
-  ShoppingBag,
-  Sparkles,
-} from "lucide-react";
+import { ArrowLeft, Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
-import type { TiptapJSON } from "~/components/tiptap-renderer";
-import type { RouterOutputs } from "~/trpc/react";
-import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import { computeSavingsLabel } from "~/lib/prices";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
-import { resolveFields } from "../index";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import {
-  FadeIn,
-  PageTransition,
-  StaggerContainer,
-  StaggerItem,
-} from "~/components/page-animations";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { FadeIn, PageTransition } from "~/components/page-animations";
 
+import { resolveFields } from "../index";
+import { HappyBambooProductDetailsTabs } from "./happy-bamboo-product-details-tabs";
+import { HappyBambooProductImageGallery } from "./happy-bamboo-product-image-gallery";
+import { HappyBambooRelatedProductsSection } from "./happy-bamboo-related-products-section";
 import { HappyBambooVariantSelector } from "./happy-bamboo-variant-selector";
-
-type ProductAdditionalFields = {
-  additionalInformation?: unknown;
-  productFeatures?: Array<{ icon: string; text: string }>;
-  comingSoon?: boolean;
-  productTagline?: string;
-} | null;
-
-function parseProductAdditionalFields(raw: unknown): ProductAdditionalFields {
-  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
-    return null;
-  }
-  return raw as ProductAdditionalFields;
-}
-
-export function HappyBambooProductDetailsTabs({
-  product,
-}: {
-  product: NonNullable<RouterOutputs["product"]["get"]>;
-}) {
-  const additional = parseProductAdditionalFields(product.additionalFields);
-
-  return (
-    <Tabs
-      defaultValue="overview"
-      className="mx-auto w-full max-w-7xl py-12 md:py-20"
-    >
-      <TabsList variant="line" className="mx-auto">
-        <TabsTrigger value="overview">Description</TabsTrigger>
-        <TabsTrigger value="analytics">Additional Information</TabsTrigger>
-      </TabsList>
-      <TabsContent value="overview">
-        <Card>
-          <CardHeader>
-            <CardTitle>Description</CardTitle>
-            {/* <CardDescription>
-              View your key metrics and recent project activity. Track progress
-              across all your active projects.
-            </CardDescription> */}
-          </CardHeader>
-          <CardContent className="text-muted-foreground text-sm">
-            <p className="text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line">
-              {product?.description}
-            </p>
-          </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value="analytics">
-        <Card>
-          <CardHeader>
-            <CardTitle>Additional Information</CardTitle>
-            {/* <CardDescription>
-              Track performance and user engagement metrics. Monitor trends and
-              identify growth opportunities.
-            </CardDescription> */}
-          </CardHeader>
-          <CardContent className="text-muted-foreground text-sm">
-            {additional?.additionalInformation ? (
-              <TiptapRenderer
-                content={additional.additionalInformation as TiptapJSON}
-                className="prose prose-sm dark:prose-invert max-w-none"
-              />
-            ) : (
-              <p>No additional information available.</p>
-            )}
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
-  );
-}
-
-// const productDetails: Record<string, { highlights: string[]; specs: Record<string, string> }> = {
-//   'bamboo-luxe-12': {
-//     highlights: [
-//       'Ultra-soft 3-ply sheets for a premium feel',
-//       '300 sheets per roll -- lasts longer than standard rolls',
-//       'Breaks down easily in all septic systems',
-//       'Free from chlorine bleach, dyes, inks, and fragrances',
-//       'Wrapped in plastic-free, recyclable paper packaging',
-//     ],
-//     specs: {
-//       'Material': '100% Bamboo Fiber',
-//       'Ply Count': '3-Ply',
-//       'Sheets Per Roll': '300',
-//       'Roll Count': '12',
-//       'Septic Safe': 'Yes',
-//       'Hypoallergenic': 'Yes',
-//       'Packaging': 'Plastic-free, recyclable paper',
-//     },
-//   },
-//   'bamboo-luxe-24': {
-//     highlights: [
-//       'Same ultra-soft 3-ply bamboo sheets in a bulk-size value pack',
-//       'Ideal for families or stocking up for the quarter',
-//       'Reduces order frequency and shipping footprint',
-//       'Free from chlorine bleach, dyes, inks, and fragrances',
-//       'Wrapped in plastic-free, recyclable paper packaging',
-//     ],
-//     specs: {
-//       'Material': '100% Bamboo Fiber',
-//       'Ply Count': '3-Ply',
-//       'Sheets Per Roll': '300',
-//       'Roll Count': '24',
-//       'Septic Safe': 'Yes',
-//       'Hypoallergenic': 'Yes',
-//       'Packaging': 'Plastic-free, recyclable paper',
-//     },
-//   },
-//   'bamboo-starter-kit': {
-//     highlights: [
-//       'Curated bundle: 6 rolls of toilet paper + 4 rolls of paper towels',
-//       'The perfect introduction to bamboo household essentials',
-//       'Makes a thoughtful, eco-conscious gift',
-//       'All products are tree-free and sustainably sourced',
-//       'Packaged in a premium, recyclable gift-style box',
-//     ],
-//     specs: {
-//       'Material': '100% Bamboo Fiber',
-//       'Toilet Paper Ply': '3-Ply',
-//       'Paper Towel Ply': '2-Ply',
-//       'Toilet Paper Rolls': '6',
-//       'Paper Towel Rolls': '4',
-//       'Septic Safe': 'Yes',
-//       'Packaging': 'Recyclable gift box',
-//     },
-//   },
-// }
-
-const trustBadges = [
-  { icon: Leaf, label: "100% Tree-Free" },
-  { icon: Droplets, label: "Septic Safe" },
-  { icon: Shield, label: "Hypoallergenic" },
-  { icon: Sparkles, label: "Premium Quality" },
-];
-
-function buildDisplayTrustBadges(
-  additional: ProductAdditionalFields,
-): Array<{ Icon: LucideIcon; label: string }> {
-  const features = additional?.productFeatures ?? [];
-  const fromDb = features
-    .map((f) => {
-      const Icon = getLucideTemplateIcon(f.icon);
-      if (!Icon || !f.text?.trim()) return null;
-      return { Icon, label: f.text.trim() };
-    })
-    .filter((b): b is { Icon: LucideIcon; label: string } => b !== null);
-  if (fromDb.length > 0) return fromDb;
-  return trustBadges.map((b) => ({ Icon: b.icon, label: b.label }));
-}
 
 export function HappyBambooProductPage({
   product,
@@ -198,23 +28,21 @@ export function HappyBambooProductPage({
     displayPrice,
     displayCompareAtPrice,
     handleAddToCart,
-
+    additionalFields,
     canAddMore,
     handleDecrement,
     handleIncrement,
     quantity,
     setSelectedVariantId,
+    isOnSale,
+    displayTrustBadges,
   } = useProduct(product);
 
   const customFields = product.business?.siteContent?.customFields;
-  const fields = resolveFields(customFields, ["happy-bamboo.sale-badge-format"]);
+  const fields = resolveFields(customFields, [
+    "happy-bamboo.sale-badge-format",
+  ]);
   const saleBadgeFormat = fields["happy-bamboo.sale-badge-format"] ?? "true";
-
-  const isOnSale =
-    displayCompareAtPrice != null &&
-    displayCompareAtPrice > 0 &&
-    displayCompareAtPrice > displayPrice;
-
 
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
@@ -222,20 +50,16 @@ export function HappyBambooProductPage({
 
   const [isAdded, setIsAdded] = useState(false);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [product.slug]);
-
   const addToCart = () => {
     handleAddToCart();
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  const additional = parseProductAdditionalFields(product.additionalFields);
-  const displayTrustBadges = buildDisplayTrustBadges(additional);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [product.slug]);
 
-  // const related: (typeof product)[] = [];
   return (
     <PageTransition>
       <section className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
@@ -256,23 +80,12 @@ export function HappyBambooProductPage({
 
         {/* Product Main */}
         <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
-          {/* Image */}
+          {/* Image Gallery */}
           <FadeIn direction="left" className="flex-1">
-            <div className="bg-secondary relative aspect-square overflow-hidden rounded-2xl">
-              <Image
-                src={product.images[0]?.url ?? "/placeholder.svg"}
-                alt={product.name}
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-              {/* {product.badge && (
-                <Badge className="bg-primary text-primary-foreground absolute top-4 left-4 px-3 py-1 text-sm">
-                  {product.badge}
-                </Badge>
-              )} */}
-            </div>
+            <HappyBambooProductImageGallery
+              images={product.images}
+              productName={product.name}
+            />
           </FadeIn>
 
           {/* Details */}
@@ -285,9 +98,9 @@ export function HappyBambooProductPage({
               <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
                 <span className="text-balance">{product.name}</span>
               </h1>
-              {additional?.productTagline && (
+              {additionalFields?.productTagline && (
                 <p className="text-muted-foreground mt-1 text-xl font-medium">
-                  {additional.productTagline}
+                  {additionalFields.productTagline}
                 </p>
               )}
             </div>
@@ -295,7 +108,11 @@ export function HappyBambooProductPage({
             <div className="flex flex-wrap items-baseline gap-3">
               {isOnSale && displayCompareAtPrice && (
                 <span className="inline-flex items-center rounded-full bg-black px-3 py-1 text-sm font-semibold text-white">
-                  {computeSavingsLabel(displayPrice, displayCompareAtPrice, saleBadgeFormat)}
+                  {computeSavingsLabel(
+                    displayPrice,
+                    displayCompareAtPrice,
+                    saleBadgeFormat,
+                  )}
                 </span>
               )}
               <div className="flex items-baseline gap-2">
@@ -308,24 +125,7 @@ export function HappyBambooProductPage({
                   </span>
                 )}
               </div>
-              {product.id === "bamboo-luxe-24" && (
-                <span className="text-primary text-sm font-medium">
-                  Best value per roll
-                </span>
-              )}
             </div>
-
-            {/* Feature tags */}
-            {/* <div className="flex flex-wrap gap-2">
-              {product.features.map((feature) => (
-                <span
-                  key={feature}
-                  className="bg-secondary text-secondary-foreground rounded-full px-3 py-1 text-sm font-medium"
-                >
-                  {feature}
-                </span>
-              ))}
-            </div> */}
 
             <Separator />
 
@@ -336,7 +136,7 @@ export function HappyBambooProductPage({
                 product={product}
                 setSelectedVariantId={setSelectedVariantId}
               />
-            ) : additional?.comingSoon ? (
+            ) : additionalFields?.comingSoon ? (
               <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800 dark:bg-amber-950">
                 <p className="font-semibold text-amber-700 dark:text-amber-300">
                   Coming Soon
@@ -379,12 +179,7 @@ export function HappyBambooProductPage({
                           <Plus className="size-4" />
                         </Button>
                       </div>
-                      <Button
-                        size="lg"
-                        onClick={addToCart}
-                        className="flex"
-                        // className="flex-1 gap-2 sm:flex-none"
-                      >
+                      <Button size="lg" onClick={addToCart} className="flex">
                         {isAdded ? (
                           <>
                             <Check className="h-4 w-4" />
@@ -434,116 +229,10 @@ export function HappyBambooProductPage({
         </div>
         <HappyBambooProductDetailsTabs product={product} />
 
-        {/* Highlights & Specs */}
-        {/* {details && (
-          <div className="mt-16 flex flex-col gap-12 lg:flex-row lg:gap-16">
-            <FadeIn direction="up" delay={0.1} className="flex-1">
-              <h2 className="text-foreground font-heading text-2xl font-bold">
-                Why You Will Love It
-              </h2>
-              <ul className="mt-6 flex flex-col gap-3">
-                {details.highlights.map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <Check className="text-primary mt-0.5 size-5 shrink-0" />
-                    <span className="text-muted-foreground text-sm leading-relaxed">
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </FadeIn>
-
-            <FadeIn direction="up" delay={0.2} className="flex-1">
-              <h2 className="text-foreground font-heading text-2xl font-bold">
-                Product Specifications
-              </h2>
-              <div className="divide-border border-border mt-6 flex flex-col divide-y overflow-hidden rounded-xl border">
-                {Object.entries(details.specs).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="even:bg-secondary/30 flex justify-between px-4 py-3 text-sm"
-                  >
-                    <span className="text-foreground font-medium">{key}</span>
-                    <span className="text-muted-foreground">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </FadeIn>
-          </div>
-        )} */}
-
         {/* Other Products */}
-        <div className="mb-20">
-          <FadeIn direction="up">
-            <h2 className="text-foreground font-heading text-2xl font-bold">
-              You Might Also Like
-            </h2>
-          </FadeIn>
-          <StaggerContainer
-            className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2"
-            staggerDelay={0.12}
-          >
-            {relatedProducts?.map((p) => {
-              const relatedEffectivePrice =
-                p.variants.length > 0
-                  ? (p.variants[0]?.price ?? p.price)
-                  : p.price;
-              const relatedCompareAtPrice =
-                p.variants.length > 0
-                  ? (p.variants[0]?.compareAtPrice ??
-                    p.compareAtPrice ??
-                    null)
-                  : (p.compareAtPrice ?? null);
-              const relatedIsOnSale =
-                relatedCompareAtPrice != null &&
-                relatedCompareAtPrice > 0 &&
-                relatedCompareAtPrice > relatedEffectivePrice;
-              return (
-                <StaggerItem key={p.id}>
-                  <Link
-                    href={`/shop/${p.slug}`}
-                    className="group border-border bg-card flex gap-4 rounded-xl border p-4 transition-shadow hover:shadow-lg"
-                  >
-                    <div className="bg-secondary relative size-24 shrink-0 overflow-hidden rounded-lg">
-                      <Image
-                        src={p.images[0]?.url ?? "/placeholder.svg"}
-                        alt={p.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="96px"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-card-foreground group-hover:text-primary font-heading text-base font-semibold transition-colors">
-                        {p.name}
-                      </h3>
-                      <p className="text-muted-foreground line-clamp-2 text-sm">
-                        {p.description}
-                      </p>
-                      <div className="mt-auto flex items-baseline gap-2">
-                        <span className="text-foreground text-lg font-bold">
-                          {formatPrice(relatedEffectivePrice)}
-                        </span>
-                        {relatedIsOnSale && relatedCompareAtPrice && (
-                          <span className="text-muted-foreground text-sm line-through">
-                            {formatPrice(relatedCompareAtPrice)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                </StaggerItem>
-              );
-            })}
-            {relatedProducts?.length === 0 && (
-              <div className="col-span-full text-center">
-                <p className="text-muted-foreground">
-                  No related products found
-                </p>
-              </div>
-            )}
-          </StaggerContainer>
-        </div>
+        <HappyBambooRelatedProductsSection
+          relatedProducts={relatedProducts ?? []}
+        />
       </section>
     </PageTransition>
   );
