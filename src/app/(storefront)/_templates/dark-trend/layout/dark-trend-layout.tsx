@@ -8,7 +8,7 @@ export function DarkTrendLayout({
   children,
 }: DefaultLayoutTemplateProps) {
   return (
-    <main className="dark-trend min-h-screen bg-[#1A1A1A] font-sans text-white antialiased">
+    <main className="dark-trend bg-background text-foreground min-h-screen font-sans antialiased">
       <DarkTrendHeader business={business} />
       {children}
       <DarkTrendFooter business={business} />

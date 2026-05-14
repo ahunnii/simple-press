@@ -5,17 +5,23 @@ import Link from "next/link";
 import { ArrowLeft, Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import type { Product } from "~/types";
 import { computeSavingsLabel } from "~/lib/prices";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
-import { FadeIn, PageTransition } from "~/components/page-animations";
+import {
+  FadeIn,
+  PageTransition,
+  StaggerContainer,
+  StaggerItem,
+} from "~/components/page-animations";
+import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
+import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
 
 import { resolveFields } from "../index";
-import { HappyBambooProductDetailsTabs } from "./happy-bamboo-product-details-tabs";
-import { HappyBambooProductImageGallery } from "./happy-bamboo-product-image-gallery";
-import { HappyBambooRelatedProductsSection } from "./happy-bamboo-related-products-section";
+import { HappyBambooProductCard } from "../shared/happy-bamboo-product-card";
 import { HappyBambooVariantSelector } from "./happy-bamboo-variant-selector";
 
 export function HappyBambooProductPage({
@@ -82,9 +88,10 @@ export function HappyBambooProductPage({
         <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
           {/* Image Gallery */}
           <FadeIn direction="left" className="flex-1">
-            <HappyBambooProductImageGallery
+            <ProductGalleryHorizontal
               images={product.images}
               productName={product.name}
+              enableLightbox={true}
             />
           </FadeIn>
 
@@ -227,12 +234,44 @@ export function HappyBambooProductPage({
             </div>
           </FadeIn>
         </div>
-        <HappyBambooProductDetailsTabs product={product} />
+        <ProductDetailsAdditionalInfoTabs
+          product={product}
+          styleProps={{
+            cardContentClassName:
+              "text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line",
+          }}
+        />
 
         {/* Other Products */}
-        <HappyBambooRelatedProductsSection
-          relatedProducts={relatedProducts ?? []}
-        />
+        <div className="mb-20">
+          <FadeIn direction="up">
+            <h2 className="text-foreground font-heading text-2xl font-bold">
+              You Might Also Like
+            </h2>
+          </FadeIn>
+          <StaggerContainer
+            className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2"
+            staggerDelay={0.12}
+          >
+            {relatedProducts?.map((p, index) => {
+              return (
+                <StaggerItem key={p.id}>
+                  <HappyBambooProductCard
+                    product={p as Product}
+                    index={index}
+                  />
+                </StaggerItem>
+              );
+            })}
+            {relatedProducts?.length === 0 && (
+              <div className="col-span-full text-center">
+                <p className="text-muted-foreground">
+                  No related products found
+                </p>
+              </div>
+            )}
+          </StaggerContainer>
+        </div>
       </section>
     </PageTransition>
   );

@@ -72,3 +72,25 @@ export function getLucideTemplateIcon(name: string): LucideIcon | null {
   }
   return null;
 }
+
+export function buildLucideIconsWithLabels(
+  additional: {
+    productFeatures?: Array<{ icon: string; text: string }>;
+  },
+  defaultArray?: Array<{ icon: LucideIcon; label: string }>,
+): Array<{ Icon: LucideIcon; label: string }> {
+  const features = additional?.productFeatures ?? [];
+  const fromDb = features
+    .map((f) => {
+      const Icon = getLucideTemplateIcon(f.icon);
+      if (!Icon || !f.text?.trim()) return null;
+      return { Icon, label: f.text.trim() };
+    })
+    .filter((b): b is { Icon: LucideIcon; label: string } => b !== null);
+  if (fromDb.length > 0) return fromDb;
+  if (!defaultArray) return [];
+  return defaultArray.map((b) => ({
+    Icon: b.icon,
+    label: b.label,
+  }));
+}

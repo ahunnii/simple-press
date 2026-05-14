@@ -9,7 +9,7 @@ import {
 } from "~/components/page-animations";
 
 import { resolveFields } from "..";
-import { BambooProductCard } from "./bamboo-product-card";
+import { BambooProductCard } from "../shared/bamboo-product-card";
 
 export const metadata: Metadata = {
   title: "Shop",
@@ -49,21 +49,7 @@ export async function BambooShopPage({
               <BambooProductCard
                 key={product.id}
                 index={index}
-                product={{
-                  id: product.id,
-                  name: product.name,
-                  description:
-                    product.description ?? "No description available",
-                  price:
-                    product?.variants?.length > 0
-                      ? (product.variants[0]?.price ?? 0)
-                      : product.price,
-                  originalPrice: null,
-                  image: product.images[0]?.url ?? "/placeholder.svg",
-                  badge: null,
-                  category: "",
-                  slug: product.slug ?? "",
-                }}
+                product={product}
               />
             </StaggerItem>
           ))}

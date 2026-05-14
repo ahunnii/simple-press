@@ -1,11 +1,11 @@
 import { useState } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { useCart } from "~/providers/cart-context";
-import { buildLucideIconsWithLabels } from "~/app/(storefront)/_templates/bamboo/products";
 
-const UNLIMITED_STOCK = 999;
+const MAX_UNTRACKED_QTY = 100;
 
 export function useProduct(
   product: NonNullable<RouterOutputs["product"]["get"]>,
@@ -48,12 +48,15 @@ export function useProduct(
             (product.baseUnitsConsumed ?? 1),
         )
       : null;
+  const isInventoryTracked =
+    product.trackInventory || poolEffectiveMaxQty !== null;
+
   const maxInventory = hasVariants
     ? (selectedVariant?.inventoryQty ?? 0)
     : (poolEffectiveMaxQty ??
       (product.trackInventory && !product.allowBackorders
         ? (product.inventoryQty ?? 0)
-        : UNLIMITED_STOCK));
+        : MAX_UNTRACKED_QTY));
   const remainingStock = maxInventory - cartQuantity;
   const canAddMore = remainingStock > 0;
   const tagline =
@@ -182,7 +185,8 @@ export function useProduct(
         (product.allowBackorders ?? false) ||
         (product.inventoryQty ?? 0) > 0;
 
-  const showLowStockWarning = remainingStock > 0 && remainingStock < 10;
+  const showLowStockWarning =
+    isInventoryTracked && remainingStock > 0 && remainingStock < 10;
 
   const isOnSale =
     displayCompareAtPrice != null &&
@@ -223,5 +227,8 @@ export function useProduct(
     isOnSale,
     additionalFields,
     displayTrustBadges,
+    trackInventory: product.trackInventory,
+    isInventoryTracked,
+    maxUntracked: MAX_UNTRACKED_QTY,
   };
 }

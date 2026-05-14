@@ -5,12 +5,12 @@ import Link from "next/link";
 import { ArrowLeft, Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { FadeIn, PageTransition } from "~/components/page-animations";
-import { buildLucideIconsWithLabels } from "~/app/(storefront)/_templates/happy-bamboo/products/index";
 
 import { PollenProductDetailsTabs } from "./pollen-product-details-tabs";
 import { PollenProductImageGallery } from "./pollen-product-image-gallery";

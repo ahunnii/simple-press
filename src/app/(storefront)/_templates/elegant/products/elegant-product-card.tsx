@@ -12,7 +12,7 @@ import Link from "next/link";
 import { Eye, ShoppingBag } from "lucide-react";
 
 import { computeSavingsLabel, formatPrice } from "~/lib/prices";
-import { useProductCard } from "~/hooks/use-product-card";
+import { checkProductStatus } from "~/lib/products/check-product-status";
 import { Badge } from "~/components/ui/badge";
 import { useCart } from "~/providers/cart-context";
 
@@ -39,10 +39,26 @@ export function ElegantProductCard({
     comingSoon,
     disableCart,
     hasVariants,
-    poolEffectiveMaxQty,
+    maxInventory,
     displayPrice,
     displayCompareAtPrice,
-  } = useProductCard(product);
+  } = checkProductStatus({
+    price: product.price,
+    compareAtPrice: product.compareAtPrice,
+    trackInventory: product.trackInventory,
+    inventoryQty: product.inventoryQty,
+    allowBackorders: product.allowBackorders,
+    baseInventoryUnit: product.baseInventoryUnit
+      ? { inventoryQty: product.baseInventoryUnit.inventoryQty ?? 0 }
+      : null,
+    baseUnitsConsumed: product.baseUnitsConsumed,
+    additionalFields: product.additionalFields,
+    variants: product.variants.map((v) => ({
+      price: v.price,
+      compareAtPrice: v.compareAtPrice,
+      inventoryQty: v.inventoryQty,
+    })),
+  });
 
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -59,7 +75,7 @@ export function ElegantProductCard({
       compareAtPrice: isOnSale ? displayCompareAtPrice : null,
       imageUrl: product.images[0]?.url ?? "/placeholder.svg",
       sku: null,
-      maxInventory: poolEffectiveMaxQty ?? undefined,
+      maxInventory,
     });
   };
 

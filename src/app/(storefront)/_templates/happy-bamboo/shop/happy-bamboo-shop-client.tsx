@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { getEffectivePrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -17,26 +18,13 @@ import {
 } from "~/components/ui/select";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
-import { HappyBambooHorizontalProductCard } from "./happy-bamboo-product-card";
+import { HappyBambooProductCard } from "../shared/happy-bamboo-product-card";
 
 type Product = NonNullable<
   RouterOutputs["business"]["getWithProducts"]
 >["products"][number];
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name-asc";
-
-function getEffectivePrice(product: Product): number {
-  return product.variants.length > 0
-    ? (product.variants[0]?.price ?? product.price)
-    : product.price;
-}
-
-function getEffectiveCompareAtPrice(product: Product): number | null {
-  if (product.variants.length > 0) {
-    return product.variants[0]?.compareAtPrice ?? product.compareAtPrice ?? null;
-  }
-  return product.compareAtPrice ?? null;
-}
 
 interface Props {
   products: Product[];
@@ -205,32 +193,11 @@ export function HappyBambooShopClient({
         {/* Product grid */}
         <div className="grid grid-cols-1 gap-6 py-12 md:py-20 lg:grid-cols-2">
           {filtered.map((product, index) => (
-            <HappyBambooHorizontalProductCard
+            <HappyBambooProductCard
               key={product.id}
               index={index}
               saleBadgeFormat={saleBadgeFormat}
-              product={{
-                id: product.id,
-                name: product.name,
-                description: product.description ?? "No description available",
-                price: getEffectivePrice(product),
-                compareAtPrice: getEffectiveCompareAtPrice(product),
-                hasVariants: product.variants.length > 0,
-                image: product.images[0]?.url ?? "/placeholder.svg",
-                badge: null,
-                category: "",
-                slug: product.slug ?? "",
-                additionalFields: product.additionalFields,
-                trackInventory: product.trackInventory,
-                inventoryQty: product.inventoryQty,
-                allowBackorders: product.allowBackorders,
-                poolEffectiveMaxQty: product.baseInventoryUnit
-                  ? Math.floor(
-                      product.baseInventoryUnit.inventoryQty /
-                        (product.baseUnitsConsumed ?? 1),
-                    )
-                  : null,
-              }}
+              product={product}
             />
           ))}
         </div>

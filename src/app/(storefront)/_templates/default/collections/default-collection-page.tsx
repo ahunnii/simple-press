@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
 
-import { DefaultProductCard } from "../products/default-product-card";
+import { DefaultProductCard } from "../shared/default-product-card";
 
 export function DefaultCollectionPage({
   collection,

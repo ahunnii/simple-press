@@ -35,14 +35,14 @@ export function DarkTrendProductDetails({ product }: Props) {
                 className="flex w-full items-center justify-between py-6 text-left"
               >
                 <div className="flex items-baseline gap-4">
-                  <span className="font-mono text-sm text-purple-500">
+                  <span className="text-primary font-mono text-sm">
                     {panel.number}
                   </span>
-                  <span className="text-lg font-semibold tracking-tight text-white">
+                  <span className="text-lg font-semibold tracking-tight">
                     {panel.title}
                   </span>
                 </div>
-                <span className="text-white/60">
+                <span className="text-muted-foreground">
                   {isOpen ? (
                     <Minus className="h-4 w-4" />
                   ) : (
@@ -58,13 +58,16 @@ export function DarkTrendProductDetails({ product }: Props) {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    transition={{
+                      duration: 0.35,
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                    }}
                     className="overflow-hidden"
                     style={{ overflowX: "hidden" }}
                   >
-                    <div className="pb-8 pl-12 pr-4">
+                    <div className="pr-4 pb-8 pl-12">
                       {panel.id === "description" && (
-                        <p className="whitespace-pre-line text-base leading-relaxed text-white/70">
+                        <p className="text-base leading-relaxed whitespace-pre-line text-white/70">
                           {product.description}
                         </p>
                       )}
@@ -72,7 +75,9 @@ export function DarkTrendProductDetails({ product }: Props) {
                         <>
                           {additional?.additionalInformation ? (
                             <TiptapRenderer
-                              content={additional.additionalInformation as TiptapJSON}
+                              content={
+                                additional.additionalInformation as TiptapJSON
+                              }
                               className="prose prose-sm prose-invert max-w-none text-white/70"
                             />
                           ) : (

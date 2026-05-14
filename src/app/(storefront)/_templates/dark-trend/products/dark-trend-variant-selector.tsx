@@ -86,11 +86,11 @@ export function DarkTrendVariantSelector({
           <Label className="mb-3 block text-sm font-medium text-white">
             Quantity
           </Label>
-          <div className="inline-flex items-center gap-4 rounded-md bg-zinc-900/50 px-4 py-2">
+          <div className="bg-card inline-flex items-center gap-4 rounded-md px-4 py-2">
             <Button
               variant="outline"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="flex h-10 w-10 items-center justify-center rounded-sm bg-zinc-800 text-white/60 transition-colors hover:text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white"
               aria-label="Decrease quantity"
             >
               -
@@ -107,7 +107,7 @@ export function DarkTrendVariantSelector({
                   Math.min(selectedVariant.inventoryQty, quantity + 1),
                 )
               }
-              className="flex h-10 w-10 items-center justify-center rounded-sm bg-zinc-800 text-white/60 transition-colors hover:text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white"
               aria-label="Increase quantity"
             >
               +

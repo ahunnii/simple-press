@@ -25,7 +25,7 @@ import {
 } from "./collections";
 import { bambooContactData, bambooContactFieldGroups } from "./contact";
 import { bambooHomepageFieldGroups, homepageBambooData } from "./homepage";
-import { bambooProductsData, bambooProductsFieldGroups } from "./products";
+import { bambooProductsData, bambooProductsFieldGroups } from "./shop";
 import {
   bambooTestimonialsData,
   bambooTestimonialsFieldGroups,

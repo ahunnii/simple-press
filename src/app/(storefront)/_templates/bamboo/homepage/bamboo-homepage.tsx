@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, MapPin, Package } from "lucide-react";
 
+import type { Product } from "~/types";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
@@ -9,12 +10,17 @@ import {
 import { cn } from "~/lib/utils";
 import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
-import { FadeIn, PageTransition, ScaleIn } from "~/components/page-animations";
+import {
+  FadeIn,
+  PageTransition,
+  ScaleIn,
+  StaggerContainer,
+  StaggerItem,
+} from "~/components/page-animations";
 
 import { DEFAULT_BAMBOO_FEATURES } from ".";
 import { resolveFields } from "..";
-import { BambooFeaturedProductsSection } from "./bamboo-featured-products-section";
-import { BambooSustainabilityBanner } from "./bamboo-sustainability-banner-section";
+import { BambooProductCard } from "../shared/bamboo-product-card";
 
 export async function BambooHomepage() {
   const homepage = await api.business.getHomepage();
@@ -57,7 +63,6 @@ export async function BambooHomepage() {
 
   return (
     <HydrateClient>
-      {" "}
       <PageTransition>
         {/* Hero Section */}
         <section
@@ -140,9 +145,30 @@ export async function BambooHomepage() {
               </p>
             </div>
           </FadeIn>
-          <BambooFeaturedProductsSection
-            featuredProducts={homepage?.products ?? []}
-          />
+          <StaggerContainer
+            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            staggerDelay={0.12}
+          >
+            {homepage?.products?.slice(0, 3)?.map((product, index) => (
+              <StaggerItem key={product.id}>
+                <BambooProductCard
+                  key={product.id}
+                  index={index}
+                  product={product as Product}
+                />
+              </StaggerItem>
+            ))}
+            {homepage?.products?.length === 0 && (
+              <StaggerItem key="no-products">
+                <div className="flex flex-col items-center justify-center">
+                  <Package className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                  <p className="text-muted-foreground text-lg">
+                    No products found
+                  </p>
+                </div>
+              </StaggerItem>
+            )}
+          </StaggerContainer>
           <FadeIn direction="up" delay={0.3}>
             <div className="mt-12 text-center">
               <Button variant="outline" size="lg" asChild>
@@ -156,9 +182,31 @@ export async function BambooHomepage() {
         </section>
 
         {/* Sustainability Banner */}
-        <BambooSustainabilityBanner
-          sustainabilityList={sustainabilityList ?? []}
-        />
+        <section className="bg-primary">
+          <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
+            <StaggerContainer
+              className="grid grid-cols-2 gap-8 lg:grid-cols-3"
+              staggerDelay={0.1}
+            >
+              {sustainabilityList?.map((feature) => (
+                <StaggerItem
+                  key={feature.title}
+                  className="flex flex-col items-center gap-3 text-center"
+                >
+                  <div className="bg-primary-foreground/10 flex size-12 items-center justify-center rounded-full">
+                    <feature.icon className="text-primary-foreground size-6" />
+                  </div>
+                  <h3 className="text-primary-foreground text-sm font-semibold">
+                    {feature.title}
+                  </h3>
+                  <p className="text-primary-foreground/70 text-xs">
+                    {feature.description}
+                  </p>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </div>
+        </section>
 
         {/* About Teaser */}
         <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import type { Product } from "~/types";
 import { Button } from "~/components/ui/button";
 import {
   FadeIn,
@@ -11,9 +12,7 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
-// import { useCart } from "~/providers/cart-context";
-
-import { HappyBambooFeaturedProductCard } from "../products/happy-bamboo-product-card";
+import { HappyBambooProductCard } from "../shared/happy-bamboo-product-card";
 
 type Props = {
   featuredProducts: NonNullable<
@@ -31,29 +30,6 @@ export function HappyBambooFeaturedProducts({
   featuredButtonText = "View All Products",
   featuredButtonLink = "/shop",
 }: Props) {
-  // const { addItem } = useCart();
-  // const router = useRouter();
-
-  // const handleAdd = (
-  //   e: React.MouseEvent,
-  //   product: NonNullable<
-  //     RouterOutputs["business"]["getHomepage"]
-  //   >["products"][number],
-  // ) => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  //   addItem({
-  //     productId: product.id,
-  //     variantId: null,
-  //     productName: product.name,
-  //     variantName: null,
-  //     price: product.price,
-  //     imageUrl: product.images[0]?.url ?? "/placeholder.svg",
-  //     sku: null,
-  //   });
-  //   toast.success(`${product.name} added to cart`);
-  // };
-
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
       <FadeIn direction="up">
@@ -73,9 +49,12 @@ export function HappyBambooFeaturedProducts({
         className="grid grid-cols-1 gap-6 md:grid-cols-2"
         staggerDelay={0.12}
       >
-        {featuredProducts?.slice(0, 4).map((product) => (
+        {featuredProducts?.slice(0, 4).map((product, index) => (
           <StaggerItem key={product.id}>
-            <HappyBambooFeaturedProductCard product={product} />
+            <HappyBambooProductCard
+              product={product as Product}
+              index={index}
+            />
           </StaggerItem>
         ))}
       </StaggerContainer>

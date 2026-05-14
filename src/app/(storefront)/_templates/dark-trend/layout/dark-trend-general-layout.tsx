@@ -29,9 +29,9 @@ export function DarkTrendGeneralLayout({
   return (
     <div className="flex-1 px-4 py-12">
       <div className="mx-auto max-w-7xl">
-        <div className="my-20 w-full space-y-4">
-          <Breadcrumb className="mx-auto w-full">
-            <BreadcrumbList className="mx-auto w-full flex-wrap justify-center text-center">
+        <div className="my-14 w-full space-y-4">
+          <Breadcrumb>
+            <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink
                   href="/"
@@ -63,10 +63,10 @@ export function DarkTrendGeneralLayout({
           </Breadcrumb>
 
           {topContent ? (
-            <div className="mx-auto max-w-4xl pt-2">{topContent}</div>
+            <div className="max-w-4xl pt-2">{topContent}</div>
           ) : null}
 
-          <h1 className="mb-2 text-center text-4xl font-bold text-white lg:text-7xl">
+          <h1 className="mb-2 text-left text-4xl font-bold text-white lg:text-7xl">
             {title}
           </h1>
 

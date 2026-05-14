@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Leaf, Package } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { resolveFields } from "../index";
+import type { Product } from "~/types";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
@@ -16,19 +16,22 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
-import { HappyBambooProductCard } from "../products/happy-bamboo-product-card";
+import { resolveFields } from "../index";
+import { HappyBambooProductCard } from "../shared/happy-bamboo-product-card";
 
-export function HappyBambooCollectionPage({
-  business,
-  collection,
-  additionalCollections,
-}: {
+type Props = {
   business: { siteContent?: { customFields?: unknown } | null };
   collection: NonNullable<RouterOutputs["collections"]["getBySlug"]>;
   additionalCollections: NonNullable<
     RouterOutputs["collections"]["getAllPublic"]
   >;
-}) {
+};
+
+export function HappyBambooCollectionPage({
+  business,
+  collection,
+  additionalCollections,
+}: Props) {
   const fields = resolveFields(business.siteContent?.customFields, [
     "happy-bamboo.sale-badge-format",
   ]);
@@ -108,22 +111,11 @@ export function HappyBambooCollectionPage({
                 <StaggerItem key={product.id}>
                   <HappyBambooProductCard
                     saleBadgeFormat={saleBadgeFormat}
-                    product={{
-                      ...product.product,
-                      image:
-                        product.product.images[0]?.url ?? "/placeholder.svg",
-                      compareAtPrice:
-                        product.product.variants.length > 0
-                          ? (product.product.variants[0]?.compareAtPrice ??
-                            product.product.compareAtPrice ??
-                            null)
-                          : (product.product.compareAtPrice ?? null),
-                      hasVariants: product.product.variants.length > 0,
-                      badge: null,
-                      category: "",
-                      slug: product.product.slug ?? "",
-                      description: product.product.description ?? "",
-                    }}
+                    product={
+                      {
+                        ...product.product,
+                      } as Product
+                    }
                     index={index}
                   />
                 </StaggerItem>
