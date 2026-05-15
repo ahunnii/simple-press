@@ -14,7 +14,9 @@ type Props = {
 
 export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
   const { addItem } = useCart();
-  const [selectedVariant, setSelectedVariant] = useState(product.variants[0] ?? null);
+  const [selectedVariant, setSelectedVariant] = useState(
+    product.variants[0] ?? null,
+  );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
 
@@ -44,7 +46,7 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
     <div className="space-y-5">
       {/* Variant Selection */}
       <div>
-        <p className="mb-3 font-sans text-[9px] tracking-[0.3em] uppercase text-muted-foreground">
+        <p className="text-muted-foreground mb-3 font-sans text-[9px] tracking-[0.3em] uppercase">
           Select Variant
         </p>
         <div className="flex flex-wrap gap-2">
@@ -69,7 +71,7 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
                 className={`border px-4 py-2 font-sans text-xs tracking-wider transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                   selectedVariant?.id === variant.id
                     ? "border-foreground bg-foreground text-background"
-                    : "border-border bg-transparent text-foreground hover:border-foreground"
+                    : "border-border text-foreground hover:border-foreground bg-transparent"
                 }`}
               >
                 {variant.name}
@@ -82,7 +84,7 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
       </div>
 
       {selectedVariant && product.trackInventory && (
-        <p className="font-sans text-xs text-muted-foreground">
+        <p className="text-muted-foreground font-sans text-xs">
           {selectedVariant.inventoryQty ?? 0} in stock
         </p>
       )}
@@ -90,7 +92,7 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         {/* Quantity */}
         {selectedVariant && (
-          <div className="flex items-center border border-border">
+          <div className="border-border flex items-center border">
             <Button
               variant="ghost"
               size="icon"
@@ -100,7 +102,7 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
             >
               <Minus className="size-3.5" />
             </Button>
-            <span className="w-10 text-center font-sans text-sm font-medium text-foreground">
+            <span className="text-foreground w-10 text-center font-sans text-sm font-medium">
               {quantity}
             </span>
             <Button

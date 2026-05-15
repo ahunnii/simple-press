@@ -52,9 +52,7 @@ export function BambooVariantSelector({
     <div className="space-y-4">
       {/* Variant Selection */}
       <div className="mb-6">
-        <Label className="mb-3 block text-sm font-medium text-white">
-          Select Variant
-        </Label>
+        <Label className="mb-3 block text-sm font-medium">Select Variant</Label>
         <div className="flex flex-wrap gap-3">
           {product.variants.map((variant) => (
             <Button
@@ -80,15 +78,11 @@ export function BambooVariantSelector({
         </div>
       </div>
 
-      {selectedVariant && (
-        <span className="text-sm">
-          {selectedVariant?.inventoryQty ?? 0} available
-        </span>
-      )}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         {/* Quantity Selection */}
         {selectedVariant && (
           <div>
+            <Label className="mb-3 block text-sm font-medium">Quantity</Label>
             <div className="border-border flex items-center gap-1 rounded-lg border">
               <Button
                 variant="ghost"
@@ -117,6 +111,11 @@ export function BambooVariantSelector({
                 <Plus className="size-4" />
               </Button>
             </div>{" "}
+            {selectedVariant && (
+              <span className="text-sm">
+                {selectedVariant?.inventoryQty ?? 0} available
+              </span>
+            )}
           </div>
         )}
 

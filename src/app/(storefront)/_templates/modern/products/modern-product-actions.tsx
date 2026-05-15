@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -9,11 +8,11 @@ import { useProduct } from "~/hooks/use-product";
 
 import { ModernVariantSelector } from "./modern-variant-selector";
 
-export function ModernProductActions({
-  product,
-}: {
+type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
-}) {
+};
+
+export function ModernProductActions({ product }: Props) {
   const {
     inStock,
     variantOptions,
@@ -24,28 +23,16 @@ export function ModernProductActions({
     handleIncrement,
     quantity,
     setSelectedVariantId,
-    cartQuantity,
+    additionalFields,
   } = useProduct(product);
 
-  const [added, setAdded] = useState(false);
-  const router = useRouter();
+  const [isAdded, setIsAdded] = useState(false);
 
-  const trackInventory = product.trackInventory ?? false;
-  const allowBackorders = product.allowBackorders ?? false;
-  const inventoryQty = product.inventoryQty ?? 0;
-  const outOfStock = !inStock;
-
-  function addToCart() {
+  const addToCart = () => {
     handleAddToCart();
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
-  }
-
-  function handleBuyNow() {
-    if (!canAddMore) return;
-    handleAddToCart();
-    router.push("/checkout");
-  }
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
 
   return (
     <div className="mt-8">
@@ -54,76 +41,87 @@ export function ModernProductActions({
           product={product}
           setSelectedVariantId={setSelectedVariantId}
         />
+      ) : additionalFields?.comingSoon ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800 dark:bg-amber-950">
+          <p className="font-semibold text-amber-700 dark:text-amber-300">
+            Coming Soon
+          </p>
+          <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+            This product isn&apos;t available yet. Check back later!
+          </p>
+        </div>
+      ) : !inStock ? (
+        <button
+          type="button"
+          disabled={true}
+          className="boty-shadow bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+          Out of Stock
+        </button>
       ) : (
         <>
-          {trackInventory && (
-            <p className="text-muted-foreground mb-2 text-sm">
-              {allowBackorders
-                ? "Backorders allowed"
-                : `${inventoryQty} in stock${cartQuantity > 0 ? ` (${cartQuantity} in cart)` : ""}`}
-            </p>
-          )}
-          {/* Quantity Selector */}
-          <div className="flex items-center gap-4">
-            <span className="text-foreground text-xs font-semibold tracking-widest uppercase">
-              Quantity
-            </span>
-            <div className="border-border flex items-center border">
-              <button
-                type="button"
-                onClick={handleDecrement}
-                disabled={outOfStock || quantity <= 1}
-                className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
-                aria-label="Decrease quantity"
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <span className="border-border text-foreground flex h-10 w-12 items-center justify-center border-x text-sm font-medium">
-                {quantity}
-              </span>
-              <button
-                type="button"
-                onClick={handleIncrement}
-                disabled={outOfStock || quantity >= remainingStock}
-                className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
-                aria-label="Increase quantity"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+          {canAddMore && (
+            <>
+              {/* Quantity Selector */}
+              <div className="flex w-fit items-center gap-4">
+                <span className="text-foreground text-xs font-semibold tracking-widest uppercase">
+                  Quantity
+                </span>
+                <div className="border-border flex items-center border">
+                  <button
+                    type="button"
+                    onClick={handleDecrement}
+                    disabled={quantity <= 1}
+                    className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="border-border text-foreground flex h-10 w-12 items-center justify-center border-x text-sm font-medium">
+                    {quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleIncrement}
+                    disabled={quantity >= remainingStock}
+                    className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
+                    aria-label="Increase quantity"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
 
-          {/* Action Buttons */}
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={addToCart}
-              disabled={outOfStock || !canAddMore}
-              className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
-              {added ? (
-                <>
-                  <Check className="h-4 w-4" />
-                  Added to Cart
-                </>
-              ) : outOfStock ? (
-                "Out of Stock"
-              ) : (
-                <>
-                  <ShoppingBag className="h-4 w-4" />
-                  Add to Cart
-                </>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={handleBuyNow}
-              disabled={outOfStock || !canAddMore}
-              className="border-foreground text-foreground hover:bg-foreground hover:text-background flex flex-1 items-center justify-center gap-2 border px-8 py-3 text-sm font-medium tracking-wide transition-colors disabled:opacity-50"
-            >
-              Buy Now
-            </button>
-          </div>
+              {/* Action Buttons */}
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={addToCart}
+                  disabled={!canAddMore}
+                  className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {isAdded ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Added to Cart
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag className="h-4 w-4" />
+                      Add to Cart
+                    </>
+                  )}
+                </button>
+              </div>
+              {product.trackInventory &&
+                product.allowBackorders &&
+                (product.inventoryQty ?? 0) === 0 && (
+                  <p className="text-muted-foreground text-sm">
+                    Backordered — ships when available
+                  </p>
+                )}
+            </>
+          )}
 
           {!canAddMore && inStock && (
             <p className="text-muted-foreground mt-3 text-center text-sm">

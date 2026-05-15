@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Minus, Plus, ShoppingBag } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
@@ -22,24 +22,16 @@ import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product
 
 import { resolveFields } from "../index";
 import { HappyBambooProductCard } from "../shared/happy-bamboo-product-card";
-import { HappyBambooVariantSelector } from "./happy-bamboo-variant-selector";
+import { HappyBambooProductActions } from "./happy-bamboo-product-actions";
 
 export function HappyBambooProductPage({
   product,
 }: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
-    inStock,
-    variantOptions,
     displayPrice,
     displayCompareAtPrice,
-    handleAddToCart,
     additionalFields,
-    canAddMore,
-    handleDecrement,
-    handleIncrement,
-    quantity,
-    setSelectedVariantId,
     isOnSale,
     displayTrustBadges,
   } = useProduct(product);
@@ -53,14 +45,6 @@ export function HappyBambooProductPage({
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
   });
-
-  const [isAdded, setIsAdded] = useState(false);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -136,89 +120,10 @@ export function HappyBambooProductPage({
 
             <Separator />
 
-            {/* Quantity + Add to Cart */}
+            {/* Quantity + Add to Cart Actions */}
+            <HappyBambooProductActions product={product} />
 
-            {Object.keys(variantOptions).length > 0 ? (
-              <HappyBambooVariantSelector
-                product={product}
-                setSelectedVariantId={setSelectedVariantId}
-              />
-            ) : additionalFields?.comingSoon ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800 dark:bg-amber-950">
-                <p className="font-semibold text-amber-700 dark:text-amber-300">
-                  Coming Soon
-                </p>
-                <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
-                  This product isn&apos;t available yet. Check back later!
-                </p>
-              </div>
-            ) : !inStock ? (
-              <Button size="lg" disabled className="flex">
-                Out of Stock
-              </Button>
-            ) : (
-              <>
-                {canAddMore && (
-                  <>
-                    {/* Quantity Selector */}
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                      <div className="border-border flex items-center justify-between gap-1 rounded-lg border">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-10"
-                          onClick={() => handleDecrement()}
-                          disabled={quantity <= 1}
-                          aria-label="Decrease quantity"
-                        >
-                          <Minus className="size-4" />
-                        </Button>
-                        <span className="text-foreground w-10 text-center text-base font-semibold">
-                          {quantity}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-10"
-                          onClick={() => handleIncrement()}
-                          aria-label="Increase quantity"
-                        >
-                          <Plus className="size-4" />
-                        </Button>
-                      </div>
-                      <Button size="lg" onClick={addToCart} className="flex">
-                        {isAdded ? (
-                          <>
-                            <Check className="h-4 w-4" />
-                            Added to Cart
-                          </>
-                        ) : (
-                          <>
-                            <ShoppingBag className="size-5" />
-                            Add to Cart - {formatPrice(displayPrice)}
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                    {product.trackInventory &&
-                      product.allowBackorders &&
-                      (product.inventoryQty ?? 0) === 0 && (
-                        <p className="text-muted-foreground text-sm">
-                          Backordered — ships when available
-                        </p>
-                      )}
-                  </>
-                )}
-
-                {!canAddMore && inStock && (
-                  <p className="mt-3 text-center text-sm text-amber-500">
-                    You have the maximum available quantity in your cart
-                  </p>
-                )}
-              </>
-            )}
-
-            {/* Trust badges */}
+            {/* Trust / Feature badges */}
             <div className="grid grid-cols-2 gap-3">
               {displayTrustBadges.map((badge, i) => (
                 <div
@@ -234,15 +139,19 @@ export function HappyBambooProductPage({
             </div>
           </FadeIn>
         </div>
+
+        {/* Additional Information */}
         <ProductDetailsAdditionalInfoTabs
           product={product}
           styleProps={{
             cardContentClassName:
               "text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line",
+            tipTapRendererClassName:
+              "text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line ",
           }}
         />
 
-        {/* Other Products */}
+        {/* Related Products */}
         <div className="mb-20">
           <FadeIn direction="up">
             <h2 className="text-foreground font-heading text-2xl font-bold">

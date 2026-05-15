@@ -5,16 +5,23 @@ import Link from "next/link";
 import { ArrowLeft, Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import type { Product } from "~/types";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
-import { FadeIn, PageTransition } from "~/components/page-animations";
+import {
+  FadeIn,
+  PageTransition,
+  StaggerContainer,
+  StaggerItem,
+} from "~/components/page-animations";
+import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
+import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
 
-import { PollenProductDetailsTabs } from "./pollen-product-details-tabs";
-import { PollenProductImageGallery } from "./pollen-product-image-gallery";
-import { PollenRelatedProductsSection } from "./pollen-related-products-section";
+import { PollenProductCard } from "../shared/pollen-product-card";
+import { PollenProductActions } from "./pollen-product-actions";
 import { PollenVariantSelector } from "./pollen-variant-selector";
 
 export function PollenProductPage({
@@ -78,9 +85,13 @@ export function PollenProductPage({
         <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
           {/* Image Gallery */}
           <FadeIn direction="left" className="flex-1">
-            <PollenProductImageGallery
+            <ProductGalleryHorizontal
               images={product.images}
+              enableLightbox={true}
               productName={product.name}
+              styleProps={{
+                singleImageContainerClassName: "rounded-md",
+              }}
             />
           </FadeIn>
 
@@ -120,72 +131,8 @@ export function PollenProductPage({
 
             <Separator />
 
-            {Object.keys(variantOptions).length > 0 ? (
-              <PollenVariantSelector
-                product={product}
-                setSelectedVariantId={setSelectedVariantId}
-              />
-            ) : (
-              <>
-                {canAddMore && (
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <div className="flex items-center gap-1 rounded-md border border-[#2a351f]/20">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-10 text-[#2a351f] hover:bg-[#2a351f]/5"
-                        onClick={() => handleDecrement()}
-                        disabled={quantity <= 1}
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus className="size-4" />
-                      </Button>
-                      <span className="w-10 text-center text-base font-semibold text-[#2a351f]">
-                        {quantity}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-10 text-[#2a351f] hover:bg-[#2a351f]/5"
-                        onClick={() => handleIncrement()}
-                        aria-label="Increase quantity"
-                      >
-                        <Plus className="size-4" />
-                      </Button>
-                    </div>
-                    <Button
-                      size="lg"
-                      onClick={addToCart}
-                      className="flex-1 gap-2 bg-[#215935] text-white hover:bg-[#1a4729] sm:flex-none"
-                    >
-                      {isAdded ? (
-                        <>
-                          <Check className="h-4 w-4" />
-                          Added to Cart
-                        </>
-                      ) : (
-                        <>
-                          <ShoppingBag className="size-5" />
-                          Add to Cart — {formatPrice(displayPrice)}
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
-
-                {!canAddMore && inStock && (
-                  <p className="mt-3 text-center text-sm text-amber-600">
-                    You have the maximum available quantity in your cart
-                  </p>
-                )}
-
-                {!inStock && (
-                  <p className="mt-3 text-center text-sm font-medium text-red-600">
-                    Out of stock
-                  </p>
-                )}
-              </>
-            )}
+            {/* Quantity + Add to Cart Actions */}
+            <PollenProductActions product={product} />
 
             {/* Trust Badges */}
             {displayTrustBadges.length > 0 && (
@@ -206,9 +153,41 @@ export function PollenProductPage({
           </FadeIn>
         </div>
 
-        <PollenProductDetailsTabs product={product} />
+        {/* Additional Information */}
+        <ProductDetailsAdditionalInfoTabs
+          product={product}
+          includeCard={false}
+          styleProps={{
+            contentClassName:
+              "whitespace-pre-line text-lg leading-relaxed text-[#4c566a]",
+            tipTapRendererClassName:
+              "whitespace-pre-line text-lg leading-relaxed text-[#4c566a]",
+          }}
+        />
 
-        <PollenRelatedProductsSection relatedProducts={relatedProducts ?? []} />
+        {/* Related Products */}
+        <div className="mb-20">
+          <FadeIn direction="up">
+            <h2 className="text-2xl font-bold tracking-wide text-[#2a351f] uppercase">
+              You Might Also Like
+            </h2>
+          </FadeIn>
+          <StaggerContainer
+            className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2"
+            staggerDelay={0.12}
+          >
+            {relatedProducts?.map((p, i) => (
+              <StaggerItem key={p.id}>
+                <PollenProductCard product={p as Product} index={i} />
+              </StaggerItem>
+            ))}
+            {relatedProducts?.length === 0 && (
+              <div className="col-span-full text-center">
+                <p className="text-[#4c566a]">No related products found</p>
+              </div>
+            )}
+          </StaggerContainer>
+        </div>
       </section>
     </PageTransition>
   );

@@ -244,9 +244,11 @@ model Product {
   updatedAt DateTime @updatedAt
 
   // Basic Info
-  name        String
-  slug        String // URL-friendly, unique per business
-  description String? @db.Text
+  name String
+  slug String // URL-friendly, unique per business
+
+  excerpt     String? @db.Text // Short description of the product
+  description String? @db.Text // Long description of the product
 
   // Pricing
   price          Float // Base price in cents or dollars

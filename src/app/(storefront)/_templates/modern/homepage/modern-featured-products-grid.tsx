@@ -1,9 +1,9 @@
 "use client";
 
-import type { CardProduct } from "../products/modern-product-card";
+import type { CardProduct } from "../shared/modern-product-card";
 import { api } from "~/trpc/react";
 
-import { ModernProductCard } from "../products/modern-product-card";
+import { ModernProductCard } from "../shared/modern-product-card";
 
 export function FeaturedProductsGrid() {
   const { data: products } = api.product.getFeatured.useQuery();

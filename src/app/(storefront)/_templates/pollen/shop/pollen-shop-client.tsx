@@ -16,7 +16,7 @@ import {
 } from "~/components/ui/select";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
-import { PollenProductCard } from "./pollen-product-card";
+import { PollenProductCard } from "../shared/pollen-product-card";
 
 type Product = NonNullable<
   RouterOutputs["business"]["getWithProducts"]
@@ -39,7 +39,9 @@ interface Props {
 export function PollenShopClient({ products, shopHeading, shopIntro }: Props) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("newest");
-  const [activeCollectionId, setActiveCollectionId] = useState<string | null>(null);
+  const [activeCollectionId, setActiveCollectionId] = useState<string | null>(
+    null,
+  );
 
   const collections = useMemo(() => {
     const seen = new Map<string, { id: string; name: string; slug: string }>();
@@ -58,7 +60,9 @@ export function PollenShopClient({ products, shopHeading, shopIntro }: Props) {
 
     if (activeCollectionId) {
       result = result.filter((p) =>
-        p.collectionProducts.some((cp) => cp.collection.id === activeCollectionId),
+        p.collectionProducts.some(
+          (cp) => cp.collection.id === activeCollectionId,
+        ),
       );
     }
 
@@ -73,8 +77,10 @@ export function PollenShopClient({ products, shopHeading, shopIntro }: Props) {
 
     if (sort !== "newest") {
       result = [...result].sort((a, b) => {
-        if (sort === "price-asc") return getEffectivePrice(a) - getEffectivePrice(b);
-        if (sort === "price-desc") return getEffectivePrice(b) - getEffectivePrice(a);
+        if (sort === "price-asc")
+          return getEffectivePrice(a) - getEffectivePrice(b);
+        if (sort === "price-desc")
+          return getEffectivePrice(b) - getEffectivePrice(a);
         if (sort === "name-asc") return a.name.localeCompare(b.name);
         return 0;
       });
@@ -122,7 +128,10 @@ export function PollenShopClient({ products, shopHeading, shopIntro }: Props) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+            <Select
+              value={sort}
+              onValueChange={(v) => setSort(v as SortOption)}
+            >
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
@@ -166,7 +175,9 @@ export function PollenShopClient({ products, shopHeading, shopIntro }: Props) {
               <button
                 key={c.id}
                 onClick={() =>
-                  setActiveCollectionId(c.id === activeCollectionId ? null : c.id)
+                  setActiveCollectionId(
+                    c.id === activeCollectionId ? null : c.id,
+                  )
                 }
                 className={cn(
                   "rounded-full border px-3.5 py-1 text-sm font-medium transition-colors",
@@ -187,17 +198,7 @@ export function PollenShopClient({ products, shopHeading, shopIntro }: Props) {
             <PollenProductCard
               key={product.id}
               index={index}
-              product={{
-                id: product.id,
-                name: product.name,
-                description: product.description ?? "No description available",
-                price: getEffectivePrice(product),
-                originalPrice: null,
-                image: product.images[0]?.url ?? "/placeholder.svg",
-                badge: null,
-                category: "",
-                slug: product.slug ?? "",
-              }}
+              product={product}
             />
           ))}
         </div>

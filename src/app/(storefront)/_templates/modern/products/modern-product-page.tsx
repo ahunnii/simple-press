@@ -6,17 +6,24 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
-import { useProduct } from "~/hooks/use-product";
+import type { Product } from "~/types";
 import { api } from "~/trpc/react";
+import { useProduct } from "~/hooks/use-product";
+import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 
+import { ModernProductCard } from "../shared/modern-product-card";
 import { ModernProductActions } from "./modern-product-actions";
-import { ModernProductDetailsTabs } from "./modern-product-details-tabs";
-import { ModernRelatedProductsSection } from "./modern-related-products-section";
 
 export function ModernProductPage({
   product,
 }: DefaultProductPageTemplateProps) {
-  const { formatPrice, displayPrice, additionalFields } = useProduct(product);
+  const {
+    formatPrice,
+    displayPrice,
+    displayCompareAtPrice,
+    isOnSale,
+    additionalFields,
+  } = useProduct(product);
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
@@ -24,8 +31,7 @@ export function ModernProductPage({
     productId: product.id,
   });
 
-  const selectedImage =
-    product.images[selectedImageIndex] ?? product.images[0];
+  const selectedImage = product.images[selectedImageIndex] ?? product.images[0];
 
   const trustBadges =
     additionalFields?.productFeatures &&
@@ -111,14 +117,21 @@ export function ModernProductPage({
                 {additionalFields.productTagline}
               </p>
             )}
+            <div className="mb-8 flex items-center gap-3">
+              <p className="text-foreground mt-4 text-2xl font-light">
+                {formatPrice(displayPrice)}
+              </p>
+              {isOnSale && displayCompareAtPrice && (
+                <span className="text-muted-foreground text-xl line-through">
+                  {formatPrice(displayCompareAtPrice)}
+                </span>
+              )}
+            </div>
 
-            <p className="text-foreground mt-4 text-2xl font-light">
-              {formatPrice(displayPrice)}
-            </p>
-
+            {/* Quantity + Add to Cart Actions*/}
             <ModernProductActions product={product} />
 
-            {/* Trust badges */}
+            {/* Trust / Feature badges */}
             {trustBadges.length > 0 && (
               <div className="border-border mt-8 border-t pt-6">
                 <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-widest uppercase">
@@ -140,12 +153,47 @@ export function ModernProductPage({
           </div>
         </div>
 
-        <ModernProductDetailsTabs product={product} />
+        <div className="border-border mt-16 border-t">
+          <ProductDetailsAdditionalInfoTabs
+            product={product}
+            includeCard={false}
+            styleProps={{
+              tabsClassName: "mr-auto",
+              tabsListClassName: "mx-0",
+              contentClassName:
+                "text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line",
+              tipTapRendererClassName:
+                "text-muted-foreground mt-3 text-lg leading-relaxed whitespace-pre-line prose-neutral prose-table:mt-0",
+            }}
+          />
+        </div>
       </div>
 
       {/* Related Products */}
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <ModernRelatedProductsSection relatedProducts={relatedProducts ?? []} />
+        <div className="border-border border-t">
+          <div className="py-16">
+            <h2 className="text-foreground font-serif text-2xl md:text-3xl">
+              You may also like
+            </h2>
+            <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {relatedProducts?.map((p, i) => (
+                <ModernProductCard
+                  key={p.id}
+                  product={p as Product}
+                  index={i}
+                />
+              ))}
+              {relatedProducts?.length === 0 && (
+                <div className="col-span-full text-center">
+                  <p className="text-muted-foreground">
+                    No related products found
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

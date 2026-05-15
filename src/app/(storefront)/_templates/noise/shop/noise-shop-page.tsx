@@ -1,8 +1,14 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
-import { FadeIn, PageTransition, StaggerContainer, StaggerItem } from "~/components/page-animations";
+import type { Product } from "~/types";
+import {
+  FadeIn,
+  PageTransition,
+  StaggerContainer,
+  StaggerItem,
+} from "~/components/page-animations";
 
 import { resolveFields } from "../index";
-import { NoiseProductCard } from "./noise-product-card";
+import { NoiseProductCard } from "../shared/noise-product-card";
 
 export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
@@ -20,16 +26,16 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
   return (
     <PageTransition>
       {/* Page header */}
-      <section className="border-b border-border bg-secondary py-20">
+      <section className="border-border bg-secondary border-b py-20">
         <FadeIn className="mx-auto max-w-7xl px-4 lg:px-8">
-          <p className="mb-4 font-sans text-[9px] tracking-[0.4em] uppercase text-muted-foreground">
+          <p className="text-muted-foreground mb-4 font-sans text-[9px] tracking-[0.4em] uppercase">
             Visual Noise Detroit
           </p>
-          <h1 className="font-serif text-5xl font-light tracking-tight text-foreground md:text-6xl lg:text-7xl">
+          <h1 className="text-foreground font-serif text-5xl font-light tracking-tight md:text-6xl lg:text-7xl">
             {shopHeading}
           </h1>
           {shopIntro && (
-            <p className="mt-5 max-w-xl font-sans text-base text-muted-foreground">
+            <p className="text-muted-foreground mt-5 max-w-xl font-sans text-base">
               {shopIntro}
             </p>
           )}
@@ -44,31 +50,14 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
         >
           {business.products?.map((product, index) => (
             <StaggerItem key={product.id}>
-              <NoiseProductCard
-                index={index}
-                product={{
-                  id: product.id,
-                  name: product.name,
-                  description: product.description ?? "",
-                  price:
-                    product.variants.length > 0
-                      ? (product.variants[0]?.price ?? 0)
-                      : product.price,
-                  image: product.images[0]?.url ?? "/placeholder.svg",
-                  slug: product.slug ?? "",
-                  additionalFields: product.additionalFields,
-                  trackInventory: product.trackInventory,
-                  inventoryQty: product.inventoryQty,
-                  allowBackorders: product.allowBackorders,
-                }}
-              />
+              <NoiseProductCard index={index} product={product} />
             </StaggerItem>
           ))}
         </StaggerContainer>
 
         {(!business.products || business.products.length === 0) && (
           <FadeIn className="py-24 text-center">
-            <p className="font-serif text-2xl font-light text-muted-foreground">
+            <p className="text-muted-foreground font-serif text-2xl font-light">
               The collection is coming soon.
             </p>
           </FadeIn>

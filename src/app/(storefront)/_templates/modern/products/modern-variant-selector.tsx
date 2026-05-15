@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { useCart } from "~/providers/cart-context";
@@ -17,7 +16,7 @@ export function ModernVariantSelector({
   setSelectedVariantId,
 }: Props) {
   const { addItem } = useCart();
-  const router = useRouter();
+
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
   );
@@ -47,26 +46,6 @@ export function ModernVariantSelector({
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  const handleBuyNow = () => {
-    if (!selectedVariant) return;
-
-    addItem(
-      {
-        productId: product.id,
-        variantId: selectedVariant.id,
-        productName: product.name,
-        variantName: selectedVariant.name,
-        price: selectedVariant.price ?? product.price,
-        imageUrl: product.images[0]?.url ?? null,
-        sku: selectedVariant.sku,
-        maxInventory: selectedVariant.inventoryQty,
-      },
-      quantity,
-    );
-
-    router.push("/checkout");
-  };
-
   return (
     <div className="space-y-6">
       {/* Variant Selection */}
@@ -75,25 +54,37 @@ export function ModernVariantSelector({
           Select Variant
         </label>
         <div className="flex flex-wrap gap-3">
-          {product.variants.map((variant) => (
-            <button
-              key={variant.id}
-              type="button"
-              onClick={() => {
-                setSelectedVariant(variant);
-                setSelectedVariantId(variant.id);
-              }}
-              disabled={variant.inventoryQty === 0}
-              className={`rounded-sm border px-6 py-3 text-sm transition-colors ${
-                selectedVariant?.id === variant.id
-                  ? "bg-primary text-primary-foreground hover:opacity-90"
-                  : "border-border text-foreground hover:bg-muted"
-              } ${variant.inventoryQty === 0 ? "cursor-not-allowed opacity-50" : ""}`}
-            >
-              {variant.name}
-              {variant.inventoryQty === 0 && " (Out of Stock)"}
-            </button>
-          ))}
+          {product.variants.map((variant) => {
+            const outOfStock =
+              product.trackInventory &&
+              variant.inventoryQty === 0 &&
+              !product.allowBackorders;
+            const isBackorderVariant =
+              product.trackInventory &&
+              variant.inventoryQty === 0 &&
+              !!product.allowBackorders;
+
+            return (
+              <button
+                key={variant.id}
+                type="button"
+                onClick={() => {
+                  setSelectedVariant(variant);
+                  setSelectedVariantId(variant.id);
+                }}
+                disabled={outOfStock}
+                className={`rounded-sm border px-6 py-3 text-sm transition-colors ${
+                  selectedVariant?.id === variant.id
+                    ? "bg-primary text-primary-foreground hover:opacity-90"
+                    : "border-border text-foreground hover:bg-muted"
+                } ${variant.inventoryQty === 0 ? "cursor-not-allowed opacity-50" : ""}`}
+              >
+                {variant.name}
+                {outOfStock && " (Out of Stock)"}
+                {isBackorderVariant && " (Pre-order)"}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -103,7 +94,7 @@ export function ModernVariantSelector({
           <label className="text-foreground mb-3 block text-xs font-semibold tracking-widest uppercase">
             Quantity
           </label>
-          <div className="border-border flex items-center border">
+          <div className="border-border flex w-fit items-center border">
             <button
               type="button"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -113,13 +104,17 @@ export function ModernVariantSelector({
             >
               <Minus className="h-4 w-4" />
             </button>
-            <span className="border-border text-foreground flex h-10 w-12 items-center justify-center border-x text-sm font-medium">
+            <span className="border-border text-foreground flex h-10 w-24 items-center justify-center border-x text-sm font-medium">
               {quantity}
             </span>
             <button
               type="button"
               onClick={() =>
-                setQuantity(Math.min(selectedVariant.inventoryQty, quantity + 1))
+                setQuantity(
+                  product.trackInventory
+                    ? Math.min(selectedVariant.inventoryQty, quantity + 1)
+                    : quantity + 1,
+                )
               }
               disabled={quantity >= selectedVariant.inventoryQty}
               className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
@@ -139,7 +134,12 @@ export function ModernVariantSelector({
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={!selectedVariant || selectedVariant.inventoryQty === 0}
+          disabled={
+            !selectedVariant ||
+            (product.trackInventory &&
+              selectedVariant.inventoryQty === 0 &&
+              !product.allowBackorders)
+          }
           className={`bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity disabled:cursor-not-allowed disabled:opacity-50 ${
             !isAdded && "hover:opacity-90"
           }`}
@@ -152,14 +152,6 @@ export function ModernVariantSelector({
           ) : (
             `Add ${quantity > 1 ? quantity : ""} to Cart`.trim()
           )}
-        </button>
-        <button
-          type="button"
-          onClick={handleBuyNow}
-          disabled={!selectedVariant || selectedVariant.inventoryQty === 0}
-          className="border-foreground text-foreground hover:bg-foreground hover:text-background flex flex-1 items-center justify-center gap-2 border px-8 py-3 text-sm font-medium tracking-wide transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Buy Now
         </button>
       </div>
     </div>

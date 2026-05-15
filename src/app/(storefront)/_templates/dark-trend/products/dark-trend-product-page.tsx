@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import { Check, ChevronLeft, Minus, Plus } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
@@ -14,29 +14,18 @@ import { Spotlight } from "~/components/ui/spotlight-new";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
 
 import { DarkTrendProductCard } from "../shared/dark-trend-product-card";
+import { DarkTrendProductActions } from "./dark-trend-product-actions";
 import { DarkTrendProductDetails } from "./dark-trend-product-details";
-import { DarkTrendVariantSelector } from "./dark-trend-variant-selector";
 
 export function DarkTrendProductPage({
   product,
 }: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
-    inStock,
-    variantOptions,
     displayPrice,
-    handleAddToCart,
-    remainingStock,
-    canAddMore,
-    handleDecrement,
-    handleIncrement,
-    quantity,
-    setSelectedVariantId,
     additionalFields,
     isOnSale,
     displayCompareAtPrice,
-    isInventoryTracked,
-    maxUntracked,
   } = useProduct(product);
 
   const { data: relatedProducts } = api.product.getRelated.useQuery({
@@ -49,17 +38,9 @@ export function DarkTrendProductPage({
       ? buildLucideIconsWithLabels(additionalFields)
       : [];
 
-  const [isAdded, setIsAdded] = useState(false);
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [product.slug]);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   return (
     <div className="relative min-h-screen overflow-x-hidden pt-16 pb-20">
@@ -76,7 +57,6 @@ export function DarkTrendProductPage({
 
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Product Image + Gallery */}
-
           <ProductGalleryHorizontal
             images={product.images}
             productName={product.name}
@@ -95,7 +75,7 @@ export function DarkTrendProductPage({
                 {product.name}
               </h1>
 
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
                 {product.description}
               </p>
             </div>
@@ -120,92 +100,10 @@ export function DarkTrendProductPage({
               </div>
             </div>
 
-            {Object.keys(variantOptions).length > 0 ? (
-              <DarkTrendVariantSelector
-                product={product}
-                setSelectedVariantId={setSelectedVariantId}
-              />
-            ) : (
-              <>
-                {canAddMore && (
-                  <>
-                    {/* Quantity Selector */}
-                    <div className="mb-8">
-                      <label className="mb-3 block text-sm font-medium text-white">
-                        Quantity
-                      </label>
-                      <div className="bg-card inline-flex items-center gap-4 rounded-md px-4 py-2">
-                        <button
-                          type="button"
-                          onClick={handleDecrement}
-                          disabled={quantity <= 1}
-                          className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
-                          aria-label="Decrease quantity"
-                        >
-                          <Minus className="h-4 w-4" />
-                        </button>
-                        <span className="w-8 text-center font-medium text-white">
-                          {quantity}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={handleIncrement}
-                          disabled={quantity >= remainingStock}
-                          className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
-                          aria-label="Increase quantity"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </button>
+            {/* Quantity + Add to Cart Actions*/}
+            <DarkTrendProductActions product={product} />
 
-                        {isInventoryTracked && (
-                          <span className="text-sm text-white/60">
-                            {remainingStock > 1
-                              ? `${remainingStock} available`
-                              : "Last one!"}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Add to Cart Buttons */}
-                <div className="mb-10 flex flex-col gap-4 sm:flex-row">
-                  <button
-                    type="button"
-                    onClick={addToCart}
-                    className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
-                      isAdded ? "bg-primary" : "bg-primary hover:bg-primary/90"
-                    }`}
-                  >
-                    {isAdded ? (
-                      <>
-                        <Check className="h-4 w-4" />
-                        Added to Cart
-                      </>
-                    ) : (
-                      "Add to Cart"
-                    )}
-                  </button>
-                  {/* <button
-                    type="button"
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-md border border-white/60 bg-transparent px-8 py-4 text-sm font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
-                  >
-                    Buy Now
-                  </button> */}
-                </div>
-
-                {!canAddMore && inStock && (
-                  <p className="mt-3 text-center text-sm text-amber-500">
-                    {isInventoryTracked
-                      ? "You have the maximum available quantity in your cart"
-                      : `Maximum of ${maxUntracked} per order`}
-                  </p>
-                )}
-              </>
-            )}
-
-            {/* Trust badges */}
+            {/* Trust / Feature badges */}
             {trustBadges.length > 0 && (
               <div className="mt-8 flex flex-wrap gap-4 border-t border-white/10 pt-8">
                 {trustBadges.map((badge, i) => (
@@ -222,11 +120,11 @@ export function DarkTrendProductPage({
           </div>
         </div>
 
+        {/* Additional Information */}
         <DarkTrendProductDetails product={product} />
       </div>
 
-      {/* Other Products */}
-
+      {/* Related Products */}
       <div className="mx-auto max-w-7xl px-6 pb-20 lg:px-8">
         <div className="mb-10 flex items-baseline gap-4">
           <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
@@ -237,6 +135,11 @@ export function DarkTrendProductPage({
           {relatedProducts?.map((p, i) => (
             <DarkTrendProductCard key={p.id} product={p as Product} index={i} />
           ))}
+          {relatedProducts?.length === 0 && (
+            <div className="col-span-full text-center">
+              <p className="text-muted-foreground">No related products found</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

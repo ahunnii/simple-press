@@ -1,11 +1,17 @@
 import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { FadeIn, StaggerContainer, StaggerItem } from "~/components/page-animations";
+import {
+  FadeIn,
+  StaggerContainer,
+  StaggerItem,
+} from "~/components/page-animations";
 
-import { NoiseProductCard } from "../products/noise-product-card";
+import { NoiseProductCard } from "../shared/noise-product-card";
 
-type FeaturedProduct = NonNullable<RouterOutputs["business"]["getHomepage"]>["products"][number];
+type FeaturedProduct = NonNullable<
+  RouterOutputs["business"]["getHomepage"]
+>["products"][number];
 
 type NoiseFeaturedProductsProps = {
   featuredProducts: FeaturedProduct[];
@@ -25,7 +31,8 @@ export function NoiseFeaturedProducts({
   if (!featuredProducts.length) return null;
 
   const title = featuredTitle ?? "The Collection";
-  const description = featuredDescription ?? "Handcrafted with intention. Worn with purpose.";
+  const description =
+    featuredDescription ?? "Handcrafted with intention. Worn with purpose.";
   const btnText = featuredButtonText ?? "View All";
   const btnLink = featuredButtonLink ?? "/shop";
 
@@ -35,24 +42,24 @@ export function NoiseFeaturedProducts({
         {/* Header */}
         <FadeIn className="mb-16 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="mb-3 font-sans text-[9px] tracking-[0.4em] uppercase text-muted-foreground">
+            <p className="text-muted-foreground mb-3 font-sans text-[9px] tracking-[0.4em] uppercase">
               Featured
             </p>
-            <h2 className="font-serif text-4xl font-light tracking-tight text-foreground md:text-5xl">
+            <h2 className="text-foreground font-serif text-4xl font-light tracking-tight md:text-5xl">
               {title}
             </h2>
             {description && (
-              <p className="mt-3 font-sans text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-3 font-sans text-sm">
                 {description}
               </p>
             )}
           </div>
           <Link
             href={btnLink}
-            className="inline-flex shrink-0 items-center gap-3 font-sans text-[10px] tracking-[0.3em] uppercase text-foreground transition-opacity hover:opacity-60"
+            className="text-foreground inline-flex shrink-0 items-center gap-3 font-sans text-[10px] tracking-[0.3em] uppercase transition-opacity hover:opacity-60"
           >
             <span>{btnText}</span>
-            <span className="h-px w-10 bg-foreground" />
+            <span className="bg-foreground h-px w-10" />
           </Link>
         </FadeIn>
 

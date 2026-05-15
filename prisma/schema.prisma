@@ -257,7 +257,9 @@ model Product {
   // Basic Info
   name        String
   slug        String // URL-friendly, unique per business
-  description String? @db.Text
+
+  excerpt String? @db.Text // Short description of the product
+  description String? @db.Text // Long description of the product
   
   // Pricing
   price       Float   // Base price in cents or dollars

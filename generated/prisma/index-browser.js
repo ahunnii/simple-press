@@ -243,6 +243,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   updatedAt: 'updatedAt',
   name: 'name',
   slug: 'slug',
+  excerpt: 'excerpt',
   description: 'description',
   price: 'price',
   compareAtPrice: 'compareAtPrice',

@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { isContentEmpty } from "~/lib/template-fields";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type Props = {
@@ -21,6 +22,10 @@ const panels = [
 export function DarkTrendProductDetails({ product }: Props) {
   const [open, setOpen] = useState<string | null>("description");
   const additional = parseCardAdditionalFields(product.additionalFields);
+
+  const isAdditionalEmpty = isContentEmpty(
+    additional?.additionalInformation as TiptapJSON,
+  );
 
   return (
     <div className="py-16">
@@ -73,7 +78,7 @@ export function DarkTrendProductDetails({ product }: Props) {
                       )}
                       {panel.id === "additional" && (
                         <>
-                          {additional?.additionalInformation ? (
+                          {!isAdditionalEmpty ? (
                             <TiptapRenderer
                               content={
                                 additional.additionalInformation as TiptapJSON

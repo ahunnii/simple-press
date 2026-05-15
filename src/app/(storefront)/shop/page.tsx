@@ -7,9 +7,9 @@ import { DarkTrendShopPage } from "../_templates/dark-trend/shop/dark-trend-shop
 import { DefaultProductsPage } from "../_templates/default/shop/default-shop-page";
 import { ElegantShopPage } from "../_templates/elegant/shop/elegant-shop-page";
 import { HappyBambooShopPage } from "../_templates/happy-bamboo/shop/happy-bamboo-shop-page";
-import { ModernProductsPage } from "../_templates/modern/products/modern-products-page";
-import { NoiseShopPage } from "../_templates/noise/products/noise-shop-page";
-import { PollenShopPage } from "../_templates/pollen/products/pollen-shop-page";
+import { ModernProductsPage } from "../_templates/modern/shop/modern-products-page";
+import { NoiseShopPage } from "../_templates/noise/shop/noise-shop-page";
+import { PollenShopPage } from "../_templates/pollen/shop/pollen-shop-page";
 
 export default async function ProductsPage() {
   const business = await api.business.getWithProducts();

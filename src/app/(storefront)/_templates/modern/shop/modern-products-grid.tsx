@@ -3,15 +3,18 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-import type { CardProduct } from "./modern-product-card";
+import type { RouterOutputs } from "~/trpc/react";
+import type { Product } from "~/types";
 import { cn } from "~/lib/utils";
 
-import { ModernProductCard } from "./modern-product-card";
+import { ModernProductCard } from "../shared/modern-product-card";
 
 export function ModernProductsGrid({
   products,
 }: {
-  products: CardProduct[];
+  products: NonNullable<
+    RouterOutputs["business"]["getWithProducts"]
+  >["products"];
   //   categories: string[];
 }) {
   const searchParams = useSearchParams();
@@ -63,8 +66,8 @@ export function ModernProductsGrid({
 
       {/* Grid */}
       <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filtered.map((product) => (
-          <ModernProductCard key={product.id} product={product} />
+        {filtered.map((product, index) => (
+          <ModernProductCard key={product.id} product={product} index={index} />
         ))}
       </div>
 

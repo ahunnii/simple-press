@@ -16,16 +16,19 @@ type StyleProps = {
   tabsTriggerClassName?: string;
   cardContentClassName?: string;
   tipTapRendererClassName?: string;
+  contentClassName?: string;
 };
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
   styleProps?: StyleProps;
+  includeCard?: boolean;
 };
 
 export function ProductDetailsAdditionalInfoTabs({
   product,
   styleProps,
+  includeCard = true,
 }: Props) {
   const additional = parseCardAdditionalFields(product.additionalFields);
 
@@ -62,31 +65,55 @@ export function ProductDetailsAdditionalInfoTabs({
         value="description"
         className={cn(styleProps?.tabsContentClassName)}
       >
-        <Card>
-          <CardHeader>
-            <CardTitle>Description</CardTitle>
-          </CardHeader>
-          <CardContent
-            className={cn(
-              "text-muted-foreground text-sm",
-              styleProps?.cardContentClassName,
-            )}
-          >
+        {includeCard && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Description</CardTitle>
+            </CardHeader>
+            <CardContent
+              className={cn(
+                "text-muted-foreground text-sm",
+                styleProps?.cardContentClassName,
+              )}
+            >
+              {product?.description}
+            </CardContent>
+          </Card>
+        )}
+        {!includeCard && (
+          <p className={cn(styleProps?.contentClassName)}>
             {product?.description}
-          </CardContent>
-        </Card>
+          </p>
+        )}
       </TabsContent>
       <TabsContent value="additional">
-        <Card>
-          <CardHeader>
-            <CardTitle>Additional Information</CardTitle>
-          </CardHeader>
-          <CardContent
-            className={cn(
-              "text-muted-foreground text-sm",
-              styleProps?.cardContentClassName,
-            )}
-          >
+        {includeCard && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Additional Information</CardTitle>
+            </CardHeader>
+            <CardContent
+              className={cn(
+                "text-muted-foreground text-sm",
+                styleProps?.cardContentClassName,
+              )}
+            >
+              {!isAdditionalEmpty ? (
+                <TiptapRenderer
+                  content={additional.additionalInformation as TiptapJSON}
+                  className={cn(
+                    "prose prose-sm dark:prose-invert max-w-none",
+                    styleProps?.tipTapRendererClassName,
+                  )}
+                />
+              ) : (
+                <p>No additional information available.</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+        {!includeCard && (
+          <>
             {!isAdditionalEmpty ? (
               <TiptapRenderer
                 content={additional.additionalInformation as TiptapJSON}
@@ -98,8 +125,8 @@ export function ProductDetailsAdditionalInfoTabs({
             ) : (
               <p>No additional information available.</p>
             )}
-          </CardContent>
-        </Card>
+          </>
+        )}
       </TabsContent>
     </Tabs>
   );

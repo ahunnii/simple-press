@@ -12982,6 +12982,7 @@ export namespace Prisma {
     updatedAt: Date | null
     name: string | null
     slug: string | null
+    excerpt: string | null
     description: string | null
     price: number | null
     compareAtPrice: number | null
@@ -13014,6 +13015,7 @@ export namespace Prisma {
     updatedAt: Date | null
     name: string | null
     slug: string | null
+    excerpt: string | null
     description: string | null
     price: number | null
     compareAtPrice: number | null
@@ -13046,6 +13048,7 @@ export namespace Prisma {
     updatedAt: number
     name: number
     slug: number
+    excerpt: number
     description: number
     price: number
     compareAtPrice: number
@@ -13107,6 +13110,7 @@ export namespace Prisma {
     updatedAt?: true
     name?: true
     slug?: true
+    excerpt?: true
     description?: true
     price?: true
     compareAtPrice?: true
@@ -13139,6 +13143,7 @@ export namespace Prisma {
     updatedAt?: true
     name?: true
     slug?: true
+    excerpt?: true
     description?: true
     price?: true
     compareAtPrice?: true
@@ -13171,6 +13176,7 @@ export namespace Prisma {
     updatedAt?: true
     name?: true
     slug?: true
+    excerpt?: true
     description?: true
     price?: true
     compareAtPrice?: true
@@ -13291,6 +13297,7 @@ export namespace Prisma {
     updatedAt: Date
     name: string
     slug: string
+    excerpt: string | null
     description: string | null
     price: number
     compareAtPrice: number | null
@@ -13343,6 +13350,7 @@ export namespace Prisma {
     updatedAt?: boolean
     name?: boolean
     slug?: boolean
+    excerpt?: boolean
     description?: boolean
     price?: boolean
     compareAtPrice?: boolean
@@ -13385,6 +13393,7 @@ export namespace Prisma {
     updatedAt?: boolean
     name?: boolean
     slug?: boolean
+    excerpt?: boolean
     description?: boolean
     price?: boolean
     compareAtPrice?: boolean
@@ -13420,6 +13429,7 @@ export namespace Prisma {
     updatedAt?: boolean
     name?: boolean
     slug?: boolean
+    excerpt?: boolean
     description?: boolean
     price?: boolean
     compareAtPrice?: boolean
@@ -13455,6 +13465,7 @@ export namespace Prisma {
     updatedAt?: boolean
     name?: boolean
     slug?: boolean
+    excerpt?: boolean
     description?: boolean
     price?: boolean
     compareAtPrice?: boolean
@@ -13482,7 +13493,7 @@ export namespace Prisma {
     additionalFields?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "allowBackorders" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "baseInventoryUnitId" | "baseUnitsConsumed" | "weight" | "weightUnit" | "published" | "featured" | "sortOrder" | "metaTitle" | "metaDescription" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "excerpt" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "allowBackorders" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "baseInventoryUnitId" | "baseUnitsConsumed" | "weight" | "weightUnit" | "published" | "featured" | "sortOrder" | "metaTitle" | "metaDescription" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     baseInventoryUnit?: boolean | Product$baseInventoryUnitArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -13521,6 +13532,7 @@ export namespace Prisma {
       updatedAt: Date
       name: string
       slug: string
+      excerpt: string | null
       description: string | null
       price: number
       compareAtPrice: number | null
@@ -13982,6 +13994,7 @@ export namespace Prisma {
     readonly updatedAt: FieldRef<"Product", 'DateTime'>
     readonly name: FieldRef<"Product", 'String'>
     readonly slug: FieldRef<"Product", 'String'>
+    readonly excerpt: FieldRef<"Product", 'String'>
     readonly description: FieldRef<"Product", 'String'>
     readonly price: FieldRef<"Product", 'Float'>
     readonly compareAtPrice: FieldRef<"Product", 'Float'>
@@ -41762,6 +41775,7 @@ export namespace Prisma {
     updatedAt: 'updatedAt',
     name: 'name',
     slug: 'slug',
+    excerpt: 'excerpt',
     description: 'description',
     price: 'price',
     compareAtPrice: 'compareAtPrice',
@@ -43129,6 +43143,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Product"> | Date | string
     name?: StringFilter<"Product"> | string
     slug?: StringFilter<"Product"> | string
+    excerpt?: StringNullableFilter<"Product"> | string | null
     description?: StringNullableFilter<"Product"> | string | null
     price?: FloatFilter<"Product"> | number
     compareAtPrice?: FloatNullableFilter<"Product"> | number | null
@@ -43170,6 +43185,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    excerpt?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     price?: SortOrder
     compareAtPrice?: SortOrderInput | SortOrder
@@ -43215,6 +43231,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Product"> | Date | string
     name?: StringFilter<"Product"> | string
     slug?: StringFilter<"Product"> | string
+    excerpt?: StringNullableFilter<"Product"> | string | null
     description?: StringNullableFilter<"Product"> | string | null
     price?: FloatFilter<"Product"> | number
     compareAtPrice?: FloatNullableFilter<"Product"> | number | null
@@ -43256,6 +43273,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    excerpt?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     price?: SortOrder
     compareAtPrice?: SortOrderInput | SortOrder
@@ -43297,6 +43315,7 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Product"> | Date | string
     name?: StringWithAggregatesFilter<"Product"> | string
     slug?: StringWithAggregatesFilter<"Product"> | string
+    excerpt?: StringNullableWithAggregatesFilter<"Product"> | string | null
     description?: StringNullableWithAggregatesFilter<"Product"> | string | null
     price?: FloatWithAggregatesFilter<"Product"> | number
     compareAtPrice?: FloatNullableWithAggregatesFilter<"Product"> | number | null
@@ -46398,6 +46417,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -46437,6 +46457,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -46476,6 +46497,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -46515,6 +46537,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -46554,6 +46577,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -46587,6 +46611,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -46618,6 +46643,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -49988,6 +50014,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    excerpt?: SortOrder
     description?: SortOrder
     price?: SortOrder
     compareAtPrice?: SortOrder
@@ -50034,6 +50061,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    excerpt?: SortOrder
     description?: SortOrder
     price?: SortOrder
     compareAtPrice?: SortOrder
@@ -50066,6 +50094,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    excerpt?: SortOrder
     description?: SortOrder
     price?: SortOrder
     compareAtPrice?: SortOrder
@@ -55387,6 +55416,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -55425,6 +55455,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -56151,6 +56182,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Product"> | Date | string
     name?: StringFilter<"Product"> | string
     slug?: StringFilter<"Product"> | string
+    excerpt?: StringNullableFilter<"Product"> | string | null
     description?: StringNullableFilter<"Product"> | string | null
     price?: FloatFilter<"Product"> | number
     compareAtPrice?: FloatNullableFilter<"Product"> | number | null
@@ -57528,6 +57560,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -57566,6 +57599,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -57694,6 +57728,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -57732,6 +57767,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -58063,6 +58099,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -58101,6 +58138,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -58196,6 +58234,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -58234,6 +58273,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -58272,6 +58312,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -58310,6 +58351,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -58455,6 +58497,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -58493,6 +58536,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -60296,6 +60340,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -60334,6 +60379,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -60498,6 +60544,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -60536,6 +60583,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -61015,6 +61063,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -61053,6 +61102,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -61386,6 +61436,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -61424,6 +61475,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -61813,6 +61865,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -61851,6 +61904,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -63335,6 +63389,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -63373,6 +63428,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -63569,6 +63625,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -63607,6 +63664,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -64503,6 +64561,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -64750,6 +64809,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -64788,6 +64848,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -64826,6 +64887,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -66895,6 +66957,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     name: string
     slug: string
+    excerpt?: string | null
     description?: string | null
     price: number
     compareAtPrice?: number | null
@@ -66942,6 +67005,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -66980,6 +67044,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -67018,6 +67083,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
