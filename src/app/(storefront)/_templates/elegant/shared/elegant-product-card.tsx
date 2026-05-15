@@ -1,55 +1,35 @@
 "use client";
 
-import type {
-  BaseInventoryUnit,
-  Product,
-  Image as ProductImage,
-  ProductVariant,
-} from "generated/prisma";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Eye, ShoppingBag } from "lucide-react";
 
+import type { Product } from "~/types";
 import { computeSavingsLabel, formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { Badge } from "~/components/ui/badge";
 import { useCart } from "~/providers/cart-context";
 
 type Props = {
-  product: Product & { variants: ProductVariant[] } & {
-    baseInventoryUnit: Partial<BaseInventoryUnit> | null;
-  } & { images: ProductImage[] };
+  product: Product;
   index: number;
   isVisible: boolean;
   saleBadgeFormat?: string;
 };
 
-export function ElegantProductCard({
-  product,
-  index,
-  isVisible,
-  saleBadgeFormat = "true",
-}: Props) {
+export function ElegantProductCard({ product, index, isVisible }: Props) {
   const { addItem } = useCart();
-  const {
-    isOnSale,
-    isOutOfStock,
-    isBackorder,
-    comingSoon,
-    disableCart,
-    hasVariants,
-    maxInventory,
-    displayPrice,
-    displayCompareAtPrice,
-  } = checkProductStatus({
+
+  const productStatus = checkProductStatus({
     price: product.price,
     compareAtPrice: product.compareAtPrice,
     trackInventory: product.trackInventory,
     inventoryQty: product.inventoryQty,
     allowBackorders: product.allowBackorders,
     baseInventoryUnit: product.baseInventoryUnit
-      ? { inventoryQty: product.baseInventoryUnit.inventoryQty ?? 0 }
+      ? { inventoryQty: product.baseInventoryUnit.inventoryQty }
       : null,
     baseUnitsConsumed: product.baseUnitsConsumed,
     additionalFields: product.additionalFields,
@@ -59,25 +39,27 @@ export function ElegantProductCard({
       inventoryQty: v.inventoryQty,
     })),
   });
-
   const [imageLoaded, setImageLoaded] = useState(false);
-
+  const productImage = product.images[0]?.url ?? "/placeholder.svg";
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (disableCart) return;
+    if (productStatus.disableCart) return;
     addItem({
       productId: product.id,
       variantId: null,
       productName: product.name,
       variantName: null,
-      price: displayPrice,
-      compareAtPrice: isOnSale ? displayCompareAtPrice : null,
-      imageUrl: product.images[0]?.url ?? "/placeholder.svg",
+      price: productStatus.displayPrice,
+      compareAtPrice: productStatus.isOnSale
+        ? productStatus.displayCompareAtPrice
+        : null,
+      imageUrl: productImage,
       sku: null,
-      maxInventory,
+      maxInventory: productStatus.maxInventory,
     });
   };
+  const router = useRouter();
 
   return (
     <Link
@@ -106,51 +88,31 @@ export function ElegantProductCard({
             }`}
             onLoad={() => setImageLoaded(true)}
           />
+          {productStatus?.badgeLabel && (
+            <Badge className="bg-accent text-accent-foreground absolute top-4 left-4 rounded-full px-3 py-1 text-xs tracking-wide">
+              {productStatus.badgeLabel}
+            </Badge>
+          )}
 
-          {comingSoon && (
-            <Badge className="absolute top-4 left-4 rounded-full bg-amber-500 px-3 py-1 text-xs tracking-wide text-white hover:bg-amber-600">
-              Coming Soon
-            </Badge>
-          )}
-          {!comingSoon && isOnSale && (
-            <Badge className="absolute top-4 left-4 rounded-full bg-black px-3 py-1 text-xs tracking-wide text-white hover:bg-black/90">
-              {computeSavingsLabel(
-                product.price,
-                product.compareAtPrice!,
-                saleBadgeFormat,
-              )}
-            </Badge>
-          )}
-          {!comingSoon && !isOnSale && isOutOfStock && (
-            <Badge
-              variant="secondary"
-              className="absolute top-4 left-4 rounded-full bg-black/60 px-3 py-1 text-xs tracking-wide text-white"
-            >
-              Out of Stock
-            </Badge>
-          )}
-          {!comingSoon && !isOnSale && isBackorder && (
-            <Badge className="absolute top-4 left-4 rounded-full bg-blue-500 px-3 py-1 text-xs tracking-wide text-white hover:bg-blue-600">
-              Pre-order
-            </Badge>
-          )}
           {/* Quick add button */}
-          {hasVariants ? (
-            <Link
-              href={`/shop/${product.slug}`}
-              className="bg-background/90 boty-transition boty-shadow absolute right-4 bottom-4 flex h-12 w-12 translate-y-2 items-center justify-center rounded-full opacity-0 backdrop-blur-sm group-hover:translate-y-0 group-hover:opacity-100"
+          {productStatus.hasVariants ? (
+            <button
+              type="button"
+              aria-label="View product"
+              onClick={() => router.push(`/shop/${product.slug}`)}
+              className="boty-shadow bg-background/90 hover:bg-primary hover:text-primary-foreground absolute right-4 bottom-4 flex h-12 w-12 translate-y-2 cursor-pointer items-center justify-center rounded-full opacity-0 backdrop-blur-sm transition-colors group-hover:translate-y-0 group-hover:opacity-100"
             >
-              <Eye className="text-foreground h-5 w-5" />
-            </Link>
+              <Eye className="h-5 w-5" />
+            </button>
           ) : (
             <button
               type="button"
-              className="bg-background/90 boty-transition boty-shadow absolute right-4 bottom-4 flex h-12 w-12 translate-y-2 items-center justify-center rounded-full opacity-0 backdrop-blur-sm group-hover:translate-y-0 group-hover:opacity-100"
+              className="boty-shadow bg-background/90 hover:bg-primary hover:text-primary-foreground absolute right-4 bottom-4 flex h-12 w-12 translate-y-2 cursor-pointer items-center justify-center rounded-full opacity-0 backdrop-blur-sm transition-colors group-hover:translate-y-0 group-hover:opacity-100"
               onClick={handleAddToCart}
-              disabled={disableCart}
+              disabled={productStatus.disableCart}
               aria-label="Add to cart"
             >
-              <ShoppingBag className="text-foreground h-5 w-5" />
+              <ShoppingBag className="h-5 w-5" />
             </button>
           )}
         </div>
@@ -160,16 +122,20 @@ export function ElegantProductCard({
           <h3 className="text-foreground mb-1 font-serif text-xl">
             {product.name}
           </h3>
-          <p className="text-muted-foreground mb-4 text-sm">
+          <p className="text-muted-foreground mb-4 line-clamp-2 min-h-[2.5em] text-sm">
             {product.description}
           </p>
+
           <div className="flex items-center gap-2">
             <span className="text-foreground text-lg font-medium">
-              {formatPrice(displayPrice)}
+              {formatPrice(productStatus.displayPrice)}
+              {productStatus.variablePricing && (
+                <span className="ml-1 text-base">+</span>
+              )}
             </span>
-            {isOnSale && (
+            {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
               <span className="text-muted-foreground text-sm line-through">
-                {formatPrice(displayCompareAtPrice!)}
+                {formatPrice(productStatus.displayCompareAtPrice)}
               </span>
             )}
           </div>

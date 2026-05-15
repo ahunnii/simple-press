@@ -8,7 +8,7 @@ import {
   PlusIcon,
   QuoteIcon,
 } from "@radix-ui/react-icons";
-import { Images } from "lucide-react";
+import { Images, Table } from "lucide-react";
 
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "~/components/ui/toggle";
@@ -22,7 +22,8 @@ type InsertElementAction =
   | "codeBlock"
   | "blockquote"
   | "horizontalRule"
-  | "gallery";
+  | "gallery"
+  | "table";
 interface InsertElement extends FormatAction {
   value: InsertElementAction;
 }
@@ -63,9 +64,19 @@ const formatActions: InsertElement[] = [
     label: "Gallery",
     icon: <Images className="size-5" />,
     action: (editor) => editor.chain().focus().insertGallery().run(),
-    isActive: () => false, // ✅ Always false - it's an insert action
+    isActive: () => false,
     canExecute: (editor) => editor.can().chain().focus().insertGallery().run(),
     shortcuts: ["mod", "alt", "G"],
+  },
+  {
+    value: "table",
+    label: "Table",
+    icon: <Table className="size-5" />,
+    action: (editor) =>
+      editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
+    isActive: (editor) => editor.isActive("table"),
+    canExecute: (editor) => !editor.isActive("table"),
+    shortcuts: [],
   },
 ];
 

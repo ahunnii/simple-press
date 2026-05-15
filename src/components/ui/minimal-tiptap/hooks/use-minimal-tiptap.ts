@@ -18,6 +18,7 @@ import {
   HorizontalRule,
   Image,
   ResetMarksOnEnter,
+  TableKit,
   UnsetAllMarks,
 } from "../extensions";
 import { useThrottle } from "../hooks/use-throttle";
@@ -195,6 +196,7 @@ const createExtensions = ({
   CodeBlockLowlight,
   Placeholder.configure({ placeholder: () => placeholder }),
   Gallery.configure({ businessId, galleriesEnabled: galleriesEnabled !== false }),
+  TableKit.configure({}),
 ];
 
 export const useMinimalTiptapEditor = ({

@@ -1,6 +1,5 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
 
-import { DefaultProductCard } from "../shared/default-product-card";
 import { DefaultShopFilterClient } from "./default-shop-filter-client";
 
 export function DefaultProductsPage({
@@ -9,13 +8,10 @@ export function DefaultProductsPage({
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
       <div className="mb-8">
+        <p className="font-base tracking-wider text-gray-600">SHOP</p>
         <h1 className="mb-2 text-4xl font-semibold text-gray-900">
           All Products
         </h1>
-        <p className="font-medium text-gray-600">
-          {business.products?.length} product
-          {business.products?.length !== 1 ? "s" : ""}
-        </p>
       </div>
 
       {business.products?.length === 0 ? (

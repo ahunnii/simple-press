@@ -5,9 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
-import { getEffectiveCompareAtPrice, getEffectivePrice } from "~/lib/prices";
 
-import { ElegantProductCard } from "./elegant-product-card";
+import { ElegantProductCard } from "../shared/elegant-product-card";
 
 export function ElegantShopPage({
   business,

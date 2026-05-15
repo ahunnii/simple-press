@@ -1,18 +1,19 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { Eye } from "lucide-react";
 
 import type { DefaultHomepageTemplateProps } from "../../types";
-import { api } from "~/trpc/react";
+import type { Product } from "~/types";
+import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
+import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
-import { QuickAddButton } from "../products/default-quick-add-product";
+import { DefaultProductCard } from "../shared/default-product-card";
 
-export function DefaultHomePage({ business }: DefaultHomepageTemplateProps) {
-  const { data: featuredProducts } = api.product.getFeatured.useQuery();
+export async function DefaultHomePage({
+  business,
+}: DefaultHomepageTemplateProps) {
+  const featuredProducts = await api.product.getFeatured();
 
   const f = resolveFields(business?.siteContent?.customFields, [
     "default.homepage.hero-image",
@@ -28,8 +29,8 @@ export function DefaultHomePage({ business }: DefaultHomepageTemplateProps) {
   ]);
 
   return (
-    <>
-      <>
+    <HydrateClient>
+      <PageTransition>
         {/* Hero Banner */}
         <section className="relative">
           <div className="container mx-auto px-4 py-12 md:px-6 md:py-24 lg:py-32">
@@ -85,51 +86,12 @@ export function DefaultHomePage({ business }: DefaultHomepageTemplateProps) {
               {f["default.homepage.featured-products-heading"]}
             </h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {featuredProducts?.map((product) => (
-                <div key={product.id} className="group relative">
-                  <div className="bg-background aspect-square overflow-hidden rounded-lg">
-                    <Image
-                      src={product.images[0]?.url ?? "/placeholder.svg"}
-                      alt={
-                        product.images[0]?.altText ??
-                        product.name ??
-                        "Product Image"
-                      }
-                      width={300}
-                      height={300}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    />
-                    <div className="absolute top-4 right-4 flex flex-col gap-2">
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        className="h-8 w-8 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
-                      >
-                        <Eye className="h-4 w-4" />
-                        <span className="sr-only">Quick view</span>
-                      </Button>
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                      {product?.variants?.length > 0 ? (
-                        <QuickAddButton product={product} />
-                      ) : null}
-                    </div>
-                  </div>
-                  <div className="mt-4 space-y-1 text-center">
-                    {/* <Badge variant="outline" className="mb-2">
-                      {product.category}
-                    </Badge> */}
-                    <h3 className="font-medium">{product.name}</h3>
-                    <div className="flex justify-center gap-2">
-                      <span className="text-muted-foreground">
-                        ${(product.price / 100).toFixed(2)}
-                      </span>
-                      {/* <span className="text-primary font-medium">
-                        ${product.offerPrice.toFixed(2)}
-                      </span> */}
-                    </div>
-                  </div>
-                </div>
+              {featuredProducts?.map((product, index) => (
+                <DefaultProductCard
+                  key={product.id}
+                  product={product as Product}
+                  index={index}
+                />
               ))}
             </div>
             <div className="mt-10 text-center">
@@ -153,7 +115,7 @@ export function DefaultHomePage({ business }: DefaultHomepageTemplateProps) {
             </div>
           </div>
         </section>
-      </>
-    </>
+      </PageTransition>
+    </HydrateClient>
   );
 }

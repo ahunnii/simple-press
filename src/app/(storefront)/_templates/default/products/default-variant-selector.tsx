@@ -1,37 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
 
-type VariantSelectorProps = {
-  // product: {
-  //   id: string;
-  //   name: string;
-  //   price: number;
-  //   images: Array<{ url: string }>;
-  //   variants: Array<{
-  //     id: string;
-  //     name: string;
-  //     price: number | null;
-  //     inventoryQty: number;
-  //     sku: string | null;
-  //     options: Record<string, string>;
-  //   }>;
-  // };
+type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
+  setSelectedVariantId: (variantId: string | null) => void;
 };
 
-export function DefaultVariantSelector({ product }: VariantSelectorProps) {
+export function DefaultVariantSelector({
+  product,
+  setSelectedVariantId,
+}: Props) {
   const { addItem } = useCart();
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
   );
   const [quantity, setQuantity] = useState(1);
+  const [isAdded, setIsAdded] = useState(false);
 
   const handleAddToCart = () => {
     if (!selectedVariant) return;
@@ -45,13 +36,16 @@ export function DefaultVariantSelector({ product }: VariantSelectorProps) {
         price: selectedVariant.price ?? product.price,
         imageUrl: product.images[0]?.url ?? null,
         sku: selectedVariant.sku,
-        maxInventory: selectedVariant.inventoryQty,
+        maxInventory: product.trackInventory
+          ? selectedVariant.inventoryQty
+          : undefined,
       },
-      quantity, // ← Add specified quantity
+      quantity,
     );
 
-    // Reset quantity after adding
     setQuantity(1);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
   };
 
   return (
@@ -59,74 +53,108 @@ export function DefaultVariantSelector({ product }: VariantSelectorProps) {
       {/* Variant Selection */}
       <div>
         <Label>Select Variant</Label>
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          {product.variants.map((variant) => (
-            <Button
-              key={variant.id}
-              variant={
-                selectedVariant?.id === variant.id ? "default" : "outline"
-              }
-              onClick={() => setSelectedVariant(variant)}
-              disabled={variant.inventoryQty === 0}
-            >
-              {variant.name}
-              {variant.inventoryQty === 0 && " (Out of Stock)"}
-            </Button>
-          ))}
+        <div className="grid-col-2 mt-2 grid gap-2 md:grid-cols-4">
+          {product.variants.map((variant) => {
+            const outOfStock =
+              product.trackInventory &&
+              variant.inventoryQty === 0 &&
+              !product.allowBackorders;
+            const isBackorderVariant =
+              product.trackInventory &&
+              variant.inventoryQty === 0 &&
+              !!product.allowBackorders;
+            return (
+              <Button
+                key={variant.id}
+                variant={
+                  selectedVariant?.id === variant.id ? "default" : "outline"
+                }
+                onClick={() => {
+                  setSelectedVariant(variant);
+                  setSelectedVariantId(variant.id);
+                }}
+                disabled={outOfStock}
+                className="rounded-full"
+              >
+                {variant.name}
+                {outOfStock && " (Out of Stock)"}
+                {isBackorderVariant && " (Pre-order)"}
+              </Button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Quantity Selection */}
+      {/* Quantity + Add to Cart */}
       {selectedVariant && (
-        <div>
+        <div className="flex flex-col gap-2">
           <Label>Quantity</Label>
-          <div className="mt-2 flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            >
-              -
-            </Button>
-            <Input
-              type="number"
-              min="1"
-              max={selectedVariant.inventoryQty}
-              value={quantity}
-              onChange={(e) => {
-                const val = parseInt(e.target.value);
-                if (!isNaN(val)) {
+          <div className="flex items-center gap-2">
+            <div className="flex w-fit items-center rounded-md border">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-10"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
+                aria-label="Decrease quantity"
+              >
+                <Minus className="size-4" />
+              </Button>
+              <span className="w-10 text-center text-base font-semibold">
+                {quantity}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-10"
+                onClick={() =>
                   setQuantity(
-                    Math.min(selectedVariant.inventoryQty, Math.max(1, val)),
-                  );
+                    product.trackInventory
+                      ? Math.min(selectedVariant.inventoryQty, quantity + 1)
+                      : quantity + 1,
+                  )
                 }
-              }}
-              className="w-20 rounded border px-2 py-1 text-center"
-            />
-            <Button
-              variant="outline"
-              onClick={() =>
-                setQuantity(
-                  Math.min(selectedVariant.inventoryQty, quantity + 1),
-                )
-              }
-            >
-              +
-            </Button>
-            <span className="text-sm text-gray-600">
-              {selectedVariant.inventoryQty} available
-            </span>
+                disabled={
+                  product.trackInventory &&
+                  !product.allowBackorders &&
+                  quantity >= selectedVariant.inventoryQty
+                }
+                aria-label="Increase quantity"
+              >
+                <Plus className="size-4" />
+              </Button>
+            </div>
+            {/* Stock count */}
+            {selectedVariant && product.trackInventory && (
+              <span className="text-sm text-gray-600">
+                {selectedVariant.inventoryQty} available
+              </span>
+            )}
           </div>
+
+          <Button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={
+              !selectedVariant ||
+              (product.trackInventory &&
+                selectedVariant.inventoryQty === 0 &&
+                !product.allowBackorders)
+            }
+            className="flex-1"
+          >
+            {isAdded ? (
+              <>
+                <Check className="mr-2 h-4 w-4" />
+                Added to Cart
+              </>
+            ) : (
+              `Add ${quantity} to Cart`
+            )}
+          </Button>
         </div>
       )}
-
-      {/* Add to Cart */}
-      <Button
-        onClick={handleAddToCart}
-        disabled={!selectedVariant || selectedVariant.inventoryQty === 0}
-        className="w-full"
-      >
-        Add {quantity} to Cart
-      </Button>
     </div>
   );
 }

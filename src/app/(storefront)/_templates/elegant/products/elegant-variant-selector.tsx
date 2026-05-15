@@ -86,7 +86,7 @@ export function ElegantVariantSelector({
               className={`boty-transition boty-shadow rounded-full px-6 py-3 text-sm ${
                 selectedVariant?.id === variant.id
                   ? "bg-primary text-primary-foreground"
-                  : "bg-card text-foreground hover:bg-card/80"
+                  : "bg-card text-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
               {variant.name}
@@ -106,7 +106,7 @@ export function ElegantVariantSelector({
             <Button
               variant="outline"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="bg-background text-foreground/60 hover:text-foreground boty-transition flex h-10 w-10 items-center justify-center rounded-full"
+              className="bg-background text-foreground/60 hover:bg-muted hover:text-foreground boty-transition flex h-10 w-10 items-center justify-center rounded-full transition-colors"
               aria-label="Decrease quantity"
             >
               -
@@ -138,7 +138,7 @@ export function ElegantVariantSelector({
                   Math.min(selectedVariant.inventoryQty, quantity + 1),
                 )
               }
-              className="bg-background text-foreground/60 hover:text-foreground boty-transition flex h-10 w-10 items-center justify-center rounded-full"
+              className="bg-background text-foreground/60 hover:bg-muted hover:text-foreground boty-transition flex h-10 w-10 items-center justify-center rounded-full transition-colors"
               aria-label="Increase quantity"
             >
               +

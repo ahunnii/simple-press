@@ -1,0 +1,215 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+
+import { cn } from "~/lib/utils";
+
+type StyleProps = {
+  containerClassName?: string;
+  singleImageContainerClassName?: string;
+  multipleImagesContainerClassName?: string;
+  buttonClassName?: string;
+  selectedButtonClassName?: string;
+  unselectedButtonClassName?: string;
+};
+
+type Props = {
+  images: { url: string }[];
+  productName: string;
+  styleProps?: StyleProps;
+  enableLightbox?: boolean;
+  primaryColor?: string;
+};
+
+export function ProductGalleryVertical({
+  images,
+  productName,
+  styleProps,
+  enableLightbox = false,
+  primaryColor,
+}: Props) {
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const hasMultipleImages = images.length > 1;
+
+  useEffect(() => {
+    if (!enableLightbox) return;
+
+    if (!lightboxOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [enableLightbox, lightboxOpen]);
+
+  return (
+    <>
+      <div
+        className={cn(
+          //   "md:sticky md:top-24 md:col-span-5 md:self-start",
+          "w-full",
+          styleProps?.containerClassName,
+        )}
+      >
+        {enableLightbox ? (
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(true)}
+            className={cn(
+              "bg-secondary relative aspect-square w-full cursor-zoom-in overflow-hidden rounded-2xl",
+              styleProps?.singleImageContainerClassName,
+            )}
+            aria-label="Enlarge image"
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedImage}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={images[selectedImage]?.url ?? "/placeholder.svg"}
+                  alt={productName}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </motion.div>
+            </AnimatePresence>
+          </button>
+        ) : (
+          <div
+            className={cn(
+              "bg-secondary relative aspect-square w-full overflow-hidden rounded-2xl",
+              styleProps?.singleImageContainerClassName,
+            )}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedImage}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={images[selectedImage]?.url ?? "/placeholder.svg"}
+                  alt={productName}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        )}
+
+        {/* {selectedImage ? (
+        <div
+          className={cn(
+            "relative aspect-square overflow-hidden rounded-lg bg-gray-100",
+            styleProps?.singleImageContainerClassName,
+          )}
+        >
+          <Image
+            src={images[selectedImage]?.url ?? "/placeholder.svg"}
+            alt={productName}
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+      ) : (
+        <div className="flex aspect-square items-center justify-center rounded-lg bg-gray-100">
+          <span className="text-gray-400">No image</span>
+        </div>
+      )} */}
+
+        {/* Thumbnail gallery */}
+        {hasMultipleImages && (
+          <div
+            className={cn(
+              "mt-4 flex flex-wrap gap-2",
+              styleProps?.multipleImagesContainerClassName,
+            )}
+          >
+            {images.map((image, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedImage(index)}
+                className={cn(
+                  `relative aspect-square w-16 overflow-hidden rounded border-2 bg-gray-100 transition-all focus:outline-none ${
+                    selectedImage === index
+                      ? `border-primary ring-primary ring-2 ${styleProps?.selectedButtonClassName}`
+                      : `border-border hover:border-primary ${styleProps?.unselectedButtonClassName}`
+                  }`,
+                )}
+                style={
+                  selectedImage === index ? { borderColor: primaryColor } : {}
+                }
+                aria-label={`View image ${index + 1}`}
+              >
+                <Image
+                  src={image.url}
+                  alt={`${productName} ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="64px"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="relative max-h-[90vh] max-w-[90vw]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={images[selectedImage]?.url ?? "/placeholder.svg"}
+                alt={productName}
+                width={1200}
+                height={1200}
+                className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(false)}
+                aria-label="Close"
+                className="bg-background/80 hover:bg-background absolute top-3 right-3 rounded-full p-1.5 backdrop-blur-sm transition-colors"
+              >
+                <X className="size-5" />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}

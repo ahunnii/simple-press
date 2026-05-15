@@ -12,6 +12,7 @@ import StarterKit from "@tiptap/starter-kit";
 
 import { api } from "~/trpc/react";
 import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
+import { TableKit } from "~/components/ui/minimal-tiptap/extensions/table";
 import { GalleryRenderer } from "~/components/gallery-renderer";
 
 /** TipTap document JSON — matches first parameter of generateHTML */
@@ -39,6 +40,7 @@ const extensions = [
     types: ["heading", "paragraph"],
   }),
   Gallery,
+  TableKit,
 ];
 
 /** Renders a single gallery by id (for storefront page content). */

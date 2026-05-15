@@ -187,12 +187,12 @@ export function DarkTrendProductPage({
                       "Add to Cart"
                     )}
                   </button>
-                  <button
+                  {/* <button
                     type="button"
                     className="inline-flex flex-1 items-center justify-center gap-2 rounded-md border border-white/60 bg-transparent px-8 py-4 text-sm font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
                   >
                     Buy Now
-                  </button>
+                  </button> */}
                 </div>
 
                 {!canAddMore && inStock && (

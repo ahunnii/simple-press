@@ -8,6 +8,7 @@ import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
 
 import { LinkBubbleMenu } from "./components/bubble-menu/link-bubble-menu";
+import { TableBubbleMenu } from "./components/bubble-menu/table-bubble-menu";
 import { MeasuredContainer } from "./components/measured-container";
 import { SectionFive } from "./components/section/five";
 import { SectionFour } from "./components/section/four";
@@ -68,7 +69,7 @@ const Toolbar = ({
 
       <SectionFive
         editor={editor}
-        activeActions={["codeBlock", "blockquote", "horizontalRule", "gallery"]}
+        activeActions={["codeBlock", "blockquote", "horizontalRule", "gallery", "table"]}
         mainActionCount={0}
         galleriesEnabled={galleriesEnabled}
       />
@@ -141,6 +142,7 @@ export const MainMinimalTiptapEditor = ({
         className={cn("minimal-tiptap-editor", editorContentClassName)}
       />
       <LinkBubbleMenu editor={providedEditor} />
+      <TableBubbleMenu editor={providedEditor} />
     </MeasuredContainer>
   );
 };

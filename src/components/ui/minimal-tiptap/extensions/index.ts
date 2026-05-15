@@ -5,4 +5,5 @@ export * from "./gallery";
 export * from "./horizontal-rule";
 export * from "./image";
 export * from "./reset-marks-on-enter";
+export * from "./table";
 export * from "./unset-all-marks";
