@@ -7,7 +7,6 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
-import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
@@ -24,6 +23,27 @@ import { NoiseOrderSummary } from "./noise-order-summary";
 type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
 };
+
+/* Shared label style */
+const LBL = "font-mono text-[9.5px] tracking-[0.22em] uppercase";
+const INP = "rounded-none border-border font-sans text-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-foreground";
+
+/* Section heading separator */
+function SectionHead({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="flex items-center gap-4 border-b pb-3 mb-5"
+      style={{ borderColor: "var(--vn-ink)" }}
+    >
+      <h4
+        className="font-mono text-[10px] tracking-[0.28em] uppercase"
+        style={{ color: "var(--vn-steel)" }}
+      >
+        {children}
+      </h4>
+    </div>
+  );
+}
 
 export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
   const {
@@ -53,48 +73,87 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
 
   if (items.length === 0) {
     return (
-      <div className="py-16 text-center">
-        <p className="font-sans text-sm text-muted-foreground mb-4">Your cart is empty</p>
-        <Button asChild className="rounded-none font-sans text-[10px] tracking-[0.25em] uppercase">
-          <Link href="/shop">Shop the Collection</Link>
-        </Button>
+      <div className="py-20 text-center flex flex-col items-center gap-6">
+        <p
+          className="font-serif italic text-2xl"
+          style={{ color: "var(--vn-steel-mist)" }}
+        >
+          Nothing to checkout.
+        </p>
+        <Link
+          href="/shop"
+          className="vn-stamp vn-stamp-solid text-[10px]"
+        >
+          Shop the Collection →
+        </Link>
       </div>
     );
   }
 
-  const labelClass = "font-sans text-[9px] tracking-[0.25em] uppercase text-foreground";
-  const inputClass = "rounded-none border-border font-sans text-sm";
-
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-8 lg:flex-row">
-      <div className="flex-1 space-y-8">
-        {/* Contact Information */}
-        <fieldset className="flex flex-col gap-4">
-          <legend className="border-b border-border pb-3 font-sans text-[10px] tracking-[0.3em] uppercase text-foreground w-full">
-            Contact Information
-          </legend>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email" className={labelClass}>Email *</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required className={inputClass} />
+    <form
+      onSubmit={handleSubmit}
+      className="vn-contact-form flex flex-col gap-0 lg:flex-row lg:gap-12"
+    >
+      {/* Left — fields */}
+      <div className="flex-1 flex flex-col gap-10">
+
+        {/* Contact */}
+        <fieldset className="flex flex-col gap-5">
+          <SectionHead>Contact information</SectionHead>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="email" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                Email *
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@frequency.com"
+                required
+                className={INP}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="name" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                Full Name *
+              </Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="First & last"
+                required
+                className={INP}
+              />
+            </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="name" className={labelClass}>Full Name *</Label>
-            <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" required className={inputClass} />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="phone" className={labelClass}>Phone *</Label>
-            <PhoneInput id="phone" autoComplete="tel" value={phone} onChange={(val) => setPhone(val)} placeholder="+1 555 123 4567" required />
+            <Label htmlFor="phone" className={LBL} style={{ color: "var(--vn-steel)" }}>
+              Phone *
+            </Label>
+            <PhoneInput
+              id="phone"
+              autoComplete="tel"
+              value={phone}
+              onChange={(val) => setPhone(val)}
+              placeholder="+1 313 555 0000"
+              required
+            />
           </div>
         </fieldset>
 
-        {/* Discount Code */}
-        <fieldset className="flex flex-col gap-3">
-          <legend className="border-b border-border pb-3 font-sans text-[10px] tracking-[0.3em] uppercase text-foreground w-full">
-            Discount Code
-          </legend>
+        {/* Discount code */}
+        <fieldset className="flex flex-col gap-4">
+          <SectionHead>Discount code</SectionHead>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
             <div className="flex flex-1 flex-col gap-1.5">
-              <Label htmlFor="discount-code" className={labelClass}>Code</Label>
+              <Label htmlFor="discount-code" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                Code
+              </Label>
               <Input
                 id="discount-code"
                 type="text"
@@ -103,106 +162,170 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   setDiscountCodeInput(e.target.value.toUpperCase());
                   setDiscountFieldError(null);
                 }}
-                placeholder="DISCOUNT CODE"
+                placeholder="VND-SUMMER-26"
                 autoComplete="off"
-                className={inputClass}
+                className={cn(INP, "font-mono tracking-[0.1em]")}
               />
             </div>
-            <Button
+            <button
               type="button"
-              variant="secondary"
               onClick={handleApplyDiscount}
-              className={cn(
-                "rounded-none font-sans text-[10px] tracking-[0.2em] uppercase",
-                discountCodeInput.trim() && "bg-primary text-primary-foreground hover:bg-primary/90",
-              )}
               disabled={isValidatingDiscount || items.length === 0}
+              className="vn-stamp text-[10px] flex items-center gap-2 disabled:opacity-40 transition-all hover:bg-foreground hover:text-background flex-shrink-0"
+              style={{ padding: "10px 16px" }}
             >
               {isValidatingDiscount ? (
-                <><Loader2 className="mr-2 size-3.5 animate-spin" />Checking…</>
+                <><Loader2 className="size-3.5 animate-spin" />Checking…</>
               ) : (
-                "Apply"
+                discountAmount > 0 ? "Applied ✓" : "Apply"
               )}
-            </Button>
+            </button>
           </div>
           {discountFieldError && (
-            <p className="font-sans text-xs text-destructive">{discountFieldError}</p>
+            <p className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-destructive">
+              {discountFieldError}
+            </p>
           )}
           {discountCodeLabel && discountAmount > 0 && (
-            <p className="font-sans text-xs text-green-600">
-              Code <span className="font-mono font-semibold">{discountCodeLabel}</span> applied.
+            <p className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-green-600">
+              Code <span className="font-semibold">{discountCodeLabel}</span> applied.
             </p>
           )}
         </fieldset>
 
-        {/* Delivery Method */}
+        {/* Delivery method */}
         {shippingConfig.offersInStorePickup && (
-          <fieldset className="flex flex-col gap-3">
-            <legend className="border-b border-border pb-3 font-sans text-[10px] tracking-[0.3em] uppercase text-foreground w-full">
-              Delivery
-            </legend>
+          <fieldset className="flex flex-col gap-4">
+            <SectionHead>Delivery</SectionHead>
             <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant={deliveryMethod === "ship" ? "default" : "outline"}
-                onClick={() => setDeliveryMethod("ship")}
-                className="rounded-none font-sans text-[10px] tracking-[0.2em] uppercase"
-              >
-                Ship to address
-              </Button>
-              <Button
-                type="button"
-                variant={deliveryMethod === "pickup" ? "default" : "outline"}
-                onClick={() => setDeliveryMethod("pickup")}
-                className="rounded-none font-sans text-[10px] tracking-[0.2em] uppercase"
-              >
-                In-store pickup
-              </Button>
+              {(["ship", "pickup"] as const).map((method) => (
+                <button
+                  key={method}
+                  type="button"
+                  onClick={() => setDeliveryMethod(method)}
+                  className="vn-stamp text-[10px] transition-all"
+                  style={
+                    deliveryMethod === method
+                      ? { background: "var(--vn-ink)", color: "var(--vn-bone)", borderColor: "var(--vn-ink)" }
+                      : {}
+                  }
+                >
+                  {method === "ship" ? "Ship to address" : "Studio pickup"}
+                </button>
+              ))}
             </div>
-            <p className="font-sans text-xs text-muted-foreground">
+            <p
+              className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
+              style={{ color: "var(--vn-steel-mist)" }}
+            >
               {deliveryMethod === "pickup"
-                ? "No shipping charge. Pick up at the store."
+                ? "No shipping charge — collect at 1217 Gratiot Ave, Detroit."
                 : "Shipping cost based on your store's settings."}
             </p>
           </fieldset>
         )}
 
-        {/* Shipping Address */}
+        {/* Shipping address */}
         {deliveryMethod === "ship" && (
-          <fieldset className="flex flex-col gap-4">
-            <legend className="border-b border-border pb-3 font-sans text-[10px] tracking-[0.3em] uppercase text-foreground w-full">
-              Shipping Address
-            </legend>
-            <p className="font-sans text-xs text-muted-foreground">
-              Pre-filled at Stripe Checkout — you can confirm or edit before paying.
+          <fieldset className="flex flex-col gap-5">
+            <SectionHead>Shipping address</SectionHead>
+            <p
+              className="font-mono text-[9.5px] tracking-[0.14em] uppercase -mt-2"
+              style={{ color: "var(--vn-steel-mist)" }}
+            >
+              Pre-filled at Stripe — you can confirm or edit before paying.
             </p>
+
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="address-line1" className={labelClass}>Address Line 1 *</Label>
-              <Input id="address-line1" type="text" autoComplete="shipping address-line1" value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} placeholder="Street address, P.O. box" required={deliveryMethod === "ship"} className={inputClass} />
+              <Label htmlFor="address-line1" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                Street address *
+              </Label>
+              <Input
+                id="address-line1"
+                type="text"
+                autoComplete="shipping address-line1"
+                value={addressLine1}
+                onChange={(e) => setAddressLine1(e.target.value)}
+                placeholder="Street address, P.O. box"
+                required={deliveryMethod === "ship"}
+                className={INP}
+              />
             </div>
+
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="address-line2" className={labelClass}>Address Line 2</Label>
-              <Input id="address-line2" type="text" autoComplete="shipping address-line2" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Apartment, suite, etc." className={inputClass} />
+              <Label htmlFor="address-line2" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                Apt / Suite / Floor
+              </Label>
+              <Input
+                id="address-line2"
+                type="text"
+                autoComplete="shipping address-line2"
+                value={addressLine2}
+                onChange={(e) => setAddressLine2(e.target.value)}
+                placeholder="Apartment, suite, etc."
+                className={INP}
+              />
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+
+            <div className="grid gap-5 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="city" className={labelClass}>City *</Label>
-                <Input id="city" type="text" autoComplete="shipping address-level2" value={city} onChange={(e) => setCity(e.target.value)} required={deliveryMethod === "ship"} placeholder="e.g. Detroit" className={inputClass} />
+                <Label htmlFor="city" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                  City *
+                </Label>
+                <Input
+                  id="city"
+                  type="text"
+                  autoComplete="shipping address-level2"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required={deliveryMethod === "ship"}
+                  placeholder="e.g. Detroit"
+                  className={INP}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="state" className={labelClass}>State / Province *</Label>
-                <Input id="state" type="text" autoComplete="shipping address-level1" value={state} onChange={(e) => setState(e.target.value)} placeholder="e.g. MI" required={deliveryMethod === "ship"} className={inputClass} />
+                <Label htmlFor="state" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                  State / Province *
+                </Label>
+                <Input
+                  id="state"
+                  type="text"
+                  autoComplete="shipping address-level1"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  placeholder="e.g. MI"
+                  required={deliveryMethod === "ship"}
+                  className={INP}
+                />
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+
+            <div className="grid gap-5 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="postal" className={labelClass}>ZIP / Postal Code *</Label>
-                <Input id="postal" type="text" autoComplete="shipping postal-code" placeholder="e.g. 48201" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} required={deliveryMethod === "ship"} className={inputClass} />
+                <Label htmlFor="postal" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                  ZIP / Postal code *
+                </Label>
+                <Input
+                  id="postal"
+                  type="text"
+                  autoComplete="shipping postal-code"
+                  placeholder="e.g. 48207"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  required={deliveryMethod === "ship"}
+                  className={INP}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="country" className={labelClass}>Country *</Label>
-                <Select value={country} onValueChange={(v) => setCountry(v as "US" | "CA")} required>
-                  <SelectTrigger id="country" className={cn("w-full", inputClass)}>
+                <Label htmlFor="country" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                  Country *
+                </Label>
+                <Select
+                  value={country}
+                  onValueChange={(v) => setCountry(v as "US" | "CA")}
+                  required
+                >
+                  <SelectTrigger id="country" className={cn("w-full", INP)}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -216,9 +339,9 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
         )}
       </div>
 
-      {/* Order Summary + Submit */}
-      <div className="w-full shrink-0 lg:w-80">
-        <div className="sticky top-20 space-y-4">
+      {/* Right — order summary + submit */}
+      <div className="w-full shrink-0 mt-10 lg:mt-0 lg:w-[360px]">
+        <div className="sticky top-28 flex flex-col gap-5">
           <NoiseOrderSummary
             shippingConfig={shippingConfig}
             deliveryMethod={deliveryMethod}
@@ -226,27 +349,55 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
           />
 
           {error && (
-            <Alert variant="destructive">
-              <AlertDescription className="font-sans text-sm">{error}</AlertDescription>
+            <Alert variant="destructive" className="rounded-none">
+              <AlertDescription className="font-mono text-[10px] tracking-[0.14em] uppercase">
+                {error}
+              </AlertDescription>
             </Alert>
           )}
 
-          <Button
+          {/* Submit */}
+          <button
             type="submit"
             disabled={isProcessing}
-            className="w-full rounded-none font-sans text-[10px] tracking-[0.25em] uppercase"
-            size="lg"
+            className="flex items-center justify-between w-full px-5 py-4 font-mono text-[11px] tracking-[0.24em] uppercase transition-all disabled:opacity-50"
+            style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
           >
-            {isProcessing ? (
-              <><Loader2 className="mr-2 size-3.5 animate-spin" />Processing...</>
-            ) : (
-              "Continue to Payment"
-            )}
-          </Button>
+            <span className="flex items-center gap-2">
+              {isProcessing && <Loader2 className="size-3.5 animate-spin" />}
+              {isProcessing ? "Processing…" : "Continue to payment"}
+            </span>
+            <span>→</span>
+          </button>
 
-          <p className="text-center font-sans text-[10px] tracking-wide text-muted-foreground">
-            All transactions are secure and encrypted via Stripe.
-          </p>
+          {/* Reassurance */}
+          <div className="flex flex-col gap-2.5">
+            {[
+              { ic: "🔒", text: "Encrypted with TLS · Powered by Stripe" },
+              { ic: "D", text: "Cut & shipped from Detroit, 48207" },
+              { ic: "↺", text: "14-day exchange on stock pieces" },
+            ].map((note) => (
+              <div key={note.ic} className="flex gap-2.5 items-start">
+                <span
+                  className="flex-shrink-0 flex items-center justify-center border font-serif italic"
+                  style={{
+                    width: "22px",
+                    height: "22px",
+                    borderColor: "var(--vn-rule)",
+                    fontSize: "12px",
+                  }}
+                >
+                  {note.ic}
+                </span>
+                <p
+                  className="font-mono text-[9.5px] tracking-[0.14em] uppercase leading-relaxed"
+                  style={{ color: "var(--vn-steel-mist)" }}
+                >
+                  {note.text}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </form>

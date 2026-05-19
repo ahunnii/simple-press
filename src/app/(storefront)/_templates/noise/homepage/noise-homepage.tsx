@@ -1,13 +1,15 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
-import { getRichTextFieldValue } from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
-import { NoiseAboutTeaser } from "./noise-about-teaser";
+import { NoiseCredentialsSection } from "./noise-credentials-section";
 import { NoiseEditorialStrip } from "./noise-editorial-strip";
 import { NoiseFeaturedProducts } from "./noise-featured-products";
 import { NoiseHeroSection } from "./noise-hero-section";
+import { NoiseManifestoSection } from "./noise-manifesto-section";
+import { NoiseNewsletterCta } from "./noise-newsletter-cta";
+import { NoiseSignalStrip } from "./noise-signal-strip";
 import { NoiseTestimonialsSection } from "./noise-testimonials-section";
 
 export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
@@ -20,11 +22,6 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     | Record<string, string>
     | undefined;
 
-  const aboutBodyContent = getRichTextFieldValue(
-    themeFields as unknown,
-    "noise.homepage-about-body",
-  );
-
   const f = resolveFields(themeFields, [
     "noise.homepage.hero-image",
     "noise.homepage.hero-overline",
@@ -33,10 +30,6 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     "noise.homepage.hero-primary-button-text",
     "noise.homepage.hero-primary-button-link",
     "noise.homepage.editorial-marquee-text",
-    "noise.homepage-about-image",
-    "noise.homepage-about-heading",
-    "noise.homepage-about-button-text",
-    "noise.homepage-about-button-link",
     "noise.homepage-featured-title",
     "noise.homepage-featured-description",
     "noise.homepage-featured-button-text",
@@ -44,9 +37,12 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     "noise.homepage-testimonials-heading",
   ]);
 
+  const address = homepage?.businessAddress ?? undefined;
+
   return (
     <HydrateClient>
       <PageTransition>
+        {/* 1. Hero — image-anchored 55/45 split */}
         <NoiseHeroSection
           heroImage={f["noise.homepage.hero-image"] ?? undefined}
           heroOverline={f["noise.homepage.hero-overline"] ?? undefined}
@@ -56,18 +52,15 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           heroPrimaryButtonLink={f["noise.homepage.hero-primary-button-link"] ?? undefined}
         />
 
+        {/* 2. Marquee strip */}
         <NoiseEditorialStrip
           marqueeText={f["noise.homepage.editorial-marquee-text"] ?? undefined}
         />
 
-        <NoiseAboutTeaser
-          imageUrl={f["noise.homepage-about-image"] ?? undefined}
-          heading={f["noise.homepage-about-heading"] ?? undefined}
-          bodyContent={aboutBodyContent}
-          buttonText={f["noise.homepage-about-button-text"] ?? undefined}
-          buttonLink={f["noise.homepage-about-button-link"] ?? undefined}
-        />
+        {/* 3. Manifesto — Three rules of the studio */}
+        <NoiseManifestoSection />
 
+        {/* 4. Featured products */}
         <NoiseFeaturedProducts
           featuredProducts={homepage?.products ?? []}
           featuredTitle={f["noise.homepage-featured-title"] ?? undefined}
@@ -76,10 +69,20 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           featuredButtonLink={f["noise.homepage-featured-button-link"] ?? undefined}
         />
 
+        {/* 5. Credentials — ink bg brand story */}
+        <NoiseCredentialsSection address={address} />
+
+        {/* 6. Signal strip — press / mentions */}
+        <NoiseSignalStrip />
+
+        {/* 7. Testimonials — ink bg */}
         <NoiseTestimonialsSection
           heading={f["noise.homepage-testimonials-heading"] ?? undefined}
           testimonials={testimonials}
         />
+
+        {/* 8. Newsletter CTA */}
+        <NoiseNewsletterCta />
       </PageTransition>
     </HydrateClient>
   );

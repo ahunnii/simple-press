@@ -23,33 +23,32 @@ export function NoiseAnnouncementBar({ businessId: _ }: NoiseAnnouncementBarProp
 
   return (
     <div
-      className="border-b border-foreground/10 bg-foreground px-4 py-2 text-center text-xs text-background"
+      className="vn-topbar flex items-center justify-center gap-3"
       role="region"
       aria-label="Promotion"
     >
-      <p className="mx-auto max-w-4xl tracking-widest uppercase">
-        {data.bannerText}{" — Code: "}
-        <span className="font-mono font-semibold tracking-wide">
-          {data.code}
-        </span>
-        {isExternal ? (
-          <a
-            href={href}
-            className="ml-3 inline-block font-medium underline underline-offset-2 opacity-70 hover:opacity-100"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Shop now
-          </a>
-        ) : (
-          <Link
-            href={href}
-            className="ml-3 inline-block font-medium underline underline-offset-2 opacity-70 hover:opacity-100"
-          >
-            Shop now
-          </Link>
-        )}
+      <p className="font-mono text-[10.5px] tracking-[0.2em] uppercase">
+        {data.bannerText}
+        {" — Code: "}
+        <span className="font-semibold tracking-wide">{data.code}</span>
       </p>
+      {isExternal ? (
+        <a
+          href={href}
+          className="vn-stamp vn-stamp-solid text-[9px] hover:opacity-80 transition-opacity"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Shop now →
+        </a>
+      ) : (
+        <Link
+          href={href}
+          className="vn-stamp vn-stamp-solid text-[9px] hover:opacity-80 transition-opacity"
+        >
+          Shop now →
+        </Link>
+      )}
     </div>
   );
 }

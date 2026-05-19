@@ -5,36 +5,29 @@ type NoiseEditorialStripProps = {
 export function NoiseEditorialStrip({ marqueeText }: NoiseEditorialStripProps) {
   const text =
     marqueeText ??
-    "Fashion that dances · Garments that fly · Haute Couture · Detroit · Visual Noise ·";
+    "Because fashion shouldn't be quiet · Haute Couture · Detroit · Visual Noise ·";
 
-  // Duplicate text enough to fill seamlessly
   const repeated = `${text}   ${text}   ${text}   ${text}   `;
 
   return (
-    <div className="overflow-hidden border-y border-foreground/10 bg-foreground py-3">
-      <style>{`
-        @keyframes noise-marquee {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        .noise-marquee-track {
-          display: flex;
-          width: max-content;
-          animation: noise-marquee 24s linear infinite;
-          will-change: transform;
-        }
-        .noise-marquee-track:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
+    <div
+      className="overflow-hidden border-y-2 border-foreground py-4"
+      style={{ background: "var(--vn-ink)" }}
+    >
       <div
-        className="noise-marquee-track"
+        className="vn-marquee-track"
         aria-hidden="true"
       >
-        <span className="whitespace-nowrap font-serif italic text-sm text-background/60 px-4">
+        <span
+          className="whitespace-nowrap font-serif italic px-6"
+          style={{ fontSize: "clamp(2rem, 4.5vw, 3rem)", color: "var(--vn-bone)", opacity: 0.85, letterSpacing: "-0.01em" }}
+        >
           {repeated}
         </span>
-        <span className="whitespace-nowrap font-serif italic text-sm text-background/60 px-4">
+        <span
+          className="whitespace-nowrap font-serif italic px-6"
+          style={{ fontSize: "clamp(2rem, 4.5vw, 3rem)", color: "var(--vn-bone)", opacity: 0.85, letterSpacing: "-0.01em" }}
+        >
           {repeated}
         </span>
       </div>

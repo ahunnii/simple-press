@@ -224,44 +224,272 @@
 }
 
 .noise {
-  /* Base — cool white body, #303D4B steel blue as the dark tone */
-  --background: oklch(0.99 0.003 225); /* near-white with faint steel tint */
-  --foreground: oklch(0.27 0.03 237); /* #303D4B steel blue-grey */
-  --card: oklch(0.99 0.003 225);
-  --card-foreground: oklch(0.27 0.03 237);
-  --popover: oklch(0.99 0.003 225);
-  --popover-foreground: oklch(0.27 0.03 237);
-  --primary: oklch(0.27 0.03 237); /* #303D4B — matches header */
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.955 0.009 225); /* light steel-blue section bg */
-  --secondary-foreground: oklch(0.27 0.03 237);
-  --muted: oklch(0.955 0.009 225);
-  --muted-foreground: oklch(0.5 0.02 232); /* medium steel grey */
-  --accent: oklch(0.84 0.04 72); /* warm champagne — editorial contrast */
-  --accent-foreground: oklch(0.27 0.03 237);
+  /* Visual Noise Detroit — editorial broadside × industrial print */
+  --background: oklch(0.965 0.013 82);    /* #f5f2eb paper */
+  --foreground: oklch(0.087 0.008 264);   /* #0e0f12 ink */
+  --card: oklch(0.94 0.017 80);           /* #ece8de bone */
+  --card-foreground: oklch(0.087 0.008 264);
+  --popover: oklch(0.94 0.017 80);
+  --popover-foreground: oklch(0.087 0.008 264);
+  --primary: oklch(0.087 0.008 264);      /* ink */
+  --primary-foreground: oklch(0.965 0.013 82); /* paper */
+  --secondary: oklch(0.94 0.017 80);      /* bone */
+  --secondary-foreground: oklch(0.087 0.008 264);
+  --muted: oklch(0.94 0.017 80);          /* bone */
+  --muted-foreground: oklch(0.505 0.033 225); /* #6a7787 steel-mist */
+  --accent: oklch(0.255 0.04 230);        /* #2c3a4d steel */
+  --accent-foreground: oklch(0.94 0.017 80); /* bone */
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.88 0.012 225); /* cool blue-grey border */
-  --input: oklch(0.88 0.012 225);
-  --ring: oklch(0.27 0.03 237);
-  --chart-1: oklch(0.27 0.03 237);
-  --chart-2: oklch(0.84 0.04 72);
-  --chart-3: oklch(0.5 0.02 232);
-  --chart-4: oklch(0.4 0.025 235);
+  --border: oklch(0.795 0.015 80);        /* #c8c3b5 rule */
+  --input: oklch(0.795 0.015 80);
+  --ring: oklch(0.087 0.008 264);
+  --chart-1: oklch(0.087 0.008 264);
+  --chart-2: oklch(0.255 0.04 230);
+  --chart-3: oklch(0.505 0.033 225);
+  --chart-4: oklch(0.4 0.03 228);
   --chart-5: oklch(0.7 0.015 225);
-  --radius: 0.15rem;
-  --sidebar: oklch(0.955 0.009 225);
-  --sidebar-foreground: oklch(0.27 0.03 237);
-  --sidebar-primary: oklch(0.27 0.03 237);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.84 0.04 72);
-  --sidebar-accent-foreground: oklch(0.27 0.03 237);
-  --sidebar-border: oklch(0.88 0.012 225);
-  --sidebar-ring: oklch(0.27 0.03 237);
-  --font-sans: "DM Sans", "DM Sans Fallback";
-  --font-heading: "DM Sans", "DM Sans Fallback";
-  --font-serif: "Cormorant Garamond", "Cormorant Garamond Fallback";
+  --radius: 0rem;                          /* Sharp corners — no border radius */
+  --sidebar: oklch(0.94 0.017 80);
+  --sidebar-foreground: oklch(0.087 0.008 264);
+  --sidebar-primary: oklch(0.087 0.008 264);
+  --sidebar-primary-foreground: oklch(0.965 0.013 82);
+  --sidebar-accent: oklch(0.255 0.04 230);
+  --sidebar-accent-foreground: oklch(0.94 0.017 80);
+  --sidebar-border: oklch(0.795 0.015 80);
+  --sidebar-ring: oklch(0.087 0.008 264);
+  --font-sans: "Space Grotesk", "Space Grotesk Fallback";
+  --font-serif: "Instrument Serif", "Instrument Serif Fallback";
+  --font-heading: var(--font-serif);
+  --font-mono: "JetBrains Mono", "JetBrains Mono Fallback";
   --noise-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* Visual Noise Detroit — design tokens at :root so portals (Sheet, Dialog) inherit them */
+:root {
+  --vn-bone: #ece8de;
+  --vn-paper: #f5f2eb;
+  --vn-ink: #0e0f12;
+  --vn-ink-soft: #1a1b1f;
+  --vn-steel: #2c3a4d;
+  --vn-steel-deep: #1f2a38;
+  --vn-steel-mist: #6a7787;
+  --vn-rule: #c8c3b5;
+}
+
+/* Alias inside layout wrapper (no-op but keeps specificity consistent) */
+.visual-noise {
+  --vn-bone: #ece8de;
+  --vn-paper: #f5f2eb;
+  --vn-ink: #0e0f12;
+  --vn-ink-soft: #1a1b1f;
+  --vn-steel: #2c3a4d;
+  --vn-steel-deep: #1f2a38;
+  --vn-steel-mist: #6a7787;
+  --vn-rule: #c8c3b5;
+}
+
+.visual-noise .vn-topbar {
+  background: var(--vn-steel);
+  color: var(--vn-bone);
+  border-bottom: 1px solid #000;
+  font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 28px;
+  min-height: 30px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.visual-noise .vn-topbar .vn-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--vn-bone);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  animation: vn-pulse 2s infinite ease-in-out;
+}
+
+@keyframes vn-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.visual-noise .vn-wordmark {
+  font-family: var(--font-serif, "Instrument Serif", serif);
+  font-style: italic;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.visual-noise .vn-wordmark-x {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-style: normal;
+  font-size: 13px;
+  color: var(--vn-steel);
+  transform: translateY(-2px);
+}
+
+.visual-noise .vn-wordmark-detroit {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-style: normal;
+  font-size: 8.5px;
+  letter-spacing: 0.3em;
+  background: var(--vn-ink);
+  color: var(--vn-bone);
+  padding: 3px 7px 2px;
+  transform: translateY(-5px);
+}
+
+.visual-noise .vn-stamp {
+  border: 1px solid var(--vn-ink);
+  padding: 4px 9px 3px;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.visual-noise .vn-stamp-solid {
+  background: var(--vn-ink);
+  color: var(--vn-bone);
+  border-color: var(--vn-ink);
+}
+
+.visual-noise .vn-stamp-steel {
+  background: var(--vn-steel);
+  color: var(--vn-bone);
+  border-color: var(--vn-steel);
+}
+
+@keyframes vn-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.visual-noise .vn-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: vn-marquee 38s linear infinite;
+  will-change: transform;
+}
+
+.visual-noise .vn-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.visual-noise .vn-nav-link {
+  position: relative;
+  padding: 4px 0;
+}
+
+.visual-noise .vn-nav-link.vn-active::after,
+.visual-noise .vn-nav-link:hover::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -3px;
+  height: 2px;
+  background: var(--vn-ink);
+}
+
+/* Hide scrollbar but keep scrollability */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Contact form — editorial field styling */
+.visual-noise .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
+.visual-noise .vn-contact-form textarea {
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1.5px solid var(--vn-ink);
+  background: transparent;
+  padding: 10px 0;
+  font-family: var(--font-sans, "Space Grotesk", sans-serif);
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  color: var(--vn-ink);
+}
+
+.visual-noise .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"])::placeholder,
+.visual-noise .vn-contact-form textarea::placeholder {
+  color: var(--vn-steel-mist);
+  opacity: 0.6;
+}
+
+.visual-noise .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
+.visual-noise .vn-contact-form textarea:focus {
+  border-bottom-color: var(--vn-steel);
+  box-shadow: none;
+}
+
+.visual-noise .vn-contact-form .vn-field-label {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--vn-steel);
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* Blog post article drop cap */
+.visual-noise .vn-article > p:first-of-type::first-letter {
+  font-family: var(--font-serif, "Instrument Serif", serif);
+  font-style: italic;
+  font-size: 4.5em;
+  line-height: 0.75;
+  float: left;
+  margin-right: 0.06em;
+  margin-top: 0.1em;
+  color: var(--vn-ink);
+}
+
+/* Product card image hover lift */
+.visual-noise .vn-prod-pic {
+  transition: box-shadow 0.15s ease;
+}
+
+.visual-noise .vn-prod-link:hover .vn-prod-pic {
+  box-shadow: 0 0 0 1px var(--vn-ink), 5px 5px 0 0 var(--vn-ink);
+}
+
+/* Category cards on shop page */
+.visual-noise .vn-cat-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.visual-noise .vn-cat-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 0 var(--vn-ink);
+}
+
+.visual-noise .vn-cat-card:hover .vn-cat-meta {
+  background: var(--vn-ink);
+  color: var(--vn-bone);
+}
+
+.visual-noise .vn-cat-card:hover .vn-cat-meta .vn-cat-num,
+.visual-noise .vn-cat-card:hover .vn-cat-meta .vn-cat-count {
+  color: var(--vn-steel-mist);
+}
+
+.visual-noise .vn-cat-card:hover .vn-cat-meta .vn-cat-name {
+  color: var(--vn-bone);
 }
 
 .elegant {
@@ -274,6 +502,7 @@
 @theme inline {
   --font-sans: var(--font-sans);
   --font-heading: var(--font-heading);
+  --font-mono: var(--font-mono);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -357,6 +586,10 @@
     h5,
     h6 {
       @apply font-serif;
+    }
+
+    .font-mono {
+      font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
     }
   }
 }

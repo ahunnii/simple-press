@@ -3,10 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2, Package } from "lucide-react";
 
-import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { formatPrice } from "~/lib/prices";
+
+const NEXT_STEPS = [
+  { icon: "✉", text: "You'll receive an email confirmation at the address provided." },
+  { icon: "✦", text: "Each piece is hand-numbered and signed before it leaves Gratiot." },
+  { icon: "↗", text: "We'll notify you with a DHL tracking number when your order ships." },
+  { icon: "D", text: "Cut & shipped from Detroit, 48207 — within five working days." },
+] as const;
 
 type Props = {
   business: {
@@ -58,91 +64,176 @@ export function NoiseOrderConfirmation({ business }: Props) {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="font-sans text-sm text-muted-foreground">Loading order details...</p>
+      <div
+        className="flex min-h-[40vh] items-center justify-center"
+        style={{ background: "var(--vn-paper)" }}
+      >
+        <p
+          className="font-mono text-[10px] tracking-[0.22em] uppercase"
+          style={{ color: "var(--vn-steel-mist)" }}
+        >
+          Confirming your transmission…
+        </p>
       </div>
     );
   }
 
   if (!sessionId) {
     return (
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="font-sans text-sm text-muted-foreground mb-4">No order found</p>
-        <Button asChild className="rounded-none font-sans text-[10px] tracking-[0.25em] uppercase">
-          <Link href="/shop">Shop the Collection</Link>
-        </Button>
+      <div
+        className="flex min-h-[40vh] flex-col items-center justify-center gap-6 px-7 text-center"
+        style={{ background: "var(--vn-paper)" }}
+      >
+        <p
+          className="font-serif italic text-2xl"
+          style={{ color: "var(--vn-steel-mist)" }}
+        >
+          No order found.
+        </p>
+        <Link href="/shop" className="vn-stamp vn-stamp-solid text-[10px]">
+          Shop the Collection →
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      {/* Success header */}
-      <div className="mb-14 text-center">
-        <div className="mb-6 inline-flex size-16 items-center justify-center border border-border">
-          <CheckCircle2 className="size-7 text-foreground" />
-        </div>
-        <h1 className="font-serif text-4xl font-light tracking-tight text-foreground md:text-5xl">
-          Order Confirmed
-        </h1>
-        <p className="mt-3 font-sans text-sm text-muted-foreground">
-          Thank you for your purchase from {business.name}
-        </p>
-      </div>
-
-      {/* Details */}
-      <div className="mb-8 border border-border p-8">
-        <div className="flex items-start gap-4">
-          <div className="flex size-10 shrink-0 items-center justify-center border border-border">
-            <Package className="size-4 text-muted-foreground" />
-          </div>
-          <div className="flex-1">
-            <h2 className="mb-4 font-sans text-[10px] tracking-[0.25em] uppercase text-foreground">
-              What Happens Next
-            </h2>
-            <ul className="space-y-2 font-sans text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <span className="text-foreground">—</span>
-                <span>You&apos;ll receive an email confirmation shortly</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-foreground">—</span>
-                <span>We&apos;ll notify you when your order ships</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-foreground">—</span>
-                <span>Track your order status via email</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {orderDetails?.customer_email && (
-          <div className="mt-6 border-t border-border pt-6">
-            <p className="font-sans text-xs text-muted-foreground">
-              Confirmation sent to:{" "}
-              <span className="font-medium text-foreground">{orderDetails.customer_email}</span>
+    <>
+      {/* Success hero — ink background */}
+      <section
+        className="border-b-2 border-foreground grid md:grid-cols-2"
+        style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
+      >
+        {/* Left — headline */}
+        <div className="flex flex-col justify-between gap-8 px-7 py-14 border-b border-foreground md:border-b-0 md:border-r" style={{ borderColor: "#2a2c30" }}>
+          <div className="flex flex-col gap-4">
+            <p
+              className="font-mono text-[9.5px] tracking-[0.22em] uppercase"
+              style={{ color: "var(--vn-steel-mist)" }}
+            >
+              Transmission confirmed · {business.name}
+            </p>
+            <h1
+              className="font-serif italic leading-[0.95] tracking-tight"
+              style={{
+                fontSize: "clamp(3rem, 6vw, 5.5rem)",
+                letterSpacing: "-0.025em",
+              }}
+            >
+              Order placed.
+            </h1>
+            <p
+              className="font-sans text-[15px] leading-relaxed max-w-[40ch]"
+              style={{ color: "rgba(255,255,255,0.6)" }}
+            >
+              Your garments are queued for the cutting table on Gratiot. We&apos;ll
+              have them packed and shipped within five working days.
             </p>
           </div>
-        )}
-      </div>
 
-      {/* Actions */}
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Button
-          asChild
-          variant="outline"
-          className="flex-1 rounded-none font-sans text-[10px] tracking-[0.25em] uppercase"
+          {/* Order amount */}
+          {orderDetails?.amount_total && (
+            <div
+              className="border-t pt-6 flex items-baseline justify-between"
+              style={{ borderColor: "#2a2c30" }}
+            >
+              <span
+                className="font-mono text-[10.5px] tracking-[0.22em] uppercase"
+                style={{ color: "var(--vn-steel-mist)" }}
+              >
+                Order total
+              </span>
+              <span
+                className="font-serif italic leading-none"
+                style={{ fontSize: "32px", letterSpacing: "-0.02em" }}
+              >
+                {formatPrice(orderDetails.amount_total)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Right — confirmation details + next steps */}
+        <div className="flex flex-col gap-8 px-7 py-14">
+          {orderDetails?.customer_email && (
+            <div>
+              <h5
+                className="font-mono text-[9px] tracking-[0.22em] uppercase mb-3"
+                style={{ color: "var(--vn-steel-mist)" }}
+              >
+                Confirmation sent to
+              </h5>
+              <p
+                className="font-mono text-[12px] tracking-[0.08em]"
+                style={{ color: "var(--vn-bone)" }}
+              >
+                {orderDetails.customer_email}
+              </p>
+            </div>
+          )}
+
+          <div>
+            <h5
+              className="font-mono text-[9px] tracking-[0.22em] uppercase mb-5"
+              style={{ color: "var(--vn-steel-mist)" }}
+            >
+              What happens next
+            </h5>
+            <div className="flex flex-col gap-3.5">
+              {NEXT_STEPS.map((step) => (
+                <div key={step.icon} className="flex gap-3 items-start">
+                  <span
+                    className="flex-shrink-0 flex items-center justify-center border font-serif italic"
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      borderColor: "#2a2c30",
+                      fontSize: "13px",
+                      color: "var(--vn-bone)",
+                    }}
+                  >
+                    {step.icon}
+                  </span>
+                  <p
+                    className="font-mono text-[10px] tracking-[0.14em] uppercase leading-relaxed"
+                    style={{ color: "rgba(255,255,255,0.55)" }}
+                  >
+                    {step.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA row */}
+      <div
+        className="flex flex-col gap-3 sm:flex-row px-7 py-8 border-b border-foreground/15"
+        style={{ background: "var(--vn-bone)" }}
+      >
+        <Link
+          href="/shop"
+          className="vn-stamp text-[10.5px] transition-all hover:bg-foreground hover:text-background flex-1 justify-center"
+          style={{ padding: "12px 20px" }}
         >
-          <Link href="/shop">Continue Shopping</Link>
-        </Button>
-        <Button
-          asChild
-          className="flex-1 rounded-none font-sans text-[10px] tracking-[0.25em] uppercase"
+          Continue Shopping
+        </Link>
+        <Link
+          href="/account/orders"
+          className="vn-stamp vn-stamp-solid text-[10.5px] transition-all hover:opacity-80 flex-1 justify-center"
+          style={{ padding: "12px 20px" }}
         >
-          <Link href="/">Back to Home</Link>
-        </Button>
+          View My Orders →
+        </Link>
+        <Link
+          href="/"
+          className="vn-stamp text-[10.5px] transition-all hover:bg-foreground hover:text-background flex-1 justify-center"
+          style={{ padding: "12px 20px" }}
+        >
+          Back to Home
+        </Link>
       </div>
-    </div>
+    </>
   );
 }

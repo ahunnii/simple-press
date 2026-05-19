@@ -25,9 +25,10 @@ import { useCart } from "~/providers/cart-context";
 import { NoiseCartDrawer } from "../cart-checkout/noise-cart-drawer";
 
 const NAV_LINKS = [
-  { href: "/", label: "Home" },
+  { href: "/", label: "Index" },
   { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About" },
+  { href: "/blog", label: "Journal" },
+  { href: "/about", label: "Studio" },
   { href: "/contact", label: "Contact" },
 ] as const;
 
@@ -42,24 +43,13 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
       href: string;
     }[]) ?? NAV_LINKS;
 
-  const authActions = (
-    <Button
-      variant="ghost"
-      size="sm"
-      asChild
-      className="font-sans text-[10px] tracking-[0.2em] uppercase text-foreground/50 hover:bg-foreground/5 hover:text-foreground"
-    >
-      <Link href="/auth/sign-in">Log in</Link>
-    </Button>
-  );
-
   const userMenu = session?.user && (
     <UserButton
       size="icon"
       classNames={{
         trigger: {
-          base: "border border-border",
-          avatar: { base: "size-8" },
+          base: "border border-foreground/30 rounded-none",
+          avatar: { base: "size-7" },
         },
       }}
       additionalLinks={[
@@ -77,95 +67,118 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     />
   );
 
+  const authLink = !session?.user && (
+    <Link
+      href="/auth/sign-in"
+      className="text-foreground/50 hover:text-foreground font-mono text-[10px] tracking-[0.18em] uppercase transition-colors"
+    >
+      Login
+    </Link>
+  );
+
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
+      <header className="bg-background sticky top-0 z-50 w-full">
+        {/* Row 1 — Topbar: steel bg with coordinates and seasonal info */}
+        <div className="vn-topbar hidden sm:flex">
+          <div className="flex items-center gap-5">
+            <span>
+              <span className="vn-dot" />
+              On the floor
+            </span>
+            <span className="hidden opacity-70 lg:inline">
+              42.3314° N / 83.0458° W
+            </span>
+          </div>
+          <div className="flex items-center gap-5">
+            <span className="hidden opacity-70 md:inline">
+              Free shipping over $200
+            </span>
+            {authLink}
+          </div>
+        </div>
+
+        {/* Row 2 — Site head: three-column with centered wordmark */}
+        <div className="border-foreground bg-background grid grid-cols-[1fr_auto_1fr] items-center border-b px-4 py-3 sm:px-7 sm:py-4">
+          {/* Left: stamps */}
+          <div className="flex items-center gap-3">
+            <span className="vn-stamp hidden sm:inline-flex">SVC. 313</span>
+            <span className="text-foreground/40 hidden font-mono text-[10px] tracking-[0.16em] uppercase xl:inline">
+              Vol. IX — Issue 02
+            </span>
+          </div>
+
+          {/* Center: wordmark */}
+          <Link href="/" className="vn-wordmark">
             {business.siteContent?.logoUrl ? (
-              <div className="relative h-14 w-44">
+              <div className="relative h-16 w-32">
                 <Image
                   src={business.siteContent.logoUrl}
                   alt={business.name}
                   fill
-                  sizes="176px"
-                  className="object-contain object-left"
+                  sizes="160px"
+                  className="object-contain"
                 />
               </div>
             ) : (
-              <span className="font-serif text-xl font-light tracking-[0.12em] text-foreground">
-                {business.name ?? "Visual Noise"}
-              </span>
+              <>
+                <span>Visual</span>
+                <span className="vn-wordmark-x">×</span>
+                <span>Noise</span>
+                <span className="vn-wordmark-detroit">DETROIT</span>
+              </>
             )}
           </Link>
 
-          {/* Desktop Nav — centered */}
-          <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "font-sans text-[10px] tracking-[0.22em] uppercase transition-colors",
-                  pathname === link.href
-                    ? "text-foreground"
-                    : "text-foreground/45 hover:text-foreground",
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            {session?.user ? userMenu : authActions}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative text-foreground/60 hover:bg-foreground/5 hover:text-foreground"
+          {/* Right: actions */}
+          <div className="flex items-center justify-end gap-3">
+            <span className="vn-stamp vn-stamp-solid hidden md:inline-flex">
+              EST · 2014
+            </span>
+            {session?.user ? userMenu : null}
+            <button
               onClick={() => setIsOpen(true)}
               aria-label="Open cart"
+              className="vn-stamp hover:bg-foreground hover:text-background relative cursor-pointer transition-colors"
             >
-              <ShoppingBag className="h-4.5 w-4.5" />
+              <ShoppingBag className="h-3.5 w-3.5" />
+              <span>BAG</span>
               {itemCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-foreground text-[9px] font-bold text-background"
+                  className="font-mono text-[10px]"
                 >
-                  {itemCount}
+                  · {itemCount}
                 </motion.span>
               )}
-            </Button>
-
-            {/* Mobile Menu */}
+            </button>
+            {/* Mobile menu trigger */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-foreground/60 hover:bg-foreground/5 hover:text-foreground"
+                  className="border-foreground/20 text-foreground/60 hover:bg-foreground hover:text-background h-8 w-8 rounded-none border"
                   aria-label="Open menu"
                 >
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
               <SheetContent
                 side="right"
-                className="flex w-[min(100vw-1rem,20rem)] flex-col gap-0 border-l border-border bg-background p-0"
+                className="border-foreground bg-background flex w-[min(100vw-1rem,22rem)] flex-col gap-0 rounded-none border-l p-0"
               >
-                <div className="border-b border-border px-6 pb-6 pt-12">
-                  <SheetTitle className="font-serif text-xl font-light tracking-widest text-foreground">
-                    {business.name ?? "Visual Noise"}
+                <div className="border-foreground border-b px-6 pt-12 pb-6">
+                  <SheetTitle className="vn-wordmark">
+                    <span>Visual</span>
+                    <span className="vn-wordmark-x">×</span>
+                    <span>Noise</span>
                   </SheetTitle>
-                  <SheetDescription className="mt-1 font-sans text-[10px] tracking-[0.25em] uppercase text-muted-foreground">
+                  <SheetDescription className="text-muted-foreground mt-2 font-mono text-[9px] tracking-[0.3em] uppercase">
                     Detroit Fashion
                   </SheetDescription>
                 </div>
-
                 <nav
                   className="flex flex-1 flex-col gap-0 overflow-y-auto overscroll-contain p-4"
                   aria-label="Mobile navigation"
@@ -178,7 +191,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                         href={link.href}
                         onClick={() => setMobileOpen(false)}
                         className={cn(
-                          "flex items-center border-b border-border py-4 font-sans text-[10px] tracking-[0.3em] uppercase transition-colors",
+                          "border-border flex items-center border-b py-4 font-mono text-[10px] tracking-[0.3em] uppercase transition-colors",
                           active
                             ? "text-foreground"
                             : "text-muted-foreground hover:text-foreground",
@@ -189,14 +202,61 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     );
                   })}
                 </nav>
-
-                <div className="border-t border-border px-6 py-4 font-sans text-[9px] tracking-[0.3em] uppercase text-muted-foreground/50">
-                  Visual Noise · Detroit
+                {/* Auth action in mobile sheet */}
+                <div className="border-border flex items-center justify-between border-t px-6 py-4">
+                  {session?.user ? (
+                    <div className="flex items-center gap-3">
+                      {userMenu}
+                      <span className="text-muted-foreground/50 font-mono text-[9px] tracking-[0.3em] uppercase">
+                        Account
+                      </span>
+                    </div>
+                  ) : (
+                    <Link
+                      href="/auth/sign-in"
+                      onClick={() => setMobileOpen(false)}
+                      className="hover:text-foreground text-muted-foreground font-mono text-[10px] tracking-[0.22em] uppercase transition-colors"
+                    >
+                      Login →
+                    </Link>
+                  )}
+                  <span className="text-muted-foreground/50 font-mono text-[9px] tracking-[0.3em] uppercase">
+                    Det. 2014
+                  </span>
                 </div>
               </SheetContent>
             </Sheet>
           </div>
         </div>
+
+        {/* Row 3 — Nav row */}
+        <nav
+          className="border-foreground/20 bg-background hidden items-center justify-between border-b px-7 py-3 md:flex"
+          aria-label="Main navigation"
+        >
+          <div className="flex items-center gap-7">
+            {links.map((link) => {
+              const active = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "vn-nav-link font-mono text-[10.5px] tracking-[0.22em] uppercase transition-colors",
+                    active
+                      ? "text-foreground vn-active"
+                      : "text-foreground/45 hover:text-foreground",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
+          <div className="text-foreground/40 flex items-center gap-4 font-mono text-[10.5px] tracking-[0.18em] uppercase">
+            <span className="hidden lg:inline">Made in Detroit</span>
+          </div>
+        </nav>
       </header>
       <NoiseCartDrawer shippingConfig={shippingConfigFromBusiness(business)} />
     </>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import type { Product } from "~/types";
 import type { RouterOutputs } from "~/trpc/react";
 import {
   FadeIn,
@@ -37,29 +38,32 @@ export function NoiseFeaturedProducts({
   const btnLink = featuredButtonLink ?? "/shop";
 
   return (
-    <section className="bg-secondary py-24">
-      <div className="mx-auto max-w-7xl px-4 lg:px-8">
-        {/* Header */}
-        <FadeIn className="mb-16 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <section className="border-b border-foreground/15 py-24" style={{ background: "var(--vn-bone)" }}>
+      <div className="mx-auto max-w-7xl px-7">
+        {/* Section header */}
+        <FadeIn className="mb-14 flex flex-col gap-3 md:flex-row md:items-end md:justify-between border-b border-foreground/20 pb-8">
           <div>
-            <p className="text-muted-foreground mb-3 font-sans text-[9px] tracking-[0.4em] uppercase">
-              Featured
+            <p className="mb-4 font-mono text-[9.5px] tracking-[0.4em] uppercase text-muted-foreground">
+              Section / 03 — Featured
             </p>
-            <h2 className="text-foreground font-serif text-4xl font-light tracking-tight md:text-5xl">
+            <h2
+              className="font-serif italic leading-tight tracking-tight"
+              style={{ fontSize: "clamp(2.5rem, 5vw, 4.5rem)", letterSpacing: "-0.02em" }}
+            >
               {title}
             </h2>
             {description && (
-              <p className="text-muted-foreground mt-3 font-sans text-sm">
+              <p className="mt-3 font-sans text-sm text-muted-foreground max-w-[44ch]">
                 {description}
               </p>
             )}
           </div>
           <Link
             href={btnLink}
-            className="text-foreground inline-flex shrink-0 items-center gap-3 font-sans text-[10px] tracking-[0.3em] uppercase transition-opacity hover:opacity-60"
+            className="inline-flex shrink-0 items-center gap-3 font-mono text-[10px] tracking-[0.3em] uppercase transition-opacity hover:opacity-60"
           >
             <span>{btnText}</span>
-            <span className="bg-foreground h-px w-10" />
+            <span className="h-px w-10 bg-foreground" />
           </Link>
         </FadeIn>
 
@@ -71,21 +75,7 @@ export function NoiseFeaturedProducts({
           {featuredProducts.map((product, index) => (
             <StaggerItem key={product.id}>
               <NoiseProductCard
-                product={{
-                  id: product.id,
-                  name: product.name,
-                  description: product.description ?? "",
-                  price:
-                    product.variants.length > 0
-                      ? (product.variants[0]?.price ?? 0)
-                      : product.price,
-                  image: product.images[0]?.url ?? "/placeholder.svg",
-                  slug: product.slug ?? "",
-                  additionalFields: product.additionalFields,
-                  trackInventory: product.trackInventory,
-                  inventoryQty: product.inventoryQty,
-                  allowBackorders: product.allowBackorders,
-                }}
+                product={product as unknown as Product}
                 index={index}
               />
             </StaggerItem>

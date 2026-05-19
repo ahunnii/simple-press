@@ -8,10 +8,18 @@ import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
 
-const quickLinks = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
+const READ_LINKS = [
+  { href: "/blog", label: "Journal" },
+  { href: "/testimonials", label: "Voices" },
   { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
+
+const NAV_LINKS = [
+  { href: "/", label: "Index" },
+  { href: "/shop", label: "Shop" },
+  { href: "/blog", label: "Journal" },
+  { href: "/about", label: "Studio" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -20,7 +28,6 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
   const phone = business?.phoneNumber;
   const address = business?.businessAddress;
   const name = business?.name ?? "Visual Noise";
-  const footerTagline = business?.siteContent?.footerText;
   const logoUrl = business?.siteContent?.logoUrl;
 
   const navigationItems = business?.siteContent?.navigationItems as
@@ -38,47 +45,97 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
       }
     | undefined;
 
-  return (
-    <footer className="bg-background">
-      {/* Top border */}
-      <div className="bg-border h-px" />
+  const hasSocial =
+    !!(socialLinks?.instagram ?? socialLinks?.facebook ?? socialLinks?.twitter ?? socialLinks?.tiktok);
 
-      {/* Main columns */}
-      <div className="container mx-auto px-4 py-14">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Brand */}
-          <div className="space-y-4">
-            <p className="text-foreground font-sans text-[9px] font-medium tracking-[0.35em] uppercase">
-              {name}
-            </p>
-            {!!footerTagline && (
-              <p className="text-foreground/65 font-sans text-sm leading-relaxed">
-                {footerTagline}
-              </p>
-            )}
-            <div className="flex gap-4 pt-1">
-              {socialLinks?.facebook && (
-                <a
-                  href={socialLinks.facebook}
-                  className="text-foreground/40 hover:text-foreground transition-colors"
-                  aria-label="Facebook"
-                >
-                  <FacebookIcon className="h-3.5 w-3.5" />
-                </a>
+  return (
+    <footer
+      className="border-t-2 border-foreground"
+      style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
+    >
+      {/* Main grid — 1 col → 2 col → 4 col */}
+      <div
+        className="grid gap-9 px-7 pt-16 pb-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]"
+      >
+        {/* Column 1 — Brand: large serif wordmark + address */}
+        <div className="flex flex-col gap-0">
+          {/* Big wordmark */}
+          {logoUrl ? (
+            <div className="relative mb-5" style={{ height: "80px", width: "180px" }}>
+              <Image
+                src={logoUrl}
+                alt={name}
+                fill
+                sizes="180px"
+                className="object-contain object-left"
+              />
+            </div>
+          ) : (
+            <div
+              className="font-serif italic leading-[1] mb-4 select-none"
+              style={{ fontSize: "56px", letterSpacing: "-0.02em" }}
+            >
+              {/* Split "Visual Noise" for the two-line treatment */}
+              {name.includes(" ") ? (
+                <>
+                  {name.split(" ")[0]}
+                  <br />
+                  {name.split(" ").slice(1).join(" ")}.
+                </>
+              ) : (
+                <>{name}.</>
               )}
+            </div>
+          )}
+
+          {/* Mini — address block in JetBrains Mono */}
+          <div
+            className="font-mono text-[10.5px] leading-[1.6] tracking-[0.14em] uppercase"
+            style={{ color: "var(--vn-steel-mist)" }}
+          >
+            {address && <span>{address}<br /></span>}
+            {phone && <span>{phone}<br /></span>}
+            {email && (
+              <a
+                href={`mailto:${email}`}
+                className="transition-opacity hover:opacity-80 block"
+              >
+                {email}
+              </a>
+            )}
+            {!address && !phone && !email && (
+              <span>Detroit, Michigan</span>
+            )}
+          </div>
+
+          {/* Social icons */}
+          {hasSocial && (
+            <div className="flex gap-4 mt-5">
               {socialLinks?.instagram && (
                 <a
                   href={socialLinks.instagram}
-                  className="text-foreground/40 hover:text-foreground transition-colors"
+                  className="transition-opacity hover:opacity-60"
+                  style={{ color: "var(--vn-steel-mist)" }}
                   aria-label="Instagram"
                 >
                   <InstagramIcon className="h-3.5 w-3.5" />
                 </a>
               )}
+              {socialLinks?.facebook && (
+                <a
+                  href={socialLinks.facebook}
+                  className="transition-opacity hover:opacity-60"
+                  style={{ color: "var(--vn-steel-mist)" }}
+                  aria-label="Facebook"
+                >
+                  <FacebookIcon className="h-3.5 w-3.5" />
+                </a>
+              )}
               {socialLinks?.twitter && (
                 <a
                   href={socialLinks.twitter}
-                  className="text-foreground/40 hover:text-foreground transition-colors"
+                  className="transition-opacity hover:opacity-60"
+                  style={{ color: "var(--vn-steel-mist)" }}
                   aria-label="Twitter"
                 >
                   <TwitterLogoIcon className="h-3.5 w-3.5" />
@@ -87,126 +144,166 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
               {socialLinks?.tiktok && (
                 <a
                   href={socialLinks.tiktok}
-                  className="text-foreground/40 hover:text-foreground transition-colors"
+                  className="transition-opacity hover:opacity-60"
+                  style={{ color: "var(--vn-steel-mist)" }}
                   aria-label="TikTok"
                 >
                   <TikTokIcon className="h-3.5 w-3.5" />
                 </a>
               )}
             </div>
-          </div>
-
-          {/* Navigate */}
-          <div>
-            <p className="text-foreground mb-5 font-sans text-[9px] font-medium tracking-[0.35em] uppercase">
-              Navigate
-            </p>
-            <ul className="flex flex-col gap-3">
-              {(navigationItems ?? quickLinks).map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-foreground/70 hover:text-foreground font-sans text-sm transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <p className="text-foreground mb-5 font-sans text-[9px] font-medium tracking-[0.35em] uppercase">
-              Contact
-            </p>
-            <address className="flex flex-col gap-3 not-italic">
-              <span className="text-foreground/70 font-sans text-sm">
-                {name}
-              </span>
-              {!!address && (
-                <span className="text-foreground/70 font-sans text-sm">
-                  {address}
-                </span>
-              )}
-              {!!phone && (
-                <a
-                  href={`tel:${phone.replace(/\D/g, "")}`}
-                  className="text-foreground/70 hover:text-foreground font-sans text-sm transition-colors"
-                >
-                  {phone}
-                </a>
-              )}
-              {!!email && (
-                <a
-                  href={`mailto:${email}`}
-                  className="text-foreground/70 hover:text-foreground font-sans text-sm transition-colors"
-                >
-                  {email}
-                </a>
-              )}
-            </address>
-          </div>
-
-          {/* Motto */}
-          <div>
-            <p className="text-foreground mb-5 font-sans text-[9px] font-medium tracking-[0.35em] uppercase">
-              The Brand
-            </p>
-            <p className="text-foreground/75 font-serif text-xl leading-snug font-light italic">
-              ...because fashion shouldn&apos;t be quiet
-            </p>
-            <p className="text-foreground/40 mt-4 font-sans text-[9px] tracking-[0.3em] uppercase">
-              Detroit, Michigan
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Policy row */}
-      <div className="border-border border-t">
-        <div className="text-foreground/45 container mx-auto flex flex-col items-center justify-between gap-3 px-4 py-5 font-sans text-[9px] tracking-[0.2em] uppercase sm:flex-row">
-          <p>
-            &copy; {new Date().getFullYear()} {name}. All rights reserved.
-          </p>
-          <div className="flex gap-6">
-            {policies.map((link) => (
-              <Link
-                key={link.id}
-                href={`/${link.slug}`}
-                className="hover:text-foreground/80 transition-colors"
-              >
-                {link.title}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Large centered logo — brand anchor */}
-      <div className="border-border/40 border-t py-14">
-        <div className="container mx-auto flex flex-col items-center px-4">
-          {logoUrl ? (
-            <div className="relative h-20 w-56">
-              <Image
-                src={logoUrl}
-                alt={name}
-                fill
-                sizes="224px"
-                className="object-contain"
-              />
-            </div>
-          ) : (
-            <p
-              className="text-foreground/15 hover:text-foreground/30 text-center font-serif leading-none font-light tracking-[0.08em] transition-opacity select-none"
-              style={{ fontSize: "clamp(3rem, 9vw, 8rem)" }}
-            >
-              {name}
-            </p>
           )}
-          <p className="text-foreground/25 mt-4 font-sans text-[8px] tracking-[0.55em] uppercase">
-            Detroit · Visual Noise
-          </p>
+        </div>
+
+        {/* Column 2 — Shop / Navigate */}
+        <div>
+          <h4
+            className="font-mono text-[10.5px] tracking-[0.22em] uppercase mb-4"
+            style={{ color: "var(--vn-steel-mist)" }}
+          >
+            Shop
+          </h4>
+          <ul className="flex flex-col gap-2">
+            {(navigationItems ?? NAV_LINKS).map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="font-sans text-sm transition-opacity hover:opacity-60"
+                  style={{ color: "var(--vn-bone)" }}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Column 3 — Read */}
+        <div>
+          <h4
+            className="font-mono text-[10.5px] tracking-[0.22em] uppercase mb-4"
+            style={{ color: "var(--vn-steel-mist)" }}
+          >
+            Read
+          </h4>
+          <ul className="flex flex-col gap-2">
+            {READ_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="font-sans text-sm transition-opacity hover:opacity-60"
+                  style={{ color: "var(--vn-bone)" }}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Column 4 — Signal (social + newsletter) */}
+        <div>
+          <h4
+            className="font-mono text-[10.5px] tracking-[0.22em] uppercase mb-4"
+            style={{ color: "var(--vn-steel-mist)" }}
+          >
+            Signal
+          </h4>
+          <ul className="flex flex-col gap-2">
+            {socialLinks?.instagram && (
+              <li>
+                <a
+                  href={socialLinks.instagram}
+                  className="font-sans text-sm transition-opacity hover:opacity-60 block"
+                  style={{ color: "var(--vn-bone)" }}
+                >
+                  Instagram /&nbsp;
+                  <span style={{ color: "var(--vn-steel-mist)" }}>
+                    {socialLinks.instagram.replace(/^https?:\/\/(www\.)?instagram\.com\/?/, "@").replace(/\/$/, "")}
+                  </span>
+                </a>
+              </li>
+            )}
+            {socialLinks?.tiktok && (
+              <li>
+                <a
+                  href={socialLinks.tiktok}
+                  className="font-sans text-sm transition-opacity hover:opacity-60 block"
+                  style={{ color: "var(--vn-bone)" }}
+                >
+                  TikTok
+                </a>
+              </li>
+            )}
+            {socialLinks?.facebook && (
+              <li>
+                <a
+                  href={socialLinks.facebook}
+                  className="font-sans text-sm transition-opacity hover:opacity-60 block"
+                  style={{ color: "var(--vn-bone)" }}
+                >
+                  Facebook
+                </a>
+              </li>
+            )}
+            {socialLinks?.twitter && (
+              <li>
+                <a
+                  href={socialLinks.twitter}
+                  className="font-sans text-sm transition-opacity hover:opacity-60 block"
+                  style={{ color: "var(--vn-bone)" }}
+                >
+                  Twitter / X
+                </a>
+              </li>
+            )}
+            {/* Always show newsletter link */}
+            <li>
+              <a
+                href="#newsletter"
+                className="font-sans text-sm transition-opacity hover:opacity-60 block"
+                style={{ color: "var(--vn-bone)" }}
+              >
+                Newsletter
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Bottom bar — three-piece: copyright · slogan · policies */}
+      <div
+        className="px-7 py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        style={{ borderTop: "1px solid #2a2c30" }}
+      >
+        {/* Copyright */}
+        <span
+          className="font-mono text-[10px] tracking-[0.18em] uppercase"
+          style={{ color: "var(--vn-steel-mist)" }}
+        >
+          &copy; {new Date().getFullYear()} {name} — Detroit. All garments numbered.
+        </span>
+
+        {/* Slogan — center, hidden on small screens */}
+        <span
+          className="font-mono text-[10px] tracking-[0.18em] uppercase hidden lg:block"
+          style={{ color: "var(--vn-steel-mist)" }}
+        >
+          Because fashion shouldn&apos;t be quiet ✦ ✦ ✦
+        </span>
+
+        {/* Policies */}
+        <div className="flex flex-wrap gap-4">
+          {policies.map((link) => (
+            <Link
+              key={link.id}
+              href={`/${link.slug}`}
+              className="font-mono text-[10px] tracking-[0.18em] uppercase transition-opacity hover:opacity-80"
+              style={{ color: "var(--vn-steel-mist)" }}
+            >
+              {link.title}
+            </Link>
+          ))}
         </div>
       </div>
     </footer>

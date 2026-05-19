@@ -7,19 +7,26 @@ import { PageTransition } from "~/components/page-animations";
 
 import { NoiseAccountLayout } from "./noise-account-layout";
 
-function statusClass(status: string) {
+function statusStyle(status: string): React.CSSProperties {
   switch (status) {
-    case "open":
-      return "border-blue-500/40 text-blue-400";
-    case "completed":
-      return "border-green-500/40 text-green-400";
-    case "cancelled":
-      return "border-red-500/40 text-red-400";
-    case "refunded":
-      return "border-border text-muted-foreground";
-    default:
-      return "border-yellow-500/40 text-yellow-400";
+    case "completed": return { borderColor: "#16a34a", color: "#16a34a" };
+    case "cancelled": return { borderColor: "#dc2626", color: "#dc2626" };
+    case "refunded": return { color: "var(--vn-steel-mist)", borderColor: "var(--vn-rule)" };
+    default: return {};
   }
+}
+
+function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+  return (
+    <div className="flex justify-between items-baseline py-2.5 border-b border-foreground/10">
+      <span className="font-mono text-[10px] tracking-[0.18em] uppercase" style={{ color: "var(--vn-steel)" }}>
+        {label}
+      </span>
+      <span className={bold ? "font-serif italic leading-none" : "font-mono text-[12px] tracking-[0.06em]"} style={bold ? { fontSize: "20px", letterSpacing: "-0.01em" } : {}}>
+        {value}
+      </span>
+    </div>
+  );
 }
 
 export function NoiseOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
@@ -28,117 +35,107 @@ export function NoiseOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
   return (
     <PageTransition>
       <NoiseAccountLayout heading={`Order #${order.orderNumber}`}>
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <span
-            className={`border px-3 py-1 font-sans text-[9px] tracking-[0.2em] uppercase ${statusClass(order.status)}`}
-          >
+        {/* Meta bar */}
+        <div className="flex flex-wrap items-center gap-3 mb-8 pb-5 border-b border-foreground/15">
+          <span className="vn-stamp text-[9.5px]" style={statusStyle(order.status)}>
             {order.status}
           </span>
-          <span className="font-sans text-sm text-muted-foreground">
+          <span className="font-mono text-[10px] tracking-[0.14em] uppercase" style={{ color: "var(--vn-steel-mist)" }}>
             {formatDate(order.createdAt)}
           </span>
-          <Link
-            href="/account/orders"
-            className="font-sans text-[10px] tracking-[0.15em] uppercase text-muted-foreground underline-offset-4 hover:underline"
-          >
+          <Link href="/account/orders" className="font-mono text-[9.5px] tracking-[0.18em] uppercase ml-auto transition-opacity hover:opacity-60" style={{ color: "var(--vn-steel)" }}>
             ← All Orders
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
           {/* Items */}
-          <div className="space-y-6 lg:col-span-2">
-            <div className="border border-border p-6">
-              <h2 className="font-sans text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
-                Items
-              </h2>
-              <div className="mt-4 space-y-4">
+          <div className="flex flex-col gap-6">
+            <div className="border border-foreground/20">
+              {/* Table header */}
+              <div className="grid gap-4 px-5 py-3 border-b border-foreground/15" style={{ gridTemplateColumns: "1fr auto auto" }}>
+                {["Garment", "Qty", "Total"].map((h) => (
+                  <span key={h} className="font-mono text-[9.5px] tracking-[0.22em] uppercase" style={{ color: "var(--vn-steel-mist)" }}>
+                    {h}
+                  </span>
+                ))}
+              </div>
+
+              {/* Items */}
+              <div className="divide-y divide-foreground/10">
                 {order.items.map((item) => (
-                  <div key={item.id} className="flex items-start justify-between gap-4">
+                  <div key={item.id} className="grid items-start gap-4 px-5 py-4" style={{ gridTemplateColumns: "1fr auto auto" }}>
                     <div>
-                      <p className="font-sans text-sm text-foreground">{item.productName}</p>
+                      <p className="font-serif italic leading-none" style={{ fontSize: "18px", letterSpacing: "-0.005em" }}>
+                        {item.productName}
+                      </p>
                       {item.variantName && (
-                        <p className="font-sans text-xs text-muted-foreground">{item.variantName}</p>
+                        <p className="font-mono text-[9.5px] tracking-[0.14em] uppercase mt-1" style={{ color: "var(--vn-steel-mist)" }}>
+                          {item.variantName}
+                        </p>
                       )}
-                      <p className="font-sans text-xs text-muted-foreground">Qty: {item.quantity}</p>
                     </div>
-                    <p className="font-serif text-lg font-light text-foreground">
-                      {formatPrice(item.price * item.quantity)}
-                    </p>
+                    <span className="font-mono text-[11px] tracking-[0.1em]">×{item.quantity}</span>
+                    <span className="font-mono text-[12px] tracking-[0.06em]">{formatPrice(item.price * item.quantity)}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-6 space-y-2 border-t border-border pt-4">
-                <div className="flex justify-between font-sans text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>{formatPrice(order.subtotal)}</span>
-                </div>
+              {/* Totals */}
+              <div className="px-5 pb-4 pt-2 border-t border-foreground/15">
+                <Row label="Subtotal" value={formatPrice(order.subtotal)} />
                 {order.discount > 0 && (
-                  <div className="flex justify-between font-sans text-sm text-green-400">
-                    <span>Discount</span>
-                    <span>-{formatPrice(order.discount)}</span>
+                  <div className="flex justify-between items-baseline py-2.5 border-b border-foreground/10">
+                    <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-green-600">Discount</span>
+                    <span className="font-mono text-[12px] tracking-[0.06em] text-green-600">−{formatPrice(order.discount)}</span>
                   </div>
                 )}
-                <div className="flex justify-between font-sans text-sm">
-                  <span className="text-muted-foreground">Shipping</span>
-                  <span>{order.shipping > 0 ? formatPrice(order.shipping) : "Free"}</span>
-                </div>
-                {order.tax > 0 && (
-                  <div className="flex justify-between font-sans text-sm">
-                    <span className="text-muted-foreground">Tax</span>
-                    <span>{formatPrice(order.tax)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between border-t border-border pt-2">
-                  <span className="font-sans text-sm font-medium">Total</span>
-                  <span className="font-serif text-xl font-light">{formatPrice(order.total)}</span>
-                </div>
+                <Row label="Shipping" value={order.shipping > 0 ? formatPrice(order.shipping) : "Free"} />
+                {order.tax > 0 && <Row label="Tax" value={formatPrice(order.tax)} />}
+                <Row label="Total" value={formatPrice(order.total)} bold />
               </div>
             </div>
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             {addr && (
-              <div className="border border-border p-6">
-                <h2 className="font-sans text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
+              <div className="border border-foreground/20 p-5">
+                <h5 className="font-mono text-[9px] tracking-[0.22em] uppercase mb-4" style={{ color: "var(--vn-steel-mist)" }}>
                   Shipping Address
-                </h2>
-                <address className="mt-3 space-y-0.5 font-sans text-sm not-italic text-foreground">
-                  <p>{addr.firstName} {addr.lastName}</p>
-                  <p className="text-muted-foreground">{addr.address1}</p>
-                  {addr.address2 && <p className="text-muted-foreground">{addr.address2}</p>}
-                  <p className="text-muted-foreground">
+                </h5>
+                <address className="not-italic flex flex-col gap-1">
+                  <p className="font-sans text-sm">{addr.firstName} {addr.lastName}</p>
+                  <p className="font-sans text-sm" style={{ color: "var(--vn-steel-mist)" }}>{addr.address1}</p>
+                  {addr.address2 && <p className="font-sans text-sm" style={{ color: "var(--vn-steel-mist)" }}>{addr.address2}</p>}
+                  <p className="font-sans text-sm" style={{ color: "var(--vn-steel-mist)" }}>
                     {addr.city}{addr.province ? `, ${addr.province}` : ""} {addr.zip}
                   </p>
-                  <p className="text-muted-foreground">{addr.country}</p>
+                  <p className="font-sans text-sm" style={{ color: "var(--vn-steel-mist)" }}>{addr.country}</p>
                 </address>
               </div>
             )}
 
             {order.shipments && order.shipments.length > 0 && (
-              <div className="border border-border p-6">
-                <h2 className="font-sans text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
+              <div className="border border-foreground/20 p-5">
+                <h5 className="font-mono text-[9px] tracking-[0.22em] uppercase mb-4" style={{ color: "var(--vn-steel-mist)" }}>
                   Shipments
-                </h2>
-                <div className="mt-3 space-y-3">
+                </h5>
+                <div className="flex flex-col gap-4">
                   {order.shipments.map((shipment) => (
-                    <div key={shipment.id} className="font-sans text-sm">
+                    <div key={shipment.id} className="flex flex-col gap-1">
                       {shipment.carrier && (
-                        <p className="text-foreground">{shipment.carrier}</p>
+                        <p className="font-mono text-[10.5px] tracking-[0.14em] uppercase">{shipment.carrier}</p>
                       )}
                       {shipment.trackingNumber && (
-                        <p className="text-muted-foreground">{shipment.trackingNumber}</p>
+                        <p className="font-mono text-[10px] tracking-[0.1em]" style={{ color: "var(--vn-steel-mist)" }}>
+                          {shipment.trackingNumber}
+                        </p>
                       )}
                       {shipment.trackingUrl && (
-                        <Link
-                          href={shipment.trackingUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[10px] tracking-[0.15em] uppercase underline-offset-4 hover:underline"
-                        >
-                          Track →
+                        <Link href={shipment.trackingUrl} target="_blank" rel="noopener noreferrer"
+                          className="vn-stamp text-[9.5px] w-fit transition-all hover:bg-foreground hover:text-background">
+                          Track shipment →
                         </Link>
                       )}
                     </div>
