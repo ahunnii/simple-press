@@ -52,7 +52,7 @@ export function PollenCartContents({ business }: Props) {
   if (items.length === 0) {
     return (
       <PageTransition>
-        <section className="mx-auto flex max-w-7xl flex-col items-center justify-center px-4 py-24 text-center sm:px-6 lg:px-8">
+        <section className="mx-auto flex max-w-7xl flex-col items-center justify-center px-4 py-40 text-center sm:px-6 lg:px-8">
           <FadeIn direction="up">
             <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-[#f5f2ee]">
               <ShoppingBag className="size-8 text-[#4c566a]" />
@@ -78,7 +78,7 @@ export function PollenCartContents({ business }: Props) {
 
   return (
     <PageTransition>
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 py-40 sm:px-6 lg:px-8">
         <FadeIn direction="up">
           <h1 className="mb-8 text-3xl font-bold text-[#2a351f] md:text-4xl">
             Your Cart

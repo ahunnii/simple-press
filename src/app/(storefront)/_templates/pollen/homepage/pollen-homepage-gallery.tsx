@@ -2,54 +2,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import type { GenericImageRow } from "~/lib/template-fields";
+import { buttonVariants } from "~/components/ui/button";
 import {
   FadeIn,
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
-import { buttonVariants } from "~/components/ui/button";
-
-type GalleryItem = { label: string; image: string };
-
-const DEFAULT_GALLERY_ITEMS: GalleryItem[] = [
-  {
-    label: "Eastern Market District",
-    image:
-      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=450&fit=crop",
-  },
-  {
-    label: "Palmer Woods",
-    image:
-      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600&h=450&fit=crop",
-  },
-  {
-    label: "New Center Commons",
-    image:
-      "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=600&h=450&fit=crop",
-  },
-  {
-    label: "Belle Isle Conservatory",
-    image:
-      "https://images.unsplash.com/photo-1558904541-efa843a96f01?w=600&h=450&fit=crop",
-  },
-  {
-    label: "Detroit Botanical Gardens",
-    image:
-      "https://images.unsplash.com/photo-1598902108854-10e335adac99?w=600&h=450&fit=crop",
-  },
-  {
-    label: "Fitzgerald Neighborhood",
-    image:
-      "https://images.unsplash.com/photo-1592150621744-aca64f48394a?w=600&h=450&fit=crop",
-  },
-];
 
 type Props = {
-  sectionLabel: string;
-  sectionHeading: string;
-  buttonText: string;
-  buttonLink: string;
-  galleryItems: GalleryItem[];
+  sectionLabel?: string;
+  sectionHeading?: string;
+  buttonText?: string;
+  buttonLink?: string;
+  galleryItems?: GenericImageRow[];
 };
 
 export function PollenHomepageGallery({
@@ -59,8 +25,6 @@ export function PollenHomepageGallery({
   buttonLink,
   galleryItems,
 }: Props) {
-  const items = galleryItems.length > 0 ? galleryItems : DEFAULT_GALLERY_ITEMS;
-
   return (
     <section id="gallery" className="bg-background py-20 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -76,7 +40,7 @@ export function PollenHomepageGallery({
         </FadeIn>
 
         <StaggerContainer className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
+          {galleryItems?.map((item) => (
             <StaggerItem key={item.label}>
               <div className="group relative aspect-4/3 overflow-hidden rounded-xl">
                 <Image
@@ -97,7 +61,7 @@ export function PollenHomepageGallery({
 
         <div className="flex justify-center">
           <Link
-            href={buttonLink}
+            href={buttonLink ?? "#!"}
             className={buttonVariants({
               size: "lg",
               className: "gap-2 bg-[#5e8b4a]! hover:bg-[#5e8b4a]/90!",

@@ -162,6 +162,14 @@ export const genericTextRowSchema = z
   })
   .passthrough();
 
+export const genericImageRowSchema = z
+  .object({
+    image: z.string(),
+    label: z.string(),
+    description: z.string().optional(),
+  })
+  .passthrough();
+
 export type GenericIconRow = {
   icon: LucideIcon;
   title: string;
@@ -171,6 +179,12 @@ export type GenericIconRow = {
 export type GenericTextRow = {
   title: string;
   description: string;
+};
+
+export type GenericImageRow = {
+  image: string;
+  label: string;
+  description?: string;
 };
 
 export function parseTemplateIconListRows(
@@ -203,6 +217,23 @@ export function parseTemplateTextListRows(
     if (!parsed.success) continue;
     const { title, description } = parsed.data;
     out.push({ title, description });
+  }
+
+  return out.length > 0 ? out : (defaultList ?? null);
+}
+
+export function parseTemplateImageListRows(
+  raw: unknown,
+  defaultList?: GenericImageRow[],
+) {
+  if (!Array.isArray(raw)) return defaultList ?? [];
+
+  const out: GenericImageRow[] = [];
+  for (const row of raw) {
+    const parsed = genericImageRowSchema.safeParse(row);
+    if (!parsed.success) continue;
+    const { image, label, description } = parsed.data;
+    out.push({ image, label, description });
   }
 
   return out.length > 0 ? out : (defaultList ?? null);

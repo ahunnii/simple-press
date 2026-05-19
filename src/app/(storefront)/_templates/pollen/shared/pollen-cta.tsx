@@ -15,17 +15,17 @@ export function PollenCallToAction({
   buttonLink,
   imageUrl,
 }: {
-  title: string;
-  subtitle: string;
-  description: string;
-  buttonText: string;
-  buttonLink: string;
-  imageUrl: string;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  buttonText?: string;
+  buttonLink?: string;
+  imageUrl?: string;
 }) {
   return (
     <section className="relative mx-auto max-w-7xl overflow-hidden rounded-xl py-12 md:py-24">
       <Image
-        src={imageUrl}
+        src={imageUrl ?? "/placeholder.svg"}
         alt=""
         fill
         className="object-cover"
@@ -50,7 +50,7 @@ export function PollenCallToAction({
             </p>
 
             <Link
-              href={buttonLink}
+              href={buttonLink ?? "#!"}
               className={cn(
                 buttonVariants({
                   size: "lg",

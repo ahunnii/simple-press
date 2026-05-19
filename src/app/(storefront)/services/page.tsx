@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { PollenServicesPage } from "../_templates/pollen/pollen-services-page";
+import { PollenServicesPage } from "../_templates/pollen/services/pollen-services-page";
 
 export default async function ServicesPage() {
   const business = await api.business.simplifiedGet();

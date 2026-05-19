@@ -22,12 +22,12 @@ const stagger = {
 };
 
 type Props = {
-  title: string;
-  subtitle: string;
-  descriptionText: string;
-  buttonText: string;
-  buttonLink: string;
-  imageUrl: string;
+  title?: string;
+  subtitle?: string;
+  descriptionText?: string;
+  buttonText?: string;
+  buttonLink?: string;
+  imageUrl?: string;
 };
 
 export function PollenHero({
@@ -42,8 +42,8 @@ export function PollenHero({
     <section className="relative flex h-svh min-h-[70vh] items-center justify-center overflow-hidden py-20 sm:py-28 md:min-h-[80vh] md:py-40">
       {/* Background image */}
       <Image
-        src={imageUrl}
-        alt="Bumblebee pollinating lavender flowers"
+        src={imageUrl ?? ""}
+        alt={title ?? ""}
         fill
         className="object-cover"
         sizes="100vw"
@@ -88,7 +88,7 @@ export function PollenHero({
             transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             <Link
-              href={buttonLink}
+              href={buttonLink ?? "#!"}
               className={buttonVariants({
                 size: "lg",
                 className:

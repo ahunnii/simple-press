@@ -1,6 +1,4 @@
-import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
@@ -13,9 +11,7 @@ import {
 import { resolveFields } from "..";
 import { PollenGeneralLayout } from "../layout/pollen-general-layout";
 import { PollenContactForm } from "./pollen-contact-form";
-
-const DEFAULT_FORM_IMAGE =
-  "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&h=1000&fit=crop";
+import { PollenContactInfoCard } from "./pollen-contact-info-card";
 
 export function PollenContactPage({
   business,
@@ -28,7 +24,6 @@ export function PollenContactPage({
     "pollen.contact.form-image",
   ]);
 
-  const formImage = f["pollen.contact.form-image"] ?? DEFAULT_FORM_IMAGE;
   const formTitle = f["pollen.contact.form-title"];
   const formDescription = f["pollen.contact.form-description"];
 
@@ -67,7 +62,7 @@ export function PollenContactPage({
         <StaggerContainer className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">
           {contactInfo.map((info) => (
             <StaggerItem key={info.label}>
-              <ContactInfoCard
+              <PollenContactInfoCard
                 Icon={info.icon}
                 label={info.label}
                 value={info.value}
@@ -79,11 +74,11 @@ export function PollenContactPage({
 
         <FadeIn direction="up" delay={0.15}>
           <div className="grid min-h-[560px] grid-cols-1 overflow-hidden rounded-lg shadow-xl lg:grid-cols-3">
-            <div className="relative flex flex-col items-center justify-end bg-[#2D4E2A] px-8 pt-8 lg:col-span-1 lg:justify-center lg:px-12">
+            <div className="relative flex flex-col items-center justify-end bg-[#2D4E2A] lg:col-span-1 lg:justify-center">
               <div className="relative h-full w-full">
                 <Image
-                  src={formImage}
-                  alt=""
+                  src={f["pollen.contact.form-image"]!}
+                  alt="Contact Us"
                   fill
                   className="object-cover object-bottom"
                   sizes="100vw"
@@ -105,41 +100,3 @@ export function PollenContactPage({
     </PollenGeneralLayout>
   );
 }
-
-const ContactInfoCard = ({
-  Icon,
-  label,
-  value,
-  href,
-}: {
-  Icon: LucideIcon;
-  label: string;
-  value: string;
-  href?: string;
-}) => {
-  return (
-    <div className="group rounded-lg bg-[#E5E8E0] px-6 py-8 text-left transition-colors duration-200 hover:bg-[#5B8A3F]">
-      <div className="mb-4 flex justify-center">
-        <Icon
-          className="h-8 w-8 text-[#5B8A3F] transition-colors duration-200 group-hover:text-white"
-          aria-hidden
-        />
-      </div>
-      <h3 className="mb-2 text-lg font-bold text-[#5B8A3F] transition-colors duration-200 group-hover:text-white">
-        {label}
-      </h3>
-      {href ? (
-        <Link
-          href={href}
-          className="text-sm font-normal text-[#5B8A3F] underline transition-colors duration-200 group-hover:text-white"
-        >
-          {value}
-        </Link>
-      ) : (
-        <p className="text-sm font-normal text-[#5B8A3F] transition-colors duration-200 group-hover:text-white">
-          {value}
-        </p>
-      )}
-    </div>
-  );
-};

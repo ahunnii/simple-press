@@ -3,13 +3,14 @@ import Image from "next/image";
 import type { RouterOutputs } from "~/trpc/react";
 import { PageTransition } from "~/components/page-animations";
 
+import { resolveFields } from "..";
 import { PollenCallToAction } from "../shared/pollen-cta";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   children: React.ReactNode;
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
   imageUrl?: string;
   showCTA?: boolean;
 };
@@ -21,10 +22,15 @@ export function PollenGeneralLayout({
   imageUrl,
   showCTA = true,
 }: Props) {
-  const themeSpecificFields = business?.siteContent?.customFields as Record<
-    string,
-    string
-  >;
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "pollen.global.header-background",
+    "pollen.global.cta-title",
+    "pollen.global.cta-subtitle",
+    "pollen.global.cta-text",
+    "pollen.global.cta-button-text",
+    "pollen.global.cta-button-link",
+    "pollen.global.cta-image",
+  ]);
 
   return (
     <PageTransition>
@@ -32,12 +38,8 @@ export function PollenGeneralLayout({
         {/* Hero Section */}
         <section className="relative overflow-hidden py-24 pb-16 md:py-32">
           <Image
-            src={
-              imageUrl ??
-              themeSpecificFields?.["pollen.global.header-background"] ??
-              "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1920&h=600&fit=crop"
-            }
-            alt=""
+            src={!!imageUrl ? imageUrl : f["pollen.global.header-background"]!}
+            alt={title ?? ""}
             fill
             className="object-cover object-right"
             sizes="100vw"
@@ -59,29 +61,12 @@ export function PollenGeneralLayout({
         {showCTA && (
           <div className="py-16">
             <PollenCallToAction
-              title={
-                themeSpecificFields?.["pollen.global.cta-title"] ??
-                "Call to Action"
-              }
-              subtitle={
-                themeSpecificFields?.["pollen.global.cta-subtitle"] ??
-                "Call to Action"
-              }
-              description={
-                themeSpecificFields?.["pollen.global.cta-text"] ??
-                "Call to Action"
-              }
-              buttonText={
-                themeSpecificFields?.["pollen.global.cta-button-text"] ??
-                "Call to Action"
-              }
-              buttonLink={
-                themeSpecificFields?.["pollen.global.cta-button-link"] ?? "#!"
-              }
-              imageUrl={
-                themeSpecificFields?.["pollen.global.cta-image"] ??
-                "/placeholder.svg"
-              }
+              title={f["pollen.global.cta-title"]}
+              subtitle={f["pollen.global.cta-subtitle"]}
+              description={f["pollen.global.cta-text"]}
+              buttonText={f["pollen.global.cta-button-text"]}
+              buttonLink={f["pollen.global.cta-button-link"]}
+              imageUrl={f["pollen.global.cta-image"]}
             />
           </div>
         )}

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
+import { FadeIn, PageTransition } from "~/components/page-animations";
+
 import { resolveFields } from "..";
 
 export function PollenCollectionsPage({
@@ -11,29 +13,33 @@ export function PollenCollectionsPage({
 }: DefaultCollectionsPageTemplateProps) {
   const list = collections ?? [];
   const f = resolveFields(business.siteContent?.customFields, [
-    "pollen.collections.listing-title",
+    "pollen.collections.page-title",
+    "pollen.collections.page-subtitle",
     "pollen.collections.listing-intro",
   ]);
 
   return (
-    <div className="bg-white pt-28">
-      {/* Header */}
-      <div className="border-b border-[#2a351f]/10 bg-[#f5f2ee] px-4 py-16 text-center sm:px-6 lg:px-8">
-        <p className="mb-2 text-sm font-medium tracking-wider text-[#5e7747] uppercase">
-          Collections
-        </p>
-        <h1 className="text-4xl font-bold text-[#2a351f] md:text-5xl">
-          {f["pollen.collections.listing-title"] ?? "Our Collections"}
-        </h1>
-        <p className="mx-auto mt-4 max-w-lg text-base text-[#4c566a]">
-          {f["pollen.collections.listing-intro"] ?? "Browse our curated collections."}
-        </p>
-      </div>
+    <PageTransition>
+      <section className="mx-auto max-w-7xl px-4 pt-40 pb-8 sm:px-6 lg:px-8">
+        <FadeIn direction="up">
+          <div className="mb-12">
+            <p className="mb-2 text-sm font-medium tracking-wider text-[#5e7747] uppercase">
+              {f["pollen.collections.page-subtitle"] ?? "Collections"}
+            </p>
+            <h1 className="text-4xl font-bold text-[#2a351f] md:text-5xl">
+              {f["pollen.collections.page-title"] ?? "Our Collections"}
+            </h1>
+            {f["pollen.collections.listing-intro"] && (
+              <p className="mt-3 max-w-2xl text-[#4c566a]">
+                {f["pollen.collections.listing-intro"]}
+              </p>
+            )}
+          </div>
+        </FadeIn>
 
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         {list.length === 0 ? (
-          <div className="py-20 text-center">
-            <p className="text-lg text-[#4c566a]">
+          <div className="py-16 text-center">
+            <p className="text-lg text-gray-500">
               No collections available at this time.
             </p>
           </div>
@@ -82,7 +88,7 @@ export function PollenCollectionsPage({
             })}
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </PageTransition>
   );
 }

@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
-import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
+import {
+  calculateShipping,
+  getAmountUntilFreeShipping,
+  getFreeShippingProgress,
+  SHIPPING_TYPES,
+  shippingConfigFromBusiness,
+} from "~/lib/shipping-utils";
 import { Button } from "~/components/ui/button";
 import {
   FadeIn,

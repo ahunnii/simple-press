@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
+import { FadeIn, PageTransition } from "~/components/page-animations";
 
 export function PollenCollectionPage({
   collection,
@@ -18,7 +19,7 @@ export function PollenCollectionPage({
     .slice(0, 3);
 
   return (
-    <div className="bg-white pt-28">
+    <PageTransition>
       {/* Hero */}
       {collection.imageUrl ? (
         <div className="relative h-[45vh] min-h-[320px] overflow-hidden">
@@ -56,32 +57,49 @@ export function PollenCollectionPage({
           </div>
         </div>
       ) : (
-        <div className="border-b border-[#2a351f]/10 bg-[#f5f2ee] px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <Link
-              href="/collections"
-              className="mb-4 inline-flex items-center gap-2 text-sm text-[#4c566a] transition-colors hover:text-[#215935]"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              All Collections
-            </Link>
-            <h1 className="text-4xl font-bold text-[#2a351f] md:text-5xl">
-              {collection.name}
-            </h1>
-            {collection.description && (
-              <p className="mt-3 max-w-xl text-[#4c566a]">
-                {collection.description}
+        <section className="mx-auto max-w-7xl px-4 pt-40 pb-8 sm:px-6 lg:px-8">
+          <FadeIn direction="up">
+            <div className="mb-12">
+              <Link
+                href="/collections"
+                className="mb-4 inline-flex items-center gap-2 text-sm text-[#4c566a] transition-colors hover:text-[#215935]"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                All Collections
+              </Link>
+              <p className="mb-2 mt-4 text-sm font-medium tracking-wider text-[#5e7747] uppercase">
+                Collection
               </p>
-            )}
-            <p className="mt-3 text-sm text-[#4c566a]">
-              {products.length} {products.length === 1 ? "product" : "products"}
-            </p>
-          </div>
-        </div>
+              <h1 className="text-4xl font-bold text-[#2a351f] md:text-5xl">
+                {collection.name}
+              </h1>
+              {collection.description && (
+                <p className="mt-3 max-w-2xl text-[#4c566a]">
+                  {collection.description}
+                </p>
+              )}
+              <p className="mt-2 text-sm text-[#4c566a]">
+                {products.length}{" "}
+                {products.length === 1 ? "product" : "products"}
+              </p>
+            </div>
+          </FadeIn>
+        </section>
       )}
 
       {/* Products */}
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        {collection.imageUrl && (
+          <FadeIn direction="up">
+            <Link
+              href="/collections"
+              className="mb-8 inline-flex items-center gap-2 text-sm text-[#4c566a] transition-colors hover:text-[#215935]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              All Collections
+            </Link>
+          </FadeIn>
+        )}
         {products.length === 0 ? (
           <div className="py-20 text-center">
             <p className="text-lg text-[#4c566a]">
@@ -106,7 +124,7 @@ export function PollenCollectionPage({
                 <Link
                   key={product.id}
                   href={`/shop/${product.slug}`}
-                  className="group block overflow-hidden rounded-md border border-[#2a351f]/10 bg-white shadow-sm transition-shadow hover:shadow-md"
+                  className="group flex flex-col overflow-hidden rounded-md border border-[#2a351f]/20 bg-white transition-shadow hover:shadow-md"
                 >
                   <div className="relative aspect-square overflow-hidden bg-[#f5f2ee]">
                     <Image
@@ -117,11 +135,18 @@ export function PollenCollectionPage({
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                   </div>
-                  <div className="p-5">
-                    <h3 className="text-lg font-semibold text-[#2a351f] transition-colors group-hover:text-[#5e7747]">
-                      {product.name}
-                    </h3>
-                    <p className="mt-1 text-sm font-medium text-[#215935]">
+                  <div className="flex flex-1 flex-col gap-3 p-5">
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#2a351f] transition-colors group-hover:text-[#5e7747]">
+                        {product.name}
+                      </h3>
+                      {product.description && (
+                        <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-[#4c566a]">
+                          {product.description}
+                        </p>
+                      )}
+                    </div>
+                    <p className="mt-auto text-xl font-bold text-[#215935]">
                       {formatPrice(displayPrice)}
                     </p>
                   </div>
@@ -175,6 +200,6 @@ export function PollenCollectionPage({
           </div>
         </div>
       )}
-    </div>
+    </PageTransition>
   );
 }

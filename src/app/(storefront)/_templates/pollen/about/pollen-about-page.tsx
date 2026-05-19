@@ -52,10 +52,7 @@ export async function PollenAboutPage({
               className="relative aspect-3/4 overflow-hidden rounded-2xl"
             >
               <Image
-                src={
-                  f["pollen.about.image"] ??
-                  "https://images.unsplash.com/photo-1598902108854-10e335adac99?w=800&h=1000&fit=crop"
-                }
+                src={f["pollen.about.image"]!}
                 alt="Lush green plants in a greenhouse or conservatory"
                 fill
                 className="object-cover"

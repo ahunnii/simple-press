@@ -1,5 +1,4 @@
-import type { LucideIcon } from "lucide-react";
-
+import type { GenericIconRow } from "~/lib/template-fields";
 import {
   FadeIn,
   StaggerContainer,
@@ -11,11 +10,7 @@ export function PollenHomepageAbout({
   sectionLabel,
   sectionHeading,
 }: {
-  services: {
-    icon: LucideIcon;
-    title: string;
-    description: string;
-  }[];
+  services?: GenericIconRow[];
   sectionLabel: string;
   sectionHeading: string;
 }) {
@@ -43,7 +38,7 @@ export function PollenHomepageAbout({
         </FadeIn>
 
         <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service) => (
+          {services?.map((service) => (
             <StaggerItem key={service.title}>
               <div className="flex h-full flex-col rounded-2xl bg-[#3d4d2f] p-6 text-left transition-all duration-300 hover:bg-[#455734]">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center">

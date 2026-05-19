@@ -1,15 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpen,
-  ExternalLink,
-  Flower2,
-  HandHelping,
-  MapIcon,
-} from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import {
+  getListFieldValue,
+  parseTemplateIconListRows,
+  parseTemplateListRows,
+} from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 import {
   Accordion,
@@ -23,64 +21,15 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
-import {
-  getListFieldValue,
-  parseTemplateIconListRows,
-  parseTemplateListRows,
-} from "~/lib/template-fields";
 
-import { resolveFields } from ".";
-import { PollenGeneralLayout } from "./layout/pollen-general-layout";
-import { PollenTestimonialsSection } from "./testimonials/pollen-testimonials-section";
+import { DEFAULT_POLLEN_FAQS, DEFAULT_POLLEN_SERVICES } from ".";
+import { resolveFields } from "..";
+import { PollenGeneralLayout } from "../layout/pollen-general-layout";
+import { PollenTestimonialsSection } from "../testimonials/pollen-testimonials-section";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
-
-const DEFAULT_SERVICES = [
-  {
-    icon: Flower2,
-    title: "Service One",
-    description:
-      "We offer a wide range of services to meet your needs. Contact us to learn more.",
-  },
-  {
-    icon: HandHelping,
-    title: "Service Two",
-    description:
-      "We offer a wide range of services to meet your needs. Contact us to learn more.",
-  },
-  {
-    icon: MapIcon,
-    title: "Service Three",
-    description:
-      "We offer a wide range of services to meet your needs. Contact us to learn more.",
-  },
-  {
-    icon: BookOpen,
-    title: "Service Four",
-    description:
-      "We offer a wide range of services to meet your needs. Contact us to learn more.",
-  },
-];
-
-const DEFAULT_FAQS = [
-  {
-    question: "How do I get started?",
-    answer:
-      "Simply reach out through our contact form and we'll get back to you within one business day.",
-  },
-  {
-    question: "What areas do you serve?",
-    answer:
-      "We serve clients locally and remotely. Contact us to confirm availability in your area.",
-  },
-  {
-    question: "Do you offer free consultations?",
-    answer:
-      "Yes! We offer a free 30-minute consultation to discuss your needs and how we can help.",
-  },
-];
 
 export async function PollenServicesPage({ business }: Props) {
   const customFields = business?.siteContent?.customFields;
@@ -92,11 +41,13 @@ export async function PollenServicesPage({ business }: Props) {
     "pollen.services.subtitle",
     "pollen.services.text",
     "pollen.services.contact-button-text",
+    "pollen.services.contact-button-link",
     "pollen.services.faq-label",
     "pollen.services.faq-heading",
     "pollen.services.faq-description",
     "pollen.services.faq-image",
     "pollen.services.faq-contact-button-text",
+    "pollen.services.faq-contact-button-link",
     "pollen.services.resources-label",
     "pollen.services.resources-title",
     "pollen.testimonials.section-label",
@@ -106,15 +57,19 @@ export async function PollenServicesPage({ business }: Props) {
 
   const testimonials = (await api.testimonial.listRandom({ limit: 3 })) ?? [];
 
-  const services =
-    parseTemplateIconListRows(
-      getListFieldValue(customFields, "pollen.services.services-list"),
-      DEFAULT_SERVICES,
-    ) ?? DEFAULT_SERVICES;
+  const services = parseTemplateIconListRows(
+    getListFieldValue(customFields, "pollen.services.services-list"),
+    DEFAULT_POLLEN_SERVICES,
+  );
 
   const rawFaqRows = parseTemplateListRows(
     getListFieldValue(customFields, "pollen.services.faq-list"),
   );
+
+  const resources = parseTemplateListRows(
+    getListFieldValue(customFields, "pollen.services.resources-list"),
+  ) as { name: string; url: string }[];
+
   const faqs =
     rawFaqRows.length > 0
       ? rawFaqRows
@@ -126,23 +81,13 @@ export async function PollenServicesPage({ business }: Props) {
             question: row.question,
             answer: typeof row.answer === "string" ? row.answer : "",
           }))
-      : DEFAULT_FAQS;
-
-  // Resource links are user-supplied URLs — read raw to preserve URLs as-is
-  const rawFields =
-    (customFields as Record<string, string> | null) ?? {};
-  const resources: { name: string; url: string }[] = [];
-  for (let i = 1; i <= 5; i++) {
-    const name = rawFields[`pollen.services.resource-name-${i}`]?.trim() ?? "";
-    const url = rawFields[`pollen.services.resource-link-${i}`]?.trim() ?? "";
-    if (name && url) resources.push({ name, url });
-  }
+      : DEFAULT_POLLEN_FAQS;
 
   return (
     <PollenGeneralLayout
       business={business}
-      title={f["pollen.services.page-title"] ?? "Services"}
-      subtitle={f["pollen.services.page-subtitle"] ?? "What We Do"}
+      title={f["pollen.services.page-title"]}
+      subtitle={f["pollen.services.page-subtitle"]}
     >
       {/* Services Overview */}
       <section className="bg-[#d4e8d4] py-20 md:py-32">
@@ -160,21 +105,21 @@ export async function PollenServicesPage({ business }: Props) {
                   {f["pollen.services.text"]}
                 </p>
                 <Link
-                  href={"/contact"}
+                  href={f["pollen.services.contact-button-link"] ?? "#!"}
                   className={buttonVariants({
                     size: "lg",
                     className:
                       "gap-2 bg-[#2a351f]! text-white hover:bg-[#3d4d2f]!",
                   })}
                 >
-                  {f["pollen.services.contact-button-text"] ?? "Get in Touch"}
+                  {f["pollen.services.contact-button-text"]}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </FadeIn>
 
             <StaggerContainer className="grid gap-6 sm:grid-cols-2">
-              {services.map((service) => (
+              {services?.map((service) => (
                 <StaggerItem key={service.title}>
                   <div className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-sm">
                     <div className="mb-4 flex h-12 w-12 items-center justify-center">
@@ -203,7 +148,7 @@ export async function PollenServicesPage({ business }: Props) {
               className="relative aspect-square overflow-hidden rounded-2xl"
             >
               <Image
-                src={f["pollen.services.faq-image"] ?? "/placeholder.svg"}
+                src={f["pollen.services.faq-image"]!}
                 alt="Potted plant with green leaves"
                 fill
                 className="object-cover"
@@ -237,7 +182,7 @@ export async function PollenServicesPage({ business }: Props) {
                 </Accordion>
 
                 <Link
-                  href={"/contact"}
+                  href={f["pollen.services.faq-contact-button-link"] ?? "#!"}
                   className={buttonVariants({
                     size: "lg",
                     variant: "outline",
@@ -245,7 +190,7 @@ export async function PollenServicesPage({ business }: Props) {
                       "border-[#374151] text-[#374151] hover:bg-[#374151]",
                   })}
                 >
-                  {f["pollen.services.faq-contact-button-text"] ?? "Contact Us"}
+                  {f["pollen.services.faq-contact-button-text"]}
                 </Link>
               </div>
             </FadeIn>
@@ -254,7 +199,7 @@ export async function PollenServicesPage({ business }: Props) {
       </section>
 
       {/* Helpful Resources Section */}
-      {resources.length > 0 && (
+      {resources?.length > 0 && (
         <section className="bg-[#E5E8E0] py-20 md:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <FadeIn direction="up">

@@ -173,7 +173,7 @@ export function PollenProductPage({
             </h2>
           </FadeIn>
           <StaggerContainer
-            className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2"
+            className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4"
             staggerDelay={0.12}
           >
             {relatedProducts?.map((p, i) => (
