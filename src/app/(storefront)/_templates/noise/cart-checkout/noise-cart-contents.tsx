@@ -16,13 +16,6 @@ import { useCart } from "~/providers/cart-context";
 import { NoiseCartItem } from "./noise-cart-item";
 import { NoiseCartSummary } from "./noise-cart-summary";
 
-const CHECKOUT_STEPS = [
-  { n: "01", label: "The Bag" },
-  { n: "02", label: "Ship to" },
-  { n: "03", label: "Pay" },
-  { n: "04", label: "Confirm" },
-] as const;
-
 type Props = {
   business: {
     id: string;
@@ -87,128 +80,46 @@ export function NoiseCartContents({ business }: Props) {
 
   return (
     <PageTransition>
-      {/* Editorial two-column header */}
+      {/* ── Centered page header ── */}
       <section
-        className="border-b-2 border-foreground grid md:grid-cols-2"
+        className="border-b border-foreground/15 px-6 pt-16 pb-12 text-center"
         style={{ background: "var(--vn-paper)" }}
       >
-        {/* Left — heading */}
-        <FadeIn className="flex flex-col gap-5 px-7 py-12 border-b border-foreground md:border-b-0 md:border-r">
+        <FadeIn className="mx-auto" style={{ maxWidth: "880px" }}>
           <p
-            className="font-mono text-[9.5px] tracking-[0.22em] uppercase"
-            style={{ color: "var(--vn-steel)" }}
+            className="font-mono text-[10px] tracking-[0.28em] uppercase mb-4"
+            style={{ color: "var(--vn-steel-mist)" }}
           >
-            Section / 05 — Your bag, your transmission
+            Your Bag
           </p>
           <h1
             className="font-serif italic leading-none tracking-tight"
-            style={{ fontSize: "clamp(3rem, 6vw, 5rem)", letterSpacing: "-0.025em" }}
+            style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)", letterSpacing: "-0.025em" }}
           >
-            The <em style={{ color: "var(--vn-steel)" }}>Bag.</em>
+            {items.length} {items.length === 1 ? "piece" : "pieces"} ready.
           </h1>
-          <p
-            className="font-sans text-[15px] leading-relaxed max-w-[40ch]"
-            style={{ color: "var(--vn-ink-soft)" }}
-          >
-            {items.length} garment{items.length !== 1 ? "s" : ""} queued, hand-cut on
-            Gratiot. Gift wrap is on the house, and we ship from Detroit within five
-            working days.
-          </p>
-        </FadeIn>
-
-        {/* Right — checkout progress + free shipping bar */}
-        <FadeIn
-          delay={0.1}
-          className="flex flex-col justify-center gap-8 px-7 py-12"
-          style={{ background: "var(--vn-bone)" }}
-        >
-          {/* Checkout steps */}
-          <div>
-            <h5
-              className="font-mono text-[9px] tracking-[0.22em] uppercase mb-4"
-              style={{ color: "var(--vn-steel-mist)" }}
-            >
-              Checkout sequence
-            </h5>
-            <div className="flex items-center gap-0">
-              {CHECKOUT_STEPS.map((step, i) => (
-                <div key={step.n} className="flex items-center">
-                  <div
-                    className="flex items-center gap-2"
-                    style={{ opacity: i === 0 ? 1 : 0.35 }}
-                  >
-                    <span
-                      className="flex-shrink-0 flex items-center justify-center border font-mono text-[9px] tracking-[0.1em]"
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        background: i === 0 ? "var(--vn-ink)" : "transparent",
-                        color: i === 0 ? "var(--vn-bone)" : "var(--vn-ink)",
-                        borderColor: i === 0 ? "var(--vn-ink)" : "var(--vn-rule)",
-                      }}
-                    >
-                      {step.n}
-                    </span>
-                    <span
-                      className="font-mono text-[9.5px] tracking-[0.14em] uppercase whitespace-nowrap"
-                      style={{ color: i === 0 ? "var(--vn-ink)" : "var(--vn-steel-mist)" }}
-                    >
-                      {step.label}
-                    </span>
-                  </div>
-                  {i < CHECKOUT_STEPS.length - 1 && (
-                    <span
-                      className="mx-3 font-mono text-[10px]"
-                      style={{ color: "var(--vn-rule)" }}
-                    >
-                      /
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* Free shipping progress */}
           {hasFreeBar && untilFree !== null && progress !== null && untilFree > 0 && (
-            <div>
+            <div className="mt-8 mx-auto" style={{ maxWidth: "480px" }}>
               <div className="flex justify-between mb-2">
-                <span
-                  className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
-                  style={{ color: "var(--vn-steel)" }}
-                >
-                  Free shipping unlocks at{" "}
-                  {shippingConfig.freeShippingThreshold
-                    ? formatPrice(shippingConfig.freeShippingThreshold)
-                    : ""}
+                <span className="font-mono text-[9.5px] tracking-[0.14em] uppercase" style={{ color: "var(--vn-steel-mist)" }}>
+                  {formatPrice(untilFree)} to free shipping
                 </span>
-                <span
-                  className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
-                  style={{ color: "var(--vn-steel-mist)" }}
-                >
-                  {Math.round(progress * 100)}% there
+                <span className="font-mono text-[9.5px] tracking-[0.14em] uppercase" style={{ color: "var(--vn-steel-mist)" }}>
+                  {Math.round(progress * 100)}%
                 </span>
               </div>
-              <div
-                className="h-px w-full relative"
-                style={{ background: "var(--vn-rule)" }}
-              >
+              <div className="h-px w-full relative" style={{ background: "var(--vn-rule)" }}>
                 <div
                   className="absolute inset-y-0 left-0 transition-all"
                   style={{
                     width: `${Math.min(100, Math.round(progress * 100))}%`,
                     background: "var(--vn-ink)",
-                    height: "2px",
-                    top: "-0.5px",
+                    height: "1px",
                   }}
                 />
               </div>
-              <p
-                className="mt-2 font-mono text-[9.5px] tracking-[0.14em] uppercase"
-                style={{ color: "var(--vn-steel-mist)" }}
-              >
-                {formatPrice(untilFree)} to go
-              </p>
             </div>
           )}
         </FadeIn>

@@ -14,17 +14,13 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
-function fmtDispatchDate(d: Date | string) {
+function fmtDate(d: Date | string) {
   const dt = typeof d === "string" ? new Date(d) : d;
-  const day = String(dt.getDate()).padStart(2, "0");
-  const month = String(dt.getMonth() + 1).padStart(2, "0");
-  const year = String(dt.getFullYear());
-  return `${day} · ${month} · ${year}`;
+  return dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
-const TOOLBAR_STAMPS = ["↗ Share", "★ Save", "↓ Print"] as const;
-
-const SUBSCRIBE_META = "One dispatch a fortnight. Studio notes, new garments, pattern math. Written here, sent nowhere else.";
+const SUBSCRIBE_META =
+  "One dispatch a fortnight. Studio notes, new garments, pattern math. Written here, sent nowhere else.";
 
 export function NoiseBlogPostPage({
   page,
@@ -37,206 +33,138 @@ export function NoiseBlogPostPage({
 
   return (
     <PageTransition>
-      {/* Breadcrumb */}
-      <div
-        className="flex items-center justify-between px-7 py-3.5 border-b border-foreground/20"
+      {/* ── Centered header — back link → category → h1 → metadata ── */}
+      <header
+        className="px-6 pt-16 pb-10 text-center border-b border-foreground/15"
         style={{ background: "var(--vn-paper)" }}
       >
-        <div className="font-mono text-[10.5px] tracking-[0.2em] uppercase flex items-center">
+        <FadeIn className="mx-auto" style={{ maxWidth: "820px" }}>
+          {/* Back to Journal */}
           <Link
             href="/blog"
-            className="transition-colors hover:opacity-60"
-            style={{ color: "var(--vn-steel)" }}
+            className="font-mono text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-60 inline-block mb-6"
+            style={{ color: "var(--vn-steel-mist)" }}
           >
-            Journal
+            ← The Journal
           </Link>
-          <span className="mx-2" style={{ color: "var(--vn-rule)" }}>/</span>
-          <span style={{ color: "var(--vn-ink)" }}
-            className="truncate max-w-[40ch]"
-          >
-            {page.title}
-          </span>
-        </div>
-        <span
-          className="font-mono text-[10px] tracking-[0.16em] uppercase hidden md:block flex-shrink-0 ml-4"
-          style={{ color: "var(--vn-steel)" }}
-        >
-          Dispatch · Vol. IX
-        </span>
-      </div>
 
-      {/* Article head — two-column: stamps+h1+dek left, byline right */}
-      <section
-        className="grid border-b-2 border-foreground grid-cols-1 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]"
-        style={{ background: "var(--vn-paper)" }}
-      >
-        {/* LEFT — stamps, h1, dek */}
-        <FadeIn className="flex flex-col gap-6 px-7 py-14 border-b border-foreground md:border-b-0 md:border-r">
-          {/* Stamps */}
-          <div className="flex flex-wrap gap-1.5">
-            <span className="vn-stamp vn-stamp-solid text-[10px]">Featured</span>
-            <span className="vn-stamp text-[10px]">The Journal</span>
-            <span className="vn-stamp text-[10px]">S/S 26</span>
-          </div>
+          {/* Category overline */}
+          <p
+            className="font-mono text-[10px] tracking-[0.28em] uppercase mb-4"
+            style={{ color: "var(--vn-steel-mist)" }}
+          >
+            The Journal
+          </p>
 
           {/* H1 */}
           <h1
-            className="font-serif italic leading-[1.0] tracking-tight"
+            className="font-serif italic leading-[1.1] tracking-tight"
             style={{
-              fontSize: "clamp(2.2rem, 4.5vw, 4.5rem)",
+              fontSize: "clamp(2.4rem, 6vw, 4.5rem)",
               letterSpacing: "-0.025em",
             }}
           >
             {page.title}
           </h1>
 
-          {/* Dek / excerpt */}
-          {page.excerpt && (
-            <p
-              className="font-sans text-[15px] leading-relaxed max-w-[44ch]"
-              style={{ color: "var(--vn-ink-soft)" }}
-            >
-              {page.excerpt}
-            </p>
-          )}
-        </FadeIn>
-
-        {/* RIGHT — byline grid + toolbar */}
-        <FadeIn
-          delay={0.1}
-          className="flex flex-col gap-8 px-8 py-14"
-          style={{ background: "var(--vn-bone)" }}
-        >
-          {/* Byline 2×2 grid */}
-          <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-            {[
-              { label: "Written by", value: "Studio Editor", mono: false },
-              { label: "Published", value: fmtDispatchDate(page.createdAt), mono: true },
-              { label: "Topic", value: "The Journal", mono: false },
-              { label: "Reading time", value: "5 min", mono: true },
-            ].map((item) => (
-              <div key={item.label}>
-                <h5
-                  className="font-mono text-[9px] tracking-[0.22em] uppercase mb-1"
-                  style={{ color: "var(--vn-steel-mist)" }}
-                >
-                  {item.label}
-                </h5>
-                <div
-                  className={item.mono ? "font-mono text-[11px] tracking-[0.12em]" : "font-sans text-[13px]"}
-                  style={{ color: "var(--vn-ink)" }}
-                >
-                  {item.value}
-                </div>
-              </div>
-            ))}
+          {/* Metadata row */}
+          <div
+            className="mt-8 font-mono text-[11px] tracking-[0.18em] uppercase"
+            style={{ color: "var(--vn-steel-mist)" }}
+          >
+            By Studio Editor &nbsp;·&nbsp; {fmtDate(page.createdAt)} &nbsp;·&nbsp; 5 min read
           </div>
+        </FadeIn>
+      </header>
 
-          {/* Toolbar stamps */}
-          <div>
-            <h5
-              className="font-mono text-[9px] tracking-[0.22em] uppercase mb-3"
-              style={{ color: "var(--vn-steel-mist)" }}
+      {/* ── Full-bleed 21:9 hero image ── */}
+      <div
+        className="relative w-full overflow-hidden border-b border-foreground/15"
+        style={{ aspectRatio: "21/9", background: "var(--vn-steel)" }}
+      >
+        {page.image ? (
+          <Image
+            src={page.image}
+            alt={page.title}
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+        ) : (
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{
+              background: `repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 12px, transparent 12px 24px), linear-gradient(180deg, var(--vn-steel-deep), var(--vn-steel))`,
+            }}
+          >
+            <span
+              className="font-serif italic select-none"
+              style={{ fontSize: "clamp(4rem, 12vw, 10rem)", color: "var(--vn-bone)", opacity: 0.12 }}
             >
-              Toolbar
-            </h5>
-            <div className="flex flex-wrap gap-2">
-              {TOOLBAR_STAMPS.map((s) => (
-                <span
-                  key={s}
-                  className="vn-stamp text-[9.5px] cursor-pointer transition-all hover:bg-foreground hover:text-background hover:border-foreground"
-                >
-                  {s}
-                </span>
-              ))}
+              VN
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* ── Article body ── */}
+      <section
+        className="px-6 py-16 border-b border-foreground/15"
+        style={{ background: "var(--vn-paper)" }}
+      >
+        <FadeIn className="mx-auto" style={{ maxWidth: "680px" }}>
+          <article
+            className="vn-article prose prose-base max-w-none
+              prose-headings:font-serif prose-headings:italic prose-headings:font-light prose-headings:tracking-tight prose-headings:text-foreground
+              prose-h2:text-[2rem] prose-h3:text-[1.5rem]
+              prose-p:font-sans prose-p:text-[15px] prose-p:leading-[1.85] prose-p:text-foreground/80
+              prose-strong:text-foreground prose-strong:font-medium
+              prose-a:text-foreground prose-a:underline prose-a:underline-offset-4
+              prose-blockquote:border-l-0 prose-blockquote:border-t prose-blockquote:border-b
+              prose-blockquote:border-foreground/20 prose-blockquote:py-8 prose-blockquote:px-0
+              prose-blockquote:my-10 prose-blockquote:font-serif prose-blockquote:italic
+              prose-blockquote:text-[1.8rem] prose-blockquote:leading-[1.4]
+              prose-blockquote:tracking-tight prose-blockquote:not-italic prose-blockquote:text-center
+            "
+          >
+            <TiptapRenderer content={page.content as TiptapJSON} />
+          </article>
+
+          {/* Filed under + actions */}
+          <div
+            className="mt-14 pt-6 flex items-center justify-between border-t font-mono text-[11px] tracking-[0.16em] uppercase"
+            style={{ borderColor: "var(--vn-rule)", color: "var(--vn-steel-mist)" }}
+          >
+            <span>Filed under · The Journal</span>
+            <div className="flex gap-5">
+              <button className="hover:opacity-60 transition-opacity">Share</button>
+              <button className="hover:opacity-60 transition-opacity">Save</button>
             </div>
           </div>
         </FadeIn>
       </section>
 
-      {/* Hero image with editorial caption */}
-      {page.image && (
-        <figure
-          className="border-b border-foreground/20"
-          style={{ background: "var(--vn-paper)" }}
-        >
-          <FadeIn>
-            <div
-              className="relative w-full overflow-hidden"
-              style={{ aspectRatio: "16/7" }}
-            >
-              <Image
-                src={page.image}
-                alt={page.title}
-                fill
-                className="object-cover"
-                priority
-                sizes="100vw"
-              />
-            </div>
-            <figcaption
-              className="flex items-start justify-between px-7 py-3 gap-8 border-t border-foreground/15"
-              style={{ background: "var(--vn-paper)" }}
-            >
-              <span className="font-mono text-[10px] tracking-[0.14em] uppercase" style={{ color: "var(--vn-steel-mist)" }}>
-                <em className="font-serif italic not-uppercase" style={{ fontSize: "13px", color: "var(--vn-ink)" }}>
-                  Fig. 01.
-                </em>{" "}
-                {page.title}
-              </span>
-              <span className="font-mono text-[10px] tracking-[0.14em] uppercase flex-shrink-0" style={{ color: "var(--vn-steel-mist)" }}>
-                Visual Noise · Det. {new Date(page.createdAt).getFullYear()}
-              </span>
-            </figcaption>
-          </FadeIn>
-        </figure>
-      )}
-
-      {/* Article body */}
+      {/* ── Shop CTA band ── */}
       <section
-        className="px-7 py-16 border-b border-foreground/15"
+        className="border-b border-foreground/20 px-7 py-0"
         style={{ background: "var(--vn-paper)" }}
       >
-        <FadeIn>
-          <div className="mx-auto max-w-2xl">
-            <article
-              className="vn-article prose prose-base max-w-none
-                prose-headings:font-serif prose-headings:italic prose-headings:font-light prose-headings:tracking-tight prose-headings:text-foreground
-                prose-h2:text-[2rem] prose-h3:text-[1.5rem]
-                prose-p:font-sans prose-p:text-[15px] prose-p:leading-[1.7] prose-p:text-foreground/80
-                prose-strong:text-foreground prose-strong:font-medium
-                prose-a:text-foreground prose-a:underline prose-a:underline-offset-4
-                prose-blockquote:border-l-2 prose-blockquote:border-foreground prose-blockquote:pl-6 prose-blockquote:font-serif prose-blockquote:italic prose-blockquote:text-xl prose-blockquote:not-italic
-              "
-            >
-              <TiptapRenderer content={page.content as TiptapJSON} />
-            </article>
-          </div>
-        </FadeIn>
-
-        {/* CTA band */}
-        <FadeIn delay={0.1} className="mx-auto max-w-2xl mt-16">
+        <FadeIn className="mx-auto" style={{ maxWidth: "680px" }}>
           <div
             className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 border-y-2 border-foreground py-8"
-            style={{ background: "var(--vn-paper)" }}
           >
             <div>
-              <p
-                className="font-serif italic leading-none"
-                style={{ fontSize: "28px", letterSpacing: "-0.01em" }}
-              >
+              <p className="font-serif italic leading-none" style={{ fontSize: "28px", letterSpacing: "-0.01em" }}>
                 Wear the Noise.
               </p>
-              <p
-                className="mt-1.5 font-sans text-sm"
-                style={{ color: "var(--vn-steel-mist)" }}
-              >
+              <p className="mt-1.5 font-sans text-sm" style={{ color: "var(--vn-steel-mist)" }}>
                 Fashion that dances. Garments that fly.
               </p>
             </div>
             <Link
               href="/shop"
-              className="vn-stamp vn-stamp-solid flex-shrink-0 text-[10.5px] transition-all hover:bg-accent hover:border-accent"
+              className="vn-stamp vn-stamp-solid flex-shrink-0 text-[10.5px] transition-all hover:opacity-80"
             >
               Shop the Collection →
             </Link>
@@ -244,101 +172,19 @@ export function NoiseBlogPostPage({
         </FadeIn>
       </section>
 
-      {/* Author bar */}
+      {/* ── Subscribe band ── */}
       <section
-        className="border-b border-foreground/20 px-7 py-10"
-        style={{ background: "var(--vn-bone)" }}
-      >
-        <FadeIn className="mx-auto max-w-2xl flex items-start gap-6">
-          {/* Avatar circle */}
-          <div
-            className="flex-shrink-0 flex items-center justify-center border-2 border-foreground font-serif italic select-none"
-            style={{
-              width: "56px",
-              height: "56px",
-              background: "var(--vn-steel)",
-              color: "var(--vn-bone)",
-              fontSize: "20px",
-              borderRadius: 0,
-            }}
-          >
-            VN
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <div
-              className="font-mono text-[9px] tracking-[0.22em] uppercase mb-1"
-              style={{ color: "var(--vn-steel-mist)" }}
-            >
-              Written by
-            </div>
-            <div
-              className="font-mono text-[11px] tracking-[0.14em] uppercase mb-2"
-              style={{ color: "var(--vn-ink)" }}
-            >
-              Studio Editor · Visual Noise
-            </div>
-            <p
-              className="font-sans text-sm leading-relaxed"
-              style={{ color: "var(--vn-steel-mist)" }}
-            >
-              Field notes from the atelier on Gratiot Avenue. Dispatches cover
-              process, garments, and the city that shapes them.
-            </p>
-          </div>
-
-          {/* Tag stamps */}
-          <div className="hidden md:flex flex-wrap gap-1.5 flex-shrink-0">
-            <span className="vn-stamp text-[9px]">#journal</span>
-            <span className="vn-stamp text-[9px]">#ss26</span>
-            <span className="vn-stamp text-[9px]">#detroit</span>
-          </div>
-        </FadeIn>
-      </section>
-
-      {/* Marquee */}
-      <div
-        className="overflow-hidden border-b border-foreground/20 py-3"
-        style={{ background: "var(--vn-ink)" }}
-      >
-        <div className="vn-marquee-track" aria-hidden="true">
-          {[0, 1].map((n) => (
-            <span
-              key={n}
-              className="whitespace-nowrap font-serif italic px-6"
-              style={{
-                fontSize: "clamp(1.2rem, 2.5vw, 1.8rem)",
-                color: "var(--vn-bone)",
-                opacity: 0.75,
-                letterSpacing: "-0.01em",
-              }}
-            >
-              One dispatch · every fortnight
-              <span className="font-mono not-italic mx-5" style={{ fontSize: "12px", color: "var(--vn-steel-mist)" }}>✦</span>
-              Sent from Detroit
-              <span className="font-mono not-italic mx-5" style={{ fontSize: "12px", color: "var(--vn-steel-mist)" }}>✦</span>
-              No spam, no static
-              <span className="font-mono not-italic mx-5" style={{ fontSize: "12px", color: "var(--vn-steel-mist)" }}>✦</span>
-              Written here, sent nowhere else
-              <span className="font-mono not-italic mx-5" style={{ fontSize: "12px", color: "var(--vn-steel-mist)" }}>✦</span>
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Subscribe band */}
-      <section
-        className="grid border-b-2 border-foreground md:grid-cols-2"
+        className="grid border-b border-foreground/20 md:grid-cols-2"
         style={{ background: "var(--vn-paper)" }}
       >
-        <div className="px-10 py-14 border-b border-foreground md:border-b-0 md:border-r">
+        <div className="px-10 py-14 border-b border-foreground/20 md:border-b-0 md:border-r">
           <span className="vn-stamp text-[9.5px] mb-5 inline-flex">Get the next dispatch</span>
           <h3
             className="font-serif italic leading-[0.95] tracking-tight mt-5 mb-4"
             style={{ fontSize: "clamp(2rem, 4vw, 3rem)", letterSpacing: "-0.02em" }}
           >
             A dispatch a fortnight,
-            <br />straight from the cutting table.
+            <br />from the cutting table.
           </h3>
           <p className="font-sans text-sm leading-relaxed" style={{ color: "var(--vn-ink-soft)", maxWidth: "38ch" }}>
             {SUBSCRIBE_META}
@@ -362,7 +208,10 @@ export function NoiseBlogPostPage({
             </div>
           ) : (
             <form
-              onSubmit={(e) => { e.preventDefault(); if (email) setSubscribed(true); }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (email) setSubscribed(true);
+              }}
               className="flex border-2 border-foreground max-w-sm"
             >
               <input
@@ -382,44 +231,41 @@ export function NoiseBlogPostPage({
               </button>
             </form>
           )}
-          <div
-            className="mt-5 font-mono text-[10px] tracking-[0.16em] uppercase leading-relaxed"
-            style={{ color: "var(--vn-steel)" }}
-          >
+          <p className="mt-4 font-mono text-[10px] tracking-[0.16em] uppercase" style={{ color: "var(--vn-steel-mist)" }}>
             No spam, no static.
-          </div>
+          </p>
         </div>
       </section>
 
-      {/* Related dispatches */}
+      {/* ── Related articles ── */}
       {filtered.length > 0 && (
-        <section className="px-7 py-14" style={{ background: "var(--vn-paper)" }}>
-          <FadeIn className="flex items-end justify-between mb-8 border-b border-foreground/20 pb-5">
+        <section className="px-7 py-16" style={{ background: "var(--vn-paper)" }}>
+          <FadeIn className="mb-10 flex items-end justify-between border-b border-foreground/20 pb-6">
             <h2
               className="font-serif italic leading-none"
-              style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", letterSpacing: "-0.02em" }}
+              style={{ fontSize: "clamp(2.5rem, 5vw, 3.5rem)", letterSpacing: "-0.02em" }}
             >
-              Keep reading.
+              More from the Journal.
             </h2>
             <Link
               href="/blog"
-              className="font-mono text-[10px] tracking-[0.3em] uppercase hidden md:flex items-center gap-3 transition-opacity hover:opacity-60"
+              className="font-mono text-[10px] tracking-[0.22em] uppercase hidden md:flex items-center gap-3 transition-opacity hover:opacity-60"
+              style={{ color: "var(--vn-ink)" }}
             >
-              All dispatches
-              <span className="h-px w-10 bg-foreground" />
+              All dispatches →
             </Link>
           </FadeIn>
 
           <StaggerContainer
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
             staggerDelay={0.08}
           >
             {filtered.map((post) => (
               <StaggerItem key={post.slug}>
                 <Link href={`/blog/${post.slug}`} className="group block">
-                  {/* Cover */}
+                  {/* 4:3 cover image */}
                   <div
-                    className="relative overflow-hidden border border-foreground mb-3"
+                    className="relative overflow-hidden border border-foreground mb-4"
                     style={{ aspectRatio: "4/3", background: "var(--vn-steel)" }}
                   >
                     {post.image ? (
@@ -442,24 +288,22 @@ export function NoiseBlogPostPage({
                       className="absolute left-2.5 top-2.5 font-mono text-[9px] tracking-[0.18em] uppercase px-1.5 py-1"
                       style={{ background: "var(--vn-bone)", color: "var(--vn-ink)" }}
                     >
-                      Dispatch
+                      The Journal
                     </div>
                   </div>
 
-                  <div
-                    className="flex items-center gap-2 mb-1.5 font-mono text-[9.5px] tracking-[0.16em] uppercase"
-                    style={{ color: "var(--vn-steel)" }}
+                  <p
+                    className="font-mono text-[9.5px] tracking-[0.16em] uppercase mb-2"
+                    style={{ color: "var(--vn-steel-mist)" }}
                   >
-                    <span>{fmtDispatchDate(post.createdAt)}</span>
-                    <span style={{ color: "var(--vn-rule)" }}>·</span>
-                    <span>6 min</span>
-                  </div>
-                  <h3
+                    {fmtDate(post.createdAt)}
+                  </p>
+                  <h4
                     className="font-serif italic leading-[1.1] tracking-tight transition-opacity group-hover:opacity-70"
                     style={{ fontSize: "20px", letterSpacing: "-0.005em" }}
                   >
                     {post.title}
-                  </h3>
+                  </h4>
                 </Link>
               </StaggerItem>
             ))}

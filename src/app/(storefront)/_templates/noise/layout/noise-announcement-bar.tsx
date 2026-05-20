@@ -23,30 +23,30 @@ export function NoiseAnnouncementBar({ businessId: _ }: NoiseAnnouncementBarProp
 
   return (
     <div
-      className="vn-topbar flex items-center justify-center gap-3"
+      className="vn-topbar"
       role="region"
       aria-label="Promotion"
     >
-      <p className="font-mono text-[10.5px] tracking-[0.2em] uppercase">
+      <p className="font-mono text-[11px] tracking-[0.22em] uppercase">
         {data.bannerText}
-        {" — Code: "}
-        <span className="font-semibold tracking-wide">{data.code}</span>
+        {" · Code: "}
+        <span className="font-semibold">{data.code}</span>
       </p>
       {isExternal ? (
         <a
           href={href}
-          className="vn-stamp vn-stamp-solid text-[9px] hover:opacity-80 transition-opacity"
+          className="font-mono text-[10px] tracking-[0.18em] uppercase ml-4 underline underline-offset-2 hover:opacity-70 transition-opacity"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Shop now →
+          Shop →
         </a>
       ) : (
         <Link
           href={href}
-          className="vn-stamp vn-stamp-solid text-[9px] hover:opacity-80 transition-opacity"
+          className="font-mono text-[10px] tracking-[0.18em] uppercase ml-4 underline underline-offset-2 hover:opacity-70 transition-opacity"
         >
-          Shop now →
+          Shop →
         </Link>
       )}
     </div>

@@ -54,7 +54,7 @@ export async function HappyBambooFooter({
             <Link href="/" className="flex items-center gap-2">
               <Leaf className="text-muted h-8 w-8" />
               <span className="text-muted font-serif text-xl font-bold">
-                {name}
+                Support Happy Bamboo Toilet Tissue
               </span>
             </Link>
             {!!footerTagline && (

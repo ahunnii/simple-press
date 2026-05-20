@@ -112,23 +112,6 @@ export const importRouter = createTRPCRouter({
         });
       }
 
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { memberships: true },
-      });
-
-      if (
-        !user?.memberships.some(
-          (m) => m.businessId === importRecord.business.id,
-        )
-      ) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-
       // Update status
       await ctx.db.productImport.update({
         where: { id: input.importId },

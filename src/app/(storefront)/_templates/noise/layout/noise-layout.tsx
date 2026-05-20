@@ -1,6 +1,6 @@
 "use server";
 
-import { Instrument_Serif, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans, JetBrains_Mono } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { getSession } from "~/server/better-auth/server";
@@ -9,16 +9,16 @@ import { NoiseAnnouncementBar } from "./noise-announcement-bar";
 import { NoiseFooter } from "./noise-footer";
 import { NoiseHeader } from "./noise-header";
 
-const fontSans = Space_Grotesk({
+const fontSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const fontSerif = Instrument_Serif({
+const fontSerif = Cormorant_Garamond({
   subsets: ["latin"],
   variable: "--font-serif",
-  weight: "400",
+  weight: ["300", "400", "500", "600"],
   style: ["normal", "italic"],
 });
 
@@ -36,6 +36,7 @@ export async function NoiseLayout({
   return (
     <main
       className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} noise visual-noise dark:noise`}
+      style={{ color: "var(--vn-ink)" }}
     >
       <NoiseAnnouncementBar businessId={business.id} />
       <NoiseHeader business={business} session={session ?? null} />

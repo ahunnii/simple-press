@@ -4,19 +4,25 @@ type NoiseCredentialsSectionProps = {
   address?: string;
 };
 
-const STAMPS = ["Hand-stitched", "Numbered editions", "Deadstock yarns"] as const;
+const STAMPS = [
+  "Hand-stitched",
+  "Numbered editions",
+  "Deadstock yarns",
+] as const;
 
-export function NoiseCredentialsSection({ address }: NoiseCredentialsSectionProps) {
+export function NoiseCredentialsSection({
+  address,
+}: NoiseCredentialsSectionProps) {
   return (
     <section
-      className="border-y-2 border-foreground px-7 py-20"
+      className="border-foreground border-y-2 px-7 py-20"
       style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
     >
       <FadeIn>
-        <div className="mx-auto max-w-7xl grid grid-cols-1 gap-14 lg:grid-cols-[1fr_1.4fr] items-start">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-start gap-14 lg:grid-cols-[1fr_1.4fr]">
           {/* Left — large italic headline */}
           <h2
-            className="font-serif italic leading-[0.92] tracking-tight"
+            className="font-serif leading-[0.92] tracking-tight italic"
             style={{
               fontSize: "clamp(2.4rem, 9vw, 5.5rem)",
               letterSpacing: "-0.02em",
@@ -43,44 +49,40 @@ export function NoiseCredentialsSection({ address }: NoiseCredentialsSectionProp
           {/* Right — body */}
           <div>
             <div
-              className="grid grid-cols-1 sm:grid-cols-2 gap-9 border-t pt-6"
+              className="grid grid-cols-1 gap-9 border-t pt-6 sm:grid-cols-2"
               style={{ borderColor: "#2a2c30" }}
             >
               {/* Atelier story */}
               <div>
                 <h5
-                  className="font-mono text-[10.5px] tracking-[0.2em] uppercase mb-3"
+                  className="mb-3 font-mono text-[10.5px] tracking-[0.2em] uppercase"
                   style={{ color: "var(--vn-steel-mist)" }}
                 >
-                  The atelier
+                  The studio
                 </h5>
                 <p
-                  className="font-serif italic leading-[1.25]"
+                  className="font-serif leading-[1.25] italic"
                   style={{ fontSize: "22px" }}
                 >
-                  Founded 2014 in a former tool & die shop on the east side. We
-                  make garments the way the city makes everything else — by hand,
-                  in small batches, with the lights on late.
+                  Established in 2011, Visual Noise is a studio for haute
+                  couture crochet fashion. We make garments the way the city
+                  makes everything else — by hand, in small batches, with the
+                  lights on late.
                 </p>
               </div>
 
               {/* Coordinates */}
               <div>
                 <h5
-                  className="font-mono text-[10.5px] tracking-[0.2em] uppercase mb-3"
+                  className="mb-3 font-mono text-[10.5px] tracking-[0.2em] uppercase"
                   style={{ color: "var(--vn-steel-mist)" }}
                 >
-                  Coordinates
+                  Location
                 </h5>
                 <p
                   className="font-mono text-sm leading-relaxed"
                   style={{ letterSpacing: "0.04em", color: "var(--vn-bone)" }}
                 >
-                  42.3314° N
-                  <br />
-                  83.0458° W
-                  <br />
-                  <br />
                   {address ?? "Detroit, MI 48207"}
                   <br />
                   <br />
@@ -90,7 +92,7 @@ export function NoiseCredentialsSection({ address }: NoiseCredentialsSectionProp
             </div>
 
             {/* Stamps */}
-            <div className="flex flex-wrap gap-2.5 mt-8">
+            <div className="mt-8 flex flex-wrap gap-2.5">
               {STAMPS.map((s) => (
                 <span
                   key={s}

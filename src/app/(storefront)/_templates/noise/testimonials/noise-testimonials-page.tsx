@@ -2,53 +2,14 @@ import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
 import { api } from "~/trpc/server";
-import {
-  FadeIn,
-  PageTransition,
-  StaggerContainer,
-  StaggerItem,
-} from "~/components/page-animations";
+import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "../index";
 
-const PROCESS_STEPS = [
-  {
-    n: "01",
-    title: "You buy a piece.",
-    body: "Every order ships with a hand-numbered tag and a postcard from the studio. The postcard has a pre-printed return address.",
-  },
-  {
-    n: "02",
-    title: "You wear it.",
-    body: "Six weeks, three weeks, a season — whatever feels right. Wash it, drape it, get caught in a Detroit rain. We want the real review, not the unboxing.",
-  },
-  {
-    n: "03",
-    title: "You write back.",
-    body: "Tell us what worked, what didn't, where you wore it. Quick email or a form below — both go to the same shelf above the cutting table.",
-  },
-  {
-    n: "04",
-    title: "We listen.",
-    body: "The wrap suit had its hem shortened twice after readers told us so. Your words become next season's patterns.",
-  },
-] as const;
-
-/* Cards cycle through three bg styles */
-const CARD_STYLES = ["paper", "ink", "steel"] as const;
-
-type CardStyle = (typeof CARD_STYLES)[number];
-
-function cardStyle(style: CardStyle) {
-  if (style === "ink")
-    return { background: "var(--vn-ink)", color: "var(--vn-bone)" };
-  if (style === "steel")
-    return { background: "var(--vn-steel)", color: "var(--vn-bone)" };
-  return { background: "var(--vn-paper)", color: "var(--vn-ink)" };
-}
-
-function mutedColor(style: CardStyle) {
-  return style === "paper" ? "var(--vn-steel-mist)" : "rgba(255,255,255,0.5)";
+/* Pull the first sentence from a testimonial as a display headline */
+function extractHeadline(text: string): string {
+  const sentence = /^[^.!?]+[.!?]/.exec(text)?.[0] ?? text.slice(0, 72);
+  return sentence.length > 72 ? sentence.slice(0, 72) + "…" : sentence;
 }
 
 export async function NoiseTestimonialsPage({
@@ -58,162 +19,206 @@ export async function NoiseTestimonialsPage({
   const customFields = business.siteContent?.customFields as
     | Record<string, string>
     | undefined;
-  const f = resolveFields(customFields, ["noise.homepage-testimonials-heading"]);
-  const heading = (f["noise.homepage-testimonials-heading"] ?? "").trim() || "Worn out loud.";
-  const featured = testimonials[0];
+  const f = resolveFields(customFields, [
+    "noise.homepage-testimonials-heading",
+  ]);
+  const heading =
+    (f["noise.homepage-testimonials-heading"] ?? "").trim() || "Testimonials";
+  const count = testimonials.length;
+
+  /* Star distribution — use testimonial rating if available, otherwise assume 5 */
+  type TestimonialWithRating = (typeof testimonials)[number] & {
+    rating?: number;
+  };
+  const withRatings = testimonials as TestimonialWithRating[];
+  const dist = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    n: withRatings.filter((t) => (t.rating ?? 5) === star).length,
+  }));
+  const avgRating =
+    count > 0
+      ? (
+          withRatings.reduce((sum, t) => sum + (t.rating ?? 5), 0) / count
+        ).toFixed(1)
+      : "5.0";
 
   return (
     <PageTransition>
-      {/* Two-column editorial header */}
+      {/* ── Centered header ── */}
       <section
-        className="grid border-b-2 border-foreground md:grid-cols-2"
+        className="border-foreground/15 border-b px-6 pt-20 pb-14 text-center"
         style={{ background: "var(--vn-paper)" }}
       >
-        {/* Left — heading + stats */}
-        <FadeIn className="flex flex-col gap-8 px-7 py-14 border-b border-foreground md:border-b-0 md:border-r">
-          <div className="flex flex-col gap-4">
-            <p
-              className="font-mono text-[9.5px] tracking-[0.22em] uppercase"
-              style={{ color: "var(--vn-steel)" }}
-            >
-              Section / 06 — From the people wearing it
-            </p>
-            <h1
-              className="font-serif italic leading-[0.95] tracking-tight"
-              style={{
-                fontSize: "clamp(3rem, 6vw, 5.5rem)",
-                letterSpacing: "-0.025em",
-              }}
-            >
-              {heading}
-            </h1>
-            <p
-              className="font-sans text-[15px] leading-relaxed max-w-[42ch]"
-              style={{ color: "var(--vn-ink-soft)" }}
-            >
-              Voices from the people in our garments — unedited, lightly
-              punctuated, signed with the city they sent it from.
-            </p>
-          </div>
+        <FadeIn className="mx-auto" style={{ maxWidth: "1280px" }}>
+          <p
+            className="mb-4 font-mono text-[10px] tracking-[0.28em] uppercase"
+            style={{ color: "var(--vn-steel-mist)" }}
+          >
+            From the people wearing it
+          </p>
+          <h1
+            className="font-serif leading-none tracking-tight italic"
+            style={{
+              fontSize: "clamp(3.5rem, 8vw, 6rem)",
+              letterSpacing: "-0.025em",
+            }}
+          >
+            {heading}
+          </h1>
+          <p
+            className="mx-auto mt-6 font-sans leading-[1.85]"
+            style={{
+              fontSize: "15px",
+              color: "var(--vn-ink-soft)",
+              maxWidth: "52ch",
+            }}
+          >
+            Unedited notes from our customers. We publish every review we
+            receive — high and low.
+          </p>
+        </FadeIn>
+      </section>
 
-          {/* Stats row */}
+      {/* ── 4-cell stats row ── */}
+      <section
+        className="border-foreground/20 border-b px-7 py-0"
+        style={{ background: "var(--vn-paper)" }}
+      >
+        <FadeIn
+          className="mx-auto"
+          style={{ maxWidth: "980px", padding: "56px 0 0" }}
+        >
           <div
-            className="grid grid-cols-2 sm:grid-cols-4 gap-0 border-t pt-6"
-            style={{ borderColor: "var(--vn-rule)" }}
+            className="border-foreground/20 grid grid-cols-2 border sm:grid-cols-4"
+            style={{ background: "var(--vn-paper)" }}
           >
             {[
-              { k: String(testimonials.length || "1,247"), v: "Voices on file" },
-              { k: "4.9", v: "Average signal" },
-              { k: "96%", v: "Buy again" },
-              { k: "42", v: "Cities" },
+              { n: avgRating, sub: "Average rating", foot: "out of 5" },
+              { n: String(count || "—"), sub: "Reviews on file" },
+              { n: "96%", sub: "Would recommend" },
+              { n: "14d", sub: "Median fit feedback" },
             ].map((stat, i) => (
               <div
-                key={i}
-                className="flex flex-col gap-1 pr-4"
-                style={{ borderRight: i < 3 ? "1px solid var(--vn-rule)" : "none" }}
+                key={stat.sub}
+                className="flex flex-col items-center justify-center gap-2 px-4 py-8 text-center"
+                style={{
+                  borderRight: i < 3 ? "1px solid var(--vn-rule)" : "none",
+                  borderBottom: i < 2 ? "1px solid var(--vn-rule)" : "none",
+                }}
               >
                 <span
-                  className="font-serif italic leading-none"
-                  style={{ fontSize: "clamp(1.6rem, 2.5vw, 2.4rem)", letterSpacing: "-0.02em" }}
+                  className="font-serif leading-none italic"
+                  style={{
+                    fontSize: "clamp(2rem, 4vw, 3rem)",
+                    letterSpacing: "-0.02em",
+                  }}
                 >
-                  {stat.k}
+                  {stat.n}
                 </span>
                 <span
-                  className="font-mono text-[9px] tracking-[0.18em] uppercase"
-                  style={{ color: "var(--vn-steel)" }}
+                  className="font-mono text-[9.5px] tracking-[0.18em] uppercase"
+                  style={{ color: "var(--vn-steel-mist)" }}
                 >
-                  {stat.v}
+                  {stat.sub}
                 </span>
+                {stat.foot && (
+                  <span
+                    className="font-mono text-[9px] tracking-[0.14em]"
+                    style={{ color: "var(--vn-steel-mist)", opacity: 0.6 }}
+                  >
+                    {stat.foot}
+                  </span>
+                )}
               </div>
             ))}
           </div>
         </FadeIn>
 
-        {/* Right — featured quote */}
-        {featured ? (
-          <FadeIn
-            delay={0.1}
-            className="flex flex-col justify-between gap-6 px-8 py-14"
-            style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
+        {/* Rating distribution */}
+        <FadeIn
+          className="mx-auto py-10"
+          style={{ maxWidth: "680px", padding: "40px 0 56px" }}
+        >
+          <p
+            className="mb-5 text-center font-mono text-[9.5px] tracking-[0.22em] uppercase"
+            style={{ color: "var(--vn-steel-mist)" }}
           >
-            <div
-              className="font-serif italic leading-none"
-              style={{ fontSize: "80px", opacity: 0.25, lineHeight: 0.8 }}
-            >
-              &ldquo;
-            </div>
-            <p
-              className="font-serif italic leading-[1.3] flex-1"
-              style={{
-                fontSize: "clamp(1.3rem, 2vw, 1.8rem)",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              {featured.text}
-            </p>
-            <div className="flex items-end justify-between">
-              <div>
+            Rating Distribution
+          </p>
+          <div className="flex flex-col gap-2.5">
+            {dist.map(({ star, n }) => {
+              const pct = count > 0 ? (n / count) * 100 : 0;
+              return (
                 <div
-                  className="font-mono text-[11px] tracking-[0.14em] uppercase"
-                  style={{ color: "var(--vn-bone)" }}
+                  key={star}
+                  className="grid items-center gap-3 font-mono text-[11px]"
+                  style={{
+                    gridTemplateColumns: "36px 1fr 28px",
+                    color: "var(--vn-steel-mist)",
+                  }}
                 >
-                  {featured.customerName}
+                  <span>{star} ★</span>
+                  <div
+                    className="relative h-1.5"
+                    style={{ background: "rgba(0,0,0,.06)" }}
+                  >
+                    <div
+                      className="absolute top-0 bottom-0 left-0 transition-all"
+                      style={{ width: `${pct}%`, background: "var(--vn-ink)" }}
+                    />
+                  </div>
+                  <span className="text-right">{n}</span>
                 </div>
-                <div
-                  className="font-mono text-[9.5px] tracking-[0.2em] uppercase mt-1"
-                  style={{ color: "var(--vn-steel-mist)" }}
-                >
-                  ★★★★★ · Verified buyer
-                </div>
-              </div>
-            </div>
-          </FadeIn>
-        ) : (
-          <div
-            className="flex items-center justify-center px-8 py-14"
-            style={{ background: "var(--vn-steel)" }}
-          >
-            <p
-              className="font-serif italic text-center"
-              style={{ fontSize: "28px", color: "var(--vn-bone)", opacity: 0.4 }}
-            >
-              More voices coming.
-            </p>
+              );
+            })}
           </div>
-        )}
+        </FadeIn>
       </section>
 
-      {/* Filter row */}
+      {/* ── Filter chips ── */}
       <div
-        className="flex items-center gap-4 border-b border-foreground/20 px-7 py-3 overflow-x-auto"
+        className="border-foreground/20 flex items-center gap-3 overflow-x-auto border-b px-7 py-4"
         style={{ background: "var(--vn-paper)" }}
       >
-        <div
-          className="font-serif italic"
-          style={{ fontSize: "20px", color: "var(--vn-ink)", letterSpacing: "-0.01em", flexShrink: 0 }}
-        >
-          ★★★★★
-        </div>
         <span
-          className="font-mono text-[22px] tracking-tight"
-          style={{ color: "var(--vn-ink)", letterSpacing: "-0.02em", fontStyle: "italic" }}
+          className="flex-shrink-0 font-serif italic"
+          style={{
+            fontSize: "18px",
+            color: "var(--vn-ink)",
+            letterSpacing: "-0.01em",
+          }}
         >
-          4.9
+          {"★".repeat(5)}
         </span>
         <span
-          className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
-          style={{ color: "var(--vn-steel)" }}
+          className="flex-shrink-0 font-mono tracking-tight"
+          style={{
+            fontSize: "20px",
+            color: "var(--vn-ink)",
+            fontStyle: "italic",
+            letterSpacing: "-0.02em",
+          }}
         >
-          based on {testimonials.length || "1,247"} verified buyers
+          {avgRating}
         </span>
-        <div className="ml-auto flex gap-2 flex-shrink-0">
+        <span
+          className="flex-shrink-0 font-mono text-[9.5px] tracking-[0.14em] uppercase"
+          style={{ color: "var(--vn-steel-mist)" }}
+        >
+          based on {count || "—"} verified buyers
+        </span>
+        <div className="ml-auto flex flex-shrink-0 gap-2">
           {["All voices", "★★★★★", "By piece"].map((pill, i) => (
             <span
               key={pill}
-              className="vn-stamp text-[9.5px] cursor-pointer"
+              className="vn-stamp hover:bg-foreground hover:text-background cursor-pointer text-[9.5px] transition-all"
               style={
                 i === 0
-                  ? { background: "var(--vn-ink)", color: "var(--vn-bone)", borderColor: "var(--vn-ink)" }
+                  ? {
+                      background: "var(--vn-ink)",
+                      color: "var(--vn-bone)",
+                      borderColor: "var(--vn-ink)",
+                    }
                   : {}
               }
             >
@@ -223,197 +228,227 @@ export async function NoiseTestimonialsPage({
         </div>
       </div>
 
-      {/* Voices grid */}
+      {/* ── Masonry grid — CSS columns matching design ── */}
       <section className="px-7 py-12" style={{ background: "var(--vn-paper)" }}>
         {testimonials.length === 0 ? (
           <FadeIn className="py-20 text-center">
             <p
-              className="font-serif italic text-2xl"
+              className="font-serif text-2xl italic"
               style={{ color: "var(--vn-steel-mist)" }}
             >
               No voices yet. Check back soon.
             </p>
-            <Link
-              href="/"
-              className="vn-stamp mt-8 inline-flex text-[10px]"
-            >
+            <Link href="/" className="vn-stamp mt-8 inline-flex text-[10px]">
               Back to home
             </Link>
           </FadeIn>
         ) : (
-          <StaggerContainer
-            className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"
-            staggerDelay={0.07}
+          <div
+            style={{ columnCount: 3, columnGap: "24px" }}
+            className="hidden md:block"
           >
-            {testimonials.map((t, i) => {
-              const style = CARD_STYLES[i % 3] ?? "paper";
-              const cs = cardStyle(style);
-              const muted = mutedColor(style);
+            {testimonials.map((t, i) => (
+              <TestimonialCard key={t.id} t={t} i={i} />
+            ))}
+          </div>
+        )}
 
-              return (
-                <StaggerItem key={t.id}>
-                  <article
-                    className="flex flex-col gap-4 border border-foreground/15 p-5 h-full"
-                    style={cs}
-                  >
-                    {/* Top: edition + stars */}
-                    <div className="flex items-center justify-between">
-                      <span
-                        className="font-mono text-[9px] tracking-[0.18em] uppercase"
-                        style={{ color: muted }}
-                      >
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span style={{ color: muted, fontSize: "12px" }}>
-                        ★★★★★
-                      </span>
-                    </div>
-
-                    {/* Quote */}
-                    <p
-                      className="font-serif italic leading-[1.35] flex-1"
-                      style={{ fontSize: "18px", letterSpacing: "-0.005em" }}
-                    >
-                      &ldquo;{t.text}&rdquo;
-                    </p>
-
-                    {/* Customer photo thumbnails */}
-                    {t.photoUrls && t.photoUrls.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {t.photoUrls.slice(0, 4).map((url, pi) => (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            key={pi}
-                            src={url}
-                            alt=""
-                            className="object-cover"
-                            style={{ width: "48px", height: "48px", border: "1px solid", borderColor: muted }}
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Footer: name + location */}
-                    <div
-                      className="flex items-end justify-between border-t pt-4 gap-4"
-                      style={{ borderColor: muted, opacity: 0.9 }}
-                    >
-                      <span
-                        className="font-mono text-[10.5px] tracking-[0.14em] uppercase"
-                      >
-                        {t.customerName}
-                      </span>
-                      <span
-                        className="font-mono text-[9px] tracking-[0.14em] uppercase text-right"
-                        style={{ color: muted }}
-                      >
-                        Verified buyer
-                      </span>
-                    </div>
-                  </article>
-                </StaggerItem>
-              );
-            })}
-          </StaggerContainer>
+        {/* Mobile: single column */}
+        {testimonials.length > 0 && (
+          <div className="flex flex-col gap-5 md:hidden">
+            {testimonials.map((t, i) => (
+              <TestimonialCard key={t.id} t={t} i={i} />
+            ))}
+          </div>
         )}
       </section>
 
-      {/* How reviews work — 4-step process */}
+      {/* ── Dark CTA — "Wearing something of ours?" ── */}
       <section
-        className="border-y-2 border-foreground px-7 py-16"
-        style={{ background: "var(--vn-bone)" }}
+        className="border-foreground border-y-2 px-7 py-20 text-center"
+        style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
       >
-        <FadeIn className="mx-auto max-w-7xl">
-          <div className="mb-10">
-            <p
-              className="font-mono text-[9.5px] tracking-[0.22em] uppercase mb-3"
-              style={{ color: "var(--vn-steel)" }}
-            >
-              How voices work
-            </p>
-            <h2
-              className="font-serif italic leading-none tracking-tight"
-              style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)", letterSpacing: "-0.02em" }}
-            >
-              How we collect them.
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-            {PROCESS_STEPS.map((step) => (
-              <div key={step.n}>
-                <div
-                  className="font-mono text-[11px] tracking-[0.22em] uppercase mb-3 flex items-center justify-center border"
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    background: "var(--vn-ink)",
-                    color: "var(--vn-bone)",
-                    borderColor: "var(--vn-ink)",
-                  }}
-                >
-                  {step.n}
-                </div>
-                <h4
-                  className="font-serif italic leading-none mb-3"
-                  style={{ fontSize: "22px", letterSpacing: "-0.01em" }}
-                >
-                  {step.title}
-                </h4>
-                <p
-                  className="font-sans text-sm leading-relaxed"
-                  style={{ color: "var(--vn-steel-mist)" }}
-                >
-                  {step.body}
-                </p>
-              </div>
-            ))}
-          </div>
-        </FadeIn>
-      </section>
-
-      {/* CTA */}
-      <section
-        className="border-b-2 border-foreground px-7 py-20"
-        style={{ background: "var(--vn-steel)", color: "var(--vn-bone)" }}
-      >
-        <FadeIn className="mx-auto max-w-7xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-          <div>
-            <p
-              className="font-mono text-[9.5px] tracking-[0.22em] uppercase mb-4"
-              style={{ color: "var(--vn-steel-mist)" }}
-            >
-              Your turn
-            </p>
-            <h2
-              className="font-serif italic leading-none tracking-tight"
-              style={{
-                fontSize: "clamp(2.5rem, 5vw, 4rem)",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Write to us.
-            </h2>
-            <p
-              className="mt-4 font-sans text-[15px] leading-relaxed max-w-[38ch]"
-              style={{ color: "rgba(255,255,255,0.6)" }}
-            >
-              Owned a piece? Worn it somewhere memorable? We&apos;d like to hear
-              about it.
-            </p>
-          </div>
-          <Link
-            href="/testimonials/submit"
-            className="vn-stamp flex-shrink-0 text-[11px] transition-all hover:opacity-80"
+        <FadeIn className="mx-auto" style={{ maxWidth: "780px" }}>
+          <p
+            className="mb-5 font-mono text-[9.5px] tracking-[0.28em] uppercase"
+            style={{ opacity: 0.55 }}
+          >
+            Wearing something of ours?
+          </p>
+          <h2
+            className="font-serif leading-none tracking-tight italic"
             style={{
-              borderColor: "var(--vn-bone)",
-              color: "var(--vn-bone)",
-              padding: "14px 22px",
+              fontSize: "clamp(2rem, 4vw, 3rem)",
+              letterSpacing: "-0.02em",
             }}
           >
-            Write a testimonial →
+            Tell us how it&apos;s holding up.
+          </h2>
+          <p
+            className="mx-auto mt-5 font-sans leading-[1.85]"
+            style={{ fontSize: "14px", opacity: 0.78, maxWidth: "48ch" }}
+          >
+            We read every note that comes in. Honest feedback — the awkward kind
+            included — is how we know what to make next.
+          </p>
+          <Link
+            href="/testimonials/submit"
+            className="mt-8 inline-block font-mono uppercase transition-opacity hover:opacity-80"
+            style={{
+              fontSize: "11px",
+              letterSpacing: ".24em",
+              padding: "14px 32px",
+              background: "var(--vn-bone)",
+              color: "var(--vn-ink)",
+              border: "1px solid var(--vn-bone)",
+            }}
+          >
+            Leave a review
           </Link>
         </FadeIn>
       </section>
     </PageTransition>
+  );
+}
+
+/* ── Card component — server-safe ── */
+type TWithRating = Awaited<ReturnType<typeof api.testimonial.list>>[number] & {
+  rating?: number;
+  productName?: string;
+};
+
+function TestimonialCard({ t, i }: { t: TWithRating; i: number }) {
+  const stars = t.rating ?? 5;
+  const headline = extractHeadline(t.text);
+  const body =
+    t.text.length > headline.replace(/[.!?]$/, "").length ? t.text : t.text;
+
+  return (
+    <div
+      style={{
+        breakInside: "avoid",
+        marginBottom: "24px",
+        border: "1px solid var(--vn-rule)",
+        background: "var(--vn-paper)",
+        padding: "26px 26px 22px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "12px",
+      }}
+    >
+      {/* Stars + date */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "14px",
+            letterSpacing: "0.16em",
+            color: "var(--vn-ink)",
+          }}
+        >
+          {"★".repeat(stars)}
+          <span style={{ color: "var(--vn-rule)" }}>
+            {"★".repeat(5 - stars)}
+          </span>
+        </span>
+        <span
+          className="font-mono text-[10px] tracking-[0.14em] uppercase"
+          style={{ color: "var(--vn-steel-mist)" }}
+        >
+          {String(i + 1).padStart(2, "0")}
+        </span>
+      </div>
+
+      {/* Headline */}
+      <h3
+        className="font-serif leading-[1.25] italic"
+        style={{
+          fontSize: "22px",
+          letterSpacing: "-0.005em",
+          color: "var(--vn-ink)",
+        }}
+      >
+        &ldquo;{headline}&rdquo;
+      </h3>
+
+      {/* Body */}
+      <p
+        className="font-sans text-[13px] leading-[1.75]"
+        style={{ color: "var(--vn-ink-soft)" }}
+      >
+        {body}
+      </p>
+
+      {/* Customer photo thumbnails */}
+      {t.photoUrls && t.photoUrls.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+          {t.photoUrls.slice(0, 4).map((url, pi) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={pi}
+              src={url}
+              alt=""
+              style={{
+                width: "48px",
+                height: "48px",
+                objectFit: "cover",
+                border: "1px solid var(--vn-rule)",
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Footer — name + location + product */}
+      <div
+        style={{
+          borderTop: "1px solid var(--vn-line-soft)",
+          paddingTop: "16px",
+          marginTop: "4px",
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "space-between",
+          gap: "12px",
+        }}
+      >
+        <div>
+          <p
+            className="font-mono text-[11px] tracking-[0.14em] uppercase"
+            style={{ color: "var(--vn-ink)", fontWeight: 500 }}
+          >
+            {t.customerName}
+          </p>
+          {(t.customerTitle ?? t.customerCompany) && (
+            <p
+              className="mt-0.5 font-mono text-[10px] tracking-[0.14em] uppercase"
+              style={{ color: "var(--vn-steel-mist)" }}
+            >
+              {t.customerTitle ?? t.customerCompany}
+            </p>
+          )}
+        </div>
+        <span
+          className="flex-shrink-0 text-right font-mono text-[9.5px] tracking-[0.14em] uppercase"
+          style={{ color: "var(--vn-steel-mist)" }}
+        >
+          Verified buyer
+        </span>
+      </div>
+
+      {/* Product name (if available) */}
+      {t.productName && (
+        <p
+          className="font-mono text-[10px] tracking-[0.14em] uppercase"
+          style={{ color: "var(--vn-steel-mist)", marginTop: "-4px" }}
+        >
+          On · {t.productName}
+        </p>
+      )}
+    </div>
   );
 }

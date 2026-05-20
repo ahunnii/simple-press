@@ -1,0 +1,110 @@
+"use client";
+
+import type { ReactNode } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { BookUser, Bell, Lock, Package, Settings } from "lucide-react";
+
+import { cn } from "~/lib/utils";
+
+const NAV_ITEMS = [
+  { href: "/account/orders", label: "Orders", icon: Package },
+  { href: "/account/settings", label: "Settings", icon: Settings },
+  { href: "/account/security", label: "Security", icon: Lock },
+  { href: "/account/address-book", label: "Address Book", icon: BookUser },
+  { href: "/account/preferences", label: "Preferences", icon: Bell },
+] as const;
+
+type Props = {
+  children: ReactNode;
+  heading: string;
+};
+
+export function NoiseAccountLayout({ children, heading }: Props) {
+  const pathname = usePathname();
+
+  return (
+    <>
+      {/* Editorial header */}
+      <section
+        className="border-b-2 border-foreground"
+        style={{ background: "var(--vn-paper)" }}
+      >
+        <div className="flex items-stretch" style={{ minHeight: "100px" }}>
+          <div
+            className="hidden md:flex flex-col justify-center gap-2 px-7 py-6 border-r border-foreground/20"
+            style={{ minWidth: "200px" }}
+          >
+            <span className="font-mono text-[9.5px] tracking-[0.22em] uppercase text-muted-foreground">
+              Visual Noise
+            </span>
+            <span className="font-mono text-[9.5px] tracking-[0.18em] uppercase text-muted-foreground opacity-60">
+              My Account
+            </span>
+          </div>
+          <div className="flex-1 flex items-center px-7 py-6">
+            <h1
+              className="font-serif italic leading-none tracking-tight"
+              style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", letterSpacing: "-0.025em" }}
+            >
+              {heading}
+            </h1>
+          </div>
+        </div>
+
+        {/* Mobile nav pills */}
+        <nav className="md:hidden flex gap-2 overflow-x-auto px-7 pb-5 pt-1" aria-label="Account navigation">
+          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+            const active = pathname === href || pathname.startsWith(href + "/");
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "vn-stamp flex-shrink-0 flex items-center gap-1.5 text-[9.5px] transition-all",
+                  active
+                    ? "bg-foreground text-background border-foreground"
+                    : "hover:bg-foreground hover:text-background hover:border-foreground",
+                )}
+              >
+                <Icon className="h-3 w-3" aria-hidden />
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+      </section>
+
+      <section className="px-7 py-10" style={{ background: "var(--vn-paper)" }}>
+        <div className="mx-auto max-w-7xl grid grid-cols-1 gap-10 md:grid-cols-[200px_1fr]">
+          {/* Desktop sidebar */}
+          <nav className="hidden md:block" aria-label="Account navigation">
+            <ul className="flex flex-col gap-0">
+              {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+                const active = pathname === href || pathname.startsWith(href + "/");
+                return (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className={cn(
+                        "flex items-center gap-3 border-l-2 py-3 pr-4 pl-3 font-mono text-[10px] tracking-[0.18em] uppercase transition-colors",
+                        active
+                          ? "border-foreground text-foreground"
+                          : "border-foreground/10 text-muted-foreground hover:border-foreground/40 hover:text-foreground",
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                      {label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          <div className="min-w-0">{children}</div>
+        </div>
+      </section>
+    </>
+  );
+}

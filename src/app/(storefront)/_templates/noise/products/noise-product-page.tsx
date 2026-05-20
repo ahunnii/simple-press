@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -20,18 +20,28 @@ import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components
 import { NoiseProductCard } from "../shared/noise-product-card";
 import { NoiseProductActions } from "./noise-product-actions";
 
+const TRUST_NOTES = [
+  "Free returns · 60 days",
+  "Carbon-neutral shipping",
+  "Lifetime repair program",
+] as const;
+
 export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
   });
 
+  const [activeImg, setActiveImg] = useState(0);
+
+  // Reset active image when product changes
   useEffect(() => {
+    setActiveImg(0);
     window.scrollTo(0, 0);
   }, [product.slug]);
 
   const additional = parseCardAdditionalFields(product.additionalFields);
 
-  /* Derive first collection for breadcrumb */
+  /* Derive first collection for breadcrumb + eyebrow */
   type CollectionRef = {
     collection: { id: string; name: string; slug: string } | null;
   };
@@ -39,87 +49,134 @@ export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
     .collectionProducts;
   const firstCollection = colProds?.[0]?.collection ?? null;
 
-  /* Stamps: season + hand-made (coming-soon handled by actions) */
-  const stamps = [
-    additional?.comingSoon ? "Coming Soon" : null,
-    "Hand-stitched",
-    "S/S 26",
-  ].filter(Boolean) as string[];
+  /* Simple in-stock check for the status indicator */
+  const inStock =
+    !product.trackInventory ||
+    (product.inventoryQty ?? 0) > 0 ||
+    product.allowBackorders;
+
+  const images = product.images.length > 0 ? product.images : [];
+  const activeImage = images[activeImg];
 
   return (
     <PageTransition>
-      {/* Breadcrumb */}
+      {/* ── Breadcrumb ── */}
       <div
         className="flex items-center justify-between px-7 py-3.5 border-b border-foreground/20"
         style={{ background: "var(--vn-paper)" }}
       >
-        <div className="font-mono text-[10.5px] tracking-[0.2em] uppercase flex items-center">
-          <Link
-            href="/"
-            className="transition-colors hover:opacity-60"
-            style={{ color: "var(--vn-steel)" }}
-          >
-            Index
+        <div className="font-mono text-[10.5px] tracking-[0.2em] uppercase flex items-center gap-2">
+          <Link href="/" className="transition-opacity hover:opacity-60" style={{ color: "var(--vn-steel-mist)" }}>
+            Home
           </Link>
-          <span className="mx-2" style={{ color: "var(--vn-rule)" }}>
-            /
-          </span>
-          <Link
-            href="/shop"
-            className="transition-colors hover:opacity-60"
-            style={{ color: "var(--vn-steel)" }}
-          >
+          <span style={{ color: "var(--vn-rule)" }}>/</span>
+          <Link href="/shop" className="transition-opacity hover:opacity-60" style={{ color: "var(--vn-steel-mist)" }}>
             Shop
           </Link>
           {firstCollection && (
             <>
-              <span className="mx-2" style={{ color: "var(--vn-rule)" }}>
-                /
-              </span>
+              <span style={{ color: "var(--vn-rule)" }}>/</span>
               <Link
                 href={`/collections/${firstCollection.slug}`}
-                className="transition-colors hover:opacity-60"
-                style={{ color: "var(--vn-steel)" }}
+                className="transition-opacity hover:opacity-60"
+                style={{ color: "var(--vn-steel-mist)" }}
               >
                 {firstCollection.name}
               </Link>
             </>
           )}
-          <span className="mx-2" style={{ color: "var(--vn-rule)" }}>
-            /
+          <span style={{ color: "var(--vn-rule)" }}>/</span>
+          <span className="truncate max-w-[30ch]" style={{ color: "var(--vn-ink)" }}>
+            {product.name}
           </span>
-          <span style={{ color: "var(--vn-ink)" }}>{product.name}</span>
         </div>
         {product.sku && (
           <span
-            className="font-mono text-[10px] tracking-[0.16em] uppercase hidden md:block"
-            style={{ color: "var(--vn-steel)" }}
+            className="font-mono text-[10px] tracking-[0.16em] uppercase hidden md:block flex-shrink-0 ml-4"
+            style={{ color: "var(--vn-steel-mist)" }}
           >
             SKU · {product.sku}
           </span>
         )}
       </div>
 
-      {/* Main two-column layout */}
+      {/* ── Main layout: 3 columns on desktop ── */}
       <section
-        className="grid border-b-2 border-foreground grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
+        className="px-5 py-6 sm:px-7 sm:py-8"
         style={{ background: "var(--vn-paper)" }}
       >
-        {/* LEFT — Gallery */}
-        <FadeIn direction="left" className="border-b border-foreground md:border-b-0 md:border-r p-7">
-          {/* Hero shot */}
+        <div
+          className="mx-auto"
+          style={{
+            maxWidth: "1280px",
+            display: "grid",
+            gridTemplateColumns: "80px 1fr 1fr",
+            gap: "28px",
+            alignItems: "flex-start",
+          }}
+        >
+          {/* ── Col 1: Vertical thumbnail strip ── */}
+          <div className="hidden md:flex flex-col gap-2.5">
+            {images.slice(0, 4).map((img, i) => (
+              <button
+                key={img.id}
+                onClick={() => setActiveImg(i)}
+                className="relative overflow-hidden transition-all"
+                style={{
+                  aspectRatio: "4 / 5",
+                  background: "var(--vn-steel)",
+                  border: activeImg === i
+                    ? "1px solid var(--vn-ink)"
+                    : "1px solid var(--vn-rule)",
+                  outline: activeImg === i ? "2px solid var(--vn-bone)" : "none",
+                  outlineOffset: "-4px",
+                }}
+                aria-label={`View image ${i + 1}`}
+              >
+                <Image
+                  src={img.url}
+                  alt={`View ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="80px"
+                />
+                <div
+                  className="absolute left-1 top-1 font-mono text-[8px] tracking-[0.12em] px-1"
+                  style={{ background: "var(--vn-bone)", color: "var(--vn-ink)" }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </div>
+              </button>
+            ))}
+            {/* Placeholder thumbs when fewer than 4 images */}
+            {images.length === 0 &&
+              [0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="relative overflow-hidden"
+                  style={{
+                    aspectRatio: "4 / 5",
+                    background: i === 0 ? "var(--vn-steel)" : "var(--vn-steel-deep)",
+                    border: i === 0 ? "1px solid var(--vn-ink)" : "1px solid var(--vn-rule)",
+                    opacity: 0.4,
+                  }}
+                />
+              ))}
+          </div>
+
+          {/* ── Col 2: Main image ── */}
           <div
-            className="relative border border-foreground overflow-hidden"
-            style={{ aspectRatio: "3/4", background: "var(--vn-steel)" }}
+            className="relative overflow-hidden border border-foreground"
+            style={{ aspectRatio: "4 / 5", background: "var(--vn-steel)" }}
           >
-            {product.images[0] ? (
+            {activeImage ? (
               <Image
-                src={product.images[0].url}
+                src={activeImage.url}
                 alt={product.name ?? "Product image"}
                 fill
-                className="object-cover"
+                className="object-cover transition-opacity duration-300"
                 priority
-                sizes="(max-width: 768px) 100vw, 55vw"
+                sizes="(max-width: 768px) 100vw, 45vw"
               />
             ) : (
               <div
@@ -130,11 +187,7 @@ export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
               >
                 <span
                   className="font-serif italic select-none"
-                  style={{
-                    fontSize: "80px",
-                    color: "var(--vn-bone)",
-                    opacity: 0.15,
-                  }}
+                  style={{ fontSize: "80px", color: "var(--vn-bone)", opacity: 0.12 }}
                 >
                   VN
                 </span>
@@ -142,115 +195,164 @@ export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
             )}
             {/* Figure label */}
             <div
-              className="absolute left-3.5 top-3.5 font-mono text-[10px] tracking-[0.18em] uppercase px-2 py-1"
+              className="absolute left-3.5 top-3.5 font-mono text-[9.5px] tracking-[0.18em] uppercase px-2 py-1"
               style={{ background: "var(--vn-bone)", color: "var(--vn-ink)" }}
             >
-              Fig. 01 · Front
+              Fig. {String(activeImg + 1).padStart(2, "0")}
             </div>
-            {/* Base price badge — shows product price, not variant */}
+            {/* Price badge */}
             <div
-              className="absolute right-3.5 top-3.5 font-mono text-[10px] tracking-[0.18em] uppercase px-2 py-1"
+              className="absolute right-3.5 top-3.5 font-mono text-[9.5px] tracking-[0.18em] uppercase px-2 py-1"
               style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
             >
               {formatPrice(product.price)}
             </div>
           </div>
 
-          {/* Thumbnail strip */}
-          {product.images.length > 1 && (
-            <div className="grid grid-cols-4 gap-3 mt-3.5">
-              {product.images.slice(0, 4).map((img, i) => (
-                <div
-                  key={img.id}
-                  className="relative border border-foreground overflow-hidden cursor-pointer"
-                  style={{ aspectRatio: "3/4", background: "var(--vn-steel)" }}
-                >
-                  <Image
-                    src={img.url}
-                    alt={`View ${i + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="15vw"
-                  />
-                  <div
-                    className="absolute left-1.5 top-1.5 font-mono text-[9px] tracking-[0.16em] px-1"
-                    style={{
-                      background: "var(--vn-bone)",
-                      color: "var(--vn-ink)",
-                    }}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </FadeIn>
-
-        {/* RIGHT — Detail panel */}
-        <FadeIn
-          direction="right"
-          delay={0.15}
-          className="flex flex-col gap-6 p-9"
-          style={{ background: "var(--vn-paper)" }}
-        >
-          {/* Stamps row */}
-          <div className="flex flex-wrap gap-1.5">
-            {stamps.map((s) => (
-              <span key={s} className="vn-stamp text-[10px]">
-                {s}
-              </span>
-            ))}
-          </div>
-
-          {/* H1 with category eyebrow */}
-          <div>
+          {/* ── Col 3: Detail panel ── */}
+          <FadeIn
+            delay={0.12}
+            className="flex flex-col gap-6"
+            style={{ paddingLeft: "20px" }}
+          >
+            {/* Category eyebrow */}
             {firstCollection && (
               <span
-                className="font-mono text-[11px] tracking-[0.22em] uppercase block mb-2.5"
-                style={{ color: "var(--vn-steel)" }}
+                className="font-mono text-[11px] tracking-[0.22em] uppercase"
+                style={{ color: "var(--vn-steel-mist)" }}
               >
-                {firstCollection.name} / N° 01
+                {firstCollection.name}
               </span>
             )}
+
+            {/* Product name */}
             <h1
               className="font-serif italic leading-[1.0] tracking-tight"
               style={{
-                fontSize: "clamp(2.8rem, 5.2vw, 5.25rem)",
+                fontSize: "clamp(2rem, 4vw, 3.2rem)",
                 letterSpacing: "-0.02em",
               }}
             >
               {product.name}
-              {additional?.productTagline && (
-                <>
-                  {" "}
-                  <em style={{ color: "var(--vn-steel)" }}>
-                    {additional.productTagline}
-                  </em>
-                </>
-              )}
             </h1>
-          </div>
 
-          {/* Lede — description as italic serif */}
-          {product.description && (
-            <p
-              className="font-serif italic leading-[1.35] max-w-[38ch]"
-              style={{ fontSize: "20px", color: "var(--vn-ink-soft)" }}
+            {/* Price + stock status */}
+            <div className="flex items-baseline gap-4">
+              <span
+                className="font-serif italic leading-none"
+                style={{ fontSize: "clamp(1.6rem, 2.5vw, 2.2rem)", letterSpacing: "-0.01em" }}
+              >
+                {formatPrice(product.price)}
+              </span>
+              {product.compareAtPrice && (
+                <span
+                  className="font-sans line-through"
+                  style={{ fontSize: "16px", color: "var(--vn-steel-mist)" }}
+                >
+                  {formatPrice(product.compareAtPrice)}
+                </span>
+              )}
+            </div>
+
+            {/* Stock indicator */}
+            <div
+              className="flex items-center gap-2 font-sans text-[13px]"
+              style={{ color: inStock ? "#3f7a4f" : "var(--vn-steel-mist)" }}
             >
-              {product.description}
-            </p>
-          )}
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: inStock ? "#3f7a4f" : "var(--vn-rule)",
+                  flexShrink: 0,
+                }}
+              />
+              {inStock
+                ? product.allowBackorders && (product.inventoryQty ?? 0) <= 0
+                  ? "Backordered · ships when available"
+                  : "In stock · ready to ship"
+                : "Out of stock"}
+            </div>
 
-          {/* Price row + variant selectors + add to cart + trust badges + notes
-              All in one client component so they share a single useProduct instance */}
-          <NoiseProductActions product={product} />
-        </FadeIn>
+            {/* Description */}
+            {product.description && (
+              <p
+                className="font-sans leading-[1.85] max-w-[44ch]"
+                style={{ fontSize: "14px", color: "var(--vn-ink-soft)" }}
+              >
+                {product.description}
+              </p>
+            )}
+
+            {/* Tagline badge */}
+            {additional?.productTagline && (
+              <span className="vn-stamp text-[10px] self-start">
+                {additional.productTagline}
+              </span>
+            )}
+
+            {/* Variant + add to cart + trust badges */}
+            <NoiseProductActions product={product} />
+
+            {/* 3-item trust row (design's guarantee strip) */}
+            <div
+              className="grid grid-cols-3 gap-2 border-t pt-5"
+              style={{ borderColor: "var(--vn-line-soft)" }}
+            >
+              {TRUST_NOTES.map((note) => (
+                <div
+                  key={note}
+                  className="font-mono text-[10px] tracking-[0.1em] uppercase text-center py-2.5 px-1"
+                  style={{
+                    border: "1px solid var(--vn-line-soft)",
+                    color: "var(--vn-steel-mist)",
+                  }}
+                >
+                  {note}
+                </div>
+              ))}
+            </div>
+          </FadeIn>
+        </div>
+
+        {/* Mobile: horizontal thumbnail strip (below main image) */}
+        {images.length > 1 && (
+          <div
+            className="md:hidden mx-auto grid grid-cols-4 gap-2 mt-4"
+            style={{ maxWidth: "1280px" }}
+          >
+            {images.slice(0, 4).map((img, i) => (
+              <button
+                key={img.id}
+                onClick={() => setActiveImg(i)}
+                className="relative overflow-hidden"
+                style={{
+                  aspectRatio: "4 / 5",
+                  background: "var(--vn-steel)",
+                  border: activeImg === i
+                    ? "1px solid var(--vn-ink)"
+                    : "1px solid var(--vn-rule)",
+                }}
+                aria-label={`View image ${i + 1}`}
+              >
+                <Image
+                  src={img.url}
+                  alt={`View ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="25vw"
+                />
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* Description tabs */}
+      {/* ── Description tabs / accordion ── */}
       <section
-        className="px-7 border-b border-foreground/20"
+        className="px-7 border-t border-b border-foreground/20"
         style={{ background: "var(--vn-paper)" }}
       >
         <ProductDetailsAdditionalInfoTabs
@@ -260,29 +362,32 @@ export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
             tabsTriggerClassName:
               "font-mono text-[10px] tracking-[0.25em] uppercase rounded-none",
             tipTapRendererClassName:
-              "pt-8 pb-8 text-muted-foreground font-sans text-base leading-relaxed",
+              "pt-8 pb-8 font-sans text-[14px] leading-[1.85] text-muted-foreground",
             contentClassName:
-              "pt-8 pb-8 text-muted-foreground font-sans text-base leading-relaxed",
+              "pt-8 pb-8 font-sans text-[14px] leading-[1.85] text-muted-foreground",
           }}
         />
       </section>
 
-      {/* Related products */}
+      {/* ── Related products ── */}
       {relatedProducts && relatedProducts.length > 0 && (
-        <section className="px-7 py-16" style={{ background: "var(--vn-paper)" }}>
+        <section
+          className="px-7 py-16"
+          style={{ background: "var(--vn-bone)" }}
+        >
           <div className="mx-auto max-w-7xl">
-            <FadeIn className="flex items-end justify-between mb-8 border-b border-foreground/20 pb-6">
+            <FadeIn className="mb-10 flex items-end justify-between border-b pb-6" style={{ borderColor: "var(--vn-rule)" }}>
               <div>
                 <p
-                  className="font-mono text-[9.5px] tracking-[0.4em] uppercase mb-3"
-                  style={{ color: "var(--vn-steel)" }}
+                  className="font-mono text-[9.5px] tracking-[0.28em] uppercase mb-3"
+                  style={{ color: "var(--vn-steel-mist)" }}
                 >
-                  You might also like
+                  You may also like
                 </p>
                 <h2
                   className="font-serif italic leading-none tracking-tight"
                   style={{
-                    fontSize: "clamp(2.5rem, 5vw, 4rem)",
+                    fontSize: "clamp(2rem, 4vw, 3rem)",
                     letterSpacing: "-0.02em",
                   }}
                 >
@@ -291,10 +396,10 @@ export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
               </div>
               <Link
                 href="/shop"
-                className="font-mono text-[10px] tracking-[0.3em] uppercase hidden md:flex items-center gap-3 transition-opacity hover:opacity-60"
+                className="font-mono text-[10px] tracking-[0.22em] uppercase hidden md:flex items-center gap-3 transition-opacity hover:opacity-60"
+                style={{ color: "var(--vn-ink)" }}
               >
-                View all
-                <span className="h-px w-10 bg-foreground" />
+                View all →
               </Link>
             </FadeIn>
 

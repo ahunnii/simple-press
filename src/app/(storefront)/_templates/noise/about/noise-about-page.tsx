@@ -3,11 +3,36 @@ import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import { getRichTextFieldValue, parseTemplateIconListRows } from "~/lib/template-fields";
-import { FadeIn, PageTransition, StaggerContainer, StaggerItem } from "~/components/page-animations";
+import {
+  FadeIn,
+  PageTransition,
+  StaggerContainer,
+  StaggerItem,
+} from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "../index";
+
+// Brand pillars — directly from the design file
+const BRAND_PILLARS = [
+  {
+    title: "Mill-direct",
+    body: "Every fabric we use is sourced direct from the mill — most often Italy, Portugal, or Japan. No intermediaries, no shortcuts.",
+  },
+  {
+    title: "Small runs",
+    body: "We cut in lots of 200–600 pieces. When something sells out, it sells out. We'd rather make less than make filler.",
+  },
+  {
+    title: "Lifetime repair",
+    body: "If a seam goes, a button drops, a hem unravels — send it back. We'll repair it, free, for as long as you own it.",
+  },
+  {
+    title: "Honest pricing",
+    body: "We tell you what our pieces cost to make. The margin between that and your cart is the studio, the repair program, and the lights.",
+  },
+] as const;
 
 const PROCESS_STEPS = [
   {
@@ -64,9 +89,11 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
     "noise.about-cta-button-link",
   ]);
 
-  const heroHeading = f["noise.about-hero-heading"] ?? "A small studio cutting loud clothes since 2014.";
+  const heroHeading = f["noise.about-hero-heading"] ?? "A studio, not a brand.";
   const heroImage = f["noise.about-hero-image"];
-  const heroLede = f["noise.about-hero-mission"] ?? "Founded in a former tool-and-die shop on Detroit's east side. Eleven hands, two cutting tables, one rule: if the seam can't take a city block, it doesn't leave the studio.";
+  const heroLede =
+    f["noise.about-hero-mission"] ??
+    "Visual Noise Detroit began in a borrowed loft in Corktown — three patternmakers, a tape measure, and the conviction that most clothing was being made wrong. We make a small number of pieces each season, and we make them carefully.";
   const storyHeading = f["noise.about-story-heading"] ?? "How a small Detroit label gets loud.";
   const ctaHeading = f["noise.about-cta-heading"] ?? "Visit the atelier.";
   const ctaBtnText = f["noise.about-cta-button-text"] ?? "Book a fitting";
@@ -75,174 +102,120 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const phone = business.phoneNumber;
   const email = business.supportEmail;
 
-  const BY_NUMBERS = [
-    { nm: "142 patterns drawn", desc: "Each one drafted on the studio table, in pencil first, then tested on three to six bodies before sign-off." },
-    { nm: "11 full-time hands", desc: "Pattern-makers, sample-cutters, finishers, a single press, and one founder still threading a needle daily." },
-    { nm: "60 per edition, max", desc: "We cap every garment run at sixty signed pieces. When they're gone, they're gone — no second drop, no restock." },
-    { nm: "42 cities, 7 countries", desc: "From the east side to East London. Shipped via DHL, signed by the wearer, traced through to the studio inbox." },
-  ];
-
   return (
     <PageTransition>
-      {/* Hero — image left, text right */}
+
+      {/* ── Centered header — "Our Story" overline + h1 + intro ── */}
       <section
-        className="grid border-b-2 border-foreground grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]"
+        className="px-6 pt-20 pb-16 text-center border-b border-foreground/15"
         style={{ background: "var(--vn-paper)" }}
       >
-        {/* Image */}
-        <FadeIn
-          direction="left"
-          className="relative border-b border-foreground md:border-b-0 md:border-r overflow-hidden"
-          style={{ minHeight: "clamp(320px, 50vw, 560px)" }}
-        >
-          {heroImage ? (
-            <Image
-              src={heroImage}
-              alt={heroHeading}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 768px) 100vw, 55vw"
-            />
-          ) : (
-            <div
-              className="absolute inset-0 flex items-center justify-center"
-              style={{ background: `linear-gradient(180deg, var(--vn-steel-deep), var(--vn-steel))` }}
-            >
-              <p
-                className="font-serif italic select-none"
-                style={{ fontSize: "120px", color: "var(--vn-bone)", opacity: 0.1 }}
-              >
-                VN
-              </p>
-            </div>
-          )}
-          {/* Address tag */}
-          <div
-            className="absolute left-5 top-5 font-mono text-[9.5px] tracking-[0.2em] uppercase px-2.5 py-1.5"
-            style={{ background: "var(--vn-bone)", color: "var(--vn-ink)" }}
+        <FadeIn className="mx-auto" style={{ maxWidth: "980px" }}>
+          <p
+            className="font-mono text-[10px] tracking-[0.28em] uppercase mb-5"
+            style={{ color: "var(--vn-steel-mist)" }}
           >
-            The Atelier · {address ?? "1217 Gratiot Ave"}
-          </div>
-          {/* Caption overlay */}
-          <div
-            className="absolute inset-x-0 bottom-0 flex items-end justify-between px-5 pb-5 pt-20"
-            style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 30%, transparent)" }}
+            Our Story
+          </p>
+          <h1
+            className="font-serif italic leading-[1.0] tracking-tight"
+            style={{
+              fontSize: "clamp(2.8rem, 7vw, 5rem)",
+              letterSpacing: "-0.025em",
+            }}
           >
-            <span className="font-serif italic text-lg" style={{ color: "var(--vn-bone)" }}>
-              Visual Noise
-            </span>
-            <span
-              className="font-mono text-[9.5px] tracking-[0.18em] uppercase"
-              style={{ color: "var(--vn-bone)", opacity: 0.7 }}
-            >
-              Detroit, Michigan
-            </span>
-          </div>
-        </FadeIn>
-
-        {/* Words */}
-        <FadeIn
-          direction="right"
-          delay={0.15}
-          className="flex flex-col justify-between gap-8 px-7 py-10 md:px-10 md:py-14"
-          style={{ background: "var(--vn-paper)" }}
-        >
-          <div className="flex flex-col gap-6">
-            <p
-              className="font-mono text-[9.5px] tracking-[0.22em] uppercase"
-              style={{ color: "var(--vn-steel)" }}
-            >
-              Section / 07 — The Studio
-            </p>
-            <h1
-              className="font-serif italic leading-[1.0] tracking-tight"
-              style={{
-                fontSize: "clamp(2.2rem, 4.5vw, 4.5rem)",
-                letterSpacing: "-0.025em",
-              }}
-            >
-              {heroHeading}
-            </h1>
-            <p
-              className="font-sans text-[15px] leading-relaxed max-w-[40ch]"
-              style={{ color: "var(--vn-ink-soft)" }}
-            >
-              {heroLede}
-            </p>
-          </div>
-
-          {/* Stats row */}
-          <div
-            className="grid grid-cols-2 sm:grid-cols-4 gap-0 border-t pt-5"
-            style={{ borderColor: "var(--vn-rule)" }}
+            {heroHeading}
+          </h1>
+          <p
+            className="font-sans mt-10 mx-auto leading-[1.85]"
+            style={{
+              fontSize: "17px",
+              color: "var(--vn-ink-soft)",
+              maxWidth: "720px",
+            }}
           >
-            {[
-              { k: "2014", v: "Founded — Det." },
-              { k: "11", v: "Hands in the room" },
-              { k: "3.2k", v: "sq ft of floor" },
-              { k: "142", v: "Patterns drawn" },
-            ].map((stat, i) => (
-              <div
-                key={i}
-                className="flex flex-col gap-1 pr-3"
-                style={{ borderRight: i < 3 ? "1px solid var(--vn-rule)" : "none" }}
-              >
-                <span
-                  className="font-serif italic leading-none"
-                  style={{ fontSize: "clamp(1.4rem, 2.2vw, 2rem)", letterSpacing: "-0.02em" }}
-                >
-                  {stat.k}
-                </span>
-                <span
-                  className="font-mono text-[8.5px] tracking-[0.16em] uppercase"
-                  style={{ color: "var(--vn-steel)" }}
-                >
-                  {stat.v}
-                </span>
-              </div>
-            ))}
-          </div>
+            {heroLede}
+          </p>
         </FadeIn>
       </section>
 
-      {/* Marquee */}
+      {/* ── Full-width hero image (21:9) ── */}
       <div
-        className="overflow-hidden border-b border-foreground/20 py-3"
-        style={{ background: "var(--vn-ink)" }}
+        className="relative border-b border-foreground/15 overflow-hidden"
+        style={{
+          maxWidth: "1280px",
+          margin: "0 auto",
+          aspectRatio: "21 / 9",
+          background: "var(--vn-steel)",
+        }}
       >
-        <div className="vn-marquee-track" aria-hidden="true">
-          {[0, 1].map((n) => (
-            <span
-              key={n}
-              className="whitespace-nowrap font-serif italic px-6"
-              style={{
-                fontSize: "clamp(1.4rem, 2.8vw, 2.2rem)",
-                color: "var(--vn-bone)",
-                opacity: 0.75,
-                letterSpacing: "-0.01em",
-              }}
+        {heroImage ? (
+          <Image
+            src={heroImage}
+            alt={heroHeading}
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+        ) : (
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{
+              background: `repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 12px, transparent 12px 24px), linear-gradient(180deg, var(--vn-steel-deep), var(--vn-steel))`,
+            }}
+          >
+            <p
+              className="font-serif italic select-none"
+              style={{ fontSize: "clamp(6rem, 18vw, 14rem)", color: "var(--vn-bone)", opacity: 0.06 }}
             >
-              Cut, sewn, signed, sent — from Detroit
-              <span className="font-mono not-italic mx-5" style={{ fontSize: "12px", color: "var(--vn-steel-mist)" }}>✦</span>
-              Eleven hands, one room
-              <span className="font-mono not-italic mx-5" style={{ fontSize: "12px", color: "var(--vn-steel-mist)" }}>✦</span>
-              Since 2014
-              <span className="font-mono not-italic mx-5" style={{ fontSize: "12px", color: "var(--vn-steel-mist)" }}>✦</span>
-              Heavy on the iron, light on the spectacle
-              <span className="font-mono not-italic mx-5" style={{ fontSize: "12px", color: "var(--vn-steel-mist)" }}>✦</span>
-            </span>
-          ))}
+              VN
+            </p>
+          </div>
+        )}
+        {/* Corner stamp */}
+        <div
+          className="absolute left-5 top-5 font-mono text-[9.5px] tracking-[0.2em] uppercase px-2.5 py-1.5"
+          style={{ background: "var(--vn-bone)", color: "var(--vn-ink)" }}
+        >
+          The Atelier · {address ?? "Detroit, MI"}
         </div>
       </div>
 
-      {/* Intro spread — two columns */}
+      {/* ── Brand pillars 2×2 grid ── */}
       <section
-        className="border-b border-foreground/20 px-7 py-20"
+        className="border-b border-foreground/15 px-7 py-20"
         style={{ background: "var(--vn-paper)" }}
       >
+        <FadeIn
+          className="mx-auto grid grid-cols-1 gap-14 sm:grid-cols-2"
+          style={{ maxWidth: "880px" }}
+        >
+          {BRAND_PILLARS.map(({ title, body }) => (
+            <div key={title}>
+              <h3
+                className="font-serif italic leading-none mb-3"
+                style={{ fontSize: "26px", letterSpacing: "-0.01em" }}
+              >
+                {title}
+              </h3>
+              <p
+                className="font-sans leading-[1.85]"
+                style={{ fontSize: "14px", color: "var(--vn-ink-soft)" }}
+              >
+                {body}
+              </p>
+            </div>
+          ))}
+        </FadeIn>
+      </section>
+
+      {/* ── Story text + By-the-numbers ── */}
+      <section
+        className="border-b border-foreground/20 px-7 py-20"
+        style={{ background: "var(--vn-bone)" }}
+      >
         <div className="mx-auto max-w-7xl grid grid-cols-1 gap-14 lg:grid-cols-[1fr_0.75fr] items-start">
-          {/* Left — story text */}
           <FadeIn direction="left">
             <h2
               className="font-serif italic leading-[1.0] tracking-tight mb-8"
@@ -261,11 +234,7 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
                   "Twelve years later the table is still the table — the same Wiss shears, the same radio that hasn't been off since we moved in. What's changed is the room around it: eleven full-time hands, a North Carolina mill on speed-dial, and a small archive of one hundred and forty-two patterns drawn, draped and signed off.",
                   "Everything we make is cut, sewn, and finished in this building. Nothing is outsourced. Every label is hand-numbered. We sign the last seam ourselves. If two people own the same piece, one of them got it wrong.",
                 ].map((para, i) => (
-                  <p
-                    key={i}
-                    className="font-sans text-[15px] leading-[1.7]"
-                    style={{ color: "var(--vn-ink-soft)" }}
-                  >
+                  <p key={i} className="font-sans text-[15px] leading-[1.7]" style={{ color: "var(--vn-ink-soft)" }}>
                     {para}
                   </p>
                 ))}
@@ -273,11 +242,10 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
             )}
           </FadeIn>
 
-          {/* Right — by the numbers */}
           <FadeIn direction="right" delay={0.15}>
             <div
-              className="border border-foreground p-7 flex flex-col gap-6"
-              style={{ background: "var(--vn-bone)" }}
+              className="border border-foreground/20 p-7 flex flex-col gap-6"
+              style={{ background: "var(--vn-paper)" }}
             >
               <h5
                 className="font-mono text-[9.5px] tracking-[0.22em] uppercase border-b pb-4"
@@ -285,18 +253,17 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
               >
                 By the numbers
               </h5>
-              {BY_NUMBERS.map((fact) => (
+              {[
+                { nm: "142 patterns drawn", desc: "Each one drafted on the studio table, in pencil first, then tested on three to six bodies before sign-off." },
+                { nm: "11 full-time hands", desc: "Pattern-makers, sample-cutters, finishers, a single press, and one founder still threading a needle daily." },
+                { nm: "60 per edition, max", desc: "We cap every garment run at sixty signed pieces. When they're gone, they're gone — no second drop, no restock." },
+                { nm: "42 cities, 7 countries", desc: "From the east side to East London. Shipped via DHL, signed by the wearer, traced through to the studio inbox." },
+              ].map((fact) => (
                 <div key={fact.nm} className="flex flex-col gap-1.5">
-                  <div
-                    className="font-serif italic leading-none"
-                    style={{ fontSize: "22px", letterSpacing: "-0.01em" }}
-                  >
+                  <div className="font-serif italic leading-none" style={{ fontSize: "22px", letterSpacing: "-0.01em" }}>
                     {fact.nm}
                   </div>
-                  <p
-                    className="font-sans text-sm leading-relaxed"
-                    style={{ color: "var(--vn-steel-mist)" }}
-                  >
+                  <p className="font-sans text-sm leading-relaxed" style={{ color: "var(--vn-steel-mist)" }}>
                     {fact.desc}
                   </p>
                 </div>
@@ -306,16 +273,13 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
         </div>
       </section>
 
-      {/* Pull quote — ink bg */}
+      {/* ── Pull quote — ink bg ── */}
       <section
         className="border-y-2 border-foreground px-7 py-20"
         style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
       >
         <FadeIn className="mx-auto max-w-4xl">
-          <div
-            className="font-serif italic leading-none mb-4"
-            style={{ fontSize: "80px", opacity: 0.25, lineHeight: 0.8 }}
-          >
+          <div className="font-serif italic leading-none mb-4" style={{ fontSize: "80px", opacity: 0.25, lineHeight: 0.8 }}>
             &ldquo;
           </div>
           <p
@@ -327,23 +291,15 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
             want to be seen.
           </p>
           <div className="mt-8">
-            <em
-              className="font-serif italic block"
-              style={{ fontSize: "20px" }}
-            >
-              Marisol Knight
-            </em>
-            <p
-              className="font-mono text-[10px] tracking-[0.2em] uppercase mt-1"
-              style={{ color: "var(--vn-steel-mist)" }}
-            >
+            <em className="font-serif italic block" style={{ fontSize: "20px" }}>Marisol Knight</em>
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase mt-1" style={{ color: "var(--vn-steel-mist)" }}>
               Founder · Head of atelier
             </p>
           </div>
         </FadeIn>
       </section>
 
-      {/* Process — from sketch to seam */}
+      {/* ── Process — from sketch to seam ── */}
       <section
         className="border-b border-foreground/20 px-7 py-20"
         style={{ background: "var(--vn-paper)" }}
@@ -351,10 +307,7 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
         <FadeIn className="mx-auto max-w-7xl">
           <div className="flex items-end justify-between mb-12 gap-6">
             <div>
-              <p
-                className="font-mono text-[9.5px] tracking-[0.22em] uppercase mb-3"
-                style={{ color: "var(--vn-steel)" }}
-              >
+              <p className="font-mono text-[9.5px] tracking-[0.22em] uppercase mb-3" style={{ color: "var(--vn-steel-mist)" }}>
                 How a garment is made
               </p>
               <h2
@@ -365,65 +318,34 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 <br />to seam.
               </h2>
             </div>
-            <div
-              className="hidden md:block font-mono text-[10px] tracking-[0.16em] uppercase text-right"
-              style={{ color: "var(--vn-steel-mist)" }}
-            >
+            <div className="hidden md:block font-mono text-[10px] tracking-[0.16em] uppercase text-right" style={{ color: "var(--vn-steel-mist)" }}>
               Five stages.
-              <br />
-              Six to fourteen weeks.
-              <br />
-              Eleven pairs of hands.
+              <br />Six to fourteen weeks.
+              <br />Eleven pairs of hands.
             </div>
           </div>
 
-          <StaggerContainer
-            className="grid grid-cols-1 gap-6 sm:grid-cols-3 lg:grid-cols-5"
-            staggerDelay={0.08}
-          >
+          <StaggerContainer className="grid grid-cols-1 gap-6 sm:grid-cols-3 lg:grid-cols-5" staggerDelay={0.08}>
             {PROCESS_STEPS.map((step) => (
               <StaggerItem key={step.n}>
                 <div
                   className="flex flex-col border border-foreground/20 p-5 h-full"
                   style={{ background: "var(--vn-steel)" }}
                 >
-                  {/* SVG icon */}
-                  <div
-                    className="mb-4"
-                    style={{ width: "56px", height: "56px", color: "var(--vn-bone)" }}
-                  >
+                  <div className="mb-4" style={{ width: "56px", height: "56px", color: "var(--vn-bone)" }}>
                     {step.svg}
                   </div>
                   <div className="flex items-center gap-3 mb-3">
-                    <span
-                      className="font-mono text-[9px] tracking-[0.18em] uppercase"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                    >
-                      {step.n}
-                    </span>
-                    <span
-                      className="font-mono text-[8.5px] tracking-[0.22em] uppercase"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                    >
-                      {step.ix}
-                    </span>
+                    <span className="font-mono text-[9px] tracking-[0.18em] uppercase" style={{ color: "var(--vn-steel-mist)" }}>{step.n}</span>
+                    <span className="font-mono text-[8.5px] tracking-[0.22em] uppercase" style={{ color: "var(--vn-steel-mist)" }}>{step.ix}</span>
                   </div>
-                  <h4
-                    className="font-serif italic leading-none mb-2"
-                    style={{ fontSize: "22px", letterSpacing: "-0.01em", color: "var(--vn-bone)" }}
-                  >
+                  <h4 className="font-serif italic leading-none mb-2" style={{ fontSize: "22px", letterSpacing: "-0.01em", color: "var(--vn-bone)" }}>
                     {step.title}
                   </h4>
-                  <p
-                    className="font-sans text-sm leading-relaxed flex-1"
-                    style={{ color: "rgba(255,255,255,0.55)" }}
-                  >
+                  <p className="font-sans text-sm leading-relaxed flex-1" style={{ color: "rgba(255,255,255,0.55)" }}>
                     {step.desc}
                   </p>
-                  <p
-                    className="font-mono text-[9px] tracking-[0.14em] uppercase mt-4"
-                    style={{ color: "var(--vn-steel-mist)" }}
-                  >
+                  <p className="font-mono text-[9px] tracking-[0.14em] uppercase mt-4" style={{ color: "var(--vn-steel-mist)" }}>
                     {step.dur}
                   </p>
                 </div>
@@ -433,17 +355,11 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
         </FadeIn>
       </section>
 
-      {/* Craftsmanship features (if configured) */}
+      {/* ── Craftsmanship features (if configured) ── */}
       {craftsmanshipItems && craftsmanshipItems.length > 0 && (
-        <section
-          className="border-b border-foreground/20 px-7 py-20"
-          style={{ background: "var(--vn-bone)" }}
-        >
+        <section className="border-b border-foreground/20 px-7 py-20" style={{ background: "var(--vn-bone)" }}>
           <FadeIn className="mx-auto max-w-7xl">
-            <p
-              className="font-mono text-[9.5px] tracking-[0.22em] uppercase mb-3"
-              style={{ color: "var(--vn-steel)" }}
-            >
+            <p className="font-mono text-[9.5px] tracking-[0.22em] uppercase mb-3" style={{ color: "var(--vn-steel-mist)" }}>
               {f["noise.about-craftsmanship-heading"] ?? "Craftsmanship"}
             </p>
             {f["noise.about-craftsmanship-banner"] && (
@@ -451,26 +367,13 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 {f["noise.about-craftsmanship-banner"]}
               </p>
             )}
-            <StaggerContainer
-              className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4"
-              staggerDelay={0.08}
-            >
+            <StaggerContainer className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4" staggerDelay={0.08}>
               {craftsmanshipItems.map((item, i) => (
                 <StaggerItem key={i}>
                   <div className="border-t-2 border-foreground pt-5">
                     <item.icon className="mb-3 size-5" style={{ color: "var(--vn-steel)" }} />
-                    <h3
-                      className="font-mono text-[10px] tracking-[0.16em] uppercase mb-2"
-                      style={{ color: "var(--vn-ink)" }}
-                    >
-                      {item.title}
-                    </h3>
-                    <p
-                      className="font-sans text-sm leading-relaxed"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                    >
-                      {item.description}
-                    </p>
+                    <h3 className="font-mono text-[10px] tracking-[0.16em] uppercase mb-2" style={{ color: "var(--vn-ink)" }}>{item.title}</h3>
+                    <p className="font-sans text-sm leading-relaxed" style={{ color: "var(--vn-steel-mist)" }}>{item.description}</p>
                   </div>
                 </StaggerItem>
               ))}
@@ -479,20 +382,13 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
         </section>
       )}
 
-      {/* CTA — two-column: visit + location */}
-      <section
-        className="grid border-b-2 border-foreground md:grid-cols-2"
-        style={{ background: "var(--vn-paper)" }}
-      >
-        {/* Left */}
+      {/* ── CTA — visit + location ── */}
+      <section className="grid border-b-2 border-foreground md:grid-cols-2" style={{ background: "var(--vn-paper)" }}>
         <div
           className="flex flex-col gap-6 px-10 py-16 border-b border-foreground md:border-b-0 md:border-r"
           style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
         >
-          <span
-            className="vn-stamp text-[9.5px] w-fit"
-            style={{ borderColor: "var(--vn-bone)", color: "var(--vn-bone)" }}
-          >
+          <span className="vn-stamp text-[9.5px] w-fit" style={{ borderColor: "var(--vn-bone)", color: "var(--vn-bone)" }}>
             Come by
           </span>
           <h2
@@ -501,25 +397,18 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
           >
             {ctaHeading}
           </h2>
-          <p
-            className="font-sans text-[15px] leading-relaxed max-w-[38ch]"
-            style={{ color: "rgba(255,255,255,0.6)" }}
-          >
+          <p className="font-sans text-[15px] leading-relaxed max-w-[38ch]" style={{ color: "rgba(255,255,255,0.6)" }}>
             Forty-five quiet minutes with the team. We pull your size, pour tea,
             walk you through the archive, and never ask you to commit.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link
-              href={ctaBtnLink}
-              className="vn-stamp vn-stamp-steel text-[11px] transition-all hover:opacity-80"
-              style={{ padding: "12px 20px" }}
-            >
+            <Link href={ctaBtnLink} className="vn-stamp vn-stamp-steel text-[11px] transition-all hover:opacity-80" style={{ padding: "12px 20px" }}>
               {ctaBtnText} →
             </Link>
             {email && (
               <a
                 href={`mailto:${email}`}
-                className="vn-stamp text-[11px] transition-all hover:bg-foreground hover:text-background"
+                className="vn-stamp text-[11px] transition-all hover:opacity-80"
                 style={{ borderColor: "var(--vn-bone)", color: "var(--vn-bone)", padding: "12px 20px" }}
               >
                 Email the studio
@@ -528,38 +417,19 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
           </div>
         </div>
 
-        {/* Right — location */}
-        <div
-          className="flex flex-col gap-6 px-10 py-16"
-          style={{ background: "var(--vn-bone)" }}
-        >
-          <h5
-            className="font-mono text-[9.5px] tracking-[0.22em] uppercase"
-            style={{ color: "var(--vn-steel-mist)" }}
-          >
+        <div className="flex flex-col gap-6 px-10 py-16" style={{ background: "var(--vn-bone)" }}>
+          <h5 className="font-mono text-[9.5px] tracking-[0.22em] uppercase" style={{ color: "var(--vn-steel-mist)" }}>
             Where to find us
           </h5>
-          <div
-            className="font-serif italic leading-[1.1]"
-            style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)", letterSpacing: "-0.02em" }}
-          >
+          <div className="font-serif italic leading-[1.1]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.5rem)", letterSpacing: "-0.02em" }}>
             {address ?? "1217 Gratiot Ave."}
-            <br />
-            Detroit, MI 48207
+            <br />Detroit, MI 48207
           </div>
-          <p
-            className="font-sans text-sm leading-relaxed"
-            style={{ color: "var(--vn-steel-mist)", maxWidth: "36ch" }}
-          >
-            Two blocks east of Eastern Market. The blue door with the brass
-            knocker — it&apos;s open if the light&apos;s on.
+          <p className="font-sans text-sm leading-relaxed" style={{ color: "var(--vn-steel-mist)", maxWidth: "36ch" }}>
+            Two blocks east of Eastern Market. The blue door with the brass knocker — it&apos;s open if the light&apos;s on.
           </p>
-          <div
-            className="font-mono text-[11px] leading-relaxed tracking-[0.06em]"
-            style={{ color: "var(--vn-steel)" }}
-          >
-            42.3314° N<br />
-            83.0458° W<br />
+          <div className="font-mono text-[11px] leading-relaxed tracking-[0.06em]" style={{ color: "var(--vn-steel)" }}>
+            42.3314° N<br />83.0458° W
             {phone && <><br />{phone}</>}
             {email && <><br />{email}</>}
           </div>

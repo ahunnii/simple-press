@@ -49,7 +49,7 @@ export function NoiseProductCard({ product, index }: Props) {
 
   /* Corner stamp label — combine edition + status if flagged */
   const isNew = productStatus.badgeLabel?.toLowerCase() === "new";
-  const isSoldOut = !productStatus.inStock;
+  const isSoldOut = productStatus.isOutOfStock;
   const editionBase = `N° ${String(index + 1).padStart(2, "0")}`;
   const editionLabel = isNew
     ? `${editionBase} · NEW`
@@ -63,8 +63,8 @@ export function NoiseProductCard({ product, index }: Props) {
     .map((v, i) => {
       const opts = v.options as Record<string, string> | null | undefined;
       const colorVal = opts
-        ? (Object.values(opts).find((val) =>
-            typeof val === "string" && /^#[0-9a-f]{3,6}$/i.test(val),
+        ? (Object.values(opts).find(
+            (val) => typeof val === "string" && /^#[0-9a-f]{3,6}$/i.test(val),
           ) ?? null)
         : null;
       return colorVal
@@ -98,7 +98,7 @@ export function NoiseProductCard({ product, index }: Props) {
     <Link href={`/shop/${product.slug}`} className="vn-prod-link group block">
       {/* Image — 4:5 aspect ratio matching design */}
       <div
-        className="vn-prod-pic relative w-full overflow-hidden border border-foreground"
+        className="vn-prod-pic border-foreground relative w-full overflow-hidden border"
         style={{ aspectRatio: "4 / 5", background: "var(--vn-steel)" }}
       >
         {productImage !== "/placeholder.svg" ? (
@@ -132,37 +132,39 @@ export function NoiseProductCard({ product, index }: Props) {
         )}
 
         {/* Top-left: edition stamp (+ status suffix if sold/new) */}
-        <div
-          className="absolute left-2.5 top-2.5 font-mono text-[10px] tracking-[0.18em] uppercase px-1.5 py-1 whitespace-nowrap"
-          style={
-            isNew
-              ? {
-                  background: "var(--vn-paper)",
-                  color: "var(--vn-ink)",
-                  border: "1px solid var(--vn-ink)",
-                }
-              : isSoldOut
+        {productStatus?.badgeLabel && (
+          <div
+            className="absolute top-2.5 left-2.5 px-1.5 py-1 font-mono text-[10px] tracking-[0.18em] whitespace-nowrap uppercase"
+            style={
+              isNew
                 ? {
-                    background: "var(--vn-steel)",
-                    color: "var(--vn-bone)",
-                  }
-                : {
-                    background: "var(--vn-bone)",
+                    background: "var(--vn-paper)",
                     color: "var(--vn-ink)",
+                    border: "1px solid var(--vn-ink)",
                   }
-          }
-        >
-          {editionLabel}
-        </div>
+                : isSoldOut
+                  ? {
+                      background: "var(--vn-steel)",
+                      color: "var(--vn-bone)",
+                    }
+                  : {
+                      background: "var(--vn-bone)",
+                      color: "var(--vn-ink)",
+                    }
+            }
+          >
+            {productStatus?.badgeLabel}
+          </div>
+        )}
 
         {/* Top-right: price stamp */}
-        <div
-          className="absolute right-2.5 top-2.5 font-mono text-[10px] tracking-[0.18em] uppercase px-1.5 py-1 whitespace-nowrap"
+        {/* <div
+          className="absolute top-2.5 right-2.5 px-1.5 py-1 font-mono text-[10px] tracking-[0.18em] whitespace-nowrap uppercase"
           style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
         >
           {formatPrice(productStatus.displayPrice)}
           {productStatus.variablePricing && "+"}
-        </div>
+        </div> */}
 
         {/* Add-to-cart bar — slides up on hover */}
         {!productStatus.disableCart && (
@@ -191,7 +193,7 @@ export function NoiseProductCard({ product, index }: Props) {
       >
         {/* Product name */}
         <h3
-          className="font-serif italic leading-[1.1] truncate min-w-0 transition-opacity group-hover:opacity-60"
+          className="min-w-0 truncate font-serif leading-[1.1] italic transition-opacity group-hover:opacity-60"
           style={{ fontSize: "22px", letterSpacing: "-0.005em" }}
         >
           {product.name}
@@ -204,30 +206,32 @@ export function NoiseProductCard({ product, index }: Props) {
         >
           {productStatus.isOnSale && productStatus.displayCompareAtPrice ? (
             <span
-              className="line-through mr-1.5"
+              className="mr-1.5 line-through"
               style={{ color: "var(--vn-steel-mist)" }}
             >
               {formatPrice(productStatus.displayCompareAtPrice)}
             </span>
           ) : null}
           {formatPrice(productStatus.displayPrice)}
+          {productStatus.variablePricing && "+"}
         </span>
 
         {/* Sub row — tagline left, swatches right */}
         <div
-          className="col-span-2 flex items-center justify-between gap-3.5 min-w-0"
+          className="col-span-2 flex min-w-0 items-center justify-between gap-3.5"
           style={{ marginTop: "2px" }}
         >
           <span
-            className="font-mono text-[10.5px] tracking-[0.16em] uppercase truncate min-w-0"
+            className="min-w-0 truncate font-mono text-[10.5px] tracking-[0.16em] uppercase"
             style={{ color: "var(--vn-steel)" }}
           >
-            {additional?.productTagline ?? (product.sku ? `SKU · ${product.sku}` : " ")}
+            {additional?.productTagline ??
+              (product.sku ? `SKU · ${product.sku}` : " ")}
           </span>
 
           {/* Variant swatches — 9×9 squares */}
-          {swatches.length > 0 && (
-            <div className="flex gap-1.5 flex-shrink-0">
+          {/* {swatches.length > 0 && (
+            <div className="flex flex-shrink-0 gap-1.5">
               {swatches.map((sw, i) => (
                 <span
                   key={i}
@@ -241,7 +245,7 @@ export function NoiseProductCard({ product, index }: Props) {
                 />
               ))}
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </Link>
