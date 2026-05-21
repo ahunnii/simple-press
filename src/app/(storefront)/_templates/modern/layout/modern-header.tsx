@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { UserButton } from "@daveyplate/better-auth-ui";
-import { IconLayoutDashboard } from "@tabler/icons-react";
+import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { Menu, ShoppingBag, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
@@ -24,6 +24,19 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const { data: session, isPending } = authClient.useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
 
   const links =
     (business?.siteContent?.navigationItems as {
@@ -60,107 +73,149 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
               },
             ]
           : []),
+        {
+          icon: <IconPackage className="h-4 w-4" />,
+          label: "Orders",
+          href: "/account/orders",
+        },
       ]}
     />
   );
 
   return (
-    <header className="bg-background/95 supports-backdrop-filter:bg-background/80 border-border sticky top-0 z-50 border-b backdrop-blur">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-        <Link
-          href="/"
-          className="text-foreground text-xl font-semibold tracking-tight"
-        >
-          {business.siteContent?.logoUrl ? (
-            <Image
-              src={business.siteContent.logoUrl}
-              alt={business.name}
-              width={50}
-              height={50}
-              className="bg-primary rounded-full"
-            />
-          ) : (
-            <span className="text-xl font-bold text-gray-900">
-              {business.name}
-            </span>
-          )}
-        </Link>
-
-        {/* Desktop navigation */}
-        <div className="hidden items-center gap-8 md:flex">
-          {links.map(({ href, label }) => {
-            return (
-              <Link
-                key={href + label}
-                href={href}
-                className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
-              >
-                {label}
-              </Link>
-            );
-          })}
-        </div>
-
-        <div className="flex items-center gap-4">
+    <>
+      <header className="bg-background/95 supports-backdrop-filter:bg-background/80 border-border sticky top-0 z-50 border-b backdrop-blur">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
           <Link
-            href="/cart"
-            className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
-            aria-label={`Shopping cart with ${itemCount} items`}
+            href="/"
+            className="text-foreground text-xl font-semibold tracking-tight"
           >
-            <ShoppingBag className="h-5 w-5" />
-            {itemCount > 0 && (
-              <span className="bg-accent text-accent-foreground absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-medium">
-                {itemCount}
+            {business.siteContent?.logoUrl ? (
+              <Image
+                src={business.siteContent.logoUrl}
+                alt={business.name}
+                width={50}
+                height={50}
+                className="bg-primary rounded-full"
+              />
+            ) : (
+              <span className="text-xl font-bold text-gray-900">
+                {business.name}
               </span>
             )}
           </Link>
 
-          {isPending ? (
-            <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
-          ) : session?.user ? (
-            userMenu
-          ) : (
-            authActions
-          )}
-
-          {/* Mobile menu toggle */}
-          <button
-            type="button"
-            className="text-foreground md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </button>
-        </div>
-      </nav>
-
-      {/* Mobile navigation */}
-      <div
-        className={cn(
-          "border-border overflow-hidden border-t transition-all duration-300 ease-in-out md:hidden",
-          mobileMenuOpen ? "max-h-48" : "max-h-0 border-t-0",
-        )}
-      >
-        <div className="flex flex-col gap-4 px-6 py-4">
-          {links.map(({ href, label }) => {
-            return (
+          {/* Desktop navigation */}
+          <div className="hidden items-center gap-8 md:flex">
+            {links.map(({ href, label }) => (
               <Link
                 key={href + label}
                 href={href}
                 className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 {label}
               </Link>
-            );
-          })}
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Link
+              href="/cart"
+              className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
+              aria-label={`Shopping cart with ${itemCount} items`}
+            >
+              <ShoppingBag className="h-5 w-5" />
+              {itemCount > 0 && (
+                <span className="bg-accent text-accent-foreground absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-medium">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
+
+            {isPending ? (
+              <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+            ) : session?.user ? (
+              userMenu
+            ) : (
+              authActions
+            )}
+
+            {/* Mobile menu toggle */}
+            <button
+              type="button"
+              className="text-foreground md:hidden"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Backdrop */}
+      <div
+        className={cn(
+          "fixed inset-0 z-50 bg-black/50 transition-opacity duration-300 md:hidden",
+          mobileMenuOpen
+            ? "opacity-100"
+            : "pointer-events-none opacity-0",
+        )}
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Drawer */}
+      <div
+        className={cn(
+          "bg-background fixed inset-y-0 right-0 z-50 flex w-72 flex-col shadow-xl transition-transform duration-300 ease-in-out md:hidden",
+          mobileMenuOpen ? "translate-x-0" : "translate-x-full",
+        )}
+        role="dialog"
+        aria-label="Navigation menu"
+        aria-modal="true"
+      >
+        <div className="border-border flex items-center justify-between border-b px-6 py-5">
+          <span className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+            Menu
+          </span>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Close menu"
+            className="text-foreground"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <nav className="flex flex-1 flex-col px-4 py-6">
+          {links.map(({ href, label }) => (
+            <Link
+              key={href + label}
+              href={href}
+              className="text-foreground hover:bg-muted rounded-sm px-4 py-4 text-base tracking-wide transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="border-border border-t px-6 py-5">
+          <Link
+            href="/cart"
+            className="text-foreground flex items-center gap-3"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <ShoppingBag className="h-5 w-5" />
+            <span className="text-sm font-medium">
+              Cart{itemCount > 0 ? ` (${itemCount})` : ""}
+            </span>
+          </Link>
         </div>
       </div>
-    </header>
+    </>
   );
 }

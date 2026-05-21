@@ -1,11 +1,10 @@
 import type { DefaultCartPageTemplateProps } from "../../types";
 
-import { ModernCartContent } from "./modern-cart-content";
+import { ModernCartContents } from "./modern-cart-contents";
 
 export default function ModernCartPage({
   business,
 }: DefaultCartPageTemplateProps) {
-  console.log(business.id);
   return (
     <div>
       <div className="bg-background">
@@ -17,7 +16,7 @@ export default function ModernCartPage({
           </div>
         </div>
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-          <ModernCartContent />
+          <ModernCartContents business={business} />
         </div>
       </div>
     </div>

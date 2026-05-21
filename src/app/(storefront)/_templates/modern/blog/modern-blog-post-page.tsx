@@ -8,6 +8,7 @@ import { formatDate } from "~/lib/utils";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { ModernGeneralLayout } from "../layout/modern-general-layout";
+import { ModernBlogPostCard } from "./modern-blog-post-card";
 
 export function ModernBlogPostPage({
   page,
@@ -65,29 +66,7 @@ export function ModernBlogPostPage({
               </h2>
               <div className="grid gap-8 sm:grid-cols-2">
                 {others.map((post) => (
-                  <Link
-                    key={post.slug}
-                    href={`/blog/${post.slug}`}
-                    className="group bg-card text-card-foreground border-border block overflow-hidden rounded-2xl border shadow-sm transition hover:shadow-md"
-                  >
-                    <div className="relative aspect-video w-full overflow-hidden">
-                      <Image
-                        src={post.image ?? "/placeholder.svg"}
-                        alt={post.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, 432px"
-                      />
-                    </div>
-                    <div className="p-5">
-                      <p className="text-muted-foreground mb-1 text-xs">
-                        {formatDate(post.createdAt)}
-                      </p>
-                      <h3 className="text-foreground group-hover:text-primary font-serif font-light tracking-wide transition-colors">
-                        {post.title}
-                      </h3>
-                    </div>
-                  </Link>
+                  <ModernBlogPostCard key={post.slug} post={post} />
                 ))}
               </div>
             </section>

@@ -83,9 +83,19 @@ export function ModernProductCard({ product }: Props) {
               {product.name}
             </h3>
           </Link>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {formatPrice(product.price)}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-muted-foreground text-sm">
+              {formatPrice(productStatus.displayPrice)}
+              {productStatus.variablePricing && (
+                <span className="ml-1 text-base">+</span>
+              )}
+            </p>
+            {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
+              <p className="text-muted-foreground text-sm line-through">
+                {formatPrice(productStatus.displayCompareAtPrice)}
+              </p>
+            )}
+          </div>
         </div>
 
         {productStatus.hasVariants ? (

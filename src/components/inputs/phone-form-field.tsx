@@ -421,7 +421,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
                 inputRef as React.MutableRefObject<HTMLInputElement | null>
               ).current = el;
           }}
-          className="rounded-s-none rounded-e-lg"
+          className={"rounded-s-none rounded-e-lg"}
           value={displayValue}
           onChange={handleInputChange}
           placeholder={placeholder}

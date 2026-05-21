@@ -2,7 +2,7 @@ import Image from "next/image";
 
 type Props = {
   children: React.ReactNode;
-  title: string;
+  title?: string;
   subtitle?: string;
   excerpt?: string;
   imageUrl?: string;
@@ -25,7 +25,7 @@ export function ModernGeneralLayout({
               <>
                 <Image
                   src={imageUrl}
-                  alt={title}
+                  alt={title ?? ""}
                   fill
                   className="object-cover"
                   priority

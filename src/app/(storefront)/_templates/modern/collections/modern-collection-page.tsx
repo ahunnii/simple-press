@@ -2,7 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
-import { formatPrice } from "~/lib/prices";
+import type { Product } from "~/types";
+
+import { ModernCollectionFilterClient } from "./modern-collection-filter-client";
 
 export function ModernCollectionPage({
   collection,
@@ -10,7 +12,7 @@ export function ModernCollectionPage({
 }: DefaultCollectionPageTemplateProps) {
   const products = collection.collectionProducts
     .map((cp) => cp.product)
-    .filter((p): p is NonNullable<typeof p> => p != null);
+    .filter((p): p is NonNullable<typeof p> => p != null) as Product[];
 
   const others = (additionalCollections ?? [])
     .filter((c) => c.slug !== collection.slug)
@@ -47,7 +49,8 @@ export function ModernCollectionPage({
                 </p>
               )}
               <p className="text-background/60 mt-3 text-sm tracking-wide uppercase">
-                {products.length} {products.length === 1 ? "product" : "products"}
+                {products.length}{" "}
+                {products.length === 1 ? "product" : "products"}
               </p>
             </div>
           </div>
@@ -91,40 +94,7 @@ export function ModernCollectionPage({
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {products.map((product) => {
-              const hasVariants = product.variants.length > 0;
-              const displayPrice = hasVariants
-                ? (product.variants[0]?.price ?? product.price)
-                : product.price;
-
-              return (
-                <Link
-                  key={product.id}
-                  href={`/shop/${product.slug}`}
-                  className="group block"
-                >
-                  <div className="bg-muted relative aspect-square overflow-hidden rounded-sm">
-                    <Image
-                      src={product.images[0]?.url ?? "/placeholder.svg"}
-                      alt={product.name}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    />
-                  </div>
-                  <div className="mt-4">
-                    <h3 className="text-foreground group-hover:text-muted-foreground text-sm font-medium transition-colors">
-                      {product.name}
-                    </h3>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      {formatPrice(displayPrice)}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          <ModernCollectionFilterClient products={products} />
         )}
       </div>
 

@@ -8,6 +8,7 @@ import {
 } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 
+import { DEFAULT_MODERN_VALUES_LIST } from ".";
 import { resolveFields } from "..";
 import { FeaturedProductsGrid } from "./modern-featured-products-grid";
 
@@ -22,9 +23,11 @@ export async function ModernHomePage() {
 
     "modern.homepage.products-title",
     "modern.homepage.products-tagline",
+    "modern.homepage.products-link-text",
+    "modern.homepage.products-link-url",
 
-    "modern.homepage.about-title",
-    "modern.homepage.about-subtitle",
+    "modern.homepage.about-header",
+    "modern.homepage.about-tagline",
     "modern.homepage.about-text",
     "modern.homepage.about-image",
     "modern.homepage.about-cta-button-text",
@@ -90,7 +93,7 @@ export async function ModernHomePage() {
                     </p>
                   </div>
                 ))
-              : DEFAULT_VALUES_LIST.map((value, index) => (
+              : DEFAULT_MODERN_VALUES_LIST.map((value, index) => (
                   <div className="text-center" key={index}>
                     <h3 className="text-foreground text-xs font-semibold tracking-widest uppercase">
                       {value.title}
@@ -117,10 +120,10 @@ export async function ModernHomePage() {
               </h2>
             </div>
             <Link
-              href="/shop"
+              href={f["modern.homepage.products-link-url"]!}
               className="text-foreground hover:text-muted-foreground hidden items-center gap-1 text-sm font-medium transition-colors md:flex"
             >
-              View All
+              {f["modern.homepage.products-link-text"]}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -129,10 +132,10 @@ export async function ModernHomePage() {
           </div>
           <div className="mt-8 text-center md:hidden">
             <Link
-              href="/shop"
+              href={f["modern.homepage.products-link-url"]!}
               className="text-foreground inline-flex items-center gap-1 text-sm font-medium"
             >
-              View All Products
+              {f["modern.homepage.products-link-text"]}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -145,12 +148,12 @@ export async function ModernHomePage() {
           <div className="grid grid-cols-1 items-center gap-12 py-20 lg:grid-cols-2">
             <div>
               <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-                {f["modern.homepage.about-title"]}
+                {f["modern.homepage.about-tagline"]}
               </p>
               <h2 className="text-foreground mt-2 font-serif text-3xl text-balance md:text-4xl">
-                {f["modern.homepage.about-subtitle"]}
+                {f["modern.homepage.about-header"]}
               </h2>
-              <p className="text-muted-foreground mt-6 leading-relaxed">
+              <p className="text-muted-foreground mt-6 leading-relaxed whitespace-pre-line">
                 {f["modern.homepage.about-text"]}
               </p>
               <Link
@@ -164,7 +167,7 @@ export async function ModernHomePage() {
             <div className="relative aspect-4/3 overflow-hidden rounded-sm">
               <Image
                 src={f["modern.homepage.about-image"]!}
-                alt="Curated collection of modern home goods"
+                alt={homepage?.name ?? "About Image"}
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -176,21 +179,3 @@ export async function ModernHomePage() {
     </div>
   );
 }
-
-const DEFAULT_VALUES_LIST = [
-  {
-    title: "Crafted With Care",
-    description:
-      "Every piece is made by skilled artisans using time-honored techniques.",
-  },
-  {
-    title: "Sustainably Made",
-    description:
-      "We source responsibly and prioritize natural, sustainable materials.",
-  },
-  {
-    title: "Built to Last",
-    description:
-      "Quality construction means pieces you will love for years to come.",
-  },
-];

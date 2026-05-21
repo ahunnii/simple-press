@@ -3,24 +3,31 @@ import Link from "next/link";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
 
+import { resolveFields } from "..";
+
 export function ModernCollectionsPage({
+  business,
   collections,
 }: DefaultCollectionsPageTemplateProps) {
   const list = collections ?? [];
+  const f = resolveFields(business.siteContent?.customFields, [
+    "modern.collections.tagline",
+    "modern.collections.title",
+    "modern.collections.intro",
+  ]);
 
   return (
     <div className="bg-background">
       <div className="border-border border-b">
         <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
           <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-            Shop
+            {f["modern.collections.tagline"]}
           </p>
           <h1 className="text-foreground mt-2 font-serif text-4xl md:text-5xl">
-            Collections
+            {f["modern.collections.title"]}
           </h1>
           <p className="text-muted-foreground mt-4 max-w-lg">
-            Browse our curated collections, each assembled with care around a
-            distinct theme or purpose.
+            {f["modern.collections.intro"]}
           </p>
         </div>
       </div>

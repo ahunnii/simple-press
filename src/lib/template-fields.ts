@@ -171,6 +171,13 @@ export const genericImageRowSchema = z
   })
   .passthrough();
 
+export const genericFAQRowSchema = z
+  .object({
+    question: z.string(),
+    answer: z.string(),
+  })
+  .passthrough();
+
 export type GenericIconRow = {
   icon: LucideIcon;
   title: string;
@@ -180,6 +187,11 @@ export type GenericIconRow = {
 export type GenericTextRow = {
   title: string;
   description: string;
+};
+
+export type GenericFAQRow = {
+  question: string;
+  answer: string;
 };
 
 export type GenericImageRow = {
@@ -218,6 +230,23 @@ export function parseTemplateTextListRows(
     if (!parsed.success) continue;
     const { title, description } = parsed.data;
     out.push({ title, description });
+  }
+
+  return out.length > 0 ? out : (defaultList ?? null);
+}
+
+export function parseTemplateFAQListRows(
+  raw: unknown,
+  defaultList?: GenericFAQRow[],
+) {
+  if (!Array.isArray(raw)) return defaultList ?? [];
+
+  const out: GenericFAQRow[] = [];
+  for (const row of raw) {
+    const parsed = genericFAQRowSchema.safeParse(row);
+    if (!parsed.success) continue;
+    const { question, answer } = parsed.data;
+    out.push({ question, answer });
   }
 
   return out.length > 0 ? out : (defaultList ?? null);

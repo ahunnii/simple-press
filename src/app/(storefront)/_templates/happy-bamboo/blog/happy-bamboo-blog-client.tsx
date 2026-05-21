@@ -22,7 +22,7 @@ import {
 
 export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
   const { filtered, featuredResult, listResults, setQuery, query } =
-    useBlogPosts(pages);
+    useBlogPosts(pages, "Zaires Visions");
   return (
     <>
       {/* Page Header */}

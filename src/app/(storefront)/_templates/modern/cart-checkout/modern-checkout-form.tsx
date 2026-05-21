@@ -13,13 +13,6 @@ import {
 } from "~/lib/shipping-utils";
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { useCart } from "~/providers/cart-context";
 
@@ -312,7 +305,7 @@ export function ModernCheckoutForm({ business }: Props) {
                 disabled={
                   validateDiscountMutation.isPending || items.length === 0
                 }
-                className="border-border bg-card text-foreground hover:bg-muted border px-6 py-3 text-sm font-medium tracking-wide transition-opacity disabled:opacity-50"
+                className="border-border bg-card text-foreground hover:bg-muted mt-1 border px-6 py-3 text-sm font-medium tracking-wide transition-opacity disabled:opacity-50"
               >
                 {validateDiscountMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -462,21 +455,15 @@ export function ModernCheckoutForm({ business }: Props) {
                   <label htmlFor="country" className={labelClass}>
                     Country *
                   </label>
-                  <Select
+                  <select
+                    id="country"
                     value={country}
-                    onValueChange={(v) => setCountry(v as "US" | "CA")}
+                    onChange={(e) => setCountry(e.target.value as "US" | "CA")}
+                    className={inputClass}
                   >
-                    <SelectTrigger
-                      id="country"
-                      className="border-border bg-card text-foreground focus:border-foreground mt-1 h-auto w-full rounded-none border px-4 py-3 text-sm focus:outline-none"
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="US">United States</SelectItem>
-                      <SelectItem value="CA">Canada</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                  </select>
                 </div>
               </div>
             </div>

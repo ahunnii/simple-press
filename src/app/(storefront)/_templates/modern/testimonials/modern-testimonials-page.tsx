@@ -3,18 +3,28 @@ import Link from "next/link";
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
 import { api } from "~/trpc/server";
 
+import { resolveFields } from "..";
 import { ModernGeneralLayout } from "../layout/modern-general-layout";
 
 export async function ModernTestimonialsPage({
-  business: _business,
+  business,
 }: DefaultTestimonialsPageTemplateProps) {
   const testimonials = await api.testimonial.list({ publicOnly: true });
 
+  const f = resolveFields(business?.siteContent?.customFields, [
+    "modern.testimonials.tagline",
+    "modern.testimonials.header",
+    "modern.testimonials.description",
+    "modern.testimonials.call-to-action.header",
+    "modern.testimonials.call-to-action.text",
+    "modern.testimonials.call-to-action.button-text",
+  ]);
+
   return (
     <ModernGeneralLayout
-      title="Testimonials"
-      subtitle="Kind words"
-      excerpt="What our customers have to say"
+      title={f["modern.testimonials.header"]}
+      subtitle={f["modern.testimonials.tagline"]}
+      excerpt={f["modern.testimonials.description"]}
     >
       <section className="bg-background py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -33,7 +43,7 @@ export async function ModernTestimonialsPage({
           ) : (
             <>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {testimonials.map((t) => (
+                {testimonials?.map((t) => (
                   <article
                     key={t.id}
                     className="bg-card text-card-foreground border-border/80 flex flex-col rounded-3xl border p-6 shadow-sm ring-1 ring-black/4 dark:ring-white/10"
@@ -82,23 +92,17 @@ export async function ModernTestimonialsPage({
                 ))}
               </div>
               <div className="bg-muted/40 mt-12 rounded-2xl px-8 py-12 text-center">
-                <h2 className="text-2xl font-bold">Share Your Experience</h2>
+                <h2 className="text-2xl font-bold">
+                  {f["modern.testimonials.call-to-action.header"]}
+                </h2>
                 <p className="text-muted-foreground mt-2">
-                  Loved shopping with us? We&apos;d love to hear from you.
+                  {f["modern.testimonials.call-to-action.text"]}
                 </p>
                 <Link
                   href="/testimonials/submit"
                   className="bg-primary text-primary-foreground mt-6 inline-block rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
                 >
-                  Write a Testimonial
-                </Link>
-              </div>
-              <div className="mt-8 text-center">
-                <Link
-                  href="/about"
-                  className="text-primary font-medium hover:underline"
-                >
-                  About us
+                  {f["modern.testimonials.call-to-action.button-text"]}
                 </Link>
               </div>
             </>

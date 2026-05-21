@@ -1,12 +1,9 @@
 import type { Page } from "generated/prisma";
 import { useMemo, useState } from "react";
 
-import {
-  blobIncludesQuery,
-  buildBlogSearchBlob,
-} from "~/lib/blog-search";
+import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
 
-export function useBlogPosts(pages: Page[]) {
+export function useBlogPosts(pages: Page[], author?: string) {
   const [query, setQuery] = useState("");
 
   const allPosts = useMemo(
@@ -14,9 +11,9 @@ export function useBlogPosts(pages: Page[]) {
       pages.map((p, idx) => ({
         ...p,
         featured: idx === 0,
-        author: "Zaires Visions",
+        ...(author ? { author } : {}),
       })),
-    [pages],
+    [pages, author],
   ) as (Page & { featured: boolean; author?: string })[];
 
   const postsWithSearch = useMemo(

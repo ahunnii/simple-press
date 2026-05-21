@@ -1,7 +1,12 @@
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
+import {
+  getListFieldValue,
+  parseTemplateFAQListRows,
+} from "~/lib/template-fields";
 
+import { DEFAULT_MODERN_CONTACT_FAQ } from ".";
 import { resolveFields } from "..";
 import { ModernContactForm } from "./modern-contact-form";
 
@@ -9,37 +14,31 @@ export function ModernContactPage({
   business,
 }: DefaultContactPageTemplateProps) {
   const f = resolveFields(business?.siteContent?.customFields, [
-    "modern.contact.header-subheader",
-    "modern.contact.header-title",
-    "modern.contact.header-description",
+    "modern.contact.page-tagline",
+    "modern.contact.page-header",
+    "modern.contact.page-description",
+
     "modern.contact.info-title",
     "modern.contact.info-description",
-    "modern.contact.email-label",
-    "modern.contact.email",
-    "modern.contact.phone-label",
-    "modern.contact.phone",
-    "modern.contact.address-label",
-    "modern.contact.address",
-    "modern.contact.hours-label",
-    "modern.contact.hours",
+
     "modern.contact.form-title",
     "modern.contact.form-description",
-    "modern.contact.faq-enabled",
-    "modern.contact.faq-1-question",
-    "modern.contact.faq-1-answer",
-    "modern.contact.faq-2-question",
-    "modern.contact.faq-2-answer",
-    "modern.contact.faq-3-question",
-    "modern.contact.faq-3-answer",
-    "modern.contact.faq-4-question",
-    "modern.contact.faq-4-answer",
+
+    "modern.contact.faq-tagline",
+    "modern.contact.faq-heading",
   ]);
 
+  const faqList = parseTemplateFAQListRows(
+    getListFieldValue(
+      business?.siteContent?.customFields,
+      "modern.contact.faq-list",
+    ),
+    DEFAULT_MODERN_CONTACT_FAQ,
+  );
   // Fall back to business record for contact details not set by owner
-  const displayEmail =
-    f["modern.contact.email"] ?? business?.supportEmail ?? "";
-  const displayAddress =
-    f["modern.contact.address"] ?? business?.businessAddress ?? "";
+  const displayEmail = business?.supportEmail;
+  const displayAddress = business?.businessAddress;
+  const displayPhone = business?.phoneNumber;
 
   return (
     <div className="bg-background">
@@ -47,13 +46,13 @@ export function ModernContactPage({
       <section className="bg-secondary py-20">
         <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
           <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-            {f["modern.contact.header-subheader"]}
+            {f["modern.contact.page-tagline"]}
           </p>
           <h1 className="text-foreground mt-2 font-serif text-4xl text-balance md:text-6xl">
-            {f["modern.contact.header-title"]}
+            {f["modern.contact.page-header"]}
           </h1>
           <p className="text-muted-foreground mx-auto mt-6 max-w-lg text-sm leading-relaxed">
-            {f["modern.contact.header-description"]}
+            {f["modern.contact.page-description"]}
           </p>
         </div>
       </section>
@@ -72,14 +71,14 @@ export function ModernContactPage({
               </p>
 
               <div className="mt-10 flex flex-col gap-8">
-                {displayEmail && (
+                {!!displayEmail && (
                   <div className="flex items-start gap-4">
-                    <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <Mail className="text-accent h-4 w-4" />
+                    <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                      <Mail className="text-primary h-4 w-4" />
                     </div>
                     <div>
                       <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
-                        {f["modern.contact.email-label"]}
+                        Email
                       </h3>
                       <p className="text-muted-foreground mt-1 text-sm">
                         {displayEmail}
@@ -88,49 +87,33 @@ export function ModernContactPage({
                   </div>
                 )}
 
-                {f["modern.contact.phone"] && (
+                {!!displayPhone && (
                   <div className="flex items-start gap-4">
-                    <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <Phone className="text-accent h-4 w-4" />
+                    <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                      <Phone className="text-primary h-4 w-4" />
                     </div>
                     <div>
                       <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
-                        {f["modern.contact.phone-label"]}
+                        Phone
                       </h3>
                       <p className="text-muted-foreground mt-1 text-sm">
-                        {f["modern.contact.phone"]}
+                        {displayPhone}
                       </p>
                     </div>
                   </div>
                 )}
 
-                {displayAddress && (
+                {!!displayAddress && (
                   <div className="flex items-start gap-4">
-                    <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <MapPin className="text-accent h-4 w-4" />
+                    <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                      <MapPin className="text-primary h-4 w-4" />
                     </div>
                     <div>
                       <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
-                        {f["modern.contact.address-label"]}
+                        Address
                       </h3>
                       <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
                         {displayAddress}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {f["modern.contact.hours"] && (
-                  <div className="flex items-start gap-4">
-                    <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <Clock className="text-accent h-4 w-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
-                        {f["modern.contact.hours-label"]}
-                      </h3>
-                      <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
-                        {f["modern.contact.hours"]}
                       </p>
                     </div>
                   </div>
@@ -155,62 +138,30 @@ export function ModernContactPage({
       </section>
 
       {/* FAQ teaser */}
-      {f["modern.contact.faq-enabled"] === "true" && (
-        <section className="border-border bg-secondary border-t py-20">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="text-center">
-              <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-                Common Questions
-              </p>
-              <h2 className="text-foreground mt-2 font-serif text-3xl md:text-4xl">
-                Frequently Asked
-              </h2>
-            </div>
-            <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
-              {f["modern.contact.faq-1-question"] && (
-                <div>
-                  <h3 className="text-foreground text-sm font-semibold">
-                    {f["modern.contact.faq-1-question"]}
-                  </h3>
-                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                    {f["modern.contact.faq-1-answer"]}
-                  </p>
-                </div>
-              )}
-              {f["modern.contact.faq-2-question"] && (
-                <div>
-                  <h3 className="text-foreground text-sm font-semibold">
-                    {f["modern.contact.faq-2-question"]}
-                  </h3>
-                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                    {f["modern.contact.faq-2-answer"]}
-                  </p>
-                </div>
-              )}
-              {f["modern.contact.faq-3-question"] && (
-                <div>
-                  <h3 className="text-foreground text-sm font-semibold">
-                    {f["modern.contact.faq-3-question"]}
-                  </h3>
-                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                    {f["modern.contact.faq-3-answer"]}
-                  </p>
-                </div>
-              )}
-              {f["modern.contact.faq-4-question"] && (
-                <div>
-                  <h3 className="text-foreground text-sm font-semibold">
-                    {f["modern.contact.faq-4-question"]}
-                  </h3>
-                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                    {f["modern.contact.faq-4-answer"]}
-                  </p>
-                </div>
-              )}
-            </div>
+      <section className="border-border bg-secondary border-t py-20">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+              {f["modern.contact.faq-tagline"]}
+            </p>
+            <h2 className="text-foreground mt-2 font-serif text-3xl md:text-4xl">
+              {f["modern.contact.faq-heading"]}
+            </h2>
           </div>
-        </section>
-      )}
+          <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
+            {faqList?.map((faq) => (
+              <div key={faq.question}>
+                <h3 className="text-foreground text-sm font-semibold">
+                  {faq.question}
+                </h3>
+                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                  {faq.answer}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
