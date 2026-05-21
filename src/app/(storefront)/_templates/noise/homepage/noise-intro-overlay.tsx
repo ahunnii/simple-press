@@ -1,21 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Default color palette when no gallery is configured
 const DEFAULT_TILES = [
-  { c: "#3e3a35", t: "Ashby" },
-  { c: "#a9c8d4", t: "Hadley" },
-  { c: "#5b4a30", t: "Pemberton" },
-  { c: "#1a1a1a", t: "Crewe" },
-  { c: "#cfd9e8", t: "Newland" },
-  { c: "#2f5b5b", t: "Sabine" },
-  { c: "#6c8674", t: "Sutton" },
-  { c: "#c8b89a", t: "Bryony" },
-  { c: "#2a3247", t: "Penhale" },
-  { c: "#4a3a2d", t: "Amaya" },
-  { c: "#e8e2d3", t: "Larkin" },
-  { c: "#7a3b1d", t: "Corktown" },
+  { c: "#3e3a35", t: "Woodward" },
+  { c: "#a9c8d4", t: "Cass" },
+  { c: "#5b4a30", t: "Michigan" },
+  { c: "#1a1a1a", t: "Jefferson" },
+  { c: "#cfd9e8", t: "Gratiot" },
+  { c: "#2f5b5b", t: "Livernois" },
+  { c: "#6c8674", t: "Vernor" },
+  { c: "#c8b89a", t: "Bagley" },
+  { c: "#2a3247", t: "Canfield" },
+  { c: "#4a3a2d", t: "Trumbull" },
+  { c: "#e8e2d3", t: "Brush" },
+  { c: "#7a3b1d", t: "Fort" },
 ] as const;
 
 // Deterministic stagger delays (avoids hydration mismatch)
@@ -74,10 +74,20 @@ export function NoiseIntroOverlay({
   const slots = buildSlots(images ?? []);
 
   useEffect(() => {
-    const t1 = setTimeout(() => { if (!skippedRef.current) setPhase(1); }, 1300);
-    const t2 = setTimeout(() => { if (!skippedRef.current) setPhase(2); }, 2700);
-    const t3 = setTimeout(() => { onDoneRef.current(); }, 3700);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    const t1 = setTimeout(() => {
+      if (!skippedRef.current) setPhase(1);
+    }, 1300);
+    const t2 = setTimeout(() => {
+      if (!skippedRef.current) setPhase(2);
+    }, 2700);
+    const t3 = setTimeout(() => {
+      onDoneRef.current();
+    }, 3700);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   }, []);
 
   function skip() {
@@ -110,7 +120,12 @@ export function NoiseIntroOverlay({
           willChange: "transform",
         }}
       >
-        <IntroScene slots={slots} tileDelays={TILE_DELAYS} phase={phase} half="left" />
+        <IntroScene
+          slots={slots}
+          tileDelays={TILE_DELAYS}
+          phase={phase}
+          half="left"
+        />
       </div>
 
       {/* Right curtain half */}
@@ -128,7 +143,12 @@ export function NoiseIntroOverlay({
           willChange: "transform",
         }}
       >
-        <IntroScene slots={slots} tileDelays={TILE_DELAYS} phase={phase} half="right" />
+        <IntroScene
+          slots={slots}
+          tileDelays={TILE_DELAYS}
+          phase={phase}
+          half="right"
+        />
       </div>
 
       {/* Hairline split — sells the curtain seam */}
