@@ -199,12 +199,30 @@ const homepageFeaturedData: TemplateField[] = [
   {
     key: "noise.homepage-featured-button-link",
     label: "Featured Button Link",
-    description: "CTA button URL",
+    description: "CTA button URL (ignored when a collection is selected — link auto-points to the collection page)",
     type: "url",
     page: "homepage",
     group: "homepage.featured",
     gridColumn: "col-span-1",
     defaultValue: "/shop",
+  },
+  {
+    key: "noise.homepage.rail-one-collection",
+    label: "Rail 1 — Collection",
+    description: "Pick a collection for the first product rail. Defaults to featured products when unset.",
+    type: "collection",
+    page: "homepage",
+    group: "homepage.featured",
+    gridColumn: "col-span-1",
+  },
+  {
+    key: "noise.homepage.rail-two-collection",
+    label: "Rail 2 — Collection",
+    description: "Pick a collection for the second product rail. Defaults to featured products when unset.",
+    type: "collection",
+    page: "homepage",
+    group: "homepage.featured",
+    gridColumn: "col-span-1",
   },
 ];
 

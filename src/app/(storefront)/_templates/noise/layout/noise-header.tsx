@@ -22,6 +22,7 @@ import {
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
 
+import { resolveFields } from "../index";
 import { NoiseCartDrawer } from "../cart-checkout/noise-cart-drawer";
 
 // Links shown on the LEFT side of the header (shop/collections)
@@ -43,7 +44,14 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const businessName = business?.name ?? "Visual Noise";
+  const businessName = business?.name ?? "";
+  const customFields = business?.siteContent?.customFields as Record<string, string> | undefined;
+  const g = resolveFields(customFields, [
+    "noise.global.location-tag",
+    "noise.global.footer-tagline",
+  ]);
+  const locationTag = g["noise.global.location-tag"] ?? "";
+  const footerTagline = g["noise.global.footer-tagline"] ?? "";
 
   const userMenu = session?.user && (
     <UserButton
@@ -100,15 +108,6 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
         >
           {/* ── Left: search + shop/collection links ── */}
           <div className="flex items-center gap-6">
-            {/* Search icon */}
-            <button
-              aria-label="Search"
-              className="flex items-center transition-opacity hover:opacity-60"
-              style={{ color: "var(--vn-ink-soft)" }}
-            >
-              <Search className="h-[18px] w-[18px]" strokeWidth={1.4} />
-            </button>
-
             {/* Left nav links (desktop only) */}
             <nav className="hidden items-center gap-6 md:flex">
               {LEFT_NAV.map((link) => {
@@ -151,7 +150,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
             ) : (
               <>
                 <span>{businessName.toUpperCase()}</span>
-                <span className="vn-wordmark-sub">· DETROIT ·</span>
+                {locationTag && <span className="vn-wordmark-sub">{locationTag}</span>}
               </>
             )}
           </Link>
@@ -242,14 +241,16 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     style={{ alignItems: "flex-start" }}
                   >
                     <span>{businessName.toUpperCase()}</span>
-                    <span className="vn-wordmark-sub">· DETROIT ·</span>
+                    {locationTag && <span className="vn-wordmark-sub">{locationTag}</span>}
                   </SheetTitle>
-                  <SheetDescription
-                    className="mt-2 font-mono text-[9px] tracking-[0.3em] uppercase"
-                    style={{ color: "var(--vn-steel-mist)" }}
-                  >
-                    Considered Apparel
-                  </SheetDescription>
+                  {footerTagline && (
+                    <SheetDescription
+                      className="mt-2 font-mono text-[9px] tracking-[0.3em] uppercase"
+                      style={{ color: "var(--vn-steel-mist)" }}
+                    >
+                      {footerTagline}
+                    </SheetDescription>
+                  )}
                 </div>
 
                 <nav
@@ -305,7 +306,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     className="font-mono text-[9px] tracking-[0.3em] uppercase"
                     style={{ color: "var(--vn-steel-mist)" }}
                   >
-                    Det. 2026
+                    {new Date().getFullYear()}
                   </span>
                 </div>
               </SheetContent>

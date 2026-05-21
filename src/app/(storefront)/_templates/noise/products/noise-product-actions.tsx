@@ -59,7 +59,7 @@ export function NoiseProductActions({
         style={{ borderColor: "var(--vn-ink)" }}
       >
         <div
-          className="font-serif italic leading-none"
+          className="font-serif leading-none italic"
           style={{
             fontSize: "clamp(2.4rem, 4vw, 3rem)",
             letterSpacing: "-0.01em",
@@ -77,7 +77,7 @@ export function NoiseProductActions({
           </span>
           {isOnSale && displayCompareAtPrice && (
             <span
-              className="ml-3 line-through font-sans font-normal"
+              className="ml-3 font-sans font-normal line-through"
               style={{ fontSize: "1.2rem", color: "var(--vn-steel-mist)" }}
             >
               {formatPrice(displayCompareAtPrice)}
@@ -111,14 +111,14 @@ export function NoiseProductActions({
           <p className="font-mono text-[10px] tracking-[0.2em] uppercase">
             Coming Soon
           </p>
-          <p className="mt-1 font-sans text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 font-sans text-sm">
             This piece isn&apos;t available yet. Check back soon.
           </p>
         </div>
       ) : !inStock ? (
         <button
           disabled
-          className="w-full py-4 font-mono text-[11px] tracking-[0.24em] uppercase opacity-40 cursor-not-allowed"
+          className="w-full cursor-not-allowed py-4 font-mono text-[11px] tracking-[0.24em] uppercase opacity-40"
           style={{
             background: "var(--vn-ink)",
             color: "var(--vn-bone)",
@@ -130,14 +130,14 @@ export function NoiseProductActions({
       ) : (
         <div className="flex flex-col gap-3">
           {canAddMore && (
-            <div className="flex gap-3 items-stretch">
+            <div className="flex items-stretch gap-3">
               {/* Qty stepper */}
               <div
                 className="flex items-center"
                 style={{ border: "1.5px solid var(--vn-ink)" }}
               >
                 <button
-                  className="flex items-center justify-center font-mono transition-colors hover:bg-foreground hover:text-background"
+                  className="hover:bg-foreground hover:text-background flex items-center justify-center font-mono transition-colors"
                   style={{ width: "44px", height: "100%", minHeight: "52px" }}
                   onClick={handleDecrement}
                   disabled={quantity <= 1}
@@ -146,13 +146,13 @@ export function NoiseProductActions({
                   <Minus className="size-3.5" />
                 </button>
                 <span
-                  className="font-mono text-sm font-medium text-center"
+                  className="text-center font-mono text-sm font-medium"
                   style={{ width: "42px" }}
                 >
                   {quantity}
                 </span>
                 <button
-                  className="flex items-center justify-center font-mono transition-colors hover:bg-foreground hover:text-background"
+                  className="hover:bg-foreground hover:text-background flex items-center justify-center font-mono transition-colors"
                   style={{ width: "44px", height: "100%", minHeight: "52px" }}
                   onClick={handleIncrement}
                   aria-label="Increase quantity"
@@ -164,7 +164,7 @@ export function NoiseProductActions({
               {/* Add to bag */}
               <button
                 onClick={addToCart}
-                className="flex-1 flex items-center justify-between px-5 py-4 font-mono text-[12px] tracking-[0.24em] uppercase transition-all"
+                className="flex flex-1 items-center justify-between px-5 py-4 font-mono text-[12px] tracking-[0.24em] uppercase transition-all"
                 style={{
                   background: isAdded ? "var(--vn-steel)" : "var(--vn-ink)",
                   color: "var(--vn-bone)",
@@ -190,14 +190,14 @@ export function NoiseProductActions({
           )}
 
           {!canAddMore && inStock && (
-            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-amber-600">
+            <p className="font-mono text-[10px] tracking-[0.2em] text-amber-600 uppercase">
               Maximum available quantity in cart
             </p>
           )}
           {product.trackInventory &&
             product.allowBackorders &&
             (product.inventoryQty ?? 0) === 0 && (
-              <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+              <p className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">
                 Backordered — ships when available
               </p>
             )}
@@ -220,7 +220,7 @@ export function NoiseProductActions({
       )}
 
       {/* Notes 2×2 grid */}
-      <div
+      {/* <div
         className="grid grid-cols-2 gap-4 border-t pt-5"
         style={{ borderColor: "var(--vn-rule)" }}
       >
@@ -245,7 +245,7 @@ export function NoiseProductActions({
             </p>
           </div>
         ))}
-      </div>
+      </div> */}
     </>
   );
 }

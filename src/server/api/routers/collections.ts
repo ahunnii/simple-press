@@ -398,4 +398,45 @@ export const collectionsRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  getProductsByCollectionId: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("collections"))
+    .input(z.string())
+    .query(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
+      const collection = await ctx.db.collection.findUnique({
+        where: { id, businessId, published: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          collectionProducts: {
+            include: {
+              product: {
+                include: {
+                  images: { orderBy: { sortOrder: "asc" }, take: 1 },
+                  variants: true,
+                  baseInventoryUnit: {
+                    select: { inventoryQty: true, allowBackorders: true },
+                  },
+                },
+              },
+            },
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      });
+      if (!collection) return null;
+      return {
+        collection: {
+          id: collection.id,
+          name: collection.name,
+          slug: collection.slug,
+          description: collection.description,
+        },
+        products: collection.collectionProducts.map((cp) => cp.product),
+      };
+    }),
 });

@@ -1106,6 +1106,11 @@ function FieldInput({
           value={stringValue}
           onChange={(nextValue) => onChange(nextValue)}
         />
+      ) : field.type === "collection" ? (
+        <CollectionFieldSelect
+          value={stringValue}
+          onChange={(nextValue) => onChange(nextValue)}
+        />
       ) : field.type === "richtext" ? (
         <MinimalTiptapEditor
           value={richTextValue}
@@ -1177,6 +1182,36 @@ function GalleryFieldSelect({
         {galleries?.map((gallery) => (
           <SelectItem key={gallery.id} value={gallery.id}>
             {gallery.name} ({gallery._count.images} images)
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+// Collection Field Select Component
+function CollectionFieldSelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const { data: collections } = api.collections.getAll.useQuery();
+
+  return (
+    <Select
+      value={value || "none"}
+      onValueChange={(v) => onChange(v === "none" ? "" : v)}
+    >
+      <SelectTrigger>
+        <SelectValue placeholder="Select a collection..." />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="none">None (use featured products)</SelectItem>
+        {collections?.map((collection) => (
+          <SelectItem key={collection.id} value={collection.id}>
+            {collection.name} ({collection._count.collectionProducts} products)
           </SelectItem>
         ))}
       </SelectContent>

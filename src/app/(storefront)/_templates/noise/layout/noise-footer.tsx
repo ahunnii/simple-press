@@ -4,6 +4,7 @@ import { TwitterLogoIcon } from "@radix-ui/react-icons";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { api } from "~/trpc/server";
+import { resolveFields } from "../index";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
@@ -22,8 +23,16 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
   const phone = business?.phoneNumber;
   const address = business?.businessAddress;
-  const name = business?.name ?? "Visual Noise";
+  const name = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
+
+  const customFields = business?.siteContent?.customFields as Record<string, string> | undefined;
+  const g = resolveFields(customFields, [
+    "noise.global.location-tag",
+    "noise.global.footer-tagline",
+  ]);
+  const locationTag = g["noise.global.location-tag"] ?? "";
+  const footerTagline = g["noise.global.footer-tagline"] ?? "Independent goods, made with care.";
 
   const socialLinks = business?.siteContent?.socialLinks as
     | {
@@ -88,33 +97,36 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                     >
                       {name.toUpperCase()}
                     </div>
-                    <div
-                      className="mt-2 font-mono"
-                      style={{
-                        fontSize: "10px",
-                        letterSpacing: "0.46em",
-                        color: "var(--vn-steel-mist)",
-                        fontWeight: 500,
-                      }}
-                    >
-                      · DETROIT ·
-                    </div>
+                    {locationTag && (
+                      <div
+                        className="mt-2 font-mono"
+                        style={{
+                          fontSize: "10px",
+                          letterSpacing: "0.46em",
+                          color: "var(--vn-steel-mist)",
+                          fontWeight: 500,
+                        }}
+                      >
+                        {locationTag}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
 
               {/* Tagline */}
-              <p
-                className="font-sans leading-[1.7]"
-                style={{
-                  fontSize: "13px",
-                  color: "var(--vn-steel-mist)",
-                  maxWidth: "280px",
-                }}
-              >
-                Considered apparel made in small batches. Built to be worn,
-                mended, and worn again.
-              </p>
+              {footerTagline && (
+                <p
+                  className="font-sans leading-[1.7]"
+                  style={{
+                    fontSize: "13px",
+                    color: "var(--vn-steel-mist)",
+                    maxWidth: "280px",
+                  }}
+                >
+                  {footerTagline}
+                </p>
+              )}
 
               {/* Newsletter signup */}
               {/* <div className="flex gap-0" style={{ maxWidth: "300px" }}>
@@ -236,7 +248,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                 Contact
               </h4>
 
-              {(address ?? true) && (
+              {address && (
                 <div className="mb-4">
                   <p
                     className="mb-0.5 font-sans font-semibold"
@@ -248,9 +260,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                     className="font-sans leading-[1.8]"
                     style={{ fontSize: "13px", color: "var(--vn-steel-mist)" }}
                   >
-                    {address ?? "1502 Michigan Ave, Studio 3"}
-                    <br />
-                    Detroit, MI 48216
+                    {address}
                   </p>
                 </div>
               )}
@@ -302,7 +312,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
             color: "var(--vn-steel-mist)",
           }}
         >
-          © {new Date().getFullYear()} {name} · Detroit
+          © {new Date().getFullYear()} {name}
         </span>
 
         {/* Payment icons */}

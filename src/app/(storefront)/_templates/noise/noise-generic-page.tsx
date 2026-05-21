@@ -23,7 +23,7 @@ export function NoiseGenericPage({ page }: Props) {
             className="font-mono text-[10px] tracking-[0.28em] uppercase mb-5"
             style={{ color: "var(--vn-steel-mist)" }}
           >
-            {isPolicyPage ? "Legal" : "Content"} — Visual Noise Detroit
+            {isPolicyPage ? "Legal" : "Content"}
           </p>
           <h1
             className="font-serif italic leading-[1.0] tracking-tight"

@@ -21,7 +21,11 @@ type Props = DefaultBlogPageTemplateProps & {
 
 function fmtDate(d: Date | string) {
   const dt = typeof d === "string" ? new Date(d) : d;
-  return dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  return dt.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 export function NoiseBlogPage({ pages, customFields }: Props) {
@@ -56,68 +60,100 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
     <PageTransition>
       {/* ── Centered header — "Reading Room" overline + h1 + intro ── */}
       <section
-        className="border-b-2 border-foreground px-6 pt-16 pb-14 text-center"
+        className="border-foreground border-b px-6 pt-16 pb-14 text-center"
         style={{ background: "var(--vn-paper)" }}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "1280px" }}>
           <p
-            className="font-mono text-[10px] tracking-[0.28em] uppercase mb-4"
+            className="mb-4 font-mono text-[10px] tracking-[0.28em] uppercase"
             style={{ color: "var(--vn-steel-mist)" }}
           >
-            Reading Room
+            Blog
           </p>
           <h1
-            className="font-serif italic leading-none tracking-tight"
-            style={{ fontSize: "clamp(3.5rem, 8vw, 6rem)", letterSpacing: "-0.025em" }}
+            className="font-serif leading-none tracking-tight italic"
+            style={{
+              fontSize: "clamp(3.5rem, 8vw, 6rem)",
+              letterSpacing: "-0.025em",
+            }}
           >
             {heading}
           </h1>
           <p
-            className="font-sans mt-6 mx-auto leading-[1.85]"
-            style={{ fontSize: "15px", color: "var(--vn-ink-soft)", maxWidth: "52ch" }}
+            className="mx-auto mt-6 font-sans leading-[1.85]"
+            style={{
+              fontSize: "15px",
+              color: "var(--vn-ink-soft)",
+              maxWidth: "52ch",
+            }}
           >
             {intro}
           </p>
         </FadeIn>
 
         {/* Search bar */}
-        <div
-          className="mx-auto mt-10 flex items-center gap-4 border-t border-foreground/15 px-7 py-3"
-          style={{ maxWidth: "1280px" }}
-        >
-          <span
-            className="font-mono text-[9.5px] tracking-[0.22em] uppercase flex-shrink-0"
-            style={{ color: "var(--vn-steel-mist)" }}
-          >
-            Search
-          </span>
-          <input
-            type="search"
-            placeholder="Filter the archive…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent font-mono text-[11px] tracking-[0.12em] uppercase outline-none placeholder:opacity-30"
+        <div className="mx-auto mt-10 px-7" style={{ maxWidth: "1280px" }}>
+          <div
+            className="flex items-center gap-4 px-5 py-4"
             style={{
-              color: "var(--vn-ink)",
-              borderBottom: "1px solid var(--vn-rule)",
+              background: "var(--vn-bone)",
+              border: "1.5px solid var(--vn-steel)",
             }}
-            aria-label="Search blog posts"
-          />
-          {query.trim() && (
-            <span
-              className="font-mono text-[9.5px] tracking-[0.18em] uppercase flex-shrink-0"
-              style={{ color: "var(--vn-steel-mist)" }}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              className="flex-shrink-0 opacity-50"
+              style={{ color: "var(--vn-ink)" }}
             >
-              {filtered.length} result{filtered.length !== 1 ? "s" : ""}
-            </span>
-          )}
+              <circle
+                cx="6.5"
+                cy="6.5"
+                r="5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+              <path
+                d="M10.5 10.5L14 14"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+            <input
+              type="search"
+              placeholder="Search the archive…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="flex-1 bg-transparent font-mono text-[12px] tracking-[0.12em] uppercase outline-none placeholder:opacity-40"
+              style={{ color: "var(--vn-ink)" }}
+              aria-label="Search blog posts"
+            />
+            {query.trim() ? (
+              <span
+                className="flex-shrink-0 font-mono text-[9.5px] tracking-[0.18em] uppercase"
+                style={{ color: "var(--vn-steel-mist)" }}
+              >
+                {filtered.length} result{filtered.length !== 1 ? "s" : ""}
+              </span>
+            ) : (
+              <span
+                className="flex-shrink-0 font-mono text-[9px] tracking-[0.22em] uppercase opacity-40"
+                style={{ color: "var(--vn-ink)" }}
+              >
+                Search
+              </span>
+            )}
+          </div>
         </div>
       </section>
 
       {/* ── Featured article ── */}
       {featured && !query.trim() && (
         <section
-          className="border-b-2 border-foreground"
+          className="border-foreground border-b"
           style={{ background: "var(--vn-paper)" }}
         >
           <FadeIn>
@@ -127,8 +163,11 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
             >
               {/* Image — 5:4 on the featured article */}
               <div
-                className="relative overflow-hidden border-b border-foreground md:border-b-0 md:border-r"
-                style={{ minHeight: "clamp(280px, 48vw, 480px)", background: "var(--vn-steel)" }}
+                className="border-foreground relative overflow-hidden border-b md:border-r md:border-b-0"
+                style={{
+                  minHeight: "clamp(280px, 48vw, 480px)",
+                  background: "var(--vn-steel)",
+                }}
               >
                 {featured.image ? (
                   <Image
@@ -148,25 +187,16 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
                   >
                     <span
                       className="font-serif italic select-none"
-                      style={{ fontSize: "80px", color: "var(--vn-bone)", opacity: 0.2 }}
+                      style={{
+                        fontSize: "80px",
+                        color: "var(--vn-bone)",
+                        opacity: 0.2,
+                      }}
                     >
                       I
                     </span>
                   </div>
                 )}
-                {/* Corner stamps */}
-                <div
-                  className="absolute left-4 top-4 font-mono text-[9.5px] tracking-[0.2em] uppercase px-2 py-1"
-                  style={{ background: "var(--vn-bone)", color: "var(--vn-ink)" }}
-                >
-                  Featured
-                </div>
-                <div
-                  className="absolute right-4 top-4 font-mono text-[9.5px] tracking-[0.2em] uppercase px-2 py-1"
-                  style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
-                >
-                  The Journal
-                </div>
               </div>
 
               {/* Text */}
@@ -174,20 +204,27 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
                 <div className="flex flex-col gap-4">
                   {/* Category chip */}
                   <span
-                    className="font-mono text-[9.5px] tracking-[0.22em] uppercase self-start px-2 py-1"
-                    style={{ background: "var(--vn-bone)", color: "var(--vn-steel-mist)", border: "1px solid var(--vn-rule)" }}
+                    className="self-start px-2 py-1 font-mono text-[9.5px] tracking-[0.22em] uppercase"
+                    style={{
+                      background: "var(--vn-bone)",
+                      color: "var(--vn-steel-mist)",
+                      border: "1px solid var(--vn-rule)",
+                    }}
                   >
-                    Featured · Issue 01
+                    Latest
                   </span>
                   <h2
-                    className="font-serif italic leading-[1.05] tracking-tight transition-opacity group-hover:opacity-70"
-                    style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)", letterSpacing: "-0.02em" }}
+                    className="font-serif leading-[1.05] tracking-tight italic transition-opacity group-hover:opacity-70"
+                    style={{
+                      fontSize: "clamp(2rem, 3.5vw, 3rem)",
+                      letterSpacing: "-0.02em",
+                    }}
                   >
                     {featured.title}
                   </h2>
                   {featured.excerpt && (
                     <p
-                      className="font-sans leading-relaxed max-w-[44ch]"
+                      className="max-w-[44ch] font-sans leading-relaxed"
                       style={{ fontSize: "15px", color: "var(--vn-ink-soft)" }}
                     >
                       {featured.excerpt}
@@ -198,22 +235,14 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p
-                      className="font-mono text-[9px] tracking-[0.2em] uppercase mb-1"
+                      className="mb-1 font-mono text-[9px] tracking-[0.2em] uppercase"
                       style={{ color: "var(--vn-steel-mist)" }}
                     >
                       {fmtDate(featured.createdAt)}
                     </p>
-                    <p
-                      className="font-mono text-[10.5px] tracking-[0.14em] uppercase"
-                      style={{ color: "var(--vn-ink)" }}
-                    >
-                      Studio Editor
-                    </p>
                   </div>
-                  <span
-                    className="vn-stamp text-[10px] transition-all group-hover:bg-foreground group-hover:text-background"
-                  >
-                    Read the essay →
+                  <span className="vn-stamp group-hover:bg-foreground group-hover:text-background text-[10px] transition-all">
+                    Read the post →
                   </span>
                 </div>
               </div>
@@ -224,20 +253,23 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
 
       {/* ── Archive heading ── */}
       <div
-        className="flex items-baseline justify-between border-b border-foreground/20 px-7 py-6"
+        className="border-foreground/20 flex items-baseline justify-between border-b px-7 py-6"
         style={{ background: "var(--vn-paper)" }}
       >
         <div
-          className="font-serif italic leading-none"
-          style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)", letterSpacing: "-0.02em" }}
+          className="font-serif leading-none italic"
+          style={{
+            fontSize: "clamp(2rem, 4vw, 3.2rem)",
+            letterSpacing: "-0.02em",
+          }}
         >
-          {query.trim() ? "Results." : "Dispatches."}
+          {query.trim() ? "Results" : "Posts"}
         </div>
         <div
-          className="font-mono text-[10px] tracking-[0.18em] uppercase hidden md:block"
+          className="hidden font-mono text-[10px] tracking-[0.18em] uppercase md:block"
           style={{ color: "var(--vn-steel-mist)" }}
         >
-          {filtered.length} in the archive
+          {filtered.length} in the blog
         </div>
       </div>
 
@@ -246,10 +278,10 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
         {filtered.length === 0 ? (
           <FadeIn className="py-20 text-center">
             <p
-              className="font-serif italic text-2xl font-light"
+              className="font-serif text-2xl font-light italic"
               style={{ color: "var(--vn-steel-mist)" }}
             >
-              No dispatches found for &ldquo;{query}&rdquo;
+              No posts found for &ldquo;{query}&rdquo;
             </p>
           </FadeIn>
         ) : (
@@ -263,8 +295,11 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
                 <Link href={`/blog/${post.slug}`} className="group block">
                   {/* Cover — 4:3 aspect matching design */}
                   <div
-                    className="relative overflow-hidden border border-foreground"
-                    style={{ aspectRatio: "4/3", background: "var(--vn-steel)" }}
+                    className="border-foreground relative overflow-hidden border"
+                    style={{
+                      aspectRatio: "4/3",
+                      background: "var(--vn-steel)",
+                    }}
                   >
                     {post.image ? (
                       <Image
@@ -283,33 +318,38 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
                       >
                         <span
                           className="font-serif italic select-none"
-                          style={{ fontSize: "64px", color: "var(--vn-bone)", opacity: 0.3 }}
+                          style={{
+                            fontSize: "64px",
+                            color: "var(--vn-bone)",
+                            opacity: 0.3,
+                          }}
                         >
                           {String.fromCharCode(0x2160 + (i % 6))}
                         </span>
                       </div>
                     )}
                     <div
-                      className="absolute left-2.5 top-2.5 font-mono text-[9px] tracking-[0.18em] uppercase px-1.5 py-1 whitespace-nowrap"
-                      style={{ background: "var(--vn-bone)", color: "var(--vn-ink)" }}
+                      className="absolute top-2.5 left-2.5 px-1.5 py-1 font-mono text-[9px] tracking-[0.18em] whitespace-nowrap uppercase"
+                      style={{
+                        background: "var(--vn-bone)",
+                        color: "var(--vn-ink)",
+                      }}
                     >
-                      The Journal
+                      Blog
                     </div>
                   </div>
 
                   {/* Meta */}
                   <div
-                    className="flex items-center gap-2 mt-4 font-mono text-[10px] tracking-[0.14em] uppercase"
+                    className="mt-4 flex items-center gap-2 font-mono text-[10px] tracking-[0.14em] uppercase"
                     style={{ color: "var(--vn-steel-mist)" }}
                   >
                     <span>{fmtDate(post.createdAt)}</span>
-                    <span style={{ color: "var(--vn-rule)" }}>·</span>
-                    <span>Dispatch</span>
                   </div>
 
                   {/* Title */}
                   <h3
-                    className="mt-2.5 font-serif italic leading-[1.15] tracking-tight transition-opacity group-hover:opacity-70"
+                    className="mt-2.5 font-serif leading-[1.15] tracking-tight italic transition-opacity group-hover:opacity-70"
                     style={{ fontSize: "22px", letterSpacing: "-0.005em" }}
                   >
                     {post.title}
@@ -330,8 +370,9 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
                     className="mt-4 flex items-center justify-between font-mono text-[10px] tracking-[0.16em] uppercase"
                     style={{ color: "var(--vn-steel-mist)" }}
                   >
-                    <span>Studio Editor</span>
-                    <span className="transition-opacity group-hover:opacity-60">Read →</span>
+                    <span className="transition-opacity group-hover:opacity-60">
+                      Read →
+                    </span>
                   </div>
                 </Link>
               </StaggerItem>

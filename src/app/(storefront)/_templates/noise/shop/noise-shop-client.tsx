@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import type { SortOption } from "~/hooks/use-shop-sort";
 import type { Product } from "~/types";
-import { formatPrice } from "~/lib/prices";
+import { formatPrice, getEffectivePrice } from "~/lib/prices";
 import {
   FadeIn,
   StaggerContainer,
@@ -13,12 +15,40 @@ import {
 
 import { NoiseProductCard } from "../shared/noise-product-card";
 
-type SortKey = "featured" | "price-asc" | "price-desc" | "name";
+const NOISE_SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
+  { value: "featured", label: "Featured" },
+  { value: "price-ascending", label: "Price · Low to High" },
+  { value: "price-descending", label: "Price · High to Low" },
+  { value: "title-ascending", label: "Name A–Z" },
+];
+
+type CollectionEntry = {
+  id: string;
+  name: string;
+  slug: string;
+  count: number;
+};
 
 type Props = {
   products: Product[];
   heading: string;
+  collections?: CollectionEntry[];
 };
+
+function isInStock(p: Product): boolean {
+  if (!p.trackInventory) return true;
+  if (p.allowBackorders) return true;
+  if (p.baseInventoryUnit) {
+    return (
+      p.baseInventoryUnit.allowBackorders ||
+      p.baseInventoryUnit.inventoryQty > 0
+    );
+  }
+  if (p.variants.length > 0) {
+    return p.variants.some((v) => v.inventoryQty > 0);
+  }
+  return (p.inventoryQty ?? 0) > 0;
+}
 
 function FilterGroup({
   title,
@@ -34,6 +64,7 @@ function FilterGroup({
       style={{ borderColor: "var(--vn-rule)" }}
     >
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between py-1"
       >
@@ -55,42 +86,74 @@ function FilterGroup({
   );
 }
 
-export function NoiseShopClient({ products, heading }: Props) {
-  const [sort, setSort] = useState<SortKey>("featured");
-  const [priceMax, setPriceMax] = useState<number | null>(null);
-  const [inStockOnly, setInStockOnly] = useState(false);
+export function NoiseShopClient({ products, collections = [] }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const sort = (searchParams.get("sort_by") ?? "featured") as SortOption;
+  const priceMaxParam = searchParams.get("price_max");
+  const priceMax = priceMaxParam !== null ? Number(priceMaxParam) : null;
+  const inStockOnly = searchParams.get("in_stock") === "1";
 
   const maxPrice = useMemo(
     () => Math.max(...products.map((p) => p.price ?? 0), 0),
     [products],
   );
 
+  // Local state drives the slider thumb and price label instantly while dragging.
+  // The URL (and filtered list) only updates on pointer/key release.
+  const [localPriceMax, setLocalPriceMax] = useState<number>(
+    () => priceMax ?? maxPrice,
+  );
+
+  useEffect(() => {
+    setLocalPriceMax(priceMax ?? maxPrice);
+  }, [priceMax, maxPrice]);
+
+  function updateParams(updates: Record<string, string | null>) {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === null) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    }
+    const qs = params.toString();
+    router.replace(pathname + (qs ? "?" + qs : ""), { scroll: false });
+  }
+
   const sorted = useMemo(() => {
     let list = [...products];
-    if (inStockOnly) {
-      list = list.filter(
-        (p) =>
-          !p.trackInventory || (p.inventoryQty ?? 0) > 0 || p.allowBackorders,
-      );
-    }
+    if (inStockOnly) list = list.filter(isInStock);
     if (priceMax !== null)
       list = list.filter((p) => (p.price ?? 0) <= priceMax);
-    if (sort === "price-asc")
-      list.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-    if (sort === "price-desc")
-      list.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
-    if (sort === "name")
-      list.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+    switch (sort) {
+      case "price-ascending":
+        list.sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
+        break;
+      case "price-descending":
+        list.sort((a, b) => getEffectivePrice(b) - getEffectivePrice(a));
+        break;
+      case "title-ascending":
+        list.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "title-descending":
+        list.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case "newest":
+        list.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+        break;
+    }
     return list;
   }, [products, sort, priceMax, inStockOnly]);
 
-  const effectiveMax = priceMax ?? maxPrice;
-
   return (
-    <section
-      className="px-7 pt-10 pb-16"
-      // style={{ background: "var(--vn-bone)" }}
-    >
+    <section className="px-7 pt-10 pb-16">
       <div
         className="mx-auto grid gap-12"
         style={{
@@ -108,20 +171,13 @@ export function NoiseShopClient({ products, heading }: Props) {
               <input
                 type="checkbox"
                 checked={inStockOnly}
-                onChange={(e) => setInStockOnly(e.target.checked)}
+                onChange={(e) =>
+                  updateParams({ in_stock: e.target.checked ? "1" : null })
+                }
                 className="accent-foreground"
                 style={{ accentColor: "var(--vn-ink)" }}
               />
-              In stock (
-              {
-                products.filter(
-                  (p) =>
-                    !p.trackInventory ||
-                    (p.inventoryQty ?? 0) > 0 ||
-                    p.allowBackorders,
-                ).length
-              }
-              )
+              In stock ({products.filter(isInStock).length})
             </label>
           </FilterGroup>
 
@@ -131,20 +187,32 @@ export function NoiseShopClient({ products, heading }: Props) {
               style={{ color: "var(--vn-steel-mist)" }}
             >
               <span>$0</span>
-              <span>{formatPrice(effectiveMax)}</span>
+              <span>{formatPrice(localPriceMax)}</span>
             </div>
             <input
               type="range"
               min={0}
+              title="Price slider"
               max={maxPrice || 1000}
-              value={effectiveMax}
-              onChange={(e) => setPriceMax(Number(e.target.value))}
+              value={localPriceMax}
+              onChange={(e) => setLocalPriceMax(Number(e.target.value))}
+              onPointerUp={(e) => {
+                const v = Number((e.target as HTMLInputElement).value);
+                updateParams({ price_max: v >= maxPrice ? null : String(v) });
+              }}
+              onKeyUp={() => {
+                updateParams({
+                  price_max:
+                    localPriceMax >= maxPrice ? null : String(localPriceMax),
+                });
+              }}
               className="w-full"
               style={{ accentColor: "var(--vn-ink)" }}
             />
             {priceMax !== null && (
               <button
-                onClick={() => setPriceMax(null)}
+                type="button"
+                onClick={() => updateParams({ price_max: null })}
                 className="mt-2 font-mono text-[10px] tracking-[0.16em] uppercase underline"
                 style={{ color: "var(--vn-steel-mist)" }}
               >
@@ -153,24 +221,30 @@ export function NoiseShopClient({ products, heading }: Props) {
             )}
           </FilterGroup>
 
-          <FilterGroup title="Collections">
-            <div className="flex flex-col gap-2.5">
-              <Link
-                href="/shop"
-                className="font-sans text-[13px] transition-colors"
-                style={{ color: "var(--vn-ink)" }}
-              >
-                All pieces
-              </Link>
-              <Link
-                href="/collections"
-                className="font-sans text-[13px] transition-colors hover:opacity-70"
-                style={{ color: "var(--vn-steel-mist)" }}
-              >
-                Browse collections →
-              </Link>
-            </div>
-          </FilterGroup>
+          {collections.length > 0 && (
+            <FilterGroup title="Collections">
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="/shop"
+                  className="font-sans text-[13px] transition-colors"
+                  style={{ color: "var(--vn-ink)" }}
+                >
+                  All pieces
+                </Link>
+                {collections.map((col) => (
+                  <Link
+                    key={col.id}
+                    href={`/collections/${col.slug}`}
+                    className="flex items-baseline justify-between font-sans text-[13px] transition-colors hover:opacity-70"
+                    style={{ color: "var(--vn-steel-mist)" }}
+                  >
+                    <span>{col.name}</span>
+                    <span className="font-mono text-[10px]">{col.count}</span>
+                  </Link>
+                ))}
+              </div>
+            </FilterGroup>
+          )}
         </aside>
 
         {/* ── Product grid ── */}
@@ -193,7 +267,12 @@ export function NoiseShopClient({ products, heading }: Props) {
               Sort
               <select
                 value={sort}
-                onChange={(e) => setSort(e.target.value as SortKey)}
+                onChange={(e) =>
+                  updateParams({
+                    sort_by:
+                      e.target.value === "featured" ? null : e.target.value,
+                  })
+                }
                 className="cursor-pointer font-sans text-[13px] outline-none"
                 style={{
                   padding: "6px 10px",
@@ -203,10 +282,11 @@ export function NoiseShopClient({ products, heading }: Props) {
                   fontFamily: "inherit",
                 }}
               >
-                <option value="featured">Featured</option>
-                <option value="price-asc">Price · Low to High</option>
-                <option value="price-desc">Price · High to Low</option>
-                <option value="name">Name A–Z</option>
+                {NOISE_SORT_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </select>
             </label>
           </div>
@@ -220,10 +300,10 @@ export function NoiseShopClient({ products, heading }: Props) {
                 No pieces match your filters.
               </p>
               <button
-                onClick={() => {
-                  setPriceMax(null);
-                  setInStockOnly(false);
-                }}
+                type="button"
+                onClick={() =>
+                  updateParams({ price_max: null, in_stock: null })
+                }
                 className="mt-6 font-mono text-[11px] tracking-[0.2em] uppercase underline"
                 style={{ color: "var(--vn-ink)" }}
               >
@@ -232,6 +312,7 @@ export function NoiseShopClient({ products, heading }: Props) {
             </FadeIn>
           ) : (
             <StaggerContainer
+              key={sorted.map((p) => p.id).join(",")}
               className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
               staggerDelay={0.06}
             >

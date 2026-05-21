@@ -21,41 +21,41 @@ export function NoiseEditorialSplit({
   image,
 }: NoiseEditorialSplitProps) {
   return (
-    <section className="border-y-2 border-foreground">
+    <section className="border-foreground border-y-2">
       <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr]">
         {/* Left — ink panel */}
         <FadeIn
-          className="flex flex-col justify-center gap-0 px-8 py-20 border-b border-foreground md:border-b-0 md:border-r md:px-16 md:py-24"
+          className="border-foreground flex flex-col justify-center gap-0 border-b px-8 py-20 md:border-r md:border-b-0 md:px-16 md:py-24"
           style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
         >
           <p
-            className="font-mono text-[9.5px] tracking-[.28em] uppercase mb-6"
+            className="mb-6 font-mono text-[9.5px] tracking-[.28em] uppercase"
             style={{ opacity: 0.55 }}
           >
-            {overline ?? "The Journal"}
+            {overline ?? "Blog"}
           </p>
 
           <h2
-            className="font-serif italic leading-[1.1] tracking-tight"
+            className="font-serif leading-[1.1] tracking-tight italic"
             style={{
               fontSize: "clamp(2rem, 4.5vw, 3rem)",
               letterSpacing: "-0.02em",
             }}
           >
-            {heading ?? "On the patience of good cloth."}
+            {heading ?? "The latest and greatest from the shop."}
           </h2>
 
           <p
-            className="font-sans leading-relaxed mt-6 max-w-[44ch]"
+            className="mt-6 max-w-[44ch] font-sans leading-relaxed"
             style={{ fontSize: "14px", opacity: 0.78, lineHeight: 1.8 }}
           >
             {body ??
-              "What it means to build a wardrobe slowly — and why the pieces that earn their keep are rarely the loudest ones."}
+              "Discover the latest arrivals, seasonal collections, and behind-the-scenes insights from the studio."}
           </p>
 
           <Link
             href={ctaHref ?? "/blog"}
-            className="font-mono uppercase mt-8 self-start transition-opacity hover:opacity-60"
+            className="mt-8 self-start font-mono uppercase transition-opacity hover:opacity-60"
             style={{
               fontSize: "11px",
               letterSpacing: ".28em",
@@ -64,14 +64,18 @@ export function NoiseEditorialSplit({
               color: "var(--vn-bone)",
             }}
           >
-            {ctaText ?? "Read the journal"} →
+            {ctaText ?? "Read the blog"} →
           </Link>
         </FadeIn>
 
         {/* Right — editorial image */}
         <div
           className="relative overflow-hidden"
-          style={{ aspectRatio: "4/3", minHeight: "400px", background: "var(--vn-steel)" }}
+          style={{
+            aspectRatio: "4/3",
+            minHeight: "400px",
+            background: "var(--vn-steel)",
+          }}
         >
           {image ? (
             <Image
@@ -90,26 +94,16 @@ export function NoiseEditorialSplit({
             >
               <span
                 className="font-serif italic select-none"
-                style={{ fontSize: "80px", color: "var(--vn-bone)", opacity: 0.2 }}
+                style={{
+                  fontSize: "80px",
+                  color: "var(--vn-bone)",
+                  opacity: 0.2,
+                }}
               >
-                J
+                B
               </span>
             </div>
           )}
-
-          {/* Corner stamps */}
-          <div
-            className="absolute left-4 top-4 font-mono text-[9.5px] tracking-[.2em] uppercase px-2 py-1"
-            style={{ background: "var(--vn-bone)", color: "var(--vn-ink)" }}
-          >
-            Editorial
-          </div>
-          <div
-            className="absolute right-4 top-4 font-mono text-[9.5px] tracking-[.2em] uppercase px-2 py-1"
-            style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
-          >
-            The Journal
-          </div>
         </div>
       </div>
     </section>

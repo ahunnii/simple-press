@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 
 import type { Product } from "~/types";
@@ -30,7 +30,10 @@ function FilterGroup({
 }) {
   const [open, setOpen] = useState(true);
   return (
-    <div className="border-b pb-5 mb-5" style={{ borderColor: "var(--vn-rule)" }}>
+    <div
+      className="mb-5 border-b pb-5"
+      style={{ borderColor: "var(--vn-rule)" }}
+    >
       <button
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between py-1"
@@ -41,7 +44,10 @@ function FilterGroup({
         >
           {title}
         </span>
-        <span className="font-mono text-sm" style={{ color: "var(--vn-steel-mist)" }}>
+        <span
+          className="font-mono text-sm"
+          style={{ color: "var(--vn-steel-mist)" }}
+        >
           {open ? "−" : "+"}
         </span>
       </button>
@@ -50,7 +56,11 @@ function FilterGroup({
   );
 }
 
-export function NoiseCollectionClient({ products, backHref = "/collections", backLabel = "All Collections" }: Props) {
+export function NoiseCollectionClient({
+  products,
+  backHref = "/collections",
+  backLabel = "All Collections",
+}: Props) {
   const [sort, setSort] = useState<SortKey>("featured");
   const [priceMax, setPriceMax] = useState<number | null>(null);
   const [inStockOnly, setInStockOnly] = useState(false);
@@ -64,29 +74,34 @@ export function NoiseCollectionClient({ products, backHref = "/collections", bac
     let list = [...products];
     if (inStockOnly) {
       list = list.filter(
-        (p) => !p.trackInventory || (p.inventoryQty ?? 0) > 0 || p.allowBackorders,
+        (p) =>
+          !p.trackInventory || (p.inventoryQty ?? 0) > 0 || p.allowBackorders,
       );
     }
-    if (priceMax !== null) list = list.filter((p) => (p.price ?? 0) <= priceMax);
-    if (sort === "price-asc") list.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-    if (sort === "price-desc") list.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
-    if (sort === "name") list.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+    if (priceMax !== null)
+      list = list.filter((p) => (p.price ?? 0) <= priceMax);
+    if (sort === "price-asc")
+      list.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+    if (sort === "price-desc")
+      list.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+    if (sort === "name")
+      list.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
     return list;
   }, [products, sort, priceMax, inStockOnly]);
 
   const effectiveMax = priceMax ?? maxPrice;
 
   return (
-    <section className="px-7 pb-16 pt-10" style={{ background: "var(--vn-bone)" }}>
+    <section className="px-7 pt-10 pb-16">
       <div
         className="mx-auto grid gap-12"
         style={{ maxWidth: "1440px", gridTemplateColumns: "240px 1fr" }}
       >
         {/* ── Filters sidebar ── */}
-        <aside className="hidden md:block pt-1">
+        <aside className="hidden pt-1 md:block">
           <Link
             href={backHref}
-            className="font-mono text-[10px] tracking-[0.18em] uppercase transition-opacity hover:opacity-60 block mb-6"
+            className="mb-6 block font-mono text-[10px] tracking-[0.18em] uppercase transition-opacity hover:opacity-60"
             style={{ color: "var(--vn-steel-mist)" }}
           >
             ← {backLabel}
@@ -94,7 +109,7 @@ export function NoiseCollectionClient({ products, backHref = "/collections", bac
 
           <FilterGroup title="Availability">
             <label
-              className="flex items-center gap-2.5 font-sans text-[13px] cursor-pointer"
+              className="flex cursor-pointer items-center gap-2.5 font-sans text-[13px]"
               style={{ color: "var(--vn-ink-soft)" }}
             >
               <input
@@ -104,14 +119,21 @@ export function NoiseCollectionClient({ products, backHref = "/collections", bac
                 style={{ accentColor: "var(--vn-ink)" }}
               />
               In stock (
-              {products.filter((p) => !p.trackInventory || (p.inventoryQty ?? 0) > 0 || p.allowBackorders).length}
+              {
+                products.filter(
+                  (p) =>
+                    !p.trackInventory ||
+                    (p.inventoryQty ?? 0) > 0 ||
+                    p.allowBackorders,
+                ).length
+              }
               )
             </label>
           </FilterGroup>
 
           <FilterGroup title="Price">
             <div
-              className="flex justify-between font-mono text-[11px] mb-2"
+              className="mb-2 flex justify-between font-mono text-[11px]"
               style={{ color: "var(--vn-steel-mist)" }}
             >
               <span>$0</span>
@@ -120,6 +142,7 @@ export function NoiseCollectionClient({ products, backHref = "/collections", bac
             <input
               type="range"
               min={0}
+              title="Price slider"
               max={maxPrice || 1000}
               value={effectiveMax}
               onChange={(e) => setPriceMax(Number(e.target.value))}
@@ -129,26 +152,12 @@ export function NoiseCollectionClient({ products, backHref = "/collections", bac
             {priceMax !== null && (
               <button
                 onClick={() => setPriceMax(null)}
-                className="font-mono text-[10px] tracking-[0.16em] uppercase mt-2 underline"
+                className="mt-2 font-mono text-[10px] tracking-[0.16em] uppercase underline"
                 style={{ color: "var(--vn-steel-mist)" }}
               >
                 Clear
               </button>
             )}
-          </FilterGroup>
-
-          <FilterGroup title="Size">
-            <div className="flex flex-wrap gap-1.5">
-              {["XS", "S", "M", "L", "XL", "XXL"].map((s) => (
-                <span
-                  key={s}
-                  className="font-mono text-[10px] tracking-[0.1em] uppercase px-2.5 py-1.5 cursor-pointer border transition-all hover:border-foreground"
-                  style={{ borderColor: "var(--vn-rule)", color: "var(--vn-ink-soft)" }}
-                >
-                  {s}
-                </span>
-              ))}
-            </div>
           </FilterGroup>
         </aside>
 
@@ -156,7 +165,7 @@ export function NoiseCollectionClient({ products, backHref = "/collections", bac
         <div>
           {/* Sort + count bar */}
           <div
-            className="flex items-center justify-between mb-8 pb-5 border-b"
+            className="mb-8 flex items-center justify-between border-b pb-5"
             style={{ borderColor: "var(--vn-rule)" }}
           >
             <span
@@ -173,7 +182,7 @@ export function NoiseCollectionClient({ products, backHref = "/collections", bac
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortKey)}
-                className="font-sans text-[13px] outline-none cursor-pointer"
+                className="cursor-pointer font-sans text-[13px] outline-none"
                 style={{
                   padding: "6px 10px",
                   border: "1px solid var(--vn-rule)",
@@ -192,12 +201,18 @@ export function NoiseCollectionClient({ products, backHref = "/collections", bac
 
           {sorted.length === 0 ? (
             <FadeIn className="py-24 text-center">
-              <p className="font-serif italic text-2xl font-light" style={{ color: "var(--vn-steel-mist)" }}>
+              <p
+                className="font-serif text-2xl font-light italic"
+                style={{ color: "var(--vn-steel-mist)" }}
+              >
                 No pieces match your filters.
               </p>
               <button
-                onClick={() => { setPriceMax(null); setInStockOnly(false); }}
-                className="font-mono text-[11px] tracking-[0.2em] uppercase mt-6 underline"
+                onClick={() => {
+                  setPriceMax(null);
+                  setInStockOnly(false);
+                }}
+                className="mt-6 font-mono text-[11px] tracking-[0.2em] uppercase underline"
                 style={{ color: "var(--vn-ink)" }}
               >
                 Clear filters

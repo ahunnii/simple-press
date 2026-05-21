@@ -14,6 +14,7 @@ import { PollenCheckoutPage } from "../_templates/pollen/cart-checkout/pollen-ch
 
 export default async function CheckoutPage() {
   const business = await api.business.simplifiedGet();
+  const environment = process.env.NODE_ENV;
   if (!business) notFound();
 
   const TemplateUnavailableComponent =
@@ -21,7 +22,8 @@ export default async function CheckoutPage() {
       modern: DefaultCheckoutUnavailable,
     }[business.templateId] ?? DefaultCheckoutUnavailable;
 
-  if (!business.isStripeConnected) return <TemplateUnavailableComponent />;
+  if (!business.isStripeConnected && environment !== "development")
+    return <TemplateUnavailableComponent />;
 
   const TemplateComponent =
     {

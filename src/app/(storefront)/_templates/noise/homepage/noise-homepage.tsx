@@ -1,4 +1,5 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
@@ -16,6 +17,8 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     api.business.getHomepage(),
     api.testimonial.listRandom({ limit: 6 }),
   ]);
+
+  const flags = await getBusinessFlags();
 
   const themeFields = homepage?.siteContent?.customFields as
     | Record<string, string>
@@ -36,11 +39,33 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     "noise.homepage.philosophy-quote",
     "noise.homepage-guarantee-title",
     "noise.homepage-guarantee-quote",
+    "noise.homepage.rail-one-collection",
+    "noise.homepage.rail-two-collection",
   ]);
 
   const products = homepage?.products ?? [];
-  const railOne = products.slice(0, 4);
-  const railTwo = products.slice(4, 8);
+
+  const rail1CollectionId = f["noise.homepage.rail-one-collection"] ?? "";
+  const rail2CollectionId = f["noise.homepage.rail-two-collection"] ?? "";
+
+  const [rail1Data, rail2Data] = await Promise.all([
+    rail1CollectionId
+      ? api.collections.getProductsByCollectionId(rail1CollectionId)
+      : Promise.resolve(null),
+    rail2CollectionId
+      ? api.collections.getProductsByCollectionId(rail2CollectionId)
+      : Promise.resolve(null),
+  ]);
+
+  const railOneProducts = rail1Data?.products ?? products.slice(0, 4);
+  const railTwoProducts = rail2Data?.products ?? products.slice(4, 8);
+
+  const railOneCtaHref = rail1Data
+    ? `/collections/${rail1Data.collection.slug}`
+    : (f["noise.homepage-featured-button-link"] ?? "/shop");
+  const railTwoCtaHref = rail2Data
+    ? `/collections/${rail2Data.collection.slug}`
+    : "/shop";
 
   return (
     <HydrateClient>
@@ -67,27 +92,37 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           />
 
           {/* 3. First product rail */}
-          {railOne.length > 0 && (
+          {railOneProducts.length > 0 && (
             <NoiseProductRail
               overline="Collection"
-              title={f["noise.homepage-featured-title"] ?? "The Collection"}
+              title={
+                rail1Data?.collection.name ??
+                f["noise.homepage-featured-title"] ??
+                "The Collection"
+              }
+              description={
+                rail1Data?.collection.description ??
+                f["noise.homepage-featured-description"] ??
+                undefined
+              }
               ctaText={f["noise.homepage-featured-button-text"] ?? "View All"}
-              ctaHref={f["noise.homepage-featured-button-link"] ?? "/shop"}
-              products={railOne}
+              ctaHref={railOneCtaHref}
+              products={railOneProducts}
             />
           )}
 
           {/* 4. Editorial split — links to the journal */}
-          <NoiseEditorialSplit />
+          {flags.isEnabled("blog") && <NoiseEditorialSplit />}
 
-          {/* 5. Second product rail (when 5+ featured products configured) */}
-          {railTwo.length > 0 && (
+          {/* 5. Second product rail (when 5+ featured products or a collection is configured) */}
+          {railTwoProducts.length > 0 && (
             <NoiseProductRail
               overline="New Arrivals"
-              title="Fresh from the Studio"
+              title={rail2Data?.collection.name ?? "Fresh from the Studio"}
+              description={rail2Data?.collection.description ?? undefined}
               ctaText="Shop New"
-              ctaHref="/shop"
-              products={railTwo}
+              ctaHref={railTwoCtaHref}
+              products={railTwoProducts}
             />
           )}
 

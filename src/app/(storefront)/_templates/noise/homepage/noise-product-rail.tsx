@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import type { Product } from "~/types";
 import type { RouterOutputs } from "~/trpc/react";
+import type { Product } from "~/types";
 import {
   FadeIn,
   StaggerContainer,
@@ -17,6 +17,7 @@ type FeaturedProduct = NonNullable<
 type NoiseProductRailProps = {
   title: string;
   overline?: string;
+  description?: string;
   ctaText: string;
   ctaHref: string;
   products: FeaturedProduct[];
@@ -27,6 +28,7 @@ type NoiseProductRailProps = {
 export function NoiseProductRail({
   title,
   overline,
+  description,
   ctaText,
   ctaHref,
   products,
@@ -37,35 +39,37 @@ export function NoiseProductRail({
 
   return (
     <section
-      className="border-b border-foreground/15 px-7 py-24"
+      className="border-foreground/15 px-7 py-20"
       style={{ background: "var(--vn-paper)" }}
     >
       <div className="mx-auto max-w-7xl">
         {/* Rail header */}
-        <FadeIn className="mb-12 flex items-end justify-between border-b border-foreground/20 pb-7">
-          <div>
-            <p
-              className="font-mono text-[9.5px] tracking-[.28em] uppercase mb-3"
-              style={{ color: "var(--vn-steel)" }}
-            >
-              {overline ?? "Collection"}
+        <FadeIn className="border-foreground/20 mb-12 flex flex-col items-center justify-center space-y-4 pb-7">
+          {overline && (
+            <p className="font-mono text-[10px] tracking-[.22em] uppercase opacity-50">
+              {overline}
             </p>
-            <h2
-              className="font-serif italic leading-tight tracking-tight"
-              style={{
-                fontSize: "clamp(2rem, 4vw, 3rem)",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              {title}
-            </h2>
-          </div>
+          )}
+          <h2
+            className="font-serif leading-tight tracking-tight italic"
+            style={{
+              fontSize: "clamp(2rem, 4vw, 3rem)",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {title}
+          </h2>
+          {description && (
+            <p className="max-w-md text-center text-sm opacity-60">
+              {description}
+            </p>
+          )}
           <Link
             href={ctaHref}
-            className="font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60 flex items-center gap-3 flex-shrink-0"
+            className="flex shrink-0 items-center gap-3 font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60"
             style={{
-              borderBottom: "1px solid var(--vn-ink)",
-              paddingBottom: "4px",
+              border: "1px solid var(--vn-ink)",
+              padding: "4px",
               color: "var(--vn-ink)",
             }}
           >
@@ -80,7 +84,10 @@ export function NoiseProductRail({
         >
           {shown.map((product, index) => (
             <StaggerItem key={product.id}>
-              <NoiseProductCard product={product as unknown as Product} index={index} />
+              <NoiseProductCard
+                product={product as unknown as Product}
+                index={index}
+              />
             </StaggerItem>
           ))}
         </StaggerContainer>

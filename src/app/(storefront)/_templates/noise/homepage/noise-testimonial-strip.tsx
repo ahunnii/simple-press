@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -31,13 +31,10 @@ export function NoiseTestimonialStrip({
   if (!testimonials.length) return null;
 
   return (
-    <section
-      className="border-y border-foreground/20 px-6 py-24"
-      style={{ background: "var(--vn-bone)" }}
-    >
+    <section className="border-foreground/15 border-y px-6 py-24">
       <div className="mx-auto max-w-3xl text-center">
         <p
-          className="font-mono text-[9.5px] tracking-[.28em] uppercase mb-8"
+          className="mb-8 font-mono text-[9.5px] tracking-[.28em] uppercase"
           style={{ color: "var(--vn-steel)" }}
         >
           {heading ?? "Worn by"}
@@ -60,7 +57,7 @@ export function NoiseTestimonialStrip({
               }}
             >
               <p
-                className="font-serif italic leading-[1.45] tracking-tight"
+                className="font-serif leading-[1.45] tracking-tight italic"
                 style={{
                   fontSize: "clamp(1.3rem, 2.5vw, 1.9rem)",
                   letterSpacing: "-0.01em",
@@ -105,7 +102,7 @@ export function NoiseTestimonialStrip({
 
         <Link
           href="/testimonials"
-          className="font-mono uppercase mt-8 inline-block transition-opacity hover:opacity-60"
+          className="mt-8 inline-block font-mono uppercase transition-opacity hover:opacity-60"
           style={{
             fontSize: "11px",
             letterSpacing: ".26em",

@@ -123,7 +123,14 @@ export function ProductDetailsAdditionalInfoTabs({
                 )}
               />
             ) : (
-              <p>No additional information available.</p>
+              <p
+                className={cn(
+                  "prose prose-sm dark:prose-invert max-w-none",
+                  styleProps?.tipTapRendererClassName,
+                )}
+              >
+                No additional information available.
+              </p>
             )}
           </>
         )}

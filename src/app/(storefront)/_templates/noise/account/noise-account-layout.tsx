@@ -36,9 +36,6 @@ export function NoiseAccountLayout({ children, heading }: Props) {
             style={{ minWidth: "200px" }}
           >
             <span className="font-mono text-[9.5px] tracking-[0.22em] uppercase text-muted-foreground">
-              Visual Noise
-            </span>
-            <span className="font-mono text-[9.5px] tracking-[0.18em] uppercase text-muted-foreground opacity-60">
               My Account
             </span>
           </div>

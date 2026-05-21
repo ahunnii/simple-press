@@ -30,7 +30,7 @@ export function NoiseHeroSection({
 
   return (
     <section
-      className="border-foreground relative overflow-hidden border-b-2"
+      className="border-foreground relative overflow-hidden border-b"
       style={{
         height: "clamp(520px, 82vh, 900px)",
         background: "var(--vn-steel-deep)",

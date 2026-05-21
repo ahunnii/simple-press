@@ -11,7 +11,7 @@ export function NoisePhilosophySection({
 }: NoisePhilosophySectionProps) {
   return (
     <section
-      className="border-foreground/20 border-b px-6 py-28 text-center"
+      className="border-foreground/20 px-6 py-24 text-center"
       style={{ background: "var(--vn-paper)" }}
     >
       <FadeIn className="mx-auto max-w-3xl">

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Suspense } from "react";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
@@ -22,7 +22,12 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
   const products = (business.products ?? []) as unknown as Product[];
 
   /* Derive unique collections from products for the browse strip */
-  type CollectionEntry = { id: string; name: string; slug: string; count: number };
+  type CollectionEntry = {
+    id: string;
+    name: string;
+    slug: string;
+    count: number;
+  };
   const collectionMap = new Map<string, CollectionEntry>();
   for (const p of business.products ?? []) {
     for (const cp of p.collectionProducts ?? []) {
@@ -30,7 +35,13 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
       if (!col) continue;
       const existing = collectionMap.get(col.id);
       if (existing) existing.count++;
-      else collectionMap.set(col.id, { id: col.id, name: col.name, slug: col.slug, count: 1 });
+      else
+        collectionMap.set(col.id, {
+          id: col.id,
+          name: col.name,
+          slug: col.slug,
+          count: 1,
+        });
     }
   }
   const collections = Array.from(collectionMap.values()).slice(0, 6);
@@ -39,18 +50,21 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
     <PageTransition>
       {/* ── Centered page header (design: "Collection" overline + h1) ── */}
       <section
-        className="border-b-2 border-foreground text-center px-6 pt-10 pb-14"
-        style={{ background: "var(--vn-paper)" }}
+        className="px-6 pt-14 pb-14 text-center"
+        style={{
+          background: "var(--vn-paper)",
+          borderBottom: "1px solid var(--vn-line-soft) ",
+        }}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "1440px" }}>
-          <p
+          {/* <p
             className="font-mono text-[10px] tracking-[0.28em] uppercase mb-4"
             style={{ color: "var(--vn-steel-mist)" }}
           >
             Collection
-          </p>
+          </p> */}
           <h1
-            className="font-serif italic leading-none tracking-tight"
+            className="font-serif leading-none tracking-tight italic"
             style={{
               fontSize: "clamp(2.8rem, 6vw, 4.5rem)",
               letterSpacing: "-0.025em",
@@ -60,7 +74,7 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
           </h1>
           {shopIntro && (
             <p
-              className="font-sans mt-5 mx-auto"
+              className="mx-auto mt-5 font-sans"
               style={{
                 fontSize: "15px",
                 lineHeight: 1.85,
@@ -75,17 +89,17 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
       </section>
 
       {/* ── Collection browse strip ── */}
-      {collections.length > 0 && (
+      {/* {collections.length > 0 && (
         <section
-          className="border-b border-foreground/20 px-7 py-8"
+          className="border-foreground/20 border-b px-7 py-8"
           style={{ background: "var(--vn-paper)" }}
         >
           <div
-            className="mx-auto flex items-center gap-3 flex-wrap"
+            className="mx-auto flex flex-wrap items-center gap-3"
             style={{ maxWidth: "1440px" }}
           >
             <span
-              className="font-mono text-[10px] tracking-[0.22em] uppercase mr-2"
+              className="mr-2 font-mono text-[10px] tracking-[0.22em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
               Browse:
@@ -94,7 +108,7 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
               <Link
                 key={col.id}
                 href={`/collections/${col.slug}`}
-                className="vn-stamp text-[10px] transition-all hover:bg-foreground hover:text-background"
+                className="vn-stamp hover:bg-foreground hover:text-background text-[10px] transition-all"
               >
                 {col.name}
                 <span
@@ -107,10 +121,16 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
             ))}
           </div>
         </section>
-      )}
+      )} */}
 
       {/* ── Products: sidebar filters + grid (client) ── */}
-      <NoiseShopClient products={products} heading={shopHeading} />
+      <Suspense>
+        <NoiseShopClient
+          products={products}
+          heading={shopHeading}
+          collections={collections}
+        />
+      </Suspense>
     </PageTransition>
   );
 }

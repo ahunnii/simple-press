@@ -81,7 +81,8 @@ export type TemplateFieldScalarType =
   | "gallery"
   | "image"
   | "video"
-  | "boolean";
+  | "boolean"
+  | "collection";
 
 export type TemplateField =
   | (TemplateFieldCommon & {
