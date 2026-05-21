@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
@@ -107,11 +108,13 @@ export function NoiseCollectionPage({
           </Link>
         </FadeIn>
       ) : (
-        <NoiseCollectionClient
-          products={products}
-          backHref="/collections"
-          backLabel="All Collections"
-        />
+        <Suspense fallback={<div className="px-7 py-24 text-center" />}>
+          <NoiseCollectionClient
+            products={products}
+            backHref="/collections"
+            backLabel="All Collections"
+          />
+        </Suspense>
       )}
 
       {/* ── More collections ── */}

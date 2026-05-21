@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 import type { Product } from "~/types";
+import type { SortOption } from "~/hooks/use-shop-filters";
 import { formatPrice } from "~/lib/prices";
+import { useShopFilters } from "~/hooks/use-shop-filters";
 import {
   FadeIn,
   StaggerContainer,
@@ -12,8 +14,6 @@ import {
 } from "~/components/page-animations";
 
 import { NoiseProductCard } from "../shared/noise-product-card";
-
-type SortKey = "featured" | "price-asc" | "price-desc" | "name";
 
 type Props = {
   products: Product[];
@@ -35,6 +35,7 @@ function FilterGroup({
       style={{ borderColor: "var(--vn-rule)" }}
     >
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between py-1"
       >
@@ -61,35 +62,20 @@ export function NoiseCollectionClient({
   backHref = "/collections",
   backLabel = "All Collections",
 }: Props) {
-  const [sort, setSort] = useState<SortKey>("featured");
-  const [priceMax, setPriceMax] = useState<number | null>(null);
-  const [inStockOnly, setInStockOnly] = useState(false);
-
-  const maxPrice = useMemo(
-    () => Math.max(...products.map((p) => p.price ?? 0), 0),
-    [products],
-  );
-
-  const sorted = useMemo(() => {
-    let list = [...products];
-    if (inStockOnly) {
-      list = list.filter(
-        (p) =>
-          !p.trackInventory || (p.inventoryQty ?? 0) > 0 || p.allowBackorders,
-      );
-    }
-    if (priceMax !== null)
-      list = list.filter((p) => (p.price ?? 0) <= priceMax);
-    if (sort === "price-asc")
-      list.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-    if (sort === "price-desc")
-      list.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
-    if (sort === "name")
-      list.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
-    return list;
-  }, [products, sort, priceMax, inStockOnly]);
-
-  const effectiveMax = priceMax ?? maxPrice;
+  const {
+    sortParam,
+    handleSort,
+    priceMax,
+    maxPrice,
+    localPriceMax,
+    setLocalPriceMax,
+    commitPriceMax,
+    inStockOnly,
+    handleInStock,
+    inStockCount,
+    filtered,
+    clearFilters,
+  } = useShopFilters(products);
 
   return (
     <section className="px-7 pt-10 pb-16">
@@ -115,19 +101,10 @@ export function NoiseCollectionClient({
               <input
                 type="checkbox"
                 checked={inStockOnly}
-                onChange={(e) => setInStockOnly(e.target.checked)}
+                onChange={(e) => handleInStock(e.target.checked)}
                 style={{ accentColor: "var(--vn-ink)" }}
               />
-              In stock (
-              {
-                products.filter(
-                  (p) =>
-                    !p.trackInventory ||
-                    (p.inventoryQty ?? 0) > 0 ||
-                    p.allowBackorders,
-                ).length
-              }
-              )
+              In stock ({inStockCount})
             </label>
           </FilterGroup>
 
@@ -137,21 +114,26 @@ export function NoiseCollectionClient({
               style={{ color: "var(--vn-steel-mist)" }}
             >
               <span>$0</span>
-              <span>{formatPrice(effectiveMax)}</span>
+              <span>{formatPrice(localPriceMax)}</span>
             </div>
             <input
               type="range"
               min={0}
               title="Price slider"
               max={maxPrice || 1000}
-              value={effectiveMax}
-              onChange={(e) => setPriceMax(Number(e.target.value))}
+              value={localPriceMax}
+              onChange={(e) => setLocalPriceMax(Number(e.target.value))}
+              onPointerUp={(e) =>
+                commitPriceMax(Number((e.target as HTMLInputElement).value))
+              }
+              onKeyUp={() => commitPriceMax(localPriceMax)}
               className="w-full"
               style={{ accentColor: "var(--vn-ink)" }}
             />
             {priceMax !== null && (
               <button
-                onClick={() => setPriceMax(null)}
+                type="button"
+                onClick={() => commitPriceMax(maxPrice)}
                 className="mt-2 font-mono text-[10px] tracking-[0.16em] uppercase underline"
                 style={{ color: "var(--vn-steel-mist)" }}
               >
@@ -172,7 +154,7 @@ export function NoiseCollectionClient({
               className="font-mono text-[11px] tracking-[0.14em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
-              {sorted.length} {sorted.length === 1 ? "piece" : "pieces"}
+              {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
             </span>
             <label
               className="flex items-center gap-3 font-mono text-[11px] tracking-[0.14em] uppercase"
@@ -180,8 +162,8 @@ export function NoiseCollectionClient({
             >
               Sort
               <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as SortKey)}
+                value={sortParam}
+                onChange={(e) => handleSort(e.target.value as SortOption)}
                 className="cursor-pointer font-sans text-[13px] outline-none"
                 style={{
                   padding: "6px 10px",
@@ -192,14 +174,14 @@ export function NoiseCollectionClient({
                 }}
               >
                 <option value="featured">Featured</option>
-                <option value="price-asc">Price · Low to High</option>
-                <option value="price-desc">Price · High to Low</option>
-                <option value="name">Name A–Z</option>
+                <option value="price-ascending">Price · Low to High</option>
+                <option value="price-descending">Price · High to Low</option>
+                <option value="title-ascending">Name A–Z</option>
               </select>
             </label>
           </div>
 
-          {sorted.length === 0 ? (
+          {filtered.length === 0 ? (
             <FadeIn className="py-24 text-center">
               <p
                 className="font-serif text-2xl font-light italic"
@@ -208,10 +190,8 @@ export function NoiseCollectionClient({
                 No pieces match your filters.
               </p>
               <button
-                onClick={() => {
-                  setPriceMax(null);
-                  setInStockOnly(false);
-                }}
+                type="button"
+                onClick={clearFilters}
                 className="mt-6 font-mono text-[11px] tracking-[0.2em] uppercase underline"
                 style={{ color: "var(--vn-ink)" }}
               >
@@ -223,7 +203,7 @@ export function NoiseCollectionClient({
               className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
               staggerDelay={0.06}
             >
-              {sorted.map((product, index) => (
+              {filtered.map((product, index) => (
                 <StaggerItem key={product.id}>
                   <NoiseProductCard product={product} index={index} />
                 </StaggerItem>

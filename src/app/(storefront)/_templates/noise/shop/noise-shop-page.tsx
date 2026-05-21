@@ -5,7 +5,7 @@ import type { Product } from "~/types";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "../index";
-import { NoiseShopClient } from "./noise-shop-client";
+import { NoiseShopClient } from "./noise-shop-filter-client";
 
 export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
   const customFields = business.siteContent?.customFields as

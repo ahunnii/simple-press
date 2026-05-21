@@ -1,11 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 
-import type { SortOption } from "~/hooks/use-shop-sort";
+import type { SortOption } from "~/hooks/use-shop-filters";
 import type { RouterOutputs } from "~/trpc/react";
-import { SORT_LABELS, useShopSort } from "~/hooks/use-shop-sort";
+import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -29,53 +28,18 @@ interface Props {
 }
 
 export function PollenShopFilterClient({ products }: Props) {
-  const [search, setSearch] = useState("");
-  const [activeCollectionId, setActiveCollectionId] = useState<string | null>(
-    null,
-  );
-
-  const filteredProducts = useMemo(() => {
-    let result = products;
-
-    if (activeCollectionId) {
-      result = result.filter((p) =>
-        p.collectionProducts.some(
-          (cp) => cp.collection.id === activeCollectionId,
-        ),
-      );
-    }
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          (p.description ?? "").toLowerCase().includes(q),
-      );
-    }
-
-    return result;
-  }, [products, search, activeCollectionId]);
-
   const {
+    search,
+    setSearch,
     sortParam,
-    paginated,
+    handleSort,
     currentPage,
     totalPages,
-    handleSort,
     handlePage,
-  } = useShopSort(filteredProducts);
-
-  const hasActiveFilters =
-    search.trim() !== "" ||
-    activeCollectionId !== null ||
-    sortParam !== "featured";
-
-  function clearFilters() {
-    setSearch("");
-    setActiveCollectionId(null);
-    handleSort("featured");
-  }
+    paginated,
+    hasActiveFilters,
+    clearFilters,
+  } = useShopFilters(products, { pageSize: 12 });
 
   return (
     <>

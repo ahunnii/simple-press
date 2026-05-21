@@ -1,7 +1,7 @@
 "use client";
 
 import type { Product } from "~/types";
-import { SORT_LABELS, useShopSort } from "~/hooks/use-shop-sort";
+import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 import { Label } from "~/components/ui/label";
 
 import { DefaultProductCard } from "../shared/default-product-card";
@@ -14,7 +14,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
     totalPages,
     handleSort,
     handlePage,
-  } = useShopSort(products);
+  } = useShopFilters(products, { pageSize: 12 });
 
   return (
     <div>
