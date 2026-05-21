@@ -40,6 +40,20 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --font-sans: "Geist", "Geist Fallback";
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+
+  --vn-bone: #fbfaf7; /* warm cream — main body background           */
+  --vn-paper: #ffffff; /* white — card/surface backgrounds            */
+  --vn-ink: #1a1a1a; /* near-black — primary text / dark sections   */
+  --vn-ink-soft: #444444; /* dark grey — secondary text                  */
+  --vn-steel: #303d4b; /* steel blue-grey — accent dark sections      */
+  --vn-steel-deep: #1f2838; /* deepest steel                               */
+  --vn-steel-mist: #7a7670; /* warm muted — tertiary / placeholder text    */
+  --vn-rule: #e8e4dc; /* warm border / divider                       */
+  --vn-line-soft: #f0ece4; /* very subtle border                          */
+  --vn-accent: #7a3b1d; /* deep terracotta — used sparingly            */
 }
 
 .dark {
@@ -74,7 +88,6 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-  --font-sans: "Geist", "Geist Fallback";
 }
 
 .bamboo {
@@ -223,70 +236,12 @@
   --sidebar-ring: oklch(0.600553 0.242472 293.8885);
 }
 
-.editorial {
-  /* Visual Noise Detroit — editorial broadside × industrial print */
-  --background: oklch(0.965 0.013 82); /* #f5f2eb paper */
-  --foreground: oklch(0.087 0.008 264); /* #0e0f12 ink */
-  --card: oklch(0.94 0.017 80); /* #ece8de bone */
-  --card-foreground: oklch(0.087 0.008 264);
-  --popover: oklch(0.94 0.017 80);
-  --popover-foreground: oklch(0.087 0.008 264);
-  --primary: oklch(0.087 0.008 264); /* ink */
-  --primary-foreground: oklch(0.965 0.013 82); /* paper */
-  --secondary: oklch(0.94 0.017 80); /* bone */
-  --secondary-foreground: oklch(0.087 0.008 264);
-  --muted: oklch(0.94 0.017 80); /* bone */
-  --muted-foreground: oklch(0.505 0.033 225); /* #6a7787 steel-mist */
-  --accent: oklch(0.255 0.04 230); /* #2c3a4d steel */
-  --accent-foreground: oklch(0.94 0.017 80); /* bone */
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.795 0.015 80); /* #c8c3b5 rule */
-  --input: oklch(0.795 0.015 80);
-  --ring: oklch(0.087 0.008 264);
-  --chart-1: oklch(0.087 0.008 264);
-  --chart-2: oklch(0.255 0.04 230);
-  --chart-3: oklch(0.505 0.033 225);
-  --chart-4: oklch(0.4 0.03 228);
-  --chart-5: oklch(0.7 0.015 225);
-  --radius: 0rem; /* Sharp corners — no border radius */
-  --sidebar: oklch(0.94 0.017 80);
-  --sidebar-foreground: oklch(0.087 0.008 264);
-  --sidebar-primary: oklch(0.087 0.008 264);
-  --sidebar-primary-foreground: oklch(0.965 0.013 82);
-  --sidebar-accent: oklch(0.255 0.04 230);
-  --sidebar-accent-foreground: oklch(0.94 0.017 80);
-  --sidebar-border: oklch(0.795 0.015 80);
-  --sidebar-ring: oklch(0.087 0.008 264);
-  --font-sans: "Space Grotesk", "Space Grotesk Fallback";
-  --font-serif: "Instrument Serif", "Instrument Serif Fallback";
-  --font-heading: var(--font-serif);
-  --font-mono: "JetBrains Mono", "JetBrains Mono Fallback";
-  --noise-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-}
-
 /* ─── Visual Noise Detroit — design tokens ─────────────────────────────────
    Defined at :root so Sheet/Dialog portals (which render outside the layout
    wrapper) still inherit the correct values.                               */
-:root {
-  --vn-bone: #fbfaf7;       /* warm cream — main body background           */
-  --vn-paper: #ffffff;      /* white — card/surface backgrounds            */
-  --vn-ink: #1a1a1a;        /* near-black — primary text / dark sections   */
-  --vn-ink-soft: #444444;   /* dark grey — secondary text                  */
-  --vn-steel: #303d4b;      /* steel blue-grey — accent dark sections      */
-  --vn-steel-deep: #1f2838; /* deepest steel                               */
-  --vn-steel-mist: #7a7670; /* warm muted — tertiary / placeholder text    */
-  --vn-rule: #e8e4dc;       /* warm border / divider                       */
-  --vn-line-soft: #f0ece4;  /* very subtle border                          */
-  --vn-accent: #7a3b1d;     /* deep terracotta — used sparingly            */
-}
 
-/* Alias inside each layout wrapper for explicit specificity. The layout
-   applies class "noise visual-noise"; .visual-editorial is kept for any
-   legacy references.                                                       */
 .noise,
-.visual-noise,
-.visual-editorial {
+.visual-noise {
   --vn-bone: #fbfaf7;
   --vn-paper: #ffffff;
   --vn-ink: #1a1a1a;
@@ -298,12 +253,14 @@
   --vn-line-soft: #f0ece4;
   --vn-accent: #7a3b1d;
   --radius: 0.15rem;
+  --font-sans: "DM Sans", "DM Sans Fallback";
+  --font-serif: "Cormorant Garamond", "Cormorant Garamond Fallback";
+  --font-mono: "JetBrains Mono", "JetBrains Mono Fallback";
 }
 
 /* ─── Announcement bar ──────────────────────────────────────────────────── */
 .noise .vn-topbar,
-.visual-noise .vn-topbar,
-.visual-editorial .vn-topbar {
+.visual-noise .vn-topbar {
   background: #111111;
   color: #ffffff;
   border-bottom: none;
@@ -362,8 +319,7 @@
 }
 
 .noise .vn-wordmark-sub,
-.visual-noise .vn-wordmark-sub,
-.visual-editorial .vn-wordmark-sub {
+.visual-noise .vn-wordmark-sub {
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-style: normal;
   font-size: 9px;
@@ -387,8 +343,7 @@
 
 /* ─── Stamps ────────────────────────────────────────────────────────────── */
 .noise .vn-stamp,
-.visual-noise .vn-stamp,
-.visual-editorial .vn-stamp {
+.visual-noise .vn-stamp {
   border: 1px solid var(--vn-ink);
   padding: 4px 9px 3px;
   font-family: var(--font-mono, "JetBrains Mono", monospace);
@@ -489,11 +444,17 @@
 }
 
 /* ─── Contact form ──────────────────────────────────────────────────────── */
-.noise .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
+.noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
 .noise .vn-contact-form textarea,
-.visual-noise .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
+.visual-noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
 .visual-noise .vn-contact-form textarea,
-.visual-editorial .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
+.visual-editorial
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
 .visual-editorial .vn-contact-form textarea {
   border-radius: 0;
   border: 0;
@@ -507,29 +468,46 @@
   color: var(--vn-ink);
 }
 
-.noise .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"])::placeholder,
+.noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not(
+    [type="tel"]
+  )::placeholder,
 .noise .vn-contact-form textarea::placeholder,
-.visual-noise .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"])::placeholder,
+.visual-noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not(
+    [type="tel"]
+  )::placeholder,
 .visual-noise .vn-contact-form textarea::placeholder,
-.visual-editorial .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"])::placeholder,
+.visual-editorial
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not(
+    [type="tel"]
+  )::placeholder,
 .visual-editorial .vn-contact-form textarea::placeholder {
   color: var(--vn-steel-mist);
   opacity: 0.6;
 }
 
-.noise .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
+.noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
 .noise .vn-contact-form textarea:focus,
-.visual-noise .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
+.visual-noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
 .visual-noise .vn-contact-form textarea:focus,
-.visual-editorial .vn-contact-form input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
+.visual-editorial
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
 .visual-editorial .vn-contact-form textarea:focus {
   border-bottom-color: var(--vn-ink);
   box-shadow: none;
 }
 
 .noise .vn-contact-form .vn-field-label,
-.visual-noise .vn-contact-form .vn-field-label,
-.visual-editorial .vn-contact-form .vn-field-label {
+.visual-noise .vn-contact-form .vn-field-label {
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-size: 9.5px;
   letter-spacing: 0.22em;
@@ -700,10 +678,6 @@
     h5,
     h6 {
       @apply font-serif;
-    }
-
-    .font-mono {
-      font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
     }
   }
 }

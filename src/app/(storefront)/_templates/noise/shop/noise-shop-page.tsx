@@ -57,12 +57,12 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
         }}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "1440px" }}>
-          {/* <p
-            className="font-mono text-[10px] tracking-[0.28em] uppercase mb-4"
+          <p
+            className="mb-4 font-mono text-[10px] tracking-[0.28em] uppercase"
             style={{ color: "var(--vn-steel-mist)" }}
           >
-            Collection
-          </p> */}
+            Shop
+          </p>
           <h1
             className="font-serif leading-none tracking-tight italic"
             style={{

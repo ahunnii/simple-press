@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
-import { formatPrice } from "~/lib/prices";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import {
   FadeIn,
@@ -20,18 +22,22 @@ import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components
 import { NoiseProductCard } from "../shared/noise-product-card";
 import { NoiseProductActions } from "./noise-product-actions";
 
-const TRUST_NOTES = [
-  "Free returns · 60 days",
-  "Carbon-neutral shipping",
-  "Lifetime repair program",
-] as const;
-
 export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
   });
 
   const [activeImg, setActiveImg] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxOpen]);
 
   // Reset active image when product changes
   useEffect(() => {
@@ -194,14 +200,21 @@ export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
             style={{ aspectRatio: "4 / 5", background: "var(--vn-steel)" }}
           >
             {activeImage ? (
-              <Image
-                src={activeImage.url}
-                alt={product.name ?? "Product image"}
-                fill
-                className="object-cover transition-opacity duration-300"
-                priority
-                sizes="(max-width: 768px) 100vw, 45vw"
-              />
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(true)}
+                className={cn("cursor-zoom-in")}
+                aria-label="Enlarge image"
+              >
+                <Image
+                  src={activeImage.url}
+                  alt={product.name ?? "Product image"}
+                  fill
+                  className="object-cover transition-opacity duration-300"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 45vw"
+                />
+              </button>
             ) : (
               <div
                 className="absolute inset-0 flex items-center justify-center"
@@ -389,7 +402,7 @@ export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
         <section className="px-7 py-16">
           <div className="mx-auto max-w-7xl">
             <FadeIn
-              className="mb-10 flex items-end justify-between border-b pb-6"
+              className="mb-10 flex items-end justify-between pb-6"
               style={{ borderColor: "var(--vn-rule)" }}
             >
               <div>
@@ -411,8 +424,11 @@ export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
               </div>
               <Link
                 href="/shop"
-                className="hidden items-center gap-3 font-mono text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-60 md:flex"
-                style={{ color: "var(--vn-ink)" }}
+                className="flex shrink-0 items-center gap-3 px-3.5 py-2 font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60"
+                style={{
+                  border: "1px solid var(--vn-ink)",
+                  color: "var(--vn-ink)",
+                }}
               >
                 View all →
               </Link>
@@ -431,6 +447,44 @@ export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
           </div>
         </section>
       )}
+
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="relative max-h-[90vh] max-w-[90vw]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={images[activeImg]?.url ?? "/placeholder.svg"}
+                alt={product.name ?? "Product image"}
+                width={1200}
+                height={1200}
+                className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(false)}
+                aria-label="Close"
+                className="bg-background/80 hover:bg-background absolute top-3 right-3 rounded-full p-1.5 backdrop-blur-sm transition-colors"
+              >
+                <X className="size-5" />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </PageTransition>
   );
 }

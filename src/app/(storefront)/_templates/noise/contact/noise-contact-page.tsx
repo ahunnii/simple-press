@@ -48,7 +48,7 @@ export function NoiseContactPage({
       <section className="px-6 pt-20 pb-0 text-center">
         <FadeIn className="mx-auto" style={{ maxWidth: "880px" }}>
           <p className="mb-5 font-mono text-[10px] tracking-[0.28em] text-(--vn-steel-mist) uppercase">
-            Get in touch
+            Contact Us
           </p>
           <h1
             className="font-serif leading-none tracking-tight italic"

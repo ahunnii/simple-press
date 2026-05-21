@@ -76,13 +76,13 @@ export function ProductDetailsAdditionalInfoTabs({
                 styleProps?.cardContentClassName,
               )}
             >
-              {product?.description}
+              {product?.description ?? "No description available."}
             </CardContent>
           </Card>
         )}
         {!includeCard && (
           <p className={cn(styleProps?.contentClassName)}>
-            {product?.description}
+            {product?.description ?? "No description available."}
           </p>
         )}
       </TabsContent>

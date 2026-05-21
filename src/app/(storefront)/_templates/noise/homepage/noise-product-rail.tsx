@@ -39,7 +39,7 @@ export function NoiseProductRail({
 
   return (
     <section
-      className="border-foreground/15 px-7 py-20"
+      className="border-foreground/15 px-7 py-16"
       style={{ background: "var(--vn-paper)" }}
     >
       <div className="mx-auto max-w-7xl">
@@ -66,10 +66,10 @@ export function NoiseProductRail({
           )}
           <Link
             href={ctaHref}
-            className="flex shrink-0 items-center gap-3 font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60"
+            className="flex shrink-0 items-center gap-3 px-3.5 py-2 font-mono text-[10px] tracking-[.22em] uppercase transition-opacity hover:opacity-60"
             style={{
               border: "1px solid var(--vn-ink)",
-              padding: "4px",
+
               color: "var(--vn-ink)",
             }}
           >

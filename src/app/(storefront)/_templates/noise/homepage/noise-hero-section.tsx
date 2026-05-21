@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 
 type NoiseHeroSectionProps = {
@@ -41,7 +41,7 @@ export function NoiseHeroSection({
     <section
       className="border-foreground relative overflow-hidden border-b"
       style={{
-        height: "clamp(520px, 82vh, 900px)",
+        height: "clamp(520px, 100svh, 900px)",
         background: "var(--vn-steel-deep)",
       }}
     >

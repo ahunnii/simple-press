@@ -3,19 +3,13 @@ import Link from "next/link";
 import { TwitterLogoIcon } from "@radix-ui/react-icons";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api } from "~/trpc/server";
-import { resolveFields } from "../index";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
 
-const QUICK_LINKS = [
-  { href: "/about", label: "About Us" },
-  { href: "/blog", label: "The Journal" },
-  { href: "/testimonials", label: "Reviews" },
-  { href: "/contact", label: "Contact" },
-  { href: "/shop", label: "Shop All" },
-] as const;
+import { resolveFields } from "../index";
 
 const PAYMENT_LABELS = ["VISA", "AMEX", "MC", "PAY", "SHOP"] as const;
 
@@ -26,13 +20,28 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
   const name = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
 
-  const customFields = business?.siteContent?.customFields as Record<string, string> | undefined;
+  const { isEnabled } = await getBusinessFlags();
+
+  const customFields = business?.siteContent?.customFields as
+    | Record<string, string>
+    | undefined;
   const g = resolveFields(customFields, [
     "noise.global.location-tag",
     "noise.global.footer-tagline",
   ]);
   const locationTag = g["noise.global.location-tag"] ?? "";
-  const footerTagline = g["noise.global.footer-tagline"] ?? "Independent goods, made with care.";
+  const footerTagline =
+    g["noise.global.footer-tagline"] ?? "Independent goods, made with care.";
+
+  const QUICK_LINKS = [
+    { href: "/about", label: "About Us" },
+    ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
+    ...(isEnabled("testimonials")
+      ? [{ href: "/testimonials", label: "Testimonials" }]
+      : []),
+    { href: "/contact", label: "Contact" },
+    ...(isEnabled("products") ? [{ href: "/shop", label: "Shop All" }] : []),
+  ] as const;
 
   const socialLinks = business?.siteContent?.socialLinks as
     | {
@@ -210,23 +219,19 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
             </div>
 
             {/* ── Col 2: Policies ── */}
-            <FooterCol
-              title="Policies"
-              links={
-                policies.length > 0
-                  ? policies.map((p) => ({
-                      href: `/${p.slug}`,
-                      label: p.title,
-                    }))
-                  : [
-                      { href: "/disclaimer", label: "Disclaimer" },
-                      { href: "/privacy-policy", label: "Privacy Policy" },
-                      { href: "/returns-refunds", label: "Returns & Refunds" },
-                      { href: "/shipping-policy", label: "Shipping Policy" },
-                      { href: "/terms-of-service", label: "Terms of Service" },
-                    ]
-              }
-            />
+            {policies.length > 0 && (
+              <FooterCol
+                title="Policies"
+                links={
+                  policies.length > 0
+                    ? policies.map((p) => ({
+                        href: `/${p.slug}`,
+                        label: p.title,
+                      }))
+                    : []
+                }
+              />
+            )}
 
             {/* ── Col 3: Quick links ── */}
             <FooterCol
@@ -236,17 +241,21 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
 
             {/* ── Col 4: Contact info ── */}
             <div>
-              <h4
-                className="mb-5 font-mono"
-                style={{
-                  fontSize: "10.5px",
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                  color: "var(--vn-steel-mist)",
-                }}
-              >
-                Contact
-              </h4>
+              {(address ?? email ?? phone) && (
+                <>
+                  <h4
+                    className="mb-5 font-mono"
+                    style={{
+                      fontSize: "10.5px",
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      color: "var(--vn-steel-mist)",
+                    }}
+                  >
+                    Contact
+                  </h4>
+                </>
+              )}
 
               {address && (
                 <div className="mb-4">
@@ -271,7 +280,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                     className="mb-0.5 font-sans font-semibold"
                     style={{ fontSize: "13px", color: "var(--vn-ink)" }}
                   >
-                    Hello
+                    Reach out to us
                   </p>
                   <div
                     className="font-sans leading-[1.8]"
@@ -286,7 +295,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                       </a>
                     )}
                     {phone && <span className="block">{phone}</span>}
-                    <span className="block">Mon–Fri · 9:00–5:00 ET</span>
+                    {/* <span className="block">Mon–Fri · 9:00–5:00 ET</span> */}
                   </div>
                 </div>
               )}

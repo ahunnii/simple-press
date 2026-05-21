@@ -11,7 +11,7 @@ export function NoisePhilosophySection({
 }: NoisePhilosophySectionProps) {
   return (
     <section
-      className="border-foreground/20 px-6 py-24 text-center"
+      className="border-foreground/20 px-6 py-16 pt-32 text-center"
       style={{ background: "var(--vn-paper)" }}
     >
       <FadeIn className="mx-auto max-w-3xl">
@@ -22,7 +22,7 @@ export function NoisePhilosophySection({
           {overline}
         </p>
         <p
-          className="font-serif leading-[1.38] tracking-tight italic"
+          className="line font-serif leading-[1.25] tracking-tight whitespace-pre-line italic"
           style={{
             fontSize: "clamp(1.6rem, 3vw, 2.6rem)",
             letterSpacing: "-0.01em",

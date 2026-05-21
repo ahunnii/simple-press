@@ -31,7 +31,7 @@ export function NoiseTestimonialStrip({
   if (!testimonials.length) return null;
 
   return (
-    <section className="border-foreground/15 border-y px-6 py-24">
+    <section className="px-6 py-16">
       <div className="mx-auto max-w-3xl text-center">
         <p
           className="mb-8 font-mono text-[9.5px] tracking-[.28em] uppercase"

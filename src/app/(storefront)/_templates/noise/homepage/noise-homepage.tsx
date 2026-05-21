@@ -122,7 +122,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
                 f["noise.homepage-featured-description"] ??
                 undefined
               }
-              ctaText={f["noise.homepage-featured-button-text"] ?? "View All"}
+              ctaText={f["noise.homepage-featured-button-text"] ?? "Shop All"}
               ctaHref={railOneCtaHref}
               products={railOneProducts}
             />
@@ -137,7 +137,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
               overline="New Arrivals"
               title={rail2Data?.collection.name ?? "Fresh from the Studio"}
               description={rail2Data?.collection.description ?? undefined}
-              ctaText="Shop New"
+              ctaText="Shop All"
               ctaHref={railTwoCtaHref}
               products={railTwoProducts}
             />
@@ -151,10 +151,12 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           />
 
           {/* 7. Rotating testimonial strip */}
-          <NoiseTestimonialStrip
-            testimonials={testimonials}
-            heading={f["noise.homepage-testimonials-heading"] ?? undefined}
-          />
+          {flags.isEnabled("testimonials") && (
+            <NoiseTestimonialStrip
+              testimonials={testimonials}
+              heading={f["noise.homepage-testimonials-heading"] ?? undefined}
+            />
+          )}
         </PageTransition>
       </NoiseIntroWrapper>
     </HydrateClient>

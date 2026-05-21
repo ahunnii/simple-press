@@ -12,6 +12,7 @@ import { motion } from "motion/react";
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import {
   Sheet,
@@ -22,30 +23,46 @@ import {
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
 
-import { resolveFields } from "../index";
 import { NoiseCartDrawer } from "../cart-checkout/noise-cart-drawer";
-
-// Links shown on the LEFT side of the header (shop/collections)
-const LEFT_NAV = [
-  { href: "/shop", label: "Shop" },
-  { href: "/collections", label: "Collections" },
-] as const;
-
-// Links always shown on the RIGHT side (editorial/info pages)
-const RIGHT_NAV = [
-  { href: "/about", label: "About" },
-  { href: "/blog", label: "Journal" },
-  { href: "/testimonials", label: "Reviews" },
-  { href: "/contact", label: "Contact" },
-] as const;
+import { resolveFields } from "../index";
 
 export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const { itemCount, setIsOpen } = useCart();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const { isEnabled } = useFeatureFlags({
+    flags: (business?.featureFlags as Record<string, boolean>) ?? {},
+  });
+
+  // Links shown on the LEFT side of the header (shop/collections)
+  const LEFT_NAV = [
+    ...(isEnabled("products") ? [{ href: "/shop", label: "Shop" }] : []),
+    ...(isEnabled("collections")
+      ? [{ href: "/collections", label: "Collections" }]
+      : []),
+  ] as const;
+
+  // Links always shown on the RIGHT side (editorial/info pages)
+  const RIGHT_NAV = [
+    { href: "/about", label: "About" },
+    ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
+    ...(isEnabled("testimonials")
+      ? [{ href: "/testimonials", label: "Reviews" }]
+      : []),
+    { href: "/contact", label: "Contact" },
+  ] as const;
+
+  const links =
+    (business?.siteContent?.navigationItems as {
+      label: string;
+      href: string;
+    }[]) ?? RIGHT_NAV;
+
   const businessName = business?.name ?? "";
-  const customFields = business?.siteContent?.customFields as Record<string, string> | undefined;
+  const customFields = business?.siteContent?.customFields as
+    | Record<string, string>
+    | undefined;
   const g = resolveFields(customFields, [
     "noise.global.location-tag",
     "noise.global.footer-tagline",
@@ -87,7 +104,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     </Link>
   );
 
-  const allNavLinks = [...LEFT_NAV, ...RIGHT_NAV];
+  const allNavLinks = [...LEFT_NAV, ...links];
 
   return (
     <>
@@ -150,7 +167,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
             ) : (
               <>
                 <span>{businessName.toUpperCase()}</span>
-                {locationTag && <span className="vn-wordmark-sub">{locationTag}</span>}
+                {locationTag && (
+                  <span className="vn-wordmark-sub">{locationTag}</span>
+                )}
               </>
             )}
           </Link>
@@ -159,7 +178,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
           <div className="flex items-center justify-end gap-6">
             {/* Right nav links (desktop only) */}
             <nav className="hidden items-center gap-6 md:flex">
-              {RIGHT_NAV.map((link) => {
+              {links.map((link) => {
                 const active = pathname === link.href;
                 return (
                   <Link
@@ -241,7 +260,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     style={{ alignItems: "flex-start" }}
                   >
                     <span>{businessName.toUpperCase()}</span>
-                    {locationTag && <span className="vn-wordmark-sub">{locationTag}</span>}
+                    {locationTag && (
+                      <span className="vn-wordmark-sub">{locationTag}</span>
+                    )}
                   </SheetTitle>
                   {footerTagline && (
                     <SheetDescription

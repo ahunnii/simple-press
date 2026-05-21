@@ -9,11 +9,11 @@ export function PlatformPolicyNotice({ slug }: { slug: string }) {
   const baseUrl = domain ? `https://${domain}` : "";
 
   return (
-    <div className="mt-12 rounded-lg border bg-muted/50 p-4">
+    <div className="bg-muted/50 mt-12 rounded-lg border p-4">
       <div className="flex gap-3">
-        <Info className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
-        <div className="text-sm text-muted-foreground">
-          <p className="font-medium text-foreground">Powered by SimplePress</p>
+        <Info className="text-muted-foreground mt-0.5 h-5 w-5 shrink-0" />
+        <div className="text-muted-foreground text-sm">
+          <p className="text-foreground font-medium">Powered by SimplePress</p>
           <p className="mt-1">
             This store is hosted on the SimplePress platform, operated by{" "}
             <strong>Center for Generative Justice LLC</strong>. Your use of this
