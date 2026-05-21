@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 
-// Product color tiles matching Visual Noise Detroit palette
-const TILES = [
+// Default color palette when no gallery is configured
+const DEFAULT_TILES = [
   { c: "#3e3a35", t: "Ashby" },
   { c: "#a9c8d4", t: "Hadley" },
   { c: "#5b4a30", t: "Pemberton" },
@@ -19,9 +19,50 @@ const TILES = [
 ] as const;
 
 // Deterministic stagger delays (avoids hydration mismatch)
-const TILE_DELAYS = TILES.map((_, i) => i * 70 + (i % 3) * 15);
+const TILE_DELAYS = DEFAULT_TILES.map((_, i) => i * 70 + (i % 3) * 15);
 
-export function NoiseIntroOverlay({ onDone }: { onDone: () => void }) {
+const TOTAL_TILES = 12;
+
+type ImageEntry = { url: string; altText: string | null };
+type Slot =
+  | { kind: "image"; url: string; altText: string }
+  | { kind: "color"; c: string; t: string };
+
+/** Evenly distributes N images across 12 tile positions, filling the rest with colors. */
+function buildSlots(images: ImageEntry[]): Slot[] {
+  const count = Math.min(images.length, TOTAL_TILES);
+
+  // Determine which slot indices receive images
+  const imageSlotIndices = new Set<number>();
+  if (count === 1) {
+    imageSlotIndices.add(5); // center-left of the grid
+  } else if (count > 1) {
+    for (let i = 0; i < count; i++) {
+      imageSlotIndices.add(Math.round((i * (TOTAL_TILES - 1)) / (count - 1)));
+    }
+  }
+
+  // Build the final 12-slot array
+  let imgIdx = 0;
+  let colorIdx = 0;
+  return Array.from({ length: TOTAL_TILES }, (_, i): Slot => {
+    if (imageSlotIndices.has(i)) {
+      const img = images[imgIdx++]!;
+      return { kind: "image", url: img.url, altText: img.altText ?? "" };
+    }
+    const color = DEFAULT_TILES[colorIdx % DEFAULT_TILES.length]!;
+    colorIdx++;
+    return { kind: "color", c: color.c, t: color.t };
+  });
+}
+
+export function NoiseIntroOverlay({
+  onDone,
+  images,
+}: {
+  onDone: () => void;
+  images?: ImageEntry[];
+}) {
   // phase 0: tiles fly in (0–1300ms)
   // phase 1: logo crystallizes (1300–2700ms)
   // phase 2: curtain opens (2700–3700ms)
@@ -29,6 +70,8 @@ export function NoiseIntroOverlay({ onDone }: { onDone: () => void }) {
   const skippedRef = useRef(false);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
+
+  const slots = buildSlots(images ?? []);
 
   useEffect(() => {
     const t1 = setTimeout(() => { if (!skippedRef.current) setPhase(1); }, 1300);
@@ -67,7 +110,7 @@ export function NoiseIntroOverlay({ onDone }: { onDone: () => void }) {
           willChange: "transform",
         }}
       >
-        <IntroScene tiles={TILES} tileDelays={TILE_DELAYS} phase={phase} half="left" />
+        <IntroScene slots={slots} tileDelays={TILE_DELAYS} phase={phase} half="left" />
       </div>
 
       {/* Right curtain half */}
@@ -85,7 +128,7 @@ export function NoiseIntroOverlay({ onDone }: { onDone: () => void }) {
           willChange: "transform",
         }}
       >
-        <IntroScene tiles={TILES} tileDelays={TILE_DELAYS} phase={phase} half="right" />
+        <IntroScene slots={slots} tileDelays={TILE_DELAYS} phase={phase} half="right" />
       </div>
 
       {/* Hairline split — sells the curtain seam */}
@@ -106,6 +149,7 @@ export function NoiseIntroOverlay({ onDone }: { onDone: () => void }) {
 
       {/* Skip button */}
       <button
+        type="button"
         onClick={skip}
         style={{
           position: "absolute",
@@ -139,15 +183,13 @@ export function NoiseIntroOverlay({ onDone }: { onDone: () => void }) {
   );
 }
 
-type TileData = { readonly c: string; readonly t: string };
-
 function IntroScene({
-  tiles,
+  slots,
   tileDelays,
   phase,
   half,
 }: {
-  tiles: readonly TileData[];
+  slots: Slot[];
   tileDelays: number[];
   phase: number;
   half: "left" | "right";
@@ -174,43 +216,72 @@ function IntroScene({
           padding: 6,
         }}
       >
-        {tiles.map((tile, i) => (
+        {slots.map((slot, i) => (
           <div
             key={i}
             style={{
               position: "relative",
-              background: tile.c,
+              overflow: "hidden",
+              ...(slot.kind === "color" ? { background: slot.c } : {}),
               opacity: 0,
               animation: `noiseIntroTileIn .55s cubic-bezier(.2,.7,.2,1) ${tileDelays[i]}ms forwards`,
-              overflow: "hidden",
             }}
           >
-            {/* Gloss sheen */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(135deg, rgba(255,255,255,.08), transparent 60%)",
-                pointerEvents: "none",
-              }}
-            />
-            {/* Tile label */}
-            <div
-              style={{
-                position: "absolute",
-                left: 10,
-                bottom: 8,
-                fontSize: 9,
-                letterSpacing: ".22em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,.65)",
-                fontWeight: 500,
-                fontFamily: "var(--font-mono, monospace)",
-              }}
-            >
-              {tile.t}
-            </div>
+            {slot.kind === "image" ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={slot.url}
+                  alt={slot.altText}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+                {/* Gloss sheen */}
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                      "linear-gradient(135deg, rgba(255,255,255,.12), transparent 60%)",
+                    pointerEvents: "none",
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                {/* Gloss sheen */}
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                      "linear-gradient(135deg, rgba(255,255,255,.08), transparent 60%)",
+                    pointerEvents: "none",
+                  }}
+                />
+                {/* Tile label */}
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 10,
+                    bottom: 8,
+                    fontSize: 9,
+                    letterSpacing: ".22em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,.65)",
+                    fontWeight: 500,
+                    fontFamily: "var(--font-mono, monospace)",
+                  }}
+                >
+                  {slot.t}
+                </div>
+              </>
+            )}
           </div>
         ))}
       </div>

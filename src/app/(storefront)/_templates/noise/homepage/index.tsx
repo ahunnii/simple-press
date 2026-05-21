@@ -1,5 +1,20 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
+// ─── Homepage: Intro Overlay ─────────────────────────────────────────────────
+
+const homepageIntroData: TemplateField[] = [
+  {
+    key: "noise.homepage.intro-gallery",
+    label: "Intro Overlay Gallery",
+    description:
+      "Gallery images shown as tiles in the intro animation. Leave unset to use the default color palette. Images are distributed evenly — a mix of photos and colors when you have fewer than 12.",
+    type: "gallery",
+    page: "homepage",
+    group: "homepage.intro",
+    gridColumn: "col-span-full",
+  },
+];
+
 // ─── Homepage: Hero ───────────────────────────────────────────────────────────
 
 const homepageHeroData: TemplateField[] = [
@@ -7,8 +22,18 @@ const homepageHeroData: TemplateField[] = [
     key: "noise.homepage.hero-image",
     label: "Hero Background Image",
     description:
-      "Full-viewport background image for the hero section. Use a striking editorial fashion photo.",
+      "Full-viewport background image for the hero section. Use a striking editorial fashion photo. Ignored when a hero video is set.",
     type: "image",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "noise.homepage.hero-video",
+    label: "Hero Background Video",
+    description:
+      "Optional video for the hero section. When set, plays instead of the background image. Use .mp4 or .webm, max 20 MB.",
+    type: "video",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
@@ -280,6 +305,7 @@ const homepageGuaranteeData: TemplateField[] = [
 ];
 
 export const noiseHomepageData = [
+  ...homepageIntroData,
   ...homepageHeroData,
   ...homepageEditorialData,
   ...homepageGuaranteeData,
@@ -293,9 +319,16 @@ export const noiseHomepageData = [
 
 export const noiseHomepageFieldGroups: TemplateFieldGroup[] = [
   {
+    id: "homepage.intro",
+    title: "Intro Overlay",
+    description: "Optional gallery to display as tiles in the intro animation",
+    icon: "✦",
+    columns: 1,
+  },
+  {
     id: "homepage.hero",
     title: "Hero Section",
-    description: "Full-viewport hero with background image and headline",
+    description: "Full-viewport hero with background image or video and headline",
     icon: "🎭",
     columns: 2,
   },

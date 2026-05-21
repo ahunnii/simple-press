@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 
 type NoiseHeroSectionProps = {
+  heroVideo?: string;
   heroImage?: string;
   heroOverline?: string;
   heroTitle?: string;
@@ -14,6 +16,7 @@ type NoiseHeroSectionProps = {
 };
 
 export function NoiseHeroSection({
+  heroVideo,
   heroImage,
   heroOverline,
   heroTitle,
@@ -21,6 +24,12 @@ export function NoiseHeroSection({
   heroPrimaryButtonText,
   heroPrimaryButtonLink,
 }: NoiseHeroSectionProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.playbackRate = 0.5;
+  }, [heroVideo]);
+
   const title = heroTitle ?? "Made with intention.";
   const tagline =
     heroTagline ??
@@ -36,8 +45,19 @@ export function NoiseHeroSection({
         background: "var(--vn-steel-deep)",
       }}
     >
-      {/* Background */}
-      {heroImage ? (
+      {/* Background — video takes priority over image */}
+      {heroVideo ? (
+        <video
+          ref={videoRef}
+          src={heroVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: "50% 20%" }}
+        />
+      ) : heroImage ? (
         <Image
           src={heroImage}
           alt={title}

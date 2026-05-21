@@ -1,5 +1,6 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
@@ -25,7 +26,9 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     | undefined;
 
   const f = resolveFields(themeFields, [
+    "noise.homepage.intro-gallery",
     "noise.homepage.hero-image",
+    "noise.homepage.hero-video",
     "noise.homepage.hero-overline",
     "noise.homepage.hero-title",
     "noise.homepage.hero-tagline",
@@ -44,6 +47,19 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
   ]);
 
   const products = homepage?.products ?? [];
+
+  const introGalleryId = f["noise.homepage.intro-gallery"];
+  const introGallery = introGalleryId
+    ? await db.gallery.findUnique({
+        where: { id: introGalleryId },
+        include: { images: { orderBy: { sortOrder: "asc" } } },
+      })
+    : null;
+  const introImages =
+    introGallery?.images.map((img) => ({
+      url: img.url,
+      altText: img.altText,
+    })) ?? [];
 
   const rail1CollectionId = f["noise.homepage.rail-one-collection"] ?? "";
   const rail2CollectionId = f["noise.homepage.rail-two-collection"] ?? "";
@@ -69,10 +85,11 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
 
   return (
     <HydrateClient>
-      <NoiseIntroWrapper>
+      <NoiseIntroWrapper introImages={introImages}>
         <PageTransition>
           {/* 1. Hero */}
           <NoiseHeroSection
+            heroVideo={f["noise.homepage.hero-video"] ?? undefined}
             heroImage={f["noise.homepage.hero-image"] ?? undefined}
             heroOverline={f["noise.homepage.hero-overline"] ?? undefined}
             heroTitle={f["noise.homepage.hero-title"] ?? undefined}
