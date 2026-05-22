@@ -3,74 +3,54 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { ShoppingBag, X } from "lucide-react";
 
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { useCart } from "~/providers/cart-context";
 
 type Business = {
   id: string;
-  siteContent: {
-    primaryColor: string | null;
-  } | null;
+  siteContent: { primaryColor: string | null } | null;
 };
 
-type CartContentsProps = {
-  business: Business;
-};
+const fmt = (cents: number) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+    cents / 100,
+  );
 
-export function DefaultCartContents({ business }: CartContentsProps) {
+export function DefaultCartContents({ business: _ }: { business: Business }) {
   const router = useRouter();
-  const {
-    items,
-    incrementItem,
-    decrementItem,
-    removeItem,
-    updateQuantity,
-    total,
-    clearCart,
-  } = useCart();
-
-  const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
-
-  const formatPrice = (cents: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(cents / 100);
-  };
-
-  const handleCheckout = () => {
-    router.push("/checkout");
-  };
+  const { items, incrementItem, decrementItem, removeItem, total } = useCart();
 
   if (items.length === 0) {
     return (
-      <div className="py-16 text-center">
-        <ShoppingBag className="mx-auto mb-4 h-16 w-16 text-gray-400" />
-        <h2 className="mb-2 text-2xl font-semibold text-gray-900">
-          Your cart is empty
-        </h2>
-        <p className="mb-8 text-gray-600">Add some products to get started!</p>
-        <Button asChild style={{ backgroundColor: primaryColor }}>
-          <Link href="/products">Shop Products</Link>
-        </Button>
+      <div className="py-24 text-center">
+        <ShoppingBag className="mx-auto mb-5 h-12 w-12 text-[#a3a3a3]" />
+        <h2 className="font-serif text-2xl font-medium">Your cart is empty</h2>
+        <p className="mt-2 text-sm text-[#6b6b6b]">
+          Add some products to get started.
+        </p>
+        <Link
+          href="/shop"
+          className="mt-8 inline-flex h-12 items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] px-8 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+        >
+          Shop products
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-3">
-      {/* Cart Items */}
-      <div className="space-y-4 lg:col-span-2">
+    <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_340px]">
+
+      {/* Line items */}
+      <div className="flex flex-col divide-y divide-[#e8e8e8]">
         {items.map((item) => (
           <div
             key={`${item.productId}-${item.variantId}`}
-            className="flex gap-4 rounded-lg border bg-white p-4"
+            className="flex gap-5 py-6 first:pt-0"
           >
             {/* Image */}
-            <div className="h-24 w-24 shrink-0 overflow-hidden rounded bg-gray-100">
+            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-[var(--radius)] bg-[#f6f6f6]">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}
@@ -80,116 +60,110 @@ export function DefaultCartContents({ business }: CartContentsProps) {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-gray-400">
-                  No image
+                <div className="flex h-full w-full items-center justify-center">
+                  <ShoppingBag className="h-6 w-6 text-[#a3a3a3]" />
                 </div>
               )}
             </div>
 
-            {/* Details */}
-            <div className="min-w-0 flex-1">
-              <h3 className="truncate font-semibold text-gray-900">
-                {item.productName}
-              </h3>
-              {item.variantName && (
-                <p className="text-sm text-gray-600">{item.variantName}</p>
-              )}
-              {item.sku && (
-                <p className="text-xs text-gray-500">SKU: {item.sku}</p>
-              )}
-              <p className="mt-2 text-lg font-semibold text-gray-900">
-                {formatPrice(item.price)}
-              </p>
-            </div>
-
-            {/* Quantity Controls */}
-            <div className="flex flex-col items-end gap-2">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => decrementItem(item.productId, item.variantId)}
+            {/* Info */}
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="font-serif text-[15px] font-medium leading-snug">
+                    {item.productName}
+                  </h3>
+                  {item.variantName && (
+                    <p className="text-[13px] text-[#6b6b6b]">
+                      {item.variantName}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeItem(item.productId, item.variantId)}
+                  aria-label="Remove item"
+                  className="shrink-0 text-[#a3a3a3] transition-colors hover:text-[#0a0a0a]"
                 >
-                  <Minus className="h-4 w-4" />
-                </Button>
-
-                <Input
-                  type="number"
-                  min="1"
-                  max={item.maxInventory ?? 999}
-                  value={item.quantity}
-                  onChange={(e) => {
-                    const qty = parseInt(e.target.value);
-                    if (!isNaN(qty)) {
-                      updateQuantity(item.productId, item.variantId, qty);
-                    }
-                  }}
-                  className="w-16 text-center"
-                />
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => incrementItem(item.productId, item.variantId)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                  <X className="h-4 w-4" />
+                </button>
               </div>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeItem(item.productId, item.variantId)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="mr-1 h-4 w-4" />
-                Remove
-              </Button>
+              <div className="flex items-center justify-between gap-4 mt-auto">
+                {/* Qty stepper */}
+                <div className="inline-flex h-9 w-[108px] items-center rounded-[var(--radius)] border border-[#e8e8e8]">
+                  <button
+                    type="button"
+                    onClick={() => decrementItem(item.productId, item.variantId)}
+                    disabled={item.quantity <= 1}
+                    aria-label="Decrease"
+                    className="flex h-full flex-1 items-center justify-center text-base font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30 rounded-l-[var(--radius)]"
+                  >
+                    −
+                  </button>
+                  <span className="w-8 text-center text-sm font-medium">
+                    {item.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => incrementItem(item.productId, item.variantId)}
+                    disabled={
+                      item.maxInventory !== undefined &&
+                      item.quantity >= item.maxInventory
+                    }
+                    aria-label="Increase"
+                    className="flex h-full flex-1 items-center justify-center text-base font-light transition-colors hover:bg-[#f6f6f6] rounded-r-[var(--radius)]"
+                  >
+                    +
+                  </button>
+                </div>
 
-              <p className="text-sm font-semibold text-gray-900">
-                {formatPrice(item.price * item.quantity)}
-              </p>
+                <p className="text-sm font-medium">
+                  {fmt(item.price * item.quantity)}
+                </p>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Order Summary */}
-      <div className="lg:col-span-1">
-        <div className="sticky top-4 rounded-lg border p-6">
-          <h2 className="mb-4 text-xl font-semibold">Order Summary</h2>
+      {/* Order summary */}
+      <div>
+        <div className="sticky top-[calc(72px+24px)] rounded-[var(--radius)] border border-[#e8e8e8] p-6">
+          <h2 className="font-serif text-xl font-medium mb-5">Order summary</h2>
 
-          <div className="mb-6 space-y-3">
-            <div className="flex justify-between text-gray-600">
-              <span>Subtotal</span>
-              <span>{formatPrice(total)}</span>
+          <div className="flex flex-col gap-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-[#6b6b6b]">Subtotal</span>
+              <span className="font-medium">{fmt(total)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
-              <span>Shipping</span>
-              <span>Calculated at checkout</span>
-            </div>
-            <div className="flex justify-between border-t pt-3 text-lg font-bold">
-              <span>Total</span>
-              <span>{formatPrice(total)}</span>
+            <div className="flex justify-between">
+              <span className="text-[#6b6b6b]">Shipping</span>
+              <span className="text-[#6b6b6b]">Calculated at checkout</span>
             </div>
           </div>
 
-          <Button
-            onClick={handleCheckout}
-            className="mb-3 w-full text-white"
-            size="lg"
-            style={{ backgroundColor: primaryColor }}
-          >
-            Proceed to Checkout
-          </Button>
+          <div className="my-5 border-t border-[#e8e8e8]" />
 
-          <Button
-            onClick={() => clearCart()}
-            variant="outline"
-            className="w-full"
+          <div className="flex justify-between text-base font-medium mb-6">
+            <span>Estimated total</span>
+            <span>{fmt(total)}</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => router.push("/checkout")}
+            className="w-full h-12 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
           >
-            Clear Cart
-          </Button>
+            Continue to checkout
+          </button>
+
+          <Link
+            href="/shop"
+            className="mt-4 block text-center text-sm text-[#6b6b6b] hover:text-[#0a0a0a] transition-colors"
+          >
+            Continue shopping
+          </Link>
         </div>
       </div>
     </div>

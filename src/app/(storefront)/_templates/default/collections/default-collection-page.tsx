@@ -19,133 +19,134 @@ export function DefaultCollectionPage({
     .slice(0, 3);
 
   return (
-    <main className="flex-1">
-      <div className="border-b bg-gray-50">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="text-muted-foreground mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-            <Link href="/" className="hover:text-primary">
+    <div>
+      {/* Page hero */}
+      <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-0 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+            <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
               Home
             </Link>
             <span>/</span>
-            <Link href="/collections" className="hover:text-primary">
+            <Link
+              href="/collections"
+              className="hover:text-[#0a0a0a] transition-colors"
+            >
               Collections
             </Link>
             <span>/</span>
-            <span className="text-gray-600">{collection.name}</span>
+            <span className="normal-case tracking-normal text-[#0a0a0a]">
+              {collection.name}
+            </span>
           </div>
 
-          <Link
-            href="/collections"
-            className="mb-6 inline-block text-sm font-medium text-gray-600 hover:text-gray-900"
-          >
-            ← Back to collections
-          </Link>
+          <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+            Collection
+          </span>
+          <h1 className="font-serif mt-3 text-[clamp(40px,5vw,72px)] font-semibold leading-[1.04] tracking-[-0.03em]">
+            {collection.name}
+          </h1>
+          {collection.description && (
+            <p className="mt-4 mb-10 text-[17px] text-[#6b6b6b] max-w-[560px]">
+              {collection.description}
+            </p>
+          )}
+          <p className="mb-10 text-sm text-[#6b6b6b]">
+            {products.length} product{products.length !== 1 ? "s" : ""}
+          </p>
 
-          {collection.imageUrl ? (
-            <div className="relative mb-6 aspect-21/9 w-full overflow-hidden rounded-lg bg-gray-100 sm:aspect-3/1">
+          {/* Banner image */}
+          {collection.imageUrl && (
+            <div className="relative aspect-[21/6] overflow-hidden rounded-t-[var(--radius)] bg-[#f6f6f6]">
               <Image
                 src={collection.imageUrl}
                 alt={collection.name}
                 fill
                 className="object-cover"
                 priority
-                sizes="(max-width: 1280px) 100vw, 1280px"
+                sizes="(max-width: 1440px) 100vw, 1440px"
               />
             </div>
-          ) : null}
-
-          <h1 className="mb-3 text-4xl font-bold text-gray-900">
-            {collection.name}
-          </h1>
-
-          {collection.description ? (
-            <p className="max-w-3xl text-lg text-gray-600">
-              {collection.description}
-            </p>
-          ) : null}
-
-          <p className="mt-4 text-sm text-gray-500">
-            {products.length} product{products.length !== 1 ? "s" : ""}
-          </p>
+          )}
         </div>
-      </div>
+      </section>
 
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <h2 className="mb-6 text-xl font-semibold text-gray-900">
-          Products in this collection
-        </h2>
+      {/* Products */}
+      <section className="px-6 py-16 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          {products.length === 0 ? (
+            <div className="py-24 text-center">
+              <p className="text-[#6b6b6b]">No products in this collection yet.</p>
+              <Link
+                href="/shop"
+                className="mt-6 inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3"
+              >
+                View all products →
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
+              {collection.collectionProducts.map((cp, index) => {
+                const product = cp.product;
+                if (!product) return null;
+                return (
+                  <DefaultProductCard
+                    key={cp.id}
+                    product={product as Product}
+                    index={index}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
 
-        {products.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="text-gray-500">No products in this collection yet.</p>
-            <Link
-              href="/products"
-              className="mt-4 inline-block text-sm font-medium hover:underline"
-            >
-              View all products
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {collection.collectionProducts.map((cp, index) => {
-              const product = cp.product;
-              if (!product) return null;
-
-              const hasVariants = product.variants.length > 0;
-              const displayPrice = hasVariants
-                ? (product.variants[0]?.price ?? product.price)
-                : product.price;
-
-              return (
-                <DefaultProductCard
-                  key={cp.id}
-                  product={product as Product}
-                  index={index}
-                />
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {others.length > 0 ? (
-        <div className="border-t border-gray-100 bg-gray-50/80 py-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <h2 className="mb-6 text-xl font-semibold text-gray-900">
-              More collections
-            </h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {/* More collections */}
+      {others.length > 0 && (
+        <section className="border-t border-[#e8e8e8] bg-[#f6f6f6] px-6 py-16 lg:px-8">
+          <div className="mx-auto max-w-[1440px]">
+            <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <h2 className="font-serif text-2xl font-medium tracking-tight">
+                More collections
+              </h2>
+              <Link
+                href="/collections"
+                className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
+              >
+                All collections →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-3">
               {others.map((col) => {
                 const count = col._count.collectionProducts;
                 return (
                   <Link
                     key={col.id}
                     href={`/collections/${col.slug}`}
-                    className="group block overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                    className="group block"
                   >
-                    <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+                    <div className="relative mb-4 aspect-4/3 overflow-hidden rounded-[var(--radius)] bg-[#e8e8e8]">
                       <Image
                         src={col.imageUrl ?? "/placeholder.svg"}
                         alt={col.name}
                         fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.015]"
                       />
                     </div>
-                    <div className="p-4">
-                      <h3 className="mb-1 text-lg font-semibold text-gray-900">
-                        {col.name}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {count} product{count !== 1 ? "s" : ""}
-                      </p>
-                    </div>
+                    <h3 className="font-serif text-[15px] font-medium tracking-[-0.005em] group-hover:opacity-70 transition-opacity">
+                      {col.name}
+                    </h3>
+                    <p className="mt-0.5 text-[14px] text-[#6b6b6b]">
+                      {count} product{count !== 1 ? "s" : ""}
+                    </p>
                   </Link>
                 );
               })}
             </div>
           </div>
-        </div>
-      ) : null}
-    </main>
+        </section>
+      )}
+    </div>
   );
 }

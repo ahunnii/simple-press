@@ -169,9 +169,9 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
   if (items.length === 0) {
     return (
       <div className="py-16 text-center">
-        <p className="mb-4 text-gray-600">Your cart is empty</p>
+        <p className="mb-4 text-[#6b6b6b]">Your cart is empty</p>
         <Button asChild>
-          <Link href="/products">Continue Shopping</Link>
+          <Link href="/shop">Continue shopping</Link>
         </Button>
       </div>
     );
@@ -259,7 +259,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                     In-store pickup
                   </Button>
                 </div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-[#6b6b6b]">
                   {deliveryMethod === "pickup"
                     ? "No shipping charge. You'll pick up your order at the store."
                     : "Shipping cost is based on your store's shipping settings."}
@@ -275,7 +275,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 <CardTitle>Shipping Address</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-[#6b6b6b]">
                   This is sent to Stripe Checkout prefilled so you can confirm
                   or edit your name, phone, and address before paying.
                 </p>
@@ -374,7 +374,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                     key={`${item.productId}-${item.variantId}`}
                     className="flex gap-3"
                   >
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded bg-gray-100">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[var(--radius)] bg-[#f6f6f6]">
                       {item.imageUrl ? (
                         <Image
                           src={item.imageUrl}
@@ -384,21 +384,21 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
+                        <div className="flex h-full w-full items-center justify-center text-xs text-[#a3a3a3]">
                           No img
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-gray-900">
+                      <p className="truncate text-sm font-medium text-[#0a0a0a]">
                         {item.productName}
                       </p>
                       {item.variantName && (
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-[#6b6b6b]">
                           {item.variantName}
                         </p>
                       )}
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-[#6b6b6b]">
                         Qty: {item.quantity}
                       </p>
                     </div>
@@ -420,7 +420,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
 
               <div className="space-y-2 border-t pt-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-[#6b6b6b]">Subtotal</span>
                   <span>{formatPrice(subtotal)}</span>
                 </div>
                 {appliedDiscount && (
@@ -430,7 +430,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Shipping</span>
+                  <span className="text-[#6b6b6b]">Shipping</span>
                   <span>
                     {deliveryMethod === "pickup"
                       ? "In-store pickup (free)"
@@ -474,7 +474,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 )}
               </Button>
 
-              <p className="text-center text-xs text-gray-500">
+              <p className="text-center text-xs text-[#6b6b6b]">
                 All transactions are secure and encrypted via Stripe. 100%
                 Secure and Encrypted Payments.
               </p>

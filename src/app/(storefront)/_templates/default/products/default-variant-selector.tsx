@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Minus, Plus } from "lucide-react";
+import { Check } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { Button } from "~/components/ui/button";
-import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
 
 type Props = {
@@ -49,65 +47,76 @@ export function DefaultVariantSelector({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Variant Selection */}
-      <div>
-        <Label>Select Variant</Label>
-        <div className="grid-col-2 mt-2 grid gap-2 md:grid-cols-4">
+    <div className="flex flex-col gap-5">
+      {/* Variant pills */}
+      <div className="flex flex-col gap-2.5">
+        <span className="text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          Select option
+          {selectedVariant && (
+            <span className="ml-2 font-normal normal-case tracking-normal text-[#0a0a0a]">
+              {selectedVariant.name}
+            </span>
+          )}
+        </span>
+        <div className="flex flex-wrap gap-2">
           {product.variants.map((variant) => {
             const outOfStock =
               product.trackInventory &&
               variant.inventoryQty === 0 &&
               !product.allowBackorders;
-            const isBackorderVariant =
+            const isBackorder =
               product.trackInventory &&
               variant.inventoryQty === 0 &&
               !!product.allowBackorders;
+            const isSelected = selectedVariant?.id === variant.id;
+
             return (
-              <Button
+              <button
                 key={variant.id}
-                variant={
-                  selectedVariant?.id === variant.id ? "default" : "outline"
-                }
+                type="button"
                 onClick={() => {
                   setSelectedVariant(variant);
                   setSelectedVariantId(variant.id);
                 }}
                 disabled={outOfStock}
-                className="rounded-full"
+                className={`inline-grid h-10 min-w-12 place-items-center rounded-[var(--radius)] border px-3.5 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                  isSelected
+                    ? "border-[#0a0a0a] bg-[#0a0a0a] text-white"
+                    : "border-[#e8e8e8] hover:border-[#0a0a0a]"
+                }`}
               >
                 {variant.name}
-                {outOfStock && " (Out of Stock)"}
-                {isBackorderVariant && " (Pre-order)"}
-              </Button>
+                {isBackorder && !isSelected && (
+                  <span className="ml-1 text-[10px] text-[#6b6b6b]">
+                    (pre-order)
+                  </span>
+                )}
+              </button>
             );
           })}
         </div>
       </div>
 
-      {/* Quantity + Add to Cart */}
+      {/* Qty + Add to cart (only shown when a variant is selected) */}
       {selectedVariant && (
-        <div className="flex flex-col gap-2">
-          <Label>Quantity</Label>
-          <div className="flex items-center gap-2">
-            <div className="flex w-fit items-center rounded-md border">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-10"
+        <div className="flex flex-col gap-2.5">
+          <div className="flex items-center gap-3">
+            {/* Qty stepper */}
+            <div className="inline-flex h-12 w-[120px] shrink-0 items-center rounded-[var(--radius)] border border-[#e8e8e8]">
+              <button
+                type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 disabled={quantity <= 1}
                 aria-label="Decrease quantity"
+                className="flex h-full flex-1 items-center justify-center text-lg font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30 rounded-l-[var(--radius)]"
               >
-                <Minus className="size-4" />
-              </Button>
-              <span className="w-10 text-center text-base font-semibold">
+                −
+              </button>
+              <span className="w-10 text-center text-sm font-medium">
                 {quantity}
               </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-10"
+              <button
+                type="button"
                 onClick={() =>
                   setQuantity(
                     product.trackInventory
@@ -121,38 +130,48 @@ export function DefaultVariantSelector({
                   quantity >= selectedVariant.inventoryQty
                 }
                 aria-label="Increase quantity"
+                className="flex h-full flex-1 items-center justify-center text-lg font-light transition-colors hover:bg-[#f6f6f6] rounded-r-[var(--radius)]"
               >
-                <Plus className="size-4" />
-              </Button>
+                +
+              </button>
             </div>
-            {/* Stock count */}
-            {selectedVariant && product.trackInventory && (
-              <span className="text-sm text-gray-600">
-                {selectedVariant.inventoryQty} available
-              </span>
-            )}
+
+            {/* Add to cart */}
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={
+                !selectedVariant ||
+                (product.trackInventory &&
+                  selectedVariant.inventoryQty === 0 &&
+                  !product.allowBackorders)
+              }
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a] active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isAdded ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Added to bag
+                </>
+              ) : (
+                "Add to cart"
+              )}
+            </button>
           </div>
 
-          <Button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={
-              !selectedVariant ||
-              (product.trackInventory &&
-                selectedVariant.inventoryQty === 0 &&
-                !product.allowBackorders)
-            }
-            className="flex-1"
-          >
-            {isAdded ? (
-              <>
-                <Check className="mr-2 h-4 w-4" />
-                Added to Cart
-              </>
-            ) : (
-              `Add ${quantity} to Cart`
+          {/* Stock hint */}
+          {product.trackInventory && selectedVariant.inventoryQty > 0 && (
+            <p className="text-xs text-[#6b6b6b]">
+              {selectedVariant.inventoryQty} available
+            </p>
+          )}
+          {product.trackInventory &&
+            selectedVariant.inventoryQty === 0 &&
+            product.allowBackorders && (
+              <p className="text-xs text-[#6b6b6b]">
+                Pre-order — ships when available
+              </p>
             )}
-          </Button>
         </div>
       )}
     </div>

@@ -236,6 +236,13 @@
   --sidebar-ring: oklch(0.600553 0.242472 293.8885);
 }
 
+.default-template {
+  --font-sans: "Poppins", "Poppins Fallback", sans-serif;
+  --font-heading: "Inter", "Inter Fallback", sans-serif;
+  --font-serif: "Inter", "Inter Fallback", sans-serif;
+  --radius: 0.25rem;
+}
+
 /* ─── Visual Noise Detroit — design tokens ─────────────────────────────────
    Defined at :root so Sheet/Dialog portals (which render outside the layout
    wrapper) still inherit the correct values.                               */
@@ -668,6 +675,25 @@
 
   .editorial {
     * {
+      @apply font-sans;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply font-serif;
+    }
+  }
+
+  .default-template {
+    * {
+      @apply font-sans;
+    }
+
+    p {
       @apply font-sans;
     }
 

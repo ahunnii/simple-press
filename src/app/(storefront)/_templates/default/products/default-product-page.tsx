@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
@@ -16,6 +15,33 @@ import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-p
 
 import { DefaultProductCard } from "../shared/default-product-card";
 import { DefaultProductActions } from "./default-product-actions";
+
+function AccordionItem({
+  summary,
+  children,
+  defaultOpen,
+}: {
+  summary: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <details
+      open={defaultOpen}
+      className="group border-b border-[#e8e8e8] py-5 first:border-t"
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium select-none [&::-webkit-details-marker]:hidden">
+        {summary}
+        <span className="text-xl font-light transition-transform duration-200 group-open:rotate-45">
+          +
+        </span>
+      </summary>
+      <div className="pt-3.5 text-sm leading-[1.7] text-[#6b6b6b]">
+        {children}
+      </div>
+    </details>
+  );
+}
 
 export function DefaultProductPage({
   product,
@@ -32,119 +58,171 @@ export function DefaultProductPage({
     productId: product.id,
   });
 
-  const primaryColor = product.business?.siteContent?.primaryColor ?? "#3b82f6";
-
-  const trustBadges =
-    additionalFields?.productFeatures &&
-    additionalFields.productFeatures.length > 0
-      ? additionalFields.productFeatures
-      : [];
   const isAdditionalEmpty = isContentEmpty(
     additionalFields?.additionalInformation as TiptapJSON,
   );
 
   return (
     <PageTransition>
-      <section className="mx-auto max-w-7xl px-4 py-12">
-        <div className="grid gap-12 md:grid-cols-8">
-          {/* Images */}
+      <div className="mx-auto max-w-[1440px] px-6 lg:px-8">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 pt-6 pb-8 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
+            Home
+          </Link>
+          <span>/</span>
+          <Link
+            href="/shop"
+            className="hover:text-[#0a0a0a] transition-colors"
+          >
+            Shop
+          </Link>
+          <span>/</span>
+          <span className="text-[#0a0a0a] normal-case tracking-normal">
+            {product.name}
+          </span>
+        </div>
 
+        {/* PDP layout */}
+        <div className="grid grid-cols-1 gap-10 pb-24 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
+          {/* Gallery */}
           <ProductGalleryVertical
             images={product.images}
             productName={product.name}
-            primaryColor={primaryColor}
-            enableLightbox={true}
+            enableLightbox
             styleProps={{
               containerClassName:
-                "md:sticky md:top-24 md:col-span-5 md:self-start",
+                "lg:sticky lg:top-[calc(72px+24px)] lg:self-start",
             }}
           />
 
-          {/* Product Info */}
-          <div className="md:col-span-3">
-            <h1 className="mb-2 text-4xl font-normal text-gray-900">
-              {product.name}
-            </h1>
-            {additionalFields?.productTagline && (
-              <p className="mb-4 text-lg font-light text-gray-500">
-                {additionalFields.productTagline}
+          {/* Info panel */}
+          <div className="flex flex-col gap-6">
+            {/* Name + price */}
+            <div className="flex flex-col gap-4">
+              <h1 className="font-serif text-[36px] leading-[1.1] font-medium tracking-[-0.02em]">
+                {product.name}
+              </h1>
+              {additionalFields?.productTagline && (
+                <p className="text-sm text-[#6b6b6b]">
+                  {additionalFields.productTagline}
+                </p>
+              )}
+              <div className="flex items-center gap-4">
+                <span className="text-[22px] font-medium">
+                  {formatPrice(displayPrice)}
+                </span>
+                {isOnSale && displayCompareAtPrice && (
+                  <>
+                    <span className="text-[18px] text-[#a3a3a3] line-through">
+                      {formatPrice(displayCompareAtPrice)}
+                    </span>
+                    <span className="inline-flex items-center rounded-[2px] bg-[#0a0a0a] px-2 py-0.5 text-[10px] font-medium tracking-[0.14em] uppercase text-white">
+                      {computeSavingsLabel(displayPrice, displayCompareAtPrice)}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            {product.description && (
+              <p className="text-[15px] leading-[1.65] text-[#6b6b6b]">
+                {product.description}
               </p>
             )}
-            <div className="mb-3 flex items-center gap-4">
-              {isOnSale && displayCompareAtPrice && (
-                <span className="inline-flex items-center rounded-full bg-black px-3 py-1 text-sm font-semibold text-white">
-                  {computeSavingsLabel(displayPrice, displayCompareAtPrice)}
-                </span>
-              )}
 
-              <p
-                className="text-2xl font-medium"
-                style={{ color: primaryColor }}
-              >
-                {formatPrice(displayPrice)}
-              </p>
-              {isOnSale && displayCompareAtPrice && (
-                <span className="text-muted-foreground text-xl line-through">
-                  {formatPrice(displayCompareAtPrice)}
-                </span>
-              )}
+            {/* Actions (variant selector + qty + add to cart) */}
+            <DefaultProductActions product={product} />
+
+            {/* Trust signals */}
+            <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-[13px] text-[#6b6b6b]">
+              <span>✓ Ships in 1–2 business days</span>
+              <span>✓ Free returns within 30 days</span>
             </div>
-            <p className="relative mb-6 w-full text-xs">
+
+            {/* Accordion */}
+            <div className="mt-2">
+              <AccordionItem summary="Details" defaultOpen>
+                {!isAdditionalEmpty ? (
+                  <TiptapRenderer
+                    content={
+                      additionalFields?.additionalInformation as TiptapJSON
+                    }
+                    className="prose prose-sm max-w-none"
+                  />
+                ) : (
+                  <p>
+                    Materials, care instructions, and any other details about
+                    this product. Edit this from your product settings.
+                  </p>
+                )}
+              </AccordionItem>
+              <AccordionItem summary="Shipping &amp; returns">
+                <p>
+                  Ships within 1–2 business days. US orders over $75 ship free.
+                  International rates calculated at checkout. 30-day returns, no
+                  questions asked.
+                </p>
+              </AccordionItem>
+              <AccordionItem summary="Ask a question">
+                <p>
+                  We answer most questions within a day.{" "}
+                  <Link
+                    href="/contact"
+                    className="underline hover:no-underline"
+                  >
+                    Contact us
+                  </Link>{" "}
+                  and we&apos;ll get back to you.
+                </p>
+              </AccordionItem>
+            </div>
+
+            {/* Shipping link */}
+            <p className="text-xs text-[#6b6b6b]">
               <Link
                 href="/shipping-policy"
-                className="relative pb-[2px] font-semibold after:absolute after:bottom-0 after:left-0 after:block after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:content-[''] hover:after:scale-x-100"
-                style={{ display: "inline-block" }}
+                className="underline hover:no-underline"
               >
                 Shipping
               </Link>{" "}
               calculated at checkout
             </p>
-            {/* Variant Options */}
-            <DefaultProductActions product={product} />
-            <p className="my-16 leading-relaxed font-semibold tracking-wide whitespace-pre-line text-zinc-800">
-              {product.description ?? "No description available."}
-            </p>{" "}
-            {/* Trust badges */}
-            {trustBadges.length > 0 && (
-              <div className="grid grid-cols-2 gap-2">
-                {trustBadges.map((badge, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
-                  >
-                    <ShieldCheck
-                      className="h-4 w-4 shrink-0 text-blue-500"
-                      style={{ color: primaryColor }}
-                    />
-                    <span className="text-xs text-gray-600">{badge.text}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            {!isAdditionalEmpty && (
-              <TiptapRenderer
-                content={additionalFields?.additionalInformation as TiptapJSON}
-                className="prose prose-sm dark:prose-invert my-16 max-w-none text-base font-semibold tracking-wide text-zinc-800"
-              />
-            )}
           </div>
         </div>
 
-        <div className="mt-16 border-t pt-10">
-          <h2 className="mb-6 text-2xl font-bold text-gray-900">
-            You Might Also Like
-          </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {relatedProducts?.map((p, index) => (
-              <DefaultProductCard
-                key={p.id}
-                product={p as Product}
-                index={index}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+        {/* You may also like */}
+        {(relatedProducts?.length ?? 0) > 0 && (
+          <section className="border-t border-[#e8e8e8] pb-24 pt-16">
+            <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="mb-1.5 text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+                  Pair it with
+                </p>
+                <h2 className="font-serif text-3xl font-semibold tracking-tight">
+                  You may also like
+                </h2>
+              </div>
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
+              >
+                All products →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+              {relatedProducts?.map((p, index) => (
+                <DefaultProductCard
+                  key={p.id}
+                  product={p as Product}
+                  index={index}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     </PageTransition>
   );
 }

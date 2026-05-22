@@ -7,6 +7,7 @@ import Link from "next/link";
 type Props = {
   imageUrl: string;
   title: string;
+  eyebrow?: string;
   description?: string;
   primaryText: string;
   primaryHref: string;
@@ -17,6 +18,7 @@ type Props = {
 export function DefaultParallaxHero({
   imageUrl,
   title,
+  eyebrow,
   description,
   primaryText,
   primaryHref,
@@ -24,11 +26,16 @@ export function DefaultParallaxHero({
   secondaryHref,
 }: Props) {
   const bgRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => {
+      const y = window.scrollY;
       if (bgRef.current) {
-        bgRef.current.style.transform = `translateY(${window.scrollY * 0.4}px)`;
+        bgRef.current.style.transform = `translateY(${y * 0.4}px)`;
+      }
+      if (textRef.current) {
+        textRef.current.style.transform = `translateY(${y * 0.12}px)`;
       }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -36,51 +43,57 @@ export function DefaultParallaxHero({
   }, []);
 
   return (
-    <section
-      className="relative overflow-hidden"
-      style={{ height: "78vh", minHeight: "500px" }}
-    >
+    <section className="relative h-[92vh] min-h-[620px] overflow-hidden bg-[#1a1a1a] text-white isolate">
       {/* Parallax background — oversized vertically so translateY never reveals a gap */}
       <div
         ref={bgRef}
         className="absolute inset-x-0 will-change-transform"
-        style={{ top: "-15%", bottom: "-15%" }}
+        style={{ top: "-10%", bottom: "-10%" }}
       >
         <Image
           src={imageUrl}
           alt={title}
           fill
-          className="object-cover"
+          className="object-cover opacity-60"
           priority
         />
+        {/* Gradient — heavier at bottom where text sits */}
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/25 to-transparent" />
       </div>
 
-      {/* Gradient overlay — heavier at the bottom where text sits */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-
-      {/* Text — anchored ~25% up from the bottom, centered horizontally */}
-      <div className="absolute inset-x-0 bottom-0 flex flex-col items-center px-6 pb-[10%] text-center text-white">
-        <h1 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-          {title}
-        </h1>
-        {description && (
-          <p className="mt-3 max-w-xl text-base opacity-85">{description}</p>
-        )}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-          <Link
-            href={primaryHref}
-            className="border border-white px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-80"
-          >
-            {primaryText}
-          </Link>
-          {secondaryText && (
-            <Link
-              href={secondaryHref ?? "/shop"}
-              className="text-sm font-medium tracking-wide underline underline-offset-4 transition-opacity hover:opacity-80"
-            >
-              {secondaryText}
-            </Link>
+      {/* Text — anchored at bottom-left */}
+      <div
+        ref={textRef}
+        className="absolute inset-x-0 bottom-0 will-change-transform"
+      >
+        <div className="mx-auto max-w-[1440px] px-6 pb-24 flex flex-col gap-6 max-w-2xl">
+          {eyebrow && (
+            <span className="text-xs font-medium tracking-[0.14em] uppercase text-white/60">
+              {eyebrow}
+            </span>
           )}
+          <h1 className="font-serif text-[clamp(54px,7.6vw,96px)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance">
+            {title}
+          </h1>
+          {description && (
+            <p className="text-lg text-white/80 max-w-[480px]">{description}</p>
+          )}
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <Link
+              href={primaryHref}
+              className="inline-flex items-center justify-center h-12 px-7 bg-white text-[#0a0a0a] text-sm font-medium tracking-[0.02em] rounded-[var(--radius)] transition-colors hover:bg-white/88"
+            >
+              {primaryText}
+            </Link>
+            {secondaryText && (
+              <Link
+                href={secondaryHref ?? "/about"}
+                className="inline-flex items-center justify-center h-12 px-7 bg-transparent text-white border border-white/40 text-sm font-medium tracking-[0.02em] rounded-[var(--radius)] transition-colors hover:border-white/70"
+              >
+                {secondaryText}
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </section>

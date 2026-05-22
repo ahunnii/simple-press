@@ -7,114 +7,136 @@ import { formatPrice } from "~/lib/prices";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { DefaultAccountLayout } from "./default-account-layout";
 
-function statusClass(status: string) {
-  switch (status) {
-    case "open":
-      return "bg-blue-100 text-blue-800";
-    case "completed":
-      return "bg-green-100 text-green-800";
-    case "cancelled":
-      return "bg-red-100 text-red-800";
-    case "refunded":
-      return "bg-gray-100 text-gray-800";
-    default:
-      return "bg-yellow-100 text-yellow-800";
-  }
+function StatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    open: "border-[#0a0a0a] text-[#0a0a0a]",
+    completed: "border-[#16a34a] text-[#16a34a]",
+    fulfilled: "border-[#16a34a] text-[#16a34a]",
+    cancelled: "border-[#dc2626] text-[#dc2626]",
+    refunded: "border-[#6b6b6b] text-[#6b6b6b]",
+  };
+  const style = styles[status] ?? "border-[#ca8a04] text-[#ca8a04]";
+  return (
+    <span
+      className={`inline-flex items-center rounded-[2px] border px-2 py-0.5 text-[10px] font-medium tracking-[0.1em] uppercase ${style}`}
+    >
+      {status}
+    </span>
+  );
 }
 
-export function DefaultOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-[var(--radius)] border border-[#e8e8e8] p-6">
+      <h2 className="mb-4 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
+}
+
+export function DefaultOrderDetailPage({
+  order,
+}: OrderDetailPageTemplateProps) {
   const addr = order.shippingAddress;
 
   return (
     <DefaultAccountLayout heading={`Order #${order.orderNumber}`}>
-      <div className="mb-6 flex flex-wrap gap-2">
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${statusClass(order.status)}`}
-        >
-          {order.status}
-        </span>
-        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+      {/* Status + date strip */}
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <StatusBadge status={order.status} />
+        <span className="text-[13px] text-[#6b6b6b]">
           {formatDate(order.createdAt)}
         </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left: items + totals */}
-        <div className="space-y-6 lg:col-span-2">
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 font-semibold text-gray-900">Items</h2>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+
+        {/* Left — items + totals + tracking */}
+        <div className="flex flex-col gap-5 lg:col-span-2">
+
+          {/* Items */}
+          <Section title="Items">
             {order.items.length > 0 ? (
-              <div className="divide-y">
+              <div className="flex flex-col divide-y divide-[#e8e8e8]">
                 {order.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-start justify-between py-4"
+                    className="flex items-start justify-between py-4 first:pt-0 last:pb-0"
                   >
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {item.productName}
-                      </p>
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-sm font-medium">{item.productName}</p>
                       {item.variantName && (
-                        <p className="text-sm text-gray-600">
+                        <p className="text-[13px] text-[#6b6b6b]">
                           {item.variantName}
                         </p>
                       )}
-                      <p className="mt-1 text-sm text-gray-500">
-                        Qty: {item.quantity} × {formatPrice(item.price)}
+                      <p className="text-[13px] text-[#6b6b6b]">
+                        Qty {item.quantity} × {formatPrice(item.price)}
                       </p>
                     </div>
-                    <p className="font-semibold text-gray-900">
+                    <p className="text-sm font-medium">
                       {formatPrice(item.total)}
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-500">No item details recorded.</p>
+              <p className="text-sm text-[#6b6b6b]">
+                No item details recorded.
+              </p>
             )}
 
-            <div className="mt-4 space-y-2 border-t pt-4 text-sm">
+            {/* Totals */}
+            <div className="mt-4 flex flex-col gap-2 border-t border-[#e8e8e8] pt-4 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal</span>
+                <span className="text-[#6b6b6b]">Subtotal</span>
                 <span>{formatPrice(order.subtotal)}</span>
               </div>
               {order.discount > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Discount</span>
-                  <span className="text-green-600">
+                  <span className="text-[#6b6b6b]">Discount</span>
+                  <span className="text-[#16a34a]">
                     -{formatPrice(order.discount)}
                   </span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-gray-600">Shipping</span>
-                <span>{formatPrice(order.shipping)}</span>
+                <span className="text-[#6b6b6b]">Shipping</span>
+                <span>
+                  {order.shipping === 0 ? "Free" : formatPrice(order.shipping)}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Tax</span>
+                <span className="text-[#6b6b6b]">Tax</span>
                 <span>{formatPrice(order.tax)}</span>
               </div>
-              <div className="flex justify-between border-t pt-2 text-base font-bold">
+              <div className="flex justify-between border-t border-[#e8e8e8] pt-2 font-medium">
                 <span>Total</span>
                 <span>{formatPrice(order.total)}</span>
               </div>
             </div>
-          </div>
+          </Section>
 
+          {/* Tracking */}
           {order.shipments.length > 0 && (
-            <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h2 className="mb-4 font-semibold text-gray-900">Tracking</h2>
-              <div className="space-y-3">
+            <Section title="Tracking">
+              <div className="flex flex-col gap-4">
                 {order.shipments.map((shipment) => (
-                  <div key={shipment.id} className="text-sm">
+                  <div key={shipment.id} className="flex flex-col gap-1 text-sm">
                     {shipment.carrier && (
-                      <p className="font-medium text-gray-900">
-                        {shipment.carrier}
-                      </p>
+                      <p className="font-medium">{shipment.carrier}</p>
                     )}
                     {shipment.trackingNumber && (
-                      <p className="text-gray-600">
-                        Tracking: {shipment.trackingNumber}
+                      <p className="text-[#6b6b6b]">
+                        {shipment.trackingNumber}
                       </p>
                     )}
                     {shipment.trackingUrl && (
@@ -122,69 +144,72 @@ export function DefaultOrderDetailPage({ order }: OrderDetailPageTemplateProps) 
                         href={shipment.trackingUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary inline-flex items-center gap-1 hover:underline"
+                        className="inline-flex items-center gap-1.5 border-b border-current pb-0.5 text-sm font-medium self-start transition-opacity hover:opacity-70"
                       >
-                        Track shipment <ExternalLink className="h-3 w-3" />
+                        Track shipment{" "}
+                        <ExternalLink className="h-3.5 w-3.5" />
                       </a>
                     )}
-                    <p className="mt-1 text-xs text-gray-400">
+                    <p className="text-[12px] text-[#a3a3a3]">
                       Added {formatDate(shipment.createdAt)}
                     </p>
                   </div>
                 ))}
               </div>
-            </div>
+            </Section>
           )}
         </div>
 
-        {/* Right: shipping address */}
-        <div className="space-y-6">
+        {/* Right — address + info */}
+        <div className="flex flex-col gap-5">
           {addr && (
-            <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h2 className="mb-4 font-semibold text-gray-900">
-                Shipping Address
-              </h2>
-              <address className="not-italic text-sm leading-relaxed text-gray-600">
+            <Section title="Shipping Address">
+              <address className="flex flex-col gap-0.5 text-sm not-italic leading-relaxed">
                 {addr.firstName && addr.lastName && (
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium">
                     {addr.firstName} {addr.lastName}
                   </p>
                 )}
-                <p>{addr.address1}</p>
-                {addr.address2 && <p>{addr.address2}</p>}
-                <p>
+                <p className="text-[#6b6b6b]">{addr.address1}</p>
+                {addr.address2 && (
+                  <p className="text-[#6b6b6b]">{addr.address2}</p>
+                )}
+                <p className="text-[#6b6b6b]">
                   {addr.city}, {addr.province} {addr.zip}
                 </p>
-                <p>{addr.country}</p>
+                <p className="text-[#6b6b6b]">{addr.country}</p>
               </address>
-            </div>
+            </Section>
           )}
 
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 font-semibold text-gray-900">Order Info</h2>
-            <dl className="space-y-2 text-sm">
+          <Section title="Order Info">
+            <dl className="flex flex-col gap-3 text-sm">
               <div>
-                <dt className="text-gray-500">Email</dt>
-                <dd className="text-gray-900">{order.customerEmail}</dd>
+                <dt className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#6b6b6b] mb-0.5">
+                  Email
+                </dt>
+                <dd>{order.customerEmail}</dd>
               </div>
               {order.customerPhone && (
                 <div>
-                  <dt className="text-gray-500">Phone</dt>
-                  <dd className="text-gray-900">{order.customerPhone}</dd>
+                  <dt className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#6b6b6b] mb-0.5">
+                    Phone
+                  </dt>
+                  <dd>{order.customerPhone}</dd>
                 </div>
               )}
               <div>
-                <dt className="text-gray-500">Payment</dt>
-                <dd className="capitalize text-gray-900">
-                  {order.paymentStatus}
-                </dd>
+                <dt className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#6b6b6b] mb-0.5">
+                  Payment
+                </dt>
+                <dd className="capitalize">{order.paymentStatus}</dd>
               </div>
             </dl>
-          </div>
+          </Section>
 
           <Link
             href="/account/orders"
-            className="text-primary block text-sm font-medium hover:underline"
+            className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 self-start"
           >
             ← Back to orders
           </Link>

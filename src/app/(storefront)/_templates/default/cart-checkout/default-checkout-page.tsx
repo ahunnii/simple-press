@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 
 import { DefaultCheckoutForm } from "./default-checkout-form";
@@ -5,29 +7,50 @@ import { DefaultCheckoutForm } from "./default-checkout-form";
 export async function DefaultCheckoutPage({
   business,
 }: DefaultCheckoutPageTemplateProps) {
-  // Check if Stripe is connected
   if (!business.isStripeConnected) {
     return (
-      <main className="flex flex-1 items-center justify-center p-4">
+      <div className="flex flex-1 items-center justify-center px-6 py-24">
         <div className="max-w-md text-center">
-          <h1 className="mb-4 text-2xl font-bold text-gray-900">
-            Checkout Unavailable
+          <h1 className="font-serif text-2xl font-medium">
+            Checkout unavailable
           </h1>
-          <p className="text-gray-600">
-            This store hasn&apos;t set up payment processing yet. Please contact
-            the store owner.
+          <p className="mt-3 text-sm text-[#6b6b6b]">
+            This store hasn&apos;t set up payment processing yet. Please
+            contact the store owner.
           </p>
+          <Link
+            href="/shop"
+            className="mt-8 inline-flex h-12 items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] px-8 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+          >
+            Back to shop
+          </Link>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="px-4 py-12">
-      <div className="mx-auto max-w-6xl">
-        <h1 className="mb-8 text-3xl font-bold text-gray-900">Checkout</h1>
-        <DefaultCheckoutForm business={business} />
+    <div>
+      {/* Minimal checkout header */}
+      <div className="border-b border-[#e8e8e8] px-6 py-5 lg:px-8">
+        <div className="mx-auto max-w-[1440px] flex items-center justify-between">
+          <h1 className="font-serif text-xl font-medium tracking-tight">
+            Checkout
+          </h1>
+          <Link
+            href="/cart"
+            className="text-sm text-[#6b6b6b] hover:text-[#0a0a0a] transition-colors"
+          >
+            ← Back to cart
+          </Link>
+        </div>
       </div>
-    </main>
+
+      <div className="px-6 py-12 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          <DefaultCheckoutForm business={business} />
+        </div>
+      </div>
+    </div>
   );
 }

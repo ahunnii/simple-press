@@ -9,65 +9,82 @@ export function DefaultCollectionsPage({
   const list = collections ?? [];
 
   return (
-    <main className="flex-1 px-4 py-12">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8">
-          <h1 className="mb-2 text-4xl font-bold text-gray-900">Collections</h1>
-          <div className="text-muted-foreground mb-4 flex items-center text-sm">
-            <Link href="/" className="hover:text-primary">
+    <div>
+      {/* Page hero */}
+      <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+            <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
               Home
             </Link>
-            <span className="mx-2">/</span>
-            <span className="text-gray-600">Collections</span>
+            <span>/</span>
+            <span>Collections</span>
           </div>
-          <p className="text-gray-600">
-            {list.length} collection{list.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-
-        {list.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-lg text-gray-500">
-              No collections available at this time.
+          <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+            Shop by collection
+          </span>
+          <h1 className="font-serif mt-3 text-[clamp(40px,5vw,72px)] font-semibold leading-[1.04] tracking-[-0.03em]">
+            Collections
+          </h1>
+          {list.length > 0 && (
+            <p className="mt-4 text-[17px] text-[#6b6b6b]">
+              {list.length} collection{list.length !== 1 ? "s" : ""}
             </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-            {list.map((collection) => {
-              const productCount = collection._count.collectionProducts;
-              return (
-                <Link
-                  key={collection.id}
-                  href={`/collections/${collection.slug}`}
-                  className="group block overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-                >
-                  <div className="relative aspect-4/3 w-full overflow-hidden bg-gray-100">
-                    <Image
-                      src={collection.imageUrl ?? "/placeholder.svg"}
-                      alt={collection.name}
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h2 className="mb-1 text-lg font-semibold text-gray-900 group-hover:text-gray-700">
-                      {collection.name}
-                    </h2>
-                    {collection.description ? (
-                      <p className="mb-2 line-clamp-2 text-sm text-gray-600">
-                        {collection.description}
+          )}
+        </div>
+      </section>
+
+      {/* Grid */}
+      <section className="px-6 py-16 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          {list.length === 0 ? (
+            <div className="py-24 text-center">
+              <p className="text-[#6b6b6b]">
+                No collections available at this time.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-x-5 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+              {list.map((collection, i) => {
+                const count = collection._count.collectionProducts;
+                return (
+                  <Link
+                    key={collection.id}
+                    href={`/collections/${collection.slug}`}
+                    className="group block"
+                  >
+                    <div
+                      className={`relative mb-4 aspect-3/4 overflow-hidden rounded-[var(--radius)] ${
+                        i % 3 === 1 ? "bg-[#efece8]" : i % 3 === 2 ? "bg-[#1a1a1a]" : "bg-[#f6f6f6]"
+                      }`}
+                    >
+                      <Image
+                        src={collection.imageUrl ?? "/placeholder.svg"}
+                        alt={collection.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.015]"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <h2 className="font-serif text-[15px] font-medium tracking-[-0.005em] group-hover:opacity-70 transition-opacity">
+                        {collection.name}
+                      </h2>
+                      {collection.description && (
+                        <p className="line-clamp-2 text-[13px] text-[#6b6b6b] leading-relaxed">
+                          {collection.description}
+                        </p>
+                      )}
+                      <p className="text-[14px] text-[#6b6b6b]">
+                        {count} product{count !== 1 ? "s" : ""}
                       </p>
-                    ) : null}
-                    <p className="text-sm text-gray-500">
-                      {productCount} product{productCount !== 1 ? "s" : ""}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </main>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
   );
 }

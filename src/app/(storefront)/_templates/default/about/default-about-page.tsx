@@ -3,8 +3,8 @@ import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { getRichTextFieldValue } from "~/lib/template-fields";
-import { FadeIn, PageTransition } from "~/components/page-animations";
+import { getRichTextFieldValue, isContentEmpty } from "~/lib/template-fields";
+import { PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "..";
@@ -13,38 +13,218 @@ export async function DefaultAboutPage({
   business,
 }: DefaultAboutPageTemplateProps) {
   const f = resolveFields(business?.siteContent?.customFields, [
+    "default.about.eyebrow",
     "default.about.heading",
+    "default.about.hero-tagline",
+    "default.about.hero-image",
+    "default.about.portrait-image",
+    "default.about.bio-eyebrow",
+    "default.about.bio-heading",
+    "default.about.paragraph-1",
+    "default.about.paragraph-2",
+    "default.about.paragraph-3",
+    "default.about.signature",
+    "default.about.pull-quote",
+    "default.about.pillar-1-title",
+    "default.about.pillar-1-desc",
+    "default.about.pillar-2-title",
+    "default.about.pillar-2-desc",
+    "default.about.pillar-3-title",
+    "default.about.pillar-3-desc",
+    "default.about.cta-eyebrow",
+    "default.about.cta-heading",
+    "default.about.cta-button-text",
+    "default.about.cta-button-link",
   ]);
 
   const storyRichContent = getRichTextFieldValue(
     business?.siteContent?.customFields as unknown,
     "default.about.story-body",
   );
+  const hasRichText = !isContentEmpty(storyRichContent as TiptapJSON);
+
+  const pillars = [
+    {
+      num: "One",
+      title: f["default.about.pillar-1-title"] ?? "Make it well.",
+      desc: f["default.about.pillar-1-desc"] ?? "Better materials, fewer shortcuts.",
+    },
+    {
+      num: "Two",
+      title: f["default.about.pillar-2-title"] ?? "Price it fairly.",
+      desc: f["default.about.pillar-2-desc"] ?? "No hidden costs. You can see where the money goes.",
+    },
+    {
+      num: "Three",
+      title: f["default.about.pillar-3-title"] ?? "Stand behind it.",
+      desc: f["default.about.pillar-3-desc"] ?? "If something's wrong, write me. I'll make it right.",
+    },
+  ];
 
   return (
-    <PageTransition className="container mx-auto px-4 py-8 md:px-6 md:py-12">
-      <section className="pt-20 pb-16 text-center">
-        <FadeIn className="mx-auto w-full max-w-4xl">
-          <h1
-            className="text-left text-xl leading-none tracking-tight"
-            style={{
-              fontSize: "clamp(2.1rem, 5.25vw, 3.75rem)",
-              letterSpacing: "-0.025em",
-            }}
-          >
-            {f["default.about.heading"]}
+    <PageTransition>
+
+      {/* ── Page hero ────────────────────────────────────────────────────── */}
+      <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-0 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          {/* Breadcrumb */}
+          <div className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+            <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
+              Home
+            </Link>
+            <span>/</span>
+            <span>About</span>
+          </div>
+
+          {f["default.about.eyebrow"] && (
+            <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+              {f["default.about.eyebrow"]}
+            </span>
+          )}
+          <h1 className="font-serif mt-3 text-[clamp(40px,5vw,72px)] font-semibold leading-[1.04] tracking-[-0.03em] text-balance">
+            {f["default.about.heading"] ?? "Hi — I'm the one making this."}
           </h1>
-        </FadeIn>
+          {f["default.about.hero-tagline"] && (
+            <p className="mt-4 mb-12 text-[17px] text-[#6b6b6b] max-w-[560px]">
+              {f["default.about.hero-tagline"]}
+            </p>
+          )}
+
+          {/* Wide hero image */}
+          <div className="relative aspect-[16/7] overflow-hidden rounded-t-[var(--radius)] bg-[#efece8]">
+            <Image
+              src={f["default.about.hero-image"] ?? "/placeholder.svg"}
+              alt={f["default.about.heading"] ?? business.name}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        </div>
       </section>
 
-      <section className="pb-20">
-        <FadeIn className="mx-auto w-full max-w-4xl">
-          <TiptapRenderer
-            content={storyRichContent as TiptapJSON}
-            className="prose prose-headings:font-serif prose-headings:font-light prose-headings:italic prose-headings:tracking-tight prose-headings:text-foreground prose-h2:text-[1.75rem] prose-h2:leading-snug prose-h2:mt-12 prose-h2:mb-5 prose-h3:text-[1.25rem] prose-h3:leading-snug prose-h3:mt-10 prose-h3:mb-4 prose-p:font-sans prose-p:text-[15px] prose-p:leading-[1.95] prose-p:tracking-[0.01em] prose-p:text-foreground/75 prose-p:mt-0 prose-p:mb-6 prose-strong:font-semibold prose-strong:text-foreground prose-strong:tracking-normal prose-a:text-foreground prose-a:underline prose-a:underline-offset-4 hover:prose-a:opacity-60 prose-li:font-sans prose-li:text-[15px] prose-li:leading-[1.85] prose-li:text-foreground/75 prose-li:tracking-[0.01em] prose-ul:my-4 prose-ol:my-4 prose-blockquote:border-l prose-blockquote:border-foreground/30 prose-blockquote:pl-6 prose-blockquote:font-serif prose-blockquote:italic prose-blockquote:text-[1.1rem] prose-blockquote:text-foreground/60 prose-blockquote:not-italic prose-hr:border-foreground/15 prose-hr:my-10 max-w-none"
-          />
-        </FadeIn>
+      {/* ── Maker bio ────────────────────────────────────────────────────── */}
+      <section className="px-6 py-24 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="grid grid-cols-1 gap-14 lg:grid-cols-[320px_1fr] lg:items-start">
+            {/* Portrait */}
+            <div className="relative aspect-[3/4] overflow-hidden rounded-[var(--radius)] bg-[#f6f6f6] lg:sticky lg:top-[calc(72px+24px)]">
+              <Image
+                src={f["default.about.portrait-image"] ?? "/placeholder.svg"}
+                alt="Portrait"
+                fill
+                className="object-cover"
+              />
+            </div>
+
+            {/* Text */}
+            <div className="flex flex-col gap-6 max-w-[600px]">
+              {f["default.about.bio-eyebrow"] && (
+                <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+                  {f["default.about.bio-eyebrow"]}
+                </span>
+              )}
+              <h2 className="font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em] text-balance">
+                {f["default.about.bio-heading"] ?? "A few words about me."}
+              </h2>
+
+              {hasRichText ? (
+                <TiptapRenderer
+                  content={storyRichContent as TiptapJSON}
+                  className="prose prose-sm max-w-none prose-p:text-[15px] prose-p:leading-[1.75] prose-p:text-[#6b6b6b]"
+                />
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {f["default.about.paragraph-1"] && (
+                    <p className="text-[17px] leading-[1.65] text-[#0a0a0a]">
+                      {f["default.about.paragraph-1"]}
+                    </p>
+                  )}
+                  {f["default.about.paragraph-2"] && (
+                    <p className="text-[15px] leading-[1.7] text-[#6b6b6b]">
+                      {f["default.about.paragraph-2"]}
+                    </p>
+                  )}
+                  {f["default.about.paragraph-3"] && (
+                    <p className="text-[15px] leading-[1.7] text-[#6b6b6b]">
+                      {f["default.about.paragraph-3"]}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {f["default.about.signature"] && (
+                <p className="font-serif text-lg italic mt-2 text-[#6b6b6b]">
+                  {f["default.about.signature"]}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
       </section>
+
+      {/* ── Pull quote ───────────────────────────────────────────────────── */}
+      {f["default.about.pull-quote"] && (
+        <section className="border-t border-[#e8e8e8] px-6 py-24 lg:px-8">
+          <div className="mx-auto max-w-[1440px]">
+            <p className="font-serif text-[clamp(22px,2.8vw,36px)] leading-[1.28] tracking-[-0.015em] text-balance max-w-[800px]">
+              &ldquo;{f["default.about.pull-quote"]}&rdquo;
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* ── Three pillars ────────────────────────────────────────────────── */}
+      <section className="border-t border-[#e8e8e8] px-6 py-24 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="mb-12 flex flex-col gap-2">
+            <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+              What I care about
+            </span>
+            <h2 className="font-serif text-3xl font-medium tracking-tight">
+              Three things, in order.
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
+            {pillars.map((p) => (
+              <div key={p.num} className="flex flex-col gap-3">
+                <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+                  {p.num}
+                </span>
+                <h3 className="font-serif text-[22px] font-medium tracking-[-0.015em]">
+                  {p.title}
+                </h3>
+                <p className="text-[14px] text-[#6b6b6b] leading-relaxed">
+                  {p.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Bottom CTA ───────────────────────────────────────────────────── */}
+      <section className="bg-[#efece8] px-6 py-24 text-center lg:px-8">
+        <div className="mx-auto max-w-[640px]">
+          {f["default.about.cta-eyebrow"] && (
+            <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+              {f["default.about.cta-eyebrow"]}
+            </span>
+          )}
+          <h2 className="font-serif mt-3 text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]">
+            {f["default.about.cta-heading"] ?? "I'd love to hear from you."}
+          </h2>
+          <div className="mt-8">
+            <Link
+              href={f["default.about.cta-button-link"] ?? "/contact"}
+              className="inline-flex h-12 items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] px-8 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+            >
+              {f["default.about.cta-button-text"] ?? "Get in touch"}
+            </Link>
+          </div>
+        </div>
+      </section>
+
     </PageTransition>
   );
 }

@@ -16,7 +16,7 @@ type FeaturedProduct = NonNullable<
 
 type DefaultProductRailProps = {
   title: string;
-  overline?: string;
+  eyebrow?: string;
   description?: string;
   ctaText: string;
   ctaHref: string;
@@ -26,7 +26,7 @@ type DefaultProductRailProps = {
 
 export function DefaultProductRail({
   title,
-  overline,
+  eyebrow,
   description,
   ctaText,
   ctaHref,
@@ -37,23 +37,25 @@ export function DefaultProductRail({
   if (shown.length === 0) return null;
 
   return (
-    <section className="px-6 py-16 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <FadeIn className="mb-12 flex flex-col items-center justify-center space-y-3 text-center">
-          {overline && (
-            <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-              {overline}
-            </p>
-          )}
-          <h2 className="text-foreground text-3xl font-bold tracking-tight md:text-4xl">
-            {title}
-          </h2>
-          {description && (
-            <p className="text-muted-foreground max-w-md text-sm">{description}</p>
-          )}
+    <section className="px-6 py-24 lg:px-8">
+      <div className="mx-auto max-w-[1440px]">
+        <FadeIn className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-2">
+            {eyebrow && (
+              <p className="text-[#6b6b6b] text-xs font-medium tracking-[0.14em] uppercase">
+                {eyebrow}
+              </p>
+            )}
+            <h2 className="font-serif text-foreground text-3xl font-semibold tracking-tight md:text-4xl">
+              {title}
+            </h2>
+            {description && (
+              <p className="text-muted-foreground max-w-md text-sm">{description}</p>
+            )}
+          </div>
           <Link
             href={ctaHref}
-            className="border-border text-foreground hover:bg-muted mt-2 inline-flex items-center gap-1 border px-6 py-2 text-xs font-medium tracking-widest uppercase transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
           >
             {ctaText} →
           </Link>

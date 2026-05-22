@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultHomepageTemplateProps } from "../../types";
@@ -15,34 +16,58 @@ export async function DefaultHomePage({
   const products = homepage?.products ?? [];
 
   const f = resolveFields(business?.siteContent?.customFields, [
+    "default.homepage.hero-eyebrow",
     "default.homepage.hero-image",
     "default.homepage.hero-description",
     "default.homepage.hero-button-text",
     "default.homepage.hero-button-link",
     "default.homepage.hero-button-2-text",
     "default.homepage.hero-button-2-link",
+    "default.homepage.collections-eyebrow",
+    "default.homepage.collections-heading",
+    "default.homepage.collections-cta-text",
+    "default.homepage.collections-cta-link",
     "default.homepage.rail-one-collection",
+    "default.homepage.rail-one-eyebrow",
     "default.homepage.rail-one-title",
     "default.homepage.rail-one-button-text",
     "default.homepage.rail-one-button-link",
     "default.homepage.rail-two-collection",
+    "default.homepage.rail-two-eyebrow",
     "default.homepage.rail-two-title",
     "default.homepage.rail-two-button-text",
     "default.homepage.rail-two-button-link",
+    "default.homepage.cta-eyebrow",
     "default.homepage.cta-heading",
     "default.homepage.cta-description",
+    "default.homepage.cta-image",
+    "default.homepage.cta-button-text",
+    "default.homepage.cta-button-link",
+    "default.homepage.testimonial-quote",
+    "default.homepage.testimonial-author",
+    "default.homepage.testimonial-cta-text",
+    "default.homepage.testimonial-cta-link",
+    "default.homepage.promise-1-title",
+    "default.homepage.promise-1-desc",
+    "default.homepage.promise-2-title",
+    "default.homepage.promise-2-desc",
+    "default.homepage.promise-3-title",
+    "default.homepage.promise-3-desc",
+    "default.homepage.promise-4-title",
+    "default.homepage.promise-4-desc",
   ]);
 
   const rail1Id = f["default.homepage.rail-one-collection"] ?? "";
   const rail2Id = f["default.homepage.rail-two-collection"] ?? "";
 
-  const [rail1Data, rail2Data] = await Promise.all([
+  const [rail1Data, rail2Data, collectionsData] = await Promise.all([
     rail1Id
       ? api.collections.getProductsByCollectionId(rail1Id)
       : Promise.resolve(null),
     rail2Id
       ? api.collections.getProductsByCollectionId(rail2Id)
       : Promise.resolve(null),
+    api.collections.getAllPublic().catch(() => [] as Awaited<ReturnType<typeof api.collections.getAllPublic>>),
   ]);
 
   const railOneProducts = rail1Data?.products ?? products.slice(0, 4);
@@ -56,69 +81,220 @@ export async function DefaultHomePage({
     ? `/collections/${rail2Data.collection.slug}`
     : (f["default.homepage.rail-two-button-link"] ?? "/shop");
 
+  const topCollections = collectionsData.slice(0, 3);
+
+  const storyHeading = f["default.homepage.cta-heading"];
+  const storyDescription = f["default.homepage.cta-description"];
+  const storyImage = f["default.homepage.cta-image"] ?? "/placeholder.svg";
+
   return (
     <HydrateClient>
       <PageTransition>
-        {/* Parallax Hero */}
+
+        {/* ── Hero ─────────────────────────────────────────────────────── */}
         <DefaultParallaxHero
           imageUrl={f["default.homepage.hero-image"] ?? "/placeholder.svg"}
           title={business.name}
+          eyebrow={f["default.homepage.hero-eyebrow"]}
           description={f["default.homepage.hero-description"]}
-          primaryText={f["default.homepage.hero-button-text"] ?? "Shop Now"}
+          primaryText={f["default.homepage.hero-button-text"] ?? "Shop the catalog"}
           primaryHref={f["default.homepage.hero-button-link"] ?? "/shop"}
           secondaryText={f["default.homepage.hero-button-2-text"]}
           secondaryHref={f["default.homepage.hero-button-2-link"]}
         />
 
-        {/* Rail 1 */}
+        {/* ── Collections ──────────────────────────────────────────────── */}
+        {topCollections.length > 0 && (
+          <section className="px-6 py-24 lg:px-8">
+            <div className="mx-auto max-w-[1440px]">
+              <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="flex flex-col gap-2">
+                  {f["default.homepage.collections-eyebrow"] && (
+                    <p className="text-[#6b6b6b] text-xs font-medium tracking-[0.14em] uppercase">
+                      {f["default.homepage.collections-eyebrow"]}
+                    </p>
+                  )}
+                  <h2 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">
+                    {f["default.homepage.collections-heading"] ?? "Collections"}
+                  </h2>
+                </div>
+                <Link
+                  href={f["default.homepage.collections-cta-link"] ?? "/collections"}
+                  className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
+                >
+                  {f["default.homepage.collections-cta-text"] ?? "View everything"} →
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {topCollections.map((col, i) => (
+                  <Link
+                    key={col.id}
+                    href={`/collections/${col.slug}`}
+                    className="group block"
+                  >
+                    <div
+                      className={`relative mb-4 aspect-3/4 overflow-hidden rounded-[var(--radius)] ${
+                        i === 1 ? "bg-[#efece8]" : i === 2 ? "bg-[#1a1a1a]" : "bg-[#f6f6f6]"
+                      }`}
+                    >
+                      {col.imageUrl ? (
+                        <Image
+                          src={col.imageUrl}
+                          alt={col.name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-[1.015]"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-xs tracking-[0.16em] uppercase text-[#6b6b6b] font-medium">
+                            {col.name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-serif text-[15px] font-medium tracking-[-0.005em] group-hover:opacity-70 transition-opacity">
+                        {col.name}
+                      </span>
+                      <span className="text-[14px] text-[#6b6b6b]">
+                        {col._count.collectionProducts} items
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── Rail 1 — Featured Products ────────────────────────────────── */}
         <DefaultProductRail
+          eyebrow={f["default.homepage.rail-one-eyebrow"] ?? "Featured"}
           title={
             rail1Data?.collection.name ??
-            (f["default.homepage.rail-one-title"] ?? "Featured Products")
+            (f["default.homepage.rail-one-title"] ?? "This week's picks.")
           }
           description={rail1Data?.collection.description ?? undefined}
-          ctaText={f["default.homepage.rail-one-button-text"] ?? "Shop All"}
+          ctaText={f["default.homepage.rail-one-button-text"] ?? "All products"}
           ctaHref={railOneCtaHref}
           products={railOneProducts}
         />
 
-        {/* Rail 2 — only shown when there are enough products or a collection is set */}
+        {/* ── Story strip ───────────────────────────────────────────────── */}
+        {(storyHeading ?? storyDescription) && (
+          <section className="bg-[#efece8] px-6 py-24 lg:px-8">
+            <div className="mx-auto max-w-[1440px]">
+              <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center">
+                {/* Image */}
+                <div className="relative aspect-4/3 overflow-hidden rounded-[var(--radius)] bg-[#e0ddd8]">
+                  <Image
+                    src={storyImage}
+                    alt={storyHeading ?? business.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+
+                {/* Text */}
+                <div className="flex flex-col gap-6 lg:max-w-[480px]">
+                  {f["default.homepage.cta-eyebrow"] && (
+                    <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+                      {f["default.homepage.cta-eyebrow"]}
+                    </span>
+                  )}
+                  {storyHeading && (
+                    <h2 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl text-balance">
+                      {storyHeading}
+                    </h2>
+                  )}
+                  {storyDescription && (
+                    <p className="text-[15px] text-[#6b6b6b] leading-relaxed">
+                      {storyDescription}
+                    </p>
+                  )}
+                  <Link
+                    href={f["default.homepage.cta-button-link"] ?? "/about"}
+                    className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 self-start"
+                  >
+                    {f["default.homepage.cta-button-text"] ?? "Read more"} →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── Rail 2 — Customer favorites ───────────────────────────────── */}
         {railTwoProducts.length > 0 && (
           <DefaultProductRail
-            overline="New Arrivals"
+            eyebrow={f["default.homepage.rail-two-eyebrow"] ?? "Customer favorites"}
             title={
               rail2Data?.collection.name ??
-              (f["default.homepage.rail-two-title"] ?? "New Arrivals")
+              (f["default.homepage.rail-two-title"] ?? "What people keep reaching for.")
             }
             description={rail2Data?.collection.description ?? undefined}
-            ctaText={f["default.homepage.rail-two-button-text"] ?? "Shop All"}
+            ctaText={f["default.homepage.rail-two-button-text"] ?? "Shop bestsellers"}
             ctaHref={railTwoCtaHref}
             products={railTwoProducts}
           />
         )}
 
-        {/* CTA strip */}
-        {(f["default.homepage.cta-heading"] ??
-          f["default.homepage.cta-description"]) && (
-          <section className="bg-primary text-primary-foreground py-16">
-            <div className="mx-auto max-w-3xl px-6 text-center lg:px-8">
-              <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                {f["default.homepage.cta-heading"]}
-              </h2>
-              {f["default.homepage.cta-description"] && (
-                <p className="text-primary-foreground/80 mt-4 text-base">
-                  {f["default.homepage.cta-description"]}
+        {/* ── Testimonial preview ───────────────────────────────────────── */}
+        {f["default.homepage.testimonial-quote"] && (
+          <section className="px-6 py-24 lg:px-8">
+            <div className="mx-auto max-w-[880px] text-center">
+              <p className="text-[clamp(22px,2.8vw,34px)] leading-[1.28] tracking-[-0.015em] text-balance">
+                &ldquo;{f["default.homepage.testimonial-quote"]}&rdquo;
+              </p>
+              {f["default.homepage.testimonial-author"] && (
+                <p className="mt-6 text-[13px] text-[#6b6b6b]">
+                  {f["default.homepage.testimonial-author"]}
                 </p>
               )}
-              <Link
-                href="/about"
-                className="mt-8 inline-flex border border-white px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-80"
-              >
-                Learn More
-              </Link>
+              {f["default.homepage.testimonial-cta-text"] && (
+                <div className="mt-8">
+                  <Link
+                    href={f["default.homepage.testimonial-cta-link"] ?? "/testimonials"}
+                    className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3"
+                  >
+                    {f["default.homepage.testimonial-cta-text"]} →
+                  </Link>
+                </div>
+              )}
             </div>
           </section>
         )}
+
+        {/* ── Promise strip ─────────────────────────────────────────────── */}
+        <div className="border-t border-b border-[#e8e8e8]">
+          <div className="mx-auto max-w-[1440px] grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-[#e8e8e8]">
+            {[
+              {
+                title: f["default.homepage.promise-1-title"] ?? "Free shipping",
+                desc: f["default.homepage.promise-1-desc"] ?? "On orders over $75 within the US.",
+              },
+              {
+                title: f["default.homepage.promise-2-title"] ?? "Easy returns",
+                desc: f["default.homepage.promise-2-desc"] ?? "30 days, no questions asked.",
+              },
+              {
+                title: f["default.homepage.promise-3-title"] ?? "Handmade",
+                desc: f["default.homepage.promise-3-desc"] ?? "Every item made with care.",
+              },
+              {
+                title: f["default.homepage.promise-4-title"] ?? "Personal service",
+                desc: f["default.homepage.promise-4-desc"] ?? "You'll always reach a real person.",
+              },
+            ].map((item) => (
+              <div key={item.title} className="flex flex-col gap-1.5 px-6 py-8 lg:px-8">
+                <h4 className="text-sm font-medium">{item.title}</h4>
+                <p className="text-[13px] text-[#6b6b6b]">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </PageTransition>
     </HydrateClient>
   );
