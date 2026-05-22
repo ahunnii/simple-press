@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
+import { IconPackage } from "@tabler/icons-react";
 import { LayoutDashboardIcon, Menu, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
@@ -58,7 +59,13 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
         },
       }}
       additionalLinks={[
-        ...(user.platformRole === "PLATFORM_ADMIN"
+        {
+          icon: <IconPackage className="h-4 w-4" />,
+          label: "Orders",
+          href: "/account/orders",
+        },
+        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
+        !!session?.session?.membershipId
           ? [
               {
                 icon: <LayoutDashboardIcon className="h-4 w-4" />,

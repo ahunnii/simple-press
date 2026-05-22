@@ -24,8 +24,8 @@ export function TestimonialsDisplay({
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {testimonials.map((testimonial) => (
-          <Card key={testimonial.id}>
-            <CardContent className="pt-6">
+          <Card key={testimonial.id} className="rounded-sm shadow-sm">
+            <CardContent>
               <p className="mb-4 text-gray-700">{testimonial.text}</p>
               <div className="flex items-center gap-3">
                 {testimonial.photoUrls?.[0] ? (

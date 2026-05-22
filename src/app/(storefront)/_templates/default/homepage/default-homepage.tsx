@@ -1,19 +1,18 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultHomepageTemplateProps } from "../../types";
-import type { Product } from "~/types";
 import { api, HydrateClient } from "~/trpc/server";
-import { Button } from "~/components/ui/button";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
-import { DefaultProductCard } from "../shared/default-product-card";
+import { DefaultParallaxHero } from "./default-parallax-hero";
+import { DefaultProductRail } from "./default-product-rail";
 
 export async function DefaultHomePage({
   business,
 }: DefaultHomepageTemplateProps) {
-  const featuredProducts = await api.product.getFeatured();
+  const homepage = await api.business.getHomepage();
+  const products = homepage?.products ?? [];
 
   const f = resolveFields(business?.siteContent?.customFields, [
     "default.homepage.hero-image",
@@ -22,99 +21,104 @@ export async function DefaultHomePage({
     "default.homepage.hero-button-link",
     "default.homepage.hero-button-2-text",
     "default.homepage.hero-button-2-link",
-    "default.homepage.featured-products-heading",
+    "default.homepage.rail-one-collection",
+    "default.homepage.rail-one-title",
+    "default.homepage.rail-one-button-text",
+    "default.homepage.rail-one-button-link",
+    "default.homepage.rail-two-collection",
+    "default.homepage.rail-two-title",
+    "default.homepage.rail-two-button-text",
+    "default.homepage.rail-two-button-link",
     "default.homepage.cta-heading",
     "default.homepage.cta-description",
-    "default.homepage.cta-image",
   ]);
+
+  const rail1Id = f["default.homepage.rail-one-collection"] ?? "";
+  const rail2Id = f["default.homepage.rail-two-collection"] ?? "";
+
+  const [rail1Data, rail2Data] = await Promise.all([
+    rail1Id
+      ? api.collections.getProductsByCollectionId(rail1Id)
+      : Promise.resolve(null),
+    rail2Id
+      ? api.collections.getProductsByCollectionId(rail2Id)
+      : Promise.resolve(null),
+  ]);
+
+  const railOneProducts = rail1Data?.products ?? products.slice(0, 4);
+  const railTwoProducts = rail2Data?.products ?? products.slice(4, 8);
+
+  const railOneCtaHref = rail1Data
+    ? `/collections/${rail1Data.collection.slug}`
+    : (f["default.homepage.rail-one-button-link"] ?? "/shop");
+
+  const railTwoCtaHref = rail2Data
+    ? `/collections/${rail2Data.collection.slug}`
+    : (f["default.homepage.rail-two-button-link"] ?? "/shop");
 
   return (
     <HydrateClient>
       <PageTransition>
-        {/* Hero Banner */}
-        <section className="relative">
-          <div className="container mx-auto px-4 py-12 md:px-6 md:py-24 lg:py-32">
-            <div className="grid items-center gap-6 lg:grid-cols-2 lg:gap-12">
-              <div className="space-y-4">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
-                  {business.name}
-                </h1>
-                <p className="text-muted-foreground max-w-[600px] md:text-xl">
-                  {f["default.homepage.hero-description"]}
-                </p>
-                <div className="flex flex-col gap-4 sm:flex-row">
-                  <Button size="lg" className="font-medium" asChild>
-                    <Link
-                      href={
-                        f["default.homepage.hero-button-link"] ?? "/products"
-                      }
-                    >
-                      {f["default.homepage.hero-button-text"]}
-                    </Link>
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="font-medium"
-                    asChild
-                  >
-                    <Link
-                      href={f["default.homepage.hero-button-2-link"] ?? "/shop"}
-                    >
-                      {f["default.homepage.hero-button-2-text"]}
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-              <div className="relative h-[300px] overflow-hidden rounded-xl sm:h-[400px] lg:h-[500px]">
-                <Image
-                  src={f["default.homepage.hero-image"] ?? "/placeholder.svg"}
-                  alt={business.name ?? "Hero Image"}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Parallax Hero */}
+        <DefaultParallaxHero
+          imageUrl={f["default.homepage.hero-image"] ?? "/placeholder.svg"}
+          title={business.name}
+          description={f["default.homepage.hero-description"]}
+          primaryText={f["default.homepage.hero-button-text"] ?? "Shop Now"}
+          primaryHref={f["default.homepage.hero-button-link"] ?? "/shop"}
+          secondaryText={f["default.homepage.hero-button-2-text"]}
+          secondaryHref={f["default.homepage.hero-button-2-link"]}
+        />
 
-        {/* Featured Products */}
-        <section className="mx-auto py-12 md:py-16">
-          <div className="container mx-auto px-4 md:px-6">
-            <h2 className="mb-8 text-center text-2xl font-bold tracking-tight md:text-3xl">
-              {f["default.homepage.featured-products-heading"]}
-            </h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {featuredProducts?.map((product, index) => (
-                <DefaultProductCard
-                  key={product.id}
-                  product={product as Product}
-                  index={index}
-                />
-              ))}
-            </div>
-            <div className="mt-10 text-center">
-              <Button variant="outline" size="lg" asChild>
-                <Link href="/shop">View All Products</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
+        {/* Rail 1 */}
+        <DefaultProductRail
+          title={
+            rail1Data?.collection.name ??
+            (f["default.homepage.rail-one-title"] ?? "Featured Products")
+          }
+          description={rail1Data?.collection.description ?? undefined}
+          ctaText={f["default.homepage.rail-one-button-text"] ?? "Shop All"}
+          ctaHref={railOneCtaHref}
+          products={railOneProducts}
+        />
 
-        {/* Call to Action */}
-        <section className="bg-primary text-primary-foreground mx-auto py-12 md:py-16">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="flex flex-col items-center space-y-4 text-center md:space-y-6">
+        {/* Rail 2 — only shown when there are enough products or a collection is set */}
+        {railTwoProducts.length > 0 && (
+          <DefaultProductRail
+            overline="New Arrivals"
+            title={
+              rail2Data?.collection.name ??
+              (f["default.homepage.rail-two-title"] ?? "New Arrivals")
+            }
+            description={rail2Data?.collection.description ?? undefined}
+            ctaText={f["default.homepage.rail-two-button-text"] ?? "Shop All"}
+            ctaHref={railTwoCtaHref}
+            products={railTwoProducts}
+          />
+        )}
+
+        {/* CTA strip */}
+        {(f["default.homepage.cta-heading"] ??
+          f["default.homepage.cta-description"]) && (
+          <section className="bg-primary text-primary-foreground py-16">
+            <div className="mx-auto max-w-3xl px-6 text-center lg:px-8">
               <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
                 {f["default.homepage.cta-heading"]}
               </h2>
-              <p className="text-primary-foreground/90 max-w-[600px] md:text-lg">
-                {f["default.homepage.cta-description"]}
-              </p>
+              {f["default.homepage.cta-description"] && (
+                <p className="text-primary-foreground/80 mt-4 text-base">
+                  {f["default.homepage.cta-description"]}
+                </p>
+              )}
+              <Link
+                href="/about"
+                className="mt-8 inline-flex border border-white px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-80"
+              >
+                Learn More
+              </Link>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </PageTransition>
     </HydrateClient>
   );

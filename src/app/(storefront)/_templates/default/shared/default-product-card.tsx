@@ -122,17 +122,20 @@ export function DefaultProductCard({ product }: Props) {
             </div>
           )}
 
-          {/* Quick Add Button */}
-          {/* {productStatus.isAvalable && ( */}
-          {/* <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-            <Button
-              onClick={() => router.push(`/shop/${product.slug}`)}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 font-heading w-full tracking-wider"
-            >
-              VIEW PRODUCT
-            </Button>
-          </div> */}
-          {/* )} */}
+          {/* Quick View Button */}
+          {!productStatus.isOutOfStock && (
+            <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push(`/shop/${product.slug}`);
+                }}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 w-full tracking-wider"
+              >
+                View Product
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Product Info */}

@@ -65,7 +65,7 @@ export function DefaultContactForm() {
         <InputFormField
           form={form}
           name="name"
-          label="First Name *"
+          label="Name"
           inputClassName={"mt-2"}
           placeholder="Jane"
           required
@@ -74,7 +74,7 @@ export function DefaultContactForm() {
         <InputFormField
           form={form}
           name="email"
-          label="Email *"
+          label="Email"
           inputClassName={"mt-2"}
           type="email"
           placeholder="jane@example.com"
@@ -93,7 +93,7 @@ export function DefaultContactForm() {
         <TextareaFormField
           form={form}
           name="message"
-          label="Message *"
+          label="Message"
           messageLength={messageLength}
           textareaClassName={"mt-2"}
           maxLength={messageMaxLength}

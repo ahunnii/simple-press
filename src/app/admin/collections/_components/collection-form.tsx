@@ -61,6 +61,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
     resolver: zodResolver(collectionFormSchema),
     defaultValues: {
       ...collection,
+      name: collection?.name ?? undefined,
       description: collection?.description ?? undefined,
       imageUrl: collection?.imageUrl ?? undefined,
       metaTitle: collection?.metaTitle ?? undefined,
