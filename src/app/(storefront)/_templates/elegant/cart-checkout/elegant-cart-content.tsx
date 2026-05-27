@@ -2,182 +2,375 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import { formatPrice } from "~/lib/prices";
 import { useCart } from "~/providers/cart-context";
+
+const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 export function ElegantCartContent() {
   const { items, updateQuantity, removeItem, subtotal } = useCart();
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
-          <ShoppingBag className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <h2 className="mt-6 font-serif text-2xl font-light tracking-wide text-foreground">
-          Your cart is empty
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Looks like you haven&apos;t added anything yet.
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "80px 0",
+        textAlign: "center",
+      }}>
+        <ShoppingBag
+          style={{ width: 40, height: 40, color: "var(--el-ink-soft, #6b6659)", marginBottom: 20 }}
+          strokeWidth={1}
+        />
+        <p style={{
+          fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+          fontSize: 28,
+          color: "var(--el-ink, #1c1a17)",
+          marginBottom: 10,
+        }}>
+          Your bag is empty.
         </p>
-        <Link
-          href="/shop"
-          className="boty-transition boty-shadow mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          Continue Shopping <ArrowRight className="h-4 w-4" />
+        <p style={{
+          fontSize: 15,
+          color: "var(--el-ink-soft, #6b6659)",
+          marginBottom: 32,
+          fontFamily: "var(--font-sans, sans-serif)",
+        }}>
+          Find something to take home.
+        </p>
+        <Link href="/shop" style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "14px 26px",
+          borderRadius: 999,
+          fontSize: 13,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          fontWeight: 500,
+          background: "var(--el-sage, #4a5240)",
+          color: "var(--el-paper, #fbf8f2)",
+          textDecoration: "none",
+          fontFamily: "var(--font-sans, sans-serif)",
+        }}>
+          Browse shop
+          <ArrowRight style={{ width: 14, height: 14 }} />
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
-      {/* Cart Items */}
-      <div className="lg:col-span-2">
-        <div className="flex flex-col divide-y divide-border">
-          {items.map((item) => (
-            <div
-              key={`${item.productId}-${item.variantId}`}
-              className="flex gap-6 py-8 first:pt-0"
-            >
-              <Link
-                href={`/shop/${item.productId}`}
-                className="relative h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-muted"
-              >
-                {item.imageUrl ? (
+    <div className="el-cart-grid" style={{
+      display: "grid",
+      gridTemplateColumns: "1fr 360px",
+      gap: 60,
+      alignItems: "start",
+    }}>
+      {/* ── Items ── */}
+      <div>
+        {items.map((item) => (
+          <div
+            key={`${item.productId}-${item.variantId}`}
+            style={{
+              display: "flex",
+              gap: 24,
+              padding: "24px 0",
+              borderBottom: "1px solid var(--el-line-2, rgba(28,26,23,0.06))",
+            }}
+          >
+            {/* Thumbnail */}
+            <Link href={`/shop/${item.productId}`} style={{ textDecoration: "none", flexShrink: 0 }}>
+              <div style={{
+                width: 100,
+                aspectRatio: "4/5",
+                borderRadius: 6,
+                overflow: "hidden",
+                position: "relative",
+                background: "var(--el-cream-2, #ebe6dc)",
+              }}>
+                {item.imageUrl && (
                   <Image
                     src={item.imageUrl}
                     alt={item.productName}
                     fill
                     className="object-cover"
-                    sizes="112px"
+                    sizes="100px"
                   />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                    No image
-                  </div>
                 )}
-              </Link>
+              </div>
+            </Link>
 
-              <div className="flex flex-1 flex-col justify-between">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <Link
-                      href={`/shop/${item.productId}`}
-                      className="font-serif text-sm font-medium text-foreground hover:text-muted-foreground"
-                    >
+            {/* Info */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <Link href={`/shop/${item.productId}`} style={{ textDecoration: "none" }}>
+                    <div style={{
+                      fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                      fontSize: 20,
+                      fontWeight: 500,
+                      color: "var(--el-ink, #1c1a17)",
+                      lineHeight: 1.2,
+                      marginBottom: 4,
+                    }}>
                       {item.productName}
-                    </Link>
-                    {item.variantName && (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {item.variantName}
-                      </p>
-                    )}
-                  </div>
+                    </div>
+                  </Link>
+                  {item.variantName && (
+                    <div style={{
+                      fontFamily: "var(--font-mono, ui-monospace)",
+                      fontSize: 10,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "var(--el-ink-soft, #6b6659)",
+                    }}>
+                      {item.variantName}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeItem(item.productId, item.variantId)}
+                  aria-label={`Remove ${item.productName}`}
+                  style={{
+                    fontSize: 11,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    color: "var(--el-ink-soft, #6b6659)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-mono, ui-monospace)",
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: 16,
+              }}>
+                {/* Qty stepper */}
+                <div style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 12,
+                  border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                  borderRadius: 999,
+                  padding: "2px 4px",
+                }}>
                   <button
                     type="button"
-                    onClick={() => removeItem(item.productId, item.variantId)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label={`Remove ${item.productName}`}
+                    onClick={() => updateQuantity(item.productId, item.variantId, item.quantity - 1)}
+                    aria-label="Decrease"
+                    style={{
+                      width: 28, height: 28,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: 999,
+                      border: "none",
+                      background: "transparent",
+                      cursor: "pointer",
+                      color: "var(--el-ink, #1c1a17)",
+                    }}
+                    className="el-qty-btn"
                   >
-                    <X className="h-4 w-4" />
+                    <Minus style={{ width: 12, height: 12 }} />
+                  </button>
+                  <span style={{
+                    minWidth: 24,
+                    textAlign: "center",
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: "var(--el-ink, #1c1a17)",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                  }}>
+                    {item.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(item.productId, item.variantId, item.quantity + 1)}
+                    aria-label="Increase"
+                    style={{
+                      width: 28, height: 28,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: 999,
+                      border: "none",
+                      background: "transparent",
+                      cursor: "pointer",
+                      color: "var(--el-ink, #1c1a17)",
+                    }}
+                    className="el-qty-btn"
+                  >
+                    <Plus style={{ width: 12, height: 12 }} />
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center overflow-hidden rounded-full border border-border">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateQuantity(
-                          item.productId,
-                          item.variantId,
-                          item.quantity - 1,
-                        )
-                      }
-                      className="flex h-8 w-8 items-center justify-center text-foreground hover:bg-muted boty-transition"
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus className="h-3 w-3" />
-                    </button>
-                    <span className="flex h-8 w-10 items-center justify-center border-x border-border text-xs font-medium text-foreground">
-                      {item.quantity}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateQuantity(
-                          item.productId,
-                          item.variantId,
-                          item.quantity + 1,
-                        )
-                      }
-                      className="flex h-8 w-8 items-center justify-center text-foreground hover:bg-muted boty-transition"
-                      aria-label="Increase quantity"
-                    >
-                      <Plus className="h-3 w-3" />
-                    </button>
-                  </div>
-                  <p className="font-serif text-sm font-medium text-foreground">
-                    {formatPrice(item.price * item.quantity)}
-                  </p>
-                </div>
+                <span style={{
+                  fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                  fontSize: 20,
+                  color: "var(--el-ink, #1c1a17)",
+                }}>
+                  {formatPrice(item.price * item.quantity)}
+                </span>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
 
-        <Link
-          href="/shop"
-          className="boty-transition mt-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Continue Shopping
+        <Link href="/shop" style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          marginTop: 24,
+          fontSize: 12,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "var(--el-ink-soft, #6b6659)",
+          textDecoration: "none",
+          fontFamily: "var(--font-mono, ui-monospace)",
+        }}>
+          <ArrowLeft style={{ width: 12, height: 12 }} />
+          Continue shopping
         </Link>
       </div>
 
-      {/* Order Summary */}
-      <div>
-        <div className="boty-shadow sticky top-24 rounded-3xl bg-card p-8">
-          <h2 className="font-serif text-xl font-light tracking-wide text-foreground">
-            Order Summary
+      {/* ── Summary ── */}
+      <div style={{ position: "sticky", top: 120 }}>
+        <div style={{
+          background: "var(--el-paper, #fbf8f2)",
+          border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+          borderRadius: 8,
+          padding: "28px 28px",
+        }}>
+          <h2 style={{
+            fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+            fontSize: 22,
+            fontWeight: 500,
+            color: "var(--el-ink, #1c1a17)",
+            marginBottom: 24,
+          }}>
+            Order summary
           </h2>
 
-          <div className="mt-6 space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span className="text-foreground">{formatPrice(subtotal)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Shipping</span>
-              <span className="text-muted-foreground">Calculated at checkout</span>
-            </div>
-          </div>
-
-          <div className="mt-6 border-t border-border pt-6">
-            <div className="flex justify-between">
-              <span className="font-serif font-medium text-foreground">
-                Estimated total
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 11,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+              }}>
+                Subtotal
               </span>
-              <span className="font-serif text-lg font-medium text-foreground">
+              <span style={{
+                fontFamily: "var(--font-sans, sans-serif)",
+                fontSize: 14,
+                color: "var(--el-ink, #1c1a17)",
+              }}>
                 {formatPrice(subtotal)}
               </span>
             </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 11,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+              }}>
+                Shipping
+              </span>
+              <span style={{
+                fontFamily: "var(--font-sans, sans-serif)",
+                fontSize: 14,
+                color: "var(--el-ink-soft, #6b6659)",
+              }}>
+                At checkout
+              </span>
+            </div>
           </div>
 
-          <Link
-            href="/checkout"
-            className="boty-transition boty-shadow mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-primary py-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            Proceed to Checkout <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div style={{
+            borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+            marginTop: 16,
+            paddingTop: 16,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            marginBottom: 20,
+          }}>
+            <span style={{
+              fontFamily: "var(--font-mono, ui-monospace)",
+              fontSize: 11,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "var(--el-ink, #1c1a17)",
+            }}>
+              Estimated total
+            </span>
+            <span style={{
+              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+              fontSize: 24,
+              color: "var(--el-ink, #1c1a17)",
+            }}>
+              {formatPrice(subtotal)}
+            </span>
+          </div>
 
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            Tax and shipping calculated at checkout.
+          <Link href="/checkout" style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+            padding: "15px 24px",
+            borderRadius: 999,
+            fontSize: 13,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontWeight: 500,
+            background: "var(--el-ink, #1c1a17)",
+            color: "var(--el-paper, #fbf8f2)",
+            textDecoration: "none",
+            fontFamily: "var(--font-sans, sans-serif)",
+            transition: `background 0.4s ${ease}`,
+          }} className="el-checkout-btn">
+            Proceed to checkout
+            <ArrowRight style={{ width: 14, height: 14 }} />
+          </Link>
+          <p style={{
+            marginTop: 12,
+            textAlign: "center",
+            fontSize: 11,
+            color: "var(--el-ink-soft, #6b6659)",
+            fontFamily: "var(--font-mono, ui-monospace)",
+            letterSpacing: "0.1em",
+          }}>
+            Tax & shipping at checkout
           </p>
         </div>
       </div>
+
+      <style>{`
+        .el-qty-btn:hover { background: var(--el-cream-2, #ebe6dc) !important; }
+        .el-checkout-btn:hover { background: var(--el-sage, #4a5240) !important; }
+        @media (max-width: 700px) {
+          .el-cart-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .el-cart-grid > div:nth-child(2) { position: static !important; }
+        }
+      `}</style>
     </div>
   );
 }

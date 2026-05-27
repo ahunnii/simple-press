@@ -1,9 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-import type { GenericIconRow } from "~/lib/template-fields";
 import type { RouterOutputs } from "~/trpc/react";
 import {
   getListFieldValue,
@@ -24,58 +20,56 @@ export function ElegantTrustBadges({
     ),
     DEFAULT_ELEGANT_TRUST_BADGES,
   );
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
-  }, []);
+  const items = trustBadges?.length ? trustBadges : DEFAULT_ELEGANT_TRUST_BADGES;
 
   return (
-    <section className="bg-background py-20">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div ref={sectionRef} className="grid grid-cols-2 gap-6 lg:grid-cols-4">
-          {trustBadges?.map((badge, index) => (
-            <div
-              key={badge.title}
-              className={`bg-background rounded-xl border border-none border-stone-200 p-6 text-center transition-all duration-700 ease-out lg:p-8 ${
-                isVisible
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-8 opacity-0"
-              }`}
-              style={{ transitionDelay: `${index * 150}ms` }}
+    <div
+      style={{
+        overflow: "hidden",
+        borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+        borderBottom: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+        padding: "22px 0",
+        background: "var(--el-paper, #fbf8f2)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: 64,
+          whiteSpace: "nowrap",
+          animation: "el-marquee 40s linear infinite",
+          width: "max-content",
+        }}
+      >
+        {/* Doubled list for seamless loop */}
+        {[...items, ...items].map((badge, i) => (
+          <span
+            key={i}
+            style={{
+              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+              fontSize: 28,
+              fontStyle: "italic",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 64,
+              color: "var(--el-ink, #1c1a17)",
+              flexShrink: 0,
+            }}
+          >
+            {badge.title}
+            <span
+              style={{
+                fontSize: 14,
+                fontStyle: "normal",
+                color: "var(--el-sage, #4a5240)",
+              }}
             >
-              <badge.icon
-                className="text-primary mx-auto mb-4 size-12"
-                strokeWidth={1}
-              />
-              <h3 className="text-foreground mb-2 font-serif text-2xl">
-                {badge.title}
-              </h3>
-              <p className="text-muted-foreground text-sm">
-                {badge.description}
-              </p>
-            </div>
-          ))}
-        </div>
+              ✿
+            </span>
+          </span>
+        ))}
       </div>
-    </section>
+    </div>
   );
 }

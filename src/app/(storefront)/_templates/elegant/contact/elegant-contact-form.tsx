@@ -33,21 +33,46 @@ export function ElegantContactForm() {
 
   if (isSuccess) {
     return (
-      <div className="flex flex-col items-center gap-4 py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
-          <CheckCircle2 className="h-7 w-7 text-foreground" />
+      <div style={{ padding: "40px 0", textAlign: "center" }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: 999,
+          background: "var(--el-sage, #4a5240)",
+          color: "var(--el-paper, #fbf8f2)",
+          margin: "0 auto 18px",
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <CheckCircle2 style={{ width: 22, height: 22 }} />
         </div>
-        <h3 className="font-serif text-xl font-light tracking-wide text-foreground">
-          Message received
+        <h3 style={{
+          fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+          fontSize: 28,
+          fontWeight: 400,
+          color: "var(--el-ink, #1c1a17)",
+          marginBottom: 8,
+        }}>
+          Thank you.
         </h3>
-        <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-          Thank you for reaching out. We&apos;ll get back to you within 24
-          hours.
+        <p style={{
+          fontSize: 15,
+          color: "var(--el-ink-soft, #6b6659)",
+          fontFamily: "var(--font-sans, sans-serif)",
+          marginBottom: 20,
+        }}>
+          We&apos;ll be in touch within a day.
         </p>
         <button
           type="button"
           onClick={resetSuccess}
-          className="mt-2 text-sm text-foreground underline underline-offset-4 hover:text-muted-foreground"
+          style={{
+            fontFamily: "var(--font-mono, ui-monospace)",
+            fontSize: 11,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "var(--el-ink-soft, #6b6659)",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+          }}
         >
           Send another message
         </button>
@@ -124,7 +149,26 @@ export function ElegantContactForm() {
         <button
           type="submit"
           disabled={isSubmitting || !captchaToken}
-          className="boty-transition boty-shadow inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            padding: "14px 26px",
+            borderRadius: 999,
+            fontSize: 13,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontWeight: 500,
+            background: "var(--el-ink, #1c1a17)",
+            color: "var(--el-paper, #fbf8f2)",
+            border: "none",
+            cursor: isSubmitting || !captchaToken ? "not-allowed" : "pointer",
+            opacity: isSubmitting || !captchaToken ? 0.5 : 1,
+            fontFamily: "var(--font-sans, sans-serif)",
+            width: "100%",
+            transition: "background 0.4s cubic-bezier(0.22,1,0.36,1)",
+          }}
         >
           {isSubmitting ? (
             <>
@@ -132,7 +176,7 @@ export function ElegantContactForm() {
               Sending…
             </>
           ) : (
-            "Send Message"
+            "Send message"
           )}
         </button>
       </form>

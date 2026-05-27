@@ -4,23 +4,49 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, ShoppingBag } from "lucide-react";
 
-import type { Product } from "~/types";
-import { computeSavingsLabel, formatPrice } from "~/lib/prices";
+import type { RouterOutputs } from "~/trpc/react";
+import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
-import { Badge } from "~/components/ui/badge";
 import { useCart } from "~/providers/cart-context";
 
+type _HomepageProduct =
+  NonNullable<RouterOutputs["business"]["getHomepage"]>["products"][number];
+
+// Minimal shape the card actually uses — compatible with homepage, shop, and related queries
+type CardProduct = Pick<
+  _HomepageProduct,
+  | "id"
+  | "name"
+  | "slug"
+  | "description"
+  | "images"
+  | "price"
+  | "compareAtPrice"
+  | "trackInventory"
+  | "inventoryQty"
+  | "allowBackorders"
+  | "baseUnitsConsumed"
+  | "additionalFields"
+  | "variants"
+> & {
+  // baseInventoryUnit is not included in getRelated, so make it optional
+  baseInventoryUnit?: { inventoryQty: number; allowBackorders: boolean } | null;
+};
+
 type Props = {
-  product: Product;
+  product: CardProduct;
   index: number;
   isVisible: boolean;
   saleBadgeFormat?: string;
 };
 
+const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+
 export function ElegantProductCard({ product, index, isVisible }: Props) {
   const { addItem } = useCart();
+  const router = useRouter();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const productStatus = checkProductStatus({
     price: product.price,
@@ -39,8 +65,9 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
       inventoryQty: v.inventoryQty,
     })),
   });
-  const [imageLoaded, setImageLoaded] = useState(false);
+
   const productImage = product.images[0]?.url ?? "/placeholder.svg";
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -59,88 +86,252 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
       maxInventory: productStatus.maxInventory,
     });
   };
-  const router = useRouter();
 
   return (
     <Link
       href={`/shop/${product.slug}`}
-      className={`group transition-all duration-700 ease-out ${
-        isVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
-      }`}
-      style={{ transitionDelay: `${index * 80}ms` }}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? "translateY(0)" : "translateY(24px)",
+        transition: `opacity 0.7s ${ease} ${index * 80}ms, transform 0.7s ${ease} ${index * 80}ms`,
+        cursor: "pointer",
+        textDecoration: "none",
+        display: "block",
+      }}
+      className="el-product-card group"
     >
-      <div className="bg-card boty-shadow boty-transition overflow-hidden rounded-3xl group-hover:scale-[1.02]">
-        {/* Image */}
-        <div className="bg-muted relative aspect-square overflow-hidden">
-          {/* Skeleton */}
-          <div
-            className={`from-muted via-muted/50 to-muted absolute inset-0 animate-pulse bg-linear-to-br transition-opacity duration-500 ${
-              imageLoaded ? "opacity-0" : "opacity-100"
-            }`}
-          />
+      {/* Image */}
+      <div
+        style={{
+          position: "relative",
+          aspectRatio: "4/5",
+          overflow: "hidden",
+          borderRadius: 8,
+          background: "var(--el-cream-2, #ebe6dc)",
+        }}
+      >
+        {/* Skeleton */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(135deg, var(--el-cream-2, #ebe6dc) 0%, var(--el-cream-3, #e0d9c8) 100%)",
+            opacity: imageLoaded ? 0 : 1,
+            transition: "opacity 0.5s",
+          }}
+        />
 
-          <Image
-            src={product.images[0]?.url ?? "/placeholder.svg"}
-            alt={product.name}
-            fill
-            className={`boty-transition object-cover transition-opacity duration-500 group-hover:scale-105 ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            onLoad={() => setImageLoaded(true)}
-          />
-          {productStatus?.badgeLabel && (
-            <Badge className="bg-accent text-accent-foreground absolute top-4 left-4 rounded-full px-3 py-1 text-xs tracking-wide">
-              {productStatus.badgeLabel}
-            </Badge>
-          )}
+        <Image
+          src={productImage}
+          alt={product.name}
+          fill
+          className="object-cover"
+          style={{
+            opacity: imageLoaded ? 1 : 0,
+            transition: `opacity 0.5s, transform 1.2s ${ease}`,
+          }}
+          onLoad={() => setImageLoaded(true)}
+        />
 
-          {/* Quick add button */}
+        {/* Badge */}
+        {productStatus.badgeLabel && (
+          <span
+            style={{
+              position: "absolute",
+              top: 12,
+              left: 12,
+              padding: "4px 10px",
+              background: "var(--el-paper, #fbf8f2)",
+              borderRadius: 999,
+              fontFamily: "var(--font-mono, ui-monospace)",
+              fontSize: 9.5,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "var(--el-ink, #1c1a17)",
+              zIndex: 2,
+            }}
+          >
+            {productStatus.badgeLabel}
+          </span>
+        )}
+
+        {/* Quick-add pills (slide up on hover) */}
+        <div
+          className="el-quick-btns"
+          style={{
+            position: "absolute",
+            left: 12,
+            right: 12,
+            bottom: 12,
+            display: "flex",
+            gap: 8,
+            zIndex: 2,
+          }}
+        >
           {productStatus.hasVariants ? (
             <button
               type="button"
-              aria-label="View product"
-              onClick={() => router.push(`/shop/${product.slug}`)}
-              className="boty-shadow bg-background/90 hover:bg-primary hover:text-primary-foreground absolute right-4 bottom-4 flex h-12 w-12 translate-y-2 cursor-pointer items-center justify-center rounded-full opacity-0 backdrop-blur-sm transition-colors group-hover:translate-y-0 group-hover:opacity-100"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push(`/shop/${product.slug}`);
+              }}
+              style={{
+                flex: 1,
+                padding: "10px 14px",
+                background: "var(--el-paper, #fbf8f2)",
+                borderRadius: 999,
+                fontSize: 11,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                fontWeight: 500,
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-sans, sans-serif)",
+                transition: `background 0.3s ${ease}, color 0.3s ${ease}`,
+              }}
+              className="el-quick-btn"
             >
-              <Eye className="h-5 w-5" />
+              View options
             </button>
           ) : (
-            <button
-              type="button"
-              className="boty-shadow bg-background/90 hover:bg-primary hover:text-primary-foreground absolute right-4 bottom-4 flex h-12 w-12 translate-y-2 cursor-pointer items-center justify-center rounded-full opacity-0 backdrop-blur-sm transition-colors group-hover:translate-y-0 group-hover:opacity-100"
-              onClick={handleAddToCart}
-              disabled={productStatus.disableCart}
-              aria-label="Add to cart"
-            >
-              <ShoppingBag className="h-5 w-5" />
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={productStatus.disableCart}
+                style={{
+                  flex: 1,
+                  padding: "10px 14px",
+                  background: "var(--el-paper, #fbf8f2)",
+                  borderRadius: 999,
+                  fontSize: 11,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                  border: "none",
+                  cursor: productStatus.disableCart ? "not-allowed" : "pointer",
+                  fontFamily: "var(--font-sans, sans-serif)",
+                  transition: `background 0.3s ${ease}, color 0.3s ${ease}`,
+                  opacity: productStatus.disableCart ? 0.5 : 1,
+                }}
+                className="el-quick-btn"
+              >
+                Quick add
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  router.push(`/shop/${product.slug}`);
+                }}
+                style={{
+                  flex: 1,
+                  padding: "10px 14px",
+                  background: "var(--el-paper, #fbf8f2)",
+                  borderRadius: 999,
+                  fontSize: 11,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-sans, sans-serif)",
+                  transition: `background 0.3s ${ease}, color 0.3s ${ease}`,
+                }}
+                className="el-quick-btn"
+              >
+                View
+              </button>
+            </>
           )}
         </div>
+      </div>
 
-        {/* Info */}
-        <div className="p-6">
-          <h3 className="text-foreground mb-1 font-serif text-xl">
+      {/* Meta */}
+      <div
+        style={{
+          marginTop: 14,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          gap: 12,
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+              fontSize: 20,
+              fontWeight: 500,
+              letterSpacing: "0.005em",
+              lineHeight: 1.2,
+              color: "var(--el-ink, #1c1a17)",
+            }}
+          >
             {product.name}
-          </h3>
-          <p className="text-muted-foreground mb-4 line-clamp-2 min-h-[2.5em] text-sm">
-            {product.description}
-          </p>
-
-          <div className="flex items-center gap-2">
-            <span className="text-foreground text-lg font-medium">
-              {formatPrice(productStatus.displayPrice)}
-              {productStatus.variablePricing && (
-                <span className="ml-1 text-base">+</span>
-              )}
-            </span>
-            {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
-              <span className="text-muted-foreground text-sm line-through">
-                {formatPrice(productStatus.displayCompareAtPrice)}
-              </span>
-            )}
           </div>
+          {product.description && (
+            <div
+              style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 10,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+                marginTop: 2,
+              }}
+            >
+              {product.description.length > 40
+                ? product.description.slice(0, 40) + "…"
+                : product.description}
+            </div>
+          )}
+        </div>
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 500,
+            whiteSpace: "nowrap",
+            color: "var(--el-ink, #1c1a17)",
+          }}
+        >
+          {formatPrice(productStatus.displayPrice)}
+          {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
+            <span
+              style={{
+                fontSize: 12,
+                color: "var(--el-ink-soft, #6b6659)",
+                textDecoration: "line-through",
+                marginLeft: 6,
+              }}
+            >
+              {formatPrice(productStatus.displayCompareAtPrice)}
+            </span>
+          )}
         </div>
       </div>
+
+      <style>{`
+        .el-product-card .el-quick-btns {
+          opacity: 0;
+          transform: translateY(8px);
+          transition: opacity 0.4s ${ease}, transform 0.4s ${ease};
+        }
+        .el-product-card:hover .el-quick-btns {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .el-product-card:hover .object-cover {
+          transform: scale(1.05);
+        }
+        .el-quick-btn:hover {
+          background: var(--el-ink, #1c1a17) !important;
+          color: var(--el-paper, #fbf8f2) !important;
+        }
+      `}</style>
     </Link>
   );
 }

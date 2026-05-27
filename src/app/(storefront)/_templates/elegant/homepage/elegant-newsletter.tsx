@@ -1,65 +1,178 @@
 "use client";
 
-import React, { useState } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight } from "lucide-react";
+
+const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
+
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.12 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return { ref, visible };
+}
 
 export function ElegantNewsletter() {
   const [email, setEmail] = useState("");
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const { ref, visible } = useReveal();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
-      setIsSubscribed(true);
+      setSubmitted(true);
       setEmail("");
     }
   };
 
-  return (
-    <section className="bg-primary py-24">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-primary-foreground mb-4 font-serif text-4xl leading-tight text-balance md:text-7xl">
-            Join the ritual
-          </h2>
-          <p className="text-primary-foreground/80 mb-10 text-lg">
-            Subscribe for exclusive offers, skincare tips, and early access to
-            new products.
-          </p>
+  const revealStyle = (delay: number): React.CSSProperties => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(24px)",
+    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+  });
 
-          {isSubscribed ? (
-            <div className="bg-primary-foreground/10 inline-flex items-center gap-3 rounded-full px-8 py-4 backdrop-blur-sm">
-              <Check className="text-primary-foreground h-5 w-5" />
-              <span className="text-primary-foreground">
-                Welcome to the Boty family!
-              </span>
-            </div>
+  return (
+    <section
+      style={{
+        padding: "80px 40px",
+        background: "var(--el-ink, #1c1a17)",
+        color: "var(--el-paper, #fbf8f2)",
+      }}
+    >
+      <div
+        ref={ref}
+        style={{
+          maxWidth: 920,
+          margin: "0 auto",
+          textAlign: "center",
+        }}
+      >
+        <div style={revealStyle(0)}>
+          <span
+            style={{
+              fontFamily: "var(--font-mono, ui-monospace)",
+              fontSize: 11,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.5)",
+              display: "block",
+              marginBottom: 20,
+            }}
+          >
+            Letters from the studio
+          </span>
+        </div>
+
+        <div style={revealStyle(0.1)}>
+          <h2
+            style={{
+              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+              fontWeight: 400,
+              fontSize: "clamp(36px, 4.5vw, 56px)",
+              lineHeight: 1.05,
+              letterSpacing: "-0.01em",
+              margin: "0 0 16px",
+              color: "var(--el-paper, #fbf8f2)",
+            }}
+          >
+            One short note,{" "}
+            <em style={{ fontStyle: "italic" }}>once a month</em>.
+          </h2>
+        </div>
+
+        <div style={revealStyle(0.2)}>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.65)",
+              maxWidth: 480,
+              margin: "0 auto 36px",
+              lineHeight: 1.65,
+              fontSize: 16,
+              fontFamily: "var(--font-sans, sans-serif)",
+            }}
+          >
+            New arrivals, restocks, and the occasional behind-the-scenes note.
+            No noise.
+          </p>
+        </div>
+
+        <div style={revealStyle(0.3)}>
+          {submitted ? (
+            <p
+              style={{
+                fontSize: 15,
+                color: "rgba(255,255,255,0.8)",
+                fontFamily: "var(--font-sans, sans-serif)",
+              }}
+            >
+              Thank you — you&apos;ll hear from us soon.
+            </p>
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="mx-auto flex max-w-md flex-col gap-4 sm:flex-row"
+              style={{
+                maxWidth: 480,
+                margin: "0 auto",
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                borderBottom: "1px solid rgba(255,255,255,0.3)",
+                paddingBottom: 6,
+              }}
             >
               <input
+                required
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 focus:border-primary-foreground/40 boty-transition flex-1 rounded-full border px-6 py-4 backdrop-blur-sm focus:outline-none"
-                required
+                placeholder="your@email.com"
+                style={{
+                  flex: 1,
+                  background: "transparent",
+                  border: 0,
+                  color: "var(--el-paper, #fbf8f2)",
+                  fontSize: 16,
+                  padding: "12px 0",
+                  outline: "none",
+                  fontFamily: "var(--font-sans, sans-serif)",
+                }}
               />
               <button
                 type="submit"
-                className="group bg-primary-foreground text-primary boty-transition hover:bg-primary-foreground/90 inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-sm tracking-wide"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontSize: 12,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  color: "var(--el-paper, #fbf8f2)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-sans, sans-serif)",
+                  flexShrink: 0,
+                }}
               >
                 Subscribe
-                <ArrowRight className="boty-transition h-4 w-4 group-hover:translate-x-1" />
+                <ArrowRight style={{ width: 14, height: 14 }} />
               </button>
             </form>
           )}
-
-          <p className="text-primary-foreground/60 mt-6 text-sm">
-            Unsubscribe anytime. We respect your inbox.
-          </p>
         </div>
       </div>
     </section>

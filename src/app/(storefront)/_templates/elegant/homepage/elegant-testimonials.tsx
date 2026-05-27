@@ -84,26 +84,64 @@ const TestimonialCard = ({
   testimonial: (typeof testimonials)[0];
 }) => (
   <div
-    className="mb-4 flex-shrink-0 rounded-3xl bg-white p-6"
     style={{
-      boxShadow:
-        "rgba(14, 63, 126, 0.04) 0px 0px 0px 1px, rgba(42, 51, 69, 0.04) 0px 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px, rgba(42, 51, 70, 0.04) 0px 6px 6px -3px, rgba(14, 63, 126, 0.04) 0px 12px 12px -6px, rgba(14, 63, 126, 0.04) 0px 24px 24px -12px",
+      marginBottom: 16,
+      flexShrink: 0,
+      borderRadius: 8,
+      background: "var(--el-paper, #fbf8f2)",
+      padding: 24,
+      border: "1px solid var(--el-line-2, rgba(28,26,23,0.06))",
     }}
   >
-    {/* Stars */}
-
-    {/* Quote */}
-    <p className="text-foreground/80 mb-4 font-serif text-xl leading-relaxed font-medium tracking-wide text-pretty">
+    <p
+      style={{
+        fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+        fontSize: 18,
+        lineHeight: 1.55,
+        color: "var(--el-ink, #1c1a17)",
+        marginBottom: 16,
+        fontStyle: "italic",
+      }}
+    >
       &ldquo;{testimonial.text}&rdquo;
     </p>
-
-    {/* Author */}
-    <div className="flex items-start justify-between gap-2">
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
       <div>
-        <p className="text-foreground text-sm font-bold">{testimonial.name}</p>
-        <p className="text-muted-foreground text-xs">{testimonial.location}</p>
+        <p
+          style={{
+            fontFamily: "var(--font-sans, sans-serif)",
+            fontSize: 13,
+            fontWeight: 500,
+            color: "var(--el-ink, #1c1a17)",
+          }}
+        >
+          {testimonial.name}
+        </p>
+        <p
+          style={{
+            fontFamily: "var(--font-mono, ui-monospace)",
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "var(--el-ink-soft, #6b6659)",
+          }}
+        >
+          {testimonial.location}
+        </p>
       </div>
-      <span className="text-primary/70 bg-primary/5 rounded-full px-2 py-1 text-xs tracking-wide whitespace-nowrap">
+      <span
+        style={{
+          fontFamily: "var(--font-mono, ui-monospace)",
+          fontSize: 9.5,
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          color: "var(--el-ink-soft, #6b6659)",
+          background: "var(--el-cream, #f5f1ea)",
+          padding: "4px 10px",
+          borderRadius: 999,
+          whiteSpace: "nowrap",
+        }}
+      >
         {testimonial.product}
       </span>
     </div>
@@ -140,29 +178,43 @@ export function ElegantTestimonials() {
   }, []);
 
   return (
-    <section className="bg-background overflow-hidden py-24 pt-12 pb-24">
+    <section
+      className="overflow-hidden py-24 pt-12 pb-24"
+      style={{ background: "var(--el-cream-2, #ebe6dc)" }}
+    >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Header */}
         <div ref={headerRef} className="mb-16 text-center">
           <span
-            className={`text-primary mb-4 block text-sm tracking-[0.3em] uppercase ${headerVisible ? "animate-blur-in opacity-0" : "opacity-0"}`}
-            style={
-              headerVisible
-                ? { animationDelay: "0.2s", animationFillMode: "forwards" }
-                : {}
-            }
+            style={{
+              fontFamily: "var(--font-mono, ui-monospace)",
+              fontSize: 11,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "var(--el-ink-soft, #6b6659)",
+              display: "block",
+              marginBottom: 16,
+              opacity: headerVisible ? 1 : 0,
+              transform: headerVisible ? "translateY(0)" : "translateY(24px)",
+              transition: "opacity 0.9s 0.1s, transform 0.9s 0.1s",
+            }}
           >
             Kind Words
           </span>
           <h2
-            className={`text-foreground font-serif text-4xl leading-tight text-balance md:text-7xl ${headerVisible ? "animate-blur-in opacity-0" : "opacity-0"}`}
-            style={
-              headerVisible
-                ? { animationDelay: "0.4s", animationFillMode: "forwards" }
-                : {}
-            }
+            style={{
+              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+              fontWeight: 400,
+              fontSize: "clamp(36px, 5vw, 64px)",
+              lineHeight: 1.05,
+              letterSpacing: "-0.01em",
+              color: "var(--el-ink, #1c1a17)",
+              opacity: headerVisible ? 1 : 0,
+              transform: headerVisible ? "translateY(0)" : "translateY(24px)",
+              transition: "opacity 0.9s 0.2s, transform 0.9s 0.2s",
+            }}
           >
-            Loved by thousands
+            Loved by our community
           </h2>
         </div>
 
@@ -256,40 +308,19 @@ export function ElegantTestimonials() {
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes scroll-down {
-          0% {
-            transform: translateY(0);
-          }
-          100% {
-            transform: translateY(-50%);
-          }
+      <style>{`
+        @keyframes el-scroll-down {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
         }
-
-        @keyframes scroll-up {
-          0% {
-            transform: translateY(-50%);
-          }
-          100% {
-            transform: translateY(0);
-          }
+        @keyframes el-scroll-up {
+          0% { transform: translateY(-50%); }
+          100% { transform: translateY(0); }
         }
-
-        .animate-scroll-down {
-          animation: scroll-down 30s linear infinite;
-        }
-
-        .animate-scroll-up {
-          animation: scroll-up 30s linear infinite;
-        }
-
-        .animate-scroll-down-slow {
-          animation: scroll-down 60s linear infinite;
-        }
-
-        .animate-scroll-up-slow {
-          animation: scroll-up 60s linear infinite;
-        }
+        .animate-scroll-down { animation: el-scroll-down 30s linear infinite; }
+        .animate-scroll-up { animation: el-scroll-up 30s linear infinite; }
+        .hover\\:animate-scroll-down-slow:hover { animation-duration: 60s; }
+        .hover\\:animate-scroll-up-slow:hover { animation-duration: 60s; }
       `}</style>
     </section>
   );

@@ -196,271 +196,230 @@ export function ElegantCheckoutForm({ business }: Props) {
     }
   };
 
+  const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+  const eyebrow = (label: string) => (
+    <span style={{
+      fontFamily: "var(--font-mono, ui-monospace)",
+      fontSize: 11,
+      letterSpacing: "0.22em",
+      textTransform: "uppercase" as const,
+      color: "var(--el-ink-soft, #6b6659)",
+      display: "block",
+      marginBottom: 20,
+    }}>
+      {label}
+    </span>
+  );
+
   if (items.length === 0) {
     return (
-      <div className="py-20 text-center">
-        <p className="text-muted-foreground mb-6">Your cart is empty</p>
-        <Link
-          href="/shop"
-          className="bg-primary text-primary-foreground boty-transition hover:bg-primary/90 boty-shadow inline-flex items-center justify-center rounded-full px-8 py-3 text-sm tracking-wide"
-        >
-          Continue Shopping
+      <div style={{ padding: "60px 0", textAlign: "center" }}>
+        <p style={{
+          fontFamily: "var(--font-serif, serif)",
+          fontSize: 22,
+          color: "var(--el-ink-soft, #6b6659)",
+          marginBottom: 24,
+        }}>
+          Your bag is empty.
+        </p>
+        <Link href="/shop" style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "14px 26px",
+          borderRadius: 999,
+          fontSize: 13,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          fontWeight: 500,
+          background: "var(--el-sage, #4a5240)",
+          color: "var(--el-paper, #fbf8f2)",
+          textDecoration: "none",
+          fontFamily: "var(--font-sans, sans-serif)",
+        }}>
+          Browse shop
         </Link>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-10 lg:flex-row">
-      {/* Left column — form fields */}
-      <div className="flex-1 space-y-10">
-        {/* Contact Information */}
+    <form onSubmit={handleSubmit} className="el-checkout-form" style={{ display: "flex", gap: 60, flexWrap: "wrap" }}>
+      {/* ── Left: fields ── */}
+      <div style={{ flex: 1, minWidth: 280, display: "flex", flexDirection: "column", gap: 40 }}>
+        {/* Contact */}
         <section>
-          <span className="text-primary mb-5 block text-sm tracking-[0.3em] uppercase">
-            Contact Information
-          </span>
-          <div className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email" className="text-muted-foreground text-sm">
-                Email *
-              </Label>
+          {eyebrow("Contact information")}
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <ElegantField label="Email *" htmlFor="email">
               <Input
-                id="email"
-                type="email"
-                value={email}
+                id="email" type="email" value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
+                placeholder="you@example.com" required
+                className="el-co-input"
               />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="name" className="text-muted-foreground text-sm">
-                Full Name *
-              </Label>
+            </ElegantField>
+            <ElegantField label="Full Name *" htmlFor="name">
               <Input
-                id="name"
-                type="text"
-                value={name}
+                id="name" type="text" value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Jane Doe"
-                required
+                placeholder="Jane Doe" required
+                className="el-co-input"
               />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="phone" className="text-muted-foreground text-sm">
-                Phone *
-              </Label>
+            </ElegantField>
+            <ElegantField label="Phone *" htmlFor="phone">
               <PhoneInput
-                id="phone"
-                autoComplete="tel"
-                value={phone}
+                id="phone" autoComplete="tel" value={phone}
                 onChange={(val) => setPhone(val)}
-                placeholder="+1 555 123 4567"
-                required
+                placeholder="+1 555 123 4567" required
+                className="el-co-input"
               />
-            </div>
+            </ElegantField>
           </div>
         </section>
 
-        {/* Discount Code */}
+        {/* Discount */}
         <section>
-          <span className="text-primary mb-5 block text-sm tracking-[0.3em] uppercase">
-            Discount Code
-          </span>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <div className="flex flex-1 flex-col gap-1.5">
-              <Label
-                htmlFor="discount-code"
-                className="text-muted-foreground text-sm"
-              >
-                Code
-              </Label>
+          {eyebrow("Discount code")}
+          <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+            <ElegantField label="Code" htmlFor="discount-code" style={{ flex: 1 }}>
               <Input
-                id="discount-code"
-                type="text"
-                value={discountCodeInput}
-                onChange={(e) =>
-                  setDiscountCodeInput(e.target.value.toUpperCase())
-                }
-                placeholder="SAVE20"
-                autoComplete="off"
+                id="discount-code" type="text" value={discountCodeInput}
+                onChange={(e) => setDiscountCodeInput(e.target.value.toUpperCase())}
+                placeholder="SAVE20" autoComplete="off"
+                className="el-co-input"
               />
-            </div>
+            </ElegantField>
             <button
               type="button"
               onClick={handleApplyDiscount}
-              disabled={
-                validateDiscountMutation.isPending || items.length === 0
-              }
-              className="border-border boty-transition hover:bg-muted inline-flex items-center justify-center rounded-full border px-6 py-2.5 text-sm font-medium disabled:opacity-50"
+              disabled={validateDiscountMutation.isPending || items.length === 0}
+              style={{
+                padding: "10px 20px",
+                borderRadius: 999,
+                fontSize: 12,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                fontWeight: 500,
+                border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                background: "transparent",
+                color: "var(--el-ink, #1c1a17)",
+                cursor: "pointer",
+                fontFamily: "var(--font-sans, sans-serif)",
+                opacity: validateDiscountMutation.isPending || items.length === 0 ? 0.5 : 1,
+                whiteSpace: "nowrap",
+              }}
             >
-              {validateDiscountMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Apply"
-              )}
+              {validateDiscountMutation.isPending
+                ? <Loader2 className="h-4 w-4 animate-spin" />
+                : "Apply"}
             </button>
           </div>
           {discountFieldError && (
-            <p className="mt-2 text-sm text-red-600">{discountFieldError}</p>
+            <p style={{ marginTop: 8, fontSize: 12, color: "#c0392b", fontFamily: "var(--font-sans, sans-serif)" }}>
+              {discountFieldError}
+            </p>
           )}
           {discountCodeLabel && discountAmount > 0 && (
-            <p className="mt-2 text-sm text-green-600">
-              Code{" "}
-              <span className="font-mono font-semibold">
-                {discountCodeLabel}
-              </span>{" "}
-              applied.
+            <p style={{ marginTop: 8, fontSize: 12, color: "var(--el-sage, #4a5240)", fontFamily: "var(--font-mono, ui-monospace)", letterSpacing: "0.1em" }}>
+              Code {discountCodeLabel} applied.
             </p>
           )}
         </section>
 
-        {/* Delivery Method */}
+        {/* Delivery method */}
         {shippingConfig.offersInStorePickup && (
           <section>
-            <span className="text-primary mb-5 block text-sm tracking-[0.3em] uppercase">
-              Delivery
-            </span>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => setDeliveryMethod("ship")}
-                className={`boty-transition rounded-full border px-6 py-2.5 text-sm font-medium ${
-                  deliveryMethod === "ship"
-                    ? "bg-primary text-primary-foreground border-transparent"
-                    : "border-border text-foreground hover:bg-muted bg-transparent"
-                }`}
-              >
-                Ship to address
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeliveryMethod("pickup")}
-                className={`boty-transition rounded-full border px-6 py-2.5 text-sm font-medium ${
-                  deliveryMethod === "pickup"
-                    ? "bg-primary text-primary-foreground border-transparent"
-                    : "border-border text-foreground hover:bg-muted bg-transparent"
-                }`}
-              >
-                In-store pickup
-              </button>
+            {eyebrow("Delivery")}
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {(["ship", "pickup"] as const).map((method) => (
+                <button
+                  key={method}
+                  type="button"
+                  onClick={() => setDeliveryMethod(method)}
+                  style={{
+                    padding: "10px 22px",
+                    borderRadius: 999,
+                    fontSize: 12,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    fontWeight: 500,
+                    border: deliveryMethod === method
+                      ? "1px solid var(--el-ink, #1c1a17)"
+                      : "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                    background: deliveryMethod === method ? "var(--el-ink, #1c1a17)" : "transparent",
+                    color: deliveryMethod === method ? "var(--el-paper, #fbf8f2)" : "var(--el-ink, #1c1a17)",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    transition: `all 0.3s ${ease}`,
+                  }}
+                >
+                  {method === "ship" ? "Ship to address" : "In-store pickup"}
+                </button>
+              ))}
             </div>
-            <p className="text-muted-foreground mt-3 text-sm">
+            <p style={{ marginTop: 12, fontSize: 13, color: "var(--el-ink-soft, #6b6659)", fontFamily: "var(--font-sans, sans-serif)" }}>
               {deliveryMethod === "pickup"
-                ? "No shipping charge. You'll pick up your order at the store."
-                : "Shipping cost is based on your store's shipping settings."}
+                ? "No shipping charge. Pick up at the store."
+                : "Shipping calculated at checkout."}
             </p>
           </section>
         )}
 
-        {/* Shipping Address */}
+        {/* Shipping address */}
         {deliveryMethod === "ship" && (
           <section>
-            <span className="text-primary mb-5 block text-sm tracking-[0.3em] uppercase">
-              Shipping Address
-            </span>
-            <p className="text-muted-foreground mb-4 text-sm">
-              This is sent to Stripe Checkout prefilled so you can confirm or
-              edit your name, phone, and address before paying.
-            </p>
-            <div className="space-y-4">
-              <div className="flex flex-col gap-1.5">
-                <Label
-                  htmlFor="address-line1"
-                  className="text-muted-foreground text-sm"
-                >
-                  Address line 1 *
-                </Label>
+            {eyebrow("Shipping address")}
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+              <ElegantField label="Address line 1 *" htmlFor="address-line1">
                 <Input
-                  id="address-line1"
-                  type="text"
-                  autoComplete="shipping address-line1"
-                  value={addressLine1}
-                  onChange={(e) => setAddressLine1(e.target.value)}
+                  id="address-line1" type="text" autoComplete="shipping address-line1"
+                  value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)}
                   placeholder="Street address, P.O. box"
                   required={deliveryMethod === "ship"}
+                  className="el-co-input"
                 />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label
-                  htmlFor="address-line2"
-                  className="text-muted-foreground text-sm"
-                >
-                  Address line 2
-                </Label>
+              </ElegantField>
+              <ElegantField label="Address line 2" htmlFor="address-line2">
                 <Input
-                  id="address-line2"
-                  type="text"
-                  autoComplete="shipping address-line2"
-                  value={addressLine2}
-                  onChange={(e) => setAddressLine2(e.target.value)}
+                  id="address-line2" type="text" autoComplete="shipping address-line2"
+                  value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)}
                   placeholder="Apartment, suite, etc."
+                  className="el-co-input"
                 />
+              </ElegantField>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                <ElegantField label="City *" htmlFor="city">
+                  <Input
+                    id="city" type="text" autoComplete="shipping address-level2"
+                    value={city} onChange={(e) => setCity(e.target.value)}
+                    required={deliveryMethod === "ship"}
+                    className="el-co-input"
+                  />
+                </ElegantField>
+                <ElegantField label="State / Province *" htmlFor="state">
+                  <Input
+                    id="state" type="text" autoComplete="shipping address-level1"
+                    value={state} onChange={(e) => setState(e.target.value)}
+                    placeholder="CA or ON"
+                    required={deliveryMethod === "ship"}
+                    className="el-co-input"
+                  />
+                </ElegantField>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
-                  <Label
-                    htmlFor="city"
-                    className="text-muted-foreground text-sm"
-                  >
-                    City *
-                  </Label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                <ElegantField label="ZIP / Postal code *" htmlFor="postal">
                   <Input
-                    id="city"
-                    type="text"
-                    autoComplete="shipping address-level2"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    id="postal" type="text" autoComplete="shipping postal-code"
+                    value={postalCode} onChange={(e) => setPostalCode(e.target.value)}
                     required={deliveryMethod === "ship"}
+                    className="el-co-input"
                   />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label
-                    htmlFor="state"
-                    className="text-muted-foreground text-sm"
-                  >
-                    State / Province *
-                  </Label>
-                  <Input
-                    id="state"
-                    type="text"
-                    autoComplete="shipping address-level1"
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    placeholder="e.g. CA or ON"
-                    required={deliveryMethod === "ship"}
-                  />
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
-                  <Label
-                    htmlFor="postal"
-                    className="text-muted-foreground text-sm"
-                  >
-                    ZIP / Postal code *
-                  </Label>
-                  <Input
-                    id="postal"
-                    type="text"
-                    autoComplete="shipping postal-code"
-                    value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
-                    required={deliveryMethod === "ship"}
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label
-                    htmlFor="country"
-                    className="text-muted-foreground text-sm"
-                  >
-                    Country *
-                  </Label>
-                  <Select
-                    value={country}
-                    onValueChange={(v) => setCountry(v as "US" | "CA")}
-                  >
-                    <SelectTrigger id="country" className="w-full">
+                </ElegantField>
+                <ElegantField label="Country *" htmlFor="country">
+                  <Select value={country} onValueChange={(v) => setCountry(v as "US" | "CA")}>
+                    <SelectTrigger id="country" className="el-co-input w-full border-x-0 border-t-0 rounded-none px-0 shadow-none focus:ring-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -468,56 +427,67 @@ export function ElegantCheckoutForm({ business }: Props) {
                       <SelectItem value="CA">Canada</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
+                </ElegantField>
               </div>
             </div>
           </section>
         )}
       </div>
 
-      {/* Right column — Order Summary */}
-      <div className="w-full shrink-0 lg:w-96">
-        <div className="boty-shadow bg-card sticky top-24 rounded-3xl p-8">
-          <h2 className="text-foreground mb-6 font-serif text-xl font-semibold">
-            Order Summary
+      {/* ── Right: order summary ── */}
+      <div style={{ width: "100%", maxWidth: 380, flexShrink: 0 }}>
+        <div style={{
+          position: "sticky",
+          top: 120,
+          background: "var(--el-paper, #fbf8f2)",
+          border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+          borderRadius: 8,
+          padding: "28px 28px",
+        }}>
+          <h2 style={{
+            fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+            fontSize: 22,
+            fontWeight: 500,
+            color: "var(--el-ink, #1c1a17)",
+            marginBottom: 20,
+          }}>
+            Order summary
           </h2>
 
-          {/* Items */}
-          <div className="max-h-64 space-y-4 overflow-y-auto">
+          {/* Item list */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 20, maxHeight: 240, overflowY: "auto" }}>
             {items.map((item) => (
-              <div
-                key={`${item.productId}-${item.variantId}`}
-                className="flex items-center gap-4"
-              >
-                <div className="bg-muted relative size-14 shrink-0 overflow-hidden rounded-2xl">
-                  {item.imageUrl ? (
-                    <Image
-                      src={item.imageUrl}
-                      alt={item.productName}
-                      fill
-                      className="object-cover"
-                      sizes="56px"
-                    />
-                  ) : (
-                    <div className="text-muted-foreground flex size-full items-center justify-center text-xs">
-                      No img
-                    </div>
+              <div key={`${item.productId}-${item.variantId}`} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                  width: 48, aspectRatio: "4/5",
+                  borderRadius: 4, position: "relative", overflow: "hidden", flexShrink: 0,
+                  background: "var(--el-cream-2, #ebe6dc)",
+                }}>
+                  {item.imageUrl && (
+                    <Image src={item.imageUrl} alt={item.productName} fill className="object-cover" sizes="48px" />
                   )}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-foreground truncate font-serif text-sm font-medium">
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{
+                    fontFamily: "var(--font-serif, serif)",
+                    fontSize: 14,
+                    color: "var(--el-ink, #1c1a17)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}>
                     {item.productName}
                   </p>
                   {item.variantName && (
-                    <p className="text-muted-foreground text-xs">
+                    <p style={{ fontFamily: "var(--font-mono, ui-monospace)", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--el-ink-soft, #6b6659)" }}>
                       {item.variantName}
                     </p>
                   )}
-                  <p className="text-muted-foreground text-xs">
+                  <p style={{ fontFamily: "var(--font-mono, ui-monospace)", fontSize: 10, letterSpacing: "0.1em", color: "var(--el-ink-soft, #6b6659)" }}>
                     Qty: {item.quantity}
                   </p>
                 </div>
-                <span className="text-foreground text-sm font-medium">
+                <span style={{ fontFamily: "var(--font-sans, sans-serif)", fontSize: 13, color: "var(--el-ink, #1c1a17)", flexShrink: 0 }}>
                   {formatPrice(item.price * item.quantity)}
                 </span>
               </div>
@@ -525,42 +495,45 @@ export function ElegantCheckoutForm({ business }: Props) {
           </div>
 
           {/* Totals */}
-          <div className="border-border/50 mt-6 space-y-3 border-t pt-6">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span className="text-foreground">{formatPrice(subtotal)}</span>
-            </div>
-            {discountAmount > 0 && discountCodeLabel && (
-              <div className="flex justify-between text-sm text-green-600">
-                <span>Discount ({discountCodeLabel})</span>
-                <span>-{formatPrice(discountAmount)}</span>
+          <div style={{
+            borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+            paddingTop: 16,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            marginBottom: 16,
+          }}>
+            {[
+              { label: "Subtotal", value: formatPrice(subtotal) },
+              ...(discountAmount > 0 && discountCodeLabel
+                ? [{ label: `Discount (${discountCodeLabel})`, value: `−${formatPrice(discountAmount)}`, green: true }]
+                : []),
+              {
+                label: "Shipping",
+                value: deliveryMethod === "pickup" ? "Pickup (free)" : shipping === 0 ? "Free" : formatPrice(shipping),
+              },
+            ].map(({ label, value, green }) => (
+              <div key={label} style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontFamily: "var(--font-mono, ui-monospace)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: green ? "var(--el-sage, #4a5240)" : "var(--el-ink-soft, #6b6659)" }}>
+                  {label}
+                </span>
+                <span style={{ fontFamily: "var(--font-sans, sans-serif)", fontSize: 13, color: green ? "var(--el-sage, #4a5240)" : "var(--el-ink, #1c1a17)" }}>
+                  {value}
+                </span>
               </div>
-            )}
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Shipping</span>
-              <span className="text-foreground">
-                {deliveryMethod === "pickup"
-                  ? "In-store pickup (free)"
-                  : shipping === 0
-                    ? "Free"
-                    : formatPrice(shipping)}
-              </span>
-            </div>
-            <div className="border-border/50 flex justify-between border-t pt-3">
-              <span className="text-foreground font-serif font-semibold">
+            ))}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", paddingTop: 12, borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))" }}>
+              <span style={{ fontFamily: "var(--font-mono, ui-monospace)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--el-ink, #1c1a17)" }}>
                 Estimated total
               </span>
-              <span className="text-foreground text-lg font-semibold">
+              <span style={{ fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)", fontSize: 24, color: "var(--el-ink, #1c1a17)" }}>
                 {formatPrice(finalTotal)}
               </span>
             </div>
-            <p className="text-muted-foreground text-xs">
-              Tax and final total are confirmed on Stripe Checkout.
-            </p>
           </div>
 
           {error && (
-            <Alert variant="destructive" className="mt-4">
+            <Alert variant="destructive" className="mb-4">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -568,24 +541,90 @@ export function ElegantCheckoutForm({ business }: Props) {
           <button
             type="submit"
             disabled={isProcessing}
-            className="bg-primary text-primary-foreground boty-transition hover:bg-primary/90 boty-shadow mt-6 flex w-full items-center justify-center gap-2 rounded-full py-4 font-medium disabled:opacity-50"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              width: "100%",
+              padding: "15px 24px",
+              borderRadius: 999,
+              fontSize: 13,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              fontWeight: 500,
+              background: "var(--el-ink, #1c1a17)",
+              color: "var(--el-paper, #fbf8f2)",
+              border: "none",
+              cursor: isProcessing ? "not-allowed" : "pointer",
+              opacity: isProcessing ? 0.7 : 1,
+              fontFamily: "var(--font-sans, sans-serif)",
+              transition: `background 0.4s ${ease}`,
+            }}
+            className="el-pay-btn"
           >
             {isProcessing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Processing...
+                Processing…
               </>
             ) : (
-              "Continue to Payment"
+              "Continue to payment"
             )}
           </button>
-
-          <p className="text-muted-foreground mt-4 text-center text-xs">
-            All transactions are secure and encrypted via Stripe. 100% Secure
-            and Encrypted Payments.
+          <p style={{ marginTop: 12, textAlign: "center", fontSize: 11, color: "var(--el-ink-soft, #6b6659)", fontFamily: "var(--font-mono, ui-monospace)", letterSpacing: "0.1em" }}>
+            Secure & encrypted via Stripe
           </p>
         </div>
       </div>
+
+      <style>{`
+        .el-co-input {
+          background: transparent !important;
+          border: 0 !important;
+          border-bottom: 1px solid var(--el-line, rgba(28,26,23,0.12)) !important;
+          border-radius: 0 !important;
+          padding: 10px 0 !important;
+          font-size: 15px !important;
+          box-shadow: none !important;
+          outline: none !important;
+        }
+        .el-co-input:focus {
+          border-bottom-color: var(--el-ink, #1c1a17) !important;
+          ring: none !important;
+        }
+        .el-pay-btn:hover:not(:disabled) { background: var(--el-sage, #4a5240) !important; }
+      `}</style>
     </form>
+  );
+}
+
+function ElegantField({
+  label,
+  htmlFor,
+  children,
+  style,
+}: {
+  label: string;
+  htmlFor: string;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, ...style }}>
+      <Label
+        htmlFor={htmlFor}
+        style={{
+          fontFamily: "var(--font-mono, ui-monospace)",
+          fontSize: 11,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "var(--el-ink-soft, #6b6659)",
+        }}
+      >
+        {label}
+      </Label>
+      {children}
+    </div>
   );
 }

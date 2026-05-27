@@ -4,19 +4,39 @@ import { ElegantCartContent } from "./elegant-cart-content";
 
 export function ElegantCartPage({ business: _ }: DefaultCartPageTemplateProps) {
   return (
-    <div className="min-h-screen">
-      <section className="bg-secondary/30 py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <p className="text-muted-foreground mb-2 text-sm tracking-widest uppercase">
+    <div style={{ background: "var(--el-cream, #f5f1ea)", minHeight: "100vh" }}>
+      {/* Header */}
+      <section style={{ padding: "48px 40px 40px" }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto" }}>
+          <span style={{
+            fontFamily: "var(--font-mono, ui-monospace)",
+            fontSize: 11,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "var(--el-ink-soft, #6b6659)",
+            display: "block",
+            marginBottom: 16,
+          }}>
             Review
-          </p>
-          <h1 className="text-foreground font-serif text-4xl font-light tracking-wide">
-            Your Cart
+          </span>
+          <h1 style={{
+            fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+            fontWeight: 400,
+            fontSize: "clamp(48px, 7vw, 84px)",
+            lineHeight: 0.95,
+            letterSpacing: "-0.01em",
+            color: "var(--el-ink, #1c1a17)",
+          }}>
+            Your bag.
           </h1>
         </div>
       </section>
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-        <ElegantCartContent />
+
+      {/* Content */}
+      <section style={{ padding: "0 40px 80px" }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto" }}>
+          <ElegantCartContent />
+        </div>
       </section>
     </div>
   );

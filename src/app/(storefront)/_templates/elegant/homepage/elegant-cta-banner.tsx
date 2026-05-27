@@ -1,96 +1,146 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Flower2, Globe, Leaf } from "lucide-react";
+import { Check } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 
 import { resolveFields } from "..";
+
+const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
+
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.12 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return { ref, visible };
+}
 
 export function ElegantCTABanner({
   homepage,
 }: {
   homepage: RouterOutputs["business"]["getHomepage"];
 }) {
-  const [isVisible, setIsVisible] = useState(false);
-  const bannerRef = useRef<HTMLDivElement>(null);
+  const { ref, visible } = useReveal();
   const customFields = homepage?.siteContent?.customFields;
 
-  // const themeSpecificFields: Record<string, string> = getThemeFields(
-  //   "elegant",
-  //   customFields as unknown,
-  // );
-
   const f = resolveFields(customFields, [
+    "elegant.cta.background",
     "elegant.cta.title",
     "elegant.cta.pointone",
     "elegant.cta.pointtwo",
     "elegant.cta.pointthree",
   ]);
 
-  console.log(f["elegant.cta.title"]);
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 },
-    );
+  const bgImage = f["elegant.cta.background"] ?? "";
+  const title = f["elegant.cta.title"] ?? "100% Natural";
+  const points = [
+    f["elegant.cta.pointone"] ?? "No Harsh Chemicals",
+    f["elegant.cta.pointtwo"] ?? "Plant-Based Goodness",
+    f["elegant.cta.pointthree"] ?? "Ethically Sourced",
+  ].filter(Boolean);
 
-    if (bannerRef.current) {
-      observer.observe(bannerRef.current);
-    }
-
-    return () => {
-      if (bannerRef.current) {
-        observer.unobserve(bannerRef.current);
-      }
-    };
-  }, []);
+  const hasBg = bgImage && bgImage !== "/placeholder.svg";
 
   return (
-    <section className="bg-background py-24">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <section
+      style={{
+        padding: "80px 40px",
+        background: "var(--el-cream-2, #ebe6dc)",
+      }}
+    >
+      <div style={{ maxWidth: 1360, margin: "0 auto" }}>
         <div
-          ref={bannerRef}
-          className={`bg-accent relative flex min-h-[400px] flex-col justify-center overflow-hidden rounded-3xl p-12 transition-all duration-700 ease-out md:p-16 ${
-            isVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
-          }`}
+          ref={ref}
+          style={{
+            position: "relative",
+            minHeight: 400,
+            borderRadius: 12,
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            padding: "60px 64px",
+            background: hasBg ? undefined : "var(--el-ink, #1c1a17)",
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(24px)",
+            transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+          }}
         >
-          {/* Background Image */}
-          <Image
-            src="/images/bf965cf4-e728-4e72-ab1b-16b1cd8f1822.png"
-            alt="Natural ingredients"
-            fill
-            className="object-cover"
+          {hasBg && (
+            <Image
+              src={bgImage}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="100vw"
+            />
+          )}
+          {/* Dark overlay */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(28, 26, 23, 0.55)",
+            }}
           />
 
-          <div className="relative z-10 max-w-2xl text-left">
-            <h3 className="mb-4 text-4xl text-white md:text-5xl lg:text-5xl">
-              100% Natural
-            </h3>
-            <h3 className="mb-8 text-3xl text-white/70 md:text-4xl lg:text-5xl">
-              100% You
-            </h3>
+          {/* Content */}
+          <div style={{ position: "relative", zIndex: 1, maxWidth: 560 }}>
+            <h2
+              style={{
+                fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                fontWeight: 400,
+                fontSize: "clamp(40px, 5vw, 64px)",
+                lineHeight: 1.05,
+                letterSpacing: "-0.01em",
+                color: "var(--el-paper, #fbf8f2)",
+                marginBottom: 28,
+              }}
+            >
+              {title}
+            </h2>
 
-            <div className="flex flex-col items-start gap-4">
-              <div className="flex items-center gap-3 text-white/90">
-                <Leaf className="h-5 w-5 flex-shrink-0" strokeWidth={1} />
-                <span className="text-base">No Harsh Chemicals</span>
-              </div>
-              <div className="flex items-center gap-3 text-white/90">
-                <Flower2 className="h-5 w-5 flex-shrink-0" strokeWidth={1} />
-                <span className="text-base">Plant-Based Goodness</span>
-              </div>
-              <div className="flex items-center gap-3 text-white/90">
-                <Globe className="h-5 w-5 flex-shrink-0" strokeWidth={1} />
-                <span className="text-base">Ethically Sourced</span>
-              </div>
-            </div>
+            <ul style={{ listStyle: "none" }}>
+              {points.map((point, i) => (
+                <li
+                  key={i}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    marginBottom: 14,
+                    color: "rgba(255,255,255,0.9)",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    fontSize: 15,
+                  }}
+                >
+                  <Check
+                    style={{
+                      width: 16,
+                      height: 16,
+                      flexShrink: 0,
+                      color: "var(--el-sage-soft, #8a9474)",
+                    }}
+                  />
+                  {point}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

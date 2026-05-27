@@ -1,20 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { ArrowRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
 
 import { formatPrice } from "~/lib/prices";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "~/components/ui/drawer";
 import { useCart } from "~/providers/cart-context";
+
+const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 export function ElegantCartDrawer() {
   const {
@@ -28,163 +22,394 @@ export function ElegantCartDrawer() {
     isHydrated,
   } = useCart();
 
-  const shipping = 0;
-  const total = subtotal + shipping;
+  // Lock body scroll when open
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
 
-  if (!isHydrated) {
-    return null;
-  }
+  if (!isHydrated) return null;
 
   return (
     <>
-      <Drawer open={isOpen} onOpenChange={setIsOpen} direction="right">
-        <DrawerContent className="h-full w-full sm:max-w-[440px]">
-          <DrawerHeader className="border-border/50 border-b p-6 py-4">
-            <DrawerTitle className="font-serif text-2xl">Cart</DrawerTitle>
-            <DrawerDescription>
-              {itemCount} {itemCount === 1 ? "item" : "items"}
-            </DrawerDescription>
-          </DrawerHeader>
+      {/* Backdrop */}
+      <div
+        onClick={() => setIsOpen(false)}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(28, 26, 23, 0.4)",
+          backdropFilter: "blur(4px)",
+          zIndex: 200,
+          opacity: isOpen ? 1 : 0,
+          pointerEvents: isOpen ? "auto" : "none",
+          transition: `opacity 0.45s ${ease}`,
+        }}
+        aria-hidden
+      />
 
-          {/* Cart Items */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {items.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center text-center">
-                <ShoppingBag className="text-muted-foreground/50 mb-4 h-12 w-12" />
-                <p className="text-muted-foreground">Your cart is empty</p>
-                <DrawerClose asChild>
+      {/* Drawer */}
+      <aside
+        role="dialog"
+        aria-modal
+        aria-label="Shopping bag"
+        style={{
+          position: "fixed",
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: "min(460px, 100vw)",
+          background: "var(--el-paper, #fbf8f2)",
+          zIndex: 201,
+          display: "flex",
+          flexDirection: "column",
+          transform: isOpen ? "translateX(0)" : "translateX(100%)",
+          transition: `transform 0.55s ${ease}`,
+        }}
+      >
+        {/* Header */}
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "22px 28px",
+          borderBottom: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+          flexShrink: 0,
+        }}>
+          <h3 style={{
+            fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+            fontSize: 22,
+            fontWeight: 500,
+            color: "var(--el-ink, #1c1a17)",
+          }}>
+            Your bag{" "}
+            <span style={{
+              fontFamily: "var(--font-mono, ui-monospace)",
+              fontSize: 13,
+              letterSpacing: "0.1em",
+              color: "var(--el-ink-soft, #6b6659)",
+            }}>
+              ({itemCount})
+            </span>
+          </h3>
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close bag"
+            style={{
+              width: 36, height: 36,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 999,
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              color: "var(--el-ink, #1c1a17)",
+              transition: `background 0.3s ${ease}`,
+            }}
+            className="el-icon-btn"
+          >
+            <X style={{ width: 18, height: 18 }} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "8px 28px" }}>
+          {items.length === 0 ? (
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 18,
+              padding: "60px 0",
+              textAlign: "center",
+            }}>
+              <ShoppingBag style={{ width: 32, height: 32, color: "var(--el-ink-soft, #6b6659)" }} strokeWidth={1} />
+              <span style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 11,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+              }}>
+                Empty bag
+              </span>
+              <p style={{
+                fontFamily: "var(--font-serif, serif)",
+                fontSize: 26,
+                color: "var(--el-ink, #1c1a17)",
+              }}>
+                Nothing here yet.
+              </p>
+              <p style={{
+                fontSize: 15,
+                color: "var(--el-ink-soft, #6b6659)",
+                maxWidth: 240,
+                fontFamily: "var(--font-sans, sans-serif)",
+              }}>
+                Find something to take home.
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "12px 22px",
+                  borderRadius: 999,
+                  fontSize: 12,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                  background: "var(--el-sage, #4a5240)",
+                  color: "var(--el-paper, #fbf8f2)",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-sans, sans-serif)",
+                }}
+              >
+                Browse shop
+                <ArrowRight style={{ width: 13, height: 13 }} />
+              </button>
+            </div>
+          ) : (
+            items.map((item) => (
+              <div
+                key={`${item.productId}-${item.variantId}`}
+                style={{
+                  display: "flex",
+                  gap: 16,
+                  padding: "18px 0",
+                  borderBottom: "1px solid var(--el-line-2, rgba(28,26,23,0.06))",
+                }}
+              >
+                {/* Thumb */}
+                <div style={{
+                  width: 80,
+                  aspectRatio: "4/5",
+                  borderRadius: 6,
+                  flexShrink: 0,
+                  position: "relative",
+                  overflow: "hidden",
+                  background: "var(--el-cream-2, #ebe6dc)",
+                }}>
+                  {item.imageUrl && (
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.productName}
+                      fill
+                      className="object-cover"
+                      sizes="80px"
+                    />
+                  )}
+                </div>
+
+                {/* Info */}
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                  <div style={{
+                    fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                    fontSize: 17,
+                    fontWeight: 500,
+                    color: "var(--el-ink, #1c1a17)",
+                    lineHeight: 1.2,
+                  }}>
+                    {item.productName}
+                  </div>
+                  {item.variantName && (
+                    <div style={{
+                      fontFamily: "var(--font-mono, ui-monospace)",
+                      fontSize: 10,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "var(--el-ink-soft, #6b6659)",
+                    }}>
+                      {item.variantName}
+                    </div>
+                  )}
+                  {/* Qty stepper */}
+                  <div style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 12,
+                    border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                    borderRadius: 999,
+                    padding: "2px 4px",
+                    marginTop: 6,
+                    fontSize: 13,
+                    width: "fit-content",
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(item.productId, item.variantId, item.quantity - 1)}
+                      aria-label="Decrease quantity"
+                      style={{
+                        width: 24, height: 24,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: 999,
+                        border: "none",
+                        background: "transparent",
+                        cursor: "pointer",
+                        color: "var(--el-ink, #1c1a17)",
+                      }}
+                      className="el-qty-sm"
+                    >
+                      <Minus style={{ width: 11, height: 11 }} />
+                    </button>
+                    <span style={{ color: "var(--el-ink, #1c1a17)" }}>{item.quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(item.productId, item.variantId, item.quantity + 1)}
+                      aria-label="Increase quantity"
+                      style={{
+                        width: 24, height: 24,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: 999,
+                        border: "none",
+                        background: "transparent",
+                        cursor: "pointer",
+                        color: "var(--el-ink, #1c1a17)",
+                      }}
+                      className="el-qty-sm"
+                    >
+                      <Plus style={{ width: 11, height: 11 }} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Price + remove */}
+                <div style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  justifyContent: "space-between",
+                }}>
                   <button
                     type="button"
-                    className="text-primary mt-4 text-sm hover:underline"
+                    onClick={() => removeItem(item.productId, item.variantId)}
+                    aria-label={`Remove ${item.productName}`}
+                    style={{
+                      fontSize: 11,
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: "var(--el-ink-soft, #6b6659)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontFamily: "var(--font-mono, ui-monospace)",
+                    }}
                   >
-                    Continue Shopping
+                    Remove
                   </button>
-                </DrawerClose>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {items.map((item) => (
-                  <div key={item.productId} className="flex gap-4">
-                    {/* Product Image */}
-                    <div className="bg-muted relative h-24 w-24 shrink-0 overflow-hidden rounded-lg">
-                      <Image
-                        src={item.imageUrl ?? "/placeholder.svg"}
-                        alt={item.productName}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-
-                    {/* Product Details */}
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-foreground mb-1 font-serif text-base font-semibold">
-                        {item.productName}
-                      </h3>
-                      <p className="text-muted-foreground mb-3 text-sm">
-                        {item.variantName}
-                      </p>
-
-                      {/* Quantity Controls */}
-                      <div className="flex items-center gap-3">
-                        <div className="border-border flex items-center rounded-full border">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateQuantity(
-                                item.productId,
-                                item.variantId,
-                                item.quantity - 1,
-                              )
-                            }
-                            className="hover:bg-muted boty-transition rounded-l-full p-1.5"
-                            aria-label="Decrease quantity"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="px-3 text-sm font-medium">
-                            {item.quantity}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateQuantity(
-                                item.productId,
-                                item.variantId,
-                                item.quantity + 1,
-                              )
-                            }
-                            className="hover:bg-muted boty-transition rounded-r-full p-1.5"
-                            aria-label="Increase quantity"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            removeItem(item.productId, item.variantId)
-                          }
-                          className="text-muted-foreground hover:text-destructive boty-transition p-1.5"
-                          aria-label="Remove item"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Price */}
-                    <div className="text-right">
-                      <p className="text-foreground font-medium">
-                        {formatPrice(item.price * item.quantity)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {items.length > 0 && (
-            <DrawerFooter className="border-border/50 gap-4 border-t p-6">
-              {/* Summary */}
-              <div className="space-y-2 text-sm">
-                <div className="text-muted-foreground flex justify-between">
-                  <span>Subtotal</span>
-                  <span>{formatPrice(subtotal)}</span>
-                </div>
-                <div className="text-muted-foreground flex justify-between">
-                  <span>Shipping</span>
-                  <span>{shipping === 0 ? "Free" : formatPrice(shipping)}</span>
-                </div>
-                <div className="text-foreground border-border/50 flex justify-between border-t pt-2 text-base font-medium">
-                  <span>Total</span>
-                  <span>{formatPrice(total)}</span>
+                  <span style={{
+                    fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                    fontSize: 18,
+                    color: "var(--el-ink, #1c1a17)",
+                  }}>
+                    {formatPrice(item.price * item.quantity)}
+                  </span>
                 </div>
               </div>
-
-              {/* Checkout Button */}
-              <DrawerClose asChild>
-                <Link
-                  href="/checkout"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 boty-transition flex w-full items-center justify-center rounded-full py-4 font-medium"
-                >
-                  Checkout
-                </Link>
-              </DrawerClose>
-
-              <DrawerClose asChild>
-                <Link
-                  href="/cart"
-                  className="border-border text-foreground hover:bg-muted boty-transition flex w-full items-center justify-center rounded-full border py-4 font-medium"
-                >
-                  View Cart
-                </Link>
-              </DrawerClose>
-            </DrawerFooter>
+            ))
           )}
-        </DrawerContent>
-      </Drawer>
+        </div>
+
+        {/* Footer */}
+        {items.length > 0 && (
+          <div style={{
+            padding: "22px 28px",
+            borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+            flexShrink: 0,
+          }}>
+            {/* Subtotal row */}
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 14,
+            }}>
+              <span style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 12,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+              }}>
+                Subtotal
+              </span>
+              <span style={{
+                fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                fontSize: 22,
+                color: "var(--el-ink, #1c1a17)",
+              }}>
+                {formatPrice(subtotal)}
+              </span>
+            </div>
+            <p style={{
+              fontSize: 12,
+              color: "var(--el-ink-soft, #6b6659)",
+              marginBottom: 14,
+              fontFamily: "var(--font-sans, sans-serif)",
+            }}>
+              Shipping and taxes calculated at checkout.
+            </p>
+            <Link
+              href="/checkout"
+              onClick={() => setIsOpen(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                padding: "15px 24px",
+                borderRadius: 999,
+                fontSize: 13,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                fontWeight: 500,
+                background: "var(--el-ink, #1c1a17)",
+                color: "var(--el-paper, #fbf8f2)",
+                textDecoration: "none",
+                fontFamily: "var(--font-sans, sans-serif)",
+                transition: `background 0.4s ${ease}`,
+              }}
+              className="el-drawer-checkout"
+            >
+              Checkout
+              <ArrowRight style={{ width: 14, height: 14 }} />
+            </Link>
+            <Link
+              href="/cart"
+              onClick={() => setIsOpen(false)}
+              style={{
+                display: "block",
+                marginTop: 12,
+                width: "100%",
+                textAlign: "center",
+                fontSize: 12,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+                textDecoration: "none",
+                fontFamily: "var(--font-mono, ui-monospace)",
+              }}
+            >
+              View full bag
+            </Link>
+          </div>
+        )}
+      </aside>
+
+      <style>{`
+        .el-icon-btn:hover { background: rgba(28,26,23,0.06) !important; }
+        .el-qty-sm:hover { background: var(--el-cream-2, #ebe6dc) !important; }
+        .el-drawer-checkout:hover { background: var(--el-sage, #4a5240) !important; }
+      `}</style>
     </>
   );
 }

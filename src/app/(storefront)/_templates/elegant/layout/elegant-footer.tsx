@@ -1,78 +1,107 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { api } from "~/trpc/server";
 
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
+const DEFAULT_NAV_LINKS = [
+  { href: "/shop", label: "All Products" },
+  { href: "/collections", label: "Collections" },
   { href: "/about", label: "Our Story" },
-  { href: "/contact", label: "Contact Us" },
+  { href: "/blog", label: "Journal" },
+];
+
+const BRAND_LINKS = [
+  { href: "/testimonials", label: "Reviews" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
   const phone = business?.phoneNumber;
-  const address = business?.businessAddress;
+  const policies = await api.content.getSimplifiedPages({ type: "policy" });
 
   const navigationItems = business?.siteContent?.navigationItems as
     | { label: string; href: string }[]
     | undefined;
 
-  const policies = await api.content.getSimplifiedPages({ type: "policy" });
-
   const socialLinks = business?.siteContent?.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-      }
+    | { instagram?: string; facebook?: string; twitter?: string }
     | undefined;
 
-  return (
-    <footer className="bg-card relative overflow-hidden pt-20 pb-10">
-      {/* Giant Background Text */}
-      <div className="pointer-events-none absolute bottom-0 left-1/2 z-0 -translate-x-1/2 select-none">
-        <span className="font-serif text-[200px] leading-none font-bold whitespace-nowrap text-white/20 sm:text-[200px] md:text-[400px] lg:text-[400px] xl:text-[400px]">
-          {business?.name}
-        </span>
-      </div>
+  const navLinks = navigationItems ?? DEFAULT_NAV_LINKS;
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mb-16 grid grid-cols-2 gap-10 md:grid-cols-4">
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
-            {business?.siteContent?.logoUrl ? (
-              <Image
-                src={business.siteContent.logoUrl}
-                alt={business.name}
-                width={40}
-                height={40}
-                className="bg-primary rounded-full"
-              />
-            ) : (
-              <h2 className="text-foreground mb-4 font-serif text-3xl">
-                {business?.name}
-              </h2>
-            )}
+  return (
+    <footer
+      style={{
+        background: "var(--el-ink, #1c1a17)",
+        color: "var(--el-paper, #fbf8f2)",
+        padding: "80px 40px 36px",
+        marginTop: 0,
+      }}
+    >
+      <div style={{ maxWidth: 1360, margin: "0 auto" }}>
+        {/* 4-column grid */}
+        <div
+          className="el-footer-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "2fr 1fr 1fr 1fr",
+            gap: 40,
+            paddingBottom: 60,
+            borderBottom: "1px solid rgba(255,255,255,0.12)",
+          }}
+        >
+          {/* Brand column */}
+          <div>
+            <div
+              style={{
+                fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                fontSize: 52,
+                fontStyle: "italic",
+                fontWeight: 500,
+                lineHeight: 0.9,
+                marginBottom: 22,
+                letterSpacing: "0.01em",
+              }}
+            >
+              <em>{business?.name}</em>
+            </div>
             {business?.siteContent?.footerText && (
-              <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
+              <p
+                style={{
+                  fontSize: 14,
+                  opacity: 0.7,
+                  maxWidth: 320,
+                  lineHeight: 1.65,
+                  marginBottom: 24,
+                  fontFamily: "var(--font-sans, sans-serif)",
+                }}
+              >
                 {business.siteContent.footerText}
               </p>
             )}
-
-            <div className="flex gap-4">
+            {/* Social icons */}
+            <div style={{ display: "flex", gap: 12 }}>
               {socialLinks?.instagram && (
                 <a
                   href={socialLinks.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-background text-foreground/60 hover:text-foreground boty-transition boty-shadow flex h-10 w-10 items-center justify-center rounded-full"
                   aria-label="Instagram"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 999,
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    color: "rgba(255,255,255,0.7)",
+                    transition: "border-color 0.3s, color 0.3s",
+                  }}
                 >
-                  <Instagram className="h-4 w-4" />
+                  <Instagram style={{ width: 15, height: 15 }} />
                 </a>
               )}
               {socialLinks?.facebook && (
@@ -80,10 +109,19 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                   href={socialLinks.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-background text-foreground/60 hover:text-foreground boty-transition boty-shadow flex h-10 w-10 items-center justify-center rounded-full"
                   aria-label="Facebook"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 999,
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    color: "rgba(255,255,255,0.7)",
+                  }}
                 >
-                  <Facebook className="h-4 w-4" />
+                  <Facebook style={{ width: 15, height: 15 }} />
                 </a>
               )}
               {socialLinks?.twitter && (
@@ -91,90 +129,167 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                   href={socialLinks.twitter}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-background text-foreground/60 hover:text-foreground boty-transition boty-shadow flex h-10 w-10 items-center justify-center rounded-full"
-                  aria-label="Twitter"
+                  aria-label="X / Twitter"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 999,
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    color: "rgba(255,255,255,0.7)",
+                  }}
                 >
-                  <Twitter className="h-4 w-4" />
+                  <Twitter style={{ width: 15, height: 15 }} />
                 </a>
               )}
             </div>
           </div>
 
-          {/* Nav Links */}
-          <div>
-            <h3 className="text-foreground mb-4 font-medium">Navigate</h3>
-            <ul className="space-y-3">
-              {(navigationItems ?? NAV_LINKS).map((link) => (
-                <li key={link.label + link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-muted-foreground hover:text-foreground boty-transition text-sm"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Shop column */}
+          <FooterColumn title="Shop" links={navLinks} />
 
-          {/* Policies */}
+          {/* Brand links column */}
+          <FooterColumn title={business?.name ?? "Brand"} links={BRAND_LINKS} />
+
+          {/* Policies / Contact column */}
           <div>
-            <h3 className="text-foreground mb-4 font-medium">Policies</h3>
-            <ul className="space-y-3">
+            <FooterColHeading>Info</FooterColHeading>
+            <ul style={{ listStyle: "none" }}>
               {policies.map((policy) => (
-                <li key={policy.id}>
+                <li key={policy.id} style={{ marginBottom: 10 }}>
                   <Link
                     href={policy.slug}
-                    className="text-muted-foreground hover:text-foreground boty-transition text-sm"
+                    style={{
+                      fontSize: 14,
+                      opacity: 0.8,
+                      color: "var(--el-paper, #fbf8f2)",
+                      textDecoration: "none",
+                      fontFamily: "var(--font-sans, sans-serif)",
+                      transition: "opacity 0.3s",
+                    }}
                   >
                     {policy.title}
                   </Link>
                 </li>
               ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          {(email ?? phone ?? address) && (
-            <div>
-              <h3 className="text-foreground mb-4 font-medium">Contact</h3>
-              <address className="flex flex-col gap-3 not-italic">
-                {!!address && (
-                  <span className="text-muted-foreground text-sm">
-                    {address}
-                  </span>
-                )}
-                {!!phone && (
-                  <a
-                    href={`tel:${phone.replace(/\D/g, "")}`}
-                    className="text-muted-foreground hover:text-foreground boty-transition text-sm"
-                  >
-                    {phone}
-                  </a>
-                )}
-                {!!email && (
+              {email && (
+                <li style={{ marginBottom: 10 }}>
                   <a
                     href={`mailto:${email}`}
-                    className="text-muted-foreground hover:text-foreground boty-transition text-sm"
+                    style={{
+                      fontSize: 14,
+                      opacity: 0.8,
+                      color: "var(--el-paper, #fbf8f2)",
+                      textDecoration: "none",
+                    }}
                   >
                     {email}
                   </a>
-                )}
-              </address>
-            </div>
-          )}
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="border-border/50 border-t pt-10">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-muted-foreground text-sm">
-              © {new Date().getFullYear()} {business?.name}. All rights
-              reserved.
-            </p>
+                </li>
+              )}
+              {phone && (
+                <li>
+                  <a
+                    href={`tel:${phone.replace(/\D/g, "")}`}
+                    style={{
+                      fontSize: 14,
+                      opacity: 0.8,
+                      color: "var(--el-paper, #fbf8f2)",
+                      textDecoration: "none",
+                    }}
+                  >
+                    {phone}
+                  </a>
+                </li>
+              )}
+            </ul>
           </div>
         </div>
+
+        {/* Bottom bar */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingTop: 32,
+            fontFamily: "var(--font-mono, ui-monospace)",
+            fontSize: 11,
+            letterSpacing: "0.12em",
+            color: "rgba(255,255,255,0.45)",
+            textTransform: "uppercase",
+          }}
+        >
+          <span>© {new Date().getFullYear()} {business?.name}</span>
+          <span>Made with care</span>
+        </div>
       </div>
+
+      <style>{`
+        @media (max-width: 760px) {
+          .el-footer-grid {
+            grid-template-columns: 1fr 1fr !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .el-footer-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </footer>
+  );
+}
+
+function FooterColHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h4
+      style={{
+        fontFamily: "var(--font-mono, ui-monospace)",
+        fontSize: 11,
+        fontWeight: 400,
+        letterSpacing: "0.22em",
+        textTransform: "uppercase",
+        color: "rgba(255,255,255,0.5)",
+        marginBottom: 18,
+      }}
+    >
+      {children}
+    </h4>
+  );
+}
+
+function FooterColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: { href: string; label: string }[];
+}) {
+  return (
+    <div>
+      <FooterColHeading>{title}</FooterColHeading>
+      <ul style={{ listStyle: "none" }}>
+        {links.map((link) => (
+          <li key={link.href + link.label} style={{ marginBottom: 10 }}>
+            <Link
+              href={link.href}
+              style={{
+                fontSize: 14,
+                opacity: 0.8,
+                color: "var(--el-paper, #fbf8f2)",
+                textDecoration: "none",
+                fontFamily: "var(--font-sans, sans-serif)",
+                transition: "opacity 0.3s",
+              }}
+            >
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

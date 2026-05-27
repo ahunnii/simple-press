@@ -1,25 +1,11 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-
-const heroMediaStyle = {
-  position: "absolute" as const,
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  minWidth: "100%",
-  minHeight: "100%",
-  width: "auto",
-  height: "auto",
-  objectFit: "cover" as const,
-};
-
-const HERO_VIDEO_SRC =
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/f3d8cad2-8091-4809-aac0-eaac74b0be7c-Z4XUCz3CRR7qjaOsoq6rFmbJfIRdgs.mp4";
 
 type Props = {
   homepage: RouterOutputs["business"]["getHomepage"];
@@ -31,8 +17,11 @@ type Props = {
   heroDescription?: string;
   heroButtonText?: string;
   heroButtonLink?: string;
-  heroTagline?: string;
 };
+
+const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
+const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+
 export function ElegantHero({
   tagline,
   heroImage,
@@ -43,104 +32,281 @@ export function ElegantHero({
   heroButtonText,
   heroButtonLink,
 }: Props) {
-  const heroImageUrl = heroImage ?? "";
-  const useVideo = !!heroVideo?.trim();
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setShown(true), 60);
+    return () => clearTimeout(t);
+  }, []);
+
+  const hasVideo = !!heroVideo?.trim();
+  const hasImage = !!heroImage?.trim() && heroImage !== "/placeholder.svg";
+
+  const revealStyle = (delay: number): React.CSSProperties => ({
+    opacity: shown ? 1 : 0,
+    transform: shown ? "translateY(0)" : "translateY(24px)",
+    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+  });
+
+  const maskStyle = (delay: number): React.CSSProperties => ({
+    display: "block",
+    transform: shown ? "translateY(0)" : "translateY(110%)",
+    transition: `transform 1.1s ${easeOut} ${delay}s`,
+  });
 
   return (
     <section
-      className="relative flex min-h-screen items-center overflow-hidden"
-      style={{ backgroundColor: "#e3e1e2" }}
+      style={{
+        padding: "0 16px",
+        marginTop: -100,
+        background: "var(--el-cream, #f5f1ea)",
+        position: "relative",
+      }}
     >
-      {/* Background media (image or video) */}
       <div
-        className="border-border/50 border-b p-6 py-2"
-        style={{ backgroundColor: "#e3e1e2" }}
+        className="el-hero-grid"
+        style={{
+          position: "relative",
+          minHeight: "100vh",
+          paddingTop: 110,
+          display: "grid",
+          gridTemplateColumns: "1.05fr 0.95fr",
+          gap: 40,
+          alignItems: "center",
+          overflow: "hidden",
+        }}
       >
-        {!useVideo ? (
-          <>
-            <img
-              src={heroImageUrl}
-              alt=""
-              className="pointer-events-none select-none"
-              style={heroMediaStyle}
-            />
-            {/* Dark overlay for contrast when using hero image
-            <div
-              className="pointer-events-none absolute inset-0 bg-black/20"
-              aria-hidden
-            /> */}
-          </>
-        ) : (
-          <video autoPlay muted loop playsInline style={heroMediaStyle}>
-            <source src={heroVideo ?? HERO_VIDEO_SRC} type="video/mp4" />
-          </video>
-        )}
-        {/* Bottom fade gradient */}
-        <div className="from-background via-background/50 absolute right-0 bottom-0 left-0 h-[60%] bg-gradient-to-t to-transparent" />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 mr-14 w-full pt-20 lg:mr-0">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto w-full text-center lg:mx-0 lg:max-w-xl lg:text-left">
+        {/* ── Text column ── */}
+        <div style={{ padding: "0 24px 48px 24px" }}>
+          {/* Eyebrow */}
+          <div style={revealStyle(0)}>
             <span
-              className="animate-blur-in mb-6 block text-sm tracking-normal text-black uppercase opacity-0"
-              style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}
+              style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 11,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 14,
+                marginBottom: 28,
+              }}
             >
-              {tagline}
-            </span>
-            <h2 className="mb-6 font-serif text-5xl leading-[1.1] text-balance text-black md:text-6xl lg:text-7xl">
               <span
-                className="animate-blur-in block font-semibold opacity-0 text-shadow-xs"
                 style={{
-                  animationDelay: "0.4s",
-                  animationFillMode: "forwards",
+                  display: "inline-block",
+                  width: 28,
+                  height: 1,
+                  background: "currentColor",
+                  flexShrink: 0,
                 }}
-              >
+              />
+              {tagline ?? "A thoughtful studio"}
+            </span>
+          </div>
+
+          {/* Display heading with mask-reveal lines */}
+          <h1
+            style={{
+              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+              fontWeight: 400,
+              fontSize: "clamp(52px, 8.5vw, 118px)",
+              lineHeight: 0.95,
+              letterSpacing: "-0.01em",
+              color: "var(--el-ink, #1c1a17)",
+            }}
+          >
+            <span style={{ display: "block", overflow: "hidden" }}>
+              <span style={maskStyle(0.08)}>
                 {heroTitleLine1 ?? "Made with care."}
               </span>
-              <span
-                className="animate-blur-in block text-7xl font-semibold opacity-0 text-shadow-xs xl:text-9xl"
+            </span>
+            <span style={{ display: "block", overflow: "hidden" }}>
+              <em style={{ ...maskStyle(0.2), fontStyle: "italic" }}>
+                {heroTitleLine2 ?? "Especially for you."}
+              </em>
+            </span>
+          </h1>
+
+          {/* Description */}
+          <p
+            style={{
+              ...revealStyle(0.5),
+              marginTop: 32,
+              maxWidth: 460,
+              fontSize: 17,
+              lineHeight: 1.65,
+              color: "var(--el-ink-soft, #6b6659)",
+              fontFamily: "var(--font-sans, sans-serif)",
+            }}
+          >
+            {heroDescription ?? "Explore our collection."}
+          </p>
+
+          {/* CTAs */}
+          <div
+            style={{
+              ...revealStyle(0.65),
+              marginTop: 36,
+              display: "flex",
+              gap: 14,
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+          >
+            <Link
+              href={heroButtonLink ?? "/shop"}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "14px 26px",
+                borderRadius: 999,
+                fontSize: 13,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                fontWeight: 500,
+                background: "var(--el-ink, #1c1a17)",
+                color: "var(--el-paper, #fbf8f2)",
+                textDecoration: "none",
+                transition: `background 0.4s ${ease}, transform 0.4s ${ease}`,
+                fontFamily: "var(--font-sans, sans-serif)",
+              }}
+              className="el-btn-primary"
+            >
+              {heroButtonText ?? "Shop Now"}
+              <ArrowRight style={{ width: 14, height: 14 }} />
+            </Link>
+            <Link
+              href="/about"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "14px 26px",
+                borderRadius: 999,
+                fontSize: 13,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                fontWeight: 500,
+                background: "transparent",
+                color: "var(--el-ink, #1c1a17)",
+                border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                textDecoration: "none",
+                transition: `background 0.4s ${ease}, color 0.4s ${ease}`,
+                fontFamily: "var(--font-sans, sans-serif)",
+              }}
+              className="el-btn-ghost"
+            >
+              Our story
+            </Link>
+          </div>
+        </div>
+
+        {/* ── Visual column ── */}
+        <div
+          style={{
+            position: "relative",
+            height: "min(82vh, 760px)",
+            padding: "0 24px",
+          }}
+        >
+          {/* Main hero media */}
+          <div
+            style={{
+              ...revealStyle(0.3),
+              position: "absolute",
+              top: "4%",
+              left: "8%",
+              right: "8%",
+              bottom: "10%",
+              borderRadius: 8,
+              overflow: "hidden",
+              background: "var(--el-cream-2, #ebe6dc)",
+            }}
+          >
+            {hasVideo ? (
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
                 style={{
-                  animationDelay: "0.6s",
-                  animationFillMode: "forwards",
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
                 }}
               >
-                {heroTitleLine2 ?? "Especially for you."}
-              </span>
-            </h2>
-            <p
-              className="animate-blur-in mx-auto mb-10 max-w-md text-lg leading-relaxed text-black opacity-0 lg:mx-0"
-              style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
-            >
-              {heroDescription ?? "Check out our products!"}
-            </p>
+                <source src={heroVideo} type="video/mp4" />
+              </video>
+            ) : hasImage ? (
+              <Image
+                src={heroImage!}
+                alt=""
+                fill
+                className="object-cover"
+                priority
+                style={{ transition: `transform 1.2s ${ease}` }}
+              />
+            ) : null}
+          </div>
 
-            <div
-              className="animate-blur-in flex flex-col justify-center gap-4 opacity-0 sm:flex-row lg:justify-start"
-              style={{ animationDelay: "1s", animationFillMode: "forwards" }}
-            >
-              <Link
-                href={heroButtonLink ?? "/shop"}
-                className="group bg-primary text-primary-foreground boty-transition hover:bg-primary/90 boty-shadow inline-flex items-center justify-center gap-3 rounded-full px-8 py-4 text-sm tracking-wide"
-              >
-                {heroButtonText ?? "Shop Now"}
-                <ArrowRight className="boty-transition h-4 w-4 group-hover:translate-x-1" />
-              </Link>
-            </div>
+          {/* Floating scroll indicator */}
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: "4%",
+              transform: "translateX(-50%)",
+              display: "inline-flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 10,
+              fontFamily: "var(--font-mono, ui-monospace)",
+              fontSize: 10,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "var(--el-ink-soft, #6b6659)",
+              ...revealStyle(0.9),
+            }}
+          >
+            Scroll
+            <span
+              style={{
+                display: "block",
+                width: 1,
+                height: 36,
+                background:
+                  "linear-gradient(180deg, var(--el-ink-soft, #6b6659), transparent)",
+                animation: "el-scroll-pulse 2.2s cubic-bezier(0.22,1,0.36,1) infinite",
+              }}
+            />
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-black">
-        <span className="text-xs font-bold tracking-widest uppercase">
-          Scroll
-        </span>
-        <div className="bg-foreground/20 relative h-12 w-px overflow-hidden">
-          <div className="bg-foreground/60 absolute top-0 left-0 h-1/2 w-full animate-pulse" />
-        </div>
-      </div>
+      <style>{`
+        @media (max-width: 900px) {
+          .el-hero-grid {
+            grid-template-columns: 1fr !important;
+            min-height: auto !important;
+          }
+          .el-hero-grid > div:nth-child(2) {
+            height: 60vh !important;
+            min-height: 400px;
+          }
+        }
+        .el-btn-primary:hover {
+          background: var(--el-sage, #4a5240) !important;
+          transform: translateY(-1px);
+        }
+        .el-btn-ghost:hover {
+          background: var(--el-ink, #1c1a17) !important;
+          color: var(--el-paper, #fbf8f2) !important;
+        }
+      `}</style>
     </section>
   );
 }

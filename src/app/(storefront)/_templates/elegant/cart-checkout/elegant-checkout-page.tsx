@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 
@@ -10,23 +10,62 @@ export async function ElegantCheckoutPage({
 }: DefaultCheckoutPageTemplateProps) {
   if (!business.isStripeConnected) {
     return (
-      <div className="flex min-h-[60vh] flex-1 items-center justify-center px-6 py-24">
-        <div className="max-w-md text-center">
-          <span className="text-primary mb-4 block text-sm tracking-[0.3em] uppercase">
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "60vh",
+        padding: "80px 40px",
+        background: "var(--el-cream, #f5f1ea)",
+      }}>
+        <div style={{ maxWidth: 480, textAlign: "center" }}>
+          <span style={{
+            fontFamily: "var(--font-mono, ui-monospace)",
+            fontSize: 11,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "var(--el-ink-soft, #6b6659)",
+            display: "block",
+            marginBottom: 16,
+          }}>
             Checkout
           </span>
-          <h1 className="text-foreground mb-4 font-serif text-3xl">
-            Checkout Unavailable
+          <h1 style={{
+            fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+            fontWeight: 400,
+            fontSize: "clamp(32px, 4vw, 48px)",
+            color: "var(--el-ink, #1c1a17)",
+            marginBottom: 16,
+          }}>
+            Checkout unavailable
           </h1>
-          <p className="text-muted-foreground mb-8">
-            This store hasn&apos;t set up payment processing yet. Please contact
-            the store owner.
+          <p style={{
+            fontSize: 16,
+            color: "var(--el-ink-soft, #6b6659)",
+            lineHeight: 1.65,
+            marginBottom: 32,
+            fontFamily: "var(--font-sans, sans-serif)",
+          }}>
+            This store hasn&apos;t set up payment processing yet. Please
+            contact the store owner.
           </p>
-          <Link
-            href="/shop"
-            className="bg-primary text-primary-foreground boty-transition hover:bg-primary/90 boty-shadow inline-flex items-center justify-center rounded-full px-8 py-3 text-sm tracking-wide"
-          >
-            Continue Shopping
+          <Link href="/shop" style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "14px 26px",
+            borderRadius: 999,
+            fontSize: 13,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontWeight: 500,
+            background: "var(--el-ink, #1c1a17)",
+            color: "var(--el-paper, #fbf8f2)",
+            textDecoration: "none",
+            fontFamily: "var(--font-sans, sans-serif)",
+          }}>
+            Continue shopping
+            <ArrowRight style={{ width: 14, height: 14 }} />
           </Link>
         </div>
       </div>
@@ -34,24 +73,54 @@ export async function ElegantCheckoutPage({
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-      <div className="mb-10">
-        <Link
-          href="/cart"
-          className="text-muted-foreground boty-transition hover:text-foreground mb-6 inline-flex items-center gap-1.5 text-sm"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Cart
-        </Link>
-        <span className="text-primary mt-4 block text-sm tracking-[0.3em] uppercase">
-          Secure Checkout
-        </span>
-        <h1 className="text-foreground font-serif text-4xl font-semibold md:text-5xl">
-          Checkout
-        </h1>
-      </div>
+    <div style={{ background: "var(--el-cream, #f5f1ea)", minHeight: "100vh" }}>
+      <section style={{ padding: "24px 40px 80px" }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto" }}>
+          {/* Back link */}
+          <Link href="/cart" style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            fontFamily: "var(--font-mono, ui-monospace)",
+            fontSize: 11,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "var(--el-ink-soft, #6b6659)",
+            textDecoration: "none",
+            marginBottom: 32,
+          }}>
+            <ArrowLeft style={{ width: 13, height: 13 }} />
+            Back to bag
+          </Link>
 
-      <ElegantCheckoutForm business={business} />
-    </section>
+          {/* Heading */}
+          <div style={{ marginBottom: 48 }}>
+            <span style={{
+              fontFamily: "var(--font-mono, ui-monospace)",
+              fontSize: 11,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "var(--el-ink-soft, #6b6659)",
+              display: "block",
+              marginBottom: 14,
+            }}>
+              Secure checkout
+            </span>
+            <h1 style={{
+              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+              fontWeight: 400,
+              fontSize: "clamp(40px, 5.5vw, 72px)",
+              lineHeight: 0.95,
+              letterSpacing: "-0.01em",
+              color: "var(--el-ink, #1c1a17)",
+            }}>
+              Almost there.
+            </h1>
+          </div>
+
+          <ElegantCheckoutForm business={business} />
+        </div>
+      </section>
+    </div>
   );
 }

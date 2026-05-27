@@ -3,9 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookUser, Bell, Lock, Package, Settings } from "lucide-react";
-
-import { cn } from "~/lib/utils";
+import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/account/orders", label: "Orders", icon: Package },
@@ -15,6 +13,8 @@ const NAV_ITEMS = [
   { href: "/account/preferences", label: "Preferences", icon: Bell },
 ] as const;
 
+const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+
 type Props = {
   children: ReactNode;
   heading: string;
@@ -23,64 +23,140 @@ type Props = {
 export function ElegantAccountLayout({ children, heading }: Props) {
   const pathname = usePathname();
 
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + "/");
+
   return (
-    <>
-      <section className="bg-secondary/30 py-16">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <p className="mb-2 text-sm tracking-widest text-muted-foreground uppercase">
+    <div style={{ background: "var(--el-cream, #f5f1ea)", minHeight: "100vh" }}>
+      {/* ── Page header ── */}
+      <section style={{ padding: "48px 40px 32px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <span
+            style={{
+              fontFamily: "var(--font-mono, ui-monospace)",
+              fontSize: 11,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "var(--el-ink-soft, #6b6659)",
+              display: "block",
+              marginBottom: 12,
+            }}
+          >
             Account
-          </p>
-          <h1 className="font-serif text-4xl font-light tracking-wide text-foreground">
+          </span>
+          <h1
+            style={{
+              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+              fontWeight: 400,
+              fontSize: "clamp(36px, 5vw, 60px)",
+              lineHeight: 0.97,
+              letterSpacing: "-0.01em",
+              color: "var(--el-ink, #1c1a17)",
+            }}
+          >
             {heading}
           </h1>
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-        {/* Mobile: horizontal scrolling tabs */}
-        <nav
-          className="mb-8 flex gap-1 overflow-x-auto pb-2 md:hidden"
-          aria-label="Account navigation"
-        >
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(href + "/");
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
-                  active
-                    ? "bg-foreground text-background"
-                    : "bg-secondary text-foreground hover:bg-secondary/70",
-                )}
-              >
-                <Icon className="h-4 w-4" aria-hidden />
-                {label}
-              </Link>
-            );
-          })}
-        </nav>
+      {/* ── Mobile tabs ── */}
+      <nav
+        aria-label="Account navigation"
+        style={{
+          padding: "0 40px",
+          overflowX: "auto",
+          display: "flex",
+          gap: 8,
+          paddingBottom: 0,
+          borderBottom: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+          marginBottom: 0,
+        }}
+        className="md:hidden el-account-mobile-nav"
+      >
+        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          const active = isActive(href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "10px 16px",
+                fontSize: 12,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                fontFamily: "var(--font-mono, ui-monospace)",
+                color: active ? "var(--el-ink, #1c1a17)" : "var(--el-ink-soft, #6b6659)",
+                textDecoration: "none",
+                borderBottom: active
+                  ? "1px solid var(--el-ink, #1c1a17)"
+                  : "1px solid transparent",
+                marginBottom: -1,
+                flexShrink: 0,
+                transition: `color 0.3s ${ease}`,
+              }}
+            >
+              <Icon
+                style={{ width: 13, height: 13 }}
+                aria-hidden
+              />
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
 
-        {/* Desktop: sidebar + content */}
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-[200px_1fr]">
-          <nav className="hidden md:block" aria-label="Account navigation">
-            <ul className="space-y-0.5">
+      {/* ── Body: sidebar + content ── */}
+      <section style={{ padding: "40px 40px 80px" }}>
+        <div
+          style={{
+            maxWidth: 1100,
+            margin: "0 auto",
+            display: "grid",
+            gridTemplateColumns: "180px 1fr",
+            gap: 60,
+            alignItems: "start",
+          }}
+          className="el-account-grid"
+        >
+          {/* Desktop sidebar */}
+          <nav
+            aria-label="Account navigation"
+            className="hidden md:block"
+            style={{ position: "sticky", top: 120 }}
+          >
+            <ul style={{ listStyle: "none" }}>
               {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-                const active =
-                  pathname === href || pathname.startsWith(href + "/");
+                const active = isActive(href);
                 return (
                   <li key={href}>
                     <Link
                       href={href}
-                      className={cn(
-                        "flex items-center gap-3 border-l-2 py-2.5 pl-3 pr-4 text-sm font-medium transition-colors",
-                        active
-                          ? "border-foreground text-foreground"
-                          : "border-transparent text-foreground/50 hover:border-foreground/30 hover:text-foreground",
-                      )}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "10px 0 10px 16px",
+                        borderLeft: active
+                          ? "1px solid var(--el-ink, #1c1a17)"
+                          : "1px solid transparent",
+                        fontSize: 13,
+                        letterSpacing: "0.02em",
+                        fontFamily: "var(--font-sans, sans-serif)",
+                        color: active
+                          ? "var(--el-ink, #1c1a17)"
+                          : "var(--el-ink-soft, #6b6659)",
+                        textDecoration: "none",
+                        transition: `color 0.3s ${ease}, border-color 0.3s ${ease}`,
+                      }}
+                      className="el-account-nav-link"
                     >
-                      <Icon className="h-4 w-4 shrink-0" aria-hidden />
+                      <Icon
+                        style={{ width: 14, height: 14, flexShrink: 0 }}
+                        aria-hidden
+                      />
                       {label}
                     </Link>
                   </li>
@@ -89,9 +165,25 @@ export function ElegantAccountLayout({ children, heading }: Props) {
             </ul>
           </nav>
 
-          <div className="min-w-0">{children}</div>
+          {/* Content */}
+          <div style={{ minWidth: 0 }}>{children}</div>
         </div>
       </section>
-    </>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .el-account-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .el-account-mobile-nav {
+            display: flex !important;
+          }
+        }
+        .el-account-nav-link:hover {
+          color: var(--el-ink, #1c1a17) !important;
+          border-left-color: rgba(28,26,23,0.3) !important;
+        }
+      `}</style>
+    </div>
   );
 }
