@@ -15,8 +15,8 @@ export async function DefaultCheckoutPage({
             Checkout unavailable
           </h1>
           <p className="mt-3 text-sm text-[#6b6b6b]">
-            This store hasn&apos;t set up payment processing yet. Please
-            contact the store owner.
+            This store hasn&apos;t set up payment processing yet. Please contact
+            the store owner.
           </p>
           <Link
             href="/shop"
@@ -33,15 +33,15 @@ export async function DefaultCheckoutPage({
     <div>
       {/* Minimal checkout header */}
       <div className="border-b border-[#e8e8e8] px-6 py-5 lg:px-8">
-        <div className="mx-auto max-w-[1440px] flex items-center justify-between">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between">
           <h1 className="font-serif text-xl font-medium tracking-tight">
             Checkout
           </h1>
           <Link
             href="/cart"
-            className="text-sm text-[#6b6b6b] hover:text-[#0a0a0a] transition-colors"
+            className="text-sm text-[#6b6b6b] transition-colors hover:text-[#0a0a0a]"
           >
-            ← Back to cart
+            <span aria-hidden="true">←</span> Back to cart
           </Link>
         </div>
       </div>

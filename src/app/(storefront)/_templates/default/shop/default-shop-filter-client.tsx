@@ -32,7 +32,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
   const totalInStock = products.filter(isInStock).length;
 
   const sidebar = (
-    <aside className="flex flex-col divide-y divide-[#e8e8e8]">
+    <aside aria-label="Product filters" className="flex flex-col divide-y divide-[#e8e8e8]">
       {/* Collections */}
       {collections.length > 0 && (
         <div className="pb-6 pt-0">
@@ -131,22 +131,25 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
         <button
           type="button"
           onClick={() => setFiltersOpen(!filtersOpen)}
+          aria-expanded={filtersOpen}
+          aria-controls="mobile-filters-panel"
+          aria-label={hasActiveFilters ? "Filters (active)" : "Filters"}
           className="flex items-center gap-2 border border-[#e8e8e8] rounded-[var(--radius)] px-4 h-10 text-sm font-medium transition-colors hover:border-[#0a0a0a]"
         >
-          <SlidersHorizontal className="h-4 w-4" />
-          Filters
+          <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+          <span aria-hidden="true">Filters</span>
           {hasActiveFilters && (
-            <span className="ml-1 h-1.5 w-1.5 rounded-full bg-[#0a0a0a]" />
+            <span className="ml-1 h-1.5 w-1.5 rounded-full bg-[#0a0a0a]" aria-hidden="true" />
           )}
         </button>
-        <p className="text-sm text-[#6b6b6b]">
+        <p className="text-sm text-[#6b6b6b]" aria-live="polite" aria-atomic="true">
           {filtered.length} product{filtered.length !== 1 ? "s" : ""}
         </p>
       </div>
 
       {/* Mobile filters panel */}
       {filtersOpen && (
-        <div className="mb-8 rounded-[var(--radius)] border border-[#e8e8e8] p-5 md:hidden">
+        <div id="mobile-filters-panel" className="mb-8 rounded-[var(--radius)] border border-[#e8e8e8] p-5 md:hidden">
           {sidebar}
         </div>
       )}
@@ -172,7 +175,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
                 onChange={(e) =>
                   handleSort(e.target.value as keyof typeof SORT_LABELS)
                 }
-                className="h-9 cursor-pointer appearance-none rounded-[var(--radius)] border border-[#e8e8e8] bg-white px-3 pr-7 text-sm text-[#0a0a0a] transition-colors hover:border-[#0a0a0a] focus:border-[#0a0a0a] focus:outline-none"
+                className="h-9 cursor-pointer appearance-none rounded-[var(--radius)] border border-[#e8e8e8] bg-white px-3 pr-7 text-sm text-[#0a0a0a] transition-colors hover:border-[#0a0a0a] focus:border-[#0a0a0a] focus-visible:outline-none"
                 style={{
                   backgroundImage:
                     "linear-gradient(45deg,transparent 50%,#0a0a0a 50%),linear-gradient(135deg,#0a0a0a 50%,transparent 50%)",
@@ -219,7 +222,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-16 flex items-center justify-center gap-2">
+            <nav aria-label="Pagination" className="mt-16 flex items-center justify-center gap-2">
               <button
                 type="button"
                 onClick={() => handlePage(currentPage - 1)}
@@ -233,6 +236,8 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
                   key={p}
                   type="button"
                   onClick={() => handlePage(p)}
+                  aria-label={`Page ${p}`}
+                  aria-current={p === currentPage ? "page" : undefined}
                   className={`flex h-9 w-9 items-center justify-center rounded-[var(--radius)] border text-sm transition-colors ${
                     p === currentPage
                       ? "border-[#0a0a0a] bg-[#0a0a0a] text-white"
@@ -250,7 +255,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
               >
                 Next
               </button>
-            </div>
+            </nav>
           )}
         </div>
       </div>

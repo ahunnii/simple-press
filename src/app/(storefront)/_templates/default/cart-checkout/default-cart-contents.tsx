@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ShoppingBag, X } from "lucide-react";
 
 import { useCart } from "~/providers/cart-context";
@@ -18,7 +17,6 @@ const fmt = (cents: number) =>
   );
 
 export function DefaultCartContents({ business: _ }: { business: Business }) {
-  const router = useRouter();
   const { items, incrementItem, decrementItem, removeItem, total } = useCart();
 
   if (items.length === 0) {
@@ -61,7 +59,7 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
-                  <ShoppingBag className="h-6 w-6 text-[#a3a3a3]" />
+                  <ShoppingBag className="h-6 w-6 text-[#6b6b6b]" aria-hidden="true" />
                 </div>
               )}
             </div>
@@ -82,26 +80,34 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
                 <button
                   type="button"
                   onClick={() => removeItem(item.productId, item.variantId)}
-                  aria-label="Remove item"
+                  aria-label={`Remove ${item.productName}${item.variantName ? ` — ${item.variantName}` : ""} from cart`}
                   className="shrink-0 text-[#a3a3a3] transition-colors hover:text-[#0a0a0a]"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
 
               <div className="flex items-center justify-between gap-4 mt-auto">
                 {/* Qty stepper */}
-                <div className="inline-flex h-9 w-[108px] items-center rounded-[var(--radius)] border border-[#e8e8e8]">
+                <div
+                  role="group"
+                  aria-label={`Quantity for ${item.productName}${item.variantName ? ` — ${item.variantName}` : ""}`}
+                  className="inline-flex h-9 w-[108px] items-center rounded-[var(--radius)] border border-[#e8e8e8]"
+                >
                   <button
                     type="button"
                     onClick={() => decrementItem(item.productId, item.variantId)}
                     disabled={item.quantity <= 1}
-                    aria-label="Decrease"
+                    aria-label={`Decrease quantity of ${item.productName}`}
                     className="flex h-full flex-1 items-center justify-center text-base font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30 rounded-l-[var(--radius)]"
                   >
-                    −
+                    <span aria-hidden="true">−</span>
                   </button>
-                  <span className="w-8 text-center text-sm font-medium">
+                  <span
+                    className="w-8 text-center text-sm font-medium"
+                    aria-live="polite"
+                    aria-atomic="true"
+                  >
                     {item.quantity}
                   </span>
                   <button
@@ -111,10 +117,10 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
                       item.maxInventory !== undefined &&
                       item.quantity >= item.maxInventory
                     }
-                    aria-label="Increase"
+                    aria-label={`Increase quantity of ${item.productName}`}
                     className="flex h-full flex-1 items-center justify-center text-base font-light transition-colors hover:bg-[#f6f6f6] rounded-r-[var(--radius)]"
                   >
-                    +
+                    <span aria-hidden="true">+</span>
                   </button>
                 </div>
 
@@ -150,13 +156,12 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
             <span>{fmt(total)}</span>
           </div>
 
-          <button
-            type="button"
-            onClick={() => router.push("/checkout")}
-            className="w-full h-12 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+          <Link
+            href="/checkout"
+            className="flex w-full h-12 items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
           >
             Continue to checkout
-          </button>
+          </Link>
 
           <Link
             href="/shop"

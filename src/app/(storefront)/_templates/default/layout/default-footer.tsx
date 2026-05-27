@@ -5,7 +5,7 @@ import type { DefaultFooterTemplateProps } from "../../types";
 
 function InstagramIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="18" height="18" rx="5" />
       <circle cx="12" cy="12" r="4" />
       <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
@@ -15,7 +15,7 @@ function InstagramIcon() {
 
 function PinterestIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="9" />
       <path d="M11 19l1.6-7.5M9 11c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5-1.5 3.7-3.4 3.7c-1 0-1.6-.6-1.6-.6" />
     </svg>
@@ -24,7 +24,7 @@ function PinterestIcon() {
 
 function TikTokIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 14a3.5 3.5 0 1 0 3.5 3.5V4c.6 2.2 2.2 3.8 4.5 4" />
     </svg>
   );
@@ -32,7 +32,7 @@ function TikTokIcon() {
 
 function FacebookIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 7h2V4h-2.5C12 4 11 5 11 6.5V9H9v3h2v8h3v-8h2.2L17 9h-3V6.8c0-.5.3-.8.7-.8H14" />
     </svg>
   );
@@ -40,7 +40,7 @@ function FacebookIcon() {
 
 function EmailIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="m3 7 9 6 9-6" />
     </svg>
@@ -103,10 +103,10 @@ export function DefaultFooter({ business }: DefaultFooterTemplateProps) {
 
           {/* Shop */}
           <div className="flex flex-col gap-4">
-            <h4 className="text-[11px] font-medium tracking-[0.18em] uppercase text-[#6b6b6b]">
+            <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-[#6b6b6b]" aria-hidden="true">
               Shop
-            </h4>
-            <nav className="flex flex-col gap-2.5">
+            </p>
+            <nav aria-label="Shop links" className="flex flex-col gap-2.5">
               {[
                 { href: "/shop", label: "All products" },
                 { href: "/collections", label: "Collections" },
@@ -126,10 +126,10 @@ export function DefaultFooter({ business }: DefaultFooterTemplateProps) {
 
           {/* Help */}
           <div className="flex flex-col gap-4">
-            <h4 className="text-[11px] font-medium tracking-[0.18em] uppercase text-[#6b6b6b]">
+            <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-[#6b6b6b]" aria-hidden="true">
               Help
-            </h4>
-            <nav className="flex flex-col gap-2.5">
+            </p>
+            <nav aria-label="Help links" className="flex flex-col gap-2.5">
               {[
                 { href: "/contact", label: "Contact" },
                 { href: "#", label: "Shipping" },
@@ -149,10 +149,10 @@ export function DefaultFooter({ business }: DefaultFooterTemplateProps) {
 
           {/* Company */}
           <div className="flex flex-col gap-4">
-            <h4 className="text-[11px] font-medium tracking-[0.18em] uppercase text-[#6b6b6b]">
+            <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-[#6b6b6b]" aria-hidden="true">
               Company
-            </h4>
-            <nav className="flex flex-col gap-2.5">
+            </p>
+            <nav aria-label="Company links" className="flex flex-col gap-2.5">
               {[
                 { href: "/about", label: "About us" },
                 { href: "/testimonials", label: "Reviews" },

@@ -10,12 +10,12 @@ import { DefaultAccountLayout } from "./default-account-layout";
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     open: "border-[#0a0a0a] text-[#0a0a0a]",
-    completed: "border-[#16a34a] text-[#16a34a]",
-    fulfilled: "border-[#16a34a] text-[#16a34a]",
+    completed: "border-[#15803d] text-[#15803d]",
+    fulfilled: "border-[#15803d] text-[#15803d]",
     cancelled: "border-[#dc2626] text-[#dc2626]",
     refunded: "border-[#6b6b6b] text-[#6b6b6b]",
   };
-  const style = styles[status] ?? "border-[#ca8a04] text-[#ca8a04]";
+  const style = styles[status] ?? "border-[#b45309] text-[#b45309]";
   return (
     <span
       className={`inline-flex items-center rounded-[2px] border px-2 py-0.5 text-[10px] font-medium tracking-[0.1em] uppercase ${style}`}
@@ -30,7 +30,7 @@ export function DefaultOrdersPage({ orders }: OrdersPageTemplateProps) {
     <DefaultAccountLayout heading="Orders">
       {orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Package className="mb-4 h-10 w-10 text-[#a3a3a3]" />
+          <Package className="mb-4 h-10 w-10 text-[#6b6b6b]" aria-hidden="true" />
           <h2 className="font-serif text-xl font-medium">No orders yet</h2>
           <p className="mt-2 text-sm text-[#6b6b6b]">
             When you place an order, it will appear here.
@@ -88,7 +88,7 @@ export function DefaultOrdersPage({ orders }: OrdersPageTemplateProps) {
                 href={`/account/orders/${order.id}`}
                 className="mt-4 inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3"
               >
-                View details →
+                View details <span aria-hidden="true">→</span>
               </Link>
             </div>
           ))}

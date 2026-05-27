@@ -29,6 +29,10 @@ export function DefaultParallaxHero({
   const textRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Respect the user's preference for reduced motion (WCAG 2.1 SC 2.3.3)
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+
     const onScroll = () => {
       const y = window.scrollY;
       if (bgRef.current) {
@@ -47,12 +51,11 @@ export function DefaultParallaxHero({
       {/* Parallax background — oversized vertically so translateY never reveals a gap */}
       <div
         ref={bgRef}
-        className="absolute inset-x-0 will-change-transform"
-        style={{ top: "-10%", bottom: "-10%" }}
+        className="absolute inset-x-0 dt-parallax-bg will-change-transform"
       >
         <Image
           src={imageUrl}
-          alt={title}
+          alt=""
           fill
           className="object-cover opacity-60"
           priority
@@ -66,7 +69,7 @@ export function DefaultParallaxHero({
         ref={textRef}
         className="absolute inset-x-0 bottom-0 will-change-transform"
       >
-        <div className="mx-auto max-w-[1440px] px-6 pb-24 flex flex-col gap-6 max-w-2xl">
+        <div className="mx-auto max-w-2xl px-6 pb-24 flex flex-col gap-6">
           {eyebrow && (
             <span className="text-xs font-medium tracking-[0.14em] uppercase text-white/60">
               {eyebrow}
@@ -81,14 +84,14 @@ export function DefaultParallaxHero({
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
               href={primaryHref}
-              className="inline-flex items-center justify-center h-12 px-7 bg-white text-[#0a0a0a] text-sm font-medium tracking-[0.02em] rounded-[var(--radius)] transition-colors hover:bg-white/88"
+              className="inline-flex items-center justify-center h-12 px-7 bg-white text-[#0a0a0a] text-sm font-medium tracking-[0.02em] rounded-(--radius) transition-colors hover:bg-white/88"
             >
               {primaryText}
             </Link>
             {secondaryText && (
               <Link
                 href={secondaryHref ?? "/about"}
-                className="inline-flex items-center justify-center h-12 px-7 bg-transparent text-white border border-white/40 text-sm font-medium tracking-[0.02em] rounded-[var(--radius)] transition-colors hover:border-white/70"
+                className="inline-flex items-center justify-center h-12 px-7 bg-transparent text-white border border-white/40 text-sm font-medium tracking-[0.02em] rounded-(--radius) transition-colors hover:border-white/70"
               >
                 {secondaryText}
               </Link>

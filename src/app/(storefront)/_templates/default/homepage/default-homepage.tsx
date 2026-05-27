@@ -122,7 +122,7 @@ export async function DefaultHomePage({
                   href={f["default.homepage.collections-cta-link"] ?? "/collections"}
                   className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
                 >
-                  {f["default.homepage.collections-cta-text"] ?? "View everything"} →
+                  {f["default.homepage.collections-cta-text"] ?? "View everything"} <span aria-hidden="true">→</span>
                 </Link>
               </div>
 
@@ -217,7 +217,7 @@ export async function DefaultHomePage({
                     href={f["default.homepage.cta-button-link"] ?? "/about"}
                     className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 self-start"
                   >
-                    {f["default.homepage.cta-button-text"] ?? "Read more"} →
+                    {f["default.homepage.cta-button-text"] ?? "Read more"} <span aria-hidden="true">→</span>
                   </Link>
                 </div>
               </div>
@@ -242,7 +242,7 @@ export async function DefaultHomePage({
 
         {/* ── Testimonial preview ───────────────────────────────────────── */}
         {f["default.homepage.testimonial-quote"] && (
-          <section className="px-6 py-24 lg:px-8">
+          <section aria-label="Customer testimonial" className="px-6 py-24 lg:px-8">
             <div className="mx-auto max-w-[880px] text-center">
               <p className="text-[clamp(22px,2.8vw,34px)] leading-[1.28] tracking-[-0.015em] text-balance">
                 &ldquo;{f["default.homepage.testimonial-quote"]}&rdquo;
@@ -258,7 +258,7 @@ export async function DefaultHomePage({
                     href={f["default.homepage.testimonial-cta-link"] ?? "/testimonials"}
                     className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3"
                   >
-                    {f["default.homepage.testimonial-cta-text"]} →
+                    {f["default.homepage.testimonial-cta-text"]} <span aria-hidden="true">→</span>
                   </Link>
                 </div>
               )}

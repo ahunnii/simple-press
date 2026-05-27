@@ -57,7 +57,7 @@ export function DefaultProductRail({
             href={ctaHref}
             className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
           >
-            {ctaText} →
+            {ctaText} <span aria-hidden="true">→</span>
           </Link>
         </FadeIn>
 

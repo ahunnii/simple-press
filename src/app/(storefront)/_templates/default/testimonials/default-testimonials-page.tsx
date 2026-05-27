@@ -6,7 +6,7 @@ import { PageTransition } from "~/components/page-animations";
 
 function StarRow({ count = 5 }: { count?: number }) {
   return (
-    <span aria-hidden className="tracking-[2px] text-[#0a0a0a]">
+    <span role="img" aria-label={`${count} out of 5 stars`} className="tracking-[2px] text-[#0a0a0a]">
       {"★".repeat(count)}
       {"☆".repeat(5 - count)}
     </span>
@@ -32,13 +32,13 @@ export async function DefaultTestimonialsPage(
       {/* ── Page hero ────────────────────────────────────────────────────── */}
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <div className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
               Home
             </Link>
-            <span>/</span>
-            <span>Reviews</span>
-          </div>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">Reviews</span>
+          </nav>
           <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             From customers
           </span>
@@ -55,7 +55,7 @@ export async function DefaultTestimonialsPage(
       {total > 0 && (
         <section className="border-b border-[#e8e8e8] px-6 py-10 lg:px-8">
           <div className="mx-auto max-w-[1440px] flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-6">
-            <span className="font-serif text-5xl font-semibold tracking-tight">
+            <span aria-hidden="true" className="font-serif text-5xl font-semibold tracking-tight">
               ★
             </span>
             <div>
@@ -80,7 +80,7 @@ export async function DefaultTestimonialsPage(
                 href="/"
                 className="mt-6 inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3"
               >
-                Back to home →
+                Back to home <span aria-hidden="true">→</span>
               </Link>
             </div>
           ) : (

@@ -13,13 +13,13 @@ export function DefaultCollectionsPage({
       {/* Page hero */}
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <div className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
               Home
             </Link>
-            <span>/</span>
-            <span>Collections</span>
-          </div>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">Collections</span>
+          </nav>
           <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             Shop by collection
           </span>
@@ -54,7 +54,7 @@ export function DefaultCollectionsPage({
                     className="group block"
                   >
                     <div
-                      className={`relative mb-4 aspect-3/4 overflow-hidden rounded-[var(--radius)] ${
+                      className={`relative mb-4 aspect-3/4 overflow-hidden rounded-(--radius) ${
                         i % 3 === 1 ? "bg-[#efece8]" : i % 3 === 2 ? "bg-[#1a1a1a]" : "bg-[#f6f6f6]"
                       }`}
                     >

@@ -243,6 +243,36 @@
   --radius: 0.25rem;
 }
 
+/* Parallax hero: extend 10% above/below so translateY never reveals a gap */
+.default-template .dt-parallax-bg {
+  top: -10%;
+  bottom: -10%;
+}
+
+/* ─── Default template — accessibility enhancements ─────────────────────────
+   Focus-visible outlines: ensure every interactive element has a visible
+   focus indicator that meets WCAG 2.1 SC 2.4.7 (AA) and 2.4.11 (AA, 2.2).
+   We override the browser default only where the template suppresses it.    */
+
+.default-template *:focus-visible {
+  outline: 2px solid #0a0a0a;
+  outline-offset: 2px;
+}
+
+/* Respect prefers-reduced-motion for all CSS transitions/animations
+   (JS-driven parallax is handled in the component).
+   WCAG 2.1 SC 2.3.3 (AAA) / best practice at AA.                           */
+@media (prefers-reduced-motion: reduce) {
+  .default-template *,
+  .default-template *::before,
+  .default-template *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ─── Visual Noise Detroit — design tokens ─────────────────────────────────
    Defined at :root so Sheet/Dialog portals (which render outside the layout
    wrapper) still inherit the correct values.                               */

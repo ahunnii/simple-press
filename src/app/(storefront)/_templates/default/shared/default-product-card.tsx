@@ -47,8 +47,8 @@ export function DefaultProductCard({ product }: Props) {
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (
-          <div className="text-[#a3a3a3] flex h-full w-full items-center justify-center">
-            <ShoppingBag className="h-10 w-10" />
+          <div className="flex h-full w-full items-center justify-center text-[#6b6b6b]">
+            <ShoppingBag className="h-10 w-10" aria-hidden="true" />
           </div>
         )}
 
@@ -83,7 +83,7 @@ export function DefaultProductCard({ product }: Props) {
             )}
           </p>
           {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
-            <p className="text-[13px] text-[#a3a3a3] line-through">
+            <p className="text-[13px] text-[#6b6b6b] line-through">
               {formatPrice(productStatus.displayCompareAtPrice)}
             </p>
           )}

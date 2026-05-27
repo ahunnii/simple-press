@@ -17,19 +17,19 @@ export function DefaultBlogPostPage({
       {/* Page header */}
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
         <div className="mx-auto max-w-[760px]">
-          <div className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
               Home
             </Link>
-            <span>/</span>
+            <span aria-hidden="true">/</span>
             <Link href="/blog" className="hover:text-[#0a0a0a] transition-colors">
               Journal
             </Link>
-            <span>/</span>
-            <span className="normal-case tracking-normal text-[#0a0a0a] truncate max-w-[200px]">
+            <span aria-hidden="true">/</span>
+            <span aria-current="page" className="normal-case tracking-normal text-[#0a0a0a] truncate max-w-[200px]">
               {page.title}
             </span>
-          </div>
+          </nav>
 
           <p className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             {formatDate(page.createdAt)}
@@ -89,7 +89,7 @@ export function DefaultBlogPostPage({
               href="/blog"
               className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
             >
-              All posts →
+              All posts <span aria-hidden="true">→</span>
             </Link>
           </div>
 

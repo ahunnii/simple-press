@@ -41,15 +41,16 @@ export function DefaultProductActions({
       ) : additionalFields?.comingSoon ? (
         <div className="rounded-[var(--radius)] border border-amber-200 bg-amber-50 px-5 py-4">
           <p className="font-medium text-amber-700">Coming Soon</p>
-          <p className="mt-1 text-sm text-amber-600">
+          <p className="mt-1 text-sm text-amber-700">
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
       ) : !inStock ? (
         <button
           type="button"
-          disabled
-          className="h-12 w-full rounded-[var(--radius)] border border-[#e8e8e8] text-sm font-medium text-[#a3a3a3] cursor-not-allowed"
+          aria-disabled="true"
+          onClick={(e) => e.preventDefault()}
+          className="h-12 w-full cursor-not-allowed rounded-[var(--radius)] border border-[#e8e8e8] text-sm font-medium text-[#a3a3a3]"
         >
           Out of Stock
         </button>
@@ -58,7 +59,11 @@ export function DefaultProductActions({
           {canAddMore && (
             <div className="flex items-center gap-3">
               {/* Qty stepper */}
-              <div className="inline-flex h-12 w-[120px] shrink-0 items-center rounded-[var(--radius)] border border-[#e8e8e8]">
+              <div
+                role="group"
+                aria-label="Quantity"
+                className="inline-flex h-12 w-[120px] shrink-0 items-center rounded-[var(--radius)] border border-[#e8e8e8]"
+              >
                 <button
                   type="button"
                   onClick={handleDecrement}
@@ -66,9 +71,13 @@ export function DefaultProductActions({
                   aria-label="Decrease quantity"
                   className="flex h-full flex-1 items-center justify-center text-lg font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30 rounded-l-[var(--radius)]"
                 >
-                  −
+                  <span aria-hidden="true">−</span>
                 </button>
-                <span className="w-10 text-center text-sm font-medium">
+                <span
+                  className="w-10 text-center text-sm font-medium"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
                   {quantity}
                 </span>
                 <button
@@ -77,7 +86,7 @@ export function DefaultProductActions({
                   aria-label="Increase quantity"
                   className="flex h-full flex-1 items-center justify-center text-lg font-light transition-colors hover:bg-[#f6f6f6] rounded-r-[var(--radius)]"
                 >
-                  +
+                  <span aria-hidden="true">+</span>
                 </button>
               </div>
 
@@ -89,13 +98,17 @@ export function DefaultProductActions({
               >
                 {isAdded ? (
                   <>
-                    <Check className="h-4 w-4" />
+                    <Check className="h-4 w-4" aria-hidden="true" />
                     Added to bag
                   </>
                 ) : (
                   `Add to cart`
                 )}
               </button>
+              {/* Live region sibling — announces state change reliably across all AT */}
+              <span className="sr-only" aria-live="polite" aria-atomic="true">
+                {isAdded ? "Added to bag" : ""}
+              </span>
             </div>
           )}
 
@@ -114,7 +127,7 @@ export function DefaultProductActions({
             )}
 
           {!canAddMore && inStock && (
-            <p className="text-sm text-amber-600">
+            <p className="text-sm text-amber-700">
               You have the maximum available quantity in your cart.
             </p>
           )}

@@ -10,12 +10,12 @@ import { DefaultAccountLayout } from "./default-account-layout";
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     open: "border-[#0a0a0a] text-[#0a0a0a]",
-    completed: "border-[#16a34a] text-[#16a34a]",
-    fulfilled: "border-[#16a34a] text-[#16a34a]",
+    completed: "border-[#15803d] text-[#15803d]",
+    fulfilled: "border-[#15803d] text-[#15803d]",
     cancelled: "border-[#dc2626] text-[#dc2626]",
     refunded: "border-[#6b6b6b] text-[#6b6b6b]",
   };
-  const style = styles[status] ?? "border-[#ca8a04] text-[#ca8a04]";
+  const style = styles[status] ?? "border-[#b45309] text-[#b45309]";
   return (
     <span
       className={`inline-flex items-center rounded-[2px] border px-2 py-0.5 text-[10px] font-medium tracking-[0.1em] uppercase ${style}`}
@@ -103,7 +103,7 @@ export function DefaultOrderDetailPage({
               {order.discount > 0 && (
                 <div className="flex justify-between">
                   <span className="text-[#6b6b6b]">Discount</span>
-                  <span className="text-[#16a34a]">
+                  <span className="text-[#15803d]">
                     -{formatPrice(order.discount)}
                   </span>
                 </div>
@@ -147,10 +147,11 @@ export function DefaultOrderDetailPage({
                         className="inline-flex items-center gap-1.5 border-b border-current pb-0.5 text-sm font-medium self-start transition-opacity hover:opacity-70"
                       >
                         Track shipment{" "}
-                        <ExternalLink className="h-3.5 w-3.5" />
+                        <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span className="sr-only">(opens in new tab)</span>
                       </a>
                     )}
-                    <p className="text-[12px] text-[#a3a3a3]">
+                    <p className="text-[12px] text-[#6b6b6b]">
                       Added {formatDate(shipment.createdAt)}
                     </p>
                   </div>
@@ -211,7 +212,7 @@ export function DefaultOrderDetailPage({
             href="/account/orders"
             className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 self-start"
           >
-            ← Back to orders
+            <span aria-hidden="true">←</span> Back to orders
           </Link>
         </div>
       </div>

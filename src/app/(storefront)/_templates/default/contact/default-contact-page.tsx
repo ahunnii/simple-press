@@ -23,7 +23,7 @@ function FaqItem({
     >
       <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium select-none [&::-webkit-details-marker]:hidden">
         {question}
-        <span className="ml-4 shrink-0 text-xl font-light transition-transform duration-200 group-open:rotate-45">
+        <span aria-hidden="true" className="ml-4 shrink-0 text-xl font-light transition-transform duration-200 group-open:rotate-45">
           +
         </span>
       </summary>
@@ -105,13 +105,13 @@ export function DefaultContactPage({
       {/* ── Page hero ────────────────────────────────────────────────────── */}
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <div className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
               Home
             </Link>
-            <span>/</span>
-            <span>Contact</span>
-          </div>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">Contact</span>
+          </nav>
           {f["default.contact.eyebrow"] && (
             <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
               {f["default.contact.eyebrow"]}
@@ -160,7 +160,7 @@ export function DefaultContactPage({
                         href={card.href}
                         className="inline-flex items-center gap-1.5 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-2.5 self-start mt-1"
                       >
-                        {card.label} →
+                        {card.label} <span aria-hidden="true">→</span>
                       </a>
                     )}
                   </div>

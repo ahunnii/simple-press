@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -34,16 +34,37 @@ export function ProductGalleryVertical({
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const hasMultipleImages = images.length > 1;
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const enlargeBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Move focus to close button when lightbox opens
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const t = setTimeout(() => closeBtnRef.current?.focus(), 50);
+    return () => clearTimeout(t);
+  }, [lightboxOpen]);
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    setTimeout(() => enlargeBtnRef.current?.focus(), 50);
+  };
 
   useEffect(() => {
-    if (!enableLightbox) return;
-
-    if (!lightboxOpen) return;
+    if (!enableLightbox || !lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "Escape") {
+        closeLightbox();
+        return;
+      }
+      // Focus trap — only the close button is interactive in the lightbox
+      if (e.key === "Tab") {
+        e.preventDefault();
+        closeBtnRef.current?.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enableLightbox, lightboxOpen]);
 
   return (
@@ -57,6 +78,7 @@ export function ProductGalleryVertical({
       >
         {enableLightbox ? (
           <button
+            ref={enlargeBtnRef}
             type="button"
             onClick={() => setLightboxOpen(true)}
             className={cn(
@@ -64,6 +86,7 @@ export function ProductGalleryVertical({
               styleProps?.singleImageContainerClassName,
             )}
             aria-label="Enlarge image"
+            aria-haspopup="dialog"
           >
             <AnimatePresence mode="wait">
               <motion.div
@@ -148,7 +171,7 @@ export function ProductGalleryVertical({
                 key={index}
                 onClick={() => setSelectedImage(index)}
                 className={cn(
-                  `relative aspect-square w-16 overflow-hidden rounded border-2 bg-gray-100 transition-all focus:outline-none ${
+                  `relative aspect-square w-16 overflow-hidden rounded border-2 bg-gray-100 transition-all focus-visible:outline-none ${
                     selectedImage === index
                       ? `border-primary ring-primary ring-2 ${styleProps?.selectedButtonClassName}`
                       : `border-border hover:border-primary ${styleProps?.unselectedButtonClassName}`
@@ -181,9 +204,12 @@ export function ProductGalleryVertical({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-            onClick={() => setLightboxOpen(false)}
+            onClick={closeLightbox}
           >
             <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label={`${productName} — enlarged image`}
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.92, opacity: 0 }}
@@ -199,12 +225,13 @@ export function ProductGalleryVertical({
                 className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
               />
               <button
+                ref={closeBtnRef}
                 type="button"
-                onClick={() => setLightboxOpen(false)}
-                aria-label="Close"
+                onClick={closeLightbox}
+                aria-label="Close enlarged image"
                 className="bg-background/80 hover:bg-background absolute top-3 right-3 rounded-full p-1.5 backdrop-blur-sm transition-colors"
               >
-                <X className="size-5" />
+                <X className="size-5" aria-hidden="true" />
               </button>
             </motion.div>
           </motion.div>

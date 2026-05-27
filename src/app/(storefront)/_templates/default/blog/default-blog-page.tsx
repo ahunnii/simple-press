@@ -40,7 +40,7 @@ function PostCard({ post }: { post: Props["pages"][number] }) {
           </p>
         )}
         <span className="mt-1 inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 self-start transition-[gap] group-hover:gap-3">
-          Read article →
+          Read article <span aria-hidden="true">→</span>
         </span>
       </div>
     </Link>
@@ -79,13 +79,13 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
       {/* Page hero */}
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <div className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
               Home
             </Link>
-            <span>/</span>
-            <span>Journal</span>
-          </div>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">Journal</span>
+          </nav>
           <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             Journal
           </span>
@@ -109,14 +109,14 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
                 href="/"
                 className="mt-6 inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3"
               >
-                Back to home →
+                Back to home <span aria-hidden="true">→</span>
               </Link>
             </div>
           ) : (
             <>
               {/* Search */}
               <div className="mb-12 flex items-center gap-3 border-b border-[#e8e8e8] pb-3 max-w-sm">
-                <Search className="h-4 w-4 shrink-0 text-[#6b6b6b]" />
+                <Search className="h-4 w-4 shrink-0 text-[#6b6b6b]" aria-hidden="true" />
                 <input
                   type="search"
                   placeholder="Search posts..."
@@ -171,7 +171,7 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
                           </p>
                         )}
                         <span className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 self-start transition-[gap] group-hover:gap-3">
-                          Read article →
+                          Read article <span aria-hidden="true">→</span>
                         </span>
                       </div>
                     </Link>

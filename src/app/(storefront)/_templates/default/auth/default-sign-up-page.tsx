@@ -140,7 +140,7 @@ export function DefaultSignUpPage({
             href="/"
             className="text-foreground flex w-fit items-center gap-2 transition-opacity hover:opacity-80"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             <span className="text-sm">Back to Home</span>
           </Link>
         </div>
@@ -169,7 +169,7 @@ export function DefaultSignUpPage({
                 href="/"
                 className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2 text-sm transition-colors"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 Back to Home
               </Link>
             </div>

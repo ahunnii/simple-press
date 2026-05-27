@@ -32,7 +32,7 @@ function AccordionItem({
     >
       <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium select-none [&::-webkit-details-marker]:hidden">
         {summary}
-        <span className="text-xl font-light transition-transform duration-200 group-open:rotate-45">
+        <span aria-hidden="true" className="text-xl font-light transition-transform duration-200 group-open:rotate-45">
           +
         </span>
       </summary>
@@ -66,22 +66,22 @@ export function DefaultProductPage({
     <PageTransition>
       <div className="mx-auto max-w-[1440px] px-6 lg:px-8">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 pt-6 pb-8 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 pt-6 pb-8 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
           <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
             Home
           </Link>
-          <span>/</span>
+          <span aria-hidden="true">/</span>
           <Link
             href="/shop"
             className="hover:text-[#0a0a0a] transition-colors"
           >
             Shop
           </Link>
-          <span>/</span>
-          <span className="text-[#0a0a0a] normal-case tracking-normal">
+          <span aria-hidden="true">/</span>
+          <span aria-current="page" className="text-[#0a0a0a] normal-case tracking-normal">
             {product.name}
           </span>
-        </div>
+        </nav>
 
         {/* PDP layout */}
         <div className="grid grid-cols-1 gap-10 pb-24 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
@@ -137,8 +137,8 @@ export function DefaultProductPage({
 
             {/* Trust signals */}
             <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-[13px] text-[#6b6b6b]">
-              <span>✓ Ships in 1–2 business days</span>
-              <span>✓ Free returns within 30 days</span>
+              <span><span aria-hidden="true">✓</span> Ships in 1–2 business days</span>
+              <span><span aria-hidden="true">✓</span> Free returns within 30 days</span>
             </div>
 
             {/* Accordion */}
@@ -208,7 +208,7 @@ export function DefaultProductPage({
                 href="/shop"
                 className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
               >
-                All products →
+                All products <span aria-hidden="true">→</span>
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">

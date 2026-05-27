@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,6 +23,53 @@ const NAV_LINKS = [
 
 export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const firstNavLinkRef = useRef<HTMLAnchorElement>(null);
+
+  // Move focus into menu when it opens
+  useEffect(() => {
+    if (mobileOpen) {
+      const t = setTimeout(() => firstNavLinkRef.current?.focus(), 50);
+      return () => clearTimeout(t);
+    }
+  }, [mobileOpen]);
+
+  // Close on Escape and return focus; trap Tab/Shift+Tab within the mobile nav
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMobileOpen(false);
+        hamburgerRef.current?.focus();
+        return;
+      }
+      if (e.key === "Tab") {
+        const nav = document.getElementById("mobile-nav");
+        if (!nav) return;
+        const focusable = Array.from(
+          nav.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          ),
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0]!;
+        const last = focusable[focusable.length - 1]!;
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
 
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
@@ -72,11 +119,12 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
           {/* Left — hamburger (mobile) or nav links (desktop) */}
           <div className="flex items-center">
             {/* Desktop nav */}
-            <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">
+            <nav className="hidden items-center gap-7 md:flex" aria-label="Primary navigation">
               {links.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={pathname === link.href ? "page" : undefined}
                   className={cn(
                     "relative py-1.5 text-sm transition-colors",
                     "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-current after:origin-left after:transition-transform after:duration-300",
@@ -92,6 +140,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
 
             {/* Mobile hamburger (left side → brand stays centered) */}
             <button
+              ref={hamburgerRef}
               type="button"
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen ? "true" : "false"}
@@ -100,9 +149,9 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
               className="flex h-10 w-10 items-center justify-center rounded-(--radius) text-[#0a0a0a] transition-colors hover:bg-[#f6f6f6] md:hidden"
             >
               {mobileOpen ? (
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5" aria-hidden="true" />
               ) : (
-                <Menu className="h-5 w-5" />
+                <Menu className="h-5 w-5" aria-hidden="true" />
               )}
             </button>
           </div>
@@ -150,11 +199,13 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
             className="border-t border-[#e8e8e8] bg-white md:hidden"
           >
             <ul className="flex flex-col divide-y divide-[#e8e8e8] px-4">
-              {links.map((link) => (
+              {links.map((link, i) => (
                 <li key={link.href}>
                   <Link
+                    ref={i === 0 ? firstNavLinkRef : undefined}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
+                    aria-current={pathname === link.href ? "page" : undefined}
                     className={cn(
                       "flex items-center py-4 text-base font-medium transition-colors",
                       pathname === link.href
@@ -186,7 +237,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                     onClick={() => setMobileOpen(false)}
                     className="text-sm text-[#6b6b6b] transition-colors hover:text-[#0a0a0a]"
                   >
-                    My account →
+                    My account <span aria-hidden="true">→</span>
                   </Link>
                 </li>
               )}

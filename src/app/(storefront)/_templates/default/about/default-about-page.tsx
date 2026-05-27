@@ -68,13 +68,13 @@ export async function DefaultAboutPage({
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-0 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           {/* Breadcrumb */}
-          <div className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
               Home
             </Link>
-            <span>/</span>
-            <span>About</span>
-          </div>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">About</span>
+          </nav>
 
           {f["default.about.eyebrow"] && (
             <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
@@ -111,7 +111,7 @@ export async function DefaultAboutPage({
             <div className="relative aspect-[3/4] overflow-hidden rounded-[var(--radius)] bg-[#f6f6f6] lg:sticky lg:top-[calc(72px+24px)]">
               <Image
                 src={f["default.about.portrait-image"] ?? "/placeholder.svg"}
-                alt="Portrait"
+                alt={f["default.about.bio-heading"] ?? `${business.name} portrait`}
                 fill
                 className="object-cover"
               />

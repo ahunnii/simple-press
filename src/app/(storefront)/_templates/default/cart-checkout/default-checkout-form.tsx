@@ -231,10 +231,11 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 <CardTitle>Delivery</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex flex-wrap gap-2">
+                <div role="group" aria-label="Delivery method" className="flex flex-wrap gap-2">
                   <Button
                     type="button"
                     variant={deliveryMethod === "ship" ? "default" : "outline"}
+                    aria-pressed={deliveryMethod === "ship"}
                     onClick={() => setDeliveryMethod("ship")}
                     style={
                       deliveryMethod === "ship"
@@ -249,6 +250,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                     variant={
                       deliveryMethod === "pickup" ? "default" : "outline"
                     }
+                    aria-pressed={deliveryMethod === "pickup"}
                     onClick={() => setDeliveryMethod("pickup")}
                     style={
                       deliveryMethod === "pickup"
@@ -384,7 +386,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-[#a3a3a3]">
+                        <div className="flex h-full w-full items-center justify-center text-xs text-[#6b6b6b]" aria-hidden="true">
                           No img
                         </div>
                       )}
@@ -424,7 +426,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   <span>{formatPrice(subtotal)}</span>
                 </div>
                 {appliedDiscount && (
-                  <div className="flex justify-between text-sm text-green-600">
+                  <div className="flex justify-between text-sm text-green-700">
                     <span>Discount ({appliedDiscount.code})</span>
                     <span>-{formatPrice(discountAmount)}</span>
                   </div>
@@ -448,27 +450,30 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 </p>
               </div>
 
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+              <div role="alert" aria-live="assertive" aria-atomic="true">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+              </div>
 
               <Button
                 type="submit"
                 disabled={isProcessing}
+                aria-busy={isProcessing}
                 className="w-full text-white"
                 size="lg"
                 style={{ backgroundColor: primaryColor }}
               >
                 {isProcessing ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />
                     Processing...
                   </>
                 ) : (
                   <>
-                    <CreditCard className="mr-2 h-5 w-5" />
+                    <CreditCard className="mr-2 h-5 w-5" aria-hidden="true" />
                     Continue to Payment
                   </>
                 )}

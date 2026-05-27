@@ -23,22 +23,22 @@ export function DefaultCollectionPage({
       {/* Page hero */}
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-0 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <div className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
               Home
             </Link>
-            <span>/</span>
+            <span aria-hidden="true">/</span>
             <Link
               href="/collections"
               className="hover:text-[#0a0a0a] transition-colors"
             >
               Collections
             </Link>
-            <span>/</span>
-            <span className="normal-case tracking-normal text-[#0a0a0a]">
+            <span aria-hidden="true">/</span>
+            <span aria-current="page" className="normal-case tracking-normal text-[#0a0a0a]">
               {collection.name}
             </span>
-          </div>
+          </nav>
 
           <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
             Collection
@@ -81,7 +81,7 @@ export function DefaultCollectionPage({
                 href="/shop"
                 className="mt-6 inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3"
               >
-                View all products →
+                View all products <span aria-hidden="true">→</span>
               </Link>
             </div>
           ) : (
@@ -114,7 +114,7 @@ export function DefaultCollectionPage({
                 href="/collections"
                 className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
               >
-                All collections →
+                All collections <span aria-hidden="true">→</span>
               </Link>
             </div>
             <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-3">

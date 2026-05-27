@@ -129,9 +129,10 @@ export function DiscountDiscountInput({
             variant="ghost"
             size="sm"
             onClick={handleRemove}
+            aria-label={`Remove discount code ${appliedDiscount.code}`}
             className="text-green-700 hover:text-green-900"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       </div>
@@ -140,10 +141,14 @@ export function DiscountDiscountInput({
 
   return (
     <div className="space-y-3">
+      <label htmlFor="discount-code" className="sr-only">
+        Discount code
+      </label>
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Tag className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Tag className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
           <Input
+            id="discount-code"
             type="text"
             placeholder="Discount code"
             value={code}
@@ -163,9 +168,10 @@ export function DiscountDiscountInput({
           onClick={handleApply}
           disabled={isValidating || !code.trim()}
           variant="outline"
+          aria-label={isValidating ? "Applying discount code" : "Apply discount code"}
         >
           {isValidating ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
             "Apply"
           )}
