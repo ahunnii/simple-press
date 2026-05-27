@@ -209,13 +209,6 @@ export function ElegantCollectionsPage({ collections }: DefaultCollectionsPageTe
                 })}
               </div>
 
-              <style>{`
-                @media (max-width: 800px) {
-                  .el-collections-mosaic { grid-template-columns: 1fr !important; }
-                  .el-collection-cell { grid-column: span 1 !important; }
-                }
-                .el-collection-cell:hover .object-cover { transform: scale(1.04); }
-              `}</style>
             </>
           )}
         </div>
@@ -285,7 +278,7 @@ export function ElegantCollectionsPage({ collections }: DefaultCollectionsPageTe
                 transition: `background 0.4s ${ease}`,
               }}>
                 Get in touch
-                <ArrowRight style={{ width: 14, height: 14 }} />
+                <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
               </Link>
             </div>
 
@@ -302,12 +295,6 @@ export function ElegantCollectionsPage({ collections }: DefaultCollectionsPageTe
           </div>
         </div>
 
-        <style>{`
-          @media (max-width: 800px) {
-            .el-editorial-cta { grid-template-columns: 1fr !important; gap: 40px !important; }
-            .el-editorial-cta > div:last-child { display: none; }
-          }
-        `}</style>
       </section>
     </div>
   );

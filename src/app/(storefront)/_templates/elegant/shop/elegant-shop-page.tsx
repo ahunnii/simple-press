@@ -167,6 +167,7 @@ export function ElegantShopPage({ business }: DefaultProductsPageTemplateProps) 
               }}
             >
               <ArrowUpDown
+                aria-hidden={true}
                 style={{
                   width: 13,
                   height: 13,
@@ -187,12 +188,12 @@ export function ElegantShopPage({ business }: DefaultProductsPageTemplateProps) 
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortKey)}
+                className="el-shop-sort-select"
                 style={{
                   border: 0,
                   background: "transparent",
                   fontSize: 13,
                   padding: "4px 4px",
-                  outline: "none",
                   cursor: "pointer",
                   color: "var(--el-ink, #1c1a17)",
                   fontFamily: "var(--font-sans, sans-serif)",

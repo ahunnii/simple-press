@@ -30,6 +30,7 @@ export function ElegantVariantSelector({
     addItem(
       {
         productId: product.id,
+        productSlug: product.slug,
         variantId: selectedVariant.id,
         productName: product.name,
         variantName: selectedVariant.name,
@@ -72,35 +73,12 @@ export function ElegantVariantSelector({
                 key={variant.id}
                 type="button"
                 disabled={outOfStock}
+                aria-pressed={isSelected}
                 onClick={() => {
                   setSelectedVariant(variant);
                   setSelectedVariantId(variant.id);
                 }}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "7px 16px",
-                  border: isSelected
-                    ? "1px solid var(--el-ink, #1c1a17)"
-                    : "1px solid var(--el-line, rgba(28,26,23,0.12))",
-                  borderRadius: 999,
-                  fontFamily: "var(--font-mono, ui-monospace)",
-                  fontSize: 10.5,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  color: isSelected
-                    ? "var(--el-paper, #fbf8f2)"
-                    : outOfStock
-                      ? "var(--el-ink-mute, #9a9485)"
-                      : "var(--el-ink-soft, #6b6659)",
-                  background: isSelected
-                    ? "var(--el-ink, #1c1a17)"
-                    : "var(--el-paper, #fbf8f2)",
-                  cursor: outOfStock ? "not-allowed" : "pointer",
-                  opacity: outOfStock ? 0.5 : 1,
-                  transition: `all 0.3s ${ease}`,
-                }}
+                className="el-variant-btn"
               >
                 {variant.name}
                 {outOfStock && " · sold out"}
@@ -156,7 +134,7 @@ export function ElegantVariantSelector({
                     : "var(--el-ink, #1c1a17)",
               }}
             >
-              <Minus style={{ width: 13, height: 13 }} />
+              <Minus aria-hidden={true} style={{ width: 13, height: 13 }} />
             </button>
             <span
               style={{
@@ -198,7 +176,7 @@ export function ElegantVariantSelector({
                     : "var(--el-ink, #1c1a17)",
               }}
             >
-              <Plus style={{ width: 13, height: 13 }} />
+              <Plus aria-hidden={true} style={{ width: 13, height: 13 }} />
             </button>
             {selectedVariant.inventoryQty <= 5 && (
               <span
@@ -257,17 +235,20 @@ export function ElegantVariantSelector({
         >
           {isAdded ? (
             <>
-              <Check style={{ width: 14, height: 14 }} />
+              <Check aria-hidden={true} style={{ width: 14, height: 14 }} />
               Added to bag
             </>
           ) : (
             <>
               Add {quantity > 1 ? `${quantity} ` : ""}to bag
               {price > 0 && ` · $${((price * quantity) / 100).toFixed(0)}`}
-              <ArrowRight style={{ width: 14, height: 14 }} />
+              <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
             </>
           )}
         </button>
+        <span className="sr-only" aria-live="polite" aria-atomic="true">
+          {isAdded ? "Added to bag" : ""}
+        </span>
       </div>
     </div>
   );

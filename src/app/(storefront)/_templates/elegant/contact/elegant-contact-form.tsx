@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 import { useContactForm } from "~/hooks/use-contact-form";
@@ -31,48 +32,33 @@ export function ElegantContactForm() {
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
 
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (isSuccess) {
+      successHeadingRef.current?.focus();
+    }
+  }, [isSuccess]);
+
   if (isSuccess) {
     return (
-      <div style={{ padding: "40px 0", textAlign: "center" }}>
-        <div style={{
-          width: 48, height: 48, borderRadius: 999,
-          background: "var(--el-sage, #4a5240)",
-          color: "var(--el-paper, #fbf8f2)",
-          margin: "0 auto 18px",
-          display: "inline-flex", alignItems: "center", justifyContent: "center",
-        }}>
+      <div className="el-contact-success">
+        <div className="el-contact-success-icon" aria-hidden="true">
           <CheckCircle2 style={{ width: 22, height: 22 }} />
         </div>
-        <h3 style={{
-          fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-          fontSize: 28,
-          fontWeight: 400,
-          color: "var(--el-ink, #1c1a17)",
-          marginBottom: 8,
-        }}>
+        <h3
+          ref={successHeadingRef}
+          tabIndex={-1}
+          className="el-contact-success-heading"
+        >
           Thank you.
         </h3>
-        <p style={{
-          fontSize: 15,
-          color: "var(--el-ink-soft, #6b6659)",
-          fontFamily: "var(--font-sans, sans-serif)",
-          marginBottom: 20,
-        }}>
+        <p className="el-contact-success-body">
           We&apos;ll be in touch within a day.
         </p>
         <button
           type="button"
           onClick={resetSuccess}
-          style={{
-            fontFamily: "var(--font-mono, ui-monospace)",
-            fontSize: 11,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--el-ink-soft, #6b6659)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-          }}
+          className="el-contact-success-btn"
         >
           Send another message
         </button>

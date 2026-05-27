@@ -67,6 +67,7 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
     };
 
     void fetchOrderDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   if (loading) {
@@ -107,7 +108,7 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
 
       <div className="mb-6 rounded-lg bg-gray-50 p-6">
         <div className="mb-4 flex items-start gap-4">
-          <Package className="h-6 w-6 flex-shrink-0 text-gray-400" />
+          <Package className="h-6 w-6 shrink-0 text-gray-400" />
           <div>
             <h2 className="mb-1 font-semibold text-gray-900">
               What happens next?

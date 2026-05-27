@@ -162,9 +162,12 @@ export function ElegantProductActions({
               }}
               className="el-qty-btn"
             >
-              <Minus style={{ width: 13, height: 13 }} />
+              <Minus aria-hidden={true} style={{ width: 13, height: 13 }} />
             </button>
             <span
+              aria-live="polite"
+              aria-atomic="true"
+              aria-label={`Quantity: ${quantity}`}
               style={{
                 minWidth: 24,
                 textAlign: "center",
@@ -200,7 +203,7 @@ export function ElegantProductActions({
               }}
               className="el-qty-btn"
             >
-              <Plus style={{ width: 13, height: 13 }} />
+              <Plus aria-hidden={true} style={{ width: 13, height: 13 }} />
             </button>
             {remainingStock <= 5 && remainingStock > 0 && (
               <span
@@ -255,17 +258,20 @@ export function ElegantProductActions({
         >
           {isAdded ? (
             <>
-              <Check style={{ width: 14, height: 14 }} />
+              <Check aria-hidden={true} style={{ width: 14, height: 14 }} />
               Added to bag
             </>
           ) : (
             <>
               Add to bag · {formatPrice(displayPrice * quantity)}
-              <ArrowRight style={{ width: 14, height: 14 }} />
+              <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
             </>
           )}
         </button>
       </div>
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {isAdded ? "Added to bag" : ""}
+      </span>
 
       {product.trackInventory &&
         product.allowBackorders &&
@@ -299,11 +305,6 @@ export function ElegantProductActions({
         </p>
       )}
 
-      <style>{`
-        .el-qty-btn:hover:not(:disabled) {
-          background: var(--el-cream-2, #ebe6dc) !important;
-        }
-      `}</style>
     </>
   );
 }

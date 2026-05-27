@@ -58,7 +58,7 @@ export function ElegantCartContent() {
           fontFamily: "var(--font-sans, sans-serif)",
         }}>
           Browse shop
-          <ArrowRight style={{ width: 14, height: 14 }} />
+          <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
         </Link>
       </div>
     );
@@ -84,7 +84,7 @@ export function ElegantCartContent() {
             }}
           >
             {/* Thumbnail */}
-            <Link href={`/shop/${item.productId}`} style={{ textDecoration: "none", flexShrink: 0 }}>
+            <Link href={`/shop/${item.productSlug ?? item.productId}`} style={{ textDecoration: "none", flexShrink: 0 }}>
               <div style={{
                 width: 100,
                 aspectRatio: "4/5",
@@ -109,7 +109,7 @@ export function ElegantCartContent() {
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
-                  <Link href={`/shop/${item.productId}`} style={{ textDecoration: "none" }}>
+                  <Link href={`/shop/${item.productSlug ?? item.productId}`} style={{ textDecoration: "none" }}>
                     <div style={{
                       fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
                       fontSize: 20,
@@ -348,7 +348,7 @@ export function ElegantCartContent() {
             transition: `background 0.4s ${ease}`,
           }} className="el-checkout-btn">
             Proceed to checkout
-            <ArrowRight style={{ width: 14, height: 14 }} />
+            <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
           </Link>
           <p style={{
             marginTop: 12,
@@ -363,14 +363,6 @@ export function ElegantCartContent() {
         </div>
       </div>
 
-      <style>{`
-        .el-qty-btn:hover { background: var(--el-cream-2, #ebe6dc) !important; }
-        .el-checkout-btn:hover { background: var(--el-sage, #4a5240) !important; }
-        @media (max-width: 700px) {
-          .el-cart-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
-          .el-cart-grid > div:nth-child(2) { position: static !important; }
-        }
-      `}</style>
     </div>
   );
 }

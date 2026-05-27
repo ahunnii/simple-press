@@ -160,7 +160,7 @@ export function ElegantCollectionPage({
                   transition: `background 0.4s ${ease}, color 0.4s ${ease}`,
                 }} className="el-btn-ghost">
                   Continue browsing
-                  <ArrowRight style={{ width: 14, height: 14 }} />
+                  <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
                 </Link>
               </div>
             </div>
@@ -188,15 +188,6 @@ export function ElegantCollectionPage({
           </div>
         </div>
 
-        <style>{`
-          @media (max-width: 800px) {
-            .el-collection-hero { grid-template-columns: 1fr !important; gap: 40px !important; }
-          }
-          .el-btn-ghost:hover {
-            background: var(--el-ink, #1c1a17) !important;
-            color: var(--el-paper, #fbf8f2) !important;
-          }
-        `}</style>
       </section>
 
       {/* ── Products ── */}
@@ -324,9 +315,6 @@ export function ElegantCollectionPage({
           )}
         </div>
 
-        <style>{`
-          .el-collection-product-card:hover .object-cover { transform: scale(1.05); }
-        `}</style>
       </section>
 
       {/* ── Other collections ── */}
@@ -432,9 +420,6 @@ export function ElegantCollectionPage({
             </div>
           </div>
 
-          <style>{`
-            .el-other-col:hover .object-cover { transform: scale(1.04); }
-          `}</style>
         </section>
       )}
     </div>

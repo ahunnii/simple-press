@@ -46,9 +46,12 @@ export function ElegantCheckoutForm({ business }: Props) {
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState<"US" | "CA">("US");
 
+  const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
   const [deliveryMethod, setDeliveryMethod] = useState<"ship" | "pickup">(
     "ship",
   );
+
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [discountCodeInput, setDiscountCodeInput] = useState("");
   const [discountCodeId, setDiscountCodeId] = useState<string | null>(null);
@@ -106,26 +109,34 @@ export function ElegantCheckoutForm({ business }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
+
+    // Per-field client-side validation
+    const errors: Record<string, string> = {};
+    if (!email.trim()) errors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(email)) errors.email = "Enter a valid email address";
+    if (!name.trim()) errors.name = "Full name is required";
+    if (!phone.trim()) errors.phone = "Phone number is required";
+    if (deliveryMethod === "ship") {
+      if (!addressLine1.trim()) errors["address-line1"] = "Street address is required";
+      if (!city.trim()) errors.city = "City is required";
+      if (!state.trim()) errors.state = "State or province is required";
+      if (!postalCode.trim()) errors.postal = "ZIP or postal code is required";
+    }
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      document.getElementById(Object.keys(errors)[0]!)?.focus();
+      return;
+    }
+
+    if (items.length === 0) {
+      setError("Your cart is empty");
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
-      if (!email || !name || !phone.trim()) {
-        throw new Error("Please fill in all required contact fields");
-      }
-
-      if (
-        deliveryMethod === "ship" &&
-        (!addressLine1.trim() ||
-          !city.trim() ||
-          !state.trim() ||
-          !postalCode.trim())
-      ) {
-        throw new Error("Please fill in all required shipping fields");
-      }
-
-      if (items.length === 0) {
-        throw new Error("Your cart is empty");
-      }
 
       const response = await fetch("/api/stripe/create-session", {
         method: "POST",
@@ -196,21 +207,30 @@ export function ElegantCheckoutForm({ business }: Props) {
     }
   };
 
-  const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
-
   const eyebrow = (label: string) => (
-    <span style={{
-      fontFamily: "var(--font-mono, ui-monospace)",
-      fontSize: 11,
-      letterSpacing: "0.22em",
-      textTransform: "uppercase" as const,
-      color: "var(--el-ink-soft, #6b6659)",
-      display: "block",
-      marginBottom: 20,
-    }}>
-      {label}
-    </span>
+    <legend className="el-fieldset-legend">{label}</legend>
   );
+
+  const handleDeliveryKeyDown = (
+    e: React.KeyboardEvent,
+    current: "ship" | "pickup",
+  ) => {
+    const methods = ["ship", "pickup"] as const;
+    const idx = methods.indexOf(current);
+    let next: number | null = null;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      next = (idx + 1) % methods.length;
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      next = (idx - 1 + methods.length) % methods.length;
+    }
+    if (next !== null) {
+      e.preventDefault();
+      setDeliveryMethod(methods[next]!);
+      const group = e.currentTarget.closest('[role="radiogroup"]');
+      const btns = group?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
+      btns?.[next]?.focus();
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -246,41 +266,48 @@ export function ElegantCheckoutForm({ business }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="el-checkout-form" style={{ display: "flex", gap: 60, flexWrap: "wrap" }}>
+      <span className="sr-only">Fields marked with an asterisk (*) are required.</span>
       {/* ── Left: fields ── */}
       <div style={{ flex: 1, minWidth: 280, display: "flex", flexDirection: "column", gap: 40 }}>
         {/* Contact */}
-        <section>
+        <fieldset style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
           {eyebrow("Contact information")}
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            <ElegantField label="Email *" htmlFor="email">
+            <ElegantField label="Email *" htmlFor="email" error={fieldErrors.email}>
               <Input
                 id="email" type="email" value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); if (fieldErrors.email) setFieldErrors(f => ({ ...f, email: "" })); }}
                 placeholder="you@example.com" required
                 className="el-co-input"
+                aria-invalid={fieldErrors.email ? true : undefined}
+                aria-describedby={fieldErrors.email ? "email-error" : undefined}
               />
             </ElegantField>
-            <ElegantField label="Full Name *" htmlFor="name">
+            <ElegantField label="Full Name *" htmlFor="name" error={fieldErrors.name}>
               <Input
                 id="name" type="text" value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => { setName(e.target.value); if (fieldErrors.name) setFieldErrors(f => ({ ...f, name: "" })); }}
                 placeholder="Jane Doe" required
                 className="el-co-input"
+                aria-invalid={fieldErrors.name ? true : undefined}
+                aria-describedby={fieldErrors.name ? "name-error" : undefined}
               />
             </ElegantField>
-            <ElegantField label="Phone *" htmlFor="phone">
+            <ElegantField label="Phone *" htmlFor="phone" error={fieldErrors.phone}>
               <PhoneInput
                 id="phone" autoComplete="tel" value={phone}
-                onChange={(val) => setPhone(val)}
+                onChange={(val) => { setPhone(val); if (fieldErrors.phone) setFieldErrors(f => ({ ...f, phone: "" })); }}
                 placeholder="+1 555 123 4567" required
                 className="el-co-input"
+                aria-invalid={fieldErrors.phone ? true : undefined}
+                aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
               />
             </ElegantField>
           </div>
-        </section>
+        </fieldset>
 
         {/* Discount */}
-        <section>
+        <fieldset style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
           {eyebrow("Discount code")}
           <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
             <ElegantField label="Code" htmlFor="discount-code" style={{ flex: 1 }}>
@@ -316,44 +343,39 @@ export function ElegantCheckoutForm({ business }: Props) {
                 : "Apply"}
             </button>
           </div>
-          {discountFieldError && (
-            <p style={{ marginTop: 8, fontSize: 12, color: "#c0392b", fontFamily: "var(--font-sans, sans-serif)" }}>
-              {discountFieldError}
-            </p>
-          )}
-          {discountCodeLabel && discountAmount > 0 && (
-            <p style={{ marginTop: 8, fontSize: 12, color: "var(--el-sage, #4a5240)", fontFamily: "var(--font-mono, ui-monospace)", letterSpacing: "0.1em" }}>
-              Code {discountCodeLabel} applied.
-            </p>
-          )}
-        </section>
+          <div aria-live="polite" aria-atomic="true">
+            {discountFieldError && (
+              <p style={{ marginTop: 8, fontSize: 12, color: "#c0392b", fontFamily: "var(--font-sans, sans-serif)" }}>
+                {discountFieldError}
+              </p>
+            )}
+            {discountCodeLabel && discountAmount > 0 && (
+              <p style={{ marginTop: 8, fontSize: 12, color: "var(--el-sage, #4a5240)", fontFamily: "var(--font-mono, ui-monospace)", letterSpacing: "0.1em" }}>
+                Code {discountCodeLabel} applied.
+              </p>
+            )}
+          </div>
+        </fieldset>
 
         {/* Delivery method */}
         {shippingConfig.offersInStorePickup && (
-          <section>
+          <fieldset style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
             {eyebrow("Delivery")}
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div
+              role="radiogroup"
+              aria-label="Delivery method"
+              style={{ display: "flex", gap: 10, flexWrap: "wrap" }}
+            >
               {(["ship", "pickup"] as const).map((method) => (
                 <button
                   key={method}
                   type="button"
+                  role="radio"
+                  aria-checked={deliveryMethod === method}
+                  tabIndex={deliveryMethod === method ? 0 : -1}
                   onClick={() => setDeliveryMethod(method)}
-                  style={{
-                    padding: "10px 22px",
-                    borderRadius: 999,
-                    fontSize: 12,
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    fontWeight: 500,
-                    border: deliveryMethod === method
-                      ? "1px solid var(--el-ink, #1c1a17)"
-                      : "1px solid var(--el-line, rgba(28,26,23,0.12))",
-                    background: deliveryMethod === method ? "var(--el-ink, #1c1a17)" : "transparent",
-                    color: deliveryMethod === method ? "var(--el-paper, #fbf8f2)" : "var(--el-ink, #1c1a17)",
-                    cursor: "pointer",
-                    fontFamily: "var(--font-sans, sans-serif)",
-                    transition: `all 0.3s ${ease}`,
-                  }}
+                  onKeyDown={(e) => handleDeliveryKeyDown(e, method)}
+                  className="el-delivery-btn"
                 >
                   {method === "ship" ? "Ship to address" : "In-store pickup"}
                 </button>
@@ -364,21 +386,24 @@ export function ElegantCheckoutForm({ business }: Props) {
                 ? "No shipping charge. Pick up at the store."
                 : "Shipping calculated at checkout."}
             </p>
-          </section>
+          </fieldset>
         )}
 
         {/* Shipping address */}
         {deliveryMethod === "ship" && (
-          <section>
+          <fieldset style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
             {eyebrow("Shipping address")}
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-              <ElegantField label="Address line 1 *" htmlFor="address-line1">
+              <ElegantField label="Address line 1 *" htmlFor="address-line1" error={fieldErrors["address-line1"]}>
                 <Input
                   id="address-line1" type="text" autoComplete="shipping address-line1"
-                  value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)}
+                  value={addressLine1}
+                  onChange={(e) => { setAddressLine1(e.target.value); if (fieldErrors["address-line1"]) setFieldErrors(f => ({ ...f, "address-line1": "" })); }}
                   placeholder="Street address, P.O. box"
                   required={deliveryMethod === "ship"}
                   className="el-co-input"
+                  aria-invalid={fieldErrors["address-line1"] ? true : undefined}
+                  aria-describedby={fieldErrors["address-line1"] ? "address-line1-error" : undefined}
                 />
               </ElegantField>
               <ElegantField label="Address line 2" htmlFor="address-line2">
@@ -390,31 +415,40 @@ export function ElegantCheckoutForm({ business }: Props) {
                 />
               </ElegantField>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-                <ElegantField label="City *" htmlFor="city">
+                <ElegantField label="City *" htmlFor="city" error={fieldErrors.city}>
                   <Input
                     id="city" type="text" autoComplete="shipping address-level2"
-                    value={city} onChange={(e) => setCity(e.target.value)}
+                    value={city}
+                    onChange={(e) => { setCity(e.target.value); if (fieldErrors.city) setFieldErrors(f => ({ ...f, city: "" })); }}
                     required={deliveryMethod === "ship"}
                     className="el-co-input"
+                    aria-invalid={fieldErrors.city ? true : undefined}
+                    aria-describedby={fieldErrors.city ? "city-error" : undefined}
                   />
                 </ElegantField>
-                <ElegantField label="State / Province *" htmlFor="state">
+                <ElegantField label="State / Province *" htmlFor="state" error={fieldErrors.state}>
                   <Input
                     id="state" type="text" autoComplete="shipping address-level1"
-                    value={state} onChange={(e) => setState(e.target.value)}
+                    value={state}
+                    onChange={(e) => { setState(e.target.value); if (fieldErrors.state) setFieldErrors(f => ({ ...f, state: "" })); }}
                     placeholder="CA or ON"
                     required={deliveryMethod === "ship"}
                     className="el-co-input"
+                    aria-invalid={fieldErrors.state ? true : undefined}
+                    aria-describedby={fieldErrors.state ? "state-error" : undefined}
                   />
                 </ElegantField>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-                <ElegantField label="ZIP / Postal code *" htmlFor="postal">
+                <ElegantField label="ZIP / Postal code *" htmlFor="postal" error={fieldErrors.postal}>
                   <Input
                     id="postal" type="text" autoComplete="shipping postal-code"
-                    value={postalCode} onChange={(e) => setPostalCode(e.target.value)}
+                    value={postalCode}
+                    onChange={(e) => { setPostalCode(e.target.value); if (fieldErrors.postal) setFieldErrors(f => ({ ...f, postal: "" })); }}
                     required={deliveryMethod === "ship"}
                     className="el-co-input"
+                    aria-invalid={fieldErrors.postal ? true : undefined}
+                    aria-describedby={fieldErrors.postal ? "postal-error" : undefined}
                   />
                 </ElegantField>
                 <ElegantField label="Country *" htmlFor="country">
@@ -430,7 +464,7 @@ export function ElegantCheckoutForm({ business }: Props) {
                 </ElegantField>
               </div>
             </div>
-          </section>
+          </fieldset>
         )}
       </div>
 
@@ -578,23 +612,6 @@ export function ElegantCheckoutForm({ business }: Props) {
         </div>
       </div>
 
-      <style>{`
-        .el-co-input {
-          background: transparent !important;
-          border: 0 !important;
-          border-bottom: 1px solid var(--el-line, rgba(28,26,23,0.12)) !important;
-          border-radius: 0 !important;
-          padding: 10px 0 !important;
-          font-size: 15px !important;
-          box-shadow: none !important;
-          outline: none !important;
-        }
-        .el-co-input:focus {
-          border-bottom-color: var(--el-ink, #1c1a17) !important;
-          ring: none !important;
-        }
-        .el-pay-btn:hover:not(:disabled) { background: var(--el-sage, #4a5240) !important; }
-      `}</style>
     </form>
   );
 }
@@ -604,11 +621,13 @@ function ElegantField({
   htmlFor,
   children,
   style,
+  error,
 }: {
   label: string;
   htmlFor: string;
   children: React.ReactNode;
   style?: React.CSSProperties;
+  error?: string;
 }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6, ...style }}>
@@ -625,6 +644,11 @@ function ElegantField({
         {label}
       </Label>
       {children}
+      {error && (
+        <span id={`${htmlFor}-error`} className="el-field-error">
+          {error}
+        </span>
+      )}
     </div>
   );
 }

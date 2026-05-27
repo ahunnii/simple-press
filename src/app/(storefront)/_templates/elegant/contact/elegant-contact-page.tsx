@@ -205,14 +205,6 @@ export function ElegantContactPage({ business }: DefaultContactPageTemplateProps
           </div>
         </div>
 
-        <style>{`
-          @media (max-width: 800px) {
-            .el-contact-grid {
-              grid-template-columns: 1fr !important;
-              gap: 48px !important;
-            }
-          }
-        `}</style>
       </section>
     </div>
   );

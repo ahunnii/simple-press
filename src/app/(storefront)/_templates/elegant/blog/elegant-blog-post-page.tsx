@@ -337,72 +337,14 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
                 }}
               >
                 All posts
-                <ArrowRight style={{ width: 14, height: 14 }} />
+                <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
               </Link>
             </div>
           </div>
 
-          <style>{`
-            .el-related-post:hover .object-cover { transform: scale(1.04); }
-            .el-btn-ghost:hover {
-              background: var(--el-ink, #1c1a17) !important;
-              color: var(--el-paper, #fbf8f2) !important;
-            }
-            .el-blog-back:hover { color: var(--el-ink, #1c1a17) !important; }
-          `}</style>
         </section>
       )}
 
-      {/* ── Blog body typography ── */}
-      <style>{`
-        .el-blog-body {
-          font-size: 18px;
-          line-height: 1.8;
-          color: var(--el-ink-2, #2a2722);
-          font-family: var(--font-sans, sans-serif);
-        }
-        .el-blog-body h1,
-        .el-blog-body h2,
-        .el-blog-body h3,
-        .el-blog-body h4 {
-          font-family: var(--font-serif, 'Cormorant Garamond', serif);
-          font-weight: 400;
-          line-height: 1.15;
-          letter-spacing: -0.01em;
-          color: var(--el-ink, #1c1a17);
-          margin: 44px 0 18px;
-        }
-        .el-blog-body h2 { font-size: clamp(28px, 3.2vw, 40px); }
-        .el-blog-body h3 { font-size: clamp(22px, 2.4vw, 30px); }
-        .el-blog-body p { margin-top: 18px; color: var(--el-ink-2, #2a2722); }
-        .el-blog-body blockquote {
-          margin: 44px 0;
-          padding: 32px 0 32px 32px;
-          border-left: 1px solid var(--el-sage, #4a5240);
-          font-family: var(--font-serif, 'Cormorant Garamond', serif);
-          font-style: italic;
-          font-size: clamp(22px, 2.4vw, 30px);
-          line-height: 1.3;
-          color: var(--el-ink, #1c1a17);
-        }
-        .el-blog-body a {
-          color: var(--el-ink, #1c1a17);
-          text-underline-offset: 3px;
-        }
-        .el-blog-body ul,
-        .el-blog-body ol {
-          padding-left: 24px;
-          margin-top: 18px;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-        .el-blog-body img {
-          border-radius: 6px;
-          margin: 32px 0;
-          width: 100%;
-        }
-      `}</style>
     </div>
   );
 }

@@ -9,6 +9,7 @@ const POLICY_LINKS = [
   { label: "Acceptable Use", href: "/platform/acceptable-use" },
   { label: "Disclaimer", href: "/platform/disclaimer" },
   { label: "INFORM Act", href: "/platform/inform-act" },
+  { label: "Accessibility", href: "/platform/accessibility" },
 ];
 
 export default function PoliciesLayout({

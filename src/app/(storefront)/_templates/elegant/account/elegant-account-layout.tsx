@@ -61,7 +61,7 @@ export function ElegantAccountLayout({ children, heading }: Props) {
 
       {/* ── Mobile tabs ── */}
       <nav
-        aria-label="Account navigation"
+        aria-label="Account mobile navigation"
         style={{
           padding: "0 40px",
           overflowX: "auto",
@@ -79,6 +79,7 @@ export function ElegantAccountLayout({ children, heading }: Props) {
             <Link
               key={href}
               href={href}
+              aria-current={active ? "page" : undefined}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -97,10 +98,11 @@ export function ElegantAccountLayout({ children, heading }: Props) {
                 flexShrink: 0,
                 transition: `color 0.3s ${ease}`,
               }}
+              className="el-account-tab-link"
             >
               <Icon
                 style={{ width: 13, height: 13 }}
-                aria-hidden
+                aria-hidden={true}
               />
               {label}
             </Link>
@@ -127,13 +129,14 @@ export function ElegantAccountLayout({ children, heading }: Props) {
             className="hidden md:block"
             style={{ position: "sticky", top: 120 }}
           >
-            <ul style={{ listStyle: "none" }}>
+            <ul role="list" style={{ listStyle: "none" }}>
               {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
                 const active = isActive(href);
                 return (
                   <li key={href}>
                     <Link
                       href={href}
+                      aria-current={active ? "page" : undefined}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -155,7 +158,7 @@ export function ElegantAccountLayout({ children, heading }: Props) {
                     >
                       <Icon
                         style={{ width: 14, height: 14, flexShrink: 0 }}
-                        aria-hidden
+                        aria-hidden={true}
                       />
                       {label}
                     </Link>
@@ -170,20 +173,6 @@ export function ElegantAccountLayout({ children, heading }: Props) {
         </div>
       </section>
 
-      <style>{`
-        @media (max-width: 768px) {
-          .el-account-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .el-account-mobile-nav {
-            display: flex !important;
-          }
-        }
-        .el-account-nav-link:hover {
-          color: var(--el-ink, #1c1a17) !important;
-          border-left-color: rgba(28,26,23,0.3) !important;
-        }
-      `}</style>
     </div>
   );
 }

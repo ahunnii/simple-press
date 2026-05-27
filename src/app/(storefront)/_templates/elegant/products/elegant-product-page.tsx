@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
@@ -32,6 +32,7 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
   const [shown, setShown] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<TabKey>("details");
+  const tabListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -52,6 +53,27 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
     transform: shown ? "translateY(0)" : "translateY(24px)",
     transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
   });
+
+  const handleTabKeyDown = (e: React.KeyboardEvent, currentKey: TabKey) => {
+    const keys = TABS.map((t) => t.key);
+    const idx = keys.indexOf(currentKey);
+    let next: number | null = null;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      next = (idx + 1) % keys.length;
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      next = (idx - 1 + keys.length) % keys.length;
+    } else if (e.key === "Home") {
+      next = 0;
+    } else if (e.key === "End") {
+      next = keys.length - 1;
+    }
+    if (next !== null) {
+      e.preventDefault();
+      setActiveTab(keys[next]!);
+      const btns = tabListRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+      btns?.[next]?.focus();
+    }
+  };
 
   const currentImage =
     product.images[selectedImageIndex]?.url ?? "/placeholder.svg";
@@ -85,7 +107,7 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
               }}
               className="el-back-link"
             >
-              <ArrowLeft style={{ width: 13, height: 13 }} />
+              <ArrowLeft aria-hidden={true} style={{ width: 13, height: 13 }} />
               Back to shop
             </Link>
           </div>
@@ -137,6 +159,7 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
                     <button
                       key={image.url}
                       type="button"
+                      className="el-thumb-btn"
                       onClick={() => setSelectedImageIndex(index)}
                       style={{
                         position: "relative",
@@ -268,6 +291,7 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
                         textDecoration: "line-through",
                       }}
                     >
+                      <span className="sr-only">Original price: </span>
                       {formatPrice(displayCompareAtPrice)}
                     </span>
                   )}
@@ -395,6 +419,9 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
               <div style={revealStyle(0.5)}>
                 {/* Tab bar */}
                 <div
+                  ref={tabListRef}
+                  role="tablist"
+                  aria-label="Product information"
                   style={{
                     display: "flex",
                     gap: 0,
@@ -407,7 +434,13 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
                     <button
                       key={key}
                       type="button"
+                      role="tab"
+                      id={`el-tab-${key}`}
+                      aria-selected={activeTab === key}
+                      aria-controls={`el-tabpanel-${key}`}
+                      tabIndex={activeTab === key ? 0 : -1}
                       onClick={() => setActiveTab(key)}
+                      onKeyDown={(e) => handleTabKeyDown(e, key)}
                       style={{
                         padding: "12px 0",
                         marginRight: 24,
@@ -419,10 +452,6 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
                           activeTab === key
                             ? "var(--el-ink, #1c1a17)"
                             : "var(--el-ink-soft, #6b6659)",
-                        borderBottom:
-                          activeTab === key
-                            ? "1px solid var(--el-ink, #1c1a17)"
-                            : "1px solid transparent",
                         marginBottom: -1,
                         background: "none",
                         border: "none",
@@ -443,6 +472,9 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
 
                 {/* Tab content */}
                 <div
+                  role="tabpanel"
+                  id={`el-tabpanel-${activeTab}`}
+                  aria-labelledby={`el-tab-${activeTab}`}
                   style={{
                     fontSize: 15,
                     lineHeight: 1.7,
@@ -547,27 +579,13 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
                 }}
               >
                 View all products
-                <ArrowRight style={{ width: 14, height: 14 }} />
+                <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
               </Link>
             </div>
           </div>
         </section>
       )}
 
-      <style>{`
-        @media (max-width: 900px) {
-          .el-pdp-grid {
-            grid-template-columns: 1fr !important;
-            gap: 40px !important;
-          }
-          .el-pdp-grid > div:nth-child(2) {
-            position: static !important;
-          }
-        }
-        .el-back-link:hover {
-          color: var(--el-ink, #1c1a17) !important;
-        }
-      `}</style>
     </>
   );
 }

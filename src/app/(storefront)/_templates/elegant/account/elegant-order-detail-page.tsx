@@ -237,7 +237,8 @@ export function ElegantOrderDetailPage({ order }: OrderDetailPageTemplateProps) 
                         }}
                       >
                         Track shipment
-                        <ExternalLink style={{ width: 11, height: 11 }} />
+                        <ExternalLink aria-hidden={true} style={{ width: 11, height: 11 }} />
+                        <span className="sr-only">(opens in new tab)</span>
                       </a>
                     )}
                     <div style={{
@@ -284,24 +285,24 @@ export function ElegantOrderDetailPage({ order }: OrderDetailPageTemplateProps) 
           <Panel title="Order info">
             <dl style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div>
-                <MetaLabel>Email</MetaLabel>
-                <div style={{ marginTop: 4, fontSize: 13, color: "var(--el-ink, #1c1a17)", fontFamily: "var(--font-sans, sans-serif)" }}>
+                <dt><MetaLabel>Email</MetaLabel></dt>
+                <dd style={{ marginLeft: 0, marginTop: 4, fontSize: 13, color: "var(--el-ink, #1c1a17)", fontFamily: "var(--font-sans, sans-serif)" }}>
                   {order.customerEmail}
-                </div>
+                </dd>
               </div>
               {order.customerPhone && (
                 <div>
-                  <MetaLabel>Phone</MetaLabel>
-                  <div style={{ marginTop: 4, fontSize: 13, color: "var(--el-ink, #1c1a17)", fontFamily: "var(--font-sans, sans-serif)" }}>
+                  <dt><MetaLabel>Phone</MetaLabel></dt>
+                  <dd style={{ marginLeft: 0, marginTop: 4, fontSize: 13, color: "var(--el-ink, #1c1a17)", fontFamily: "var(--font-sans, sans-serif)" }}>
                     {order.customerPhone}
-                  </div>
+                  </dd>
                 </div>
               )}
               <div>
-                <MetaLabel>Payment</MetaLabel>
-                <div style={{ marginTop: 4, fontSize: 13, color: "var(--el-ink, #1c1a17)", fontFamily: "var(--font-sans, sans-serif)", textTransform: "capitalize" }}>
+                <dt><MetaLabel>Payment</MetaLabel></dt>
+                <dd style={{ marginLeft: 0, marginTop: 4, fontSize: 13, color: "var(--el-ink, #1c1a17)", fontFamily: "var(--font-sans, sans-serif)", textTransform: "capitalize" }}>
                   {order.paymentStatus}
-                </div>
+                </dd>
               </div>
             </dl>
           </Panel>
@@ -320,19 +321,12 @@ export function ElegantOrderDetailPage({ order }: OrderDetailPageTemplateProps) 
               fontFamily: "var(--font-mono, ui-monospace)",
             }}
           >
-            <ArrowLeft style={{ width: 12, height: 12 }} />
+            <ArrowLeft aria-hidden={true} style={{ width: 12, height: 12 }} />
             Back to orders
           </Link>
         </div>
       </div>
 
-      <style>{`
-        @media (max-width: 700px) {
-          .el-order-detail-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </ElegantAccountLayout>
   );
 }

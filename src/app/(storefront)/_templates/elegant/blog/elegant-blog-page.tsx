@@ -183,13 +183,17 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
             borderBottom: "1px solid var(--el-line, rgba(28,26,23,0.12))",
             flexWrap: "wrap",
           }}>
-            <span style={{
-              fontFamily: "var(--font-mono, ui-monospace)",
-              fontSize: 11,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--el-ink-soft, #6b6659)",
-            }}>
+            <span
+              aria-live="polite"
+              aria-atomic="true"
+              style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 11,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+              }}
+            >
               {query.trim()
                 ? `${filtered.length} result${filtered.length !== 1 ? "s" : ""}`
                 : `${pages.length} post${pages.length !== 1 ? "s" : ""}`}
@@ -224,6 +228,7 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
             <Link
               href={`/blog/${featured.slug}`}
+              aria-labelledby={`featured-post-${featured.slug}`}
               style={{ display: "block", textDecoration: "none" }}
               className="el-featured-post group"
             >
@@ -280,15 +285,18 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
                   }}>
                     {formatDate(featured.createdAt)}
                   </div>
-                  <h2 style={{
-                    fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-                    fontWeight: 400,
-                    fontSize: "clamp(32px, 4.8vw, 60px)",
-                    lineHeight: 1.05,
-                    color: "var(--el-ink, #1c1a17)",
-                    marginBottom: 18,
-                    letterSpacing: "-0.01em",
-                  }}>
+                  <h2
+                    id={`featured-post-${featured.slug}`}
+                    style={{
+                      fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                      fontWeight: 400,
+                      fontSize: "clamp(32px, 4.8vw, 60px)",
+                      lineHeight: 1.05,
+                      color: "var(--el-ink, #1c1a17)",
+                      marginBottom: 18,
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
                     {featured.title}
                   </h2>
                   {featured.excerpt && (
@@ -313,19 +321,13 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
                     fontFamily: "var(--font-sans, sans-serif)",
                   }}>
                     Read the piece
-                    <ArrowRight style={{ width: 14, height: 14 }} />
+                    <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
                   </span>
                 </div>
               </div>
             </Link>
           </div>
 
-          <style>{`
-            @media (max-width: 900px) {
-              .el-feature-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
-            }
-            .el-featured-post:hover .object-cover { transform: scale(1.04); }
-          `}</style>
         </section>
       )}
 
@@ -367,6 +369,7 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
                 <Link
                   key={post.slug}
                   href={`/blog/${post.slug}`}
+                  aria-label={post.title}
                   style={{
                     display: "block",
                     textDecoration: "none",
@@ -433,9 +436,6 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
             </div>
           </div>
 
-          <style>{`
-            .el-post-card:hover .object-cover { transform: scale(1.04); }
-          `}</style>
         </section>
       )}
 

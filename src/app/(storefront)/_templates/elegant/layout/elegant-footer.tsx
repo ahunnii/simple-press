@@ -147,6 +147,16 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
             </div>
           </div>
 
+          {/* Nav columns — 3-col sub-grid so the <nav> landmark is preserved */}
+          <nav
+            aria-label="Footer navigation"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: 40,
+              gridColumn: "span 3",
+            }}
+          >
           {/* Shop column */}
           <FooterColumn title="Shop" links={navLinks} />
 
@@ -156,7 +166,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
           {/* Policies / Contact column */}
           <div>
             <FooterColHeading>Info</FooterColHeading>
-            <ul style={{ listStyle: "none" }}>
+            <ul role="list" style={{ listStyle: "none" }}>
               {policies.map((policy) => (
                 <li key={policy.id} style={{ marginBottom: 10 }}>
                   <Link
@@ -206,6 +216,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
               )}
             </ul>
           </div>
+          </nav>
         </div>
 
         {/* Bottom bar */}
@@ -218,7 +229,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
             fontFamily: "var(--font-mono, ui-monospace)",
             fontSize: 11,
             letterSpacing: "0.12em",
-            color: "rgba(255,255,255,0.45)",
+            color: "rgba(255,255,255,0.65)",
             textTransform: "uppercase",
           }}
         >
@@ -227,18 +238,6 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
         </div>
       </div>
 
-      <style>{`
-        @media (max-width: 760px) {
-          .el-footer-grid {
-            grid-template-columns: 1fr 1fr !important;
-          }
-        }
-        @media (max-width: 480px) {
-          .el-footer-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </footer>
   );
 }
@@ -252,7 +251,7 @@ function FooterColHeading({ children }: { children: React.ReactNode }) {
         fontWeight: 400,
         letterSpacing: "0.22em",
         textTransform: "uppercase",
-        color: "rgba(255,255,255,0.5)",
+        color: "rgba(255,255,255,0.65)",
         marginBottom: 18,
       }}
     >
@@ -271,7 +270,7 @@ function FooterColumn({
   return (
     <div>
       <FooterColHeading>{title}</FooterColHeading>
-      <ul style={{ listStyle: "none" }}>
+      <ul role="list" style={{ listStyle: "none" }}>
         {links.map((link) => (
           <li key={link.href + link.label} style={{ marginBottom: 10 }}>
             <Link

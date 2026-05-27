@@ -90,6 +90,7 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
             hamburger — only one is visible at a time via CSS, but they
             share the same grid cell so the logo always stays centred. */}
         <nav
+          aria-label="Main navigation"
           className="el-pill"
           style={{
             pointerEvents: "auto",
@@ -118,6 +119,7 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                   key={link.href}
                   href={link.href}
                   className="el-nav-link"
+                  aria-current={isActive(link.href) ? "page" : undefined}
                   style={{
                     position: "relative",
                     fontSize: 13.5,
@@ -160,10 +162,12 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
+              aria-controls="el-mobile-nav"
+              aria-haspopup="true"
             >
               {menuOpen
-                ? <X style={{ width: 18, height: 18 }} />
-                : <Menu style={{ width: 18, height: 18 }} />
+                ? <X aria-hidden={true} style={{ width: 18, height: 18 }} />
+                : <Menu aria-hidden={true} style={{ width: 18, height: 18 }} />
               }
             </button>
           </div>
@@ -207,14 +211,14 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
               gap: 2,
             }}
           >
-            <button
-              type="button"
-              aria-label="Search"
+            <Link
+              href="/shop"
+              aria-label="Search products"
               style={iconBtnStyle}
               className="el-icon-btn"
             >
-              <Search style={{ width: 17, height: 17 }} />
-            </button>
+              <Search aria-hidden={true} style={{ width: 17, height: 17 }} />
+            </Link>
 
             {isPending ? (
               <div
@@ -253,19 +257,20 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                 className="el-icon-btn"
                 aria-label="Sign in"
               >
-                <User style={{ width: 17, height: 17 }} />
+                <User aria-hidden={true} style={{ width: 17, height: 17 }} />
               </Link>
             )}
 
             <button
               type="button"
               onClick={() => setIsOpen(true)}
-              aria-label="Cart"
+              aria-label={itemCount > 0 ? `Cart (${itemCount} item${itemCount === 1 ? "" : "s"})` : "Cart"}
               style={{ ...iconBtnStyle, position: "relative" }}
               className="el-icon-btn"
             >
-              <ShoppingBag style={{ width: 17, height: 17 }} />
+              <ShoppingBag aria-hidden={true} style={{ width: 17, height: 17 }} />
               <span
+                aria-hidden={true}
                 style={{
                   position: "absolute",
                   top: 4,
@@ -294,6 +299,8 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
 
         {/* ── Mobile dropdown ── */}
         <div
+          id="el-mobile-nav"
+          aria-hidden={!menuOpen}
           style={{
             pointerEvents: menuOpen ? "auto" : "none",
             maxHeight: menuOpen ? 500 : 0,
@@ -318,6 +325,8 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
               <Link
                 key={link.href}
                 href={link.href}
+                tabIndex={menuOpen ? undefined : -1}
+                aria-current={isActive(link.href) ? "page" : undefined}
                 onClick={() => setMenuOpen(false)}
                 style={{
                   fontSize: 16,
@@ -340,33 +349,6 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
       {/* Cart drawer */}
       <ElegantCartDrawer />
 
-      <style>{`
-        /* Nav link hover underline */
-        .el-nav-link:hover .el-nav-underline {
-          transform: scaleX(1) !important;
-        }
-        .el-nav-link:hover {
-          color: var(--el-ink, #1c1a17) !important;
-        }
-
-        /* Icon button hover */
-        .el-icon-btn:hover {
-          background: rgba(28, 26, 23, 0.06) !important;
-        }
-
-        /* Mobile: hide desktop nav, show hamburger */
-        @media (max-width: 767px) {
-          .el-desktop-nav { display: none !important; }
-          .el-hamburger { display: inline-flex !important; }
-          .el-pill { padding: 10px 18px !important; }
-        }
-
-        /* Desktop: show desktop nav, hide hamburger */
-        @media (min-width: 768px) {
-          .el-desktop-nav { display: flex !important; }
-          .el-hamburger { display: none !important; }
-        }
-      `}</style>
     </>
   );
 }

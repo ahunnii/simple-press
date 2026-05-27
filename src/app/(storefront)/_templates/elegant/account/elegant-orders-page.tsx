@@ -50,6 +50,7 @@ export function ElegantOrdersPage({ orders }: OrdersPageTemplateProps) {
           }}
         >
           <Package
+            aria-hidden={true}
             style={{
               width: 36,
               height: 36,
@@ -97,7 +98,7 @@ export function ElegantOrdersPage({ orders }: OrdersPageTemplateProps) {
             }}
           >
             Start shopping
-            <ArrowRight style={{ width: 13, height: 13 }} />
+            <ArrowRight aria-hidden={true} style={{ width: 13, height: 13 }} />
           </Link>
         </div>
       ) : (
@@ -221,6 +222,7 @@ export function ElegantOrdersPage({ orders }: OrdersPageTemplateProps) {
                 </div>
                 <Link
                   href={`/account/orders/${order.id}`}
+                  aria-label={`View details for order #${order.orderNumber}`}
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -234,7 +236,7 @@ export function ElegantOrdersPage({ orders }: OrdersPageTemplateProps) {
                   }}
                 >
                   View details
-                  <ArrowRight style={{ width: 12, height: 12 }} />
+                  <ArrowRight aria-hidden={true} style={{ width: 12, height: 12 }} />
                 </Link>
               </div>
             </div>

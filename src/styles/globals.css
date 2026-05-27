@@ -614,7 +614,7 @@
   --el-cream-3: #e0d9c8;
   --el-ink: #1c1a17;
   --el-ink-2: #2a2722;
-  --el-ink-soft: #6b6659;
+  --el-ink-soft: #5a5348;
   --el-ink-mute: #9a9485;
   --el-paper: #fbf8f2;
   --el-sage: #4a5240;
@@ -644,6 +644,535 @@
   0%, 100% { transform: scaleY(0.4); transform-origin: top; }
   50% { transform: scaleY(1); }
 }
+@keyframes el-scroll-down {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+@keyframes el-scroll-up {
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
+}
+
+/* ─── Elegant Template – Shared Component Styles ───────────────────────────
+   All .el-* interactive and structural rules live here, scoped via the
+   `.elegant` class on the layout root. Components no longer embed <style>
+   blocks — those injected CSS on every render and caused duplication.      */
+
+/* ── Buttons ── */
+.elegant .el-btn-primary:hover {
+  background: var(--el-sage, #4a5240) !important;
+  transform: translateY(-1px);
+}
+.elegant .el-btn-ghost:hover {
+  background: var(--el-ink, #1c1a17) !important;
+  color: var(--el-paper, #fbf8f2) !important;
+}
+.elegant .el-btn-primary:focus-visible,
+.elegant .el-btn-ghost:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+.elegant .el-cta-primary:hover { background: var(--el-sage, #4a5240) !important; }
+.elegant .el-cta-ghost:hover {
+  background: var(--el-ink, #1c1a17) !important;
+  color: var(--el-paper, #fbf8f2) !important;
+}
+.elegant .el-cta-primary:focus-visible,
+.elegant .el-cta-ghost:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+.elegant .el-checkout-btn:hover,
+.elegant .el-pay-btn:hover:not(:disabled),
+.elegant .el-drawer-checkout:hover {
+  background: var(--el-sage, #4a5240) !important;
+}
+.elegant .el-drawer-checkout:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+/* ── Icon / quantity buttons ── */
+.elegant .el-icon-btn:hover { background: rgba(28, 26, 23, 0.06) !important; }
+.elegant .el-icon-btn:focus-visible,
+.elegant .el-qty-sm:focus-visible,
+.elegant .el-qty-btn:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+}
+.elegant .el-qty-sm:hover { background: var(--el-cream-2, #ebe6dc) !important; }
+.elegant .el-qty-btn:hover:not(:disabled) { background: var(--el-cream-2, #ebe6dc) !important; }
+
+/* ── Video toggle ── */
+.elegant .el-video-toggle:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+}
+
+/* ── Header nav ── */
+.elegant .el-nav-link:hover .el-nav-underline { transform: scaleX(1) !important; }
+.elegant .el-nav-link:hover { color: var(--el-ink, #1c1a17) !important; }
+.elegant .el-nav-link:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.elegant .el-hamburger:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+}
+@media (max-width: 767px) {
+  .elegant .el-desktop-nav { display: none !important; }
+  .elegant .el-hamburger   { display: inline-flex !important; }
+  .elegant .el-pill        { padding: 10px 18px !important; }
+}
+@media (min-width: 768px) {
+  .elegant .el-desktop-nav { display: flex !important; }
+  .elegant .el-hamburger   { display: none !important; }
+}
+
+/* ── Newsletter ── */
+.elegant .el-newsletter-input:focus-visible,
+.elegant .el-newsletter-submit:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* ── Shop sort select ── */
+.elegant .el-shop-sort-select:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Product card ── */
+.elegant .el-product-card .el-quick-btns {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s var(--el-ease-out), transform 0.4s var(--el-ease-out);
+}
+.elegant .el-product-card:hover .el-quick-btns,
+.elegant .el-product-card:focus-within .el-quick-btns {
+  opacity: 1;
+  transform: translateY(0);
+}
+.elegant .el-product-card:hover .object-cover { transform: scale(1.05); }
+.elegant .el-quick-btn:hover {
+  background: var(--el-ink, #1c1a17) !important;
+  color: var(--el-paper, #fbf8f2) !important;
+}
+.elegant .el-quick-btn:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+.elegant .el-card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.elegant .el-card-link:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Product detail page ── */
+.elegant .el-back-link:hover { color: var(--el-ink, #1c1a17) !important; }
+.elegant .el-back-link:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.elegant .el-thumb-btn:focus-visible {
+  outline: 2px solid var(--el-ink, #1c1a17);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.elegant button[role="tab"]:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Checkout form inputs ── */
+.elegant .el-co-input {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--el-line, rgba(28, 26, 23, 0.12)) !important;
+  border-radius: 0 !important;
+  padding: 10px 0 !important;
+  font-size: 15px !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.elegant .el-co-input:focus {
+  border-bottom-color: var(--el-ink, #1c1a17) !important;
+}
+.elegant .el-co-input:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240) !important;
+  outline-offset: 2px !important;
+}
+
+/* ── Account nav ── */
+.elegant .el-account-nav-link:hover {
+  color: var(--el-ink, #1c1a17) !important;
+  border-left-color: rgba(28, 26, 23, 0.3) !important;
+}
+.elegant .el-account-nav-link:focus-visible,
+.elegant .el-account-tab-link:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Testimonials masonry scroll ── */
+.elegant .animate-scroll-down { animation: el-scroll-down 30s linear infinite; }
+.elegant .animate-scroll-up   { animation: el-scroll-up   30s linear infinite; }
+.elegant .hover\:animate-scroll-down-slow:hover { animation-duration: 60s; }
+.elegant .hover\:animate-scroll-up-slow:hover   { animation-duration: 60s; }
+
+/* ── Reduced-motion overrides ── */
+@media (prefers-reduced-motion: reduce) {
+  .elegant .animate-scroll-down,
+  .elegant .animate-scroll-up { animation: none; }
+  .elegant .el-marquee-track  { animation: none; }
+  .elegant { --el-reveal-dur: 0s; }
+}
+
+/* ── Scroll-reveal helpers (JS toggles .is-visible; CSS handles the motion) ── */
+.elegant .el-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity var(--el-reveal-dur, 0.9s) var(--el-ease-out),
+    transform var(--el-reveal-dur, 0.9s) var(--el-ease-out);
+  transition-delay: var(--reveal-delay, 0s);
+}
+.elegant .el-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+/* Mask reveal (text clip) */
+.elegant .el-mask-wrap { overflow: hidden; }
+.elegant .el-mask-inner {
+  transform: translateY(110%);
+  transition: transform var(--el-reveal-dur, 0.9s) var(--el-ease-out);
+  transition-delay: var(--reveal-delay, 0s);
+}
+.elegant .el-reveal.is-visible .el-mask-inner { transform: none; }
+
+/* ── Newsletter ── */
+.elegant .el-newsletter-eyebrow {
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  /* rgba(255,255,255,0.75) on #1c1a17 ≈ 9:1 — passes WCAG 1.4.3 */
+  color: rgba(255, 255, 255, 0.75);
+  display: block;
+  margin-bottom: 20px;
+}
+.elegant .el-newsletter-success {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: var(--font-sans, sans-serif);
+}
+
+/* ── Checkout delivery method buttons ── */
+.elegant .el-delivery-btn {
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  border: 1px solid var(--el-line, rgba(28, 26, 23, 0.12));
+  background: transparent;
+  color: var(--el-ink, #1c1a17);
+  cursor: pointer;
+  font-family: var(--font-sans, sans-serif);
+  transition: all 0.3s var(--el-ease);
+}
+.elegant .el-delivery-btn[aria-checked="true"] {
+  border-color: var(--el-ink, #1c1a17);
+  background: var(--el-ink, #1c1a17);
+  color: var(--el-paper, #fbf8f2);
+}
+.elegant .el-delivery-btn:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+/* ── Checkout field-level error ── */
+.elegant .el-field-error {
+  font-family: var(--font-sans, sans-serif);
+  font-size: 12px;
+  color: #c0392b;
+  margin-top: 2px;
+}
+
+/* ── Checkout fieldset legend ── */
+.elegant .el-fieldset-legend {
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--el-ink-soft, #5a5348);
+  display: block;
+  margin-bottom: 20px;
+  padding: 0;
+  float: left;
+  width: 100%;
+}
+
+/* ── Variant selector ── */
+.elegant .el-variant-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: 1px solid var(--el-line, rgba(28, 26, 23, 0.12));
+  border-radius: 999px;
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--el-ink-soft, #5a5348);
+  background: var(--el-paper, #fbf8f2);
+  cursor: pointer;
+  transition: all 0.3s var(--el-ease);
+}
+.elegant .el-variant-btn[aria-pressed="true"] {
+  border-color: var(--el-ink, #1c1a17);
+  color: var(--el-paper, #fbf8f2);
+  background: var(--el-ink, #1c1a17);
+}
+.elegant .el-variant-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.elegant .el-variant-btn:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+/* ── Contact form success ── */
+.elegant .el-contact-success {
+  padding: 40px 0;
+  text-align: center;
+}
+.elegant .el-contact-success-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--el-sage, #4a5240);
+  color: var(--el-paper, #fbf8f2);
+  margin: 0 auto 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.elegant .el-contact-success-heading {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--el-ink, #1c1a17);
+  margin-bottom: 8px;
+}
+.elegant .el-contact-success-body {
+  font-size: 15px;
+  color: var(--el-ink-soft, #5a5348);
+  font-family: var(--font-sans, sans-serif);
+  margin-bottom: 20px;
+}
+.elegant .el-contact-success-btn {
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--el-ink-soft, #5a5348);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.elegant .el-contact-success-btn:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Image hover scale (cards across the template) ── */
+.elegant .el-related-post:hover .object-cover,
+.elegant .el-featured-post:hover .object-cover,
+.elegant .el-post-card:hover .object-cover,
+.elegant .el-collection-cell:hover .object-cover,
+.elegant .el-other-col:hover .object-cover { transform: scale(1.04); }
+.elegant .el-collection-product-card:hover .object-cover { transform: scale(1.05); }
+.elegant .el-blog-back:hover { color: var(--el-ink, #1c1a17) !important; }
+
+/* ── Layout grids — responsive overrides for inline-style grid tracks ── */
+@media (max-width: 900px) {
+  .elegant .el-hero-grid {
+    grid-template-columns: 1fr !important;
+    min-height: auto !important;
+  }
+  .elegant .el-hero-grid > div:nth-child(2) {
+    height: 60vh !important;
+    min-height: 400px;
+  }
+  .elegant .el-pdp-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  .elegant .el-pdp-grid > div:nth-child(2) { position: static !important; }
+  .elegant .el-feature-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+}
+@media (max-width: 800px) {
+  .elegant .el-editorial-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .elegant .el-about-grid     { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .elegant .el-contact-grid   { grid-template-columns: 1fr !important; gap: 48px !important; }
+  .elegant .el-collections-mosaic { grid-template-columns: 1fr !important; }
+  .elegant .el-collection-cell    { grid-column: span 1 !important; }
+  .elegant .el-editorial-cta { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .elegant .el-editorial-cta > div:last-child { display: none; }
+  .elegant .el-collection-hero { grid-template-columns: 1fr !important; gap: 40px !important; }
+}
+@media (max-width: 768px) {
+  .elegant .el-account-grid       { grid-template-columns: 1fr !important; }
+  .elegant .el-account-mobile-nav { display: flex !important; }
+}
+@media (max-width: 760px) {
+  .elegant .el-footer-grid { grid-template-columns: 1fr 1fr !important; }
+}
+@media (max-width: 700px) {
+  .elegant .el-cart-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .elegant .el-cart-grid > div:nth-child(2) { position: static !important; }
+  .elegant .el-order-detail-grid { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 480px) {
+  .elegant .el-footer-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── Rich-text bodies (generic pages + blog posts) ── */
+.elegant .el-generic-body {
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--el-ink-2, #2a2722);
+  font-family: var(--font-sans, sans-serif);
+}
+.elegant .el-generic-body h1,
+.elegant .el-generic-body h2,
+.elegant .el-generic-body h3,
+.elegant .el-generic-body h4 {
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--el-ink, #1c1a17);
+  margin: 40px 0 16px;
+}
+.elegant .el-generic-body h1 { font-size: clamp(28px, 3.5vw, 44px); }
+.elegant .el-generic-body h2 { font-size: clamp(24px, 2.8vw, 36px); }
+.elegant .el-generic-body h3 { font-size: clamp(20px, 2.2vw, 28px); }
+.elegant .el-generic-body p  { margin-top: 16px; color: var(--el-ink-2, #2a2722); }
+.elegant .el-generic-body a  { color: var(--el-ink, #1c1a17); text-underline-offset: 3px; }
+.elegant .el-generic-body ul,
+.elegant .el-generic-body ol {
+  padding-left: 24px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--el-ink-2, #2a2722);
+}
+.elegant .el-generic-body li { line-height: 1.65; }
+.elegant .el-generic-body blockquote {
+  margin: 36px 0;
+  padding: 24px 0 24px 28px;
+  border-left: 1px solid var(--el-sage, #4a5240);
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
+  font-style: italic;
+  font-size: clamp(20px, 2.2vw, 28px);
+  line-height: 1.35;
+  color: var(--el-ink, #1c1a17);
+}
+.elegant .el-generic-body hr {
+  border: none;
+  border-top: 1px solid var(--el-line, rgba(28, 26, 23, 0.12));
+  margin: 40px 0;
+}
+.elegant .el-generic-body strong { font-weight: 600; color: var(--el-ink, #1c1a17); }
+.elegant .el-generic-body img { border-radius: 6px; margin: 28px 0; width: 100%; }
+.elegant .el-generic-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 28px 0;
+  font-size: 15px;
+}
+.elegant .el-generic-body th {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--el-line, rgba(28, 26, 23, 0.12));
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--el-ink-soft, #5a5348);
+  font-weight: 400;
+}
+.elegant .el-generic-body td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--el-line-2, rgba(28, 26, 23, 0.06));
+  color: var(--el-ink-2, #2a2722);
+}
+.elegant .el-blog-body {
+  font-size: 18px;
+  line-height: 1.8;
+  color: var(--el-ink-2, #2a2722);
+  font-family: var(--font-sans, sans-serif);
+}
+.elegant .el-blog-body h1,
+.elegant .el-blog-body h2,
+.elegant .el-blog-body h3,
+.elegant .el-blog-body h4 {
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--el-ink, #1c1a17);
+  margin: 44px 0 18px;
+}
+.elegant .el-blog-body h2 { font-size: clamp(28px, 3.2vw, 40px); }
+.elegant .el-blog-body h3 { font-size: clamp(22px, 2.4vw, 30px); }
+.elegant .el-blog-body p  { margin-top: 18px; color: var(--el-ink-2, #2a2722); }
+.elegant .el-blog-body blockquote {
+  margin: 44px 0;
+  padding: 32px 0 32px 32px;
+  border-left: 1px solid var(--el-sage, #4a5240);
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
+  font-style: italic;
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.3;
+  color: var(--el-ink, #1c1a17);
+}
+.elegant .el-blog-body a { color: var(--el-ink, #1c1a17); text-underline-offset: 3px; }
+.elegant .el-blog-body ul,
+.elegant .el-blog-body ol {
+  padding-left: 24px;
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.elegant .el-blog-body img { border-radius: 6px; margin: 32px 0; width: 100%; }
 
 @theme inline {
   --font-sans: var(--font-sans);

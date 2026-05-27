@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 
@@ -30,6 +31,7 @@ export function ElegantNewsletter() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const { ref, visible } = useReveal();
+  const reducedMotion = useReducedMotion();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,11 +41,14 @@ export function ElegantNewsletter() {
     }
   };
 
-  const revealStyle = (delay: number): React.CSSProperties => ({
-    opacity: visible ? 1 : 0,
-    transform: visible ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const revealStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   return (
     <section
@@ -62,17 +67,7 @@ export function ElegantNewsletter() {
         }}
       >
         <div style={revealStyle(0)}>
-          <span
-            style={{
-              fontFamily: "var(--font-mono, ui-monospace)",
-              fontSize: 11,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.5)",
-              display: "block",
-              marginBottom: 20,
-            }}
-          >
+          <span className="el-newsletter-eyebrow">
             Letters from the studio
           </span>
         </div>
@@ -112,13 +107,7 @@ export function ElegantNewsletter() {
 
         <div style={revealStyle(0.3)}>
           {submitted ? (
-            <p
-              style={{
-                fontSize: 15,
-                color: "rgba(255,255,255,0.8)",
-                fontFamily: "var(--font-sans, sans-serif)",
-              }}
-            >
+            <p role="status" className="el-newsletter-success">
               Thank you — you&apos;ll hear from us soon.
             </p>
           ) : (
@@ -134,12 +123,17 @@ export function ElegantNewsletter() {
                 paddingBottom: 6,
               }}
             >
+              <label htmlFor="el-newsletter-email" className="sr-only">
+                Email address
+              </label>
               <input
+                id="el-newsletter-email"
                 required
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
+                className="el-newsletter-input"
                 style={{
                   flex: 1,
                   background: "transparent",
@@ -147,12 +141,12 @@ export function ElegantNewsletter() {
                   color: "var(--el-paper, #fbf8f2)",
                   fontSize: 16,
                   padding: "12px 0",
-                  outline: "none",
                   fontFamily: "var(--font-sans, sans-serif)",
                 }}
               />
               <button
                 type="submit"
+                className="el-newsletter-submit"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -169,7 +163,7 @@ export function ElegantNewsletter() {
                 }}
               >
                 Subscribe
-                <ArrowRight style={{ width: 14, height: 14 }} />
+                <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
               </button>
             </form>
           )}

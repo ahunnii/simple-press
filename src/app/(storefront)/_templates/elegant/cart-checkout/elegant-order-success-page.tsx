@@ -28,7 +28,7 @@ export function ElegantOrderSuccessPage({
             justifyContent: "center",
             marginBottom: 28,
           }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden={true} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="m5 12 5 5L20 7" />
             </svg>
           </div>
@@ -114,7 +114,7 @@ export function ElegantOrderSuccessPage({
               fontFamily: "var(--font-sans, sans-serif)",
             }}>
               Continue shopping
-              <ArrowRight style={{ width: 14, height: 14 }} />
+              <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
             </Link>
           </div>
         </div>

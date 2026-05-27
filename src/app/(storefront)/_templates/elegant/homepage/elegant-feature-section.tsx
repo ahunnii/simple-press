@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import {
@@ -55,6 +55,28 @@ export function ElegantFeatureSection({
   aboutImage,
 }: Props) {
   const { ref, visible } = useReveal();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoPaused, setVideoPaused] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq.matches) {
+      setVideoPaused(true);
+      videoRef.current?.pause();
+    }
+  }, []);
+
+  const toggleVideo = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play().catch(() => undefined);
+      setVideoPaused(false);
+    } else {
+      video.pause();
+      setVideoPaused(true);
+    }
+  };
 
   const hasVideo = !!aboutVideo?.trim();
   const hasImage =
@@ -104,21 +126,50 @@ export function ElegantFeatureSection({
             }}
           >
             {hasVideo ? (
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              >
-                <source src={aboutVideo} type="video/mp4" />
-              </video>
+              <>
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                >
+                  <source src={aboutVideo} type="video/mp4" />
+                </video>
+                <button
+                  type="button"
+                  onClick={toggleVideo}
+                  aria-label={videoPaused ? "Play video" : "Pause video"}
+                  style={{
+                    position: "absolute",
+                    bottom: 12,
+                    right: 12,
+                    zIndex: 10,
+                    width: 32,
+                    height: 32,
+                    borderRadius: 999,
+                    background: "rgba(251,248,242,0.85)",
+                    border: "1px solid rgba(28,26,23,0.12)",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--el-ink, #1c1a17)",
+                  }}
+                  className="el-video-toggle"
+                >
+                  {videoPaused
+                    ? <Play aria-hidden={true} style={{ width: 13, height: 13 }} />
+                    : <Pause aria-hidden={true} style={{ width: 13, height: 13 }} />}
+                </button>
+              </>
             ) : hasImage ? (
               <Image
                 src={aboutImage!}
@@ -269,25 +320,13 @@ export function ElegantFeatureSection({
                 className="el-btn-ghost"
               >
                 Read our story
-                <ArrowRight style={{ width: 14, height: 14 }} />
+                <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      <style>{`
-        @media (max-width: 800px) {
-          .el-editorial-grid {
-            grid-template-columns: 1fr !important;
-            gap: 40px !important;
-          }
-        }
-        .el-btn-ghost:hover {
-          background: var(--el-ink, #1c1a17) !important;
-          color: var(--el-paper, #fbf8f2) !important;
-        }
-      `}</style>
     </section>
   );
 }

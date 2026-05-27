@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
@@ -22,11 +22,75 @@ export function ElegantCartDrawer() {
     isHydrated,
   } = useCart();
 
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<Element | null>(null);
+
   // Lock body scroll when open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
+
+  // Mark background content as inert when drawer is open so screen readers
+  // cannot navigate outside the dialog (supplements aria-modal).
+  useEffect(() => {
+    if (!isOpen) return;
+    const main = document.querySelector("main");
+    const footer = document.querySelector(".elegant footer");
+    main?.setAttribute("inert", "");
+    footer?.setAttribute("inert", "");
+    return () => {
+      main?.removeAttribute("inert");
+      footer?.removeAttribute("inert");
+    };
+  }, [isOpen]);
+
+  // Focus management: move focus into drawer on open, restore on close
+  useEffect(() => {
+    if (isOpen) {
+      triggerRef.current = document.activeElement;
+      requestAnimationFrame(() => closeButtonRef.current?.focus());
+    } else if (triggerRef.current instanceof HTMLElement) {
+      triggerRef.current.focus();
+      triggerRef.current = null;
+    }
+  }, [isOpen]);
+
+  // Global Escape key to close
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, setIsOpen]);
+
+  const trapFocus = (e: React.KeyboardEvent) => {
+    if (e.key !== "Tab") return;
+    const el = drawerRef.current;
+    if (!el) return;
+    const focusable = Array.from(
+      el.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0]!;
+    const last = focusable[focusable.length - 1]!;
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  };
 
   if (!isHydrated) return null;
 
@@ -45,14 +109,16 @@ export function ElegantCartDrawer() {
           pointerEvents: isOpen ? "auto" : "none",
           transition: `opacity 0.45s ${ease}`,
         }}
-        aria-hidden
+        aria-hidden={true}
       />
 
       {/* Drawer */}
-      <aside
+      <div
+        ref={drawerRef}
         role="dialog"
-        aria-modal
+        aria-modal={true}
         aria-label="Shopping bag"
+        onKeyDown={trapFocus}
         style={{
           position: "fixed",
           top: 0,
@@ -76,7 +142,7 @@ export function ElegantCartDrawer() {
           borderBottom: "1px solid var(--el-line, rgba(28,26,23,0.12))",
           flexShrink: 0,
         }}>
-          <h3 style={{
+          <h2 style={{
             fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
             fontSize: 22,
             fontWeight: 500,
@@ -91,8 +157,9 @@ export function ElegantCartDrawer() {
             }}>
               ({itemCount})
             </span>
-          </h3>
+          </h2>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={() => setIsOpen(false)}
             aria-label="Close bag"
@@ -110,7 +177,7 @@ export function ElegantCartDrawer() {
             }}
             className="el-icon-btn"
           >
-            <X style={{ width: 18, height: 18 }} />
+            <X aria-hidden={true} style={{ width: 18, height: 18 }} />
           </button>
         </div>
 
@@ -125,7 +192,7 @@ export function ElegantCartDrawer() {
               padding: "60px 0",
               textAlign: "center",
             }}>
-              <ShoppingBag style={{ width: 32, height: 32, color: "var(--el-ink-soft, #6b6659)" }} strokeWidth={1} />
+              <ShoppingBag aria-hidden={true} style={{ width: 32, height: 32, color: "var(--el-ink-soft, #6b6659)" }} strokeWidth={1} />
               <span style={{
                 fontFamily: "var(--font-mono, ui-monospace)",
                 fontSize: 11,
@@ -171,7 +238,7 @@ export function ElegantCartDrawer() {
                 }}
               >
                 Browse shop
-                <ArrowRight style={{ width: 13, height: 13 }} />
+                <ArrowRight aria-hidden={true} style={{ width: 13, height: 13 }} />
               </button>
             </div>
           ) : (
@@ -243,7 +310,7 @@ export function ElegantCartDrawer() {
                     <button
                       type="button"
                       onClick={() => updateQuantity(item.productId, item.variantId, item.quantity - 1)}
-                      aria-label="Decrease quantity"
+                      aria-label={`Decrease quantity of ${item.productName}`}
                       style={{
                         width: 24, height: 24,
                         display: "inline-flex",
@@ -257,13 +324,19 @@ export function ElegantCartDrawer() {
                       }}
                       className="el-qty-sm"
                     >
-                      <Minus style={{ width: 11, height: 11 }} />
+                      <Minus aria-hidden={true} style={{ width: 11, height: 11 }} />
                     </button>
-                    <span style={{ color: "var(--el-ink, #1c1a17)" }}>{item.quantity}</span>
+                    <span
+                      aria-live="polite"
+                      aria-atomic="true"
+                      style={{ color: "var(--el-ink, #1c1a17)" }}
+                    >
+                      {item.quantity}
+                    </span>
                     <button
                       type="button"
                       onClick={() => updateQuantity(item.productId, item.variantId, item.quantity + 1)}
-                      aria-label="Increase quantity"
+                      aria-label={`Increase quantity of ${item.productName}`}
                       style={{
                         width: 24, height: 24,
                         display: "inline-flex",
@@ -277,7 +350,7 @@ export function ElegantCartDrawer() {
                       }}
                       className="el-qty-sm"
                     >
-                      <Plus style={{ width: 11, height: 11 }} />
+                      <Plus aria-hidden={true} style={{ width: 11, height: 11 }} />
                     </button>
                   </div>
                 </div>
@@ -381,7 +454,7 @@ export function ElegantCartDrawer() {
               className="el-drawer-checkout"
             >
               Checkout
-              <ArrowRight style={{ width: 14, height: 14 }} />
+              <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
             </Link>
             <Link
               href="/cart"
@@ -403,13 +476,8 @@ export function ElegantCartDrawer() {
             </Link>
           </div>
         )}
-      </aside>
+      </div>
 
-      <style>{`
-        .el-icon-btn:hover { background: rgba(28,26,23,0.06) !important; }
-        .el-qty-sm:hover { background: var(--el-cream-2, #ebe6dc) !important; }
-        .el-drawer-checkout:hover { background: var(--el-sage, #4a5240) !important; }
-      `}</style>
     </>
   );
 }

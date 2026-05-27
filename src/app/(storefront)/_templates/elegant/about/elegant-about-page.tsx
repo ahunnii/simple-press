@@ -243,7 +243,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 }}
               >
                 Come say hello
-                <ArrowRight style={{ width: 14, height: 14 }} />
+                <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
               </Link>
             </div>
 
@@ -271,14 +271,6 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
           </div>
         </div>
 
-        <style>{`
-          @media (max-width: 800px) {
-            .el-about-grid {
-              grid-template-columns: 1fr !important;
-              gap: 40px !important;
-            }
-          }
-        `}</style>
       </section>
 
       {/* ── Mission / Vision ── */}

@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Pause, Play } from "lucide-react";
 
 const testimonials = [
   {
@@ -150,6 +151,7 @@ const TestimonialCard = ({
 
 export function ElegantTestimonials() {
   const [headerVisible, setHeaderVisible] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
 
   const column1 = [testimonials[0], testimonials[3], testimonials[6]];
@@ -184,7 +186,7 @@ export function ElegantTestimonials() {
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Header */}
-        <div ref={headerRef} className="mb-16 text-center">
+        <div ref={headerRef} className="mb-16 text-center" style={{ position: "relative" }}>
           <span
             style={{
               fontFamily: "var(--font-mono, ui-monospace)",
@@ -216,6 +218,30 @@ export function ElegantTestimonials() {
           >
             Loved by our community
           </h2>
+          <button
+            type="button"
+            onClick={() => setIsPaused((p) => !p)}
+            aria-label={isPaused ? "Resume scrolling testimonials" : "Pause scrolling testimonials"}
+            style={{
+              position: "absolute",
+              right: 0,
+              top: "50%",
+              transform: "translateY(-50%)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 36,
+              height: 36,
+              borderRadius: 999,
+              border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+              background: "transparent",
+              cursor: "pointer",
+              color: "var(--el-ink-soft, #6b6659)",
+            }}
+            className="el-icon-btn"
+          >
+            {isPaused ? <Play size={14} /> : <Pause size={14} />}
+          </button>
         </div>
 
         {/* Scrolling Testimonials */}
@@ -227,15 +253,24 @@ export function ElegantTestimonials() {
           {/* Mobile - Single Column */}
           <div className="h-[600px] md:hidden">
             <div className="relative h-full overflow-hidden">
-              <div className="animate-scroll-down hover:animate-scroll-down-slow">
-                {[...testimonials, ...testimonials].map(
-                  (testimonial, index) => (
+              <div
+                className="animate-scroll-down hover:animate-scroll-down-slow"
+                style={{ animationPlayState: isPaused ? "paused" : "running" }}
+              >
+                {testimonials.map((testimonial) => (
+                  <TestimonialCard
+                    key={`mobile-${testimonial.id}-first`}
+                    testimonial={testimonial}
+                  />
+                ))}
+                <div aria-hidden="true">
+                  {testimonials.map((testimonial) => (
                     <TestimonialCard
-                      key={`mobile-${testimonial.id}-${index}`}
+                      key={`mobile-${testimonial.id}-dup`}
                       testimonial={testimonial}
                     />
-                  ),
-                )}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -244,84 +279,76 @@ export function ElegantTestimonials() {
           <div className="hidden h-[600px] gap-4 md:grid md:grid-cols-3">
             {/* Column 1 - Scrolling Down */}
             <div className="relative overflow-hidden">
-              <div className="animate-scroll-down hover:animate-scroll-down-slow">
-                {[...column1, ...column1].map((testimonial, index) => (
+              <div
+                className="animate-scroll-down hover:animate-scroll-down-slow"
+                style={{ animationPlayState: isPaused ? "paused" : "running" }}
+              >
+                {column1.map((testimonial) => (
                   <TestimonialCard
-                    key={`col1-${testimonial?.id}-${index}`}
-                    testimonial={
-                      testimonial ?? {
-                        id: 0,
-                        name: "",
-                        location: "",
-                        rating: 0,
-                        text: "",
-                        product: "",
-                      }
-                    }
+                    key={`col1-${testimonial?.id}-first`}
+                    testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
                   />
                 ))}
+                <div aria-hidden="true">
+                  {column1.map((testimonial) => (
+                    <TestimonialCard
+                      key={`col1-${testimonial?.id}-dup`}
+                      testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Column 2 - Scrolling Up */}
             <div className="relative overflow-hidden">
-              <div className="animate-scroll-up hover:animate-scroll-up-slow">
-                {[...column2, ...column2].map((testimonial, index) => (
+              <div
+                className="animate-scroll-up hover:animate-scroll-up-slow"
+                style={{ animationPlayState: isPaused ? "paused" : "running" }}
+              >
+                {column2.map((testimonial) => (
                   <TestimonialCard
-                    key={`col2-${testimonial?.id}-${index}`}
-                    testimonial={
-                      testimonial ?? {
-                        id: 0,
-                        name: "",
-                        location: "",
-                        rating: 0,
-                        text: "",
-                        product: "",
-                      }
-                    }
+                    key={`col2-${testimonial?.id}-first`}
+                    testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
                   />
                 ))}
+                <div aria-hidden="true">
+                  {column2.map((testimonial) => (
+                    <TestimonialCard
+                      key={`col2-${testimonial?.id}-dup`}
+                      testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Column 3 - Scrolling Down */}
             <div className="relative overflow-hidden">
-              <div className="animate-scroll-down hover:animate-scroll-down-slow">
-                {[...column3, ...column3].map((testimonial, index) => (
+              <div
+                className="animate-scroll-down hover:animate-scroll-down-slow"
+                style={{ animationPlayState: isPaused ? "paused" : "running" }}
+              >
+                {column3.map((testimonial) => (
                   <TestimonialCard
-                    key={`col3-${testimonial?.id}-${index}`}
-                    testimonial={
-                      testimonial ?? {
-                        id: 0,
-                        name: "",
-                        location: "",
-                        rating: 0,
-                        text: "",
-                        product: "",
-                      }
-                    }
+                    key={`col3-${testimonial?.id}-first`}
+                    testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
                   />
                 ))}
+                <div aria-hidden="true">
+                  {column3.map((testimonial) => (
+                    <TestimonialCard
+                      key={`col3-${testimonial?.id}-dup`}
+                      testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <style>{`
-        @keyframes el-scroll-down {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(-50%); }
-        }
-        @keyframes el-scroll-up {
-          0% { transform: translateY(-50%); }
-          100% { transform: translateY(0); }
-        }
-        .animate-scroll-down { animation: el-scroll-down 30s linear infinite; }
-        .animate-scroll-up { animation: el-scroll-up 30s linear infinite; }
-        .hover\\:animate-scroll-down-slow:hover { animation-duration: 60s; }
-        .hover\\:animate-scroll-up-slow:hover { animation-duration: 60s; }
-      `}</style>
     </section>
   );
 }

@@ -31,10 +31,11 @@ function useScrollReveal(threshold = 0.1) {
 
 function Stars({ count = 5 }: { count?: number }) {
   return (
-    <div style={{ display: "flex", gap: 3 }}>
+    <div aria-label={`${count} out of 5 stars`} style={{ display: "flex", gap: 3 }}>
       {Array.from({ length: count }).map((_, i) => (
         <Star
           key={i}
+          aria-hidden={true}
           style={{ width: 13, height: 13, color: "var(--el-sage, #4a5240)", fill: "var(--el-sage, #4a5240)" }}
         />
       ))}
@@ -107,7 +108,7 @@ function TestimonialCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={testimonial.photoUrls[0]}
-            alt=""
+            alt={testimonial.customerName}
             style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
           />
         ) : (
@@ -160,7 +161,7 @@ function TestimonialCard({
             <img
               key={i}
               src={url}
-              alt=""
+              alt={`Photo ${i + 1} from ${testimonial.customerName}`}
               style={{ width: 52, height: 52, borderRadius: 6, objectFit: "cover" }}
             />
           ))}
@@ -439,7 +440,7 @@ export function ElegantTestimonialsClient({
               className="el-cta-primary"
             >
               Shop the collection
-              <ArrowRight style={{ width: 14, height: 14 }} />
+              <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
             </Link>
             <Link
               href="/testimonials/submit"
@@ -468,13 +469,6 @@ export function ElegantTestimonialsClient({
         </div>
       </section>
 
-      <style>{`
-        .el-cta-primary:hover { background: var(--el-sage, #4a5240) !important; }
-        .el-cta-ghost:hover {
-          background: var(--el-ink, #1c1a17) !important;
-          color: var(--el-paper, #fbf8f2) !important;
-        }
-      `}</style>
     </div>
   );
 }

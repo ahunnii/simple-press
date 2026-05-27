@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { formatPrice } from "~/lib/prices";
@@ -45,7 +44,6 @@ const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 export function ElegantProductCard({ product, index, isVisible }: Props) {
   const { addItem } = useCart();
-  const router = useRouter();
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const productStatus = checkProductStatus({
@@ -74,6 +72,7 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
     if (productStatus.disableCart) return;
     addItem({
       productId: product.id,
+      productSlug: product.slug,
       variantId: null,
       productName: product.name,
       variantName: null,
@@ -88,15 +87,13 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
   };
 
   return (
-    <Link
-      href={`/shop/${product.slug}`}
+    <article
+      aria-label={product.name}
       style={{
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? "translateY(0)" : "translateY(24px)",
         transition: `opacity 0.7s ${ease} ${index * 80}ms, transform 0.7s ${ease} ${index * 80}ms`,
-        cursor: "pointer",
-        textDecoration: "none",
-        display: "block",
+        position: "relative",
       }}
       className="el-product-card group"
     >
@@ -156,7 +153,7 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
           </span>
         )}
 
-        {/* Quick-add pills (slide up on hover) */}
+        {/* Quick-add pills (slide up on hover) — z-index:3 sits above card-link ::after overlay */}
         <div
           className="el-quick-btns"
           style={{
@@ -166,17 +163,12 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
             bottom: 12,
             display: "flex",
             gap: 8,
-            zIndex: 2,
+            zIndex: 3,
           }}
         >
           {productStatus.hasVariants ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                router.push(`/shop/${product.slug}`);
-              }}
+            <Link
+              href={`/shop/${product.slug}`}
               style={{
                 flex: 1,
                 padding: "10px 14px",
@@ -190,11 +182,14 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
                 cursor: "pointer",
                 fontFamily: "var(--font-sans, sans-serif)",
                 transition: `background 0.3s ${ease}, color 0.3s ${ease}`,
+                textDecoration: "none",
+                color: "var(--el-ink, #1c1a17)",
+                textAlign: "center",
               }}
               className="el-quick-btn"
             >
               View options
-            </button>
+            </Link>
           ) : (
             <>
               <button
@@ -220,13 +215,8 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
               >
                 Quick add
               </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  router.push(`/shop/${product.slug}`);
-                }}
+              <Link
+                href={`/shop/${product.slug}`}
                 style={{
                   flex: 1,
                   padding: "10px 14px",
@@ -240,11 +230,14 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
                   cursor: "pointer",
                   fontFamily: "var(--font-sans, sans-serif)",
                   transition: `background 0.3s ${ease}, color 0.3s ${ease}`,
+                  textDecoration: "none",
+                  color: "var(--el-ink, #1c1a17)",
+                  textAlign: "center",
                 }}
                 className="el-quick-btn"
               >
                 View
-              </button>
+              </Link>
             </>
           )}
         </div>
@@ -261,18 +254,25 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
         }}
       >
         <div>
-          <div
-            style={{
-              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-              fontSize: 20,
-              fontWeight: 500,
-              letterSpacing: "0.005em",
-              lineHeight: 1.2,
-              color: "var(--el-ink, #1c1a17)",
-            }}
+          {/* Title link — ::after extends to cover the full card as click target */}
+          <Link
+            href={`/shop/${product.slug}`}
+            className="el-card-link"
+            style={{ textDecoration: "none", color: "inherit" }}
           >
-            {product.name}
-          </div>
+            <div
+              style={{
+                fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                fontSize: 20,
+                fontWeight: 500,
+                letterSpacing: "0.005em",
+                lineHeight: 1.2,
+                color: "var(--el-ink, #1c1a17)",
+              }}
+            >
+              {product.name}
+            </div>
+          </Link>
           {product.description && (
             <div
               style={{
@@ -308,30 +308,13 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
                 marginLeft: 6,
               }}
             >
+              <span className="sr-only">Original price: </span>
               {formatPrice(productStatus.displayCompareAtPrice)}
             </span>
           )}
         </div>
       </div>
 
-      <style>{`
-        .el-product-card .el-quick-btns {
-          opacity: 0;
-          transform: translateY(8px);
-          transition: opacity 0.4s ${ease}, transform 0.4s ${ease};
-        }
-        .el-product-card:hover .el-quick-btns {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        .el-product-card:hover .object-cover {
-          transform: scale(1.05);
-        }
-        .el-quick-btn:hover {
-          background: var(--el-ink, #1c1a17) !important;
-          color: var(--el-paper, #fbf8f2) !important;
-        }
-      `}</style>
-    </Link>
+    </article>
   );
 }

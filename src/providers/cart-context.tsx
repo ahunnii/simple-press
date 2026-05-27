@@ -149,6 +149,7 @@ import { toast } from "sonner";
 
 export type CartItem = {
   productId: string;
+  productSlug?: string | null;
   variantId: string | null;
   productName: string;
   variantName: string | null;
