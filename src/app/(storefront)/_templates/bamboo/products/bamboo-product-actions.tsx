@@ -46,7 +46,7 @@ export function BambooProductActions({
           <p className="font-semibold text-amber-700 dark:text-amber-300">
             Coming Soon
           </p>
-          <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+          <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
@@ -64,24 +64,29 @@ export function BambooProductActions({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-10"
+                    className="size-11"
                     onClick={() => handleDecrement()}
                     disabled={quantity <= 1}
                     aria-label="Decrease quantity"
                   >
-                    <Minus className="size-4" />
+                    <Minus className="size-4" aria-hidden="true" />
                   </Button>
-                  <span className="text-foreground w-10 text-center text-base font-semibold">
+                  <span
+                    className="text-foreground w-10 text-center text-base font-semibold"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    aria-label={`Quantity: ${quantity}`}
+                  >
                     {quantity}
                   </span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-10"
+                    className="size-11"
                     onClick={() => handleIncrement()}
                     aria-label="Increase quantity"
                   >
-                    <Plus className="size-4" />
+                    <Plus className="size-4" aria-hidden="true" />
                   </Button>
                 </div>
                 <Button
@@ -113,7 +118,7 @@ export function BambooProductActions({
           )}
 
           {!canAddMore && inStock && (
-            <p className="mt-3 text-center text-sm text-amber-500">
+            <p className="mt-3 text-center text-sm text-amber-700">
               You have the maximum available quantity in your cart
             </p>
           )}

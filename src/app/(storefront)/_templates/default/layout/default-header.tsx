@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconPackage } from "@tabler/icons-react";
-import { LayoutDashboardIcon, Menu, X } from "lucide-react";
+import { ChevronDown, LayoutDashboardIcon, Menu, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
@@ -14,15 +14,20 @@ import { authClient } from "~/server/better-auth/client";
 
 import { DefaultCartBadge } from "../cart-checkout/default-cart-badge";
 
-const NAV_LINKS = [
+type NavChild = { label: string; href: string; external?: boolean };
+type NavLink = { label: string; href: string; external?: boolean; children?: NavChild[] };
+
+const NAV_LINKS: NavLink[] = [
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About" },
   { href: "/testimonials", label: "Reviews" },
   { href: "/contact", label: "Contact" },
-] as const;
+];
 
 export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+  const [expandedMobile, setExpandedMobile] = useState<Set<number>>(new Set());
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const firstNavLinkRef = useRef<HTMLAnchorElement>(null);
 
@@ -71,15 +76,43 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
 
+  // Close desktop dropdown on Escape
+  useEffect(() => {
+    if (openDropdown === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenDropdown(null);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [openDropdown]);
+
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
   const pathname = usePathname();
 
   const links =
-    (business?.siteContent?.navigationItems as {
-      label: string;
-      href: string;
-    }[]) ?? NAV_LINKS;
+    (business?.siteContent?.navigationItems as NavLink[]) ?? NAV_LINKS;
+
+  const toggleMobileExpanded = (index: number) => {
+    setExpandedMobile((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  };
+
+  const linkClass = (active: boolean) =>
+    cn(
+      "relative py-1.5 text-sm transition-colors",
+      "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-current after:origin-left after:transition-transform after:duration-300",
+      active
+        ? "text-[#0a0a0a] after:scale-x-100"
+        : "text-[#6b6b6b] hover:text-[#0a0a0a] after:scale-x-0 hover:after:scale-x-100",
+    );
 
   const userMenu = user && (
     <UserButton
@@ -120,22 +153,73 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
           <div className="flex items-center">
             {/* Desktop nav */}
             <nav className="hidden items-center gap-7 md:flex" aria-label="Primary navigation">
-              {links.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  aria-current={pathname === link.href ? "page" : undefined}
-                  className={cn(
-                    "relative py-1.5 text-sm transition-colors",
-                    "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-current after:origin-left after:transition-transform after:duration-300",
-                    pathname === link.href
-                      ? "text-[#0a0a0a] after:scale-x-100"
-                      : "text-[#6b6b6b] hover:text-[#0a0a0a] after:scale-x-0 hover:after:scale-x-100",
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {links.map((link, i) =>
+                link.children?.length ? (
+                  <div
+                    key={link.href + link.label}
+                    className="relative"
+                    onMouseEnter={() => setOpenDropdown(i)}
+                    onMouseLeave={() => setOpenDropdown(null)}
+                  >
+                    <button
+                      aria-haspopup="true"
+                      aria-expanded={openDropdown === i}
+                      onClick={() =>
+                        setOpenDropdown(openDropdown === i ? null : i)
+                      }
+                      className={cn(
+                        linkClass(link.children.some((c) => pathname === c.href)),
+                        "flex cursor-pointer items-center gap-1 bg-transparent border-none p-0",
+                      )}
+                    >
+                      {link.label}
+                      <ChevronDown
+                        className={cn(
+                          "h-3 w-3 transition-transform duration-200",
+                          openDropdown === i ? "rotate-180" : "",
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+
+                    {openDropdown === i && (
+                      <div className="absolute left-0 top-full z-10 pt-2">
+                        <div className="min-w-[160px] overflow-hidden rounded-(--radius) border border-[#e8e8e8] bg-white shadow-sm">
+                          {link.children.map((child) => (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              target={child.external ? "_blank" : undefined}
+                              rel={child.external ? "noopener noreferrer" : undefined}
+                              aria-current={pathname === child.href ? "page" : undefined}
+                              onClick={() => setOpenDropdown(null)}
+                              className={cn(
+                                "block px-4 py-2.5 text-sm transition-colors",
+                                pathname === child.href
+                                  ? "text-[#0a0a0a] bg-[#f6f6f6]"
+                                  : "text-[#6b6b6b] hover:text-[#0a0a0a] hover:bg-[#f6f6f6]",
+                              )}
+                            >
+                              {child.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    aria-current={pathname === link.href ? "page" : undefined}
+                    className={linkClass(pathname === link.href)}
+                  >
+                    {link.label}
+                  </Link>
+                ),
+              )}
             </nav>
 
             {/* Mobile hamburger (left side → brand stays centered) */}
@@ -200,21 +284,71 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
           >
             <ul className="flex flex-col divide-y divide-[#e8e8e8] px-4">
               {links.map((link, i) => (
-                <li key={link.href}>
-                  <Link
-                    ref={i === 0 ? firstNavLinkRef : undefined}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    aria-current={pathname === link.href ? "page" : undefined}
-                    className={cn(
-                      "flex items-center py-4 text-base font-medium transition-colors",
-                      pathname === link.href
-                        ? "text-[#0a0a0a]"
-                        : "text-[#6b6b6b]",
-                    )}
-                  >
-                    {link.label}
-                  </Link>
+                <li key={link.href + link.label}>
+                  {link.children?.length ? (
+                    <>
+                      <button
+                        onClick={() => toggleMobileExpanded(i)}
+                        aria-expanded={expandedMobile.has(i)}
+                        className={cn(
+                          "flex w-full items-center justify-between py-4 text-base font-medium transition-colors",
+                          link.children.some((c) => pathname === c.href)
+                            ? "text-[#0a0a0a]"
+                            : "text-[#6b6b6b]",
+                        )}
+                      >
+                        {link.label}
+                        <ChevronDown
+                          className={cn(
+                            "h-4 w-4 transition-transform duration-200",
+                            expandedMobile.has(i) ? "rotate-180" : "",
+                          )}
+                          aria-hidden="true"
+                        />
+                      </button>
+                      {expandedMobile.has(i) && (
+                        <ul className="pb-2">
+                          {link.children.map((child, ci) => (
+                            <li key={child.href}>
+                              <Link
+                                ref={i === 0 && ci === 0 ? firstNavLinkRef : undefined}
+                                href={child.href}
+                                target={child.external ? "_blank" : undefined}
+                                rel={child.external ? "noopener noreferrer" : undefined}
+                                onClick={() => setMobileOpen(false)}
+                                aria-current={pathname === child.href ? "page" : undefined}
+                                className={cn(
+                                  "flex items-center py-2.5 pl-4 text-sm transition-colors",
+                                  pathname === child.href
+                                    ? "text-[#0a0a0a] font-medium"
+                                    : "text-[#6b6b6b]",
+                                )}
+                              >
+                                {child.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      ref={i === 0 ? firstNavLinkRef : undefined}
+                      href={link.href}
+                      target={link.external ? "_blank" : undefined}
+                      rel={link.external ? "noopener noreferrer" : undefined}
+                      onClick={() => setMobileOpen(false)}
+                      aria-current={pathname === link.href ? "page" : undefined}
+                      className={cn(
+                        "flex items-center py-4 text-base font-medium transition-colors",
+                        pathname === link.href
+                          ? "text-[#0a0a0a]"
+                          : "text-[#6b6b6b]",
+                      )}
+                    >
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
 

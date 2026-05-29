@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, GripVertical, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, GripVertical, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "~/lib/utils";
@@ -13,10 +13,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
+type NavChild = {
+  label: string;
+  href: string;
+  external?: boolean;
+};
+
 type NavItem = {
   label: string;
   href: string;
   external?: boolean;
+  children?: NavChild[];
 };
 
 type Props = {
@@ -97,6 +104,37 @@ export function NavigationBuilder({ business, siteContent }: Props) {
     setNavItems(updated);
   };
 
+  const addChildItem = (parentIndex: number) => {
+    const updated = [...navItems];
+    const parent = { ...updated[parentIndex]! };
+    parent.children = [...(parent.children ?? []), { label: "", href: "" }];
+    updated[parentIndex] = parent;
+    setNavItems(updated);
+  };
+
+  const updateChildItem = <K extends keyof NavChild>(
+    parentIndex: number,
+    childIndex: number,
+    field: K,
+    value: NavChild[K],
+  ) => {
+    const updated = [...navItems];
+    const parent = { ...updated[parentIndex]! };
+    const children = [...(parent.children ?? [])];
+    children[childIndex] = { ...children[childIndex]!, [field]: value };
+    parent.children = children;
+    updated[parentIndex] = parent;
+    setNavItems(updated);
+  };
+
+  const deleteChildItem = (parentIndex: number, childIndex: number) => {
+    const updated = [...navItems];
+    const parent = { ...updated[parentIndex]! };
+    parent.children = (parent.children ?? []).filter((_, i) => i !== childIndex);
+    updated[parentIndex] = parent;
+    setNavItems(updated);
+  };
+
   const quickAddPage = (slug: string, title: string) => {
     setNavItems([
       ...navItems,
@@ -105,14 +143,20 @@ export function NavigationBuilder({ business, siteContent }: Props) {
     toast.success(`Added "${title}" to navigation`);
   };
 
-  // Determine if navItems in state are different from original navItems prop (from siteContent)
   const initialNavItems = siteContent.navigationItems ?? [];
   const isSameOrder = navItems.every((item, i) => {
     const original = initialNavItems[i];
+    const childrenMatch =
+      (item.children?.length ?? 0) === (original?.children?.length ?? 0) &&
+      (item.children ?? []).every((child, ci) => {
+        const oc = original?.children?.[ci];
+        return child.label === oc?.label && child.href === oc?.href && child.external === oc?.external;
+      });
     return (
       item.label === original?.label &&
       item.href === original.href &&
-      item.external === original.external
+      item.external === original.external &&
+      childrenMatch
     );
   });
 
@@ -262,6 +306,65 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                                 Open in new tab
                               </Label>
                             </div>
+
+                            {/* Sub-items */}
+                            {(item.children?.length ?? 0) > 0 && (
+                              <div className="border-t pt-3">
+                                <p className="mb-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                  Sub-items
+                                </p>
+                                <div className="space-y-3">
+                                  {item.children!.map((child, ci) => (
+                                    <div
+                                      key={ci}
+                                      className="flex items-start gap-3 rounded-md border border-gray-100 bg-gray-50 p-3"
+                                    >
+                                      <div className="flex-1 grid grid-cols-2 gap-2">
+                                        <div>
+                                          <Label className="text-xs">Label</Label>
+                                          <Input
+                                            value={child.label}
+                                            onChange={(e) =>
+                                              updateChildItem(index, ci, "label", e.target.value)
+                                            }
+                                            placeholder="Sub-page"
+                                            className="mt-1 h-8 text-sm"
+                                          />
+                                        </div>
+                                        <div>
+                                          <Label className="text-xs">URL</Label>
+                                          <Input
+                                            value={child.href}
+                                            onChange={(e) =>
+                                              updateChildItem(index, ci, "href", e.target.value)
+                                            }
+                                            placeholder="/sub-page"
+                                            className="mt-1 h-8 text-sm"
+                                          />
+                                        </div>
+                                      </div>
+                                      <button
+                                        onClick={() => deleteChildItem(index, ci)}
+                                        className="mt-5 text-gray-400 hover:text-red-500 transition-colors"
+                                        title="Remove sub-item"
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => addChildItem(index)}
+                              className="text-xs"
+                            >
+                              <ChevronDown className="mr-1.5 h-3 w-3" />
+                              Add sub-item
+                            </Button>
                           </div>
 
                           <Button

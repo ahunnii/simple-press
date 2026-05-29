@@ -116,7 +116,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
           <div className="flex flex-col items-center gap-12 md:flex-row">
             <FadeIn className="flex flex-1 flex-col justify-center text-left">
               <Badge className="mb-4 w-fit">
-                <Leaf className="mr-1 h-3 w-3" />
+                <Leaf className="mr-1 h-3 w-3" aria-hidden="true" />
                 Stories &amp; Insights
               </Badge>
               <h1 className="text-foreground font-heading text-4xl font-bold tracking-tight md:text-5xl">
@@ -149,7 +149,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
         <div className="mx-auto max-w-lg">
           <InputGroup>
             <InputGroupAddon>
-              <Search className="text-muted-foreground h-4 w-4" />
+              <Search className="text-muted-foreground h-4 w-4" aria-hidden="true" />
             </InputGroupAddon>
             <InputGroupInput
               type="search"
@@ -159,13 +159,16 @@ export function BambooBlogPage({ pages, customFields }: Props) {
               aria-label="Search blog posts"
             />
           </InputGroup>
-          {query.trim() !== "" && (
-            <p className="text-muted-foreground mt-2 text-sm">
-              {filtered.length === 0
+          <p
+            aria-live="polite"
+            aria-atomic="true"
+            className="text-muted-foreground mt-2 text-sm"
+          >
+            {query.trim() !== "" &&
+              (filtered.length === 0
                 ? "No articles found. Try a different keyword."
-                : `${filtered.length} article${filtered.length !== 1 ? "s" : ""} found`}
-            </p>
-          )}
+                : `${filtered.length} article${filtered.length !== 1 ? "s" : ""} found`)}
+          </p>
         </div>
       </FadeIn>
 
@@ -195,7 +198,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
                   </div>
                   <div className="flex flex-col justify-center p-8 md:p-12">
                     <Badge variant="secondary" className="mb-4 w-fit">
-                      <Tag className="mr-1 h-3 w-3" />
+                      <Tag className="mr-1 h-3 w-3" aria-hidden="true" />
                       Latest post
                     </Badge>
                     <h2 className="text-foreground font-heading group-hover:text-primary mb-4 text-2xl leading-snug font-bold transition-colors md:text-3xl">
@@ -206,7 +209,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
                     </p>
                     <div className="text-muted-foreground mb-8 flex flex-wrap items-center gap-4 text-sm">
                       <span className="flex items-center gap-1.5">
-                        <CalendarDays className="h-4 w-4" />
+                        <CalendarDays className="h-4 w-4" aria-hidden="true" />
                         {formatDate(featuredResult.createdAt)}
                       </span>
                     </div>
@@ -264,7 +267,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
                         </p>
                         <div className="text-muted-foreground flex items-center gap-4 text-xs">
                           <span className="flex items-center gap-1.5">
-                            <CalendarDays className="h-3.5 w-3.5" />
+                            <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
                             {formatDate(post.createdAt)}
                           </span>
                         </div>
@@ -277,7 +280,7 @@ export function BambooBlogPage({ pages, customFields }: Props) {
           ) : (
             <FadeIn>
               <div className="text-muted-foreground flex flex-col items-center py-16 text-center">
-                <Search className="mb-4 h-10 w-10 opacity-30" />
+                <Search className="mb-4 h-10 w-10 opacity-30" aria-hidden="true" />
                 <p className="text-lg font-medium">
                   No articles matched &ldquo;{query}&rdquo;
                 </p>

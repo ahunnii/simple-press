@@ -62,7 +62,7 @@ export function BambooContactPage({
               <div className="flex flex-col gap-6">
                 {contactInfo.map((info) => (
                   <div key={info.label} className="flex items-start gap-4">
-                    <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-full">
+                    <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-full" aria-hidden="true">
                       <info.icon className="text-primary size-5" />
                     </div>
                     <div>

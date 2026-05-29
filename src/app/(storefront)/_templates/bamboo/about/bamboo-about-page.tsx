@@ -102,7 +102,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
               <div className="relative aspect-4/3 overflow-hidden rounded-2xl">
                 <Image
                   src={f["bamboo.about.hero-image"]!}
-                  alt="About page hero"
+                  alt=""
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"
@@ -121,7 +121,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
             <div className="relative aspect-3/4 overflow-hidden rounded-2xl">
               <Image
                 src={f["bamboo.about.mission-image"]!}
-                alt="Mission section"
+                alt=""
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -159,7 +159,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
               <StaggerItem key={i}>
                 <Card className="border-border/60 bg-card h-full">
                   <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
-                    <div className="bg-primary/10 flex size-14 items-center justify-center rounded-full">
+                    <div className="bg-primary/10 flex size-14 items-center justify-center rounded-full" aria-hidden="true">
                       <value.icon className="text-primary size-7" />
                     </div>
                     <h3 className="text-card-foreground font-heading text-lg font-semibold">
@@ -183,7 +183,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
             <div className="relative aspect-4/3 overflow-hidden rounded-2xl">
               <Image
                 src={f["bamboo.about.supplier-image"]!}
-                alt="Supplier section"
+                alt=""
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -225,7 +225,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 key={i}
                 className="flex flex-col items-center gap-3 text-center"
               >
-                <div className="bg-primary/10 flex size-12 items-center justify-center rounded-full">
+                <div className="bg-primary/10 flex size-12 items-center justify-center rounded-full" aria-hidden="true">
                   <item.icon className="text-primary size-6" />
                 </div>
                 <h3 className="text-foreground font-heading text-lg font-semibold">
@@ -247,7 +247,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
             <div className="relative aspect-4/3 overflow-hidden rounded-2xl">
               <Image
                 src={f["bamboo.about.nationwide-image"]!}
-                alt="Nationwide shipping"
+                alt=""
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -267,7 +267,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
             >
               {nationwideList?.map((item, i) => (
                 <StaggerItem key={i} className="flex items-start gap-4">
-                  <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-lg">
+                  <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-lg" aria-hidden="true">
                     <item.icon className="text-primary size-5" />
                   </div>
                   <div>
@@ -318,13 +318,13 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
               <Button size="lg" asChild>
                 <Link href={f["bamboo.about.cta-button-link"]!}>
                   {f["bamboo.about.cta-button-text"]}{" "}
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
                 <Link href={f["bamboo.about.cta-secondary-button-link"]!}>
                   {f["bamboo.about.cta-secondary-button-text"]}
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </Button>
             </div>

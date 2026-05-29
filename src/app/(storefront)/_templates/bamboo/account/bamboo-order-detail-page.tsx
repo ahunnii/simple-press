@@ -33,6 +33,7 @@ export function BambooOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
         <div className="mb-4 flex flex-wrap gap-2">
           <span
             className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${statusClass(order.status)}`}
+            aria-label={`Status: ${order.status}`}
           >
             {order.status}
           </span>
@@ -89,7 +90,7 @@ export function BambooOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                     {order.discount > 0 && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Discount</span>
-                        <span className="text-green-600">
+                        <span className="text-green-700">
                           -{formatPrice(order.discount)}
                         </span>
                       </div>
@@ -139,7 +140,8 @@ export function BambooOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                               className="text-primary inline-flex items-center gap-1 hover:underline"
                             >
                               Track shipment{" "}
-                              <ExternalLink className="h-3 w-3" />
+                              <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                              <span className="sr-only">(opens in new tab)</span>
                             </a>
                           )}
                           <p className="text-muted-foreground mt-1 text-xs">
@@ -214,7 +216,7 @@ export function BambooOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
               href="/account/orders"
               className="text-primary block text-sm font-medium hover:underline"
             >
-              ← Back to orders
+              <span aria-hidden="true">← </span>Back to orders
             </Link>
           </div>
         </div>

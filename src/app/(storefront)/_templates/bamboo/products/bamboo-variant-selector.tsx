@@ -52,8 +52,10 @@ export function BambooVariantSelector({
     <div className="space-y-4">
       {/* Variant Selection */}
       <div className="mb-6">
-        <Label className="mb-3 block text-sm font-medium">Select Variant</Label>
-        <div className="flex flex-wrap gap-3">
+        <Label className="mb-3 block text-sm font-medium" id="variant-label">
+          Select Variant
+        </Label>
+        <div className="flex flex-wrap gap-3" role="group" aria-labelledby="variant-label">
           {product.variants.map((variant) => (
             <Button
               key={variant.id}
@@ -65,6 +67,7 @@ export function BambooVariantSelector({
                 setSelectedVariantId(variant.id);
               }}
               disabled={variant.inventoryQty === 0}
+              aria-pressed={selectedVariant?.id === variant.id}
               className={`bamboo-variant-btn ${
                 selectedVariant?.id === variant.id
                   ? "bamboo-variant-btn--selected"
@@ -87,20 +90,25 @@ export function BambooVariantSelector({
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-10"
+                className="size-11"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 disabled={quantity <= 1}
                 aria-label="Decrease quantity"
               >
-                <Minus className="size-4" />
+                <Minus className="size-4" aria-hidden="true" />
               </Button>
-              <span className="text-foreground w-10 text-center text-base font-semibold">
+              <span
+                className="text-foreground w-10 text-center text-base font-semibold"
+                aria-live="polite"
+                aria-atomic="true"
+                aria-label={`Quantity: ${quantity}`}
+              >
                 {quantity}
               </span>
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-10"
+                className="size-11"
                 onClick={() =>
                   setQuantity(
                     Math.min(selectedVariant.inventoryQty, quantity + 1),
@@ -108,7 +116,7 @@ export function BambooVariantSelector({
                 }
                 aria-label="Increase quantity"
               >
-                <Plus className="size-4" />
+                <Plus className="size-4" aria-hidden="true" />
               </Button>
             </div>{" "}
             {selectedVariant && (

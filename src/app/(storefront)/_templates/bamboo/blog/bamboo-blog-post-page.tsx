@@ -64,7 +64,7 @@ export function BambooBlogPostPage({
             <FadeIn delay={0.15}>
               <div className="text-muted-foreground mt-6 mb-8 flex flex-wrap items-center gap-5 text-sm">
                 <span className="flex items-center gap-1.5">
-                  <CalendarDays className="text-primary h-4 w-4" />
+                  <CalendarDays className="text-primary h-4 w-4" aria-hidden="true" />
                   {formatDate(page.createdAt)}
                 </span>
               </div>
@@ -104,7 +104,7 @@ export function BambooBlogPostPage({
                 <FadeIn delay={0.1} className="mt-10">
                   <div className="border-border/60 bg-muted/50 rounded-2xl border p-6 md:p-8">
                     <div className="flex items-start gap-4">
-                      <div className="bg-primary/10 shrink-0 rounded-full p-3">
+                      <div className="bg-primary/10 shrink-0 rounded-full p-3" aria-hidden="true">
                         <Leaf className="text-primary h-6 w-6" />
                       </div>
                       <div>
@@ -121,7 +121,7 @@ export function BambooBlogPostPage({
                         <Button asChild className="group">
                           <Link href={ctaHref!}>
                             {ctaButtonText}
-                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                           </Link>
                         </Button>
                       </div>

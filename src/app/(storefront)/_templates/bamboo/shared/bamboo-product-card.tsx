@@ -2,14 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Eye } from "lucide-react";
 
 import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 
 type Props = {
   product: Product;
@@ -17,8 +15,6 @@ type Props = {
 };
 
 export function BambooProductCard({ product }: Props) {
-  const router = useRouter();
-
   const productStatus = checkProductStatus({
     price: product.price,
     compareAtPrice: product.compareAtPrice,
@@ -77,17 +73,18 @@ export function BambooProductCard({ product }: Props) {
             </span>
             {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
               <span className="text-muted-foreground text-sm line-through">
+                <span className="sr-only">Original price: </span>
                 {formatPrice(productStatus.displayCompareAtPrice)}
               </span>
             )}
           </div>
-          <Button
-            onClick={() => router.push(`/shop/${product.slug}`)}
-            className="gap-2"
+          <span
+            aria-hidden="true"
+            className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium"
           >
             <Eye className="size-4" />
             View Product
-          </Button>
+          </span>
         </div>
       </div>
     </Link>
@@ -148,6 +145,7 @@ export function BambooHorizontalProductCard({ product }: Props) {
             </span>
             {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
               <span className="text-muted-foreground text-sm line-through">
+                <span className="sr-only">Original price: </span>
                 {formatPrice(productStatus.displayCompareAtPrice)}
               </span>
             )}

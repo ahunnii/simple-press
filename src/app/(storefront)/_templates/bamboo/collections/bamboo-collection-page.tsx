@@ -30,7 +30,7 @@ export function BambooCollectionPage({
             priority
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-black/60" />
           <div className="absolute inset-0 flex flex-col justify-end px-4 pb-12 sm:px-6 lg:px-8">
             <div className="mx-auto w-full max-w-7xl">
               <Link

@@ -128,6 +128,26 @@
   --font-heading: "Plus Jakarta Sans", "Inter Fallback";
 }
 
+/* ─── Bamboo template — accessibility enhancements ──────────────────────────
+   Focus-visible outlines for every interactive element (WCAG 2.4.7 / 2.4.11).
+   prefers-reduced-motion support (WCAG 2.3.3 / best practice at AA).         */
+
+.bamboo *:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bamboo *,
+  .bamboo *::before,
+  .bamboo *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 .happy-bamboo {
   --background: oklch(1 0 0);
   --foreground: oklch(0.148 0.004 228.8);

@@ -106,7 +106,7 @@ export async function BambooHomepage() {
                 <Button size="lg" asChild>
                   <Link href={f["bamboo.homepage.hero-primary-button-link"]!}>
                     {f["bamboo.homepage.hero-primary-button-text"]}{" "}
-                    <ArrowRight className="size-4" />
+                    <ArrowRight className="size-4" aria-hidden="true" />
                   </Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
@@ -120,7 +120,7 @@ export async function BambooHomepage() {
               <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl">
                 <Image
                   src={f["bamboo.homepage.hero-image"]!}
-                  alt="Hero Image"
+                  alt=""
                   fill
                   className="object-cover"
                   priority
@@ -174,7 +174,7 @@ export async function BambooHomepage() {
               <Button variant="outline" size="lg" asChild>
                 <Link href="/shop">
                   View All Products
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </Button>
             </div>
@@ -193,13 +193,13 @@ export async function BambooHomepage() {
                   key={feature.title}
                   className="flex flex-col items-center gap-3 text-center"
                 >
-                  <div className="bg-primary-foreground/10 flex size-12 items-center justify-center rounded-full">
+                  <div className="bg-primary-foreground/10 flex size-12 items-center justify-center rounded-full" aria-hidden="true">
                     <feature.icon className="text-primary-foreground size-6" />
                   </div>
                   <h3 className="text-primary-foreground text-sm font-semibold">
                     {feature.title}
                   </h3>
-                  <p className="text-primary-foreground/70 text-xs">
+                  <p className="text-primary-foreground/80 text-xs">
                     {feature.description}
                   </p>
                 </StaggerItem>
@@ -223,7 +223,7 @@ export async function BambooHomepage() {
               <Button variant="outline" asChild>
                 <Link href={f["bamboo.homepage.about-teaser-button-link"]!}>
                   {f["bamboo.homepage.about-teaser-button-text"]}{" "}
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </Button>
             </div>
@@ -247,19 +247,23 @@ export async function BambooHomepage() {
               href={mapsUrl ?? "#!"}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="View our location on Google Maps (opens in new tab)"
               className="group relative block aspect-video w-full overflow-hidden rounded-lg bg-slate-100"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={f["bamboo.global.location-map"]}
-                alt="Map"
+                alt=""
                 className="absolute inset-0 h-full w-full object-cover"
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+              >
                 <div className="flex flex-col items-center justify-center">
                   <MapPin className="h-12 w-12 text-white" />
                   <p className="text-lg font-medium text-white drop-shadow">
-                    Click to view on Google Maps
+                    View on Google Maps
                   </p>
                 </div>
               </div>

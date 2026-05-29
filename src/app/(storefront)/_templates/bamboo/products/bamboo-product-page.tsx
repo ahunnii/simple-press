@@ -102,7 +102,7 @@ export function BambooProductPage({
 
             <div className="flex flex-wrap items-baseline gap-3">
               {isOnSale && displayCompareAtPrice && (
-                <span className="inline-flex items-center rounded-full bg-black px-3 py-1 text-sm font-semibold text-white">
+                <span className="bg-foreground text-background inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold">
                   {computeSavingsLabel(displayPrice, displayCompareAtPrice)}
                 </span>
               )}
@@ -112,6 +112,7 @@ export function BambooProductPage({
                 </span>
                 {isOnSale && displayCompareAtPrice && (
                   <span className="text-muted-foreground text-xl line-through">
+                    <span className="sr-only">Original price: </span>
                     {formatPrice(displayCompareAtPrice)}
                   </span>
                 )}

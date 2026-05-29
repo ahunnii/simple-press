@@ -98,6 +98,7 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
             <Link
               key={link.href}
               href={link.href}
+              aria-current={pathname === link.href ? "page" : undefined}
               className={`hover:text-primary text-sm font-medium transition-colors ${
                 pathname === link.href
                   ? "text-primary"

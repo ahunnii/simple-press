@@ -52,7 +52,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
     items,
   } = useCheckoutForm(business);
 
-  const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
+  // primaryColor is used only for the delivery method toggle indicator and
+  // the submit button; falls back to the CSS --primary token when absent.
+  const primaryColor = business.siteContent?.primaryColor ?? undefined;
 
   const shipping =
     deliveryMethod === "pickup"
@@ -84,6 +86,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               <Input
                 id="email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
@@ -95,6 +98,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               <Input
                 id="name"
                 type="text"
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
@@ -131,6 +135,8 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 }
                 placeholder="SAVE20"
                 autoComplete="off"
+                aria-invalid={!!discountFieldError}
+                aria-describedby={discountFieldError ? "discount-error" : undefined}
               />
             </div>
             <Button
@@ -152,10 +158,10 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
             </Button>
           </div>
           {discountFieldError && (
-            <p className="text-destructive text-sm">{discountFieldError}</p>
+            <p id="discount-error" className="text-destructive text-sm" role="alert">{discountFieldError}</p>
           )}
           {discountCodeLabel && discountAmount > 0 && (
-            <p className="text-sm text-green-600">
+            <p className="text-sm text-green-700">
               Code{" "}
               <span className="font-mono font-semibold">
                 {discountCodeLabel}
@@ -174,6 +180,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               <Button
                 type="button"
                 variant={deliveryMethod === "ship" ? "default" : "outline"}
+                aria-pressed={deliveryMethod === "ship"}
                 onClick={() => setDeliveryMethod("ship")}
                 style={
                   deliveryMethod === "ship"
@@ -186,6 +193,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               <Button
                 type="button"
                 variant={deliveryMethod === "pickup" ? "default" : "outline"}
+                aria-pressed={deliveryMethod === "pickup"}
                 onClick={() => setDeliveryMethod("pickup")}
                 style={
                   deliveryMethod === "pickup"
@@ -350,7 +358,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 <span>{formatPrice(subtotal)}</span>
               </div>
               {discountAmount > 0 && discountCodeLabel && (
-                <div className="flex justify-between text-sm text-green-600">
+                <div className="flex justify-between text-sm text-green-700">
                   <span>Discount ({discountCodeLabel})</span>
                   <span>-{formatPrice(discountAmount)}</span>
                 </div>
@@ -383,9 +391,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
             <Button
               type="submit"
               disabled={isProcessing}
-              className="w-full text-white"
+              className="w-full"
               size="lg"
-              style={{ backgroundColor: primaryColor }}
+              style={primaryColor ? { backgroundColor: primaryColor } : undefined}
             >
               {isProcessing ? (
                 <>

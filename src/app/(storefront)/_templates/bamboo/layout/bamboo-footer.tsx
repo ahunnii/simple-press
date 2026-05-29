@@ -32,7 +32,7 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <Leaf className="size-5" />
+              <Leaf className="size-5" aria-hidden="true" />
               <span className="font-heading text-xl font-bold">{name}</span>
             </Link>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
@@ -41,7 +41,7 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
           </div>
 
           <div>
-            <h3 className="text-primary-foreground/60 mb-4 text-sm font-semibold tracking-wider uppercase">
+            <h3 className="text-primary-foreground/80 mb-4 text-sm font-semibold tracking-wider uppercase">
               Quick Links
             </h3>
             <nav className="flex flex-col gap-2.5" aria-label="Quick links">
@@ -58,7 +58,7 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
           </div>
 
           <div>
-            <h3 className="text-primary-foreground/60 mb-4 text-sm font-semibold tracking-wider uppercase">
+            <h3 className="text-primary-foreground/80 mb-4 text-sm font-semibold tracking-wider uppercase">
               Policies
             </h3>
             <nav
@@ -78,7 +78,7 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
           </div>
 
           <div>
-            <h3 className="text-primary-foreground/60 mb-4 text-sm font-semibold tracking-wider uppercase">
+            <h3 className="text-primary-foreground/80 mb-4 text-sm font-semibold tracking-wider uppercase">
               Connect
             </h3>
             <address className="text-primary-foreground/80 flex flex-col gap-2.5 text-sm not-italic">
@@ -97,10 +97,10 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
         </div>
 
         <div className="border-primary-foreground/20 mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row">
-          <p className="text-primary-foreground/60 text-xs">
+          <p className="text-primary-foreground/80 text-xs">
             {"© 2026 " + name + ". All rights reserved."}
           </p>
-          <p className="text-primary-foreground/60 text-xs">
+          <p className="text-primary-foreground/80 text-xs">
             Proudly made in Detroit
           </p>
         </div>

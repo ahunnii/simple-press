@@ -53,6 +53,7 @@ export function BambooMobileNav({
               key={link.href}
               href={link.href}
               onClick={() => onOpenChange(false)}
+              aria-current={pathname === link.href ? "page" : undefined}
               className={`hover:bg-secondary rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
                 pathname === link.href
                   ? "bg-secondary text-primary"

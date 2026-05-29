@@ -37,7 +37,7 @@ export function BambooOrdersPage({ orders }: OrdersPageTemplateProps) {
         {orders.length === 0 ? (
           <FadeIn direction="up">
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="bg-primary/10 mb-4 flex size-16 items-center justify-center rounded-full">
+              <div className="bg-primary/10 mb-4 flex size-16 items-center justify-center rounded-full" aria-hidden="true">
                 <Package className="text-primary size-8" />
               </div>
               <h2 className="font-heading text-foreground mb-2 text-xl font-semibold">
@@ -73,6 +73,7 @@ export function BambooOrdersPage({ orders }: OrdersPageTemplateProps) {
                       <div className="flex flex-col items-end gap-2">
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${statusClass(order.status)}`}
+                          aria-label={`Status: ${order.status}`}
                         >
                           {order.status}
                         </span>
@@ -103,8 +104,10 @@ export function BambooOrdersPage({ orders }: OrdersPageTemplateProps) {
                       <Link
                         href={`/account/orders/${order.id}`}
                         className="text-primary mt-4 inline-block text-sm font-medium hover:underline"
+                        aria-label={`View details for order #${order.orderNumber}`}
                       >
-                        View Details →
+                        View Details
+                        <span aria-hidden="true"> →</span>
                       </Link>
                     </div>
                   </CardContent>

@@ -37,6 +37,133 @@ export default function AccessibilityStatementPage() {
 
       <h2>2. Recently Addressed</h2>
 
+      <h3>Bamboo Template — May 2026</h3>
+      <ul>
+        <li>
+          <strong>Invalid landmark structure — layout root was a{" "}
+          <code>&lt;main&gt;</code></strong> — The layout root element now uses{" "}
+          <code>&lt;div&gt;</code> with a proper <code>&lt;main id="bamboo-main-content"&gt;</code>{" "}
+          wrapping only page content, not header and footer. <em>WCAG 1.3.1, 4.1.1.</em>
+        </li>
+        <li>
+          <strong>No skip navigation link</strong> — A &ldquo;Skip to main
+          content&rdquo; link is now the first focusable element on every page.{" "}
+          <em>WCAG 2.4.1.</em>
+        </li>
+        <li>
+          <strong>Nested interactive elements in product card</strong> — A{" "}
+          <code>&lt;Button&gt;</code> nested inside a <code>&lt;Link&gt;</code>{" "}
+          has been replaced with a decorative <code>&lt;span aria-hidden&gt;</code>,
+          making the card&apos;s single link the only interactive element. <em>WCAG 4.1.2.</em>
+        </li>
+        <li>
+          <strong>Active page not identified in navigation</strong> — Nav links in
+          the header, mobile nav, and account sidebar now carry{" "}
+          <code>aria-current=&quot;page&quot;</code> on the active item. <em>WCAG 2.4.8.</em>
+        </li>
+        <li>
+          <strong>Variant selector — selected state conveyed by color alone</strong>{" "}
+          — Variant buttons now carry <code>aria-pressed</code> and are grouped
+          with <code>role=&quot;group&quot;</code> and a label. <em>WCAG 1.4.1, 4.1.2.</em>
+        </li>
+        <li>
+          <strong>Quantity changes not announced</strong> — Quantity displays in
+          the product page, variant selector, and cart items now carry{" "}
+          <code>aria-live=&quot;polite&quot; aria-atomic=&quot;true&quot;</code>.
+          Stepper labels include the product name for disambiguation. <em>WCAG 4.1.3.</em>
+        </li>
+        <li>
+          <strong>Sale price not labelled for screen readers</strong> — A
+          visually-hidden &ldquo;Original price:&rdquo; prefix is now included
+          inside the strikethrough price span on product cards and the product
+          detail page. <em>WCAG 1.3.1.</em>
+        </li>
+        <li>
+          <strong>Decorative icons announced by screen readers</strong> — All
+          decorative icons throughout the template (arrows, leaf logo, calendar,
+          tag, search, quote marks, status icons) now carry{" "}
+          <code>aria-hidden=&quot;true&quot;</code>. <em>WCAG 1.1.1.</em>
+        </li>
+        <li>
+          <strong>Order status badges — state conveyed by color alone</strong> —
+          Each status badge now includes an <code>aria-label</code> such as
+          &ldquo;Status: completed&rdquo;. <em>WCAG 1.4.1.</em>
+        </li>
+        <li>
+          <strong>Arrow characters in link text announced literally</strong> —
+          Arrow glyphs in &ldquo;View Details&rdquo; and back links are wrapped
+          in <code>aria-hidden=&quot;true&quot;</code>; the links carry
+          descriptive <code>aria-label</code> values. <em>WCAG 2.4.4.</em>
+        </li>
+        <li>
+          <strong>Focus-visible ring and reduced-motion CSS</strong> — A
+          scoped <code>.bamboo *:focus-visible</code> rule ensures a visible 2px
+          focus outline on every interactive element. A{" "}
+          <code>prefers-reduced-motion</code> block suppresses all CSS-driven
+          animations and transitions. <em>WCAG 2.4.7, 2.3.3.</em>
+        </li>
+        <li>
+          <strong>Color contrast — multiple failures</strong> — Footer headings
+          and copyright text at 60% white opacity on the green primary
+          background (~3.57:1), sustainability banner description text at 70%
+          opacity (~4.28:1), discount success text using{" "}
+          <code>text-green-600</code> (~3.13:1), and the max-quantity warning
+          using <code>text-amber-500</code> (~2.04:1) have all been corrected to
+          meet the 4.5:1 minimum. <em>WCAG 1.4.3.</em>
+        </li>
+        <li>
+          <strong>Touch targets below 44px</strong> — Cart item quantity and
+          remove buttons (32px) and product page quantity buttons (40px) have
+          been increased to 44px. <em>WCAG 2.5.5.</em>
+        </li>
+        <li>
+          <strong>Missing autocomplete on checkout personal data fields</strong>{" "}
+          — Email and name fields in the checkout form now include{" "}
+          <code>autoComplete=&quot;email&quot;</code> and{" "}
+          <code>autoComplete=&quot;name&quot;</code>. <em>WCAG 1.3.5.</em>
+        </li>
+        <li>
+          <strong>Discount field error not associated to its input</strong> —
+          The error message now uses <code>aria-invalid</code>,{" "}
+          <code>aria-describedby</code>, and <code>role=&quot;alert&quot;</code>
+          on the error paragraph. <em>WCAG 3.3.1, 3.3.3.</em>
+        </li>
+        <li>
+          <strong>Checkout delivery method — selected state conveyed by color alone</strong>{" "}
+          — The &ldquo;Ship to address&rdquo; and &ldquo;In-store pickup&rdquo;
+          toggle buttons now carry <code>aria-pressed</code>. <em>WCAG 4.1.2.</em>
+        </li>
+        <li>
+          <strong>Blog search results have no live region</strong> — The result
+          count paragraph now carries <code>aria-live=&quot;polite&quot; aria-atomic=&quot;true&quot;</code>
+          so screen readers announce count changes as the user types. <em>WCAG 4.1.3.</em>
+        </li>
+        <li>
+          <strong>Star ratings communicated nothing to screen readers</strong> —
+          The testimonials star container now carries{" "}
+          <code>aria-label=&quot;5 out of 5 stars&quot;</code>; individual star
+          icons are <code>aria-hidden</code>. <em>WCAG 1.1.1.</em>
+        </li>
+        <li>
+          <strong>Free-shipping progress bar had no accessible label</strong> —
+          The progress bar now carries a human-readable <code>aria-label</code>
+          with the current percentage. <em>WCAG 4.1.2.</em>
+        </li>
+        <li>
+          <strong>SPA route changes not announced</strong> — A new{" "}
+          <code>BambooRouteAnnouncer</code> client component watches for
+          pathname changes and announces the incoming page title via a
+          visually-hidden <code>aria-live=&quot;polite&quot;</code> region.{" "}
+          <em>WCAG 2.4.2, SPA best practice.</em>
+        </li>
+        <li>
+          <strong>Collection hero overlay insufficient contrast guarantee</strong>{" "}
+          — The overlay behind hero text has been increased from{" "}
+          <code>bg-black/50</code> to <code>bg-black/60</code> to better ensure
+          text contrast against unknown user-uploaded images. <em>WCAG 1.4.3.</em>
+        </li>
+      </ul>
+
       <h3>Elegant Template — May 2026</h3>
       <ul>
         <li>
@@ -601,11 +728,10 @@ export default function AccessibilityStatementPage() {
       </ul>
       <p>
         This statement was prepared based on internal self-assessments conducted
-        in May 2026, covering the Elegant and Default storefront templates. A
-        second remediation pass on the Default template was completed in May
-        2026, resolving all critical and serious issues identified in the
-        initial audit. It reflects the current state of the platform and its
-        storefront templates.
+        in May 2026, covering the Elegant, Default, and Bamboo storefront
+        templates. All critical and serious issues identified across three
+        templates have been resolved. It reflects the current state of the
+        platform and its storefront templates.
       </p>
 
       <hr />

@@ -53,7 +53,7 @@ export function BambooCartItem({ item }: Props) {
           <Button
             variant="ghost"
             size="icon"
-            className="text-muted-foreground hover:text-destructive size-8 shrink-0"
+            className="text-muted-foreground hover:text-destructive size-11 shrink-0"
             onClick={() => removeItem(productId, variantId)}
             aria-label={`Remove ${productName} from cart`}
           >
@@ -65,24 +65,29 @@ export function BambooCartItem({ item }: Props) {
             <Button
               variant="ghost"
               size="icon"
-              className="size-8"
+              className="size-11"
               onClick={() => updateQuantity(productId, variantId, quantity - 1)}
               disabled={quantity <= 1}
-              aria-label="Decrease quantity"
+              aria-label={`Decrease quantity of ${productName}`}
             >
-              <Minus className="size-3" />
+              <Minus className="size-3" aria-hidden="true" />
             </Button>
-            <span className="text-foreground w-8 text-center text-sm font-medium">
+            <span
+              className="text-foreground w-8 text-center text-sm font-medium"
+              aria-live="polite"
+              aria-atomic="true"
+              aria-label={`Quantity: ${quantity}`}
+            >
               {quantity}
             </span>
             <Button
               variant="ghost"
               size="icon"
-              className="size-8"
+              className="size-11"
               onClick={() => updateQuantity(productId, variantId, quantity + 1)}
-              aria-label="Increase quantity"
+              aria-label={`Increase quantity of ${productName}`}
             >
-              <Plus className="size-3" />
+              <Plus className="size-3" aria-hidden="true" />
             </Button>
           </div>
           <span className="text-foreground text-sm font-bold">

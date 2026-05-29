@@ -10,11 +10,19 @@ const socialLinksSchema = z
   })
   .optional();
 
+const navChildSchema = z.object({
+  label: z.string().max(100),
+  href: z.string().max(500),
+  external: z.boolean().optional(),
+});
+
 const navigationItemsSchema = z
   .array(
     z.object({
       label: z.string().max(100),
       href: z.string().max(500),
+      external: z.boolean().optional(),
+      children: z.array(navChildSchema).optional(),
     }),
   )
   .optional();

@@ -51,7 +51,11 @@ export function BambooCartSummary({ shippingConfig }: CartSummaryProps) {
         </div>
         {showProgress && untilFree !== null && (
           <div className="space-y-2">
-            <Progress value={progress * 100} className="h-2" />
+            <Progress
+              value={progress * 100}
+              className="h-2"
+              aria-label={`Free shipping progress: ${Math.round(progress * 100)}% of the way there`}
+            />
             <p className="text-muted-foreground text-xs">
               Add {formatPrice(untilFree)} more for free shipping
             </p>
