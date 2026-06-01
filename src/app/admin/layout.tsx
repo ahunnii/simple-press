@@ -9,6 +9,7 @@ import { AppSidebar } from "~/app/admin/_components/app-sidebar";
 type Props = {
   children: React.ReactNode;
 };
+
 export default async function AdminLayout({ children }: Props) {
   const session = await getSession();
 

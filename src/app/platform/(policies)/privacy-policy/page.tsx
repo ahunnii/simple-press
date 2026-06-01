@@ -7,246 +7,376 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="prose prose-lg mx-auto w-full max-w-7xl px-4 py-8">
       <h1>SimplePress Platform Privacy Policy</h1>
+
       <p>
-        Operated by Center for Generative Justice LLC &mdash; Effective under
-        Michigan law.
+        <strong>Last Updated:</strong> May 29, 2026
       </p>
 
-      <h2>1. Data Processing Roles</h2>
+      <h2>1. Introduction</h2>
       <p>
-        SimplePress acts as a <strong>Data Processor</strong>. We host data on
-        behalf of Merchants (the Data Controllers). We do not own, sell, or
-        monetize your business data or your customers&apos; personal
-        information.
-      </p>
-
-      <h2>2. Technical Sub-Processors</h2>
-      <p>
-        To provide the service, we use the following vetted third-party
-        providers. Each is bound by its own privacy policy.
+        This Privacy Policy explains how THE CENTER FOR GENERATIVE JUSTICE LLC
+        (&ldquo;SimplePress,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;)
+        collects, uses, stores, and discloses information when you access or use:
       </p>
       <ul>
-        <li>
-          <strong>Authentication:</strong> Better Auth (email/password
-          credentials, session management).
-        </li>
-        <li>
-          <strong>Transactional Email:</strong> Resend (order receipts,
-          notifications, and verification emails).
-        </li>
-        <li>
-          <strong>Asset Storage:</strong> Self-hosted MinIO (US-based servers;
-          product images and uploaded files).
-        </li>
-        <li>
-          <strong>Analytics:</strong> Self-hosted Umami (privacy-focused, no
-          cross-site tracking, no advertising use).
-        </li>
-        <li>
-          <strong>Payment Processing:</strong> Stripe (handles all payment card
-          data and merchant identity verification directly &mdash; see Section
-          8).
-        </li>
-        <li>
-          <strong>Error Monitoring:</strong> Sentry (captures application errors
-          for debugging &mdash; see Section 9).
-        </li>
+        <li>simplepress.dev;</li>
+        <li>storefronts hosted on the SimplePress platform;</li>
+        <li>custom domains connected to the platform;</li>
+        <li>related services, applications, APIs, communications, and infrastructure.</li>
+      </ul>
+      <p>
+        By using SimplePress, you agree to the collection and use of information in
+        accordance with this Privacy Policy.
+      </p>
+      <hr />
+
+      <h2>2. Scope of This Policy</h2>
+      <p>This Privacy Policy applies to:</p>
+      <ul>
+        <li>visitors browsing SimplePress;</li>
+        <li>businesses operating storefronts on SimplePress;</li>
+        <li>customers purchasing from storefronts hosted on SimplePress;</li>
+        <li>users creating SimplePress Accounts.</li>
+      </ul>
+      <p>
+        This Privacy Policy does not govern the independent business practices of storefront
+        operators using the platform. Businesses hosted on SimplePress may have their own
+        policies, terms, and practices.
+      </p>
+      <hr />
+
+      <h2>3. Information We Collect</h2>
+
+      <h3>A. Account Information</h3>
+      <p>When you create or use a SimplePress Account, we may collect:</p>
+      <ul>
+        <li>name;</li>
+        <li>email address;</li>
+        <li>username;</li>
+        <li>encrypted authentication credentials;</li>
+        <li>account preferences;</li>
+        <li>verification status;</li>
+        <li>profile information.</li>
       </ul>
 
-      <h2>3. Data Security</h2>
+      <h3>B. Transaction and Order Information</h3>
       <p>
-        We implement industry-standard security practices including TLS
-        encryption in transit and row-level database security. Merchants are
-        responsible for maintaining the security of their own account
-        credentials. The Center is responsible for platform-level security
-        infrastructure.
-      </p>
-
-      <h2>4. The &quot;Global Account&quot; Architecture</h2>
-      <p>
-        SimplePress is designed to make shopping local easier. To do this, we
-        maintain a central database of user accounts.
+        When purchases are made through storefronts hosted on SimplePress, we may collect:
       </p>
       <ul>
-        <li>
-          <strong>What we store globally:</strong> Your name, email address,
-          profile image, and your list of associated businesses (where you are a
-          customer or staff member).
-        </li>
-        <li>
-          <strong>What is shared with Merchants:</strong> When you interact with
-          a business (e.g., place an order), that specific Merchant is granted
-          access to your profile to fulfill their services.
-        </li>
-        <li>
-          <strong>What is NOT shared:</strong> Merchants never have access to
-          your password, your activity at other unrelated shops, or your payment
-          methods (which are handled directly by Stripe).
-        </li>
+        <li>order details;</li>
+        <li>purchased products;</li>
+        <li>shipping information;</li>
+        <li>billing information;</li>
+        <li>customer email address;</li>
+        <li>transaction metadata;</li>
+        <li>order history;</li>
+        <li>refund or dispute information.</li>
       </ul>
-
-      <h2>5. No Data Monetization</h2>
       <p>
-        The Center for Generative Justice LLC does not sell your account data,
-        track your behavior for advertising, or &quot;pool&quot; your data for
-        marketing purposes. Your account exists solely to provide a seamless
-        login experience for community-led commerce.
+        Payment card information is generally processed by third-party payment processors
+        such as Stripe and is not stored directly by SimplePress.
       </p>
 
-      <h2>6. Personal Information We Collect</h2>
+      <h3>C. Business and Storefront Information</h3>
+      <p>Businesses using SimplePress may provide:</p>
+      <ul>
+        <li>business names;</li>
+        <li>branding;</li>
+        <li>logos;</li>
+        <li>product listings;</li>
+        <li>descriptions;</li>
+        <li>storefront content;</li>
+        <li>custom domain information;</li>
+        <li>support communications;</li>
+        <li>uploaded media and files.</li>
+      </ul>
+
+      <h3>D. Technical and Device Information</h3>
+      <p>We may automatically collect certain technical information, including:</p>
+      <ul>
+        <li>IP addresses;</li>
+        <li>browser type;</li>
+        <li>operating system;</li>
+        <li>device information;</li>
+        <li>referring pages;</li>
+        <li>session activity;</li>
+        <li>timestamps;</li>
+        <li>diagnostic and security logs;</li>
+        <li>user agent information.</li>
+      </ul>
+
+      <h3>E. Analytics Information</h3>
       <p>
-        We collect the following categories of personal information when you
-        create an account or interact with a store on SimplePress:
+        SimplePress uses self-hosted analytics tools, including Umami Analytics, to better
+        understand platform usage, performance, and reliability.
+      </p>
+      <p>Analytics may collect:</p>
+      <ul>
+        <li>page visits;</li>
+        <li>approximate geographic region;</li>
+        <li>browser and device information;</li>
+        <li>referrer data;</li>
+        <li>session behavior;</li>
+        <li>technical performance metrics.</li>
+      </ul>
+      <p>We do not use analytics to sell personal data or build advertising profiles.</p>
+
+      <h3>F. Communications</h3>
+      <p>
+        If you contact us or interact with platform communications, we may collect:
       </p>
       <ul>
-        <li>
-          <strong>Identity data:</strong> Name and email address (required for
-          account creation).
-        </li>
-        <li>
-          <strong>Profile data:</strong> Optional profile photo.
-        </li>
-        <li>
-          <strong>Transaction data:</strong> Order history, shipping addresses,
-          and purchase amounts (stored per Merchant).
-        </li>
-        <li>
-          <strong>Technical data:</strong> IP address and browser/device
-          information collected incidentally during normal use and in error
-          reports (see Section 9).
-        </li>
+        <li>email correspondence;</li>
+        <li>support requests;</li>
+        <li>moderation communications;</li>
+        <li>operational notices;</li>
+        <li>feedback and bug reports.</li>
       </ul>
-      <p>
-        We do <strong>not</strong> collect payment card numbers, bank account
-        details, or government identification &mdash; these are handled
-        exclusively by Stripe (see Section 8).
-      </p>
+      <hr />
 
-      <h2>7. How We Use Your Information</h2>
-      <p>We use your information exclusively to:</p>
+      <h2>4. How We Use Information</h2>
+      <p>We use information to:</p>
       <ul>
-        <li>Authenticate your account and maintain your session.</li>
-        <li>Process and fulfill orders placed at participating stores.</li>
-        <li>
-          Send transactional emails (order confirmations, shipping updates,
-          password resets).
-        </li>
-        <li>
-          Diagnose and fix technical errors (via Sentry error monitoring).
-        </li>
-        <li>
-          Measure aggregate platform usage via self-hosted, privacy-focused
-          analytics (Umami).
-        </li>
+        <li>operate and maintain the platform;</li>
+        <li>authenticate users;</li>
+        <li>process transactions;</li>
+        <li>facilitate storefront functionality;</li>
+        <li>provide customer support;</li>
+        <li>improve performance and reliability;</li>
+        <li>detect fraud, abuse, and security threats;</li>
+        <li>enforce our Terms and policies;</li>
+        <li>communicate operational updates and notices;</li>
+        <li>comply with legal obligations;</li>
+        <li>investigate violations or disputes.</li>
+      </ul>
+      <hr />
+
+      <h2>5. Payment Processing</h2>
+      <p>
+        Payments on SimplePress are processed by third-party payment processors, including
+        Stripe.
+      </p>
+      <p>
+        When making a purchase or operating a storefront, your payment information may be
+        processed directly by Stripe subject to Stripe&rsquo;s own privacy practices and
+        terms.
+      </p>
+      <p>SimplePress does not control Stripe&rsquo;s independent handling of payment data.</p>
+      <hr />
+
+      <h2>6. Cookies and Session Technologies</h2>
+      <p>SimplePress may use:</p>
+      <ul>
+        <li>cookies;</li>
+        <li>session tokens;</li>
+        <li>authentication tokens;</li>
+        <li>local storage;</li>
+        <li>similar technologies</li>
+      </ul>
+      <p>to:</p>
+      <ul>
+        <li>maintain login sessions;</li>
+        <li>secure accounts;</li>
+        <li>remember preferences;</li>
+        <li>improve platform functionality;</li>
+        <li>support analytics and performance monitoring.</li>
       </ul>
       <p>
-        We do <strong>not</strong> use your data for advertising, behavioral
-        profiling, or any purpose beyond operating the platform.
+        You may be able to control certain cookie settings through your browser
+        configuration.
       </p>
+      <p>Disabling certain cookies may impact platform functionality.</p>
+      <hr />
 
-      <h2>8. Payment Processing &amp; Stripe</h2>
+      <h2>7. Data Sharing and Disclosure</h2>
+      <p>We do not sell personal information or user data.</p>
+      <p>We may share information in limited circumstances, including:</p>
+      <ul>
+        <li>with service providers and infrastructure providers;</li>
+        <li>with payment processors such as Stripe;</li>
+        <li>with businesses involved in customer transactions;</li>
+        <li>when required by law or legal process;</li>
+        <li>to protect platform security and integrity;</li>
+        <li>to investigate fraud, abuse, or illegal activity;</li>
+        <li>during mergers, restructurings, or organizational transfers.</li>
+      </ul>
       <p>
-        All payment transactions are processed directly by{" "}
-        <strong>Stripe</strong>. When you check out on a SimplePress store, your
-        payment card details are transmitted directly to Stripe&apos;s servers
-        &mdash; they never pass through or are stored by SimplePress. We only
-        receive a webhook confirmation from Stripe once a payment is complete.
-      </p>
-      <p>
-        Merchants who connect Stripe accounts undergo identity verification
-        (KYC/KYB) managed entirely by Stripe. Stripe&apos;s data practices are
-        governed by the{" "}
-        <a
-          href="https://stripe.com/privacy"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Stripe Privacy Policy
-        </a>
-        .
-      </p>
-
-      <h2>9. Error Monitoring &amp; Sentry</h2>
-      <p>
-        When a technical error occurs on the platform, diagnostic data is
-        automatically sent to{" "}
-        <a
-          href="https://sentry.io"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Sentry
-        </a>{" "}
-        to help us identify and fix bugs. This data may include:
+        We may also disclose information if we reasonably believe disclosure is necessary
+        to:
       </p>
       <ul>
-        <li>Your IP address and browser/OS information.</li>
-        <li>The page or action you were performing when the error occurred.</li>
+        <li>comply with legal obligations;</li>
+        <li>enforce our Terms;</li>
+        <li>protect users or the public;</li>
         <li>
-          Anonymized identifiers for the user and business involved (e.g., a
-          numeric ID, not your name or email).
+          protect the rights or property of SimplePress or THE CENTER FOR GENERATIVE JUSTICE
+          LLC.
         </li>
       </ul>
-      <p>
-        Error data is used solely for debugging and improving platform
-        stability. It is never used for advertising or shared outside of Sentry.
-        Sentry&apos;s data practices are governed by the{" "}
-        <a
-          href="https://sentry.io/privacy/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Sentry Privacy Policy
-        </a>
-        .
-      </p>
+      <hr />
 
-      <h2>10. Cookies &amp; Analytics</h2>
-      <p>SimplePress uses two categories of cookies:</p>
-      <ul>
-        <li>
-          <strong>Session cookies (essential):</strong> Set by Better Auth to
-          keep you logged in. These are httpOnly cookies and are required for
-          the platform to function. They cannot be opted out of while using an
-          authenticated session.
-        </li>
-        <li>
-          <strong>Analytics (non-essential):</strong> We use a self-hosted
-          instance of{" "}
-          <a
-            href="https://umami.is"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Umami
-          </a>
-          , a privacy-focused analytics tool. Umami does not use cookies, does
-          not track you across sites, and does not fingerprint your device. It
-          collects only aggregate page-view data.
-        </li>
-      </ul>
+      <h2>8. User Content</h2>
       <p>
-        We do <strong>not</strong> use Google Analytics, Meta Pixel, or any
-        third-party advertising or behavioral tracking tools.
+        Storefronts hosted on SimplePress may publicly display information uploaded by
+        businesses, including:
       </p>
-
-      <h2>11. Your Rights</h2>
-      <p>Under applicable law, you have the right to:</p>
       <ul>
-        <li>Request a copy of the personal data we hold about you.</li>
-        <li>Request correction of inaccurate information.</li>
-        <li>
-          Request deletion of your account and associated personal data (subject
-          to any legal retention requirements).
-        </li>
-        <li>Opt out of non-essential communications.</li>
+        <li>business names;</li>
+        <li>product listings;</li>
+        <li>images;</li>
+        <li>branding;</li>
+        <li>descriptions;</li>
+        <li>storefront content.</li>
       </ul>
       <p>
-        To exercise any of these rights, email{" "}
-        <a href={`mailto:${contactEmail}`}>
-          {contactEmail}
-        </a>
-        .
+        Users are responsible for ensuring that uploaded content does not violate privacy
+        rights or applicable laws.
+      </p>
+      <hr />
+
+      <h2>9. Data Retention</h2>
+      <p>We retain information for as long as reasonably necessary to:</p>
+      <ul>
+        <li>operate the platform;</li>
+        <li>maintain account integrity;</li>
+        <li>comply with legal obligations;</li>
+        <li>resolve disputes;</li>
+        <li>enforce agreements;</li>
+        <li>maintain security and backup systems.</li>
+      </ul>
+      <p>
+        We may retain certain records after account closure where necessary for legal,
+        operational, fraud prevention, tax, or security purposes.
+      </p>
+      <hr />
+
+      <h2>10. Security</h2>
+      <p>
+        We implement reasonable administrative, technical, and organizational measures
+        designed to protect information stored on the platform.
+      </p>
+      <p>However, no method of transmission or storage is completely secure.</p>
+      <p>You acknowledge and agree that:</p>
+      <ul>
+        <li>internet communications are not guaranteed secure;</li>
+        <li>no system can guarantee absolute security;</li>
+        <li>you use the platform at your own risk.</li>
+      </ul>
+      <p>
+        Users are responsible for maintaining the confidentiality of their account
+        credentials.
+      </p>
+      <hr />
+
+      <h2>11. Business Responsibility for Customer Data</h2>
+      <p>
+        Businesses operating storefronts on SimplePress are independently responsible for:
+      </p>
+      <ul>
+        <li>complying with applicable privacy laws;</li>
+        <li>handling customer information appropriately;</li>
+        <li>responding to customer inquiries;</li>
+        <li>maintaining lawful business practices.</li>
+      </ul>
+      <p>
+        SimplePress provides platform infrastructure but does not independently control all
+        business data practices conducted by storefront operators.
+      </p>
+      <hr />
+
+      <h2>12. Children&rsquo;s Privacy</h2>
+      <p>SimplePress is not intended for users under 18 years of age.</p>
+      <p>We do not knowingly collect personal information from children under 18.</p>
+      <p>
+        If we become aware that information from a minor has been collected in violation of
+        this policy, we may remove such information and terminate associated accounts.
+      </p>
+      <hr />
+
+      <h2>13. International Use</h2>
+      <p>
+        SimplePress is primarily intended for users and businesses operating within the
+        United States.
+      </p>
+      <p>
+        Our infrastructure and data processing operations are generally conducted within the
+        United States.
+      </p>
+      <p>
+        By using the platform, you understand that your information may be transferred to
+        and processed in the United States.
+      </p>
+      <hr />
+
+      <h2>14. Your Rights and Choices</h2>
+      <p>
+        Depending on applicable law, users may have certain rights regarding their personal
+        information, including the ability to:
+      </p>
+      <ul>
+        <li>request access to information;</li>
+        <li>request correction of inaccurate information;</li>
+        <li>request deletion of certain information;</li>
+        <li>close accounts;</li>
+        <li>opt out of certain communications.</li>
+      </ul>
+      <p>We may decline requests where:</p>
+      <ul>
+        <li>required by law;</li>
+        <li>necessary for security or fraud prevention;</li>
+        <li>necessary to preserve operational integrity;</li>
+        <li>necessary to comply with legal obligations.</li>
+      </ul>
+      <p>
+        Requests may be submitted to:{" "}
+        <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+      </p>
+      <hr />
+
+      <h2>15. Third-Party Services and Links</h2>
+      <p>SimplePress may integrate with or link to third-party services, including:</p>
+      <ul>
+        <li>payment processors;</li>
+        <li>custom domains;</li>
+        <li>external websites;</li>
+        <li>embedded content providers;</li>
+        <li>hosting infrastructure providers.</li>
+      </ul>
+      <p>
+        We are not responsible for the privacy practices or content of third-party services.
+      </p>
+      <p>Users should review the policies of those services independently.</p>
+      <hr />
+
+      <h2>16. Platform Changes</h2>
+      <p>SimplePress is an evolving platform.</p>
+      <p>We may modify:</p>
+      <ul>
+        <li>platform features;</li>
+        <li>data practices;</li>
+        <li>analytics systems;</li>
+        <li>infrastructure providers;</li>
+        <li>operational processes</li>
+      </ul>
+      <p>as the platform develops.</p>
+      <p>We reserve the right to update this Privacy Policy at any time.</p>
+      <p>Updated versions will become effective upon posting unless otherwise stated.</p>
+      <p>
+        Continued use of the platform after updates constitutes acceptance of the revised
+        policy.
+      </p>
+      <hr />
+
+      <h2>17. Contact Information</h2>
+      <p>
+        THE CENTER FOR GENERATIVE JUSTICE LLC
+        <br />
+        2635 Alex Dr
+        <br />
+        Ann Arbor, MI 48103
+        <br />
+        <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
       </p>
 
       <hr />

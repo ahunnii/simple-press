@@ -1,26 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
-import { IconLayoutDashboard } from "@tabler/icons-react";
-import { Menu, ShoppingBag } from "lucide-react";
+import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
+import { ChevronDown, Menu, ShoppingBag } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
 import { BambooMobileNav } from "./bamboo-mobile-nav";
 
-const NAV_LINKS = [
+type NavChild = { label: string; href: string; external?: boolean };
+type NavLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+  children?: NavChild[];
+};
+
+const NAV_LINKS: NavLink[] = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
-] as const;
+];
 
 export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
@@ -28,12 +37,20 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
   const { data: session, isPending } = authClient.useSession();
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+
+  // Close desktop dropdown on Escape
+  useEffect(() => {
+    if (openDropdown === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenDropdown(null);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [openDropdown]);
 
   const links =
-    (business?.siteContent?.navigationItems as {
-      label: string;
-      href: string;
-    }[]) ?? NAV_LINKS;
+    (business?.siteContent?.navigationItems as NavLink[]) ?? NAV_LINKS;
 
   const authActions = (
     <>
@@ -55,6 +72,11 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
         },
       }}
       additionalLinks={[
+        {
+          icon: <IconPackage className="h-4 w-4" />,
+          label: "Orders",
+          href: "/account/orders",
+        },
         ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
         !!session?.session?.membershipId
           ? [
@@ -94,20 +116,82 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
           className="hidden items-center gap-8 md:flex"
           aria-label="Main navigation"
         >
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              aria-current={pathname === link.href ? "page" : undefined}
-              className={`hover:text-primary text-sm font-medium transition-colors ${
-                pathname === link.href
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {links.map((link, i) =>
+            link.children?.length ? (
+              <div
+                key={link.href + link.label}
+                className="relative"
+                onMouseEnter={() => setOpenDropdown(i)}
+                onMouseLeave={() => setOpenDropdown(null)}
+              >
+                <button
+                  type="button"
+                  aria-haspopup="true"
+                  aria-expanded={openDropdown === i ? "true" : "false"}
+                  onClick={() => setOpenDropdown(openDropdown === i ? null : i)}
+                  className={cn(
+                    "flex cursor-pointer items-center gap-1 border-none bg-transparent p-0 text-sm font-medium transition-colors",
+                    link.children.some((c) => pathname === c.href)
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-primary",
+                  )}
+                >
+                  {link.label}
+                  <ChevronDown
+                    className={cn(
+                      "h-3 w-3 transition-transform duration-200",
+                      openDropdown === i ? "rotate-180" : "",
+                    )}
+                    aria-hidden="true"
+                  />
+                </button>
+
+                {openDropdown === i && (
+                  <div className="absolute top-full left-0 z-10 pt-2">
+                    <div className="bg-background border-border/60 min-w-[160px] overflow-hidden rounded-(--radius) border shadow-sm">
+                      {link.children.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          target={child.external ? "_blank" : undefined}
+                          rel={
+                            child.external ? "noopener noreferrer" : undefined
+                          }
+                          aria-current={
+                            pathname === child.href ? "page" : undefined
+                          }
+                          onClick={() => setOpenDropdown(null)}
+                          className={cn(
+                            "block px-4 py-2.5 text-sm transition-colors",
+                            pathname === child.href
+                              ? "text-primary bg-secondary"
+                              : "text-muted-foreground hover:text-primary hover:bg-secondary",
+                          )}
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                target={link.external ? "_blank" : undefined}
+                rel={link.external ? "noopener noreferrer" : undefined}
+                aria-current={pathname === link.href ? "page" : undefined}
+                className={`hover:text-primary text-sm font-medium transition-colors ${
+                  pathname === link.href
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
         </nav>
 
         <div className="flex items-center gap-2">

@@ -193,7 +193,10 @@ export async function BambooHomepage() {
                   key={feature.title}
                   className="flex flex-col items-center gap-3 text-center"
                 >
-                  <div className="bg-primary-foreground/10 flex size-12 items-center justify-center rounded-full" aria-hidden="true">
+                  <div
+                    className="bg-primary-foreground/10 flex size-12 items-center justify-center rounded-full"
+                    aria-hidden="true"
+                  >
                     <feature.icon className="text-primary-foreground size-6" />
                   </div>
                   <h3 className="text-primary-foreground text-sm font-semibold">
