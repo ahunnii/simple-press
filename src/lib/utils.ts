@@ -108,6 +108,8 @@ export function isSubdomainReserved(subdomain: string): boolean {
     "status",
     "dev",
     "staging",
+    "platform",
+    "preview",
   ];
   return reserved.includes(subdomain.toLowerCase());
 }

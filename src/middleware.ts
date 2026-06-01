@@ -14,12 +14,45 @@ export async function middleware(req: NextRequest) {
     ? hostname === "localhost:3000" || hostname === "localhost"
     : hostname === platformDomain || hostname === `mystore.${platformDomain}`;
 
+  // Determine if this is the dedicated platform admin subdomain
+  const isPlatformSubdomain = isDevelopment
+    ? hostname === "platform.localhost:3000"
+    : hostname === `platform.${platformDomain}`;
+
   // ========================================
   // PLATFORM DOMAIN (localhost:3000 in dev)
   // ========================================
   if (isPlatformDomain) {
     // Platform routes work normally
     return NextResponse.next();
+  }
+
+  // ========================================
+  // PLATFORM ADMIN SUBDOMAIN (platform.*)
+  // ========================================
+  if (isPlatformSubdomain) {
+    // Infrastructure and auth routes pass through unchanged — auth must not be
+    // rewritten into platform-hub or the layout's session redirect loops forever.
+    if (
+      pathname.startsWith("/api") ||
+      pathname.startsWith("/auth") ||
+      pathname.startsWith("/_next") ||
+      pathname.startsWith("/favicon")
+    ) {
+      return NextResponse.next();
+    }
+
+    const url = req.nextUrl.clone();
+
+    // Strip the /admin/platform prefix so existing component links (e.g. hrefs
+    // like /admin/platform/users inside UsersTable) resolve correctly here.
+    let targetPath = pathname;
+    if (pathname.startsWith("/admin/platform")) {
+      targetPath = pathname.slice("/admin/platform".length) || "/";
+    }
+
+    url.pathname = `/platform-hub${targetPath === "/" ? "" : targetPath}`;
+    return NextResponse.rewrite(url);
   }
 
   // ========================================
@@ -36,24 +69,6 @@ export async function middleware(req: NextRequest) {
   ) {
     return NextResponse.next();
   }
-
-  // Storefront routes need to be rewritten to (storefront) group
-  // const url = req.nextUrl.clone();
-
-  // if (pathname === "/") {
-  //   url.pathname = "/(storefront)";
-  //   return NextResponse.rewrite(url);
-  // }
-
-  // if (pathname.startsWith("/products")) {
-  //   url.pathname = `/(storefront)${pathname}`;
-  //   return NextResponse.rewrite(url);
-  // }
-
-  // if (pathname.startsWith("/cart") || pathname.startsWith("/checkout")) {
-  //   url.pathname = `/(storefront)${pathname}`;
-  //   return NextResponse.rewrite(url);
-  // }
 
   // For any other paths on tenant domains, just pass through
   return NextResponse.next();
