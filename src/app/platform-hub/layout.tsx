@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { IconTerminal } from "@tabler/icons-react";
-import { Building2, Globe, Users } from "lucide-react";
+import { Building2, Globe, LayoutDashboard, Users } from "lucide-react";
 
 import { env } from "~/env";
 import { getSession } from "~/server/better-auth/server";
@@ -21,6 +21,7 @@ import {
 import { NavUser } from "~/app/admin/_components/nav-user";
 
 const navItems = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Users", url: "/users", icon: Users },
   { title: "Businesses", url: "/businesses", icon: Building2 },
   { title: "Domains", url: "/domains", icon: Globe },
@@ -45,7 +46,7 @@ export default async function PlatformHubLayout({
   const session = await getSession();
 
   if (!session) {
-    redirect("/auth/sign-in?redirectTo=/users");
+    redirect("/auth/sign-in?redirectTo=/dashboard");
   }
 
   if (session.user.platformRole !== "PLATFORM_ADMIN") {
@@ -70,7 +71,7 @@ export default async function PlatformHubLayout({
                   asChild
                   className="h-20 w-full data-[slot=sidebar-menu-button]:p-1.5!"
                 >
-                  <Link href="/users" className="flex flex-col items-start">
+                  <Link href="/dashboard" className="flex flex-col items-start">
                     <span className="flex flex-row items-center gap-1 font-mono text-2xl font-bold">
                       <IconTerminal className="size-8" />
                       simple_press

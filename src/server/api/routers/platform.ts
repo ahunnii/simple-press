@@ -469,6 +469,65 @@ export const platformRouter = createTRPCRouter({
       return { id: business.id, name: business.name, subdomain: business.subdomain };
     }),
 
+  getDashboardStats: platformAdminProcedure.query(async ({ ctx }) => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const [
+      totalUsers,
+      totalBusinesses,
+      newUsers30d,
+      newBusinesses30d,
+      activeBusinesses,
+      pendingDomains,
+      recentUsers,
+      recentBusinesses,
+    ] = await Promise.all([
+      ctx.db.user.count(),
+      ctx.db.business.count(),
+      ctx.db.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+      ctx.db.business.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+      ctx.db.business.count({ where: { status: "active" } }),
+      ctx.db.domainQueue.count({
+        where: { status: { in: ["pending", "processing", "failed"] } },
+      }),
+      ctx.db.user.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          platformRole: true,
+          createdAt: true,
+        },
+      }),
+      ctx.db.business.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          subdomain: true,
+          status: true,
+          ownerEmail: true,
+          createdAt: true,
+        },
+      }),
+    ]);
+
+    return {
+      totalUsers,
+      totalBusinesses,
+      newUsers30d,
+      newBusinesses30d,
+      activeBusinesses,
+      pendingDomains,
+      recentUsers,
+      recentBusinesses,
+    };
+  }),
+
   // Domain Management
   listDomainQueue: platformAdminProcedure.query(async ({ ctx }) => {
     const entries = await ctx.db.domainQueue.findMany({

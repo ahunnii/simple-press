@@ -10,9 +10,28 @@ import { BusinessesTable } from "~/app/admin/platform/_components/businesses-tab
 import { CreateBusinessButton } from "~/app/admin/platform/_components/create-business-button";
 
 import { PlatformTrailHeader } from "../_components/platform-trail-header";
+import { PlatformListFilters } from "../_components/platform-list-filters";
+import { PlatformListPagination } from "../_components/platform-list-pagination";
 
-export default async function PlatformBusinessesPage() {
-  const { businesses } = await api.platform.listBusinesses();
+const PAGE_SIZE = 25;
+
+type Props = {
+  searchParams: Promise<{
+    search?: string;
+    page?: string;
+  }>;
+};
+
+export default async function PlatformBusinessesPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10));
+  const offset = (page - 1) * PAGE_SIZE;
+
+  const { businesses, total } = await api.platform.listBusinesses({
+    search: params.search,
+    limit: PAGE_SIZE,
+    offset,
+  });
 
   return (
     <>
@@ -26,18 +45,32 @@ export default async function PlatformBusinessesPage() {
           <CreateBusinessButton />
         </div>
 
+        <PlatformListFilters
+          total={total}
+          placeholder="Search by name, subdomain, or domain..."
+        />
+
         {businesses.length === 0 ? (
           <Card>
             <CardHeader>
               <CardTitle>No businesses found</CardTitle>
               <CardDescription>
-                No businesses have been created on the platform yet
+                {params.search
+                  ? "Try a different search term."
+                  : "No businesses have been created on the platform yet."}
               </CardDescription>
             </CardHeader>
             <CardContent />
           </Card>
         ) : (
-          <BusinessesTable businesses={businesses} />
+          <>
+            <BusinessesTable businesses={businesses} />
+            <PlatformListPagination
+              total={total}
+              page={page}
+              pageSize={PAGE_SIZE}
+            />
+          </>
         )}
       </div>
     </>

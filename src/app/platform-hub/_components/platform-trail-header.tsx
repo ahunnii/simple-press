@@ -32,7 +32,7 @@ export function PlatformTrailHeader({ breadcrumbs }: Props) {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/users">Platform Admin</Link>
+                <Link href="/dashboard">Platform Admin</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />

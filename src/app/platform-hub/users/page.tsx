@@ -9,9 +9,28 @@ import {
 import { UsersTable } from "~/app/admin/platform/_components/users-table";
 
 import { PlatformTrailHeader } from "../_components/platform-trail-header";
+import { PlatformListFilters } from "../_components/platform-list-filters";
+import { PlatformListPagination } from "../_components/platform-list-pagination";
 
-export default async function PlatformUsersPage() {
-  const { users } = await api.platform.listUsers();
+const PAGE_SIZE = 25;
+
+type Props = {
+  searchParams: Promise<{
+    search?: string;
+    page?: string;
+  }>;
+};
+
+export default async function PlatformUsersPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10));
+  const offset = (page - 1) * PAGE_SIZE;
+
+  const { users, total } = await api.platform.listUsers({
+    search: params.search,
+    limit: PAGE_SIZE,
+    offset,
+  });
 
   return (
     <>
@@ -24,18 +43,32 @@ export default async function PlatformUsersPage() {
           </div>
         </div>
 
+        <PlatformListFilters
+          total={total}
+          placeholder="Search by name or email..."
+        />
+
         {users.length === 0 ? (
           <Card>
             <CardHeader>
               <CardTitle>No users found</CardTitle>
               <CardDescription>
-                No users have been created on the platform yet
+                {params.search
+                  ? "Try a different search term."
+                  : "No users have been created on the platform yet."}
               </CardDescription>
             </CardHeader>
             <CardContent />
           </Card>
         ) : (
-          <UsersTable users={users} />
+          <>
+            <UsersTable users={users} />
+            <PlatformListPagination
+              total={total}
+              page={page}
+              pageSize={PAGE_SIZE}
+            />
+          </>
         )}
       </div>
     </>
