@@ -26,6 +26,7 @@ import { PollenVariantSelector } from "./pollen-variant-selector";
 
 export function PollenProductPage({
   product,
+  business,
 }: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
@@ -132,7 +133,7 @@ export function PollenProductPage({
             <Separator />
 
             {/* Quantity + Add to Cart Actions */}
-            <PollenProductActions product={product} />
+            <PollenProductActions product={product} business={business} />
 
             {/* Trust Badges */}
             {displayTrustBadges.length > 0 && (

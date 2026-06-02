@@ -26,6 +26,7 @@ import { HappyBambooProductActions } from "./happy-bamboo-product-actions";
 
 export function HappyBambooProductPage({
   product,
+  business,
 }: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
@@ -121,7 +122,7 @@ export function HappyBambooProductPage({
             <Separator />
 
             {/* Quantity + Add to Cart Actions */}
-            <HappyBambooProductActions product={product} />
+            <HappyBambooProductActions product={product} business={business} />
 
             {/* Trust / Feature badges */}
             <div className="grid grid-cols-2 gap-3">

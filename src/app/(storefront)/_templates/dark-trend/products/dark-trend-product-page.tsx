@@ -19,6 +19,7 @@ import { DarkTrendProductDetails } from "./dark-trend-product-details";
 
 export function DarkTrendProductPage({
   product,
+  business,
 }: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
@@ -101,7 +102,7 @@ export function DarkTrendProductPage({
             </div>
 
             {/* Quantity + Add to Cart Actions*/}
-            <DarkTrendProductActions product={product} />
+            <DarkTrendProductActions product={product} business={business} />
 
             {/* Trust / Feature badges */}
             {trustBadges.length > 0 && (

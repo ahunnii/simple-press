@@ -25,6 +25,7 @@ export type DefaultProductsPageTemplateProps = {
 
 export type DefaultProductPageTemplateProps = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 
 export type DefaultContactPageTemplateProps = {

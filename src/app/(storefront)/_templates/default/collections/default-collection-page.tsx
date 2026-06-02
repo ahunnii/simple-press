@@ -23,31 +23,34 @@ export function DefaultCollectionPage({
       {/* Page hero */}
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-0 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
-            <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+          >
+            <Link href="/" className="transition-colors hover:text-[#0a0a0a]">
               Home
             </Link>
             <span aria-hidden="true">/</span>
             <Link
               href="/collections"
-              className="hover:text-[#0a0a0a] transition-colors"
+              className="transition-colors hover:text-[#0a0a0a]"
             >
               Collections
             </Link>
             <span aria-hidden="true">/</span>
-            <span aria-current="page" className="normal-case tracking-normal text-[#0a0a0a]">
+            <span aria-current="page" className="font-semibold text-[#0a0a0a]">
               {collection.name}
             </span>
           </nav>
 
-          <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          {/* <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
             Collection
-          </span>
-          <h1 className="font-serif mt-3 text-[clamp(40px,5vw,72px)] font-semibold leading-[1.04] tracking-[-0.03em]">
+          </span> */}
+          <h1 className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]">
             {collection.name}
           </h1>
           {collection.description && (
-            <p className="mt-4 mb-10 text-[17px] text-[#6b6b6b] max-w-[560px]">
+            <p className="mt-4 mb-10 max-w-[560px] text-[17px] text-[#6b6b6b]">
               {collection.description}
             </p>
           )}
@@ -57,7 +60,7 @@ export function DefaultCollectionPage({
 
           {/* Banner image */}
           {collection.imageUrl && (
-            <div className="relative aspect-[21/6] overflow-hidden rounded-t-[var(--radius)] bg-[#f6f6f6]">
+            <div className="relative aspect-21/6 overflow-hidden rounded-t-(--radius) bg-[#f6f6f6]">
               <Image
                 src={collection.imageUrl}
                 alt={collection.name}
@@ -76,10 +79,12 @@ export function DefaultCollectionPage({
         <div className="mx-auto max-w-[1440px]">
           {products.length === 0 ? (
             <div className="py-24 text-center">
-              <p className="text-[#6b6b6b]">No products in this collection yet.</p>
+              <p className="text-[#6b6b6b]">
+                No products in this collection yet.
+              </p>
               <Link
                 href="/shop"
-                className="mt-6 inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3"
+                className="mt-6 inline-flex items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
               >
                 View all products <span aria-hidden="true">→</span>
               </Link>
@@ -112,7 +117,7 @@ export function DefaultCollectionPage({
               </h2>
               <Link
                 href="/collections"
-                className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
+                className="inline-flex shrink-0 items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
               >
                 All collections <span aria-hidden="true">→</span>
               </Link>
@@ -134,7 +139,7 @@ export function DefaultCollectionPage({
                         className="object-cover transition-transform duration-500 group-hover:scale-[1.015]"
                       />
                     </div>
-                    <h3 className="font-serif text-[15px] font-medium tracking-[-0.005em] group-hover:opacity-70 transition-opacity">
+                    <h3 className="font-serif text-[15px] font-medium tracking-[-0.005em] transition-opacity group-hover:opacity-70">
                       {col.name}
                     </h3>
                     <p className="mt-0.5 text-[14px] text-[#6b6b6b]">

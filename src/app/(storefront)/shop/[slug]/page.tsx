@@ -39,7 +39,7 @@ export default async function ProductDetailPage({ params }: Props) {
       pollen: PollenProductPage,
     }[business.templateId] ?? DefaultProductPage;
 
-  return <TemplateComponent product={product} />;
+  return <TemplateComponent product={product} business={business} />;
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -59,7 +59,14 @@ export async function generateMetadata({ params }: Props) {
       title,
       description: description ?? "",
       images: product.ogImage
-        ? [{ url: product.ogImage, width: 1200, height: 630, alt: product.name }]
+        ? [
+            {
+              url: product.ogImage,
+              width: 1200,
+              height: 630,
+              alt: product.name,
+            },
+          ]
         : undefined,
     },
   };

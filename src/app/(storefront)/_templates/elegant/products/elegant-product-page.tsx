@@ -25,7 +25,10 @@ const TABS = [
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
-export function ElegantProductPage({ product }: DefaultProductPageTemplateProps) {
+export function ElegantProductPage({
+  product,
+  business,
+}: DefaultProductPageTemplateProps) {
   const { formatPrice, displayPrice, displayCompareAtPrice, isOnSale } =
     useProduct(product);
 
@@ -70,7 +73,8 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
     if (next !== null) {
       e.preventDefault();
       setActiveTab(keys[next]!);
-      const btns = tabListRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+      const btns =
+        tabListRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
       btns?.[next]?.focus();
     }
   };
@@ -300,7 +304,7 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
 
               {/* Actions */}
               <div style={revealStyle(0.3)}>
-                <ElegantProductActions product={product} />
+                <ElegantProductActions product={product} business={business} />
               </div>
 
               {/* Trust line */}
@@ -310,8 +314,7 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
                     display: "flex",
                     gap: 24,
                     paddingTop: 20,
-                    borderTop:
-                      "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                    borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
                     marginBottom: 32,
                     flexWrap: "wrap",
                   }}
@@ -381,8 +384,7 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
                               gap: 8,
                               borderRadius: 8,
                               padding: "16px 12px",
-                              background:
-                                "var(--el-paper, #fbf8f2)",
+                              background: "var(--el-paper, #fbf8f2)",
                               border:
                                 "1px solid var(--el-line-2, rgba(28,26,23,0.06))",
                               textAlign: "center",
@@ -482,11 +484,7 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
                     fontFamily: "var(--font-sans, sans-serif)",
                   }}
                 >
-                  {activeTab === "details" && (
-                    <p>
-                      {product.description}
-                    </p>
-                  )}
+                  {activeTab === "details" && <p>{product.description}</p>}
                   {activeTab === "how" && (
                     <p>
                       For best results, apply to clean skin morning and evening.
@@ -532,8 +530,7 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
               </span>
               <h2
                 style={{
-                  fontFamily:
-                    "var(--font-serif, 'Cormorant Garamond', serif)",
+                  fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
                   fontWeight: 400,
                   fontSize: "clamp(36px, 4.5vw, 56px)",
                   lineHeight: 1.05,
@@ -579,13 +576,15 @@ export function ElegantProductPage({ product }: DefaultProductPageTemplateProps)
                 }}
               >
                 View all products
-                <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
+                <ArrowRight
+                  aria-hidden={true}
+                  style={{ width: 14, height: 14 }}
+                />
               </Link>
             </div>
           </div>
         </section>
       )}
-
     </>
   );
 }

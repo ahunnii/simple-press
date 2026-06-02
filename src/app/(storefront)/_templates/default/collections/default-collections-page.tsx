@@ -13,17 +13,10 @@ export function DefaultCollectionsPage({
       {/* Page hero */}
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
-            <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
-              Home
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page">Collections</span>
-          </nav>
-          <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
             Shop by collection
           </span>
-          <h1 className="font-serif mt-3 text-[clamp(40px,5vw,72px)] font-semibold leading-[1.04] tracking-[-0.03em]">
+          <h1 className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]">
             Collections
           </h1>
           {list.length > 0 && (
@@ -55,7 +48,11 @@ export function DefaultCollectionsPage({
                   >
                     <div
                       className={`relative mb-4 aspect-3/4 overflow-hidden rounded-(--radius) ${
-                        i % 3 === 1 ? "bg-[#efece8]" : i % 3 === 2 ? "bg-[#1a1a1a]" : "bg-[#f6f6f6]"
+                        i % 3 === 1
+                          ? "bg-[#efece8]"
+                          : i % 3 === 2
+                            ? "bg-[#1a1a1a]"
+                            : "bg-[#f6f6f6]"
                       }`}
                     >
                       <Image
@@ -66,11 +63,11 @@ export function DefaultCollectionsPage({
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <h2 className="font-serif text-[15px] font-medium tracking-[-0.005em] group-hover:opacity-70 transition-opacity">
+                      <h2 className="font-serif text-[15px] font-medium tracking-[-0.005em] transition-opacity group-hover:opacity-70">
                         {collection.name}
                       </h2>
                       {collection.description && (
-                        <p className="line-clamp-2 text-[13px] text-[#6b6b6b] leading-relaxed">
+                        <p className="line-clamp-2 text-[13px] leading-relaxed text-[#6b6b6b]">
                           {collection.description}
                         </p>
                       )}

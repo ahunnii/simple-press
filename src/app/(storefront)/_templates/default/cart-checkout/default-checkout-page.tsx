@@ -7,7 +7,7 @@ import { DefaultCheckoutForm } from "./default-checkout-form";
 export async function DefaultCheckoutPage({
   business,
 }: DefaultCheckoutPageTemplateProps) {
-  if (!business.isStripeConnected) {
+  if (!business.isStripeConnected && process.env.NODE_ENV !== "development") {
     return (
       <div className="flex flex-1 items-center justify-center px-6 py-24">
         <div className="max-w-md text-center">

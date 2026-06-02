@@ -254,7 +254,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Add item to cart
   const addItem = useCallback(
     (newItem: Omit<CartItem, "quantity">, quantity = 1) => {
+      let toastMsg: string | null = null;
+      let toastIsError = false;
+      let openCart = false;
+
       setItems((currentItems) => {
+        toastMsg = null;
+        toastIsError = false;
+        openCart = false;
+
         const existingIndex = currentItems.findIndex(
           (item) =>
             item.productId === newItem.productId &&
@@ -262,13 +270,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         );
 
         if (existingIndex > -1) {
-          // Item exists, update quantity
           const updated = [...currentItems];
           const newQuantity = updated[existingIndex]!.quantity + quantity;
 
-          // Check max inventory if provided
           if (newItem.maxInventory && newQuantity > newItem.maxInventory) {
-            toast.error(`Only ${newItem.maxInventory} available in stock`);
+            toastMsg = `Only ${newItem.maxInventory} available in stock`;
+            toastIsError = true;
             return currentItems;
           }
 
@@ -277,20 +284,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             quantity: newQuantity,
           };
 
-          toast.success(`Updated quantity in cart`);
+          toastMsg = `Updated quantity in cart`;
           return updated;
         }
 
-        // New item, add to cart
         if (newItem.maxInventory && quantity > newItem.maxInventory) {
-          toast.error(`Only ${newItem.maxInventory} available in stock`);
+          toastMsg = `Only ${newItem.maxInventory} available in stock`;
+          toastIsError = true;
           return currentItems;
         }
 
-        toast.success(`${newItem.productName} added to cart`);
-        setIsOpen(true);
+        toastMsg = `${newItem.productName} added to cart`;
+        openCart = true;
         return [...currentItems, { ...newItem, quantity }];
       });
+
+      if (toastMsg !== null) {
+        if (toastIsError) toast.error(toastMsg);
+        else toast.success(toastMsg);
+      }
+      if (openCart) setIsOpen(true);
     },
     [],
   );
@@ -298,18 +311,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Remove item from cart
   const removeItem = useCallback(
     (productId: string, variantId: string | null) => {
+      let removed = false;
+
       setItems((currentItems) => {
+        removed = false;
         const filtered = currentItems.filter(
           (item) =>
             !(item.productId === productId && item.variantId === variantId),
         );
-
-        if (filtered.length < currentItems.length) {
-          toast.success("Removed from cart");
-        }
-
+        if (filtered.length < currentItems.length) removed = true;
         return filtered;
       });
+
+      if (removed) toast.success("Removed from cart");
     },
     [],
   );
@@ -322,20 +336,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      let maxInventoryHit: number | null = null;
+
       setItems((currentItems) => {
+        maxInventoryHit = null;
         return currentItems.map((item) => {
           if (item.productId === productId && item.variantId === variantId) {
-            // Check max inventory
             if (item.maxInventory && quantity > item.maxInventory) {
-              toast.error(`Only ${item.maxInventory} available in stock`);
+              maxInventoryHit = item.maxInventory;
               return item;
             }
-
             return { ...item, quantity };
           }
           return item;
         });
       });
+
+      if (maxInventoryHit !== null) toast.error(`Only ${maxInventoryHit} available in stock`);
     },
     [removeItem],
   );
@@ -343,13 +360,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Increment item quantity
   const incrementItem = useCallback(
     (productId: string, variantId: string | null) => {
+      let maxInventoryHit: number | null = null;
+
       setItems((currentItems) => {
+        maxInventoryHit = null;
         return currentItems.map((item) => {
           if (item.productId === productId && item.variantId === variantId) {
             const newQuantity = item.quantity + 1;
 
             if (item.maxInventory && newQuantity > item.maxInventory) {
-              toast.error(`Only ${item.maxInventory} available in stock`);
+              maxInventoryHit = item.maxInventory;
               return item;
             }
 
@@ -358,6 +378,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           return item;
         });
       });
+
+      if (maxInventoryHit !== null) toast.error(`Only ${maxInventoryHit} available in stock`);
     },
     [],
   );
@@ -365,14 +387,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Decrement item quantity
   const decrementItem = useCallback(
     (productId: string, variantId: string | null) => {
+      let removed = false;
+
       setItems((currentItems) => {
+        removed = false;
         return currentItems
           .map((item) => {
             if (item.productId === productId && item.variantId === variantId) {
               const newQuantity = item.quantity - 1;
 
               if (newQuantity <= 0) {
-                toast.success("Removed from cart");
+                removed = true;
                 return null;
               }
 
@@ -382,6 +407,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           })
           .filter((item): item is CartItem => item !== null);
       });
+
+      if (removed) toast.success("Removed from cart");
     },
     [],
   );

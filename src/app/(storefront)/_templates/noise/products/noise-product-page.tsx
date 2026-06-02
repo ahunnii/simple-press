@@ -22,7 +22,10 @@ import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components
 import { NoiseProductCard } from "../shared/noise-product-card";
 import { NoiseProductActions } from "./noise-product-actions";
 
-export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
+export function NoiseProductPage({
+  product,
+  business,
+}: DefaultProductPageTemplateProps) {
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
   });
@@ -321,7 +324,7 @@ export function NoiseProductPage({ product }: DefaultProductPageTemplateProps) {
             )}
 
             {/* Variant + add to cart + trust badges */}
-            <NoiseProductActions product={product} />
+            <NoiseProductActions product={product} business={business} />
 
             {/* 3-item trust row (design's guarantee strip)
             <div

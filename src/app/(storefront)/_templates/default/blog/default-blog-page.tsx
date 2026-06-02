@@ -28,10 +28,10 @@ function PostCard({ post }: { post: Props["pages"][number] }) {
         />
       </div>
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+        <p className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
           {formatDate(post.createdAt)}
         </p>
-        <h3 className="font-serif text-[18px] font-medium leading-snug tracking-[-0.01em] group-hover:opacity-70 transition-opacity">
+        <h3 className="font-serif text-[18px] leading-snug font-medium tracking-[-0.01em] transition-opacity group-hover:opacity-70">
           {post.title}
         </h3>
         {post.excerpt && (
@@ -39,7 +39,7 @@ function PostCard({ post }: { post: Props["pages"][number] }) {
             {post.excerpt}
           </p>
         )}
-        <span className="mt-1 inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 self-start transition-[gap] group-hover:gap-3">
+        <span className="mt-1 inline-flex items-center gap-2 self-start border-b border-current pb-0.5 text-sm font-medium transition-[gap] group-hover:gap-3">
           Read article <span aria-hidden="true">→</span>
         </span>
       </div>
@@ -53,8 +53,11 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
     "default.blog.listing-intro",
   ]);
 
-  const listingTitle = (f["default.blog.listing-title"] ?? "").trim() || "Journal";
-  const listingIntro = (f["default.blog.listing-intro"] ?? "").trim() || "Stories behind the work.";
+  const listingTitle =
+    (f["default.blog.listing-title"] ?? "").trim() || "Journal";
+  const listingIntro =
+    (f["default.blog.listing-intro"] ?? "").trim() ||
+    "Stories behind the work.";
 
   const [query, setQuery] = useState("");
 
@@ -79,17 +82,10 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
       {/* Page hero */}
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
-            <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
-              Home
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page">Journal</span>
-          </nav>
-          <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
             Journal
           </span>
-          <h1 className="font-serif mt-3 text-[clamp(40px,5vw,72px)] font-semibold leading-[1.04] tracking-[-0.03em]">
+          <h1 className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]">
             {listingTitle}
           </h1>
           {listingIntro && (
@@ -101,13 +97,12 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
       {/* Content */}
       <section className="px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-
           {pages.length === 0 ? (
             <div className="py-24 text-center">
               <p className="text-[#6b6b6b]">No posts yet — check back soon!</p>
               <Link
                 href="/"
-                className="mt-6 inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3"
+                className="mt-6 inline-flex items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
               >
                 Back to home <span aria-hidden="true">→</span>
               </Link>
@@ -115,8 +110,11 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
           ) : (
             <>
               {/* Search */}
-              <div className="mb-12 flex items-center gap-3 border-b border-[#e8e8e8] pb-3 max-w-sm">
-                <Search className="h-4 w-4 shrink-0 text-[#6b6b6b]" aria-hidden="true" />
+              <div className="mb-12 flex max-w-sm items-center gap-3 border-b border-[#e8e8e8] pb-3">
+                <Search
+                  className="h-4 w-4 shrink-0 text-[#6b6b6b]"
+                  aria-hidden="true"
+                />
                 <input
                   type="search"
                   placeholder="Search posts..."
@@ -159,18 +157,18 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
                         />
                       </div>
                       <div className="flex flex-col gap-4">
-                        <p className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+                        <p className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
                           {formatDate(featured.createdAt)} · Latest
                         </p>
-                        <h2 className="font-serif text-[clamp(24px,3vw,38px)] font-medium leading-[1.15] tracking-[-0.02em] text-balance group-hover:opacity-70 transition-opacity">
+                        <h2 className="font-serif text-[clamp(24px,3vw,38px)] leading-[1.15] font-medium tracking-[-0.02em] text-balance transition-opacity group-hover:opacity-70">
                           {featured.title}
                         </h2>
                         {featured.excerpt && (
-                          <p className="text-[15px] text-[#6b6b6b] leading-relaxed line-clamp-3">
+                          <p className="line-clamp-3 text-[15px] leading-relaxed text-[#6b6b6b]">
                             {featured.excerpt}
                           </p>
                         )}
-                        <span className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 self-start transition-[gap] group-hover:gap-3">
+                        <span className="inline-flex items-center gap-2 self-start border-b border-current pb-0.5 text-sm font-medium transition-[gap] group-hover:gap-3">
                           Read article <span aria-hidden="true">→</span>
                         </span>
                       </div>
@@ -182,10 +180,10 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
                     <>
                       {featured && (
                         <div className="mb-10 flex items-center gap-2">
-                          <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+                          <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
                             More posts
                           </span>
-                          <div className="flex-1 h-px bg-[#e8e8e8]" />
+                          <div className="h-px flex-1 bg-[#e8e8e8]" />
                         </div>
                       )}
                       <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">

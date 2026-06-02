@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
@@ -23,7 +22,10 @@ function FaqItem({
     >
       <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium select-none [&::-webkit-details-marker]:hidden">
         {question}
-        <span aria-hidden="true" className="ml-4 shrink-0 text-xl font-light transition-transform duration-200 group-open:rotate-45">
+        <span
+          aria-hidden="true"
+          className="ml-4 shrink-0 text-xl font-light transition-transform duration-200 group-open:rotate-45"
+        >
           +
         </span>
       </summary>
@@ -101,27 +103,19 @@ export function DefaultContactPage({
 
   return (
     <PageTransition>
-
       {/* ── Page hero ────────────────────────────────────────────────────── */}
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
-            <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
-              Home
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page">Contact</span>
-          </nav>
           {f["default.contact.eyebrow"] && (
-            <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+            <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
               {f["default.contact.eyebrow"]}
             </span>
           )}
-          <h1 className="font-serif mt-3 text-[clamp(40px,5vw,72px)] font-semibold leading-[1.04] tracking-[-0.03em]">
+          <h1 className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]">
             {f["default.contact.heading"] ?? "Say hello."}
           </h1>
           {f["default.contact.description"] && (
-            <p className="mt-4 text-[17px] text-[#6b6b6b] max-w-[560px]">
+            <p className="mt-4 max-w-[560px] text-[17px] text-[#6b6b6b]">
               {f["default.contact.description"]}
             </p>
           )}
@@ -132,7 +126,6 @@ export function DefaultContactPage({
       <section className="px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           <div className="grid grid-cols-1 gap-16 lg:grid-cols-[1fr_320px]">
-
             {/* Contact form */}
             <div>
               <DefaultContactForm />
@@ -144,21 +137,21 @@ export function DefaultContactPage({
                 {contactCards.map((card) => (
                   <div
                     key={card.eyebrow}
-                    className="flex flex-col gap-2 rounded-[var(--radius)] border border-[#e8e8e8] p-6"
+                    className="flex flex-col gap-2 rounded-(--radius) border border-[#e8e8e8] p-6"
                   >
-                    <span className="text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+                    <span className="text-[11px] font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
                       {card.eyebrow}
                     </span>
                     <h3 className="font-serif text-[20px] font-medium tracking-[-0.01em]">
                       {card.heading}
                     </h3>
-                    <p className="text-[13px] text-[#6b6b6b] leading-relaxed">
+                    <p className="text-[13px] leading-relaxed text-[#6b6b6b]">
                       {card.body}
                     </p>
                     {card.href && card.label && (
                       <a
                         href={card.href}
-                        className="inline-flex items-center gap-1.5 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-2.5 self-start mt-1"
+                        className="mt-1 inline-flex items-center gap-1.5 self-start border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-2.5"
                       >
                         {card.label} <span aria-hidden="true">→</span>
                       </a>
@@ -176,10 +169,10 @@ export function DefaultContactPage({
         <section className="bg-[#efece8] px-6 py-20 lg:px-8">
           <div className="mx-auto max-w-[760px]">
             <div className="mb-12 text-center">
-              <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+              <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
                 Frequently asked
               </span>
-              <h2 className="font-serif mt-3 text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]">
+              <h2 className="mt-3 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]">
                 Quick answers.
               </h2>
             </div>
@@ -196,7 +189,6 @@ export function DefaultContactPage({
           </div>
         </section>
       )}
-
     </PageTransition>
   );
 }

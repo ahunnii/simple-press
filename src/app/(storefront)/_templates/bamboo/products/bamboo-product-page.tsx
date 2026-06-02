@@ -27,6 +27,7 @@ import { BambooProductActions } from "./bamboo-product-actions";
 
 export function BambooProductPage({
   product,
+  business,
 }: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
@@ -122,7 +123,7 @@ export function BambooProductPage({
             <Separator />
 
             {/* Quantity + Add to Cart Actions*/}
-            <BambooProductActions product={product} />
+            <BambooProductActions product={product} business={business} />
 
             {/* Trust / Feature badges */}
             <div className="grid grid-cols-2 gap-3">

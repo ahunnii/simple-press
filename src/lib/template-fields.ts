@@ -178,6 +178,13 @@ export const genericFAQRowSchema = z
   })
   .passthrough();
 
+export const genericTrustBadgeRowSchema = z
+  .object({
+    icon: z.string().optional(),
+    label: z.string(),
+  })
+  .passthrough();
+
 export type GenericIconRow = {
   icon: LucideIcon;
   title: string;
@@ -200,6 +207,10 @@ export type GenericImageRow = {
   description?: string;
 };
 
+export type GenericTrustBadgeRow = {
+  icon?: LucideIcon;
+  label: string;
+};
 export function parseTemplateIconListRows(
   raw: unknown,
   defaultList?: GenericIconRow[],
@@ -213,6 +224,24 @@ export function parseTemplateIconListRows(
     const { icon, title, description } = parsed.data;
     const Icon = getLucideTemplateIcon(icon) ?? Leaf;
     out.push({ icon: Icon, title, description });
+  }
+
+  return out.length > 0 ? out : (defaultList ?? null);
+}
+
+export function parseTemplateTrustBadgesListRows(
+  raw: unknown,
+  defaultList?: GenericTrustBadgeRow[],
+) {
+  if (!Array.isArray(raw)) return defaultList ?? [];
+
+  const out: GenericTrustBadgeRow[] = [];
+  for (const row of raw) {
+    const parsed = genericTrustBadgeRowSchema.safeParse(row);
+    if (!parsed.success) continue;
+    const { icon, label } = parsed.data;
+    const Icon = icon ? getLucideTemplateIcon(icon) : undefined;
+    out.push({ icon: Icon ?? undefined, label });
   }
 
   return out.length > 0 ? out : (defaultList ?? null);

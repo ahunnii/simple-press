@@ -7,12 +7,12 @@ import {
   TreeDeciduous,
 } from "lucide-react";
 
-import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 import type {
   GenericIconRow,
   TemplateField,
   TemplateFieldGroup,
 } from "~/lib/template-fields";
+import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 const homepageHeroData: TemplateField[] = [
   {
@@ -1146,7 +1146,10 @@ export const _bambooFieldMap = new Map(
   happyBambooData["happy-bamboo"].map((field) => [field.key, field]),
 );
 
-export function resolveFields(customFields: unknown, keys: string[]): Record<string, string> {
+export function resolveFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
   return resolveTemplateFields(customFields, keys, _bambooFieldMap);
 }
 
