@@ -69,6 +69,11 @@ export const InputFormField = <CurrentForm extends FieldValues>({
             {label && (
               <FormLabel className={cn(labelClassName)}>
                 {label} {required && <span className="text-red-500">*</span>}
+                {/* {required && (
+                  <span className="items-center text-[10px] font-medium tracking-[0.05em] text-red-500">
+                    * REQUIRED
+                  </span>
+                )} */}
               </FormLabel>
             )}
             <FormControl>

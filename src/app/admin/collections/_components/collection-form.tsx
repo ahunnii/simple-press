@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Search, Trash2, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -40,6 +40,8 @@ import { Form, FormField } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Switch } from "~/components/ui/switch";
+import { Badge } from "~/components/ui/badge";
+import { Input } from "~/components/ui/input";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
@@ -56,16 +58,18 @@ export function CollectionForm({ collection, allProducts }: Props) {
   const utils = api.useUtils();
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [productSearch, setProductSearch] = useState("");
 
   const form = useForm<CollectionFormData>({
     resolver: zodResolver(collectionFormSchema),
     defaultValues: {
       ...collection,
-      name: collection?.name ?? undefined,
-      description: collection?.description ?? undefined,
+      published: collection?.published ?? true,
+      name: collection?.name ?? "",
+      description: collection?.description ?? "",
       imageUrl: collection?.imageUrl ?? undefined,
-      metaTitle: collection?.metaTitle ?? undefined,
-      metaDescription: collection?.metaDescription ?? undefined,
+      metaTitle: collection?.metaTitle ?? "",
+      metaDescription: collection?.metaDescription ?? "",
       imageFile: undefined,
       productIds:
         collection?.collectionProducts.map((cp) => cp.product.id) ?? [],
@@ -253,11 +257,18 @@ export function CollectionForm({ collection, allProducts }: Props) {
                 </h1>
 
                 <span
-                  className={`admin-status-badge ${
-                    isDirty ? "isDirty" : "isPublished"
-                  }`}
+                  className={cn(
+                    `admin-status-badge`,
+                    `${
+                      isDirty ? "isDirty" : "isPublished"
+                    } ${!collection?.id ? "isNew" : ""}`,
+                  )}
                 >
-                  {isDirty ? "Unsaved Changes" : "Saved"}
+                  {isDirty
+                    ? "Unsaved Changes"
+                    : !collection?.id
+                      ? "Draft"
+                      : "Saved"}
                 </span>
               </div>
             </div>
@@ -407,55 +418,130 @@ export function CollectionForm({ collection, allProducts }: Props) {
                           else next.add(productId);
                           field.onChange([...next]);
                         };
+                        const filteredProducts = productSearch.trim()
+                          ? (allProducts ?? []).filter((p) =>
+                              p.name
+                                .toLowerCase()
+                                .includes(productSearch.toLowerCase().trim()),
+                            )
+                          : (allProducts ?? []);
+
+                        const productMap = new Map(
+                          (allProducts ?? []).map((p) => [p.id, p]),
+                        );
+                        const selectedProducts = ids
+                          .map((id) => productMap.get(id))
+                          .filter(
+                            (p): p is NonNullable<typeof p> =>
+                              p !== undefined,
+                          );
+
                         return (
                           <>
+                            {ids.length > 0 && (
+                              <div className="mb-3 flex flex-wrap gap-1.5">
+                                {selectedProducts.map((product) => (
+                                  <Badge
+                                    key={product.id}
+                                    variant="secondary"
+                                    className="gap-1 pr-1"
+                                  >
+                                    <span className="max-w-[160px] truncate">
+                                      {product.name}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      aria-label={`Remove ${product.name}`}
+                                      className="ml-0.5 rounded-full hover:bg-black/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                      onClick={() =>
+                                        toggleProduct(product.id)
+                                      }
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+
+                            <div className="relative mb-3">
+                              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                              <Input
+                                type="search"
+                                placeholder="Search products..."
+                                value={productSearch}
+                                onChange={(e) =>
+                                  setProductSearch(e.target.value)
+                                }
+                                className="pl-10"
+                              />
+                            </div>
+
                             <ScrollArea className="h-96 min-h-0 overflow-hidden">
                               <div className="space-y-2">
-                                {allProducts?.map((product) => (
-                                  <div
-                                    key={product.id}
-                                    className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-gray-50"
-                                    onClick={() => toggleProduct(product.id)}
-                                  >
-                                    <span
-                                      className="shrink-0"
-                                      onClick={(e) => e.stopPropagation()}
-                                      onKeyDown={(e) => e.stopPropagation()}
+                                {filteredProducts.length === 0 ? (
+                                  <p className="py-6 text-center text-sm text-gray-400">
+                                    No products match &ldquo;{productSearch}
+                                    &rdquo;
+                                  </p>
+                                ) : (
+                                  filteredProducts.map((product) => (
+                                    <div
+                                      key={product.id}
+                                      className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-gray-50"
+                                      onClick={() => toggleProduct(product.id)}
                                     >
-                                      <Checkbox
-                                        checked={ids.includes(product.id)}
-                                        onCheckedChange={(checked) => {
-                                          if (checked === "indeterminate")
-                                            return;
-                                          toggleProduct(product.id);
-                                        }}
-                                      />
-                                    </span>
-                                    {product.images[0] && (
-                                      <div className="relative h-12 w-12 rounded bg-gray-100">
+                                      <span
+                                        className="shrink-0"
+                                        onClick={(e) => e.stopPropagation()}
+                                        onKeyDown={(e) => e.stopPropagation()}
+                                      >
+                                        <Checkbox
+                                          checked={ids.includes(product.id)}
+                                          onCheckedChange={(checked) => {
+                                            if (checked === "indeterminate")
+                                              return;
+                                            toggleProduct(product.id);
+                                          }}
+                                        />
+                                      </span>
+                                      <div className="relative h-12 w-12 shrink-0 rounded bg-gray-100">
                                         <Image
-                                          src={product.images[0].url}
+                                          src={
+                                            product.images[0]?.url ??
+                                            "/placeholder.svg"
+                                          }
                                           alt={product.name}
                                           fill
                                           className="rounded object-cover"
                                         />
                                       </div>
-                                    )}
-                                    <div className="flex-1">
-                                      <p className="font-medium">
-                                        {product.name}
-                                      </p>
-                                      <p className="text-sm text-gray-500">
-                                        ${(product.price / 100).toFixed(2)}
-                                      </p>
+                                      <div className="flex-1">
+                                        <p className="font-medium">
+                                          {product.name}
+                                        </p>
+                                        <p className="text-sm text-gray-500">
+                                          ${(product.price / 100).toFixed(2)}
+                                        </p>
+                                      </div>
                                     </div>
-                                  </div>
-                                ))}
+                                  ))
+                                )}
                               </div>
                             </ScrollArea>
 
                             <p className="mt-4 text-sm text-gray-500">
-                              {ids.length} products selected
+                              {ids.length} product
+                              {ids.length !== 1 ? "s" : ""} selected
+                              {productSearch &&
+                                filteredProducts.length !==
+                                  (allProducts?.length ?? 0) && (
+                                  <span className="text-gray-400">
+                                    {" "}
+                                    · showing {filteredProducts.length} of{" "}
+                                    {allProducts?.length ?? 0}
+                                  </span>
+                                )}
                             </p>
                           </>
                         );
