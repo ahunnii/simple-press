@@ -103,6 +103,7 @@ export const productRouter = createTRPCRouter({
         include: {
           variants: { orderBy: { createdAt: "asc" } },
           images: { orderBy: { sortOrder: "asc" } },
+          collectionProducts: { select: { collectionId: true } },
         },
       });
       return product;

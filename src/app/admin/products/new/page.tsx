@@ -9,6 +9,10 @@ export default async function NewProductPage() {
     api.baseInventoryUnit.list(),
   ]);
 
+  const allCollections = flags.isEnabled("collections")
+    ? await api.collections.getAll()
+    : [];
+
   return (
     <>
       <TrailHeader
@@ -18,7 +22,12 @@ export default async function NewProductPage() {
         ]}
       />
 
-      <ProductForm galleriesEnabled={flags.isEnabled("galleries")} pools={pools} />
+      <ProductForm
+        galleriesEnabled={flags.isEnabled("galleries")}
+        collectionsEnabled={flags.isEnabled("collections")}
+        allCollections={allCollections}
+        pools={pools}
+      />
     </>
   );
 }

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, X, Search } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -53,6 +53,10 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Badge } from "~/components/ui/badge";
+import { Input } from "~/components/ui/input";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Checkbox } from "~/components/ui/checkbox";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
@@ -66,6 +70,8 @@ import { VariantManager } from "./variant-manager";
 type Props = {
   product?: RouterOutputs["product"]["secureGet"];
   galleriesEnabled?: boolean;
+  collectionsEnabled?: boolean;
+  allCollections?: RouterOutputs["collections"]["getAll"];
   pools?: RouterOutputs["baseInventoryUnit"]["list"];
 };
 
@@ -83,7 +89,7 @@ function parseStoredAdditionalFields(raw: unknown) {
   };
 }
 
-export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
+export function ProductForm({ product, galleriesEnabled, collectionsEnabled, allCollections = [], pools = [] }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const utils = api.useUtils();
@@ -93,6 +99,12 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
   const [images, setImages] = useState<FormProductImage[]>([]);
   const imagesToSyncRef = useRef<FormProductImage[]>([]);
   const initialImagesRef = useRef<FormProductImage[]>([]);
+
+  // Collections state
+  const initialCollectionIds = product?.collectionProducts?.map((cp) => cp.collectionId) ?? [];
+  const [collectionIds, setCollectionIds] = useState<string[]>(initialCollectionIds);
+  const [baselineCollectionIds, setBaselineCollectionIds] = useState<string[]>(initialCollectionIds);
+  const [collectionSearch, setCollectionSearch] = useState("");
 
   // Variants state (kept separate due to complex nested structure and VariantManager component)
   const [variants, setVariants] = useState<FormVariant[]>(
@@ -107,6 +119,7 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
   const form = useForm<ProductFormSchema>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
+      published: product?.published ?? true,
       name: product?.name ?? "",
       slug: product?.slug ?? "",
       description: product?.description ?? undefined,
@@ -114,7 +127,6 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
       compareAtPrice: product?.compareAtPrice
         ? product.compareAtPrice / 100
         : undefined,
-      published: product?.published ?? false,
       trackInventory: product?.trackInventory ?? false,
       inventoryQty: product?.inventoryQty ?? 0,
       allowBackorders: product?.allowBackorders ?? false,
@@ -297,6 +309,19 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
           productId: product.id,
           images: imagesToSyncRef.current,
         });
+
+        // Sync collection memberships
+        const initial = new Set(baselineCollectionIds);
+        const selected = new Set(collectionIds);
+        for (const id of selected) {
+          if (!initial.has(id))
+            await utils.client.collections.addProduct.mutate({ collectionId: id, productId: product.id });
+        }
+        for (const id of initial) {
+          if (!selected.has(id))
+            await utils.client.collections.removeProduct.mutate({ collectionId: id, productId: product.id });
+        }
+        setBaselineCollectionIds([...collectionIds]);
       }
     } else {
       // Create new product
@@ -340,6 +365,15 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
         });
       }
 
+      if (response.productId && collectionIds.length > 0) {
+        for (const collectionId of collectionIds) {
+          await utils.client.collections.addProduct.mutate({
+            collectionId,
+            productId: response.productId,
+          });
+        }
+      }
+
       if (response.productId) {
         // toast.success("Product created!", {
         //   action: {
@@ -363,7 +397,16 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
     syncImagesMutation.isPending;
 
   const isDeleting = deleteProductMutation.isPending;
-  const isDirty = form.formState.isDirty || isImagesDirty;
+
+  const isCollectionsDirty = useMemo(() => {
+    const initial = new Set(baselineCollectionIds);
+    const current = new Set(collectionIds);
+    if (initial.size !== current.size) return true;
+    for (const id of current) if (!initial.has(id)) return true;
+    return false;
+  }, [collectionIds, baselineCollectionIds]);
+
+  const isDirty = form.formState.isDirty || isImagesDirty || isCollectionsDirty;
 
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
@@ -436,7 +479,10 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
                 variant="outline"
                 size="sm"
                 disabled={isSubmitting || !isDirty}
-                onClick={() => form.reset()}
+                onClick={() => {
+                  form.reset();
+                  setCollectionIds(baselineCollectionIds);
+                }}
                 className="hidden md:inline-flex"
               >
                 Reset
@@ -463,6 +509,9 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
             <Tabs defaultValue="basics" className="w-full">
               <TabsList>
                 <TabsTrigger value="basics">Basics</TabsTrigger>
+                {collectionsEnabled && (
+                  <TabsTrigger value="collections">Collections</TabsTrigger>
+                )}
                 <TabsTrigger value="additional">Additional Info</TabsTrigger>
               </TabsList>
               <TabsContent value="basics" className="space-y-6">
@@ -792,6 +841,167 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
                   )}
                 />
               </TabsContent>
+
+              {collectionsEnabled && (
+                <TabsContent value="collections" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Collections</CardTitle>
+                      <CardDescription>
+                        Assign this product to one or more collections
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {allCollections.length === 0 ? (
+                        <p className="text-muted-foreground py-6 text-center text-sm">
+                          No collections yet.{" "}
+                          <Link
+                            href="/admin/collections/new"
+                            className="underline"
+                          >
+                            Create one
+                          </Link>{" "}
+                          to get started.
+                        </p>
+                      ) : (
+                        <>
+                          {collectionIds.length > 0 && (
+                            <div className="mb-3 flex flex-wrap gap-1.5">
+                              {collectionIds
+                                .map((id) =>
+                                  allCollections.find((c) => c.id === id),
+                                )
+                                .filter(
+                                  (c): c is NonNullable<typeof c> =>
+                                    c !== undefined,
+                                )
+                                .map((collection) => (
+                                  <Badge
+                                    key={collection.id}
+                                    variant="secondary"
+                                    className="gap-1 pr-1"
+                                  >
+                                    <span className="max-w-[160px] truncate">
+                                      {collection.name}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      aria-label={`Remove ${collection.name}`}
+                                      className="ml-0.5 rounded-full hover:bg-black/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                      onClick={() =>
+                                        setCollectionIds((prev) =>
+                                          prev.filter(
+                                            (id) => id !== collection.id,
+                                          ),
+                                        )
+                                      }
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </Badge>
+                                ))}
+                            </div>
+                          )}
+
+                          <div className="relative mb-3">
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <Input
+                              type="search"
+                              placeholder="Search collections..."
+                              value={collectionSearch}
+                              onChange={(e) =>
+                                setCollectionSearch(e.target.value)
+                              }
+                              className="pl-10"
+                            />
+                          </div>
+
+                          <ScrollArea className="h-72 min-h-0 overflow-hidden">
+                            <div className="space-y-2">
+                              {(() => {
+                                const filtered = collectionSearch.trim()
+                                  ? allCollections.filter((c) =>
+                                      c.name
+                                        .toLowerCase()
+                                        .includes(
+                                          collectionSearch.toLowerCase().trim(),
+                                        ),
+                                    )
+                                  : allCollections;
+
+                                if (filtered.length === 0) {
+                                  return (
+                                    <p className="py-6 text-center text-sm text-gray-400">
+                                      No collections match &ldquo;
+                                      {collectionSearch}&rdquo;
+                                    </p>
+                                  );
+                                }
+
+                                return filtered.map((collection) => (
+                                  <div
+                                    key={collection.id}
+                                    className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-gray-50"
+                                    onClick={() =>
+                                      setCollectionIds((prev) => {
+                                        const next = new Set(prev);
+                                        if (next.has(collection.id))
+                                          next.delete(collection.id);
+                                        else next.add(collection.id);
+                                        return [...next];
+                                      })
+                                    }
+                                  >
+                                    <span
+                                      className="shrink-0"
+                                      onClick={(e) => e.stopPropagation()}
+                                      onKeyDown={(e) => e.stopPropagation()}
+                                    >
+                                      <Checkbox
+                                        checked={collectionIds.includes(
+                                          collection.id,
+                                        )}
+                                        onCheckedChange={() =>
+                                          setCollectionIds((prev) => {
+                                            const next = new Set(prev);
+                                            if (next.has(collection.id))
+                                              next.delete(collection.id);
+                                            else next.add(collection.id);
+                                            return [...next];
+                                          })
+                                        }
+                                      />
+                                    </span>
+                                    <div className="flex-1">
+                                      <p className="font-medium">
+                                        {collection.name}
+                                      </p>
+                                      <p className="text-sm text-gray-500">
+                                        {collection._count.collectionProducts}{" "}
+                                        product
+                                        {collection._count.collectionProducts !==
+                                        1
+                                          ? "s"
+                                          : ""}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ));
+                              })()}
+                            </div>
+                          </ScrollArea>
+
+                          <p className="mt-4 text-sm text-gray-500">
+                            {collectionIds.length} collection
+                            {collectionIds.length !== 1 ? "s" : ""} selected
+                          </p>
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )}
+
               <TabsContent value="additional" className="space-y-6">
                 <Card>
                   <CardHeader>

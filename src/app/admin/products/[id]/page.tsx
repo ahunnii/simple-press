@@ -22,6 +22,10 @@ export default async function EditProductPage({ params }: Props) {
 
   if (!product) notFound();
 
+  const allCollections = flags.isEnabled("collections")
+    ? await api.collections.getAll()
+    : [];
+
   return (
     <>
       <TrailHeader
@@ -31,7 +35,13 @@ export default async function EditProductPage({ params }: Props) {
         ]}
       />
 
-      <ProductForm product={product} galleriesEnabled={flags.isEnabled("galleries")} pools={pools} />
+      <ProductForm
+        product={product}
+        galleriesEnabled={flags.isEnabled("galleries")}
+        collectionsEnabled={flags.isEnabled("collections")}
+        allCollections={allCollections}
+        pools={pools}
+      />
     </>
   );
 }
