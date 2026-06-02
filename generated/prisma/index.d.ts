@@ -13004,6 +13004,8 @@ export namespace Prisma {
     sortOrder: number | null
     metaTitle: string | null
     metaDescription: string | null
+    metaKeywords: string | null
+    ogImage: string | null
     businessId: string | null
     averageRating: number | null
     reviewCount: number | null
@@ -13037,6 +13039,8 @@ export namespace Prisma {
     sortOrder: number | null
     metaTitle: string | null
     metaDescription: string | null
+    metaKeywords: string | null
+    ogImage: string | null
     businessId: string | null
     averageRating: number | null
     reviewCount: number | null
@@ -13070,6 +13074,8 @@ export namespace Prisma {
     sortOrder: number
     metaTitle: number
     metaDescription: number
+    metaKeywords: number
+    ogImage: number
     businessId: number
     averageRating: number
     reviewCount: number
@@ -13132,6 +13138,8 @@ export namespace Prisma {
     sortOrder?: true
     metaTitle?: true
     metaDescription?: true
+    metaKeywords?: true
+    ogImage?: true
     businessId?: true
     averageRating?: true
     reviewCount?: true
@@ -13165,6 +13173,8 @@ export namespace Prisma {
     sortOrder?: true
     metaTitle?: true
     metaDescription?: true
+    metaKeywords?: true
+    ogImage?: true
     businessId?: true
     averageRating?: true
     reviewCount?: true
@@ -13198,6 +13208,8 @@ export namespace Prisma {
     sortOrder?: true
     metaTitle?: true
     metaDescription?: true
+    metaKeywords?: true
+    ogImage?: true
     businessId?: true
     averageRating?: true
     reviewCount?: true
@@ -13319,6 +13331,8 @@ export namespace Prisma {
     sortOrder: number
     metaTitle: string | null
     metaDescription: string | null
+    metaKeywords: string | null
+    ogImage: string | null
     businessId: string
     averageRating: number | null
     reviewCount: number
@@ -13372,6 +13386,8 @@ export namespace Prisma {
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
+    metaKeywords?: boolean
+    ogImage?: boolean
     businessId?: boolean
     averageRating?: boolean
     reviewCount?: boolean
@@ -13415,6 +13431,8 @@ export namespace Prisma {
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
+    metaKeywords?: boolean
+    ogImage?: boolean
     businessId?: boolean
     averageRating?: boolean
     reviewCount?: boolean
@@ -13451,6 +13469,8 @@ export namespace Prisma {
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
+    metaKeywords?: boolean
+    ogImage?: boolean
     businessId?: boolean
     averageRating?: boolean
     reviewCount?: boolean
@@ -13487,13 +13507,15 @@ export namespace Prisma {
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
+    metaKeywords?: boolean
+    ogImage?: boolean
     businessId?: boolean
     averageRating?: boolean
     reviewCount?: boolean
     additionalFields?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "excerpt" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "allowBackorders" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "baseInventoryUnitId" | "baseUnitsConsumed" | "weight" | "weightUnit" | "published" | "featured" | "sortOrder" | "metaTitle" | "metaDescription" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "excerpt" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "allowBackorders" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "baseInventoryUnitId" | "baseUnitsConsumed" | "weight" | "weightUnit" | "published" | "featured" | "sortOrder" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     baseInventoryUnit?: boolean | Product$baseInventoryUnitArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -13554,6 +13576,8 @@ export namespace Prisma {
       sortOrder: number
       metaTitle: string | null
       metaDescription: string | null
+      metaKeywords: string | null
+      ogImage: string | null
       businessId: string
       averageRating: number | null
       reviewCount: number
@@ -14016,6 +14040,8 @@ export namespace Prisma {
     readonly sortOrder: FieldRef<"Product", 'Int'>
     readonly metaTitle: FieldRef<"Product", 'String'>
     readonly metaDescription: FieldRef<"Product", 'String'>
+    readonly metaKeywords: FieldRef<"Product", 'String'>
+    readonly ogImage: FieldRef<"Product", 'String'>
     readonly businessId: FieldRef<"Product", 'String'>
     readonly averageRating: FieldRef<"Product", 'Float'>
     readonly reviewCount: FieldRef<"Product", 'Int'>
@@ -41797,6 +41823,8 @@ export namespace Prisma {
     sortOrder: 'sortOrder',
     metaTitle: 'metaTitle',
     metaDescription: 'metaDescription',
+    metaKeywords: 'metaKeywords',
+    ogImage: 'ogImage',
     businessId: 'businessId',
     averageRating: 'averageRating',
     reviewCount: 'reviewCount',
@@ -43165,6 +43193,8 @@ export namespace Prisma {
     sortOrder?: IntFilter<"Product"> | number
     metaTitle?: StringNullableFilter<"Product"> | string | null
     metaDescription?: StringNullableFilter<"Product"> | string | null
+    metaKeywords?: StringNullableFilter<"Product"> | string | null
+    ogImage?: StringNullableFilter<"Product"> | string | null
     businessId?: StringFilter<"Product"> | string
     averageRating?: FloatNullableFilter<"Product"> | number | null
     reviewCount?: IntFilter<"Product"> | number
@@ -43207,6 +43237,8 @@ export namespace Prisma {
     sortOrder?: SortOrder
     metaTitle?: SortOrderInput | SortOrder
     metaDescription?: SortOrderInput | SortOrder
+    metaKeywords?: SortOrderInput | SortOrder
+    ogImage?: SortOrderInput | SortOrder
     businessId?: SortOrder
     averageRating?: SortOrderInput | SortOrder
     reviewCount?: SortOrder
@@ -43253,6 +43285,8 @@ export namespace Prisma {
     sortOrder?: IntFilter<"Product"> | number
     metaTitle?: StringNullableFilter<"Product"> | string | null
     metaDescription?: StringNullableFilter<"Product"> | string | null
+    metaKeywords?: StringNullableFilter<"Product"> | string | null
+    ogImage?: StringNullableFilter<"Product"> | string | null
     businessId?: StringFilter<"Product"> | string
     averageRating?: FloatNullableFilter<"Product"> | number | null
     reviewCount?: IntFilter<"Product"> | number
@@ -43295,6 +43329,8 @@ export namespace Prisma {
     sortOrder?: SortOrder
     metaTitle?: SortOrderInput | SortOrder
     metaDescription?: SortOrderInput | SortOrder
+    metaKeywords?: SortOrderInput | SortOrder
+    ogImage?: SortOrderInput | SortOrder
     businessId?: SortOrder
     averageRating?: SortOrderInput | SortOrder
     reviewCount?: SortOrder
@@ -43337,6 +43373,8 @@ export namespace Prisma {
     sortOrder?: IntWithAggregatesFilter<"Product"> | number
     metaTitle?: StringNullableWithAggregatesFilter<"Product"> | string | null
     metaDescription?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    metaKeywords?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    ogImage?: StringNullableWithAggregatesFilter<"Product"> | string | null
     businessId?: StringWithAggregatesFilter<"Product"> | string
     averageRating?: FloatNullableWithAggregatesFilter<"Product"> | number | null
     reviewCount?: IntWithAggregatesFilter<"Product"> | number
@@ -46438,6 +46476,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     averageRating?: number | null
     reviewCount?: number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -46479,6 +46519,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
     averageRating?: number | null
     reviewCount?: number
@@ -46518,6 +46560,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -46559,6 +46603,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
@@ -46599,6 +46645,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
     averageRating?: number | null
     reviewCount?: number
@@ -46632,6 +46680,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -46665,6 +46715,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
@@ -50036,6 +50088,8 @@ export namespace Prisma {
     sortOrder?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
+    metaKeywords?: SortOrder
+    ogImage?: SortOrder
     businessId?: SortOrder
     averageRating?: SortOrder
     reviewCount?: SortOrder
@@ -50083,6 +50137,8 @@ export namespace Prisma {
     sortOrder?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
+    metaKeywords?: SortOrder
+    ogImage?: SortOrder
     businessId?: SortOrder
     averageRating?: SortOrder
     reviewCount?: SortOrder
@@ -50116,6 +50172,8 @@ export namespace Prisma {
     sortOrder?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
+    metaKeywords?: SortOrder
+    ogImage?: SortOrder
     businessId?: SortOrder
     averageRating?: SortOrder
     reviewCount?: SortOrder
@@ -55437,6 +55495,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     averageRating?: number | null
     reviewCount?: number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -55477,6 +55537,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     averageRating?: number | null
     reviewCount?: number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -56204,6 +56266,8 @@ export namespace Prisma {
     sortOrder?: IntFilter<"Product"> | number
     metaTitle?: StringNullableFilter<"Product"> | string | null
     metaDescription?: StringNullableFilter<"Product"> | string | null
+    metaKeywords?: StringNullableFilter<"Product"> | string | null
+    ogImage?: StringNullableFilter<"Product"> | string | null
     businessId?: StringFilter<"Product"> | string
     averageRating?: FloatNullableFilter<"Product"> | number | null
     reviewCount?: IntFilter<"Product"> | number
@@ -57581,6 +57645,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     averageRating?: number | null
     reviewCount?: number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -57621,6 +57687,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
     averageRating?: number | null
     reviewCount?: number
@@ -57749,6 +57817,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -57789,6 +57859,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
@@ -58120,6 +58192,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     averageRating?: number | null
     reviewCount?: number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -58160,6 +58234,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
     averageRating?: number | null
     reviewCount?: number
@@ -58255,6 +58331,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -58295,6 +58373,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
@@ -58333,6 +58413,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     averageRating?: number | null
     reviewCount?: number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -58373,6 +58455,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
     averageRating?: number | null
     reviewCount?: number
@@ -58518,6 +58602,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -58558,6 +58644,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
@@ -60361,6 +60449,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     averageRating?: number | null
     reviewCount?: number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -60401,6 +60491,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
     averageRating?: number | null
     reviewCount?: number
@@ -60565,6 +60657,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -60605,6 +60699,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
@@ -61084,6 +61180,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     averageRating?: number | null
     reviewCount?: number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -61124,6 +61222,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
     averageRating?: number | null
     reviewCount?: number
@@ -61457,6 +61557,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -61497,6 +61599,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
@@ -61886,6 +61990,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     averageRating?: number | null
     reviewCount?: number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -61925,6 +62031,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
     averageRating?: number | null
     reviewCount?: number
@@ -63410,6 +63518,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     averageRating?: number | null
     reviewCount?: number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -63450,6 +63560,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
     averageRating?: number | null
     reviewCount?: number
@@ -63646,6 +63758,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -63686,6 +63800,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
@@ -64583,6 +64699,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     averageRating?: number | null
     reviewCount?: number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -64830,6 +64948,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -64870,6 +64990,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -64909,6 +65031,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -66978,6 +67102,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
     averageRating?: number | null
     reviewCount?: number
@@ -67026,6 +67152,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
     additionalFields?: NullableJsonNullValueInput | InputJsonValue
@@ -67065,6 +67193,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number
@@ -67104,6 +67234,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewCount?: IntFieldUpdateOperationsInput | number

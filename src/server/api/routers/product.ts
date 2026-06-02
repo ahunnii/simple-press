@@ -158,6 +158,10 @@ export const productRouter = createTRPCRouter({
         baseUnitsConsumed,
         variants,
         additionalFields,
+        metaTitle,
+        metaDescription,
+        metaKeywords,
+        ogImage,
       } = input;
 
       const { businessId } = ctx;
@@ -197,6 +201,10 @@ export const productRouter = createTRPCRouter({
                 JSON.stringify(additionalFields),
               ) as Prisma.InputJsonValue)
             : undefined,
+          metaTitle: metaTitle ?? null,
+          metaDescription: metaDescription ?? null,
+          metaKeywords: metaKeywords ?? null,
+          ogImage: ogImage ?? null,
           businessId,
           variants: {
             create: variants.map((v) => ({
@@ -238,6 +246,10 @@ export const productRouter = createTRPCRouter({
         baseUnitsConsumed,
         variants,
         additionalFields,
+        metaTitle,
+        metaDescription,
+        metaKeywords,
+        ogImage,
       } = input;
 
       // Check if slug is already taken for this business
@@ -298,6 +310,10 @@ export const productRouter = createTRPCRouter({
                 JSON.stringify(additionalFields),
               ) as Prisma.InputJsonValue)
             : undefined,
+          metaTitle: metaTitle ?? null,
+          metaDescription: metaDescription ?? null,
+          metaKeywords: metaKeywords ?? null,
+          ogImage: ogImage ?? null,
           // Reset alert flags when inventory is manually increased above threshold/zero
           ...(inventoryIncreased && inventoryQty > 0
             ? { outOfStockAlertSent: false }

@@ -48,8 +48,19 @@ export async function generateMetadata({ params }: Props) {
 
   if (!product) return { title: "Product Not Found" };
 
+  const title = product.metaTitle ?? product.name;
+  const description = product.metaDescription ?? product.description;
+
   return {
-    title: `${product.name} `,
-    description: product.description,
+    title,
+    description,
+    keywords: product.metaKeywords ?? undefined,
+    openGraph: {
+      title,
+      description: description ?? "",
+      images: product.ogImage
+        ? [{ url: product.ogImage, width: 1200, height: 630, alt: product.name }]
+        : undefined,
+    },
   };
 }

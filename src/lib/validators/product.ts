@@ -47,6 +47,10 @@ export const productFormSchema = z.object({
   variants: z.array(variantSchema).optional(),
   images: z.array(productImageSchema).optional(),
   additionalFields: additionalFieldsSchema,
+  metaTitle: z.string().max(60).optional().nullable(),
+  metaDescription: z.string().max(160).optional().nullable(),
+  metaKeywords: z.string().optional().nullable(),
+  ogImage: z.string().url().optional().nullable(),
 });
 
 export const productCreateSchema = productFormSchema

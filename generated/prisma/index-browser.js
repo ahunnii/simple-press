@@ -265,6 +265,8 @@ exports.Prisma.ProductScalarFieldEnum = {
   sortOrder: 'sortOrder',
   metaTitle: 'metaTitle',
   metaDescription: 'metaDescription',
+  metaKeywords: 'metaKeywords',
+  ogImage: 'ogImage',
   businessId: 'businessId',
   averageRating: 'averageRating',
   reviewCount: 'reviewCount',

@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Trash2, X, Search } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Upload, X, Search } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -89,9 +90,141 @@ function parseStoredAdditionalFields(raw: unknown) {
   };
 }
 
+function OgImageUploader({
+  file,
+  existingUrl,
+  fileInputRef,
+  onFileChange,
+  onRemove,
+  disabled,
+}: {
+  file: File | null;
+  existingUrl?: string;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  onFileChange: (f: File) => void;
+  onRemove: () => void;
+  disabled?: boolean;
+}) {
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!file) { setObjectUrl(null); return; }
+    const url = URL.createObjectURL(file);
+    setObjectUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  const previewUrl = objectUrl ?? existingUrl ?? null;
+
+  return (
+    <div className="space-y-2">
+      <input
+        ref={(el) => { (fileInputRef as React.MutableRefObject<HTMLInputElement | null>).current = el; }}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        disabled={disabled}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onFileChange(f);
+          e.target.value = "";
+        }}
+      />
+      {previewUrl && (
+        <div className="bg-muted flex items-center gap-3 rounded-lg border p-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={previewUrl} alt="OG image preview" className="h-16 w-16 shrink-0 rounded-md object-cover" />
+          <div className="min-w-0 flex-1">
+            <p className="text-muted-foreground text-xs">
+              {file ? "New image selected. Upload on submit." : "Existing image."}
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            disabled={disabled}
+            aria-label="Remove image"
+            className="text-muted-foreground hover:text-destructive shrink-0"
+            onClick={onRemove}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={disabled}
+        onClick={() => fileInputRef.current?.click()}
+        className="w-full"
+      >
+        <Upload className="mr-2 h-4 w-4" />
+        {previewUrl ? "Replace image" : "Choose image"}
+      </Button>
+    </div>
+  );
+}
+
+function SocialPreviewCard({
+  title,
+  description,
+  ogImageFile,
+  existingOgImage,
+}: {
+  title: string;
+  description: string;
+  ogImageFile: File | null | undefined;
+  existingOgImage?: string;
+}) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!(ogImageFile instanceof File)) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(ogImageFile);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [ogImageFile]);
+
+  const imageToShow = previewUrl ?? existingOgImage ?? null;
+
+  return (
+    <div className="overflow-hidden rounded-lg border bg-white">
+      {imageToShow ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageToShow}
+          alt="Open Graph preview"
+          className="aspect-[1200/630] w-full object-cover"
+        />
+      ) : (
+        <div className="flex aspect-[1200/630] items-center justify-center bg-gray-100 text-sm text-gray-400">
+          1200 × 630 — no image set
+        </div>
+      )}
+      <div className="border-t p-3">
+        <p className="text-xs uppercase tracking-wide text-gray-400">
+          yourstore.com
+        </p>
+        <p className="truncate text-sm font-medium text-gray-900">{title}</p>
+        {description && (
+          <p className="mt-0.5 line-clamp-2 text-sm text-gray-500">
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ProductForm({ product, galleriesEnabled, collectionsEnabled, allCollections = [], pools = [] }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
+  const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
   const utils = api.useUtils();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -99,6 +232,10 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
   const [images, setImages] = useState<FormProductImage[]>([]);
   const imagesToSyncRef = useRef<FormProductImage[]>([]);
   const initialImagesRef = useRef<FormProductImage[]>([]);
+
+  // OG image state (kept separate, same pattern as gallery images)
+  const [ogImageFile, setOgImageFile] = useState<File | null>(null);
+  const [ogImageRemoved, setOgImageRemoved] = useState(false);
 
   // Collections state
   const initialCollectionIds = product?.collectionProducts?.map((cp) => cp.collectionId) ?? [];
@@ -141,6 +278,10 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
         comingSoon: storedAdditional?.comingSoon ?? false,
         productTagline: storedAdditional?.productTagline ?? "",
       },
+      metaTitle: product?.metaTitle ?? "",
+      metaDescription: product?.metaDescription ?? "",
+      metaKeywords: product?.metaKeywords ?? "",
+      ogImage: product?.ogImage ?? undefined,
     },
   });
 
@@ -183,6 +324,14 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
       );
     });
   }, [images]);
+
+  const ogImageUploader = useUploadFile({
+    api: "/api/upload",
+    route: "image",
+    onError: (error) => {
+      toast.error(error.message ?? "OG image upload failed.");
+    },
+  });
 
   // Auto-generate slug from name (only for new products)
   const handleNameChange = (value: string | null) => {
@@ -263,6 +412,24 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
       ? Math.round(data.compareAtPrice * 100)
       : undefined;
 
+    // Resolve ogImage URL: upload new file, keep existing URL, or clear
+    let resolvedOgImage: string | null;
+    if (ogImageFile instanceof File) {
+      try {
+        const response = await ogImageUploader.upload(ogImageFile);
+        const fileLocation =
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ?? "";
+        resolvedOgImage = fileLocation || null;
+      } catch {
+        toast.error("Failed to upload Open Graph image.");
+        return;
+      }
+    } else if (ogImageRemoved) {
+      resolvedOgImage = null;
+    } else {
+      resolvedOgImage = data.ogImage ?? null;
+    }
+
     if (product) {
       // Update existing product
       imagesToSyncRef.current = images;
@@ -296,10 +463,16 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
           comingSoon: data.additionalFields?.comingSoon ?? false,
           productTagline: data.additionalFields?.productTagline ?? undefined,
         },
+        metaTitle: data.metaTitle ?? null,
+        metaDescription: data.metaDescription ?? null,
+        metaKeywords: data.metaKeywords ?? null,
+        ogImage: resolvedOgImage ?? null,
       });
 
       // New default baseline so isDirty clears (RHF only used initial defaultValues otherwise).
       form.reset(data);
+      setOgImageFile(null);
+      setOgImageRemoved(false);
       requestAnimationFrame(() => {
         form.reset(form.getValues());
       });
@@ -352,6 +525,10 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
           comingSoon: data.additionalFields?.comingSoon ?? false,
           productTagline: data.additionalFields?.productTagline ?? "",
         },
+        metaTitle: data.metaTitle ?? null,
+        metaDescription: data.metaDescription ?? null,
+        metaKeywords: data.metaKeywords ?? null,
+        ogImage: resolvedOgImage ?? null,
       });
 
       if (response.productId && images.length > 0) {
@@ -394,7 +571,8 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
   const isSubmitting =
     updateProductMutation.isPending ||
     createProductMutation.isPending ||
-    syncImagesMutation.isPending;
+    syncImagesMutation.isPending ||
+    ogImageUploader.isPending;
 
   const isDeleting = deleteProductMutation.isPending;
 
@@ -406,10 +584,17 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
     return false;
   }, [collectionIds, baselineCollectionIds]);
 
-  const isDirty = form.formState.isDirty || isImagesDirty || isCollectionsDirty;
+  const isOgImageDirty = ogImageFile !== null || ogImageRemoved;
+  const isDirty = form.formState.isDirty || isImagesDirty || isCollectionsDirty || isOgImageDirty;
 
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
+
+  // SEO preview values — || is intentional so empty string falls back to the default
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const seoPreviewTitle = form.watch("metaTitle") || form.watch("name") || "Product Name";
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const seoPreviewDesc = form.watch("metaDescription") || form.watch("description") || "Your product description will appear here in search results.";
 
   return (
     <>
@@ -482,6 +667,9 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                 onClick={() => {
                   form.reset();
                   setCollectionIds(baselineCollectionIds);
+                  setOgImageFile(null);
+                  setOgImageRemoved(false);
+                  if (ogImageFileInputRef.current) ogImageFileInputRef.current.value = "";
                 }}
                 className="hidden md:inline-flex"
               >
@@ -512,6 +700,7 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                 {collectionsEnabled && (
                   <TabsTrigger value="collections">Collections</TabsTrigger>
                 )}
+                <TabsTrigger value="seo">SEO</TabsTrigger>
                 <TabsTrigger value="additional">Additional Info</TabsTrigger>
               </TabsList>
               <TabsContent value="basics" className="space-y-6">
@@ -1001,6 +1190,116 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                   </Card>
                 </TabsContent>
               )}
+
+              <TabsContent value="seo" className="space-y-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Meta Tags</CardTitle>
+                        <CardDescription>
+                          Override how this product appears in search engine results
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <InputFormField
+                          form={form}
+                          name="metaTitle"
+                          label="Meta Title"
+                          placeholder={form.watch("name") || "e.g., Classic White T-Shirt"}
+                          description={`${form.watch("metaTitle")?.length ?? 0}/60 characters — leave blank to use product name`}
+                          descriptionClassName="text-xs text-gray-500"
+                        />
+
+                        <TextareaFormField
+                          form={form}
+                          name="metaDescription"
+                          label="Meta Description"
+                          placeholder={form.watch("description") ?? "e.g., Soft, breathable cotton tee perfect for everyday wear."}
+                          description={`${form.watch("metaDescription")?.length ?? 0}/160 characters — leave blank to use product description`}
+                          descriptionClassName="text-xs text-gray-500"
+                          rows={3}
+                        />
+
+                        <InputFormField
+                          form={form}
+                          name="metaKeywords"
+                          label="Meta Keywords"
+                          placeholder="e.g., t-shirt, cotton, classic, white"
+                          description="Comma-separated keywords"
+                          descriptionClassName="text-xs text-gray-500"
+                        />
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Open Graph Image</CardTitle>
+                        <CardDescription>
+                          Shown when this product is shared on social media. Recommended: 1200×630px.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <OgImageUploader
+                          file={ogImageFile}
+                          existingUrl={ogImageRemoved ? undefined : (product?.ogImage ?? undefined)}
+                          fileInputRef={ogImageFileInputRef}
+                          onFileChange={(f) => {
+                            setOgImageFile(f);
+                            setOgImageRemoved(false);
+                          }}
+                          onRemove={() => {
+                            setOgImageFile(null);
+                            setOgImageRemoved(true);
+                          }}
+                          disabled={isSubmitting}
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Search Result Preview</CardTitle>
+                        <CardDescription>
+                          How this product might appear in Google
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="rounded-lg border bg-white p-4">
+                          <div className="mb-1 truncate text-sm font-medium text-blue-600">
+                            {seoPreviewTitle}
+                          </div>
+                          <div className="mb-1 text-xs text-green-700">
+                            yourstore.com/products/{form.watch("slug") || "product-slug"}
+                          </div>
+                          <div className="line-clamp-2 text-sm text-gray-600">
+                            {seoPreviewDesc}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Social Media Preview</CardTitle>
+                        <CardDescription>
+                          How this product looks when shared on social platforms
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <SocialPreviewCard
+                          title={seoPreviewTitle}
+                          description={seoPreviewDesc}
+                          ogImageFile={ogImageFile}
+                          existingOgImage={ogImageRemoved ? undefined : (product?.ogImage ?? undefined)}
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </TabsContent>
 
               <TabsContent value="additional" className="space-y-6">
                 <Card>
