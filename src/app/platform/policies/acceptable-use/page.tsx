@@ -330,9 +330,10 @@ export default function AcceptableUsePage() {
       <hr />
       <p className="text-sm text-gray-500">
         Related policies:{" "}
-        <Link href="/platform/terms-of-service">Terms of Service</Link> &middot;{" "}
-        <Link href="/platform/privacy-policy">Privacy Policy</Link> &middot;{" "}
-        <Link href="/platform/disclaimer">Disclaimer</Link>
+        <Link href="/platform/policies/terms-of-service">Terms of Service</Link>{" "}
+        &middot;{" "}
+        <Link href="/platform/policies/privacy-policy">Privacy Policy</Link>{" "}
+        &middot; <Link href="/platform/policies/disclaimer">Disclaimer</Link>
       </p>
     </div>
   );

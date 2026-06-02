@@ -45,6 +45,7 @@ export const brandingFormSchema = z.object({
       twitter: z.string().optional().nullable(),
       linkedin: z.string().optional().nullable(),
       tiktok: z.string().optional().nullable(),
+      pinterest: z.string().optional().nullable(),
     })
     .optional()
     .nullable(),

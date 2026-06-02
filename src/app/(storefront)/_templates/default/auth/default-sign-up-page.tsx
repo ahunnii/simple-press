@@ -179,14 +179,14 @@ export function DefaultSignUpPage({
         <div className="text-muted-foreground border-t p-4 text-center text-xs">
           By signing up, you agree to our{" "}
           <Link
-            href="/platform/terms-of-service"
+            href="/platform/policies/terms-of-service"
             className="text-primary hover:underline"
           >
             Terms of Service
           </Link>{" "}
           and{" "}
           <Link
-            href="/platform/privacy-policy"
+            href="/platform/policies/privacy-policy"
             className="text-primary hover:underline"
           >
             Privacy Policy

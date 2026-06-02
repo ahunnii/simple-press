@@ -59,12 +59,15 @@ export function BrandingEditor({ business, siteContent }: Props) {
         twitter?: string;
         linkedin?: string;
         tiktok?: string;
+        pinterest?: string;
       }
     | undefined) ?? {
     instagram: "",
     facebook: "",
     twitter: "",
     linkedin: "",
+    pinterest: "",
+    tiktok: "",
   };
 
   // Refs
@@ -85,6 +88,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
         twitter: socialLinks.twitter ?? "",
         linkedin: socialLinks.linkedin ?? "",
         tiktok: socialLinks.tiktok ?? "",
+        pinterest: socialLinks.pinterest ?? "",
       },
       logoUrl: siteContent.logoUrl ?? undefined,
       logoFile: null,
@@ -109,12 +113,16 @@ export function BrandingEditor({ business, siteContent }: Props) {
             facebook?: string;
             twitter?: string;
             linkedin?: string;
+            tiktok?: string;
+            pinterest?: string;
           }
         | undefined) ?? {
         instagram: "",
         facebook: "",
         twitter: "",
         linkedin: "",
+        pinterest: "",
+        tiktok: "",
       };
 
       form.reset({
@@ -409,6 +417,15 @@ export function BrandingEditor({ business, siteContent }: Props) {
                       name="socialLinks.tiktok"
                       label="TikTok"
                       placeholder="https://tiktok.com/@yourstore"
+                      type="url"
+                      disabled={isSubmitting}
+                      className="col-span-1"
+                    />
+                    <InputFormField
+                      form={form}
+                      name="socialLinks.pinterest"
+                      label="Pinterest"
+                      placeholder="https://pinterest.com/yourstore"
                       type="url"
                       disabled={isSubmitting}
                       className="col-span-1"

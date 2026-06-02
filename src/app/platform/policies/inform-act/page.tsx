@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 const contactEmail =
-  process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ?? "csdt@generativejustice.org";
+  process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??
+  "csdt@generativejustice.org";
 
 export default function InformActPage() {
   return (
@@ -46,9 +47,7 @@ export default function InformActPage() {
         account is verified, the platform considers that Merchant
         INFORM-compliant.
       </p>
-      <p>
-        Stripe&apos;s verification collects and validates:
-      </p>
+      <p>Stripe&apos;s verification collects and validates:</p>
       <ul>
         <li>Legal business name and type.</li>
         <li>Business address and contact information.</li>
@@ -77,20 +76,21 @@ export default function InformActPage() {
         If you believe a seller on the SimplePress platform is operating
         fraudulently, misrepresenting their identity, or violating the INFORM
         Consumers Act, please contact the SimplePress team at{" "}
-        <a href={`mailto:${contactEmail}`}>
-          {contactEmail}
-        </a>
-        . Include the store name or URL and a description of your concern. We
-        will review all reports and take appropriate action.
+        <a href={`mailto:${contactEmail}`}>{contactEmail}</a>. Include the store
+        name or URL and a description of your concern. We will review all
+        reports and take appropriate action.
       </p>
 
       <hr />
       <p className="text-sm text-gray-500">
         Related policies:{" "}
-        <Link href="/platform/terms-of-service">Terms of Service</Link>{" "}
-        &middot; <Link href="/platform/privacy-policy">Privacy Policy</Link>{" "}
+        <Link href="/platform/policies/terms-of-service">Terms of Service</Link>{" "}
         &middot;{" "}
-        <Link href="/platform/acceptable-use">Acceptable Use Policy</Link>
+        <Link href="/platform/policies/privacy-policy">Privacy Policy</Link>{" "}
+        &middot;{" "}
+        <Link href="/platform/policies/acceptable-use">
+          Acceptable Use Policy
+        </Link>
       </p>
     </div>
   );

@@ -111,7 +111,9 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
       slug: product?.slug ?? "",
       description: product?.description ?? undefined,
       price: product?.price ? product.price / 100 : 0, // Convert cents to dollars
-      compareAtPrice: product?.compareAtPrice ? product.compareAtPrice / 100 : undefined,
+      compareAtPrice: product?.compareAtPrice
+        ? product.compareAtPrice / 100
+        : undefined,
       published: product?.published ?? false,
       trackInventory: product?.trackInventory ?? false,
       inventoryQty: product?.inventoryQty ?? 0,
@@ -339,6 +341,12 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
       }
 
       if (response.productId) {
+        // toast.success("Product created!", {
+        //   action: {
+        //     label: "Create another",
+        //     onClick: () => router.push("/admin/products/new"),
+        //   },
+        // });
         router.push(`/admin/products/${response.productId}`);
       } else {
         form.reset({ ...data });
@@ -602,13 +610,16 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
                       <CardContent className="space-y-4">
                         {/* Base Unit pool selector (shown when pools exist and no variants) */}
                         {pools.length > 0 && variants.length === 0 && (
-                          <div className="rounded-lg border p-4 space-y-3">
+                          <div className="space-y-3 rounded-lg border p-4">
                             <div>
-                              <Label className="text-sm font-medium">Base Unit</Label>
-                              <p className="text-sm text-muted-foreground mt-0.5">
-                                Link this product to a shared inventory pool. For example,
-                                if your base unit is a &ldquo;4-pack Roll&rdquo; and this
-                                product is a 24-pack, set units consumed to 6.
+                              <Label className="text-sm font-medium">
+                                Base Unit
+                              </Label>
+                              <p className="text-muted-foreground mt-0.5 text-sm">
+                                Link this product to a shared inventory pool.
+                                For example, if your base unit is a
+                                &ldquo;4-pack Roll&rdquo; and this product is a
+                                24-pack, set units consumed to 6.
                               </p>
                             </div>
                             <FormField
@@ -619,7 +630,9 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
                                   <FormLabel>Pool</FormLabel>
                                   <Select
                                     onValueChange={(val) =>
-                                      field.onChange(val === "__none__" ? null : val)
+                                      field.onChange(
+                                        val === "__none__" ? null : val,
+                                      )
                                     }
                                     value={field.value ?? "__none__"}
                                   >
@@ -633,8 +646,12 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
                                         None — use individual inventory
                                       </SelectItem>
                                       {pools.map((pool) => (
-                                        <SelectItem key={pool.id} value={pool.id}>
-                                          {pool.name} ({pool.inventoryQty} units)
+                                        <SelectItem
+                                          key={pool.id}
+                                          value={pool.id}
+                                        >
+                                          {pool.name} ({pool.inventoryQty}{" "}
+                                          units)
                                         </SelectItem>
                                       ))}
                                     </SelectContent>
@@ -648,7 +665,9 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
                                 name="baseUnitsConsumed"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Units consumed per purchase</FormLabel>
+                                    <FormLabel>
+                                      Units consumed per purchase
+                                    </FormLabel>
                                     <FormControl>
                                       <NumberInput
                                         step="1"
@@ -659,7 +678,8 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
                                       />
                                     </FormControl>
                                     <FormDescription>
-                                      How many base units this product uses per item sold.
+                                      How many base units this product uses per
+                                      item sold.
                                     </FormDescription>
                                   </FormItem>
                                 )}
@@ -720,7 +740,9 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
                                 name="lowInventoryThreshold"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Low Inventory Threshold</FormLabel>
+                                    <FormLabel>
+                                      Low Inventory Threshold
+                                    </FormLabel>
                                     <FormControl>
                                       <NumberInput
                                         step="1"
@@ -742,9 +764,10 @@ export function ProductForm({ product, galleriesEnabled, pools = [] }: Props) {
 
                         {/* Informational note when pool is active */}
                         {form.watch("baseInventoryUnitId") && (
-                          <p className="text-sm text-muted-foreground">
-                            Individual inventory tracking is disabled while a base unit pool is
-                            selected. Manage pool stock from the{" "}
+                          <p className="text-muted-foreground text-sm">
+                            Individual inventory tracking is disabled while a
+                            base unit pool is selected. Manage pool stock from
+                            the{" "}
                             <Link href="/admin/inventory" className="underline">
                               Inventory
                             </Link>{" "}

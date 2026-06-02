@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 const contactEmail =
-  process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ?? "csdt@generativejustice.org";
+  process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??
+  "csdt@generativejustice.org";
 
 export default function SellerMerchantPage() {
   return (
@@ -14,11 +15,12 @@ export default function SellerMerchantPage() {
 
       <h2>1. Introduction</h2>
       <p>
-        This Seller &amp; Merchant Agreement (&ldquo;Agreement&rdquo;) governs the
-        participation of businesses (&ldquo;Merchant,&rdquo; &ldquo;Seller,&rdquo;
-        &ldquo;you,&rdquo; or &ldquo;your&rdquo;) using the SimplePress ecommerce platform
-        operated by THE CENTER FOR GENERATIVE JUSTICE LLC (&ldquo;SimplePress,&rdquo;
-        &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;).
+        This Seller &amp; Merchant Agreement (&ldquo;Agreement&rdquo;) governs
+        the participation of businesses (&ldquo;Merchant,&rdquo;
+        &ldquo;Seller,&rdquo; &ldquo;you,&rdquo; or &ldquo;your&rdquo;) using
+        the SimplePress ecommerce platform operated by THE CENTER FOR GENERATIVE
+        JUSTICE LLC (&ldquo;SimplePress,&rdquo; &ldquo;we,&rdquo;
+        &ldquo;us,&rdquo; or &ldquo;our&rdquo;).
       </p>
       <p>This Agreement supplements the:</p>
       <ul>
@@ -26,18 +28,20 @@ export default function SellerMerchantPage() {
         <li>Privacy Policy;</li>
         <li>Acceptable Use Policy;</li>
         <li>DMCA Policy;</li>
-        <li>and any additional policies or guidelines published by SimplePress.</li>
+        <li>
+          and any additional policies or guidelines published by SimplePress.
+        </li>
       </ul>
       <p>
-        By operating a storefront, listing products, or conducting sales through SimplePress,
-        you agree to this Agreement.
+        By operating a storefront, listing products, or conducting sales through
+        SimplePress, you agree to this Agreement.
       </p>
       <hr />
 
       <h2>2. Nature of the Platform</h2>
       <p>
-        SimplePress is a software and infrastructure platform that enables independent
-        businesses to operate online storefronts.
+        SimplePress is a software and infrastructure platform that enables
+        independent businesses to operate online storefronts.
       </p>
       <p>SimplePress is not:</p>
       <ul>
@@ -49,12 +53,13 @@ export default function SellerMerchantPage() {
         <li>your agent or franchise operator.</li>
       </ul>
       <p>
-        You operate your business independently and remain solely responsible for all
-        commercial activity conducted through your storefront.
+        You operate your business independently and remain solely responsible
+        for all commercial activity conducted through your storefront.
       </p>
       <p>
-        Any technical assistance, onboarding support, customization work, feature
-        collaboration, or operational guidance provided by SimplePress does not create:
+        Any technical assistance, onboarding support, customization work,
+        feature collaboration, or operational guidance provided by SimplePress
+        does not create:
       </p>
       <ul>
         <li>a partnership;</li>
@@ -67,7 +72,10 @@ export default function SellerMerchantPage() {
       <hr />
 
       <h2>3. Eligibility and Approval</h2>
-      <p>Merchant access to SimplePress is currently invite-only or manually approved.</p>
+      <p>
+        Merchant access to SimplePress is currently invite-only or manually
+        approved.
+      </p>
       <p>SimplePress reserves the right to:</p>
       <ul>
         <li>approve or reject businesses;</li>
@@ -106,14 +114,15 @@ export default function SellerMerchantPage() {
         <li>consumer protection compliance.</li>
       </ul>
       <p>
-        You acknowledge that SimplePress is not responsible for the operation or legality
-        of your business.
+        You acknowledge that SimplePress is not responsible for the operation or
+        legality of your business.
       </p>
       <hr />
 
       <h2>5. Product Listings and Content</h2>
       <p>
-        You are solely responsible for all content uploaded to your storefront, including:
+        You are solely responsible for all content uploaded to your storefront,
+        including:
       </p>
       <ul>
         <li>product listings;</li>
@@ -135,14 +144,15 @@ export default function SellerMerchantPage() {
         <li>your content is accurate and not deceptive.</li>
       </ul>
       <p>
-        SimplePress reserves the right to remove or restrict content at our discretion.
+        SimplePress reserves the right to remove or restrict content at our
+        discretion.
       </p>
       <hr />
 
       <h2>6. Prohibited Products and Conduct</h2>
       <p>
-        Merchants may not use SimplePress to sell or promote prohibited products or engage
-        in prohibited conduct as described in the:
+        Merchants may not use SimplePress to sell or promote prohibited products
+        or engage in prohibited conduct as described in the:
       </p>
       <ul>
         <li>Acceptable Use Policy;</li>
@@ -162,35 +172,38 @@ export default function SellerMerchantPage() {
         <li>fraudulent medical or financial claims.</li>
       </ul>
       <p>
-        SimplePress reserves sole discretion in determining whether conduct or products
-        violate platform policies.
+        SimplePress reserves sole discretion in determining whether conduct or
+        products violate platform policies.
       </p>
       <hr />
 
       <h2>7. Payments and Stripe</h2>
       <p>SimplePress uses third-party payment processors, including Stripe.</p>
       <p>
-        By using payment functionality through SimplePress, you acknowledge and agree that:
+        By using payment functionality through SimplePress, you acknowledge and
+        agree that:
       </p>
       <ul>
         <li>payment processing services are provided by Stripe;</li>
         <li>Stripe&rsquo;s terms and policies independently apply;</li>
         <li>
-          you are solely responsible for your Stripe account and compliance obligations;
+          you are solely responsible for your Stripe account and compliance
+          obligations;
         </li>
         <li>
-          you are solely responsible for refunds, disputes, chargebacks, and payment
-          obligations;
+          you are solely responsible for refunds, disputes, chargebacks, and
+          payment obligations;
         </li>
         <li>SimplePress does not hold customer funds;</li>
         <li>
-          SimplePress is not responsible for payment processor actions, frozen accounts,
-          delayed payouts, or payment failures.
+          SimplePress is not responsible for payment processor actions, frozen
+          accounts, delayed payouts, or payment failures.
         </li>
       </ul>
       <p>
-        You authorize SimplePress to share necessary operational information with payment
-        providers where required to facilitate platform functionality or compliance.
+        You authorize SimplePress to share necessary operational information
+        with payment providers where required to facilitate platform
+        functionality or compliance.
       </p>
       <hr />
 
@@ -204,8 +217,8 @@ export default function SellerMerchantPage() {
         <li>complying with tax laws and regulations.</li>
       </ul>
       <p>
-        SimplePress does not provide tax advice and does not guarantee tax compliance
-        functionality.
+        SimplePress does not provide tax advice and does not guarantee tax
+        compliance functionality.
       </p>
       <hr />
 
@@ -222,14 +235,15 @@ export default function SellerMerchantPage() {
         <li>returns and exchanges.</li>
       </ul>
       <p>
-        SimplePress is not liable for shipping disputes, delays, lost packages, or
-        fulfillment failures.
+        SimplePress is not liable for shipping disputes, delays, lost packages,
+        or fulfillment failures.
       </p>
       <hr />
 
       <h2>10. Customer Relationships</h2>
       <p>
-        Merchants are solely responsible for interactions with their customers, including:
+        Merchants are solely responsible for interactions with their customers,
+        including:
       </p>
       <ul>
         <li>customer support;</li>
@@ -242,7 +256,8 @@ export default function SellerMerchantPage() {
       </ul>
       <p>
         SimplePress may assist with moderation, operational concerns, or abuse
-        investigations but is not obligated to resolve merchant-customer disputes.
+        investigations but is not obligated to resolve merchant-customer
+        disputes.
       </p>
       <hr />
 
@@ -256,8 +271,8 @@ export default function SellerMerchantPage() {
         <li>complies with applicable laws and regulations.</li>
       </ul>
       <p>
-        SimplePress does not independently verify originality, ownership, legality, or
-        authenticity of AI-generated material.
+        SimplePress does not independently verify originality, ownership,
+        legality, or authenticity of AI-generated material.
       </p>
       <hr />
 
@@ -285,8 +300,8 @@ export default function SellerMerchantPage() {
 
       <h2>13. Platform Availability and Experimental Nature</h2>
       <p>
-        SimplePress is an evolving and experimental platform provided on a best-effort
-        basis.
+        SimplePress is an evolving and experimental platform provided on a
+        best-effort basis.
       </p>
       <p>We do not guarantee:</p>
       <ul>
@@ -301,7 +316,8 @@ export default function SellerMerchantPage() {
         Features may change, break, or be discontinued as the platform evolves.
       </p>
       <p>
-        You acknowledge that use of the platform involves operational and technical risk.
+        You acknowledge that use of the platform involves operational and
+        technical risk.
       </p>
       <hr />
 
@@ -318,15 +334,15 @@ export default function SellerMerchantPage() {
         <li>uploaded media.</li>
       </ul>
       <p>
-        SimplePress may assist with exports or migrations at our discretion but is under no
-        obligation to provide backup or recovery services.
+        SimplePress may assist with exports or migrations at our discretion but
+        is under no obligation to provide backup or recovery services.
       </p>
       <hr />
 
       <h2>15. Communications</h2>
       <p>
-        By using SimplePress, you consent to receiving operational communications,
-        including:
+        By using SimplePress, you consent to receiving operational
+        communications, including:
       </p>
       <ul>
         <li>account notices;</li>
@@ -338,8 +354,8 @@ export default function SellerMerchantPage() {
         <li>legal notices.</li>
       </ul>
       <p>
-        Merchants may not use the platform to send spam, deceptive communications, or
-        unlawful marketing messages.
+        Merchants may not use the platform to send spam, deceptive
+        communications, or unlawful marketing messages.
       </p>
       <hr />
 
@@ -370,14 +386,15 @@ export default function SellerMerchantPage() {
       </ul>
       <p>at any time in the future.</p>
       <p>
-        Reasonable notice will generally be provided before material pricing changes take
-        effect.
+        Reasonable notice will generally be provided before material pricing
+        changes take effect.
       </p>
       <hr />
 
       <h2>18. Intellectual Property</h2>
       <p>
-        SimplePress and THE CENTER FOR GENERATIVE JUSTICE LLC retain ownership of:
+        SimplePress and THE CENTER FOR GENERATIVE JUSTICE LLC retain ownership
+        of:
       </p>
       <ul>
         <li>platform software;</li>
@@ -390,8 +407,8 @@ export default function SellerMerchantPage() {
         <li>trademarks.</li>
       </ul>
       <p>
-        The SimplePress platform is source-available in certain contexts but is not open
-        source unless explicitly stated otherwise.
+        The SimplePress platform is source-available in certain contexts but is
+        not open source unless explicitly stated otherwise.
       </p>
       <p>Merchants may not:</p>
       <ul>
@@ -402,14 +419,20 @@ export default function SellerMerchantPage() {
         <li>recreate;</li>
         <li>sublicense</li>
       </ul>
-      <p>the platform or proprietary infrastructure without written authorization.</p>
+      <p>
+        the platform or proprietary infrastructure without written
+        authorization.
+      </p>
       <hr />
 
       <h2>19. Disclaimer of Warranties</h2>
-      <p>SIMPLEPRESS IS PROVIDED &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE.&rdquo;</p>
       <p>
-        TO THE MAXIMUM EXTENT PERMITTED BY LAW, SIMPLEPRESS DISCLAIMS ALL WARRANTIES,
-        EXPRESS OR IMPLIED, INCLUDING:
+        SIMPLEPRESS IS PROVIDED &ldquo;AS IS&rdquo; AND &ldquo;AS
+        AVAILABLE.&rdquo;
+      </p>
+      <p>
+        TO THE MAXIMUM EXTENT PERMITTED BY LAW, SIMPLEPRESS DISCLAIMS ALL
+        WARRANTIES, EXPRESS OR IMPLIED, INCLUDING:
       </p>
       <ul>
         <li>MERCHANTABILITY;</li>
@@ -433,8 +456,8 @@ export default function SellerMerchantPage() {
 
       <h2>20. Limitation of Liability</h2>
       <p>
-        TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE CENTER FOR GENERATIVE JUSTICE LLC AND
-        SIMPLEPRESS SHALL NOT BE LIABLE FOR:
+        TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE CENTER FOR GENERATIVE
+        JUSTICE LLC AND SIMPLEPRESS SHALL NOT BE LIABLE FOR:
       </p>
       <ul>
         <li>lost profits;</li>
@@ -451,16 +474,16 @@ export default function SellerMerchantPage() {
         <li>indirect or consequential damages.</li>
       </ul>
       <p>
-        OUR TOTAL LIABILITY ARISING OUT OF OR RELATED TO THE PLATFORM SHALL NOT EXCEED ONE
-        HUNDRED U.S. DOLLARS ($100 USD).
+        OUR TOTAL LIABILITY ARISING OUT OF OR RELATED TO THE PLATFORM SHALL NOT
+        EXCEED ONE HUNDRED U.S. DOLLARS ($100 USD).
       </p>
       <hr />
 
       <h2>21. Indemnification</h2>
       <p>
-        You agree to defend, indemnify, and hold harmless THE CENTER FOR GENERATIVE JUSTICE
-        LLC and SimplePress from claims, liabilities, damages, losses, or expenses arising
-        from:
+        You agree to defend, indemnify, and hold harmless THE CENTER FOR
+        GENERATIVE JUSTICE LLC and SimplePress from claims, liabilities,
+        damages, losses, or expenses arising from:
       </p>
       <ul>
         <li>your business activities;</li>
@@ -475,27 +498,36 @@ export default function SellerMerchantPage() {
 
       <h2>22. Arbitration and Governing Law</h2>
       <p>
-        Disputes arising from this Agreement shall first be addressed through informal
-        good-faith negotiations.
+        Disputes arising from this Agreement shall first be addressed through
+        informal good-faith negotiations.
       </p>
       <p>
-        If unresolved within thirty (30) days, disputes shall be resolved through binding
-        arbitration in Washtenaw County, Michigan under the rules of the American
-        Arbitration Association (&ldquo;AAA&rdquo;).
+        If unresolved within thirty (30) days, disputes shall be resolved
+        through binding arbitration in Washtenaw County, Michigan under the
+        rules of the American Arbitration Association (&ldquo;AAA&rdquo;).
       </p>
       <p>You waive:</p>
       <ul>
         <li>the right to sue in court;</li>
         <li>the right to a jury trial;</li>
-        <li>the right to participate in class actions or collective proceedings.</li>
+        <li>
+          the right to participate in class actions or collective proceedings.
+        </li>
       </ul>
       <p>This Agreement is governed by the laws of the State of Michigan.</p>
       <hr />
 
       <h2>23. Changes to This Agreement</h2>
-      <p>SimplePress may modify this Agreement at any time as the platform evolves.</p>
-      <p>Updated versions become effective upon posting unless otherwise stated.</p>
-      <p>Continued use of the platform constitutes acceptance of revised terms.</p>
+      <p>
+        SimplePress may modify this Agreement at any time as the platform
+        evolves.
+      </p>
+      <p>
+        Updated versions become effective upon posting unless otherwise stated.
+      </p>
+      <p>
+        Continued use of the platform constitutes acceptance of revised terms.
+      </p>
       <hr />
 
       <h2>24. Contact Information</h2>
@@ -512,10 +544,14 @@ export default function SellerMerchantPage() {
       <hr />
       <p className="text-sm text-gray-500">
         Related policies:{" "}
-        <Link href="/platform/terms-of-service">Terms of Service</Link> &middot;{" "}
-        <Link href="/platform/privacy-policy">Privacy Policy</Link> &middot;{" "}
-        <Link href="/platform/acceptable-use">Acceptable Use Policy</Link> &middot;{" "}
-        <Link href="/platform/dmca">DMCA Policy</Link>
+        <Link href="/platform/policies/terms-of-service">Terms of Service</Link>{" "}
+        &middot;{" "}
+        <Link href="/platform/policies/privacy-policy">Privacy Policy</Link>{" "}
+        &middot;{" "}
+        <Link href="/platform/policies/acceptable-use">
+          Acceptable Use Policy
+        </Link>{" "}
+        &middot; <Link href="/platform/policies/dmca">DMCA Policy</Link>
       </p>
     </div>
   );

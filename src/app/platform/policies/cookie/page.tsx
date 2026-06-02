@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 const contactEmail =
-  process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ?? "csdt@generativejustice.org";
+  process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??
+  "csdt@generativejustice.org";
 
 export default function CookiePolicyPage() {
   return (
@@ -31,15 +32,15 @@ export default function CookiePolicyPage() {
         <li>Acceptable Use Policy.</li>
       </ul>
       <p>
-        By using SimplePress, you consent to the use of cookies and similar technologies
-        as described in this Policy.
+        By using SimplePress, you consent to the use of cookies and similar
+        technologies as described in this Policy.
       </p>
       <hr />
 
       <h2>2. What Are Cookies?</h2>
       <p>
-        Cookies are small text files stored on your device by your browser when you visit
-        a website.
+        Cookies are small text files stored on your device by your browser when
+        you visit a website.
       </p>
       <p>Cookies help websites:</p>
       <ul>
@@ -71,13 +72,15 @@ export default function CookiePolicyPage() {
         <li>support security and platform functionality.</li>
       </ul>
       <p>
-        Without these cookies, certain parts of the platform may not function properly.
+        Without these cookies, certain parts of the platform may not function
+        properly.
       </p>
 
       <h3>B. Analytics Cookies</h3>
       <p>
-        SimplePress uses self-hosted analytics tools, including Umami Analytics, to
-        understand how the platform is used and to improve reliability and performance.
+        SimplePress uses self-hosted analytics tools, including Umami Analytics,
+        to understand how the platform is used and to improve reliability and
+        performance.
       </p>
       <p>Analytics technologies may collect information such as:</p>
       <ul>
@@ -120,8 +123,8 @@ export default function CookiePolicyPage() {
 
       <h2>4. Third-Party Services</h2>
       <p>
-        SimplePress integrates with third-party providers that may use their own cookies
-        or technologies, including:
+        SimplePress integrates with third-party providers that may use their own
+        cookies or technologies, including:
       </p>
       <ul>
         <li>Stripe;</li>
@@ -149,7 +152,8 @@ export default function CookiePolicyPage() {
         <li>maintain technical stability.</li>
       </ul>
       <p>
-        We do not use cookies to sell personal information or operate advertising networks.
+        We do not use cookies to sell personal information or operate
+        advertising networks.
       </p>
       <hr />
 
@@ -169,46 +173,46 @@ export default function CookiePolicyPage() {
         <li>platform performance.</li>
       </ul>
       <p>
-        Because some cookies are essential for platform operation, certain functionality
-        may not work correctly if cookies are disabled.
+        Because some cookies are essential for platform operation, certain
+        functionality may not work correctly if cookies are disabled.
       </p>
       <hr />
 
       <h2>7. Do Not Track Signals</h2>
+      <p>Some browsers provide &ldquo;Do Not Track&rdquo; signals.</p>
       <p>
-        Some browsers provide &ldquo;Do Not Track&rdquo; signals.
+        Because there is currently no universally accepted standard for
+        responding to such signals, SimplePress may not respond to all Do Not
+        Track requests in a standardized manner.
       </p>
       <p>
-        Because there is currently no universally accepted standard for responding to such
-        signals, SimplePress may not respond to all Do Not Track requests in a standardized
-        manner.
-      </p>
-      <p>
-        However, SimplePress does not use cookies for advertising profiling or cross-site
-        behavioral advertising.
+        However, SimplePress does not use cookies for advertising profiling or
+        cross-site behavioral advertising.
       </p>
       <hr />
 
       <h2>8. International Use</h2>
-      <p>SimplePress is primarily intended for users within the United States.</p>
       <p>
-        The platform currently does not provide region-specific cookie consent systems
-        designed for jurisdictions such as the European Union.
+        SimplePress is primarily intended for users within the United States.
       </p>
       <p>
-        By using the platform, you acknowledge that cookies and similar technologies may
-        be used as described in this Policy.
+        The platform currently does not provide region-specific cookie consent
+        systems designed for jurisdictions such as the European Union.
+      </p>
+      <p>
+        By using the platform, you acknowledge that cookies and similar
+        technologies may be used as described in this Policy.
       </p>
       <hr />
 
       <h2>9. Changes to This Policy</h2>
+      <p>We may update or modify this Cookie Policy as the platform evolves.</p>
       <p>
-        We may update or modify this Cookie Policy as the platform evolves.
+        Updated versions become effective upon posting unless otherwise stated.
       </p>
-      <p>Updated versions become effective upon posting unless otherwise stated.</p>
       <p>
-        Continued use of the platform after updates constitutes acceptance of the revised
-        policy.
+        Continued use of the platform after updates constitutes acceptance of
+        the revised policy.
       </p>
       <hr />
 
@@ -226,9 +230,13 @@ export default function CookiePolicyPage() {
       <hr />
       <p className="text-sm text-gray-500">
         Related policies:{" "}
-        <Link href="/platform/terms-of-service">Terms of Service</Link> &middot;{" "}
-        <Link href="/platform/privacy-policy">Privacy Policy</Link> &middot;{" "}
-        <Link href="/platform/acceptable-use">Acceptable Use Policy</Link>
+        <Link href="/platform/policies/terms-of-service">Terms of Service</Link>{" "}
+        &middot;{" "}
+        <Link href="/platform/policies/privacy-policy">Privacy Policy</Link>{" "}
+        &middot;{" "}
+        <Link href="/platform/policies/acceptable-use">
+          Acceptable Use Policy
+        </Link>
       </p>
     </div>
   );

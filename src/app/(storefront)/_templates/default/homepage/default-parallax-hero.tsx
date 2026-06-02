@@ -30,7 +30,9 @@ export function DefaultParallaxHero({
 
   useEffect(() => {
     // Respect the user's preference for reduced motion (WCAG 2.1 SC 2.3.3)
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (prefersReduced) return;
 
     const onScroll = () => {
@@ -47,11 +49,11 @@ export function DefaultParallaxHero({
   }, []);
 
   return (
-    <section className="relative h-[92vh] min-h-[620px] overflow-hidden bg-[#1a1a1a] text-white isolate">
+    <section className="relative isolate h-[92vh] min-h-[620px] overflow-hidden bg-[#1a1a1a] text-white">
       {/* Parallax background — oversized vertically so translateY never reveals a gap */}
       <div
         ref={bgRef}
-        className="absolute inset-x-0 dt-parallax-bg will-change-transform"
+        className="dt-parallax-bg absolute inset-x-0 will-change-transform"
       >
         <Image
           src={imageUrl}
@@ -69,9 +71,9 @@ export function DefaultParallaxHero({
         ref={textRef}
         className="absolute inset-x-0 bottom-0 will-change-transform"
       >
-        <div className="mx-auto max-w-2xl px-6 pb-24 flex flex-col gap-6">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-6 pb-24">
           {eyebrow && (
-            <span className="text-xs font-medium tracking-[0.14em] uppercase text-white/60">
+            <span className="text-xs font-medium tracking-[0.14em] text-white/60 uppercase">
               {eyebrow}
             </span>
           )}
@@ -79,19 +81,19 @@ export function DefaultParallaxHero({
             {title}
           </h1>
           {description && (
-            <p className="text-lg text-white/80 max-w-[480px]">{description}</p>
+            <p className="max-w-[480px] text-lg text-white/80">{description}</p>
           )}
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
               href={primaryHref}
-              className="inline-flex items-center justify-center h-12 px-7 bg-white text-[#0a0a0a] text-sm font-medium tracking-[0.02em] rounded-(--radius) transition-colors hover:bg-white/88"
+              className="inline-flex h-12 items-center justify-center rounded-(--radius) bg-white px-7 text-sm font-medium tracking-[0.02em] text-[#0a0a0a] transition-colors hover:bg-white/88"
             >
               {primaryText}
             </Link>
             {secondaryText && (
               <Link
                 href={secondaryHref ?? "/about"}
-                className="inline-flex items-center justify-center h-12 px-7 bg-transparent text-white border border-white/40 text-sm font-medium tracking-[0.02em] rounded-(--radius) transition-colors hover:border-white/70"
+                className="inline-flex h-12 items-center justify-center rounded-(--radius) border border-white/40 bg-transparent px-7 text-sm font-medium tracking-[0.02em] text-white transition-colors hover:border-white/70"
               >
                 {secondaryText}
               </Link>

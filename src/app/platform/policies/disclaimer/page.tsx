@@ -105,10 +105,13 @@ export default function DisclaimerPage() {
       <hr />
       <p className="text-sm text-gray-500">
         Related policies:{" "}
-        <Link href="/platform/terms-of-service">Terms of Service</Link>{" "}
-        &middot; <Link href="/platform/privacy-policy">Privacy Policy</Link>{" "}
+        <Link href="/platform/policies/terms-of-service">Terms of Service</Link>{" "}
         &middot;{" "}
-        <Link href="/platform/acceptable-use">Acceptable Use Policy</Link>
+        <Link href="/platform/policies/privacy-policy">Privacy Policy</Link>{" "}
+        &middot;{" "}
+        <Link href="/platform/policies/acceptable-use">
+          Acceptable Use Policy
+        </Link>
       </p>
     </div>
   );

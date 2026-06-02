@@ -4,12 +4,18 @@ import Link from "next/link";
 import { PlatformHeader } from "~/app/_components/platform-specific/platform-header";
 
 const POLICY_LINKS = [
-  { label: "Terms of Service", href: "/platform/terms-of-service" },
-  { label: "Privacy Policy", href: "/platform/privacy-policy" },
-  { label: "Acceptable Use", href: "/platform/acceptable-use" },
-  { label: "Disclaimer", href: "/platform/disclaimer" },
-  { label: "INFORM Act", href: "/platform/inform-act" },
-  { label: "Accessibility", href: "/platform/accessibility" },
+  { label: "Terms of Service", href: "/platform/policies/terms-of-service" },
+  { label: "Privacy Policy", href: "/platform/policies/privacy-policy" },
+  { label: "Acceptable Use", href: "/platform/policies/acceptable-use" },
+  {
+    label: "Seller Agreement",
+    href: "/platform/policies/seller-merchant",
+  },
+  { label: "Cookies", href: "/platform/policies/cookie" },
+  { label: "DMCA", href: "/platform/policies/dmca" },
+  { label: "INFORM Act", href: "/platform/policies/inform-act" },
+  { label: "Disclaimer", href: "/platform/policies/disclaimer" },
+  { label: "Accessibility", href: "/platform/policies/accessibility" },
 ];
 
 export default function PoliciesLayout({

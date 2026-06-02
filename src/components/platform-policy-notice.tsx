@@ -19,7 +19,7 @@ export function PlatformPolicyNotice({ slug }: { slug: string }) {
             <strong>Center for Generative Justice LLC</strong>. Your use of this
             store is also subject to the SimplePress{" "}
             <a
-              href={`/platform/terms-of-service`}
+              href={`/platform/policies/terms-of-service`}
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:no-underline"
@@ -28,7 +28,7 @@ export function PlatformPolicyNotice({ slug }: { slug: string }) {
             </a>{" "}
             and{" "}
             <a
-              href={`${baseUrl}/platform/privacy-policy`}
+              href={`${baseUrl}/platform/policies/privacy-policy`}
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:no-underline"

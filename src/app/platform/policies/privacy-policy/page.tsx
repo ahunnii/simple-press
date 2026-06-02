@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 const contactEmail =
-  process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ?? "csdt@generativejustice.org";
+  process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??
+  "csdt@generativejustice.org";
 
 export default function PrivacyPolicyPage() {
   return (
@@ -15,18 +16,22 @@ export default function PrivacyPolicyPage() {
       <h2>1. Introduction</h2>
       <p>
         This Privacy Policy explains how THE CENTER FOR GENERATIVE JUSTICE LLC
-        (&ldquo;SimplePress,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;)
-        collects, uses, stores, and discloses information when you access or use:
+        (&ldquo;SimplePress,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or
+        &ldquo;our&rdquo;) collects, uses, stores, and discloses information
+        when you access or use:
       </p>
       <ul>
         <li>simplepress.dev;</li>
         <li>storefronts hosted on the SimplePress platform;</li>
         <li>custom domains connected to the platform;</li>
-        <li>related services, applications, APIs, communications, and infrastructure.</li>
+        <li>
+          related services, applications, APIs, communications, and
+          infrastructure.
+        </li>
       </ul>
       <p>
-        By using SimplePress, you agree to the collection and use of information in
-        accordance with this Privacy Policy.
+        By using SimplePress, you agree to the collection and use of information
+        in accordance with this Privacy Policy.
       </p>
       <hr />
 
@@ -39,9 +44,9 @@ export default function PrivacyPolicyPage() {
         <li>users creating SimplePress Accounts.</li>
       </ul>
       <p>
-        This Privacy Policy does not govern the independent business practices of storefront
-        operators using the platform. Businesses hosted on SimplePress may have their own
-        policies, terms, and practices.
+        This Privacy Policy does not govern the independent business practices
+        of storefront operators using the platform. Businesses hosted on
+        SimplePress may have their own policies, terms, and practices.
       </p>
       <hr />
 
@@ -61,7 +66,8 @@ export default function PrivacyPolicyPage() {
 
       <h3>B. Transaction and Order Information</h3>
       <p>
-        When purchases are made through storefronts hosted on SimplePress, we may collect:
+        When purchases are made through storefronts hosted on SimplePress, we
+        may collect:
       </p>
       <ul>
         <li>order details;</li>
@@ -74,8 +80,8 @@ export default function PrivacyPolicyPage() {
         <li>refund or dispute information.</li>
       </ul>
       <p>
-        Payment card information is generally processed by third-party payment processors
-        such as Stripe and is not stored directly by SimplePress.
+        Payment card information is generally processed by third-party payment
+        processors such as Stripe and is not stored directly by SimplePress.
       </p>
 
       <h3>C. Business and Storefront Information</h3>
@@ -93,7 +99,9 @@ export default function PrivacyPolicyPage() {
       </ul>
 
       <h3>D. Technical and Device Information</h3>
-      <p>We may automatically collect certain technical information, including:</p>
+      <p>
+        We may automatically collect certain technical information, including:
+      </p>
       <ul>
         <li>IP addresses;</li>
         <li>browser type;</li>
@@ -108,8 +116,8 @@ export default function PrivacyPolicyPage() {
 
       <h3>E. Analytics Information</h3>
       <p>
-        SimplePress uses self-hosted analytics tools, including Umami Analytics, to better
-        understand platform usage, performance, and reliability.
+        SimplePress uses self-hosted analytics tools, including Umami Analytics,
+        to better understand platform usage, performance, and reliability.
       </p>
       <p>Analytics may collect:</p>
       <ul>
@@ -120,11 +128,15 @@ export default function PrivacyPolicyPage() {
         <li>session behavior;</li>
         <li>technical performance metrics.</li>
       </ul>
-      <p>We do not use analytics to sell personal data or build advertising profiles.</p>
+      <p>
+        We do not use analytics to sell personal data or build advertising
+        profiles.
+      </p>
 
       <h3>F. Communications</h3>
       <p>
-        If you contact us or interact with platform communications, we may collect:
+        If you contact us or interact with platform communications, we may
+        collect:
       </p>
       <ul>
         <li>email correspondence;</li>
@@ -154,15 +166,18 @@ export default function PrivacyPolicyPage() {
 
       <h2>5. Payment Processing</h2>
       <p>
-        Payments on SimplePress are processed by third-party payment processors, including
-        Stripe.
+        Payments on SimplePress are processed by third-party payment processors,
+        including Stripe.
       </p>
       <p>
-        When making a purchase or operating a storefront, your payment information may be
-        processed directly by Stripe subject to Stripe&rsquo;s own privacy practices and
-        terms.
+        When making a purchase or operating a storefront, your payment
+        information may be processed directly by Stripe subject to
+        Stripe&rsquo;s own privacy practices and terms.
       </p>
-      <p>SimplePress does not control Stripe&rsquo;s independent handling of payment data.</p>
+      <p>
+        SimplePress does not control Stripe&rsquo;s independent handling of
+        payment data.
+      </p>
       <hr />
 
       <h2>6. Cookies and Session Technologies</h2>
@@ -202,24 +217,24 @@ export default function PrivacyPolicyPage() {
         <li>during mergers, restructurings, or organizational transfers.</li>
       </ul>
       <p>
-        We may also disclose information if we reasonably believe disclosure is necessary
-        to:
+        We may also disclose information if we reasonably believe disclosure is
+        necessary to:
       </p>
       <ul>
         <li>comply with legal obligations;</li>
         <li>enforce our Terms;</li>
         <li>protect users or the public;</li>
         <li>
-          protect the rights or property of SimplePress or THE CENTER FOR GENERATIVE JUSTICE
-          LLC.
+          protect the rights or property of SimplePress or THE CENTER FOR
+          GENERATIVE JUSTICE LLC.
         </li>
       </ul>
       <hr />
 
       <h2>8. User Content</h2>
       <p>
-        Storefronts hosted on SimplePress may publicly display information uploaded by
-        businesses, including:
+        Storefronts hosted on SimplePress may publicly display information
+        uploaded by businesses, including:
       </p>
       <ul>
         <li>business names;</li>
@@ -230,8 +245,8 @@ export default function PrivacyPolicyPage() {
         <li>storefront content.</li>
       </ul>
       <p>
-        Users are responsible for ensuring that uploaded content does not violate privacy
-        rights or applicable laws.
+        Users are responsible for ensuring that uploaded content does not
+        violate privacy rights or applicable laws.
       </p>
       <hr />
 
@@ -246,15 +261,15 @@ export default function PrivacyPolicyPage() {
         <li>maintain security and backup systems.</li>
       </ul>
       <p>
-        We may retain certain records after account closure where necessary for legal,
-        operational, fraud prevention, tax, or security purposes.
+        We may retain certain records after account closure where necessary for
+        legal, operational, fraud prevention, tax, or security purposes.
       </p>
       <hr />
 
       <h2>10. Security</h2>
       <p>
-        We implement reasonable administrative, technical, and organizational measures
-        designed to protect information stored on the platform.
+        We implement reasonable administrative, technical, and organizational
+        measures designed to protect information stored on the platform.
       </p>
       <p>However, no method of transmission or storage is completely secure.</p>
       <p>You acknowledge and agree that:</p>
@@ -264,14 +279,15 @@ export default function PrivacyPolicyPage() {
         <li>you use the platform at your own risk.</li>
       </ul>
       <p>
-        Users are responsible for maintaining the confidentiality of their account
-        credentials.
+        Users are responsible for maintaining the confidentiality of their
+        account credentials.
       </p>
       <hr />
 
       <h2>11. Business Responsibility for Customer Data</h2>
       <p>
-        Businesses operating storefronts on SimplePress are independently responsible for:
+        Businesses operating storefronts on SimplePress are independently
+        responsible for:
       </p>
       <ul>
         <li>complying with applicable privacy laws;</li>
@@ -280,39 +296,42 @@ export default function PrivacyPolicyPage() {
         <li>maintaining lawful business practices.</li>
       </ul>
       <p>
-        SimplePress provides platform infrastructure but does not independently control all
-        business data practices conducted by storefront operators.
+        SimplePress provides platform infrastructure but does not independently
+        control all business data practices conducted by storefront operators.
       </p>
       <hr />
 
       <h2>12. Children&rsquo;s Privacy</h2>
       <p>SimplePress is not intended for users under 18 years of age.</p>
-      <p>We do not knowingly collect personal information from children under 18.</p>
       <p>
-        If we become aware that information from a minor has been collected in violation of
-        this policy, we may remove such information and terminate associated accounts.
+        We do not knowingly collect personal information from children under 18.
+      </p>
+      <p>
+        If we become aware that information from a minor has been collected in
+        violation of this policy, we may remove such information and terminate
+        associated accounts.
       </p>
       <hr />
 
       <h2>13. International Use</h2>
       <p>
-        SimplePress is primarily intended for users and businesses operating within the
-        United States.
+        SimplePress is primarily intended for users and businesses operating
+        within the United States.
       </p>
       <p>
-        Our infrastructure and data processing operations are generally conducted within the
-        United States.
+        Our infrastructure and data processing operations are generally
+        conducted within the United States.
       </p>
       <p>
-        By using the platform, you understand that your information may be transferred to
-        and processed in the United States.
+        By using the platform, you understand that your information may be
+        transferred to and processed in the United States.
       </p>
       <hr />
 
       <h2>14. Your Rights and Choices</h2>
       <p>
-        Depending on applicable law, users may have certain rights regarding their personal
-        information, including the ability to:
+        Depending on applicable law, users may have certain rights regarding
+        their personal information, including the ability to:
       </p>
       <ul>
         <li>request access to information;</li>
@@ -335,7 +354,10 @@ export default function PrivacyPolicyPage() {
       <hr />
 
       <h2>15. Third-Party Services and Links</h2>
-      <p>SimplePress may integrate with or link to third-party services, including:</p>
+      <p>
+        SimplePress may integrate with or link to third-party services,
+        including:
+      </p>
       <ul>
         <li>payment processors;</li>
         <li>custom domains;</li>
@@ -344,7 +366,8 @@ export default function PrivacyPolicyPage() {
         <li>hosting infrastructure providers.</li>
       </ul>
       <p>
-        We are not responsible for the privacy practices or content of third-party services.
+        We are not responsible for the privacy practices or content of
+        third-party services.
       </p>
       <p>Users should review the policies of those services independently.</p>
       <hr />
@@ -361,10 +384,13 @@ export default function PrivacyPolicyPage() {
       </ul>
       <p>as the platform develops.</p>
       <p>We reserve the right to update this Privacy Policy at any time.</p>
-      <p>Updated versions will become effective upon posting unless otherwise stated.</p>
       <p>
-        Continued use of the platform after updates constitutes acceptance of the revised
-        policy.
+        Updated versions will become effective upon posting unless otherwise
+        stated.
+      </p>
+      <p>
+        Continued use of the platform after updates constitutes acceptance of
+        the revised policy.
       </p>
       <hr />
 
@@ -382,11 +408,14 @@ export default function PrivacyPolicyPage() {
       <hr />
       <p className="text-sm text-gray-500">
         Related policies:{" "}
-        <Link href="/platform/terms-of-service">Terms of Service</Link>{" "}
+        <Link href="/platform/policies/terms-of-service">Terms of Service</Link>{" "}
         &middot;{" "}
-        <Link href="/platform/acceptable-use">Acceptable Use Policy</Link>{" "}
-        &middot; <Link href="/platform/disclaimer">Disclaimer</Link> &middot;{" "}
-        <Link href="/platform/inform-act">INFORM Act Notice</Link>
+        <Link href="/platform/policies/acceptable-use">
+          Acceptable Use Policy
+        </Link>{" "}
+        &middot; <Link href="/platform/policies/disclaimer">Disclaimer</Link>{" "}
+        &middot;{" "}
+        <Link href="/platform/policies/inform-act">INFORM Act Notice</Link>
       </p>
     </div>
   );
