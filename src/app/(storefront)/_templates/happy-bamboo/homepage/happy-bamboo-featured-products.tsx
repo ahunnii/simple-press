@@ -22,6 +22,8 @@ type Props = {
   featuredDescription?: string;
   featuredButtonText?: string;
   featuredButtonLink?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 export function HappyBambooFeaturedProducts({
   featuredProducts,
@@ -29,9 +31,13 @@ export function HappyBambooFeaturedProducts({
   featuredDescription = "Every product is 100% bamboo, tree-free, and crafted to the highest standard. No compromises.",
   featuredButtonText = "View All Products",
   featuredButtonLink = "/shop",
+  sectionAttrs,
 }: Props) {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
+    <section
+      className="mx-auto max-w-7xl px-4 py-20 lg:px-8"
+      {...sectionAttrs}
+    >
       <FadeIn direction="up">
         <div className="mb-12 space-y-6 text-center">
           <span className="text-primary text-sm font-semibold tracking-wider uppercase">

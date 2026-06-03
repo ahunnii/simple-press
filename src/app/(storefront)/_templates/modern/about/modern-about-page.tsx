@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateTextListRows,
@@ -48,9 +49,13 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
     <ModernGeneralLayout
       title={f["modern.about.main-title"]}
       subtitle={f["modern.about.main-tagline"]}
+      sectionAttrs={sectionGroupAttr("about", "main")}
     >
       {/* Mission */}
-      <section className="bg-background py-20">
+      <section
+        className="bg-background py-20"
+        {...sectionGroupAttr("about", "mission")}
+      >
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <div className="relative aspect-4/3 overflow-hidden rounded-sm">
@@ -79,7 +84,10 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* Values */}
-      <section className="bg-secondary py-20">
+      <section
+        className="bg-secondary py-20"
+        {...sectionGroupAttr("about", "values")}
+      >
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center">
             <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
@@ -110,7 +118,10 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* Team / Story Section */}
-      <section className="bg-background py-20">
+      <section
+        className="bg-background py-20"
+        {...sectionGroupAttr("about", "story")}
+      >
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
             <div className="relative aspect-4/3 overflow-hidden rounded-sm">
@@ -138,7 +149,7 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* CTA */}
-      <section className="bg-primary py-20">
+      <section className="bg-primary py-20" {...sectionGroupAttr("about", "cta")}>
         <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
           <h2 className="text-primary-foreground font-serif text-3xl md:text-4xl">
             {f["modern.about.cta-header"]}

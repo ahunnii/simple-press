@@ -1,4 +1,5 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
 import { ModernProductsFilterClient } from "./modern-products-filter-client";
@@ -38,7 +39,10 @@ export function ModernProductsPage({
 
   return (
     <div className="bg-background">
-      <div className="border-border border-b">
+      <div
+        className="border-border border-b"
+        {...sectionGroupAttr("products", "main")}
+      >
         <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
           <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
             {f["modern.products.tagline"]}

@@ -1,5 +1,6 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
@@ -100,12 +101,14 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
             heroPrimaryButtonLink={
               f["noise.homepage.hero-primary-button-link"] ?? undefined
             }
+            sectionAttrs={sectionGroupAttr("homepage", "hero")}
           />
 
           {/* 2. Philosophy */}
           <NoisePhilosophySection
             overline={f["noise.homepage.philosophy-overline"]}
             quote={f["noise.homepage.philosophy-quote"]}
+            sectionAttrs={sectionGroupAttr("homepage", "philosophy")}
           />
 
           {/* 3. First product rail */}
@@ -125,6 +128,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
               ctaText={f["noise.homepage-featured-button-text"] ?? "Shop All"}
               ctaHref={railOneCtaHref}
               products={railOneProducts}
+              sectionAttrs={sectionGroupAttr("homepage", "featured")}
             />
           )}
 
@@ -140,6 +144,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
               ctaText="Shop All"
               ctaHref={railTwoCtaHref}
               products={railTwoProducts}
+              sectionAttrs={sectionGroupAttr("homepage", "featured")}
             />
           )}
 
@@ -148,6 +153,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
             heading={f["noise.homepage-guarantee-heading"]}
             headingAccent={f["noise.homepage-guarantee-headingAccent"]}
             body={f["noise.homepage-guarantee-quote"]}
+            sectionAttrs={sectionGroupAttr("homepage", "guarantee")}
           />
 
           {/* 7. Rotating testimonial strip */}
@@ -155,6 +161,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
             <NoiseTestimonialStrip
               testimonials={testimonials}
               heading={f["noise.homepage-testimonials-heading"] ?? undefined}
+              sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
             />
           )}
         </PageTransition>

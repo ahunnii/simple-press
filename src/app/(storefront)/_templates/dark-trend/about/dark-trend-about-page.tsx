@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateTextListRows,
@@ -40,7 +41,7 @@ export function DarkTrendAboutPage({
   return (
     <DarkTrendGeneralLayout title="About Us">
       {/* Features Section */}
-      <section className="mb-32 py-20">
+      <section className="mb-32 py-20" {...sectionGroupAttr("about", "features")}>
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           {/* Image */}
           <div className="relative aspect-square overflow-hidden rounded-sm bg-linear-to-br from-purple-600 to-blue-500">
@@ -96,7 +97,7 @@ export function DarkTrendAboutPage({
       </section>
 
       {/* Custom Section */}
-      <section className="mb-20 py-20">
+      <section className="mb-20 py-20" {...sectionGroupAttr("about", "cta")}>
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           {/* Content */}
           <div className="space-y-6">

@@ -10,11 +10,14 @@ type Testimonial = RouterOutputs["testimonial"]["listRandom"][number];
 type NoiseTestimonialStripProps = {
   testimonials: Testimonial[];
   heading?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function NoiseTestimonialStrip({
   testimonials,
   heading,
+  sectionAttrs,
 }: NoiseTestimonialStripProps) {
   const [active, setActive] = useState(0);
 
@@ -31,7 +34,7 @@ export function NoiseTestimonialStrip({
   if (!testimonials.length) return null;
 
   return (
-    <section className="px-6 py-16">
+    <section className="px-6 py-16" {...sectionAttrs}>
       <div className="mx-auto max-w-3xl text-center">
         <p
           className="mb-8 font-mono text-[9.5px] tracking-[.28em] uppercase"

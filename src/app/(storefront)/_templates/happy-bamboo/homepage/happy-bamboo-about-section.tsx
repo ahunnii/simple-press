@@ -17,6 +17,8 @@ type Props = {
   aboutDescription?: TiptapJSON | null;
   aboutButtonText?: string | null;
   aboutButtonLink?: string | null;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 const DEFAULT_ABOUT_VIDEO_URL = "https://www.w3schools.com/html/mov_bbb.mp4";
@@ -29,9 +31,10 @@ export function HappyBambooAboutSection({
   aboutHeading = "Our Vision for a Sustainable Future",
   aboutButtonText = "Read More About Us",
   aboutButtonLink = "/about",
+  sectionAttrs,
 }: Props) {
   return (
-    <section className="py-20 md:py-32">
+    <section className="py-20 md:py-32" {...sectionAttrs}>
       <div className="container mx-auto px-4">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <FadeIn

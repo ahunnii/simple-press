@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 
@@ -82,6 +83,7 @@ export function DarkTrendBlogPage({ pages, customFields }: Props) {
     <DarkTrendGeneralLayout
       title={listingTitle}
       excerpt={listingIntro || undefined}
+      sectionAttrs={sectionGroupAttr("blog", "listing")}
     >
       <div className="mb-12">
         <div className="mx-auto flex max-w-md items-center gap-3 border-b border-white/20 pb-2">

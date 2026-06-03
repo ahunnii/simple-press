@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
 import { ElegantContactForm } from "./elegant-contact-form";
@@ -54,7 +55,7 @@ export function ElegantContactPage({ business }: DefaultContactPageTemplateProps
 
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
-      <section style={{ padding: "48px 40px 80px" }}>
+      <section {...sectionGroupAttr("contact", "hero")} style={{ padding: "48px 40px 80px" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
           <div
             className="el-contact-grid"
@@ -65,7 +66,7 @@ export function ElegantContactPage({ business }: DefaultContactPageTemplateProps
             }}
           >
             {/* ── Left: info ── */}
-            <div>
+            <div {...sectionGroupAttr("contact", "info")}>
               <div style={fadeStyle(0)}>
                 <span
                   style={{
@@ -179,6 +180,7 @@ export function ElegantContactPage({ business }: DefaultContactPageTemplateProps
 
             {/* ── Right: form panel ── */}
             <div
+              {...sectionGroupAttr("contact", "form")}
               style={{
                 ...fadeStyle(0.2),
                 background: "var(--el-paper, #fbf8f2)",

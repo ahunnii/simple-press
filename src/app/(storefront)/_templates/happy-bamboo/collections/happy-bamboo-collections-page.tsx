@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Leaf, Sparkles } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -37,7 +38,10 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
   return (
     <PageTransition>
       {/* Hero Section */}
-      <section className="bg-muted/50 py-16 md:py-24">
+      <section
+        className="bg-muted/50 py-16 md:py-24"
+        {...sectionGroupAttr("collections", "listing")}
+      >
         <div className="container mx-auto px-4">
           <FadeIn className="mx-auto max-w-3xl text-center">
             <Badge variant="secondary" className="mb-4">
@@ -118,7 +122,10 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24">
+      <section
+        className="py-16 md:py-24"
+        {...sectionGroupAttr("collections", "cta")}
+      >
         <div className="container mx-auto px-4">
           <FadeIn>
             <div className="mx-auto max-w-2xl text-center">

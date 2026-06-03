@@ -10,6 +10,7 @@ import {
   getListFieldValue,
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { DEFAULT_ELEGANT_ABOUT_FEATURES } from "..";
 
@@ -20,6 +21,8 @@ type Props = {
   aboutVideo?: string;
   aboutImage?: string;
   aboutTagline?: string;
+  /** Spread on root <section> for preview overlay hotspot (homepage.about). */
+  sectionAttrs?: Record<string, string>;
 };
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
@@ -53,6 +56,7 @@ export function ElegantFeatureSection({
   aboutTagline,
   aboutVideo,
   aboutImage,
+  sectionAttrs,
 }: Props) {
   const { ref, visible } = useReveal();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -98,6 +102,7 @@ export function ElegantFeatureSection({
 
   return (
     <section
+      {...sectionAttrs}
       style={{
         padding: "80px 40px",
         background: "var(--el-paper, #fbf8f2)",
@@ -234,6 +239,7 @@ export function ElegantFeatureSection({
             {/* Feature icon cards */}
             {featureCards && featureCards.length > 0 && (
               <div
+                {...sectionGroupAttr("homepage", "features")}
                 style={{
                   ...revealStyle(0.34),
                   display: "grid",

@@ -91,6 +91,12 @@ const PAGE_PREVIEW_PATHS: Record<string, string> = {
   about: "/about",
   blog: "/blog",
   contact: "/contact",
+  collections: "/collections",
+  testimonials: "/testimonials",
+  // The "products" tab edits the shop/product-listing page, served at /shop.
+  products: "/shop",
+  // happy-bamboo groups its shop listing fields under a "shop" page key.
+  shop: "/shop",
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -1,5 +1,6 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getRichTextFieldValue } from "~/lib/template-fields";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
@@ -23,7 +24,10 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
   return (
     <PageTransition>
       {/* ── Centered header — "Our Story" overline + h1 + intro ── */}
-      <section className="px-6 pt-20 pb-16 text-center">
+      <section
+        className="px-6 pt-20 pb-16 text-center"
+        {...sectionGroupAttr("about", "main")}
+      >
         <FadeIn className="mx-auto" style={{ maxWidth: "980px" }}>
           <p className="mb-5 font-mono text-[10px] tracking-[0.28em] text-(--vn-steel-mist) uppercase">
             Our Story
@@ -40,7 +44,7 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
         </FadeIn>
       </section>
 
-      <section className="px-6 pb-20">
+      <section className="px-6 pb-20" {...sectionGroupAttr("about", "main")}>
         <FadeIn className="mx-auto w-full max-w-5xl">
           <TiptapRenderer
             content={storyRichContent as TiptapJSON}

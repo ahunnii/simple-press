@@ -7,6 +7,7 @@ import {
   getListFieldValue,
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
@@ -66,6 +67,7 @@ export async function BambooHomepage() {
       <PageTransition>
         {/* Hero Section */}
         <section
+          {...sectionGroupAttr("homepage", "hero")}
           className={cn(
             "relative overflow-hidden",
             heroBackground ? "" : "bg-secondary",
@@ -132,7 +134,10 @@ export async function BambooHomepage() {
         </section>
 
         {/* Featured Products */}
-        <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
+        <section
+          {...sectionGroupAttr("homepage", "featured")}
+          className="mx-auto max-w-7xl px-4 py-20 lg:px-8"
+        >
           <FadeIn direction="up">
             <div className="mb-12 text-center">
               <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
@@ -182,7 +187,10 @@ export async function BambooHomepage() {
         </section>
 
         {/* Sustainability Banner */}
-        <section className="bg-primary">
+        <section
+          {...sectionGroupAttr("homepage", "sustainability")}
+          className="bg-primary"
+        >
           <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
             <StaggerContainer
               className="grid grid-cols-2 gap-8 lg:grid-cols-3"
@@ -212,7 +220,10 @@ export async function BambooHomepage() {
         </section>
 
         {/* About Teaser */}
-        <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
+        <section
+          {...sectionGroupAttr("homepage", "aboutTeaser")}
+          className="mx-auto max-w-7xl px-4 py-20 lg:px-8"
+        >
           <ScaleIn>
             <div className="bg-secondary flex flex-col items-center gap-6 rounded-2xl p-8 text-center md:p-16">
               <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
@@ -234,7 +245,10 @@ export async function BambooHomepage() {
         </section>
 
         {/* Location */}
-        <section className="bg-secondary/50 py-20">
+        <section
+          {...sectionGroupAttr("homepage", "location")}
+          className="bg-secondary/50 py-20"
+        >
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn direction="up">
               <div className="mb-12 text-center">

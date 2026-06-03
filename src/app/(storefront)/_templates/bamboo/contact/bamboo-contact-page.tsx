@@ -3,6 +3,7 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -35,7 +36,7 @@ export function BambooContactPage({
 
   return (
     <PageTransition>
-      <section className="bg-secondary">
+      <section {...sectionGroupAttr("contact", "info")} className="bg-secondary">
         <div className="mx-auto flex max-w-7xl flex-col-reverse items-center gap-8 px-4 py-16 md:flex-row md:py-24 lg:px-8">
           <FadeIn
             direction="right"

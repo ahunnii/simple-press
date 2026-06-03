@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
 
@@ -84,7 +85,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
       {/* ── Hero ── */}
-      <section style={{ padding: "48px 40px 40px" }}>
+      <section {...sectionGroupAttr("about", "hero")} style={{ padding: "48px 40px 40px" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
           <div style={fadeStyle(shown, 0)}>
             <span
@@ -139,7 +140,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
 
       {/* ── Full-width image ── */}
       {hasHeroImage && (
-        <section style={{ padding: "0 40px" }}>
+        <section {...sectionGroupAttr("about", "hero")} style={{ padding: "0 40px" }}>
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
             <div
               style={{
@@ -168,6 +169,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
       {/* ── Story / editorial ── */}
       <section
         ref={story.ref}
+        {...sectionGroupAttr("about", "story")}
         style={{ padding: "80px 40px", background: "var(--el-paper, #fbf8f2)" }}
       >
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
@@ -275,7 +277,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
 
       {/* ── Mission / Vision ── */}
       {(mission || vision) && (
-        <section ref={values.ref} style={{ padding: "80px 40px" }}>
+        <section ref={values.ref} {...sectionGroupAttr("about", "values")} style={{ padding: "80px 40px" }}>
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
             <div
               style={{

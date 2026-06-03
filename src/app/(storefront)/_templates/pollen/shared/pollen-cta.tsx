@@ -14,6 +14,7 @@ export function PollenCallToAction({
   buttonText,
   buttonLink,
   imageUrl,
+  sectionAttrs,
 }: {
   title?: string;
   subtitle?: string;
@@ -21,9 +22,14 @@ export function PollenCallToAction({
   buttonText?: string;
   buttonLink?: string;
   imageUrl?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 }) {
   return (
-    <section className="relative mx-auto max-w-7xl overflow-hidden rounded-xl py-12 md:py-24">
+    <section
+      className="relative mx-auto max-w-7xl overflow-hidden rounded-xl py-12 md:py-24"
+      {...sectionAttrs}
+    >
       <Image
         src={imageUrl ?? "/placeholder.svg"}
         alt=""

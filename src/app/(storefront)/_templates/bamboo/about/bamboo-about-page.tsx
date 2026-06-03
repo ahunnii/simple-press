@@ -7,6 +7,7 @@ import {
   getListFieldValue,
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -79,7 +80,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
   return (
     <PageTransition>
       {/* Hero */}
-      <section className="bg-secondary">
+      <section {...sectionGroupAttr("about", "hero")} className="bg-secondary">
         <div className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
           <div className="flex flex-col items-center gap-12 md:flex-row">
             <FadeIn
@@ -115,7 +116,10 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* Mission -- text + image staggered */}
-      <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
+      <section
+        {...sectionGroupAttr("about", "mission")}
+        className="mx-auto max-w-7xl px-4 py-20 lg:px-8"
+      >
         <div className="flex flex-col items-center gap-12 md:flex-row">
           <FadeIn direction="up" className="flex-1">
             <div className="relative aspect-3/4 overflow-hidden rounded-2xl">
@@ -142,7 +146,10 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* Values */}
-      <section className="bg-secondary/50 py-20">
+      <section
+        {...sectionGroupAttr("about", "values")}
+        className="bg-secondary/50 py-20"
+      >
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <FadeIn direction="up">
             <h2 className="text-foreground font-heading text-center text-3xl font-bold tracking-tight">
@@ -177,7 +184,10 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* Supplier */}
-      <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
+      <section
+        {...sectionGroupAttr("about", "supplier")}
+        className="mx-auto max-w-7xl px-4 py-20 lg:px-8"
+      >
         <div className="flex flex-col items-center gap-12 md:flex-row-reverse">
           <FadeIn direction="up" className="flex-1">
             <div className="relative aspect-4/3 overflow-hidden rounded-2xl">
@@ -204,7 +214,10 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* Why Bamboo */}
-      <section className="bg-secondary/50 py-20">
+      <section
+        {...sectionGroupAttr("about", "whyBamboo")}
+        className="bg-secondary/50 py-20"
+      >
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <FadeIn direction="up">
             <h2 className="text-foreground font-heading text-center text-3xl font-bold tracking-tight">
@@ -241,7 +254,10 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* Nationwide Shipping + Service */}
-      <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
+      <section
+        {...sectionGroupAttr("about", "nationwide")}
+        className="mx-auto max-w-7xl px-4 py-20 lg:px-8"
+      >
         <div className="flex flex-col items-center gap-12 md:flex-row">
           <FadeIn direction="up" className="flex-1">
             <div className="relative aspect-4/3 overflow-hidden rounded-2xl">
@@ -286,7 +302,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* Detroit Roots -- full-width accent */}
-      <section className="bg-primary">
+      <section {...sectionGroupAttr("about", "detroit")} className="bg-primary">
         <FadeIn
           direction="up"
           className="mx-auto max-w-7xl px-4 py-20 text-center lg:px-8"
@@ -303,7 +319,7 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* CTA */}
-      <section className="py-20">
+      <section {...sectionGroupAttr("about", "cta")} className="py-20">
         <ScaleIn>
           <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 px-4 text-center">
             <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight">

@@ -9,15 +9,19 @@ export function PollenHomepageAbout({
   services,
   sectionLabel,
   sectionHeading,
+  sectionAttrs,
 }: {
   services?: GenericIconRow[];
   sectionLabel: string;
   sectionHeading: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 }) {
   return (
     <section
       id="services"
       className="relative overflow-hidden bg-[#2a351f] py-20 md:py-32"
+      {...sectionAttrs}
     >
       {/* Repeating flower pattern overlay */}
       <div

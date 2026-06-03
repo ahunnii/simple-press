@@ -404,7 +404,24 @@ export const businessRouter = createTRPCRouter({
       ];
     }
 
-    return business;
+    if (!business) {
+      return business;
+    }
+
+    // Swap in the preview draft if the current user is an authorized owner/manager.
+    const sc = business.siteContent;
+    if (sc?.previewCustomFields != null) {
+      const previewBizId = await getAuthorizedPreviewBusinessId(business.id);
+      if (previewBizId) {
+        sc.customFields = sc.previewCustomFields;
+      }
+    }
+    // Never ship the raw draft field to clients.
+    const sanitizedSiteContent = sc
+      ? (({ previewCustomFields: _drop, ...safe }) => safe)(sc)
+      : sc;
+
+    return { ...business, siteContent: sanitizedSiteContent };
   }),
 
   getWithIntegrations: ownerAdminProcedure.query(async ({ ctx }) => {

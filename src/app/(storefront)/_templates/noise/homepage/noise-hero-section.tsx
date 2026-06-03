@@ -13,6 +13,8 @@ type NoiseHeroSectionProps = {
   heroTagline?: string;
   heroPrimaryButtonText?: string;
   heroPrimaryButtonLink?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function NoiseHeroSection({
@@ -23,6 +25,7 @@ export function NoiseHeroSection({
   heroTagline,
   heroPrimaryButtonText,
   heroPrimaryButtonLink,
+  sectionAttrs,
 }: NoiseHeroSectionProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -44,6 +47,7 @@ export function NoiseHeroSection({
         height: "clamp(520px, 100svh, 900px)",
         background: "var(--vn-steel-deep)",
       }}
+      {...sectionAttrs}
     >
       {/* Background — video takes priority over image */}
       {heroVideo ? (

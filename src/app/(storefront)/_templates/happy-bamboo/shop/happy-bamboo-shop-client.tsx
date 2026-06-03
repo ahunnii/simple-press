@@ -5,6 +5,7 @@ import { Search, X } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { getEffectivePrice } from "~/lib/prices";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -102,7 +103,10 @@ export function HappyBambooShopClient({
 
   return (
     <PageTransition>
-      <section className="mx-auto max-w-7xl py-16 md:py-24">
+      <section
+        className="mx-auto max-w-7xl py-16 md:py-24"
+        {...sectionGroupAttr("shop", "listing")}
+      >
         <FadeIn className="mx-auto max-w-3xl text-center">
           <Badge className="mb-4">Eco-Friendly Products</Badge>
           <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">

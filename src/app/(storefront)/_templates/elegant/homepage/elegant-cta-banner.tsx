@@ -33,8 +33,11 @@ function useReveal() {
 
 export function ElegantCTABanner({
   homepage,
+  sectionAttrs,
 }: {
   homepage: RouterOutputs["business"]["getHomepage"];
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 }) {
   const { ref, visible } = useReveal();
   const customFields = homepage?.siteContent?.customFields;
@@ -59,6 +62,7 @@ export function ElegantCTABanner({
 
   return (
     <section
+      {...sectionAttrs}
       style={{
         padding: "80px 40px",
         background: "var(--el-cream-2, #ebe6dc)",

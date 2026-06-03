@@ -1,4 +1,5 @@
 import { api } from "~/trpc/server";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
 import { ElegantCTABanner } from "./elegant-cta-banner";
@@ -50,9 +51,13 @@ export async function ElegantHomePage() {
         heroDescription={f["elegant.homepage.hero-description"]}
         heroButtonText={f["elegant.homepage.hero-button-text"]}
         heroButtonLink={f["elegant.homepage.hero-button-link"]}
+        sectionAttrs={sectionGroupAttr("homepage", "hero")}
       />
 
-      <ElegantTrustBadges homepage={homepage} />
+      <ElegantTrustBadges
+        homepage={homepage}
+        sectionAttrs={sectionGroupAttr("homepage", "trust-badges")}
+      />
 
       <ElegantProductGrid
         homepage={homepage}
@@ -61,6 +66,7 @@ export async function ElegantHomePage() {
         productsDescription={f["elegant.homepage.products-description"]}
         productsButtonText={f["elegant.homepage.products-button-text"]}
         productsButtonLink={f["elegant.homepage.products-button-link"]}
+        sectionAttrs={sectionGroupAttr("homepage", "products")}
       />
 
       <ElegantFeatureSection
@@ -70,11 +76,15 @@ export async function ElegantHomePage() {
         aboutVideo={f["elegant.homepage.about.video"]}
         aboutTitle={f["elegant.homepage.about.title"]}
         aboutText={f["elegant.homepage.about.text"]}
+        sectionAttrs={sectionGroupAttr("homepage", "about")}
       />
 
       <ElegantTestimonials />
 
-      <ElegantCTABanner homepage={homepage} />
+      <ElegantCTABanner
+        homepage={homepage}
+        sectionAttrs={sectionGroupAttr("homepage", "cta")}
+      />
 
       <ElegantNewsletter />
     </>

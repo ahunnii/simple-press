@@ -3,6 +3,7 @@ import { ExternalLink, Heart, Leaf, Star } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   isContentEmpty,
@@ -103,7 +104,10 @@ export function HappyBambooAboutPage({
   return (
     <PageTransition>
       {/* Hero Section — Mission & Vision */}
-      <section className="bg-muted/50 relative overflow-hidden py-16 md:py-28">
+      <section
+        className="bg-muted/50 relative overflow-hidden py-16 md:py-28"
+        {...sectionGroupAttr("about", "hero")}
+      >
         <div className="container mx-auto px-4">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <FadeIn direction="left">
@@ -155,7 +159,7 @@ export function HappyBambooAboutPage({
       </section>
 
       {/* Mission Banner */}
-      <section className="py-12 md:py-16">
+      <section className="py-12 md:py-16" {...sectionGroupAttr("about", "mission")}>
         <div className="container mx-auto px-4">
           <FadeIn>
             <div className="bg-primary relative overflow-hidden rounded-2xl px-8 py-10 md:px-12 md:py-14">
@@ -190,7 +194,10 @@ export function HappyBambooAboutPage({
       </section>
 
       {/* Our Services Section */}
-      <section className="bg-muted/50 py-20 md:py-32">
+      <section
+        className="bg-muted/50 py-20 md:py-32"
+        {...sectionGroupAttr("about", "services")}
+      >
         <div className="container mx-auto px-4">
           <FadeIn className="mb-16 text-center">
             <Badge className="mb-4">
@@ -228,7 +235,7 @@ export function HappyBambooAboutPage({
       </section>
 
       {/* Why Bamboo Is Better Section */}
-      <section className="py-20 md:py-32">
+      <section className="py-20 md:py-32" {...sectionGroupAttr("about", "bamboo")}>
         <div className="container mx-auto px-4">
           <div className="grid items-start gap-12 lg:grid-cols-5">
             <div className="lg:col-span-3">
@@ -311,7 +318,10 @@ export function HappyBambooAboutPage({
       </section>
 
       {/* CTA Section with Image */}
-      <section className="relative mx-auto max-w-6xl overflow-hidden">
+      <section
+        className="relative mx-auto max-w-6xl overflow-hidden"
+        {...sectionGroupAttr("about", "cta")}
+      >
         <FadeIn
           direction="up"
           className="relative aspect-16/7 w-full overflow-hidden rounded-xl"
@@ -326,7 +336,10 @@ export function HappyBambooAboutPage({
       </section>
       {/* Connect With Us Section */}
 
-      <section className="bg-muted/50 py-20 md:py-24">
+      <section
+        className="bg-muted/50 py-20 md:py-24"
+        {...sectionGroupAttr("about", "connect-with-us")}
+      >
         <div className="container mx-auto px-4">
           <FadeIn className="mb-12 text-center">
             <Badge className="mb-2">

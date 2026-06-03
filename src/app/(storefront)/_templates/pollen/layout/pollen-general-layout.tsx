@@ -13,6 +13,8 @@ type Props = {
   subtitle?: string;
   imageUrl?: string;
   showCTA?: boolean;
+  /** Spread on the hero header <section> for the preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 export function PollenGeneralLayout({
   business,
@@ -21,6 +23,7 @@ export function PollenGeneralLayout({
   subtitle,
   imageUrl,
   showCTA = true,
+  sectionAttrs,
 }: Props) {
   const f = resolveFields(business?.siteContent?.customFields, [
     "pollen.global.header-background",
@@ -36,7 +39,10 @@ export function PollenGeneralLayout({
     <PageTransition>
       <div className="bg-background pt-24">
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-24 pb-16 md:py-32">
+        <section
+          className="relative overflow-hidden py-24 pb-16 md:py-32"
+          {...sectionAttrs}
+        >
           <Image
             src={!!imageUrl ? imageUrl : f["pollen.global.header-background"]!}
             alt={title ?? ""}

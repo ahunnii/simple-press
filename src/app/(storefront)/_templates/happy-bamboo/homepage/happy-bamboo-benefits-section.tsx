@@ -15,6 +15,8 @@ type Props = {
   heading?: string;
   intro?: string;
   closing?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function HappyBambooBenefitsSection({
@@ -22,6 +24,7 @@ export function HappyBambooBenefitsSection({
   heading = "Why Choose Bamboo Products?",
   intro = "Bamboo products come with a variety of benefits, making them an appealing option for many consumers.",
   closing = "Overall, choosing bamboo products can be a responsible and eco-conscious decision that benefits both consumers and the environment.",
+  sectionAttrs,
 }: Props) {
   const benefitsListRaw = getListFieldValue(
     themeSpecificFieldsRaw,
@@ -30,7 +33,7 @@ export function HappyBambooBenefitsSection({
   const items = parseHappyBambooBenefitsList(benefitsListRaw);
 
   return (
-    <section className="bg-muted/50 py-20 md:py-32">
+    <section className="bg-muted/50 py-20 md:py-32" {...sectionAttrs}>
       <div className="container mx-auto px-4">
         <FadeIn className="mb-16 text-center">
           <span className="text-primary text-sm font-semibold tracking-wider uppercase">

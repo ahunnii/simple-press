@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "../index";
@@ -55,6 +56,7 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
           background: "var(--vn-paper)",
           borderBottom: "1px solid var(--vn-line-soft) ",
         }}
+        {...sectionGroupAttr("shop", "listing")}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "1440px" }}>
           <p

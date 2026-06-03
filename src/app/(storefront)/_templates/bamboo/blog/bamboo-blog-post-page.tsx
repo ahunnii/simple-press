@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, CalendarDays, Leaf } from "lucide-react";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -102,7 +103,10 @@ export function BambooBlogPostPage({
 
               {(ctaHeading ?? ctaBody) && (
                 <FadeIn delay={0.1} className="mt-10">
-                  <div className="border-border/60 bg-muted/50 rounded-2xl border p-6 md:p-8">
+                  <div
+                    {...sectionGroupAttr("blog", "post")}
+                    className="border-border/60 bg-muted/50 rounded-2xl border p-6 md:p-8"
+                  >
                     <div className="flex items-start gap-4">
                       <div className="bg-primary/10 shrink-0 rounded-full p-3" aria-hidden="true">
                         <Leaf className="text-primary h-6 w-6" />

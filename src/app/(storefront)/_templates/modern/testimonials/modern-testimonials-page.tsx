@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
@@ -25,6 +26,7 @@ export async function ModernTestimonialsPage({
       title={f["modern.testimonials.header"]}
       subtitle={f["modern.testimonials.tagline"]}
       excerpt={f["modern.testimonials.description"]}
+      sectionAttrs={sectionGroupAttr("testimonials", "page")}
     >
       <section className="bg-background py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -91,7 +93,10 @@ export async function ModernTestimonialsPage({
                   </article>
                 ))}
               </div>
-              <div className="bg-muted/40 mt-12 rounded-2xl px-8 py-12 text-center">
+              <div
+                className="bg-muted/40 mt-12 rounded-2xl px-8 py-12 text-center"
+                {...sectionGroupAttr("testimonials", "call-to-action")}
+              >
                 <h2 className="text-2xl font-bold">
                   {f["modern.testimonials.call-to-action.header"]}
                 </h2>

@@ -28,6 +28,8 @@ type Props = {
   buttonText?: string;
   buttonLink?: string;
   imageUrl?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function PollenHero({
@@ -37,9 +39,13 @@ export function PollenHero({
   buttonText,
   buttonLink,
   imageUrl,
+  sectionAttrs,
 }: Props) {
   return (
-    <section className="relative flex h-svh min-h-[70vh] items-center justify-center overflow-hidden py-20 sm:py-28 md:min-h-[80vh] md:py-40">
+    <section
+      className="relative flex h-svh min-h-[70vh] items-center justify-center overflow-hidden py-20 sm:py-28 md:min-h-[80vh] md:py-40"
+      {...sectionAttrs}
+    >
       {/* Background image */}
       <Image
         src={imageUrl ?? ""}

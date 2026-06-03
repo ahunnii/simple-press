@@ -1,6 +1,7 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateFAQListRows,
@@ -43,7 +44,10 @@ export function ModernContactPage({
   return (
     <div className="bg-background">
       {/* Header */}
-      <section className="bg-secondary py-20">
+      <section
+        className="bg-secondary py-20"
+        {...sectionGroupAttr("contact", "main")}
+      >
         <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
           <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
             {f["modern.contact.page-tagline"]}
@@ -62,7 +66,7 @@ export function ModernContactPage({
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-16 lg:grid-cols-5">
             {/* Contact Details */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2" {...sectionGroupAttr("contact", "info")}>
               <h2 className="text-foreground font-serif text-2xl md:text-3xl">
                 {f["modern.contact.info-title"]}
               </h2>
@@ -122,7 +126,7 @@ export function ModernContactPage({
             </div>
 
             {/* Form */}
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3" {...sectionGroupAttr("contact", "form")}>
               <div className="border-border bg-card rounded-sm border p-8 md:p-10">
                 <h2 className="text-foreground font-serif text-2xl md:text-3xl">
                   {f["modern.contact.form-title"]}
@@ -138,7 +142,10 @@ export function ModernContactPage({
       </section>
 
       {/* FAQ teaser */}
-      <section className="border-border bg-secondary border-t py-20">
+      <section
+        className="border-border bg-secondary border-t py-20"
+        {...sectionGroupAttr("contact", "questions")}
+      >
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center">
             <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">

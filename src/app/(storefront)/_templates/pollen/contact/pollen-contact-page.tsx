@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
   StaggerContainer,
@@ -57,8 +58,12 @@ export function PollenContactPage({
       business={business}
       title={f["pollen.contact.page-title"] ?? "Contact Us"}
       subtitle={f["pollen.contact.page-subtitle"] ?? "Let's Talk"}
+      sectionAttrs={sectionGroupAttr("contact", "main")}
     >
-      <div className="mx-auto max-w-7xl px-4 py-20 pb-20 sm:px-6 md:py-20 lg:px-8">
+      <div
+        className="mx-auto max-w-7xl px-4 py-20 pb-20 sm:px-6 md:py-20 lg:px-8"
+        {...sectionGroupAttr("contact", "main")}
+      >
         <StaggerContainer className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">
           {contactInfo.map((info) => (
             <StaggerItem key={info.label}>

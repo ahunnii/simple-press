@@ -9,6 +9,7 @@ import { ArrowRight, CalendarDays, Leaf, Search, Tag } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent } from "~/components/ui/card";
@@ -111,7 +112,10 @@ export function HappyBambooBlogPage({ pages, customFields }: Props) {
   return (
     <PageTransition>
       {/* Page Header */}
-      <section className="bg-muted/50 py-16 md:py-24">
+      <section
+        className="bg-muted/50 py-16 md:py-24"
+        {...sectionGroupAttr("blog", "listing")}
+      >
         <div className="container mx-auto px-4">
           <div className="mx-auto flex w-full flex-col items-center justify-center gap-12 md:flex-row">
             {/* Text content */}

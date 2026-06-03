@@ -16,6 +16,8 @@ type Props = {
   buttonText?: string;
   buttonLink?: string;
   galleryItems?: GenericImageRow[];
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function PollenHomepageGallery({
@@ -24,9 +26,10 @@ export function PollenHomepageGallery({
   buttonText,
   buttonLink,
   galleryItems,
+  sectionAttrs,
 }: Props) {
   return (
-    <section id="gallery" className="bg-background py-20 md:py-32">
+    <section id="gallery" className="bg-background py-20 md:py-32" {...sectionAttrs}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <FadeIn direction="up">
           <div className="mx-auto mb-12 max-w-3xl text-center">

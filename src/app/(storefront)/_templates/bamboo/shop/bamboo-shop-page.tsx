@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
   PageTransition,
@@ -29,7 +30,7 @@ export async function BambooShopPage({
     <PageTransition>
       <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
         <FadeIn direction="up">
-          <div className="mb-12">
+          <div {...sectionGroupAttr("products", "listing")} className="mb-12">
             <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
               <span className="text-balance">
                 {f["bamboo.products.listing-title"]}

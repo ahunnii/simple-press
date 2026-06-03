@@ -8,6 +8,7 @@ import { CalendarDays, Search } from "lucide-react";
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import type { RouterOutputs } from "~/trpc/react";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 import { FadeIn } from "~/components/page-animations";
@@ -93,6 +94,7 @@ export function PollenBlogPage({ pages, customFields, business }: Props) {
         title={listingTitle}
         subtitle="Blog"
         imageUrl={heroImageUrl}
+        sectionAttrs={sectionGroupAttr("blog", "header")}
       >
         <section className="bg-background py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -126,6 +128,7 @@ export function PollenBlogPage({ pages, customFields, business }: Props) {
       title={listingTitle}
       subtitle="Blog"
       imageUrl={heroImageUrl}
+      sectionAttrs={sectionGroupAttr("blog", "header")}
     >
       <section className="bg-background py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

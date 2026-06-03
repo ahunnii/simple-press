@@ -17,6 +17,8 @@ type Props = {
   heroDescription?: string;
   heroButtonText?: string;
   heroButtonLink?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
@@ -31,6 +33,7 @@ export function ElegantHero({
   heroDescription,
   heroButtonText,
   heroButtonLink,
+  sectionAttrs,
 }: Props) {
   const [shown, setShown] = useState(false);
   const [videoPaused, setVideoPaused] = useState(false);
@@ -78,6 +81,7 @@ export function ElegantHero({
 
   return (
     <section
+      {...sectionAttrs}
       style={{
         padding: "0 16px",
         marginTop: -100,

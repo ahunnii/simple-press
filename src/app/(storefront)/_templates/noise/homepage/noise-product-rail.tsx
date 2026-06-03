@@ -23,6 +23,8 @@ type NoiseProductRailProps = {
   products: FeaturedProduct[];
   /** Maximum products to show — defaults to 4 */
   limit?: number;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function NoiseProductRail({
@@ -33,6 +35,7 @@ export function NoiseProductRail({
   ctaHref,
   products,
   limit = 4,
+  sectionAttrs,
 }: NoiseProductRailProps) {
   const shown = products.slice(0, limit);
   if (shown.length === 0) return null;
@@ -41,6 +44,7 @@ export function NoiseProductRail({
     <section
       className="border-foreground/15 px-7 py-16"
       style={{ background: "var(--vn-paper)" }}
+      {...sectionAttrs}
     >
       <div className="mx-auto max-w-7xl">
         {/* Rail header */}

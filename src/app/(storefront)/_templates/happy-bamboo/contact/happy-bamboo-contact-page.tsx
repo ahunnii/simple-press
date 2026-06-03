@@ -4,6 +4,7 @@
 import { Mail, MapPin, MessageSquare, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getListFieldValue } from "~/lib/template-fields";
 import {
   Accordion,
@@ -74,7 +75,10 @@ export function HappyBambooContactPage({
 
   return (
     <PageTransition>
-      <section className="bg-muted/50 py-16 md:py-24">
+      <section
+        className="bg-muted/50 py-16 md:py-24"
+        {...sectionGroupAttr("contact", "info")}
+      >
         <div className="container mx-auto px-4">
           <div className="mx-auto flex w-full flex-col items-center justify-center gap-12 md:flex-row">
             {/* Text content */}
@@ -148,7 +152,10 @@ export function HappyBambooContactPage({
       </section>
 
       {/* FAQ Section */}
-      <section className="bg-muted/50 py-12 md:py-20">
+      <section
+        className="bg-muted/50 py-12 md:py-20"
+        {...sectionGroupAttr("contact", "faq")}
+      >
         <div className="container mx-auto px-4">
           <FadeIn className="mb-12 text-center">
             <h2 className="mb-4 font-serif text-3xl font-bold md:text-4xl">

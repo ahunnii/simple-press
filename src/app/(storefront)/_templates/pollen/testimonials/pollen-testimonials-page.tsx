@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
@@ -25,9 +26,13 @@ export async function PollenTestimonialsPage({
       business={business}
       title={f["pollen.testimonials.section-heading"]}
       subtitle={f["pollen.testimonials.section-label"]}
+      sectionAttrs={sectionGroupAttr("testimonials", "page")}
     >
       <PollenTestimonialsWall testimonials={testimonials} />
-      <section className="bg-[#f5f2ee] py-16">
+      <section
+        className="bg-[#f5f2ee] py-16"
+        {...sectionGroupAttr("testimonials", "page")}
+      >
         <div className="mx-auto max-w-2xl px-4 text-center">
           <h2 className="text-2xl font-bold text-[#2a351f]">
             {f["pollen.testimonials.call-to-action-header"]}

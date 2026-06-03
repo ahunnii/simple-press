@@ -1,4 +1,5 @@
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   Accordion,
   AccordionContent,
@@ -45,7 +46,10 @@ export function NoiseContactPage({
   return (
     <PageTransition>
       {/* ── Centered header — "Get in touch" overline + h1 + description ── */}
-      <section className="px-6 pt-20 pb-0 text-center">
+      <section
+        className="px-6 pt-20 pb-0 text-center"
+        {...sectionGroupAttr("contact", "info")}
+      >
         <FadeIn className="mx-auto" style={{ maxWidth: "880px" }}>
           <p className="mb-5 font-mono text-[10px] tracking-[0.28em] text-(--vn-steel-mist) uppercase">
             Contact Us
@@ -106,7 +110,11 @@ export function NoiseContactPage({
       </section>
 
       {/* ── FAQ ── */}
-      <section className="px-7 py-16" style={{ background: "var(--vn-paper)" }}>
+      <section
+        className="px-7 py-16"
+        style={{ background: "var(--vn-paper)" }}
+        {...sectionGroupAttr("contact", "faq")}
+      >
         <FadeIn className="mx-auto max-w-4xl">
           <div className="border-foreground/15 mb-10 flex items-end justify-between border-b pb-6">
             <div>

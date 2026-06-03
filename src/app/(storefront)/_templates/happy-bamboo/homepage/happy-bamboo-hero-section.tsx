@@ -15,6 +15,7 @@ export function HappyBambooHeroSection({
   heroDescription = `Luxuriously soft, tree-free happy-bamboo paper products crafted in Detroit. Because what you bring into your home should be as thoughtful as the life you build in it.`,
   heroPrimaryButtonText = "Shop Now",
   heroPrimaryButtonLink = "/shop",
+  sectionAttrs,
 }: {
   heroImage?: string;
   heroWelcome?: string;
@@ -23,9 +24,14 @@ export function HappyBambooHeroSection({
   heroDescription?: string;
   heroPrimaryButtonText?: string;
   heroPrimaryButtonLink?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 }) {
   return (
-    <section className="relative min-h-[90vh] overflow-hidden">
+    <section
+      className="relative min-h-[90vh] overflow-hidden"
+      {...sectionAttrs}
+    >
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image

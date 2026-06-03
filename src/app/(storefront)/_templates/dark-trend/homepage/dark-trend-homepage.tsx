@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { formatPrice } from "~/lib/prices";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
@@ -53,7 +54,10 @@ export async function DarkTrendHomepage() {
   return (
     <div className="min-h-screen bg-[#1A1A1A] pb-20 text-white">
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
+      <section
+        className="relative overflow-hidden"
+        {...sectionGroupAttr("homepage", "hero")}
+      >
         <div className="relative h-[85vh] min-h-[560px]">
           <Image
             src={f["dark-trend.homepage.hero-image"] ?? "/placeholder.svg"}

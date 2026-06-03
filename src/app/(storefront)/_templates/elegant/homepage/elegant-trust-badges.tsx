@@ -12,8 +12,11 @@ import { DEFAULT_ELEGANT_TRUST_BADGES } from "..";
 
 export function ElegantTrustBadges({
   homepage,
+  sectionAttrs,
 }: {
   homepage: RouterOutputs["business"]["getHomepage"];
+  /** Spread on root <div> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 }) {
   const [isPaused, setIsPaused] = useState(false);
 
@@ -29,6 +32,7 @@ export function ElegantTrustBadges({
 
   return (
     <div
+      {...sectionAttrs}
       style={{
         overflow: "hidden",
         borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",

@@ -7,6 +7,7 @@ import { ArrowRight, Search } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 
 import { resolveFields } from "..";
@@ -85,7 +86,7 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
   if (pages.length === 0) {
     return (
       <div style={{ background: "var(--el-cream, #f5f1ea)", minHeight: "60vh" }}>
-        <section style={{ padding: "48px 40px 80px" }}>
+        <section {...sectionGroupAttr("blog", "header")} style={{ padding: "48px 40px 80px" }}>
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
             <div style={fadeStyle(0)}>
               <span style={{
@@ -126,7 +127,7 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
       {/* ── Hero ── */}
-      <section style={{ padding: "48px 40px 0" }}>
+      <section {...sectionGroupAttr("blog", "header")} style={{ padding: "48px 40px 0" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
           <div style={fadeStyle(0)}>
             <span style={{

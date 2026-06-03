@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -14,7 +15,10 @@ export function PollenShopPage({ business }: DefaultProductsPageTemplateProps) {
 
   return (
     <PageTransition>
-      <section className="mx-auto max-w-7xl px-4 pt-40 pb-8 sm:px-6 lg:px-8">
+      <section
+        className="mx-auto max-w-7xl px-4 pt-40 pb-8 sm:px-6 lg:px-8"
+        {...sectionGroupAttr("products", "shop")}
+      >
         <FadeIn direction="up">
           <div className="mb-12">
             <p className="mb-2 text-sm font-medium tracking-wider text-[#5e7747] uppercase">

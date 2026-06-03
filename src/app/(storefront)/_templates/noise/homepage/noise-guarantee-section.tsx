@@ -8,6 +8,8 @@ type NoiseGuaranteeSectionProps = {
   headingAccent?: string;
   body?: string;
   image?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function NoiseGuaranteeSection({
@@ -16,9 +18,10 @@ export function NoiseGuaranteeSection({
   headingAccent,
   body,
   image,
+  sectionAttrs,
 }: NoiseGuaranteeSectionProps) {
   return (
-    <section className="px-7 py-16">
+    <section className="px-7 py-16" {...sectionAttrs}>
       <FadeIn className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 md:grid-cols-2 md:gap-24">
         {/* Text side */}
         <div>

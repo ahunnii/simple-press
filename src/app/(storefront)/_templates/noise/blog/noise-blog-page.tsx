@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
   PageTransition,
@@ -62,6 +63,7 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
       <section
         className="border-foreground border-b px-6 pt-16 pb-14 text-center"
         style={{ background: "var(--vn-paper)" }}
+        {...sectionGroupAttr("blog", "listing")}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "1280px" }}>
           <p

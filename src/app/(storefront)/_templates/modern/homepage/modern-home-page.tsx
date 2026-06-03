@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateListRows,
@@ -46,7 +47,10 @@ export async function ModernHomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
+      <section
+        className="relative overflow-hidden"
+        {...sectionGroupAttr("homepage", "hero")}
+      >
         <div className="relative h-[85vh] min-h-[600px]">
           <Image
             src={f["modern.homepage.hero-image"]!}
@@ -79,7 +83,10 @@ export async function ModernHomePage() {
       </section>
 
       {/* Values Strip */}
-      <section className="border-border bg-background border-b">
+      <section
+        className="border-border bg-background border-b"
+        {...sectionGroupAttr("homepage", "features")}
+      >
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {(valuesList?.length ?? 0) > 0
@@ -108,7 +115,10 @@ export async function ModernHomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="bg-background py-20">
+      <section
+        className="bg-background py-20"
+        {...sectionGroupAttr("homepage", "products")}
+      >
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex items-end justify-between">
             <div>
@@ -143,7 +153,7 @@ export async function ModernHomePage() {
       </section>
 
       {/* Collection CTA */}
-      <section className="bg-secondary">
+      <section className="bg-secondary" {...sectionGroupAttr("homepage", "about")}>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 items-center gap-12 py-20 lg:grid-cols-2">
             <div>

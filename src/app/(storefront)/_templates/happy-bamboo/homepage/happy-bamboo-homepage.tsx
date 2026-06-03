@@ -1,3 +1,4 @@
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getRichTextFieldValue } from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
@@ -58,6 +59,7 @@ export async function HappyBambooHomepage() {
           heroPrimaryButtonLink={themeSpecificFields?.[
             "happy-bamboo.homepage.hero-primary-button-link"
           ]?.trim()}
+          sectionAttrs={sectionGroupAttr("homepage", "hero")}
         />
 
         <HappyBambooAboutSection
@@ -68,6 +70,7 @@ export async function HappyBambooHomepage() {
           aboutButtonText={f["happy-bamboo.homepage-about-button-text"]}
           aboutButtonLink={f["happy-bamboo.homepage-about-button-link"]}
           aboutImageUrl={f["happy-bamboo.homepage-about-image"]}
+          sectionAttrs={sectionGroupAttr("homepage", "aboutTeaser")}
         />
 
         {/* Featured Products */}
@@ -85,6 +88,7 @@ export async function HappyBambooHomepage() {
           featuredButtonLink={themeSpecificFields?.[
             "happy-bamboo.homepage-featured-button-link"
           ]?.trim()}
+          sectionAttrs={sectionGroupAttr("homepage", "featured")}
         />
 
         <HappyBambooBenefitsSection
@@ -98,12 +102,14 @@ export async function HappyBambooHomepage() {
           closing={themeSpecificFields?.[
             "happy-bamboo.homepage-benefits-closing"
           ]?.trim()}
+          sectionAttrs={sectionGroupAttr("homepage", "benefits")}
         />
         <HappyBambooTestimonialsSection
           heading={themeSpecificFields?.[
             "happy-bamboo.homepage-testimonials-heading"
           ]?.trim()}
           testimonials={testimonials}
+          sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
         />
         {/* <HappyBambooCtaSection
           heading={themeSpecificFields?.[

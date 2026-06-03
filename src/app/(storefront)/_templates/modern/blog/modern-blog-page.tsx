@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { useBlogPosts } from "~/hooks/use-blog-posts";
 import { Input } from "~/components/ui/input";
@@ -33,6 +34,7 @@ export function ModernBlogPage({ pages, customFields }: Props) {
         title={f["modern.blog.listing-title"]}
         subtitle={f["modern.blog.listing-tagline"]}
         excerpt={f["modern.blog.listing-intro"]}
+        sectionAttrs={sectionGroupAttr("blog", "header")}
       >
         <section className="bg-background py-16">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -58,6 +60,7 @@ export function ModernBlogPage({ pages, customFields }: Props) {
       title={f["modern.blog.listing-title"]}
       subtitle={f["modern.blog.listing-tagline"]}
       excerpt={f["modern.blog.listing-intro"]}
+      sectionAttrs={sectionGroupAttr("blog", "header")}
     >
       <section className="bg-background py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

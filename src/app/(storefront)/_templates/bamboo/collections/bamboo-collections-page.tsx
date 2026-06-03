@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "../index";
 
@@ -18,7 +19,10 @@ export function BambooCollectionsPage({
   return (
     <div className="bg-background">
       {/* Header */}
-      <div className="bg-secondary/30 border-border border-b px-4 py-16 text-center sm:px-6 lg:px-8">
+      <div
+        {...sectionGroupAttr("collections", "listing")}
+        className="bg-secondary/30 border-border border-b px-4 py-16 text-center sm:px-6 lg:px-8"
+      >
         <h1 className="font-heading text-foreground text-4xl font-bold md:text-5xl">
           {f["bamboo.collections.listing-title"]}
         </h1>

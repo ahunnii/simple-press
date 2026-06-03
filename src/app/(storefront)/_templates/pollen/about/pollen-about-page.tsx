@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import {
   FadeIn,
@@ -35,7 +36,7 @@ export async function PollenAboutPage({
       title="About Us"
       subtitle="Our Story"
     >
-      <section className="py-20">
+      <section className="py-20" {...sectionGroupAttr("about", "main")}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <FadeIn direction="right">
@@ -64,7 +65,7 @@ export async function PollenAboutPage({
       </section>
 
       {/* Owner Section — Bamboo-style two-column image + blurb */}
-      <section className="bg-white py-20">
+      <section className="bg-white py-20" {...sectionGroupAttr("about", "owner")}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <FadeIn direction="right" className="flex-1">

@@ -6,6 +6,8 @@ type Props = {
   subtitle?: string;
   excerpt?: string;
   imageUrl?: string;
+  /** Spread on the header root for the preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function ModernGeneralLayout({
@@ -15,12 +17,13 @@ export function ModernGeneralLayout({
 
   excerpt,
   imageUrl,
+  sectionAttrs,
 }: Props) {
   return (
     <div className="bg-background">
       {imageUrl ? (
         <>
-          <section className="relative overflow-hidden">
+          <section className="relative overflow-hidden" {...sectionAttrs}>
             <div className="relative h-[50vh] min-h-[400px]">
               <>
                 <Image
@@ -62,7 +65,7 @@ export function ModernGeneralLayout({
           </section>
         </>
       ) : (
-        <div className="border-border border-b">
+        <div className="border-border border-b" {...sectionAttrs}>
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
             <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
               {subtitle}

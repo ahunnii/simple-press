@@ -19,6 +19,8 @@ type Testimonial = {
 type Props = {
   heading?: string;
   testimonials: Testimonial[];
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 function getInitials(name: string): string {
@@ -32,11 +34,12 @@ function getInitials(name: string): string {
 export function HappyBambooTestimonialsSection({
   heading = "What Consumers Say",
   testimonials,
+  sectionAttrs,
 }: Props) {
   if (testimonials.length === 0) return null;
 
   return (
-    <section className="py-20 md:py-32">
+    <section className="py-20 md:py-32" {...sectionAttrs}>
       <div className="container mx-auto px-4">
         <FadeIn className="mb-16 text-center">
           <span className="text-primary text-sm font-semibold tracking-wider uppercase">

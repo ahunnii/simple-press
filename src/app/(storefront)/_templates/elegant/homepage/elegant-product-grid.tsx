@@ -38,6 +38,7 @@ export function ElegantProductGrid({
   productsDescription,
   productsButtonText,
   productsButtonLink,
+  sectionAttrs,
 }: {
   homepage: RouterOutputs["business"]["getHomepage"];
   productsTagline?: string;
@@ -45,6 +46,8 @@ export function ElegantProductGrid({
   productsDescription?: string;
   productsButtonText?: string;
   productsButtonLink?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 }) {
   const { ref: headerRef, visible: headerVisible } = useReveal();
   const { ref: gridRef, visible: gridVisible } = useReveal();
@@ -59,6 +62,7 @@ export function ElegantProductGrid({
 
   return (
     <section
+      {...sectionAttrs}
       style={{
         padding: "80px 40px",
         background: "var(--el-cream, #f5f1ea)",

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
@@ -88,9 +89,13 @@ export async function PollenServicesPage({ business }: Props) {
       business={business}
       title={f["pollen.services.page-title"]}
       subtitle={f["pollen.services.page-subtitle"]}
+      sectionAttrs={sectionGroupAttr("products", "main")}
     >
       {/* Services Overview */}
-      <section className="bg-[#d4e8d4] py-20 md:py-32">
+      <section
+        className="bg-[#d4e8d4] py-20 md:py-32"
+        {...sectionGroupAttr("products", "main")}
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
             <FadeIn direction="up">
@@ -140,7 +145,10 @@ export async function PollenServicesPage({ business }: Props) {
       </section>
 
       {/* FAQ Section */}
-      <section className="bg-white py-20 md:py-32">
+      <section
+        className="bg-white py-20 md:py-32"
+        {...sectionGroupAttr("products", "faq")}
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <FadeIn
@@ -200,7 +208,10 @@ export async function PollenServicesPage({ business }: Props) {
 
       {/* Helpful Resources Section */}
       {resources?.length > 0 && (
-        <section className="bg-[#E5E8E0] py-20 md:py-32">
+        <section
+          className="bg-[#E5E8E0] py-20 md:py-32"
+          {...sectionGroupAttr("products", "resources")}
+        >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <FadeIn direction="up">
               <p className="mb-4 text-sm font-semibold tracking-wider text-[#2a351f] uppercase">

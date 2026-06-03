@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 // "use client";
 
 // import { createContext, useContext, useEffect, useState } from "react";
@@ -352,7 +353,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         });
       });
 
-      if (maxInventoryHit !== null) toast.error(`Only ${maxInventoryHit} available in stock`);
+      if (maxInventoryHit !== null)
+        toast.error(`Only ${maxInventoryHit} available in stock`);
     },
     [removeItem],
   );
@@ -379,7 +381,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         });
       });
 
-      if (maxInventoryHit !== null) toast.error(`Only ${maxInventoryHit} available in stock`);
+      if (maxInventoryHit !== null)
+        toast.error(`Only ${maxInventoryHit} available in stock`);
     },
     [],
   );

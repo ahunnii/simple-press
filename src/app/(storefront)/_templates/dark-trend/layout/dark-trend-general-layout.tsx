@@ -16,6 +16,8 @@ type Props = {
   parentBreadcrumb?: { label: string; href: string };
   /** Renders after the breadcrumb, before the main title (e.g. back link + date). */
   topContent?: React.ReactNode;
+  /** Spread on the header block for the preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function DarkTrendGeneralLayout({
@@ -25,11 +27,12 @@ export function DarkTrendGeneralLayout({
   excerpt,
   parentBreadcrumb,
   topContent,
+  sectionAttrs,
 }: Props) {
   return (
     <div className="flex-1 px-4 py-12">
       <div className="mx-auto max-w-7xl">
-        <div className="my-14 w-full space-y-4">
+        <div className="my-14 w-full space-y-4" {...sectionAttrs}>
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>

@@ -1,3 +1,4 @@
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
@@ -67,11 +68,13 @@ export async function PollenHomepage() {
           buttonText={f["pollen.homepage.hero-button-text"]}
           buttonLink={f["pollen.homepage.hero-button-link"]}
           imageUrl={f["pollen.homepage.hero-image"]}
+          sectionAttrs={sectionGroupAttr("homepage", "hero")}
         />
         <PollenHomepageAbout
           services={services ?? []}
           sectionLabel={f["pollen.homepage.about-service-title"] ?? ""}
           sectionHeading={f["pollen.homepage.about-service-description"] ?? ""}
+          sectionAttrs={sectionGroupAttr("homepage", "services")}
         />
         <PollenHomepageGallery
           sectionLabel={f["pollen.homepage.gallery-label"] ?? ""}
@@ -79,6 +82,7 @@ export async function PollenHomepage() {
           buttonText={f["pollen.homepage.gallery-button-text"]}
           buttonLink={f["pollen.homepage.gallery-button-link"] ?? "/gallery"}
           galleryItems={galleryItems ?? []}
+          sectionAttrs={sectionGroupAttr("homepage", "gallery")}
         />
         <PollenCallToAction
           title={f["pollen.global.cta-title"] ?? ""}
@@ -87,6 +91,7 @@ export async function PollenHomepage() {
           buttonText={f["pollen.global.cta-button-text"] ?? ""}
           buttonLink={f["pollen.global.cta-button-link"] ?? "/contact"}
           imageUrl={f["pollen.global.cta-image"] ?? "/placeholder.svg"}
+          sectionAttrs={sectionGroupAttr("global", "cta")}
         />{" "}
       </div>
     </PageTransition>

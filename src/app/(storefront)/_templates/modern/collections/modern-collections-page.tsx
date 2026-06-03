@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
 
@@ -18,7 +19,10 @@ export function ModernCollectionsPage({
 
   return (
     <div className="bg-background">
-      <div className="border-border border-b">
+      <div
+        className="border-border border-b"
+        {...sectionGroupAttr("collections", "main")}
+      >
         <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
           <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
             {f["modern.collections.tagline"]}

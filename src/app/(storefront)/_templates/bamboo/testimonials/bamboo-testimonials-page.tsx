@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Quote, Star } from "lucide-react";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Card, CardContent } from "~/components/ui/card";
@@ -40,7 +41,10 @@ export async function BambooTestimonialsPage({
 
   return (
     <PageTransition>
-      <section className="bg-secondary py-16 md:py-24">
+      <section
+        {...sectionGroupAttr("testimonials", "page")}
+        className="bg-secondary py-16 md:py-24"
+      >
         <div className="mx-auto max-w-7xl px-4 text-center lg:px-8">
           <FadeIn>
             <span className="text-primary text-sm font-semibold tracking-wider uppercase">
