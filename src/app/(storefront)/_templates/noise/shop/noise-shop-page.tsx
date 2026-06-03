@@ -90,41 +90,6 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
         </FadeIn>
       </section>
 
-      {/* ── Collection browse strip ── */}
-      {/* {collections.length > 0 && (
-        <section
-          className="border-foreground/20 border-b px-7 py-8"
-          style={{ background: "var(--vn-paper)" }}
-        >
-          <div
-            className="mx-auto flex flex-wrap items-center gap-3"
-            style={{ maxWidth: "1440px" }}
-          >
-            <span
-              className="mr-2 font-mono text-[10px] tracking-[0.22em] uppercase"
-              style={{ color: "var(--vn-steel-mist)" }}
-            >
-              Browse:
-            </span>
-            {collections.map((col) => (
-              <Link
-                key={col.id}
-                href={`/collections/${col.slug}`}
-                className="vn-stamp hover:bg-foreground hover:text-background text-[10px] transition-all"
-              >
-                {col.name}
-                <span
-                  className="font-mono text-[9px]"
-                  style={{ color: "var(--vn-steel-mist)" }}
-                >
-                  &nbsp;{col.count}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )} */}
-
       {/* ── Products: sidebar filters + grid (client) ── */}
       <Suspense>
         <NoiseShopClient

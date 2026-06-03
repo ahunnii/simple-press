@@ -10,16 +10,25 @@ type IntroImage = { url: string; altText: string | null };
 export function NoiseIntroWrapper({
   children,
   introImages,
+  wordmark,
+  locationTag,
 }: {
   children: React.ReactNode;
   introImages?: IntroImage[];
+  wordmark?: string;
+  locationTag?: string;
 }) {
   const [done, setDone] = useState(false);
 
   return (
     <>
       {!done && (
-        <NoiseIntroOverlay images={introImages} onDone={() => setDone(true)} />
+        <NoiseIntroOverlay
+          images={introImages}
+          onDone={() => setDone(true)}
+          wordmark={wordmark}
+          locationTag={locationTag}
+        />
       )}
       {children}
     </>

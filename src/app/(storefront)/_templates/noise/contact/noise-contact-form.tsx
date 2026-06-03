@@ -61,7 +61,7 @@ export function NoiseContactForm() {
         <button
           type="button"
           onClick={resetSuccess}
-          className="vn-stamp cursor-pointer text-[9.5px] transition-all hover:opacity-70"
+          className="vn-focus-on-dark vn-stamp cursor-pointer text-[9.5px] transition-all hover:opacity-70"
           style={{ borderColor: "var(--vn-bone)", color: "var(--vn-bone)" }}
         >
           Send another →
@@ -104,56 +104,48 @@ export function NoiseContactForm() {
 
           {/* Name + Email */}
           <div className="grid grid-cols-1 gap-7 sm:grid-cols-2">
-            <div>
-              <span className="vn-field-label">Name</span>
-              <InputFormField
-                form={form}
-                name="name"
-                label=""
-                placeholder="First & last"
-                required
-                className="flex flex-col gap-0"
-              />
-            </div>
-            <div>
-              <span className="vn-field-label">Email</span>
-              <InputFormField
-                form={form}
-                name="email"
-                label=""
-                type="email"
-                placeholder="frequency@email.com"
-                required
-                className="flex flex-col gap-0"
-              />
-            </div>
+            <InputFormField
+              form={form}
+              name="name"
+              label="Name"
+              labelClassName="vn-field-label"
+              placeholder="First & last"
+              required
+              className="flex flex-col gap-0"
+            />
+            <InputFormField
+              form={form}
+              name="email"
+              label="Email"
+              labelClassName="vn-field-label"
+              type="email"
+              placeholder="frequency@email.com"
+              required
+              className="flex flex-col gap-0"
+            />
           </div>
 
           {/* Phone */}
-          <div>
-            <span className="vn-field-label">Phone (optional)</span>
-            <PhoneFormField
-              form={form}
-              name="phone"
-              label=""
-              className="flex flex-col gap-0"
-            />
-          </div>
+          <PhoneFormField
+            form={form}
+            name="phone"
+            label="Phone (optional)"
+            labelClassName="vn-field-label"
+            className="flex flex-col gap-0"
+          />
 
           {/* Message */}
-          <div>
-            <span className="vn-field-label">Message</span>
-            <TextareaFormField
-              form={form}
-              name="message"
-              label=""
-              placeholder="Say it loud. We can take it."
-              required
-              messageLength={messageLength}
-              maxLength={messageMaxLength}
-              className="flex flex-col gap-0"
-            />
-          </div>
+          <TextareaFormField
+            form={form}
+            name="message"
+            label="Message"
+            labelClassName="vn-field-label"
+            placeholder="Say it loud. We can take it."
+            required
+            messageLength={messageLength}
+            maxLength={messageMaxLength}
+            className="flex flex-col gap-0"
+          />
 
           {/* Captcha */}
           <HCaptchaField

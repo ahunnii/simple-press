@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -14,6 +13,8 @@ import {
 } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { resolveFields } from "../index";
+
 function fmtDate(d: Date | string) {
   const dt = typeof d === "string" ? new Date(d) : d;
   return dt.toLocaleDateString("en-US", {
@@ -23,12 +24,33 @@ function fmtDate(d: Date | string) {
   });
 }
 
+type NoiseBlogPostPageProps = DefaultBlogPostPageTemplateProps & {
+  business?: {
+    name?: string | null;
+    siteContent?: { customFields?: unknown } | null;
+  } | null;
+};
+
 export function NoiseBlogPostPage({
   page,
   relatedPosts,
-}: DefaultBlogPostPageTemplateProps) {
-  const [subscribed, setSubscribed] = useState(false);
-  const [email, setEmail] = useState("");
+  business,
+}: NoiseBlogPostPageProps) {
+  const customFields = business?.siteContent?.customFields as
+    | Record<string, string>
+    | undefined;
+  const f = resolveFields(customFields, [
+    "noise.global.shop-cta-text",
+    "noise.global.shop-cta-link",
+    "noise.blog.post-shop-cta-heading",
+    "noise.blog.post-shop-cta-subheading",
+  ]);
+
+  const shopCtaText = f["noise.global.shop-cta-text"] ?? "Shop the Collection";
+  const shopCtaLink = f["noise.global.shop-cta-link"] ?? "/shop";
+  const shopCtaHeading = f["noise.blog.post-shop-cta-heading"] ?? "Shop the Collection.";
+  const shopCtaSubheading =
+    f["noise.blog.post-shop-cta-subheading"] ?? "Discover pieces made with intention.";
 
   const filtered = relatedPosts.filter((p) => p.slug !== page.slug).slice(0, 3);
 
@@ -113,24 +135,6 @@ export function NoiseBlogPostPage({
             className="prose prose-headings:font-serif prose-headings:font-light prose-headings:italic prose-headings:tracking-tight prose-headings:text-foreground prose-h2:text-[1.75rem] prose-h2:leading-snug prose-h2:mt-12 prose-h2:mb-5 prose-h3:text-[1.25rem] prose-h3:leading-snug prose-h3:mt-10 prose-h3:mb-4 prose-p:font-sans prose-p:text-[15px] prose-p:leading-[1.95] prose-p:tracking-[0.01em] prose-p:text-foreground/75 prose-p:mt-0 prose-p:mb-6 prose-strong:font-semibold prose-strong:text-foreground prose-strong:tracking-normal prose-a:text-foreground prose-a:underline prose-a:underline-offset-4 hover:prose-a:opacity-60 prose-li:font-sans prose-li:text-[15px] prose-li:leading-[1.85] prose-li:text-foreground/75 prose-li:tracking-[0.01em] prose-ul:my-4 prose-ol:my-4 prose-blockquote:border-l prose-blockquote:border-foreground/30 prose-blockquote:pl-6 prose-blockquote:font-serif prose-blockquote:italic prose-blockquote:text-[1.1rem] prose-blockquote:text-foreground/60 prose-blockquote:not-italic prose-hr:border-foreground/15 prose-hr:my-10 max-w-none"
           />
 
-          {/* Filed under + actions */}
-          {/* <div
-            className="mt-14 flex items-center justify-between border-t pt-6 font-mono text-[11px] tracking-[0.16em] uppercase"
-            style={{
-              borderColor: "var(--vn-rule)",
-              color: "var(--vn-steel-mist)",
-            }}
-          >
-            <span>Filed under · The Journal</span>
-            <div className="flex gap-5">
-              <button className="transition-opacity hover:opacity-60">
-                Share
-              </button>
-              <button className="transition-opacity hover:opacity-60">
-                Save
-              </button>
-            </div>
-          </div> */}
         </FadeIn>
       </section>
 
@@ -143,20 +147,20 @@ export function NoiseBlogPostPage({
                 className="font-serif leading-none italic"
                 style={{ fontSize: "28px", letterSpacing: "-0.01em" }}
               >
-                Wear the Noise.
+                {shopCtaHeading}
               </p>
               <p
                 className="mt-1.5 font-sans text-sm"
                 style={{ color: "var(--vn-steel-mist)" }}
               >
-                Fashion that dances. Garments that fly.
+                {shopCtaSubheading}
               </p>
             </div>
             <Link
-              href="/shop"
+              href={shopCtaLink}
               className="vn-stamp vn-stamp-solid flex-shrink-0 text-[10.5px] transition-all hover:opacity-80"
             >
-              Shop the Collection →
+              {shopCtaText} →
             </Link>
           </div>
         </FadeIn>

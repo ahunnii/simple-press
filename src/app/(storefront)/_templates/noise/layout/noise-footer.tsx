@@ -137,37 +137,6 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                 </p>
               )}
 
-              {/* Newsletter signup */}
-              {/* <div className="flex gap-0" style={{ maxWidth: "300px" }}>
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  className="flex-1 font-sans outline-none"
-                  style={{
-                    padding: "12px 14px",
-                    background: "transparent",
-                    border: "1px solid var(--vn-rule)",
-                    borderRight: "none",
-                    fontSize: "13px",
-                    color: "var(--vn-ink)",
-                  }}
-                />
-                <button
-                  className="font-mono uppercase transition-opacity hover:opacity-80"
-                  style={{
-                    padding: "12px 18px",
-                    background: "var(--vn-ink)",
-                    color: "#fff",
-                    fontSize: "11px",
-                    letterSpacing: "0.22em",
-                    fontWeight: 500,
-                    flexShrink: 0,
-                  }}
-                >
-                  JOIN
-                </button>
-              </div> */}
-
               {/* Social icons */}
               {(socialLinks?.instagram ??
                 socialLinks?.facebook ??
@@ -295,7 +264,6 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                       </a>
                     )}
                     {phone && <span className="block">{phone}</span>}
-                    {/* <span className="block">Mon–Fri · 9:00–5:00 ET</span> */}
                   </div>
                 </div>
               )}
@@ -336,7 +304,6 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                 fontSize: "9px",
                 letterSpacing: "0.18em",
                 color: "var(--vn-steel-mist)",
-                opacity: 0.7,
               }}
             >
               {label}

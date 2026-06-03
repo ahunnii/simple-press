@@ -219,7 +219,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
               style={{ color: "var(--vn-steel-mist)" }}
             >
               {deliveryMethod === "pickup"
-                ? "No shipping charge — collect at 1217 Gratiot Ave, Detroit."
+                ? "No shipping charge — contact us for pick-up details."
                 : "Shipping cost based on your store's settings."}
             </p>
           </fieldset>
@@ -374,7 +374,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
           <div className="flex flex-col gap-2.5">
             {[
               { ic: "🔒", text: "Encrypted with TLS · Powered by Stripe" },
-              { ic: "D", text: "Cut & shipped from Detroit, 48207" },
+              { ic: "✦", text: "Ships within five working days" },
               { ic: "↺", text: "14-day exchange on stock pieces" },
             ].map((note) => (
               <div key={note.ic} className="flex gap-2.5 items-start">

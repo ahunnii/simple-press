@@ -10,13 +10,6 @@ import { useProduct } from "~/hooks/use-product";
 
 import { NoiseVariantSelector } from "./noise-variant-selector";
 
-const NOTES = [
-  { icon: "✓", text: "Ships in 5–7 days from the Detroit atelier." },
-  { icon: "✱", text: "Numbered & signed inside the placket." },
-  { icon: "↺", text: "14-day exchange. We pay return postage in the US." },
-  { icon: "D", text: "Cut & finished in 48207. Detroit-made, top to seam." },
-];
-
 export function NoiseProductActions({
   product,
 }: DefaultProductPageTemplateProps) {
@@ -219,33 +212,6 @@ export function NoiseProductActions({
         </div>
       )}
 
-      {/* Notes 2×2 grid */}
-      {/* <div
-        className="grid grid-cols-2 gap-4 border-t pt-5"
-        style={{ borderColor: "var(--vn-rule)" }}
-      >
-        {NOTES.map((note) => (
-          <div key={note.icon} className="flex gap-2.5 items-start">
-            <span
-              className="flex-shrink-0 flex items-center justify-center border font-serif italic"
-              style={{
-                width: "28px",
-                height: "28px",
-                borderColor: "var(--vn-ink)",
-                fontSize: "16px",
-              }}
-            >
-              {note.icon}
-            </span>
-            <p
-              className="font-mono text-[10.5px] tracking-[0.14em] uppercase leading-relaxed"
-              style={{ color: "var(--vn-ink-soft)" }}
-            >
-              {note.text}
-            </p>
-          </div>
-        ))}
-      </div> */}
     </>
   );
 }

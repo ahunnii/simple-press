@@ -305,7 +305,10 @@
   --vn-ink-soft: #444444;
   --vn-steel: #303d4b;
   --vn-steel-deep: #1f2838;
-  --vn-steel-mist: #7a7670;
+  /* Darkened from #7a7670 (≈3.6:1) to #6b6760 (≈4.6:1 on white) so muted
+     text used at body sizes meets WCAG 1.4.3 (AA). Still reads as a soft
+     warm grey against the bone/paper backgrounds.                        */
+  --vn-steel-mist: #6b6760;
   --vn-rule: #e8e4dc;
   --vn-line-soft: #f0ece4;
   --vn-accent: #7a3b1d;
@@ -596,11 +599,30 @@
 }
 
 .noise .vn-prod-link:hover .vn-prod-pic,
+.noise .vn-prod-link:focus-within .vn-prod-pic,
 .visual-noise .vn-prod-link:hover .vn-prod-pic,
-.visual-editorial .vn-prod-link:hover .vn-prod-pic {
+.visual-noise .vn-prod-link:focus-within .vn-prod-pic,
+.visual-editorial .vn-prod-link:hover .vn-prod-pic,
+.visual-editorial .vn-prod-link:focus-within .vn-prod-pic {
   box-shadow:
     0 0 0 1px var(--vn-ink),
     5px 5px 0 0 var(--vn-ink);
+}
+
+/* Stretched card link: the title link covers the whole card as the click
+   target without nesting the add-to-cart <button> inside an <a> (fixes the
+   invalid interactive-in-interactive markup — WCAG 1.3.1 / 4.1.2).         */
+.noise .vn-card-link::after,
+.visual-noise .vn-card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.noise .vn-card-link:focus-visible,
+.visual-noise .vn-card-link:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 3px;
 }
 
 /* ─── Category cards ────────────────────────────────────────────────────── */
@@ -639,6 +661,128 @@
 .visual-noise .vn-cat-card:hover .vn-cat-meta .vn-cat-name,
 .visual-editorial .vn-cat-card:hover .vn-cat-meta .vn-cat-name {
   color: var(--vn-paper);
+}
+
+/* ─── Visual Noise Detroit — accessibility enhancements ─────────────────────
+   This template ships no theme-mapped --ring token and previously suppressed
+   focus indicators on its hand-rolled controls. The rules below restore a
+   visible focus indicator for every interactive element (WCAG 2.4.7 / 2.4.11)
+   and add prefers-reduced-motion support (WCAG 2.3.3) for the marquee, intro
+   overlay, hover-lift, pulse and card-transform animations.                  */
+
+.noise *:focus-visible,
+.visual-noise *:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 2px;
+}
+
+/* On dark steel / ink sections an ink outline is invisible. Elements placed
+   on those backgrounds opt into a paper-colored ring via .vn-focus-on-dark. */
+.noise .vn-focus-on-dark:focus-visible,
+.visual-noise .vn-focus-on-dark:focus-visible {
+  outline: 2px solid var(--vn-bone);
+  outline-offset: 3px;
+}
+
+/* The contact-form fields suppress the native outline and rely only on a
+   border-bottom color change; add a visible focus ring back for keyboard
+   users (WCAG 2.4.7).                                                        */
+.noise .vn-contact-form input:focus-visible,
+.noise .vn-contact-form textarea:focus-visible,
+.visual-noise .vn-contact-form input:focus-visible,
+.visual-noise .vn-contact-form textarea:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 3px;
+}
+
+/* ─── Product page grid (thumb-rail only on md+) ────────────────────────── */
+.noise .vn-product-grid,
+.visual-noise .vn-product-grid {
+  grid-template-columns: 1fr 1fr;
+}
+@media (min-width: 768px) {
+  .noise .vn-product-grid,
+  .visual-noise .vn-product-grid {
+    grid-template-columns: 80px 1fr 1fr;
+  }
+}
+
+/* ─── Hero overlay (replaces inline rgba) ───────────────────────────────── */
+.noise .vn-hero-overlay,
+.visual-noise .vn-hero-overlay {
+  background: linear-gradient(
+    180deg,
+    oklch(from var(--vn-ink) l c h / 0.2) 0%,
+    oklch(from var(--vn-ink) l c h / 0.35) 50%,
+    oklch(from var(--vn-ink) l c h / 0.6) 100%
+  );
+}
+
+/* ─── Button hover transition (replaces JS onMouseOver) ─────────────────── */
+/* Hero CTA button */
+.noise .vn-btn-hero,
+.visual-noise .vn-btn-hero {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  padding: 15px 38px;
+  background: var(--vn-paper);
+  color: var(--vn-ink);
+  border: 1px solid var(--vn-paper);
+  transition: background 0.15s ease, color 0.15s ease;
+  display: inline-block;
+}
+.noise .vn-btn-hero:hover,
+.visual-noise .vn-btn-hero:hover {
+  background: var(--vn-bone);
+  border-color: var(--vn-bone);
+}
+
+/* ─── Shared heading scale ───────────────────────────────────────────────── */
+/* h1 hero */
+.noise .vn-h1,
+.visual-noise .vn-h1 {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(3rem, 9vw, 7.5rem);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+/* h1 page */
+.noise .vn-h1-page,
+.visual-noise .vn-h1-page {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(3rem, 7vw, 5rem);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+/* h2 section */
+.noise .vn-h2,
+.visual-noise .vn-h2 {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noise *,
+  .noise *::before,
+  .noise *::after,
+  .visual-noise *,
+  .visual-noise *::before,
+  .visual-noise *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .elegant {

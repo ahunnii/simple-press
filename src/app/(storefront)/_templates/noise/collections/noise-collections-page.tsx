@@ -59,19 +59,6 @@ export function NoiseCollectionsPage({
           >
             All Collections
           </h1>
-          {/* <p
-            className="mx-auto mt-5 font-sans"
-            style={{
-              fontSize: "15px",
-              lineHeight: 1.85,
-              color: "var(--vn-steel-mist)",
-              maxWidth: "48ch",
-            }}
-          >
-            {list.length} {list.length === 1 ? "collection" : "collections"} —
-            each one a distinct frequency.
-          </p> */}
-
           <Link
             href="/shop"
             className="mt-5 inline-flex flex-shrink-0 font-mono text-[10.5px] tracking-[0.22em] whitespace-nowrap uppercase transition-opacity hover:opacity-70"

@@ -34,14 +34,23 @@ export async function NoiseLayout({
 }: DefaultLayoutTemplateProps) {
   const session = await getSession();
   return (
-    <main
+    <div
       className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} noise visual-noise dark:noise`}
       style={{ color: "var(--vn-ink)" }}
     >
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:rounded focus:px-4 focus:py-2 focus:shadow-lg"
+        style={{ background: "var(--vn-paper)", color: "var(--vn-ink)" }}
+      >
+        Skip to main content
+      </a>
       <NoiseAnnouncementBar businessId={business.id} />
       <NoiseHeader business={business} session={session ?? null} />
-      <div className="min-h-[calc(100vh-4rem)]">{children}</div>
+      <main id="main-content" className="min-h-[calc(100vh-4rem)]">
+        {children}
+      </main>
       <NoiseFooter business={business} />
-    </main>
+    </div>
   );
 }

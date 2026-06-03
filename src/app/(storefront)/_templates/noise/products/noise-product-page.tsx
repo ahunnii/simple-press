@@ -130,11 +130,10 @@ export function NoiseProductPage({
         style={{ background: "var(--vn-paper)" }}
       >
         <div
-          className="mx-auto"
+          className="vn-product-grid mx-auto"
           style={{
             maxWidth: "1280px",
             display: "grid",
-            gridTemplateColumns: "80px 1fr 1fr",
             gap: "28px",
             alignItems: "flex-start",
           }}
@@ -266,46 +265,6 @@ export function NoiseProductPage({
               {product.name}
             </h1>
 
-            {/* Price + stock status */}
-            {/* <div className="flex items-baseline gap-4">
-              <span
-                className="font-serif italic leading-none"
-                style={{ fontSize: "clamp(1.6rem, 2.5vw, 2.2rem)", letterSpacing: "-0.01em" }}
-              >
-                {formatPrice(product.price)}
-              </span>
-              {product.compareAtPrice && (
-                <span
-                  className="font-sans line-through"
-                  style={{ fontSize: "16px", color: "var(--vn-steel-mist)" }}
-                >
-                  {formatPrice(product.compareAtPrice)}
-                </span>
-              )}
-            </div> */}
-
-            {/* Stock indicator */}
-            {/* <div
-              className="flex items-center gap-2 font-sans text-[13px]"
-              style={{ color: inStock ? "#3f7a4f" : "var(--vn-steel-mist)" }}
-            >
-              <span
-                style={{
-                  display: "inline-block",
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: inStock ? "#3f7a4f" : "var(--vn-rule)",
-                  flexShrink: 0,
-                }}
-              />
-              {inStock
-                ? product.allowBackorders && (product.inventoryQty ?? 0) <= 0
-                  ? "Backordered · ships when available"
-                  : "In stock · ready to ship"
-                : "Out of stock"}
-            </div> */}
-
             {/* Description */}
             {product.description && (
               <p
@@ -325,25 +284,6 @@ export function NoiseProductPage({
 
             {/* Variant + add to cart + trust badges */}
             <NoiseProductActions product={product} business={business} />
-
-            {/* 3-item trust row (design's guarantee strip)
-            <div
-              className="grid grid-cols-3 gap-2 border-t pt-5"
-              style={{ borderColor: "var(--vn-line-soft)" }}
-            >
-              {TRUST_NOTES.map((note) => (
-                <div
-                  key={note}
-                  className="px-1 py-2.5 text-center font-mono text-[10px] tracking-[0.1em] uppercase"
-                  style={{
-                    border: "1px solid var(--vn-line-soft)",
-                    color: "var(--vn-steel-mist)",
-                  }}
-                >
-                  {note}
-                </div>
-              ))}
-            </div> */}
           </FadeIn>
         </div>
 
@@ -474,7 +414,7 @@ export function NoiseProductPage({
                 alt={product.name ?? "Product image"}
                 width={1200}
                 height={1200}
-                className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
+                className="max-h-[90vh] max-w-[90vw] rounded-none object-contain"
               />
               <button
                 type="button"

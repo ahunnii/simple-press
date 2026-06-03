@@ -8,6 +8,8 @@ type NoiseGuaranteeSectionProps = {
   headingAccent?: string;
   body?: string;
   image?: string;
+  /** Short label shown as a corner stamp on the image. Leave undefined to hide. */
+  stamp?: string;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
 };
@@ -18,6 +20,7 @@ export function NoiseGuaranteeSection({
   headingAccent,
   body,
   image,
+  stamp,
   sectionAttrs,
 }: NoiseGuaranteeSectionProps) {
   return (
@@ -93,13 +96,15 @@ export function NoiseGuaranteeSection({
             </div>
           )}
 
-          {/* Corner stamp */}
-          <div
-            className="absolute top-4 left-4 px-2 py-1 font-mono text-[9.5px] tracking-[.2em] uppercase"
-            style={{ background: "var(--vn-bone)", color: "var(--vn-ink)" }}
-          >
-            Made in Detroit
-          </div>
+          {/* Corner stamp — only shown when owner sets a value */}
+          {stamp && (
+            <div
+              className="absolute top-4 left-4 px-2 py-1 font-mono text-[9.5px] tracking-[.2em] uppercase"
+              style={{ background: "var(--vn-bone)", color: "var(--vn-ink)" }}
+            >
+              {stamp}
+            </div>
+          )}
         </div>
       </FadeIn>
     </section>

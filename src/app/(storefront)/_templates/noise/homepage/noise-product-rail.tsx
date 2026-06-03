@@ -83,7 +83,7 @@ export function NoiseProductRail({
 
         {/* 4-column product grid */}
         <StaggerContainer
-          className="grid grid-cols-2 gap-5 sm:grid-cols-2 lg:grid-cols-4"
+          className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4"
           staggerDelay={0.07}
         >
           {shown.map((product, index) => (

@@ -21,9 +21,25 @@ export async function NoiseTestimonialsPage({
     | undefined;
   const f = resolveFields(customFields, [
     "noise.homepage-testimonials-heading",
+    "noise.testimonials.page-overline",
+    "noise.testimonials.page-intro",
+    "noise.testimonials.cta-overline",
+    "noise.testimonials.cta-heading",
+    "noise.testimonials.cta-body",
+    "noise.testimonials.empty-state-text",
   ]);
   const heading =
     (f["noise.homepage-testimonials-heading"] ?? "").trim() || "Testimonials";
+  const pageOverline = f["noise.testimonials.page-overline"] ?? "From the people wearing it";
+  const pageIntro =
+    f["noise.testimonials.page-intro"] ??
+    "Unedited notes from our customers. We publish every review we receive — high and low.";
+  const ctaOverline = f["noise.testimonials.cta-overline"] ?? "Wearing something of ours?";
+  const ctaHeading = f["noise.testimonials.cta-heading"] ?? "Tell us how it's holding up.";
+  const ctaBody =
+    f["noise.testimonials.cta-body"] ??
+    "We read every note that comes in. Honest feedback — the awkward kind included — is how we know what to make next.";
+  const emptyStateText = f["noise.testimonials.empty-state-text"] ?? "No voices yet. Check back soon.";
   const count = testimonials.length;
 
   /* Star distribution — use testimonial rating if available, otherwise assume 5 */
@@ -54,7 +70,7 @@ export async function NoiseTestimonialsPage({
             className="mb-4 font-mono text-[10px] tracking-[0.28em] uppercase"
             style={{ color: "var(--vn-steel-mist)" }}
           >
-            From the people wearing it
+            {pageOverline}
           </p>
           <h1
             className="font-serif leading-none tracking-tight italic"
@@ -73,8 +89,7 @@ export async function NoiseTestimonialsPage({
               maxWidth: "52ch",
             }}
           >
-            Unedited notes from our customers. We publish every review we
-            receive — high and low.
+            {pageIntro}
           </p>
         </FadeIn>
       </section>
@@ -87,7 +102,7 @@ export async function NoiseTestimonialsPage({
               className="font-serif text-2xl italic"
               style={{ color: "var(--vn-steel-mist)" }}
             >
-              No voices yet. Check back soon.
+              {emptyStateText}
             </p>
             <Link href="/" className="vn-stamp mt-8 inline-flex text-[10px]">
               Back to home
@@ -124,7 +139,7 @@ export async function NoiseTestimonialsPage({
             className="mb-5 font-mono text-[9.5px] tracking-[0.28em] uppercase"
             style={{ opacity: 0.55 }}
           >
-            Wearing something of ours?
+            {ctaOverline}
           </p>
           <h2
             className="font-serif leading-none tracking-tight italic"
@@ -133,18 +148,17 @@ export async function NoiseTestimonialsPage({
               letterSpacing: "-0.02em",
             }}
           >
-            Tell us how it&apos;s holding up.
+            {ctaHeading}
           </h2>
           <p
             className="mx-auto mt-5 font-sans leading-[1.85]"
             style={{ fontSize: "14px", opacity: 0.78, maxWidth: "48ch" }}
           >
-            We read every note that comes in. Honest feedback — the awkward kind
-            included — is how we know what to make next.
+            {ctaBody}
           </p>
           <Link
             href="/testimonials/submit"
-            className="mt-8 inline-block font-mono uppercase transition-opacity hover:opacity-80"
+            className="vn-focus-on-dark mt-8 inline-block font-mono uppercase transition-opacity hover:opacity-80"
             style={{
               fontSize: "11px",
               letterSpacing: ".24em",

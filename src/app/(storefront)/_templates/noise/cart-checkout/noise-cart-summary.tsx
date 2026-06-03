@@ -13,10 +13,10 @@ import {
 import { useCart } from "~/providers/cart-context";
 
 const REASSURANCE = [
-  { icon: "✓", text: "Free DHL on orders over $250" },
-  { icon: "✱", text: "Numbered editions, hand-finished" },
-  { icon: "↺", text: "14-day exchange in the US" },
-  { icon: "D", text: "Cut & sewn in Detroit, 48207" },
+  { icon: "✓", text: "Free shipping on qualifying orders" },
+  { icon: "✱", text: "Carefully packed and hand-finished" },
+  { icon: "↺", text: "14-day exchange policy" },
+  { icon: "✦", text: "Ships within five working days" },
 ] as const;
 
 type Props = {

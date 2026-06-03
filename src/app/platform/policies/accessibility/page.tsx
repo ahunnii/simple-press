@@ -9,7 +9,7 @@ export default function AccessibilityStatementPage() {
     <div className="prose prose-lg mx-auto w-full max-w-7xl px-4 py-8">
       <h1>Accessibility Statement</h1>
       <p>
-        <strong>Last updated: May 27, 2026</strong>
+        <strong>Last updated: June 3, 2026</strong>
       </p>
       <p>
         SimplePress is operated by the Center for Generative Justice LLC. We are
@@ -36,6 +36,107 @@ export default function AccessibilityStatementPage() {
       </p>
 
       <h2>2. Recently Addressed</h2>
+
+      <h3>Noise Template — June 2026</h3>
+      <ul>
+        <li>
+          <strong>
+            Invalid landmark structure — layout root was a{" "}
+            <code>&lt;main&gt;</code>
+          </strong>{" "}
+          — The layout root now uses <code>&lt;div&gt;</code> with a proper{" "}
+          <code>&lt;main id=&quot;main-content&quot;&gt;</code> wrapping only
+          page content, so the header and footer landmarks are no longer nested
+          inside <code>main</code>. <em>WCAG 1.3.1, 4.1.1.</em>
+        </li>
+        <li>
+          <strong>No skip navigation link</strong> — A &ldquo;Skip to main
+          content&rdquo; link is now the first focusable element on every page.{" "}
+          <em>WCAG 2.4.1.</em>
+        </li>
+        <li>
+          <strong>No focus-visible indicator on any interactive element</strong>{" "}
+          — Scoped <code>.noise *:focus-visible</code> rules now provide a
+          visible 2px outline on every interactive element, with a{" "}
+          <code>.vn-focus-on-dark</code> variant for controls placed on
+          steel/ink backgrounds. <em>WCAG 2.4.7.</em>
+        </li>
+        <li>
+          <strong>No reduced-motion handling</strong> — A scoped{" "}
+          <code>prefers-reduced-motion</code> block now collapses the marquee,
+          pulsing announcement dot, intro tile/curtain motion, and product/card
+          hover animations. <em>WCAG 2.3.3.</em>
+        </li>
+        <li>
+          <strong>Nested interactive elements in product card</strong> — The
+          card wrapper was an <code>&lt;a&gt;</code> containing the add-to-cart{" "}
+          <code>&lt;button&gt;</code> (invalid markup). The wrapper is now a{" "}
+          <code>&lt;div&gt;</code>, the product title is a stretched link, and
+          the add-to-cart button is an independent sibling with an{" "}
+          <code>aria-label</code>. <em>WCAG 1.3.1, 4.1.2.</em>
+        </li>
+        <li>
+          <strong>Contact form inputs had no accessible name</strong> — Fields
+          rendered a standalone label span and passed an empty{" "}
+          <code>label</code>, leaving inputs labelled by placeholder only. Real{" "}
+          <code>&lt;label&gt;</code> associations are now wired through the form
+          field components. <em>WCAG 1.3.1, 3.3.2, 4.1.2.</em>
+        </li>
+        <li>
+          <strong>
+            Variant selector — selected state conveyed by color alone
+          </strong>{" "}
+          — Variant buttons now carry <code>aria-pressed</code> so the selected
+          option is communicated to assistive technology.{" "}
+          <em>WCAG 1.4.1, 4.1.2.</em>
+        </li>
+        <li>
+          <strong>Muted text color below contrast minimum</strong> — The{" "}
+          <code>--vn-steel-mist</code> token, used for body-sized muted text
+          (footer links, taglines, mono labels), was darkened from{" "}
+          <code>#7a7670</code> (~3.6:1) to <code>#6b6760</code> (~4.6:1), and a
+          0.7 opacity on the footer payment labels that undid the fix was
+          removed. <em>WCAG 1.4.3.</em>
+        </li>
+        <li>
+          <strong>
+            Auto-advancing testimonial carousel had no pause control
+          </strong>{" "}
+          — The testimonial rotator advances every 5 seconds; it now has a
+          labelled pause/play toggle, and auto-advance is suppressed entirely
+          when reduced motion is requested. Inactive slides are{" "}
+          <code>aria-hidden</code>, the stack is an <code>aria-live</code>{" "}
+          region, and the nav dots carry <code>aria-current</code>.{" "}
+          <em>WCAG 2.2.2, 2.3.3, 4.1.2.</em>
+        </li>
+        <li>
+          <strong>Intro overlay — modal semantics and focus management</strong>{" "}
+          — The full-screen intro animation is now a{" "}
+          <code>role=&quot;dialog&quot; aria-modal=&quot;true&quot;</code> that
+          moves focus to its Skip button on open, traps Tab within the overlay,
+          and dismisses on Escape. Under <code>prefers-reduced-motion</code> the
+          timed sequence is skipped immediately, and the duplicated curtain
+          halves are marked <code>aria-hidden</code>.{" "}
+          <em>WCAG 2.1.2, 2.4.3, 2.3.3, 1.3.1.</em>
+        </li>
+        <li>
+          <strong>
+            Text over user-uploaded imagery — contrast not guaranteed
+          </strong>{" "}
+          — The hero gradient overlay is now center-weighted, and the hero
+          tagline, hero credit strip, and intro tile labels received legibility
+          scrims (<code>text-shadow</code>) so foreground text remains readable
+          over arbitrary light hero images, video, or light intro tiles.{" "}
+          <em>WCAG 1.4.3.</em>
+        </li>
+        <li>
+          <strong>Price range slider had a weak accessible name</strong> — The
+          shop filter price slider now exposes a descriptive, value-aware{" "}
+          <code>aria-label</code>, and the collapsible filter groups carry{" "}
+          <code>aria-expanded</code> with the decorative glyph hidden.{" "}
+          <em>WCAG 1.3.1, 4.1.2.</em>
+        </li>
+      </ul>
 
       <h3>Bamboo Template — May 2026</h3>
       <ul>
@@ -783,11 +884,11 @@ export default function AccessibilityStatementPage() {
         </li>
       </ul>
       <p>
-        This statement was prepared based on internal self-assessments conducted
-        in May 2026, covering the Elegant, Default, and Bamboo storefront
-        templates. All critical and serious issues identified across three
-        templates have been resolved. It reflects the current state of the
-        platform and its storefront templates.
+        This statement was prepared based on internal self-assessments
+        conducted in May and June 2026, covering the Elegant, Default, Bamboo,
+        and Noise storefront templates. All critical and serious issues
+        identified across these four templates have been resolved. It reflects
+        the current state of the platform and its storefront templates.
       </p>
 
       <hr />

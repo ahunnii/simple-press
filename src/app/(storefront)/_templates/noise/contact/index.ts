@@ -136,6 +136,6 @@ export const DEFAULT_FAQ: {
     _id: "d5",
     question: "Where are the garments made?",
     answer:
-      "Every piece is cut, sewn, and finished in our studio on Gratiot Avenue, Detroit. Fabrics come from mills in Italy, Japan, and one weaver in North Carolina.",
+      "Every piece is cut, sewn, and finished in our studio with care. Fabrics are sourced from quality mills to ensure lasting durability and feel.",
   },
 ];

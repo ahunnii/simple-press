@@ -67,36 +67,27 @@ export function NoiseContactPage({
             {contactSubheader}
           </p>
 
-          {/* ── 3 info-block cards ── */}
-          <div className="mb-0 grid grid-cols-1 gap-6 border-0 text-left sm:grid-cols-3">
-            <NoiseContactInfoBlock
-              title="Studio"
-              lines={[
-                address ?? "1502 Michigan Ave, Studio 3",
-                "Detroit, MI 48216",
-                "United States",
-              ]}
-            />
-            <NoiseContactInfoBlock
-              title="Reach Us"
-              lines={[
-                email ?? "hello@visualnoise.example",
-                phone ?? "+1 (313) 555-0184",
-              ]}
-              links={[
-                email ? `mailto:${email}` : null,
-                phone ? `tel:${phone.replace(/\D/g, "")}` : null,
-              ]}
-            />
-            <NoiseContactInfoBlock
-              title="Hours"
-              lines={[
-                "Mon — Fri",
-                "9:00 — 17:00 ET",
-                "Closed Saturdays & Sundays",
-              ]}
-            />
-          </div>
+          {/* ── Info-block cards (only rendered when data is present) ── */}
+          {(address ?? email ?? phone) && (
+            <div className="mb-0 grid grid-cols-1 gap-6 border-0 text-left sm:grid-cols-2">
+              {address && (
+                <NoiseContactInfoBlock title="Studio" lines={[address]} />
+              )}
+              {(email ?? phone) && (
+                <NoiseContactInfoBlock
+                  title="Reach Us"
+                  lines={[
+                    ...(email ? [email] : []),
+                    ...(phone ? [phone] : []),
+                  ]}
+                  links={[
+                    ...(email ? [`mailto:${email}`] : []),
+                    ...(phone ? [`tel:${phone.replace(/\D/g, "")}`] : []),
+                  ]}
+                />
+              )}
+            </div>
+          )}
         </FadeIn>
       </section>
 

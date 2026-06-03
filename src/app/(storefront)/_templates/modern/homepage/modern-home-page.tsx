@@ -85,7 +85,7 @@ export async function ModernHomePage() {
       {/* Values Strip */}
       <section
         className="border-border bg-background border-b"
-        {...sectionGroupAttr("homepage", "features")}
+        {...sectionGroupAttr("homepage", "values")}
       >
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -153,7 +153,10 @@ export async function ModernHomePage() {
       </section>
 
       {/* Collection CTA */}
-      <section className="bg-secondary" {...sectionGroupAttr("homepage", "about")}>
+      <section
+        className="bg-secondary"
+        {...sectionGroupAttr("homepage", "about")}
+      >
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 items-center gap-12 py-20 lg:grid-cols-2">
             <div>

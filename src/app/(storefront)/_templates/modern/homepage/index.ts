@@ -137,27 +137,28 @@ const homepageProductsData: TemplateField[] = [
 ];
 const homepageAboutData: TemplateField[] = [
   {
-    key: "modern.homepage.about-header",
-    label: "About Header",
-    description: "Title for the about section",
-    type: "text",
-    page: "homepage",
-    group: "homepage.about",
-    gridColumn: "col-span-1",
-    defaultValue: "Our Story",
-    placeholder: "e.g. Our Story",
-  },
-  {
     key: "modern.homepage.about-tagline",
     label: "About Tagline",
     description: "Subtitle for the about section",
     type: "text",
     page: "homepage",
     group: "homepage.about",
-    gridColumn: "col-span-1",
+    gridColumn: "col-span-full",
     defaultValue: "About Us",
     placeholder: "e.g. About Us",
   },
+  {
+    key: "modern.homepage.about-header",
+    label: "About Header",
+    description: "Title for the about section",
+    type: "text",
+    page: "homepage",
+    group: "homepage.about",
+    gridColumn: "col-span-full",
+    defaultValue: "Our Story",
+    placeholder: "e.g. Our Story",
+  },
+
   {
     key: "modern.homepage.about-text",
     label: "About Text",
@@ -165,6 +166,7 @@ const homepageAboutData: TemplateField[] = [
     type: "textarea",
     page: "homepage",
     group: "homepage.about",
+    gridColumn: "col-span-full",
     placeholder: "e.g. We work directly with artisans from around the world...",
     defaultValue:
       "We work directly with artisans from around the world to bring you pieces that tell a story. Every item in our collection is chosen for its quality, beauty, and the hands that made it.",
@@ -176,6 +178,7 @@ const homepageAboutData: TemplateField[] = [
     type: "image",
     page: "homepage",
     group: "homepage.about",
+    gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
   },
   {
@@ -219,17 +222,17 @@ export const modernHomepageFieldGroups: TemplateFieldGroup[] = [
   },
 
   {
-    id: "homepage.features",
+    id: "homepage.values",
     title: "Values Section",
     description: "What sets your business apart?",
-    icon: "🎯",
+    icon: "💡",
     columns: 2,
   },
   {
     id: "homepage.products",
     title: "Featured Products Section",
     description: "Featured products section after the hero section",
-    icon: "🎯",
+    icon: "🛍️",
     columns: 1,
   },
 
@@ -237,7 +240,7 @@ export const modernHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.services",
     title: "Services Section",
     description: "Services section after the hero section",
-    icon: "🎯",
+    icon: "💬",
     columns: 1,
   },
 
@@ -245,7 +248,7 @@ export const modernHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.about",
     title: "About Section",
     description: "About section on the homepage",
-    icon: "🎯",
+    icon: "📖",
     columns: 2,
   },
 ];

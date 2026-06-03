@@ -42,12 +42,12 @@ const homepageHeroData: TemplateField[] = [
     key: "noise.homepage.hero-overline",
     label: "Hero Overline",
     description:
-      "Small caps label above the main title (e.g. 'Visual Noise Detroit')",
+      "Small caps label above the main title (e.g. 'New Collection')",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
-    defaultValue: "Visual Noise Detroit",
+    defaultValue: "",
   },
   {
     key: "noise.homepage.hero-title",
@@ -57,7 +57,7 @@ const homepageHeroData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
-    defaultValue: "Visual Noise",
+    defaultValue: "Made with intention.",
   },
   {
     key: "noise.homepage.hero-tagline",
@@ -130,7 +130,7 @@ const homepageEditorialData: TemplateField[] = [
     group: "homepage.editorial",
     gridColumn: "col-span-full",
     defaultValue:
-      "Fashion that dances · Garments that fly · Haute Couture · Detroit · Visual Noise ·",
+      "Fashion that dances · Garments that fly · Considered apparel · Small batches ·",
   },
 ];
 
@@ -241,6 +241,16 @@ const homepageFeaturedData: TemplateField[] = [
     gridColumn: "col-span-1",
   },
   {
+    key: "noise.homepage.rail-one-overline",
+    label: "Rail 1 — Overline",
+    description: "Small caps label above the first product rail (e.g. 'Collection'). Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.featured",
+    gridColumn: "col-span-1",
+    defaultValue: "Collection",
+  },
+  {
     key: "noise.homepage.rail-two-collection",
     label: "Rail 2 — Collection",
     description: "Pick a collection for the second product rail. Defaults to featured products when unset.",
@@ -248,6 +258,26 @@ const homepageFeaturedData: TemplateField[] = [
     page: "homepage",
     group: "homepage.featured",
     gridColumn: "col-span-1",
+  },
+  {
+    key: "noise.homepage.rail-two-overline",
+    label: "Rail 2 — Overline",
+    description: "Small caps label above the second product rail (e.g. 'New Arrivals'). Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.featured",
+    gridColumn: "col-span-1",
+    defaultValue: "New Arrivals",
+  },
+  {
+    key: "noise.homepage.rail-two-title",
+    label: "Rail 2 — Title",
+    description: "Section heading for the second product rail (used when no collection is selected).",
+    type: "text",
+    page: "homepage",
+    group: "homepage.featured",
+    gridColumn: "col-span-full",
+    defaultValue: "New Arrivals",
   },
 ];
 
@@ -301,6 +331,17 @@ const homepageGuaranteeData: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue:
       "If a piece doesn't fit, doesn't last, or doesn't feel right — we'll make it right. Free returns within 60 days, and a lifetime repair program for every garment we make.",
+  },
+  {
+    key: "noise.homepage-guarantee-stamp",
+    label: "Guarantee Corner Stamp",
+    description: "Short label shown on the image in the guarantee section. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.guarantee",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. Handmade",
   },
 ];
 

@@ -9,9 +9,9 @@ import { formatPrice } from "~/lib/prices";
 
 const NEXT_STEPS = [
   { icon: "✉", text: "You'll receive an email confirmation at the address provided." },
-  { icon: "✦", text: "Each piece is hand-numbered and signed before it leaves Gratiot." },
-  { icon: "↗", text: "We'll notify you with a DHL tracking number when your order ships." },
-  { icon: "D", text: "Cut & shipped from Detroit, 48207 — within five working days." },
+  { icon: "✦", text: "Each piece is carefully prepared before it ships." },
+  { icon: "↗", text: "We'll notify you with a tracking number when your order ships." },
+  { icon: "✓", text: "Your order will be packed and shipped within five working days." },
 ] as const;
 
 type Props = {
@@ -126,8 +126,8 @@ export function NoiseOrderConfirmation({ business }: Props) {
               className="font-sans text-[15px] leading-relaxed max-w-[40ch]"
               style={{ color: "rgba(255,255,255,0.6)" }}
             >
-              Your garments are queued for the cutting table on Gratiot. We&apos;ll
-              have them packed and shipped within five working days.
+              Your order is queued for preparation. We&apos;ll
+              have everything packed and shipped within five working days.
             </p>
           </div>
 

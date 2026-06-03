@@ -10,14 +10,6 @@ import { parseCardAdditionalFields } from "~/lib/products";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { useCart } from "~/providers/cart-context";
 
-/* Palette used to tint the variant swatch squares when no color info */
-const SWATCH_PALETTE = [
-  "var(--vn-ink)",
-  "var(--vn-steel)",
-  "var(--vn-bone)",
-  "var(--vn-steel-mist)",
-];
-
 type Props = {
   product: Product;
   index: number;
@@ -57,24 +49,6 @@ export function NoiseProductCard({ product, index }: Props) {
       ? `${editionBase} · SOLD`
       : editionBase;
 
-  /* Variant swatches — try to read hex color from options, fall back to palette */
-  const swatches: { bg: string; border: string }[] = product.variants
-    .slice(0, 4)
-    .map((v, i) => {
-      const opts = v.options as Record<string, string> | null | undefined;
-      const colorVal = opts
-        ? (Object.values(opts).find(
-            (val) => typeof val === "string" && /^#[0-9a-f]{3,6}$/i.test(val),
-          ) ?? null)
-        : null;
-      return colorVal
-        ? { bg: colorVal, border: "var(--vn-ink)" }
-        : {
-            bg: SWATCH_PALETTE[i % SWATCH_PALETTE.length] ?? "var(--vn-ink)",
-            border: "var(--vn-ink)",
-          };
-    });
-
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -95,7 +69,7 @@ export function NoiseProductCard({ product, index }: Props) {
   };
 
   return (
-    <Link href={`/shop/${product.slug}`} className="vn-prod-link group block">
+    <div className="vn-prod-link group relative block">
       {/* Image — 4:5 aspect ratio matching design */}
       <div
         className="vn-prod-pic border-foreground relative w-full overflow-hidden border"
@@ -157,20 +131,14 @@ export function NoiseProductCard({ product, index }: Props) {
           </div>
         )}
 
-        {/* Top-right: price stamp */}
-        {/* <div
-          className="absolute top-2.5 right-2.5 px-1.5 py-1 font-mono text-[10px] tracking-[0.18em] whitespace-nowrap uppercase"
-          style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
-        >
-          {formatPrice(productStatus.displayPrice)}
-          {productStatus.variablePricing && "+"}
-        </div> */}
-
-        {/* Add-to-cart bar — slides up on hover */}
+        {/* Add-to-cart bar — slides up on hover. z-10 keeps it above the
+            stretched card link (::after) so it stays independently clickable. */}
         {!productStatus.disableCart && (
-          <div className="absolute inset-x-0 bottom-0 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
+          <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full transition-transform duration-300 group-hover:translate-y-0 group-focus-within:translate-y-0">
             <button
+              type="button"
               onClick={handleAddToCart}
+              aria-label={`Add ${product.name} to bag`}
               className="flex w-full items-center justify-center gap-2 py-3 font-mono text-[10px] tracking-[0.25em] uppercase transition-opacity hover:opacity-80"
               style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
             >
@@ -191,12 +159,14 @@ export function NoiseProductCard({ product, index }: Props) {
           alignItems: "baseline",
         }}
       >
-        {/* Product name */}
+        {/* Product name — stretched link covers the whole card via ::after */}
         <h3
           className="min-w-0 truncate font-serif leading-[1.1] italic transition-opacity group-hover:opacity-60"
           style={{ fontSize: "22px", letterSpacing: "-0.005em" }}
         >
-          {product.name}
+          <Link href={`/shop/${product.slug}`} className="vn-card-link">
+            {product.name}
+          </Link>
         </h3>
 
         {/* Price */}
@@ -229,25 +199,8 @@ export function NoiseProductCard({ product, index }: Props) {
               (product.sku ? `SKU · ${product.sku}` : " ")}
           </span>
 
-          {/* Variant swatches — 9×9 squares */}
-          {/* {swatches.length > 0 && (
-            <div className="flex flex-shrink-0 gap-1.5">
-              {swatches.map((sw, i) => (
-                <span
-                  key={i}
-                  style={{
-                    display: "inline-block",
-                    width: "9px",
-                    height: "9px",
-                    background: sw.bg,
-                    border: `1px solid ${sw.border}`,
-                  }}
-                />
-              ))}
-            </div>
-          )} */}
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

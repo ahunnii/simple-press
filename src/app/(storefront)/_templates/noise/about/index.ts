@@ -11,7 +11,7 @@ const aboutNoiseData: TemplateField[] = [
     page: "about",
     group: "about.main",
     gridColumn: "col-span-full",
-    defaultValue: "Visual Noise Detroit",
+    defaultValue: "About Us",
   },
 
   {

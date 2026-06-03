@@ -26,6 +26,8 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     | Record<string, string>
     | undefined;
 
+  const businessName = homepage?.name ?? "";
+
   const f = resolveFields(themeFields, [
     "noise.homepage.intro-gallery",
     "noise.homepage.hero-image",
@@ -44,7 +46,14 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     "noise.homepage-guarantee-title",
     "noise.homepage-guarantee-quote",
     "noise.homepage.rail-one-collection",
+    "noise.homepage.rail-one-overline",
     "noise.homepage.rail-two-collection",
+    "noise.homepage.rail-two-overline",
+    "noise.homepage.rail-two-title",
+    "noise.global.shop-cta-text",
+    "noise.global.shop-cta-link",
+    "noise.global.location-tag",
+    "noise.homepage-guarantee-stamp",
   ]);
 
   const products = homepage?.products ?? [];
@@ -86,7 +95,11 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
 
   return (
     <HydrateClient>
-      <NoiseIntroWrapper introImages={introImages}>
+      <NoiseIntroWrapper
+        introImages={introImages}
+        wordmark={businessName.length > 0 ? businessName : undefined}
+        locationTag={f["noise.global.location-tag"] ?? undefined}
+      >
         <PageTransition>
           {/* 1. Hero */}
           <NoiseHeroSection
@@ -101,6 +114,8 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
             heroPrimaryButtonLink={
               f["noise.homepage.hero-primary-button-link"] ?? undefined
             }
+            wordmark={businessName.length > 0 ? businessName : undefined}
+            locationTag={(f["noise.global.location-tag"] ?? "").length > 0 ? f["noise.global.location-tag"] : undefined}
             sectionAttrs={sectionGroupAttr("homepage", "hero")}
           />
 
@@ -114,7 +129,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           {/* 3. First product rail */}
           {railOneProducts.length > 0 && (
             <NoiseProductRail
-              overline="Collection"
+              overline={f["noise.homepage.rail-one-overline"] ?? "Collection"}
               title={
                 rail1Data?.collection.name ??
                 f["noise.homepage-featured-title"] ??
@@ -138,10 +153,14 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           {/* 5. Second product rail (when 5+ featured products or a collection is configured) */}
           {railTwoProducts.length > 0 && (
             <NoiseProductRail
-              overline="New Arrivals"
-              title={rail2Data?.collection.name ?? "Fresh from the Studio"}
+              overline={f["noise.homepage.rail-two-overline"] ?? "New Arrivals"}
+              title={
+                rail2Data?.collection.name ??
+                f["noise.homepage.rail-two-title"] ??
+                "New Arrivals"
+              }
               description={rail2Data?.collection.description ?? undefined}
-              ctaText="Shop All"
+              ctaText={f["noise.global.shop-cta-text"] ?? "Shop All"}
               ctaHref={railTwoCtaHref}
               products={railTwoProducts}
               sectionAttrs={sectionGroupAttr("homepage", "featured")}
@@ -153,6 +172,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
             heading={f["noise.homepage-guarantee-heading"]}
             headingAccent={f["noise.homepage-guarantee-headingAccent"]}
             body={f["noise.homepage-guarantee-quote"]}
+            stamp={f["noise.homepage-guarantee-stamp"] ?? undefined}
             sectionAttrs={sectionGroupAttr("homepage", "guarantee")}
           />
 

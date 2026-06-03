@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 
@@ -20,16 +21,28 @@ export function NoiseTestimonialStrip({
   sectionAttrs,
 }: NoiseTestimonialStripProps) {
   const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [prefersReduced, setPrefersReduced] = useState(false);
 
-  // Auto-advance every 5 s, matching the design
+  // Honor the user's reduced-motion preference (WCAG 2.3.3)
   useEffect(() => {
-    if (testimonials.length <= 1) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setPrefersReduced(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // Auto-advance every 5 s, matching the design.
+  // Stops when paused by the user or when reduced motion is requested (WCAG 2.2.2).
+  useEffect(() => {
+    if (testimonials.length <= 1 || paused || prefersReduced) return;
     const t = setInterval(
       () => setActive((x) => (x + 1) % testimonials.length),
       5000,
     );
     return () => clearInterval(t);
-  }, [testimonials.length]);
+  }, [testimonials.length, paused, prefersReduced]);
 
   if (!testimonials.length) return null;
 
@@ -44,10 +57,15 @@ export function NoiseTestimonialStrip({
         </p>
 
         {/* Quote carousel — stack all, fade active */}
-        <div style={{ minHeight: "160px", position: "relative" }}>
+        <div
+          style={{ minHeight: "160px", position: "relative" }}
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {testimonials.map((t, j) => (
             <div
               key={t.id}
+              aria-hidden={j !== active}
               style={{
                 position: "absolute",
                 inset: 0,
@@ -79,27 +97,57 @@ export function NoiseTestimonialStrip({
           ))}
         </div>
 
-        {/* Navigation dots */}
+        {/* Navigation dots + pause control */}
         {testimonials.length > 1 && (
-          <div className="mt-8 flex justify-center gap-2">
-            {testimonials.map((_, j) => (
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <div className="flex items-center gap-2">
+              {testimonials.map((_, j) => (
+                <button
+                  key={j}
+                  type="button"
+                  onClick={() => setActive(j)}
+                  aria-label={`Go to testimonial ${j + 1}`}
+                  aria-current={j === active}
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: 9999,
+                    background:
+                      j === active ? "var(--vn-ink)" : "rgba(0,0,0,.18)",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "background .3s",
+                    padding: 0,
+                  }}
+                />
+              ))}
+            </div>
+            {!prefersReduced && (
               <button
-                key={j}
-                onClick={() => setActive(j)}
-                aria-label={`Go to testimonial ${j + 1}`}
+                type="button"
+                onClick={() => setPaused((p) => !p)}
+                aria-label={
+                  paused ? "Resume testimonial rotation" : "Pause testimonial rotation"
+                }
+                aria-pressed={paused}
+                className="inline-flex items-center justify-center transition-opacity hover:opacity-60"
                 style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: 9999,
-                  background:
-                    j === active ? "var(--vn-ink)" : "rgba(0,0,0,.18)",
+                  width: 18,
+                  height: 18,
                   border: "none",
+                  background: "transparent",
                   cursor: "pointer",
-                  transition: "background .3s",
                   padding: 0,
+                  color: "var(--vn-steel)",
                 }}
-              />
-            ))}
+              >
+                {paused ? (
+                  <Play className="size-3" aria-hidden="true" />
+                ) : (
+                  <Pause className="size-3" aria-hidden="true" />
+                )}
+              </button>
+            )}
           </div>
         )}
 

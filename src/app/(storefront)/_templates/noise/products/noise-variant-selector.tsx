@@ -63,6 +63,8 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
             return (
               <button
                 key={variant.id}
+                type="button"
+                aria-pressed={selectedVariant?.id === variant.id}
                 onClick={() => {
                   setSelectedVariant(variant);
                   setSelectedVariantId(variant.id);

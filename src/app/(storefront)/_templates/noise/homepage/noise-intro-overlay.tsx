@@ -1,21 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // Default color palette when no gallery is configured
 const DEFAULT_TILES = [
-  { c: "#3e3a35", t: "Woodward" },
-  { c: "#a9c8d4", t: "Cass" },
-  { c: "#5b4a30", t: "Michigan" },
-  { c: "#1a1a1a", t: "Jefferson" },
-  { c: "#cfd9e8", t: "Gratiot" },
-  { c: "#2f5b5b", t: "Livernois" },
-  { c: "#6c8674", t: "Vernor" },
-  { c: "#c8b89a", t: "Bagley" },
-  { c: "#2a3247", t: "Canfield" },
-  { c: "#4a3a2d", t: "Trumbull" },
-  { c: "#e8e2d3", t: "Brush" },
-  { c: "#7a3b1d", t: "Fort" },
+  { c: "#3e3a35", t: "I" },
+  { c: "#a9c8d4", t: "II" },
+  { c: "#5b4a30", t: "III" },
+  { c: "#1a1a1a", t: "IV" },
+  { c: "#cfd9e8", t: "V" },
+  { c: "#2f5b5b", t: "VI" },
+  { c: "#6c8674", t: "VII" },
+  { c: "#c8b89a", t: "VIII" },
+  { c: "#2a3247", t: "IX" },
+  { c: "#4a3a2d", t: "X" },
+  { c: "#e8e2d3", t: "XI" },
+  { c: "#7a3b1d", t: "XII" },
 ] as const;
 
 // Deterministic stagger delays (avoids hydration mismatch)
@@ -59,9 +59,13 @@ function buildSlots(images: ImageEntry[]): Slot[] {
 export function NoiseIntroOverlay({
   onDone,
   images,
+  wordmark,
+  locationTag,
 }: {
   onDone: () => void;
   images?: ImageEntry[];
+  wordmark?: string;
+  locationTag?: string;
 }) {
   // phase 0: tiles fly in (0–1300ms)
   // phase 1: logo crystallizes (1300–2700ms)
@@ -70,10 +74,21 @@ export function NoiseIntroOverlay({
   const skippedRef = useRef(false);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
+  const skipBtnRef = useRef<HTMLButtonElement>(null);
 
   const slots = buildSlots(images ?? []);
 
+  const skip = useCallback(() => {
+    skippedRef.current = true;
+    onDoneRef.current();
+  }, []);
+
   useEffect(() => {
+    // Reduced motion: skip the whole timed sequence immediately (WCAG 2.3.3)
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      skip();
+      return;
+    }
     const t1 = setTimeout(() => {
       if (!skippedRef.current) setPhase(1);
     }, 1300);
@@ -88,15 +103,32 @@ export function NoiseIntroOverlay({
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, []);
+  }, [skip]);
 
-  function skip() {
-    skippedRef.current = true;
-    onDoneRef.current();
-  }
+  // Focus management: focus the skip control on open, trap focus on it
+  // (the overlay is modal and Skip is its only interactive element), and
+  // allow Escape to dismiss (WCAG 2.1.2 / 2.4.3).
+  useEffect(() => {
+    skipBtnRef.current?.focus();
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        skip();
+      } else if (e.key === "Tab") {
+        e.preventDefault();
+        skipBtnRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [skip]);
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Intro animation"
       style={{
         position: "fixed",
         inset: 0,
@@ -107,6 +139,7 @@ export function NoiseIntroOverlay({
     >
       {/* Left curtain half */}
       <div
+        aria-hidden="true"
         style={{
           position: "absolute",
           top: 0,
@@ -125,11 +158,14 @@ export function NoiseIntroOverlay({
           tileDelays={TILE_DELAYS}
           phase={phase}
           half="left"
+          wordmark={wordmark}
+          locationTag={locationTag}
         />
       </div>
 
       {/* Right curtain half */}
       <div
+        aria-hidden="true"
         style={{
           position: "absolute",
           top: 0,
@@ -148,6 +184,8 @@ export function NoiseIntroOverlay({
           tileDelays={TILE_DELAYS}
           phase={phase}
           half="right"
+          wordmark={wordmark}
+          locationTag={locationTag}
         />
       </div>
 
@@ -169,8 +207,11 @@ export function NoiseIntroOverlay({
 
       {/* Skip button */}
       <button
+        ref={skipBtnRef}
         type="button"
         onClick={skip}
+        aria-label="Skip intro animation"
+        className="vn-focus-on-dark"
         style={{
           position: "absolute",
           bottom: 28,
@@ -208,11 +249,15 @@ function IntroScene({
   tileDelays,
   phase,
   half,
+  wordmark,
+  locationTag,
 }: {
   slots: Slot[];
   tileDelays: number[];
   phase: number;
   half: "left" | "right";
+  wordmark?: string;
+  locationTag?: string;
 }) {
   return (
     <div
@@ -293,7 +338,9 @@ function IntroScene({
                     fontSize: 9,
                     letterSpacing: ".22em",
                     textTransform: "uppercase",
-                    color: "rgba(255,255,255,.65)",
+                    color: "rgba(255,255,255,.85)",
+                    // Scrim so the label stays legible on light tiles/images
+                    textShadow: "0 1px 5px rgba(0,0,0,.7)",
                     fontWeight: 500,
                     fontFamily: "var(--font-mono, monospace)",
                   }}
@@ -346,7 +393,7 @@ function IntroScene({
             fontStyle: "italic",
           }}
         >
-          VISUAL NOISE
+          {wordmark ? wordmark.toUpperCase() : ""}
         </div>
         {/* Hairline rule */}
         <div
@@ -358,18 +405,20 @@ function IntroScene({
             transition: "width 1s ease .15s",
           }}
         />
-        <div
-          style={{
-            fontSize: 11,
-            letterSpacing: ".5em",
-            opacity: 0.7,
-            marginTop: 18,
-            fontWeight: 500,
-            fontFamily: "var(--font-mono, monospace)",
-          }}
-        >
-          · DETROIT · EST. MMXXVI ·
-        </div>
+        {locationTag && (
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: ".5em",
+              opacity: 0.7,
+              marginTop: 18,
+              fontWeight: 500,
+              fontFamily: "var(--font-mono, monospace)",
+            }}
+          >
+            {locationTag}
+          </div>
+        )}
       </div>
     </div>
   );

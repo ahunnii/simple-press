@@ -135,6 +135,94 @@ const globalBrandingData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "Independent goods, made with care.",
   },
+  {
+    key: "noise.global.shop-cta-text",
+    label: "Shop CTA Text",
+    description:
+      "Text for the main 'shop' call-to-action used in the blog post band, cart empty state, and orders empty state.",
+    type: "text",
+    page: "global",
+    group: "global.branding",
+    gridColumn: "col-span-1",
+    defaultValue: "Shop the Collection",
+  },
+  {
+    key: "noise.global.shop-cta-link",
+    label: "Shop CTA Link",
+    description: "URL for the main shop call-to-action.",
+    type: "url",
+    page: "global",
+    group: "global.branding",
+    gridColumn: "col-span-1",
+    defaultValue: "/shop",
+  },
+];
+
+// ─── Testimonials Page ────────────────────────────────────────────────────────
+
+const testimonialsPageData: TemplateField[] = [
+  {
+    key: "noise.testimonials.page-overline",
+    label: "Testimonials Page Overline",
+    description: "Small caps label above the testimonials heading.",
+    type: "text",
+    page: "testimonials",
+    group: "testimonials.page",
+    gridColumn: "col-span-1",
+    defaultValue: "From the people wearing it",
+  },
+  {
+    key: "noise.testimonials.page-intro",
+    label: "Testimonials Page Intro",
+    description: "Short paragraph below the page heading.",
+    type: "textarea",
+    page: "testimonials",
+    group: "testimonials.page",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Unedited notes from our customers. We publish every review we receive — high and low.",
+  },
+  {
+    key: "noise.testimonials.cta-overline",
+    label: "Testimonials CTA Overline",
+    description: "Small caps label above the testimonials CTA section.",
+    type: "text",
+    page: "testimonials",
+    group: "testimonials.page",
+    gridColumn: "col-span-1",
+    defaultValue: "Wearing something of ours?",
+  },
+  {
+    key: "noise.testimonials.cta-heading",
+    label: "Testimonials CTA Heading",
+    description: "Heading for the bottom testimonials call-to-action section.",
+    type: "text",
+    page: "testimonials",
+    group: "testimonials.page",
+    gridColumn: "col-span-1",
+    defaultValue: "Tell us how it's holding up.",
+  },
+  {
+    key: "noise.testimonials.cta-body",
+    label: "Testimonials CTA Body",
+    description: "Body text for the testimonials call-to-action section.",
+    type: "textarea",
+    page: "testimonials",
+    group: "testimonials.page",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "We read every note that comes in. Honest feedback — the awkward kind included — is how we know what to make next.",
+  },
+  {
+    key: "noise.testimonials.empty-state-text",
+    label: "Testimonials Empty State",
+    description: "Text shown when there are no testimonials yet.",
+    type: "text",
+    page: "testimonials",
+    group: "testimonials.page",
+    gridColumn: "col-span-full",
+    defaultValue: "No voices yet. Check back soon.",
+  },
 ];
 
 // ─── Global: Authentication ───────────────────────────────────────────────────
@@ -160,7 +248,7 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.branding",
     title: "Global Branding",
-    description: "Location tag and footer tagline shown throughout the template",
+    description: "Location tag, footer tagline, and shop CTA used throughout the template",
     icon: "🏷️",
     columns: 2,
   },
@@ -186,6 +274,13 @@ const fieldGroups: TemplateFieldGroup[] = [
     columns: 1,
   },
   {
+    id: "testimonials.page",
+    title: "Testimonials Page",
+    description: "Overline, intro, CTA section, and empty state for the testimonials page",
+    icon: "💬",
+    columns: 2,
+  },
+  {
     id: "global.authentication",
     title: "Authentication",
     description: "Image shown on sign-in and sign-up pages",
@@ -204,6 +299,7 @@ export const noiseData = {
     ...contactFaqData,
     ...shopListingData,
     ...noiseBlogData,
+    ...testimonialsPageData,
     ...globalBrandingData,
     ...globalAuthenticationData,
   ],

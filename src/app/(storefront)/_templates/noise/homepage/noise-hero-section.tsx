@@ -15,6 +15,10 @@ type NoiseHeroSectionProps = {
   heroPrimaryButtonLink?: string;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
+  /** Business name shown in the bottom credit strip. */
+  wordmark?: string;
+  /** Location tag shown in the bottom credit strip. Leave undefined to hide. */
+  locationTag?: string;
 };
 
 export function NoiseHeroSection({
@@ -26,6 +30,8 @@ export function NoiseHeroSection({
   heroPrimaryButtonText,
   heroPrimaryButtonLink,
   sectionAttrs,
+  wordmark,
+  locationTag,
 }: NoiseHeroSectionProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -103,14 +109,10 @@ export function NoiseHeroSection({
         </div>
       )}
 
-      {/* Dark gradient overlay */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(14,13,11,.15) 0%, rgba(14,13,11,.5) 100%)",
-        }}
-      />
+      {/* Dark gradient overlay — center-weighted so foreground text keeps
+          ≥4.5:1 contrast over arbitrary light user-uploaded images/video
+          (WCAG 1.4.3). */}
+      <div className="vn-hero-overlay absolute inset-0" />
 
       {/* Centered content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
@@ -137,7 +139,8 @@ export function NoiseHeroSection({
             className="font-sans leading-relaxed"
             style={{
               fontSize: "clamp(14px, 1.1vw, 16px)",
-              color: "rgba(255,255,255,.85)",
+              color: "rgba(255,255,255,.9)",
+              textShadow: "0 1px 14px rgba(0,0,0,.55)",
               maxWidth: "52ch",
             }}
           >
@@ -146,23 +149,7 @@ export function NoiseHeroSection({
 
           <Link
             href={btnLink}
-            className="font-mono uppercase transition-all"
-            style={{
-              fontSize: "11px",
-              letterSpacing: ".28em",
-              padding: "15px 38px",
-              background: "#fff",
-              color: "var(--vn-ink)",
-              border: "1px solid #fff",
-              marginTop: "4px",
-            }}
-            onMouseOver={(e) => {
-              (e.currentTarget as HTMLElement).style.background =
-                "var(--vn-bone)";
-            }}
-            onMouseOut={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "#fff";
-            }}
+            className="vn-btn-hero vn-focus-on-dark mt-1"
           >
             {btnText}
           </Link>
@@ -170,23 +157,35 @@ export function NoiseHeroSection({
       </div>
 
       {/* Bottom credit strip */}
-      <div
-        className="absolute inset-x-0 bottom-0 flex items-center justify-between px-5 pb-5"
-        style={{ pointerEvents: "none" }}
-      >
-        <span
-          className="font-serif text-xl leading-tight italic"
-          style={{ color: "rgba(255,255,255,.65)" }}
+      {(wordmark ?? locationTag) && (
+        <div
+          className="absolute inset-x-0 bottom-0 flex items-center justify-between px-5 pb-5"
+          style={{ pointerEvents: "none" }}
         >
-          Visual Noise
-        </span>
-        <span
-          className="font-mono text-[10px] tracking-[.18em] uppercase"
-          style={{ color: "rgba(255,255,255,.5)" }}
-        >
-          Detroit, Michigan
-        </span>
-      </div>
+          {wordmark && (
+            <span
+              className="font-serif text-xl leading-tight italic"
+              style={{
+                color: "rgba(255,255,255,.85)",
+                textShadow: "0 1px 8px rgba(0,0,0,.6)",
+              }}
+            >
+              {wordmark}
+            </span>
+          )}
+          {locationTag && (
+            <span
+              className="font-mono text-[10px] tracking-[.18em] uppercase"
+              style={{
+                color: "rgba(255,255,255,.75)",
+                textShadow: "0 1px 8px rgba(0,0,0,.6)",
+              }}
+            >
+              {locationTag}
+            </span>
+          )}
+        </div>
+      )}
     </section>
   );
 }

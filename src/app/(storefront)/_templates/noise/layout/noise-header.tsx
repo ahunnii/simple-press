@@ -116,11 +116,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
         }}
       >
         <div
-          className="grid items-center px-5 sm:px-9"
+          className="grid items-center gap-6 px-5 py-4 sm:px-7 sm:py-[18px] lg:px-9"
           style={{
             gridTemplateColumns: "1fr auto 1fr",
-            padding: "18px 36px",
-            gap: "24px",
           }}
         >
           {/* ── Left: search + shop/collection links ── */}

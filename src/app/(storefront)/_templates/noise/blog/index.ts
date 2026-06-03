@@ -22,7 +22,31 @@ const blogListingData: TemplateField[] = [
   },
 ];
 
-export const noiseBlogData = [...blogListingData];
+const blogPostData: TemplateField[] = [
+  {
+    key: "noise.blog.post-shop-cta-heading",
+    label: "Blog Post Shop CTA Heading",
+    description:
+      "Serif heading in the shop call-to-action band at the bottom of each blog post.",
+    type: "text",
+    page: "blog",
+    group: "blog.post",
+    gridColumn: "col-span-1",
+    defaultValue: "Shop the Collection.",
+  },
+  {
+    key: "noise.blog.post-shop-cta-subheading",
+    label: "Blog Post Shop CTA Subheading",
+    description: "Smaller line below the shop CTA heading.",
+    type: "text",
+    page: "blog",
+    group: "blog.post",
+    gridColumn: "col-span-1",
+    defaultValue: "Discover pieces made with intention.",
+  },
+];
+
+export const noiseBlogData = [...blogListingData, ...blogPostData];
 
 // ─── Field Groups ─────────────────────────────────────────────────────────────
 
@@ -33,5 +57,12 @@ export const noiseBlogFieldGroups: TemplateFieldGroup[] = [
     description: "Heading and intro for the blog listing page",
     icon: "✍️",
     columns: 1,
+  },
+  {
+    id: "blog.post",
+    title: "Blog Post — Shop CTA",
+    description: "Call-to-action band at the bottom of each blog post",
+    icon: "🛍️",
+    columns: 2,
   },
 ];
