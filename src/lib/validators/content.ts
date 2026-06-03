@@ -72,6 +72,23 @@ export const siteContentSchema = z.object({
   customFields: z.any().optional(),
 });
 
+/** Max payload size for a preview draft (~1MB of JSON). */
+const PREVIEW_DRAFT_MAX_BYTES = 1_000_000;
+
+export const previewDraftSchema = z
+  .object({
+    customFields: z.record(z.string(), z.unknown()),
+  })
+  .superRefine((val, ctx) => {
+    const size = JSON.stringify(val.customFields).length;
+    if (size > PREVIEW_DRAFT_MAX_BYTES) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Preview draft exceeds ${PREVIEW_DRAFT_MAX_BYTES.toLocaleString()} characters`,
+      });
+    }
+  });
+
 export const pageSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z

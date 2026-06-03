@@ -13,6 +13,12 @@ type Props = {
   primaryHref: string;
   secondaryText?: string;
   secondaryHref?: string;
+  /**
+   * Optional passthrough attributes spread on the root <section>.
+   * Used by the preview overlay to annotate sections with data-sp-group.
+   * Pattern: {...sectionGroupAttr("homepage", "hero")}
+   */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function DefaultParallaxHero({
@@ -24,6 +30,7 @@ export function DefaultParallaxHero({
   primaryHref,
   secondaryText,
   secondaryHref,
+  sectionAttrs,
 }: Props) {
   const bgRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -49,7 +56,10 @@ export function DefaultParallaxHero({
   }, []);
 
   return (
-    <section className="relative isolate h-[92vh] min-h-[620px] overflow-hidden bg-[#1a1a1a] text-white">
+    <section
+      className="relative isolate h-[92vh] min-h-[620px] overflow-hidden bg-[#1a1a1a] text-white"
+      {...sectionAttrs}
+    >
       {/* Parallax background — oversized vertically so translateY never reveals a gap */}
       <div
         ref={bgRef}

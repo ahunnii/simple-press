@@ -22,6 +22,12 @@ type DefaultProductRailProps = {
   ctaHref: string;
   products: FeaturedProduct[];
   limit?: number;
+  /**
+   * Optional passthrough attributes spread on the root <section>.
+   * Used by the preview overlay to annotate sections with data-sp-group.
+   * Pattern: {...sectionGroupAttr("homepage", "rails")}
+   */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function DefaultProductRail({
@@ -32,12 +38,13 @@ export function DefaultProductRail({
   ctaHref,
   products,
   limit = 4,
+  sectionAttrs,
 }: DefaultProductRailProps) {
   const shown = products.slice(0, limit);
   if (shown.length === 0) return null;
 
   return (
-    <section className="px-6 py-24 lg:px-8">
+    <section className="px-6 py-24 lg:px-8" {...sectionAttrs}>
       <div className="mx-auto max-w-[1440px]">
         <FadeIn className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col gap-2">

@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
-import { pageSchema, siteContentSchema } from "~/lib/validators/content";
+import {
+  pageSchema,
+  previewDraftSchema,
+  siteContentSchema,
+} from "~/lib/validators/content";
 import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
 
 import {
@@ -50,7 +55,12 @@ export const contentRouter = createTRPCRouter({
           businessId,
           ...data,
         },
-        update: data,
+        update: {
+          ...data,
+          // Clear the preview draft whenever the owner publishes real content.
+          previewCustomFields: Prisma.JsonNull,
+          previewUpdatedAt: null,
+        },
       });
 
       if (templateId) {
@@ -65,6 +75,43 @@ export const contentRouter = createTRPCRouter({
         templateId,
       };
     }),
+
+  // Save a preview draft (owner-only, not visible to public visitors)
+  savePreviewDraft: ownerAdminProcedure
+    .input(previewDraftSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      await ctx.db.siteContent.upsert({
+        where: { businessId },
+        create: {
+          businessId,
+          previewCustomFields: input.customFields as Prisma.InputJsonValue,
+          previewUpdatedAt: new Date(),
+        },
+        update: {
+          previewCustomFields: input.customFields as Prisma.InputJsonValue,
+          previewUpdatedAt: new Date(),
+        },
+      });
+
+      return { ok: true };
+    }),
+
+  // Clear the preview draft (e.g., on editor unmount or explicit clear)
+  clearPreviewDraft: ownerAdminProcedure.mutation(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    await ctx.db.siteContent.updateMany({
+      where: { businessId },
+      data: {
+        previewCustomFields: Prisma.JsonNull,
+        previewUpdatedAt: null,
+      },
+    });
+
+    return { ok: true };
+  }),
 
   // ==========================================
   // PAGES

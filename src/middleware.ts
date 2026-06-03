@@ -5,6 +5,12 @@ export async function middleware(req: NextRequest) {
   const hostname = req.headers.get("host") ?? "";
   const pathname = req.nextUrl.pathname;
 
+  // Build a mutable headers copy; set x-sp-preview when ?__preview=1 is present.
+  const requestHeaders = new Headers(req.headers);
+  if (req.nextUrl.searchParams.get("__preview") === "1") {
+    requestHeaders.set("x-sp-preview", "1");
+  }
+
   // Get platform domain from env
   const platformDomain = process.env.PLATFORM_DOMAIN ?? "localhost";
   const isDevelopment = process.env.NODE_ENV === "development";
@@ -24,7 +30,7 @@ export async function middleware(req: NextRequest) {
   // ========================================
   if (isPlatformDomain) {
     // Platform routes work normally
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   // ========================================
@@ -39,7 +45,7 @@ export async function middleware(req: NextRequest) {
       pathname.startsWith("/_next") ||
       pathname.startsWith("/favicon")
     ) {
-      return NextResponse.next();
+      return NextResponse.next({ request: { headers: requestHeaders } });
     }
 
     const url = req.nextUrl.clone();
@@ -52,7 +58,7 @@ export async function middleware(req: NextRequest) {
     }
 
     url.pathname = `/platform-hub${targetPath === "/" ? "" : targetPath}`;
-    return NextResponse.rewrite(url);
+    return NextResponse.rewrite(url, { request: { headers: requestHeaders } });
   }
 
   // ========================================
@@ -67,11 +73,11 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon")
   ) {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   // For any other paths on tenant domains, just pass through
-  return NextResponse.next();
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {

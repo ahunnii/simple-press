@@ -4,10 +4,21 @@ import Link from "next/link";
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
 import { DefaultParallaxHero } from "./default-parallax-hero";
 import { DefaultProductRail } from "./default-product-rail";
+
+/*
+ * Preview annotation pattern for the default template:
+ * Each major section's outermost element carries a `data-sp-group` attribute
+ * matching the TemplateFieldGroup.id for that section (e.g. "homepage.hero").
+ * The admin preview overlay uses these to enable hover/click-to-edit hotspots.
+ * Inline sections get the attribute directly; sub-components (DefaultParallaxHero,
+ * DefaultProductRail) accept an optional `sectionAttrs` prop for passthrough.
+ * To annotate another template, replicate this pattern using sectionGroupAttr().
+ */
 
 export async function DefaultHomePage({
   business,
@@ -101,11 +112,12 @@ export async function DefaultHomePage({
           primaryHref={f["default.homepage.hero-button-link"] ?? "/shop"}
           secondaryText={f["default.homepage.hero-button-2-text"]}
           secondaryHref={f["default.homepage.hero-button-2-link"]}
+          sectionAttrs={sectionGroupAttr("homepage", "hero")}
         />
 
         {/* ── Collections ──────────────────────────────────────────────── */}
         {topCollections.length > 0 && (
-          <section className="px-6 py-24 lg:px-8">
+          <section className="px-6 py-24 lg:px-8" {...sectionGroupAttr("homepage", "collections")}>
             <div className="mx-auto max-w-[1440px]">
               <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex flex-col gap-2">
@@ -179,11 +191,12 @@ export async function DefaultHomePage({
           ctaText={f["default.homepage.rail-one-button-text"] ?? "All products"}
           ctaHref={railOneCtaHref}
           products={railOneProducts}
+          sectionAttrs={sectionGroupAttr("homepage", "rails")}
         />
 
         {/* ── Story strip ───────────────────────────────────────────────── */}
         {(storyHeading ?? storyDescription) && (
-          <section className="bg-[#efece8] px-6 py-24 lg:px-8">
+          <section className="bg-[#efece8] px-6 py-24 lg:px-8" {...sectionGroupAttr("homepage", "story")}>
             <div className="mx-auto max-w-[1440px]">
               <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center">
                 {/* Image */}
@@ -237,12 +250,13 @@ export async function DefaultHomePage({
             ctaText={f["default.homepage.rail-two-button-text"] ?? "Shop bestsellers"}
             ctaHref={railTwoCtaHref}
             products={railTwoProducts}
+            sectionAttrs={sectionGroupAttr("homepage", "rails")}
           />
         )}
 
         {/* ── Testimonial preview ───────────────────────────────────────── */}
         {f["default.homepage.testimonial-quote"] && (
-          <section aria-label="Customer testimonial" className="px-6 py-24 lg:px-8">
+          <section aria-label="Customer testimonial" className="px-6 py-24 lg:px-8" {...sectionGroupAttr("homepage", "testimonial")}>
             <div className="mx-auto max-w-[880px] text-center">
               <p className="text-[clamp(22px,2.8vw,34px)] leading-[1.28] tracking-[-0.015em] text-balance">
                 &ldquo;{f["default.homepage.testimonial-quote"]}&rdquo;
@@ -267,7 +281,7 @@ export async function DefaultHomePage({
         )}
 
         {/* ── Promise strip ─────────────────────────────────────────────── */}
-        <div className="border-t border-b border-[#e8e8e8]">
+        <div className="border-t border-b border-[#e8e8e8]" {...sectionGroupAttr("homepage", "promise")}>
           <div className="mx-auto max-w-[1440px] grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-[#e8e8e8]">
             {[
               {

@@ -13,7 +13,9 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
+  Eye,
   MoreHorizontal,
+  Pencil,
   Plus,
   Search,
   Trash,
@@ -21,7 +23,11 @@ import {
   Upload,
   X,
 } from "lucide-react";
+
 import { toast } from "sonner";
+
+import type { PreviewPaneHandle } from "~/components/preview/preview-pane";
+import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
 
 import type {
   TemplateField,
@@ -75,8 +81,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 import { ResetFormButton } from "~/components/shared/reset-form-button";
 import { SaveFormButton } from "~/components/shared/save-form-button";
+import { PreviewPane } from "~/components/preview/preview-pane";
 
 const EMPTY_TIPTAP_DOC: Content = { type: "doc", content: [] };
+
+/** Map editor page tab keys to storefront paths for the preview iframe. */
+const PAGE_PREVIEW_PATHS: Record<string, string> = {
+  homepage: "/",
+  about: "/about",
+  blog: "/blog",
+  contact: "/contact",
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === "object" && !Array.isArray(value);
@@ -105,6 +120,21 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("homepage");
+  // Full-width Form ⇄ Preview toggle — used at ALL breakpoints.
+  const [view, setView] = useState<"form" | "preview">("form");
+
+  // Derive the storefront path to load in the preview iframe for the active tab.
+  const previewPath = PAGE_PREVIEW_PATHS[activeTab] ?? "/";
+
+  // Ref to the PreviewPane so we can call refresh() and focusGroup() imperatively.
+  const previewRef = useRef<PreviewPaneHandle>(null);
+  // Whether a draft flush is in-flight (shows shimmer).
+  const [isUpdating, setIsUpdating] = useState(false);
+  // Pending scroll-to-group after tab switch renders.
+  const [pendingScroll, setPendingScroll] = useState<{
+    page: string;
+    group: string;
+  } | null>(null);
 
   // Group fields by page
   const groupedByPage = groupFieldsByPage(business.templateId);
@@ -179,6 +209,8 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
           fields: { ...savedFieldsRef.current },
         }));
       });
+      // Refresh the preview iframe so it shows the newly-published content.
+      previewRef.current?.refresh();
       router.refresh();
     },
     onError: (error) => {
@@ -193,7 +225,60 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
     },
   });
 
+  // Draft save mutation — orthogonal to publish; does NOT touch modifiedFields/initialState.
+  const savePreviewDraft = api.content.savePreviewDraft.useMutation();
+
+  // Clear draft mutation — called on unmount and pagehide.
+  const clearPreviewDraft = api.content.clearPreviewDraft.useMutation();
+
   const isSaving = updateSiteContent.isPending;
+
+  // Set the preview cookie on mount; clear cookie AND draft on unmount.
+  useEffect(() => {
+    document.cookie = `${PREVIEW_COOKIE}=${business.id}; path=/; SameSite=Lax`;
+    return () => {
+      document.cookie = `${PREVIEW_COOKIE}=; path=/; Max-Age=0; SameSite=Lax`;
+      clearPreviewDraft.mutate();
+    };
+  }, [business.id]);
+
+  // pagehide: synchronously clear the cookie (the load-bearing part) so closing
+  // the tab removes the swap signal even if the React unmount doesn't fire.
+  useEffect(() => {
+    const onPageHide = () => {
+      document.cookie = `${PREVIEW_COOKIE}=; path=/; Max-Age=0; SameSite=Lax`;
+      // Best-effort — may not complete on tab close, but the cookie clear above is enough.
+      clearPreviewDraft.mutate();
+    };
+    window.addEventListener("pagehide", onPageHide);
+    return () => window.removeEventListener("pagehide", onPageHide);
+  }, []);
+
+  /**
+   * Flush the current in-memory fields to the preview draft.
+   * Called when switching to Preview view, Refresh, and Open-in-new-tab.
+   * Returns a promise so callers can await it before refreshing.
+   */
+  const flushDraft = useCallback(
+    async (
+      fields: Record<string, unknown>,
+      pairs: Array<{ key: string; value: string; page: string }>,
+    ) => {
+      const allFields = { ...fields };
+      pairs.forEach((pair) => {
+        if (pair.key && pair.value) {
+          allFields[pair.key] = pair.value;
+        }
+      });
+      setIsUpdating(true);
+      try {
+        await savePreviewDraft.mutateAsync({ customFields: allFields });
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [],
+  );
 
   const handleSave = () => {
     const allFields = { ...customFields };
@@ -215,9 +300,10 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
     setModifiedFields(new Set());
   };
 
+  // handleFieldChange only updates local state — no per-keystroke autosave.
   const handleFieldChange = (key: string, value: unknown) => {
-    setCustomFields({ ...customFields, [key]: value });
-    setModifiedFields(new Set(modifiedFields).add(key));
+    setCustomFields((prev) => ({ ...prev, [key]: value }));
+    setModifiedFields((prev) => new Set(prev).add(key));
   };
 
   // Re-baseline after TipTap normalizes on mount to prevent false dirty state
@@ -415,6 +501,60 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
   const isDirty = hasUnsavedChanges();
   const activeTabStats = getPageTabStats(activeTab);
 
+  /**
+   * Called when the storefront overlay sends sp:edit-group.
+   * Switches to Form view, switches to the correct page tab, then defers the
+   * scroll until React has rendered the tab content (via pendingScroll + useEffect).
+   * `group` is the full data-sp-group value (e.g. "homepage.hero"), which matches
+   * the Card id `fieldgroup-<page>-<group>` directly.
+   */
+  const handleEditGroup = useCallback((page: string, group: string) => {
+    setView("form");
+    setActiveTab(page);
+    setPendingScroll({ page, group });
+  }, []);
+
+  // Scroll to the pending group once the correct tab + form are rendered.
+  useEffect(() => {
+    if (!pendingScroll) return;
+    if (view !== "form" || activeTab !== pendingScroll.page) return;
+    const id = `fieldgroup-${pendingScroll.page}-${pendingScroll.group}`;
+    const raf = requestAnimationFrame(() => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        el.focus({ preventScroll: true });
+      }
+      setPendingScroll(null);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [pendingScroll, view, activeTab]);
+
+  /**
+   * Switch to Preview view: flush the current draft then refresh the iframe.
+   */
+  const switchToPreview = useCallback(async () => {
+    setView("preview");
+    await flushDraft(customFields, customPairs);
+    previewRef.current?.refresh();
+  }, [flushDraft, customFields, customPairs]);
+
+  /**
+   * Refresh handler passed to PreviewPane — flushes current edits then reloads.
+   */
+  const handleRefresh = useCallback(async () => {
+    await flushDraft(customFields, customPairs);
+    previewRef.current?.refresh();
+  }, [flushDraft, customFields, customPairs]);
+
+  /**
+   * Open-in-new-tab handler — flushes draft so the new tab shows the latest edits.
+   */
+  const handleOpenExternal = useCallback(async () => {
+    await flushDraft(customFields, customPairs);
+    window.open(`${previewPath}?__preview=1`, "_blank", "noopener");
+  }, [flushDraft, customFields, customPairs, previewPath]);
+
   // Warn before leaving page with unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -504,7 +644,40 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Form ⇄ Preview segmented toggle — all breakpoints */}
+      <div className="flex items-center justify-center gap-1 border-b bg-white px-4 py-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-pressed={view === "form"}
+          onClick={() => setView("form")}
+          className={cn("gap-1.5", view === "form" && "bg-secondary text-secondary-foreground")}
+        >
+          <Pencil className="h-3.5 w-3.5" />
+          Form
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-pressed={view === "preview"}
+          onClick={() => void switchToPreview()}
+          className={cn("gap-1.5", view === "preview" && "bg-secondary text-secondary-foreground")}
+        >
+          <Eye className="h-3.5 w-3.5" />
+          Preview
+        </Button>
+      </div>
+
+      {/* Single full-width column — both panes stay mounted, toggled with hidden */}
+      <div className="h-[calc(100vh-var(--toolbar-height,56px)-42px)]">
+        {/* ── Fields pane ── */}
+        <div
+          className={cn(
+            "h-full overflow-y-auto px-4 py-6 sm:px-6",
+            view === "preview" ? "hidden" : "block",
+          )}
+        >
+          <div className="mx-auto max-w-4xl">
         {/* Main Content */}
         <Card>
           <CardHeader>
@@ -686,6 +859,7 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
                         <FieldGroup
                           key={groupId}
                           groupId={groupId}
+                          page={page}
                           groupMeta={groupMeta}
                           fields={fields}
                           customFields={customFields}
@@ -747,13 +921,36 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
             </Tabs>
           </CardContent>
         </Card>
-      </div>
+          </div>{/* /max-w-4xl */}
+        </div>{/* /fields pane */}
+
+        {/* ── Preview pane — mounted always, hidden when not active ── */}
+        <div
+          className={cn(
+            "h-full bg-muted/20",
+            view === "form" ? "hidden" : "block",
+          )}
+        >
+          <div className="h-full p-4">
+            <PreviewPane
+              ref={previewRef}
+              isUpdating={isUpdating}
+              onEditGroup={handleEditGroup}
+              onRefresh={() => void handleRefresh()}
+              onOpenExternal={() => void handleOpenExternal()}
+              path={previewPath}
+            />
+          </div>
+        </div>
+      </div>{/* /full-width column */}
     </div>
   );
 }
 
 // Field Group Component
 function FieldGroup({
+  groupId,
+  page,
   groupMeta,
   fields,
   customFields,
@@ -763,6 +960,7 @@ function FieldGroup({
   businessId: _businessId,
 }: {
   groupId: string;
+  page: string;
   groupMeta?: TemplateFieldGroup;
   fields: TemplateField[];
   customFields: Record<string, unknown>;
@@ -774,7 +972,8 @@ function FieldGroup({
   const columns = groupMeta?.columns ?? 1;
 
   return (
-    <Card>
+    // Stable id + tabIndex so handleEditGroup can scroll/focus this group.
+    <Card id={`fieldgroup-${page}-${groupId}`} tabIndex={-1}>
       <CardHeader>
         {!isUngrouped && groupMeta && (
           <div className="flex items-center gap-2">

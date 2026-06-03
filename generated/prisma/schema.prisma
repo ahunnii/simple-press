@@ -233,6 +233,10 @@ model SiteContent {
   //Misc Business Information
   customFields Json? // { key: value }
 
+  // Owner-only preview draft (never shipped to public visitors)
+  previewCustomFields Json?
+  previewUpdatedAt    DateTime?
+
   // One-to-one with Business
   businessId String   @unique
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)

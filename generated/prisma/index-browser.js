@@ -234,6 +234,8 @@ exports.Prisma.SiteContentScalarFieldEnum = {
   accentColor: 'accentColor',
   navigationItems: 'navigationItems',
   customFields: 'customFields',
+  previewCustomFields: 'previewCustomFields',
+  previewUpdatedAt: 'previewUpdatedAt',
   businessId: 'businessId'
 };
 

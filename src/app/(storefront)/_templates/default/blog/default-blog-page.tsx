@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 
 import { resolveFields } from "..";
@@ -80,7 +81,7 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
   return (
     <div>
       {/* Page hero */}
-      <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
+      <section {...sectionGroupAttr("blog", "header")} className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
             Journal

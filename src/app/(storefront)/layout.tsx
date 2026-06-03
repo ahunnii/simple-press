@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api, HydrateClient } from "~/trpc/server";
 import { TemplateSelectorDevTool } from "~/components/development/template-selector";
+import { PreviewOverlay } from "~/components/preview/preview-overlay";
 
 import { BambooLayout } from "./_templates/bamboo/layout/bamboo-general-layout";
 import { DarkTrendLayout } from "./_templates/dark-trend/layout/dark-trend-layout";
@@ -37,6 +38,7 @@ export default async function StorefrontLayout({ children }: Props) {
       <TemplateLayout business={business}>
         <>{children}</>
       </TemplateLayout>
+      <PreviewOverlay />
       <TemplateSelectorDevTool />
     </HydrateClient>
   );

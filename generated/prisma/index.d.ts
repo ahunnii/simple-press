@@ -11655,6 +11655,7 @@ export namespace Prisma {
     primaryColor: string | null
     secondaryColor: string | null
     accentColor: string | null
+    previewUpdatedAt: Date | null
     businessId: string | null
   }
 
@@ -11680,6 +11681,7 @@ export namespace Prisma {
     primaryColor: string | null
     secondaryColor: string | null
     accentColor: string | null
+    previewUpdatedAt: Date | null
     businessId: string | null
   }
 
@@ -11709,6 +11711,8 @@ export namespace Prisma {
     accentColor: number
     navigationItems: number
     customFields: number
+    previewCustomFields: number
+    previewUpdatedAt: number
     businessId: number
     _all: number
   }
@@ -11736,6 +11740,7 @@ export namespace Prisma {
     primaryColor?: true
     secondaryColor?: true
     accentColor?: true
+    previewUpdatedAt?: true
     businessId?: true
   }
 
@@ -11761,6 +11766,7 @@ export namespace Prisma {
     primaryColor?: true
     secondaryColor?: true
     accentColor?: true
+    previewUpdatedAt?: true
     businessId?: true
   }
 
@@ -11790,6 +11796,8 @@ export namespace Prisma {
     accentColor?: true
     navigationItems?: true
     customFields?: true
+    previewCustomFields?: true
+    previewUpdatedAt?: true
     businessId?: true
     _all?: true
   }
@@ -11892,6 +11900,8 @@ export namespace Prisma {
     accentColor: string | null
     navigationItems: JsonValue | null
     customFields: JsonValue | null
+    previewCustomFields: JsonValue | null
+    previewUpdatedAt: Date | null
     businessId: string
     _count: SiteContentCountAggregateOutputType | null
     _min: SiteContentMinAggregateOutputType | null
@@ -11938,6 +11948,8 @@ export namespace Prisma {
     accentColor?: boolean
     navigationItems?: boolean
     customFields?: boolean
+    previewCustomFields?: boolean
+    previewUpdatedAt?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["siteContent"]>
@@ -11968,6 +11980,8 @@ export namespace Prisma {
     accentColor?: boolean
     navigationItems?: boolean
     customFields?: boolean
+    previewCustomFields?: boolean
+    previewUpdatedAt?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["siteContent"]>
@@ -11998,6 +12012,8 @@ export namespace Prisma {
     accentColor?: boolean
     navigationItems?: boolean
     customFields?: boolean
+    previewCustomFields?: boolean
+    previewUpdatedAt?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["siteContent"]>
@@ -12028,10 +12044,12 @@ export namespace Prisma {
     accentColor?: boolean
     navigationItems?: boolean
     customFields?: boolean
+    previewCustomFields?: boolean
+    previewUpdatedAt?: boolean
     businessId?: boolean
   }
 
-  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "navigationItems" | "customFields" | "businessId", ExtArgs["result"]["siteContent"]>
+  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "navigationItems" | "customFields" | "previewCustomFields" | "previewUpdatedAt" | "businessId", ExtArgs["result"]["siteContent"]>
   export type SiteContentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -12073,6 +12091,8 @@ export namespace Prisma {
       accentColor: string | null
       navigationItems: Prisma.JsonValue | null
       customFields: Prisma.JsonValue | null
+      previewCustomFields: Prisma.JsonValue | null
+      previewUpdatedAt: Date | null
       businessId: string
     }, ExtArgs["result"]["siteContent"]>
     composites: {}
@@ -12523,6 +12543,8 @@ export namespace Prisma {
     readonly accentColor: FieldRef<"SiteContent", 'String'>
     readonly navigationItems: FieldRef<"SiteContent", 'Json'>
     readonly customFields: FieldRef<"SiteContent", 'Json'>
+    readonly previewCustomFields: FieldRef<"SiteContent", 'Json'>
+    readonly previewUpdatedAt: FieldRef<"SiteContent", 'DateTime'>
     readonly businessId: FieldRef<"SiteContent", 'String'>
   }
     
@@ -41789,6 +41811,8 @@ export namespace Prisma {
     accentColor: 'accentColor',
     navigationItems: 'navigationItems',
     customFields: 'customFields',
+    previewCustomFields: 'previewCustomFields',
+    previewUpdatedAt: 'previewUpdatedAt',
     businessId: 'businessId'
   };
 
@@ -43031,6 +43055,8 @@ export namespace Prisma {
     accentColor?: StringNullableFilter<"SiteContent"> | string | null
     navigationItems?: JsonNullableFilter<"SiteContent">
     customFields?: JsonNullableFilter<"SiteContent">
+    previewCustomFields?: JsonNullableFilter<"SiteContent">
+    previewUpdatedAt?: DateTimeNullableFilter<"SiteContent"> | Date | string | null
     businessId?: StringFilter<"SiteContent"> | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }
@@ -43061,6 +43087,8 @@ export namespace Prisma {
     accentColor?: SortOrderInput | SortOrder
     navigationItems?: SortOrderInput | SortOrder
     customFields?: SortOrderInput | SortOrder
+    previewCustomFields?: SortOrderInput | SortOrder
+    previewUpdatedAt?: SortOrderInput | SortOrder
     businessId?: SortOrder
     business?: BusinessOrderByWithRelationInput
   }
@@ -43095,6 +43123,8 @@ export namespace Prisma {
     accentColor?: StringNullableFilter<"SiteContent"> | string | null
     navigationItems?: JsonNullableFilter<"SiteContent">
     customFields?: JsonNullableFilter<"SiteContent">
+    previewCustomFields?: JsonNullableFilter<"SiteContent">
+    previewUpdatedAt?: DateTimeNullableFilter<"SiteContent"> | Date | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }, "id" | "businessId">
 
@@ -43124,6 +43154,8 @@ export namespace Prisma {
     accentColor?: SortOrderInput | SortOrder
     navigationItems?: SortOrderInput | SortOrder
     customFields?: SortOrderInput | SortOrder
+    previewCustomFields?: SortOrderInput | SortOrder
+    previewUpdatedAt?: SortOrderInput | SortOrder
     businessId?: SortOrder
     _count?: SiteContentCountOrderByAggregateInput
     _max?: SiteContentMaxOrderByAggregateInput
@@ -43159,6 +43191,8 @@ export namespace Prisma {
     accentColor?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
     navigationItems?: JsonNullableWithAggregatesFilter<"SiteContent">
     customFields?: JsonNullableWithAggregatesFilter<"SiteContent">
+    previewCustomFields?: JsonNullableWithAggregatesFilter<"SiteContent">
+    previewUpdatedAt?: DateTimeNullableWithAggregatesFilter<"SiteContent"> | Date | string | null
     businessId?: StringWithAggregatesFilter<"SiteContent"> | string
   }
 
@@ -46273,6 +46307,8 @@ export namespace Prisma {
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
+    previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
+    previewUpdatedAt?: Date | string | null
     business: BusinessCreateNestedOneWithoutSiteContentInput
   }
 
@@ -46302,6 +46338,8 @@ export namespace Prisma {
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
+    previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
+    previewUpdatedAt?: Date | string | null
     businessId: string
   }
 
@@ -46331,6 +46369,8 @@ export namespace Prisma {
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
+    previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
+    previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutSiteContentNestedInput
   }
 
@@ -46360,6 +46400,8 @@ export namespace Prisma {
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
+    previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
+    previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -46389,6 +46431,8 @@ export namespace Prisma {
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
+    previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
+    previewUpdatedAt?: Date | string | null
     businessId: string
   }
 
@@ -46418,6 +46462,8 @@ export namespace Prisma {
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
+    previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
+    previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type SiteContentUncheckedUpdateManyInput = {
@@ -46446,6 +46492,8 @@ export namespace Prisma {
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
+    previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
+    previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -49898,6 +49946,8 @@ export namespace Prisma {
     accentColor?: SortOrder
     navigationItems?: SortOrder
     customFields?: SortOrder
+    previewCustomFields?: SortOrder
+    previewUpdatedAt?: SortOrder
     businessId?: SortOrder
   }
 
@@ -49923,6 +49973,7 @@ export namespace Prisma {
     primaryColor?: SortOrder
     secondaryColor?: SortOrder
     accentColor?: SortOrder
+    previewUpdatedAt?: SortOrder
     businessId?: SortOrder
   }
 
@@ -49948,6 +49999,7 @@ export namespace Prisma {
     primaryColor?: SortOrder
     secondaryColor?: SortOrder
     accentColor?: SortOrder
+    previewUpdatedAt?: SortOrder
     businessId?: SortOrder
   }
   export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
@@ -55752,6 +55804,8 @@ export namespace Prisma {
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
+    previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
+    previewUpdatedAt?: Date | string | null
   }
 
   export type SiteContentUncheckedCreateWithoutBusinessInput = {
@@ -55780,6 +55834,8 @@ export namespace Prisma {
     accentColor?: string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
+    previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
+    previewUpdatedAt?: Date | string | null
   }
 
   export type SiteContentCreateOrConnectWithoutBusinessInput = {
@@ -56411,6 +56467,8 @@ export namespace Prisma {
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
+    previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
+    previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type SiteContentUncheckedUpdateWithoutBusinessInput = {
@@ -56439,6 +56497,8 @@ export namespace Prisma {
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
+    previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
+    previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ImageUpsertWithWhereUniqueWithoutBusinessInput = {

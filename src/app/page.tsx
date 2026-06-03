@@ -1,4 +1,5 @@
 import { api, HydrateClient } from "~/trpc/server";
+import { PreviewOverlay } from "~/components/preview/preview-overlay";
 
 import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
 import { BambooHomepage } from "./(storefront)/_templates/bamboo/homepage/bamboo-homepage";
@@ -18,7 +19,15 @@ import { NoiseLayout } from "./(storefront)/_templates/noise/layout/noise-layout
 import { PollenHomepage } from "./(storefront)/_templates/pollen/homepage/pollen-homepage";
 import { PollenLayout } from "./(storefront)/_templates/pollen/layout/pollen-layout";
 
-export default async function PlatformLandingPage() {
+// Next 15: searchParams is a Promise.
+type Props = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function PlatformLandingPage({ searchParams }: Props) {
+  const params = await (searchParams ?? Promise.resolve<Record<string, string | string[] | undefined>>({}));
+  const isPreview = params.__preview === "1";
+
   const business = await api.business.simplifiedGetWithProducts();
 
   if (!business) {
@@ -54,6 +63,7 @@ export default async function PlatformLandingPage() {
       <TemplateLayout business={business}>
         <TemplateComponent business={business} />
       </TemplateLayout>
+      {isPreview && <PreviewOverlay />}
     </HydrateClient>
   );
 }

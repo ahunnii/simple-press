@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { stripeClient } from "~/lib/stripe/client";
 import {
   createTRPCRouter,
@@ -47,6 +48,7 @@ export const businessRouter = createTRPCRouter({
             navigationItems: true,
             socialLinks: true,
             customFields: true,
+            previewCustomFields: true,
             metaTitle: true,
             metaDescription: true,
             metaKeywords: true,
@@ -60,9 +62,20 @@ export const businessRouter = createTRPCRouter({
       return null;
     }
 
-    const { stripeAccountId, ...rest } = businessData;
+    // Swap in the preview draft if the current user is an authorized owner/manager.
+    const sc = businessData.siteContent;
+    if (sc?.previewCustomFields != null) {
+      const previewBizId = await getAuthorizedPreviewBusinessId(businessData.id);
+      if (previewBizId) {
+        sc.customFields = sc.previewCustomFields;
+      }
+    }
 
-    return { ...rest, isStripeConnected: !!stripeAccountId };
+    const { stripeAccountId, ...rest } = businessData;
+    const sanitizedSiteContent = rest.siteContent
+      ? (({ previewCustomFields: _drop, ...safe }) => safe)(rest.siteContent)
+      : rest.siteContent;
+    return { ...rest, siteContent: sanitizedSiteContent, isStripeConnected: !!stripeAccountId };
   }),
 
   simplifiedGetWithProducts: publicProcedure.query(async ({ ctx }) => {
@@ -105,6 +118,7 @@ export const businessRouter = createTRPCRouter({
             navigationItems: true,
             socialLinks: true,
             customFields: true,
+            previewCustomFields: true,
           },
         },
       },
@@ -113,8 +127,26 @@ export const businessRouter = createTRPCRouter({
     if (!businessData) {
       return null;
     }
+
+    // Swap in the preview draft if the current user is an authorized owner/manager.
+    const sc = businessData.siteContent;
+    if (sc?.previewCustomFields != null) {
+      const previewBizId = await getAuthorizedPreviewBusinessId(businessData.id);
+      if (previewBizId) {
+        sc.customFields = sc.previewCustomFields;
+      }
+    }
+    // Never ship the raw draft field to clients.
     const { stripeAccountId, ...rest } = businessData;
-    return { ...rest, isStripeConnected: !!stripeAccountId };
+    const { siteContent, ...restWithoutSiteContent } = rest;
+    const sanitizedSiteContent = siteContent
+      ? (({ previewCustomFields: _drop, ...safe }) => safe)(siteContent)
+      : siteContent;
+    return {
+      ...restWithoutSiteContent,
+      siteContent: sanitizedSiteContent,
+      isStripeConnected: !!stripeAccountId,
+    };
   }),
 
   getWithPolicies: ownerAdminProcedure.query(async ({ ctx }) => {
@@ -158,6 +190,7 @@ export const businessRouter = createTRPCRouter({
             logoAltText: true,
             faviconUrl: true,
             customFields: true,
+            previewCustomFields: true,
           },
         },
         products: {
@@ -203,7 +236,23 @@ export const businessRouter = createTRPCRouter({
         },
       },
     });
-    return homepage;
+
+    if (!homepage) return homepage;
+
+    // Swap in the preview draft if the current user is an authorized owner/manager.
+    const hsc = homepage.siteContent;
+    if (hsc?.previewCustomFields != null) {
+      const previewBizId = await getAuthorizedPreviewBusinessId(business.id);
+      if (previewBizId) {
+        hsc.customFields = hsc.previewCustomFields;
+      }
+    }
+    // Never ship the raw draft field to clients.
+    const { siteContent: homepageSc, ...homepageRest } = homepage;
+    const sanitizedHomepageSc = homepageSc
+      ? (({ previewCustomFields: _drop, ...safe }) => safe)(homepageSc)
+      : homepageSc;
+    return { ...homepageRest, siteContent: sanitizedHomepageSc };
   }),
 
   getForEmailPreview: ownerAdminProcedure.query(async ({ ctx }) => {
