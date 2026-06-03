@@ -25,7 +25,7 @@ export function NoiseGuaranteeSection({
 }: NoiseGuaranteeSectionProps) {
   return (
     <section className="px-7 py-16" {...sectionAttrs}>
-      <FadeIn className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 md:grid-cols-2 md:gap-24">
+      <FadeIn className="mx-auto grid max-w-[1440px] grid-cols-1 items-center gap-16 md:grid-cols-2 md:gap-24">
         {/* Text side */}
         <div>
           <p

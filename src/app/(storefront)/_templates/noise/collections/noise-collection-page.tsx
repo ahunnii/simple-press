@@ -123,7 +123,7 @@ export function NoiseCollectionPage({
           className="border-foreground border-t-2 px-7 pt-14 pb-14"
           style={{ background: "var(--vn-paper)" }}
         >
-          <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-[1440px]">
             <FadeIn className="mb-10 flex items-end justify-between gap-6">
               <div>
                 <p

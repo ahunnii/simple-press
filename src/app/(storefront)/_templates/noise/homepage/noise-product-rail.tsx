@@ -46,7 +46,7 @@ export function NoiseProductRail({
       style={{ background: "var(--vn-paper)" }}
       {...sectionAttrs}
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-[1440px]">
         {/* Rail header */}
         <FadeIn className="border-foreground/20 mb-12 flex flex-col items-center justify-center space-y-4 pb-7">
           {overline && (

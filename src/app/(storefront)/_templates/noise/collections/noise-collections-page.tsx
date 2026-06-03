@@ -87,7 +87,7 @@ export function NoiseCollectionsPage({
         </FadeIn>
       ) : (
         <section className="px-7 pt-14 pb-16">
-          <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-[1440px]">
             {/* Collection cards */}
             <StaggerContainer
               className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"

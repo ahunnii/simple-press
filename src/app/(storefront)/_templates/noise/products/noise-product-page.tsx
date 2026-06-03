@@ -343,7 +343,7 @@ export function NoiseProductPage({
       {/* ── Related products ── */}
       {relatedProducts && relatedProducts.length > 0 && (
         <section className="px-7 py-16">
-          <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-[1440px]">
             <FadeIn
               className="mb-10 flex items-end justify-between pb-6"
               style={{ borderColor: "var(--vn-rule)" }}

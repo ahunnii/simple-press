@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookUser, Bell, Lock, Package, Settings } from "lucide-react";
+import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 
@@ -27,22 +27,25 @@ export function NoiseAccountLayout({ children, heading }: Props) {
     <>
       {/* Editorial header */}
       <section
-        className="border-b-2 border-foreground"
+        className="border-foreground border-b-2"
         style={{ background: "var(--vn-paper)" }}
       >
         <div className="flex items-stretch" style={{ minHeight: "100px" }}>
           <div
-            className="hidden md:flex flex-col justify-center gap-2 px-7 py-6 border-r border-foreground/20"
+            className="border-foreground/20 hidden flex-col justify-center gap-2 border-r px-7 py-6 md:flex"
             style={{ minWidth: "200px" }}
           >
-            <span className="font-mono text-[9.5px] tracking-[0.22em] uppercase text-muted-foreground">
+            <span className="text-muted-foreground font-mono text-[9.5px] tracking-[0.22em] uppercase">
               My Account
             </span>
           </div>
-          <div className="flex-1 flex items-center px-7 py-6">
+          <div className="flex flex-1 items-center px-7 py-6">
             <h1
-              className="font-serif italic leading-none tracking-tight"
-              style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", letterSpacing: "-0.025em" }}
+              className="font-serif leading-none tracking-tight italic"
+              style={{
+                fontSize: "clamp(2rem, 5vw, 3.5rem)",
+                letterSpacing: "-0.025em",
+              }}
             >
               {heading}
             </h1>
@@ -50,7 +53,10 @@ export function NoiseAccountLayout({ children, heading }: Props) {
         </div>
 
         {/* Mobile nav pills */}
-        <nav className="md:hidden flex gap-2 overflow-x-auto px-7 pb-5 pt-1" aria-label="Account navigation">
+        <nav
+          className="flex gap-2 overflow-x-auto px-7 pt-1 pb-5 md:hidden"
+          aria-label="Account navigation"
+        >
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(href + "/");
             return (
@@ -58,7 +64,7 @@ export function NoiseAccountLayout({ children, heading }: Props) {
                 key={href}
                 href={href}
                 className={cn(
-                  "vn-stamp flex-shrink-0 flex items-center gap-1.5 text-[9.5px] transition-all",
+                  "vn-stamp flex flex-shrink-0 items-center gap-1.5 text-[9.5px] transition-all",
                   active
                     ? "bg-foreground text-background border-foreground"
                     : "hover:bg-foreground hover:text-background hover:border-foreground",
@@ -73,12 +79,13 @@ export function NoiseAccountLayout({ children, heading }: Props) {
       </section>
 
       <section className="px-7 py-10" style={{ background: "var(--vn-paper)" }}>
-        <div className="mx-auto max-w-7xl grid grid-cols-1 gap-10 md:grid-cols-[200px_1fr]">
+        <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-10 md:grid-cols-[200px_1fr]">
           {/* Desktop sidebar */}
           <nav className="hidden md:block" aria-label="Account navigation">
             <ul className="flex flex-col gap-0">
               {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-                const active = pathname === href || pathname.startsWith(href + "/");
+                const active =
+                  pathname === href || pathname.startsWith(href + "/");
                 return (
                   <li key={href}>
                     <Link

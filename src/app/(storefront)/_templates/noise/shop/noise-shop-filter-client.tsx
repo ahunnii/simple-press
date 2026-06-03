@@ -6,7 +6,7 @@ import { SlidersHorizontal, X } from "lucide-react";
 
 import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
-import { useShopFilters } from "~/hooks/use-shop-filters";
+import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 import {
   FadeIn,
   StaggerContainer,
@@ -185,7 +185,7 @@ export function NoiseShopClient({ products, collections = [] }: Props) {
           <select
             value={sortParam}
             onChange={(e) =>
-              handleSort(e.target.value as Parameters<typeof handleSort>[0])
+              handleSort(e.target.value as keyof typeof SORT_LABELS)
             }
             className="cursor-pointer font-sans text-[13px] outline-none"
             style={{
@@ -196,10 +196,11 @@ export function NoiseShopClient({ products, collections = [] }: Props) {
               fontFamily: "inherit",
             }}
           >
-            <option value="featured">Featured</option>
-            <option value="price-ascending">Price · Low to High</option>
-            <option value="price-descending">Price · High to Low</option>
-            <option value="title-ascending">Name A–Z</option>
+            {Object.entries(SORT_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </select>
         </label>
       </div>
@@ -242,7 +243,10 @@ export function NoiseShopClient({ products, collections = [] }: Props) {
       {/* Mobile filter toggle */}
       <div
         className="mb-6 flex items-center justify-between md:hidden"
-        style={{ borderBottom: "1px solid var(--vn-rule)", paddingBottom: "12px" }}
+        style={{
+          borderBottom: "1px solid var(--vn-rule)",
+          paddingBottom: "12px",
+        }}
       >
         <span
           className="font-mono text-[11px] tracking-[0.14em] uppercase"

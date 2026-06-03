@@ -54,6 +54,13 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
 
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
 
+  const shippingPolicy = policies.find((p) => p.slug === "shipping-policy");
+  const returnPolicy = policies.find((p) => p.slug === "refund-policy");
+  const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
+  const termsOfService = policies.find((p) => p.slug === "terms-of-service");
+
+  const blogEnabled = isEnabled("blog");
+
   return (
     <footer
       style={{
@@ -188,7 +195,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
             </div>
 
             {/* ── Col 2: Policies ── */}
-            {policies.length > 0 && (
+            {/* {policies.length > 0 && (
               <FooterCol
                 title="Policies"
                 links={
@@ -200,7 +207,16 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                     : []
                 }
               />
-            )}
+            )} */}
+
+            <FooterCol
+              title="Shop"
+              links={[
+                { href: "/shop", label: "Shop All" },
+                { href: "/collections", label: "Collections" },
+                { href: "/shop?sort_by=new", label: "New arrivals" },
+              ]}
+            />
 
             {/* ── Col 3: Quick links ── */}
             <FooterCol
@@ -293,22 +309,52 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
         </span>
 
         {/* Payment icons */}
-        <div className="flex flex-wrap gap-2">
-          {PAYMENT_LABELS.map((label) => (
-            <span
-              key={label}
-              className="font-mono"
-              style={{
-                border: "1px solid var(--vn-rule)",
-                padding: "4px 8px",
-                fontSize: "9px",
-                letterSpacing: "0.18em",
-                color: "var(--vn-steel-mist)",
-              }}
+        <div
+          className="flex flex-wrap gap-3 font-mono"
+          style={{
+            padding: "4px 8px",
+            fontSize: "9px",
+            letterSpacing: "0.18em",
+            color: "var(--vn-steel-mist)",
+          }}
+        >
+          {privacyPolicy ? (
+            <Link
+              href={privacyPolicy.slug}
+              className="transition-colors hover:text-[#0a0a0a]"
             >
-              {label}
-            </span>
-          ))}
+              Privacy Policy{" "}
+            </Link>
+          ) : (
+            <Link
+              href="/platform/policies/privacy-policy"
+              className="transition-colors hover:text-[#0a0a0a]"
+            >
+              Privacy Policy
+            </Link>
+          )}
+
+          {termsOfService ? (
+            <Link
+              href={termsOfService.slug}
+              className="transition-colors hover:text-[#0a0a0a]"
+            >
+              Terms of Service
+            </Link>
+          ) : (
+            <Link
+              href="/platform/policies/terms-of-service"
+              className="transition-colors hover:text-[#0a0a0a]"
+            >
+              Terms of Service
+            </Link>
+          )}
+          <Link
+            href="/platform/policies/"
+            className="transition-colors hover:text-[#0a0a0a]"
+          >
+            Platform Policies
+          </Link>
         </div>
       </div>
     </footer>
@@ -318,12 +364,14 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
 function FooterCol({
   title,
   links,
+  className,
 }: {
   title: string;
   links: { href: string; label: string }[];
+  className?: string;
 }) {
   return (
-    <div>
+    <div className={className}>
       <h4
         className="mb-5 font-mono"
         style={{

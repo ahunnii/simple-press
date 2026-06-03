@@ -116,7 +116,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
         }}
       >
         <div
-          className="grid items-center gap-6 px-5 py-4 sm:px-7 sm:py-[18px] lg:px-9"
+          className="mx-auto grid w-full max-w-[1440px] items-center gap-6 px-4 py-4 sm:px-6 sm:py-[18px]"
           style={{
             gridTemplateColumns: "1fr auto 1fr",
           }}

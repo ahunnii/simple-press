@@ -224,7 +224,8 @@ const homepageFeaturedData: TemplateField[] = [
   {
     key: "noise.homepage-featured-button-link",
     label: "Featured Button Link",
-    description: "CTA button URL (ignored when a collection is selected — link auto-points to the collection page)",
+    description:
+      "CTA button URL (ignored when a collection is selected — link auto-points to the collection page)",
     type: "url",
     page: "homepage",
     group: "homepage.featured",
@@ -234,7 +235,8 @@ const homepageFeaturedData: TemplateField[] = [
   {
     key: "noise.homepage.rail-one-collection",
     label: "Rail 1 — Collection",
-    description: "Pick a collection for the first product rail. Defaults to featured products when unset.",
+    description:
+      "Pick a collection for the first product rail. Defaults to featured products when unset.",
     type: "collection",
     page: "homepage",
     group: "homepage.featured",
@@ -243,7 +245,8 @@ const homepageFeaturedData: TemplateField[] = [
   {
     key: "noise.homepage.rail-one-overline",
     label: "Rail 1 — Overline",
-    description: "Small caps label above the first product rail (e.g. 'Collection'). Leave blank to hide.",
+    description:
+      "Small caps label above the first product rail (e.g. 'Collection'). Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
@@ -253,7 +256,8 @@ const homepageFeaturedData: TemplateField[] = [
   {
     key: "noise.homepage.rail-two-collection",
     label: "Rail 2 — Collection",
-    description: "Pick a collection for the second product rail. Defaults to featured products when unset.",
+    description:
+      "Pick a collection for the second product rail. Defaults to featured products when unset.",
     type: "collection",
     page: "homepage",
     group: "homepage.featured",
@@ -262,7 +266,8 @@ const homepageFeaturedData: TemplateField[] = [
   {
     key: "noise.homepage.rail-two-overline",
     label: "Rail 2 — Overline",
-    description: "Small caps label above the second product rail (e.g. 'New Arrivals'). Leave blank to hide.",
+    description:
+      "Small caps label above the second product rail (e.g. 'New Arrivals'). Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
@@ -272,7 +277,8 @@ const homepageFeaturedData: TemplateField[] = [
   {
     key: "noise.homepage.rail-two-title",
     label: "Rail 2 — Title",
-    description: "Section heading for the second product rail (used when no collection is selected).",
+    description:
+      "Section heading for the second product rail (used when no collection is selected).",
     type: "text",
     page: "homepage",
     group: "homepage.featured",
@@ -335,13 +341,24 @@ const homepageGuaranteeData: TemplateField[] = [
   {
     key: "noise.homepage-guarantee-stamp",
     label: "Guarantee Corner Stamp",
-    description: "Short label shown on the image in the guarantee section. Leave blank to hide.",
+    description:
+      "Short label shown on the image in the guarantee section. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.guarantee",
     gridColumn: "col-span-1",
     defaultValue: "",
     placeholder: "e.g. Handmade",
+  },
+  {
+    key: "noise.homepage-guarantee-image",
+    label: "Guarantee Image",
+    description: "Image for the guarantee section",
+    type: "image",
+    page: "homepage",
+    group: "homepage.guarantee",
+    defaultValue: "/placeholder.svg",
+    gridColumn: "col-span-full",
   },
 ];
 
@@ -369,7 +386,8 @@ export const noiseHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.hero",
     title: "Hero Section",
-    description: "Full-viewport hero with background image or video and headline",
+    description:
+      "Full-viewport hero with background image or video and headline",
     icon: "🎭",
     columns: 2,
   },

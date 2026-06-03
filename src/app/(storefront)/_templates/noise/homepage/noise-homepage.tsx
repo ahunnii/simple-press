@@ -54,6 +54,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     "noise.global.shop-cta-link",
     "noise.global.location-tag",
     "noise.homepage-guarantee-stamp",
+    "noise.homepage-guarantee-image",
   ]);
 
   const products = homepage?.products ?? [];
@@ -115,7 +116,11 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
               f["noise.homepage.hero-primary-button-link"] ?? undefined
             }
             wordmark={businessName.length > 0 ? businessName : undefined}
-            locationTag={(f["noise.global.location-tag"] ?? "").length > 0 ? f["noise.global.location-tag"] : undefined}
+            locationTag={
+              (f["noise.global.location-tag"] ?? "").length > 0
+                ? f["noise.global.location-tag"]
+                : undefined
+            }
             sectionAttrs={sectionGroupAttr("homepage", "hero")}
           />
 
@@ -173,6 +178,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
             headingAccent={f["noise.homepage-guarantee-headingAccent"]}
             body={f["noise.homepage-guarantee-quote"]}
             stamp={f["noise.homepage-guarantee-stamp"] ?? undefined}
+            image={f["noise.homepage-guarantee-image"] ?? undefined}
             sectionAttrs={sectionGroupAttr("homepage", "guarantee")}
           />
 
