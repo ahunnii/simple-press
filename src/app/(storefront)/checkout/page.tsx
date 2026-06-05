@@ -11,6 +11,7 @@ import { HappyBambooCheckoutPage } from "../_templates/happy-bamboo/cart-checkou
 import { ModernCheckoutPage } from "../_templates/modern/cart-checkout/modern-checkout-page";
 import { NoiseCheckoutPage } from "../_templates/noise/cart-checkout/noise-checkout-page";
 import { PollenCheckoutPage } from "../_templates/pollen/cart-checkout/pollen-checkout-page";
+import { SledgeCheckoutPage } from "../_templates/sledge/cart-checkout/sledge-checkout-page";
 
 export default async function CheckoutPage() {
   const business = await api.business.simplifiedGet();
@@ -34,6 +35,7 @@ export default async function CheckoutPage() {
       elegant: ElegantCheckoutPage,
       pollen: PollenCheckoutPage,
       noise: NoiseCheckoutPage,
+      sledge: SledgeCheckoutPage,
     }[business.templateId] ?? DefaultCheckoutPage;
 
   return <TemplateComponent business={business} />;

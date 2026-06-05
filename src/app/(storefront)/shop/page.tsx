@@ -10,6 +10,7 @@ import { HappyBambooShopPage } from "../_templates/happy-bamboo/shop/happy-bambo
 import { ModernProductsPage } from "../_templates/modern/shop/modern-products-page";
 import { NoiseShopPage } from "../_templates/noise/shop/noise-shop-page";
 import { PollenShopPage } from "../_templates/pollen/shop/pollen-shop-page";
+import { SledgeShopPage } from "../_templates/sledge/shop/sledge-shop-page";
 
 export default async function ProductsPage() {
   const business = await api.business.getWithProducts();
@@ -25,6 +26,7 @@ export default async function ProductsPage() {
       bamboo: BambooShopPage,
       "happy-bamboo": HappyBambooShopPage,
       noise: NoiseShopPage,
+      sledge: SledgeShopPage,
     }[business.templateId] ?? DefaultProductsPage;
 
   return <TemplateComponent business={business} />;

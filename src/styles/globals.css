@@ -695,16 +695,10 @@
   outline-offset: 3px;
 }
 
-/* ─── Product page grid (thumb-rail only on md+) ────────────────────────── */
+/* ─── Product page grid ─────────────────────────────────────────────────── */
 .noise .vn-product-grid,
 .visual-noise .vn-product-grid {
   grid-template-columns: 1fr 1fr;
-}
-@media (min-width: 768px) {
-  .noise .vn-product-grid,
-  .visual-noise .vn-product-grid {
-    grid-template-columns: 80px 1fr 1fr;
-  }
 }
 
 /* ─── Hero overlay (replaces inline rgba) ───────────────────────────────── */
@@ -730,7 +724,9 @@
   background: var(--vn-paper);
   color: var(--vn-ink);
   border: 1px solid var(--vn-paper);
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
   display: inline-block;
 }
 .noise .vn-btn-hero:hover,
@@ -1629,6 +1625,334 @@
     h6 {
       @apply font-serif;
     }
+  }
+
+  /* ─── Judy Sledge — design tokens ──────────────────────────────────────── */
+  .sledge {
+    --sl-cream: #e7f4dd;
+    --sl-green: #8ed36c;
+    --sl-coral: #e87b4c;
+    --sl-coral-deep: #d4632f;
+    --sl-red: #a32c2c;
+    --sl-dark: #161616;
+    --sl-ink: #2b2b2b;
+    --sl-ink-soft: #4a4a4a;
+    --sl-orange: #fc6434;
+
+    /* keep cloned vn-* markup alive */
+    --vn-paper: var(--sl-cream);
+    --vn-bone: var(--sl-cream);
+    --vn-ink: var(--sl-ink);
+    --vn-ink-soft: var(--sl-ink-soft);
+    --vn-accent: var(--sl-coral);
+    --vn-steel: var(--sl-green);
+    --vn-steel-mist: var(--sl-ink-soft);
+    --vn-rule: #cfe4c2;
+    --vn-line-soft: #d9ecce;
+    --font-serif: var(--font-heading);
+    --font-mono: var(--font-sans);
+    --radius: 0.5rem;
+
+    background: var(--sl-cream);
+    color: var(--sl-ink);
+
+    * {
+      @apply font-sans;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply font-heading;
+    }
+  }
+
+  /* ─── Sledge: announcement bar ─────────────────────────────────────────── */
+  .sledge .vn-topbar {
+    background: var(--sl-dark);
+    color: #ffffff;
+    border-bottom: none;
+    font-family: var(--font-sans, sans-serif);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    min-height: 38px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* ─── Sledge: nav links ─────────────────────────────────────────────────── */
+  .sledge .vn-nav-link {
+    position: relative;
+    padding: 4px 0;
+  }
+
+  .sledge .vn-nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -3px;
+    height: 2px;
+    background: var(--sl-coral);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .sledge .vn-nav-link:hover::after,
+  .sledge .vn-nav-link.vn-active::after {
+    transform: scaleX(1);
+  }
+
+  /* ─── Sledge: nav dropdown links ────────────────────────────────────────── */
+  .sledge .vn-nav-dropdown-link {
+    display: block;
+    padding: 1rem 1.75rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .sledge .vn-nav-dropdown-link:hover,
+  .sledge .vn-nav-dropdown-link.vn-active {
+    color: var(--sl-coral);
+  }
+
+  /* ─── Sledge: footer links ──────────────────────────────────────────────── */
+  .sledge .vn-footer-link {
+    color: rgba(255, 255, 255, 0.65);
+    transition: color 0.15s ease;
+    text-decoration: none;
+  }
+
+  .sledge .vn-footer-link:hover {
+    color: #ffffff;
+  }
+
+  /* ─── Sledge: coral button helper ──────────────────────────────────────── */
+  .sledge .sl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--sl-coral);
+    color: #ffffff;
+    font-family: var(--font-sans, sans-serif);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 15px 27px;
+    border: none;
+    border-radius: var(--radius, 0.25rem);
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+      background 0.15s ease,
+      opacity 0.15s ease;
+  }
+
+  .sledge .sl-btn:hover {
+    background: var(--sl-coral-deep);
+  }
+
+  /* ─── Sledge: focus ring ────────────────────────────────────────────────── */
+  .sledge *:focus-visible {
+    outline: 2px solid var(--sl-coral);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sledge *,
+    .sledge *::before,
+    .sledge *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ─── Sledge: hero mosaic collage ──────────────────────────────────────── */
+  .sledge .sl-mosaic {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .sledge .sl-mosaic .sl-m-logo {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 1rem 1rem;
+  }
+
+  .sledge .sl-mosaic .sl-m-tile {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.4rem;
+    aspect-ratio: 3 / 4;
+    background: var(--sl-green);
+  }
+
+  @media (min-width: 768px) {
+    /* Fine-grained row grid (each track is a fraction of a tile) so the
+       center column pair can be staggered DOWN relative to the flanks —
+       the intentional offset from the original collage. */
+    .sledge .sl-mosaic {
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(11, clamp(70px, 7vw, 96px));
+      gap: 10px;
+    }
+    .sledge .sl-mosaic .sl-m-tile {
+      aspect-ratio: auto;
+    }
+    /* Logo: top-center, sitting above the (lower) center pair. */
+    .sledge .sl-mosaic .sl-m-logo {
+      grid-column: 2 / 4;
+      grid-row: 1 / 4;
+      padding: 0 0.5rem;
+    }
+    /* Flanking columns: tall top image + image below, both anchored to the
+       top. They end higher than the center pair. */
+    .sledge .sl-mosaic .sl-m-0 {
+      grid-column: 1;
+      grid-row: 1 / 6;
+    }
+    .sledge .sl-mosaic .sl-m-1 {
+      grid-column: 4;
+      grid-row: 1 / 6;
+    }
+    .sledge .sl-mosaic .sl-m-4 {
+      grid-column: 1;
+      grid-row: 6 / 10;
+    }
+    .sledge .sl-mosaic .sl-m-7 {
+      grid-column: 4;
+      grid-row: 6 / 10;
+    }
+    /* Center pair: pushed down beneath the logo so it hangs below the
+       flanks — the staggered offset. */
+    .sledge .sl-mosaic .sl-m-2 {
+      grid-column: 2;
+      grid-row: 4 / 8;
+    }
+    .sledge .sl-mosaic .sl-m-3 {
+      grid-column: 3;
+      grid-row: 4 / 8;
+    }
+    .sledge .sl-mosaic .sl-m-5 {
+      grid-column: 2;
+      grid-row: 8 / 12;
+    }
+    .sledge .sl-mosaic .sl-m-6 {
+      grid-column: 3;
+      grid-row: 8 / 12;
+    }
+  }
+
+  /* ─── Sledge: product card ──────────────────────────────────────────────── */
+  .sledge .sledge-card-img {
+    aspect-ratio: 4 / 5;
+    background: var(--sl-green);
+  }
+
+  .sledge .sledge-card-placeholder {
+    background:
+      repeating-linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.06) 0 12px,
+        transparent 12px 24px
+      ),
+      linear-gradient(180deg, var(--sl-dark), var(--sl-ink));
+  }
+
+  .sledge .sledge-card-placeholder-num {
+    font-size: 64px;
+    color: var(--sl-cream);
+    opacity: 0.4;
+  }
+
+  .sledge .sledge-badge-new {
+    background: var(--sl-cream);
+    color: var(--sl-ink);
+    border: 1px solid var(--sl-ink);
+  }
+
+  .sledge .sledge-badge-sold {
+    background: var(--sl-dark);
+    color: var(--sl-cream);
+  }
+
+  .sledge .sledge-badge-default {
+    background: var(--sl-coral);
+    color: white;
+  }
+
+  .sledge .sledge-card-name {
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+
+  .sledge .sledge-card-price {
+    font-size: 16px;
+    letter-spacing: 0.02em;
+  }
+
+  .sledge .sledge-price-compare {
+    text-decoration: line-through;
+    color: var(--sl-ink-soft);
+  }
+
+  .sledge .sledge-card-tagline {
+    color: var(--sl-ink-soft);
+  }
+
+  /*
+   * Meta section: single element, transforms into a white card on hover.
+   * Only horizontal padding (px) animates — vertical padding and height
+   * stay fixed so the card never shifts other grid items.
+   * The CTA is always in the layout (opacity-only reveal), so its height
+   * is baked into the card from the start.
+   */
+  .sledge .sledge-card-meta {
+    margin-top: 16px;
+    padding: 16px 4px 8px;
+    border-radius: 1rem;
+    transition:
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.3s ease,
+      box-shadow 0.3s ease,
+      padding-left 0.35s ease,
+      padding-right 0.35s ease;
+  }
+
+  .sledge .group:hover .sledge-card-meta {
+    background: white;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    padding-left: 20px;
+    padding-right: 20px;
+    transform: translateY(-32px);
+  }
+
+  /* CTA: always occupies layout space, only opacity changes — no height shift */
+  .sledge .sledge-cta-reveal {
+    margin-top: 6px;
+    opacity: 0;
+    transition: opacity 0.25s ease-out;
+  }
+
+  .sledge .group:hover .sledge-cta-reveal {
+    opacity: 1;
   }
 }
 

@@ -12,6 +12,7 @@ import { HappyBambooLayout } from "./_templates/happy-bamboo/layout/happy-bamboo
 import { ModernLayout } from "./_templates/modern/layout/modern-layout";
 import { NoiseLayout } from "./_templates/noise/layout/noise-layout";
 import { PollenLayout } from "./_templates/pollen/layout/pollen-layout";
+import { SledgeLayout } from "./_templates/sledge/layout/sledge-layout";
 
 type Props = {
   children: React.ReactNode;
@@ -31,6 +32,7 @@ export default async function StorefrontLayout({ children }: Props) {
       pollen: PollenLayout,
       "happy-bamboo": HappyBambooLayout,
       noise: NoiseLayout,
+      sledge: SledgeLayout,
     }[business.templateId] ?? DefaultLayout;
 
   return (

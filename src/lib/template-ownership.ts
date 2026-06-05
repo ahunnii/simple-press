@@ -32,7 +32,11 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
   },
   noise: {
     label: "Noise",
-    subdomains: ["visualnoise"],
+    subdomains: ["visualnoise", "visual-noise"],
+  },
+  sledge: {
+    label: "Sledge",
+    subdomains: ["judysledge"],
   },
 };
 

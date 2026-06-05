@@ -10,6 +10,7 @@ import { HappyBambooCollectionPage } from "../../_templates/happy-bamboo/collect
 import { ModernCollectionPage } from "../../_templates/modern/collections/modern-collection-page";
 import { NoiseCollectionPage } from "../../_templates/noise/collections/noise-collection-page";
 import { PollenCollectionPage } from "../../_templates/pollen/collections/pollen-collection-page";
+import { SledgeCollectionPage } from "../../_templates/sledge/collections/sledge-collection-page";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -39,6 +40,7 @@ export default async function CollectionPage({ params }: Props) {
       modern: ModernCollectionPage,
       noise: NoiseCollectionPage,
       pollen: PollenCollectionPage,
+      sledge: SledgeCollectionPage,
     }[business.templateId] ?? DefaultCollectionPage;
 
   return (

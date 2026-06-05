@@ -10,6 +10,7 @@ import { HappyBambooCartPage } from "../_templates/happy-bamboo/cart-checkout/ha
 import ModernCartPage from "../_templates/modern/cart-checkout/modern-cart-page";
 import { NoiseCartPage } from "../_templates/noise/cart-checkout/noise-cart-page";
 import { PollenCartPage } from "../_templates/pollen/cart-checkout/pollen-cart-page";
+import { SledgeCartPage } from "../_templates/sledge/cart-checkout/sledge-cart-page";
 
 export default async function CartPage() {
   const business = await api.business.simplifiedGetWithProducts();
@@ -24,6 +25,7 @@ export default async function CartPage() {
       bamboo: BambooCartPage,
       "happy-bamboo": HappyBambooCartPage,
       noise: NoiseCartPage,
+      sledge: SledgeCartPage,
     }[business.templateId] ?? DefaultCartPage;
 
   return <TemplateComponent business={business} />;

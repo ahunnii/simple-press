@@ -65,7 +65,9 @@ export const businessRouter = createTRPCRouter({
     // Swap in the preview draft if the current user is an authorized owner/manager.
     const sc = businessData.siteContent;
     if (sc?.previewCustomFields != null) {
-      const previewBizId = await getAuthorizedPreviewBusinessId(businessData.id);
+      const previewBizId = await getAuthorizedPreviewBusinessId(
+        businessData.id,
+      );
       if (previewBizId) {
         sc.customFields = sc.previewCustomFields;
       }
@@ -75,7 +77,11 @@ export const businessRouter = createTRPCRouter({
     const sanitizedSiteContent = rest.siteContent
       ? (({ previewCustomFields: _drop, ...safe }) => safe)(rest.siteContent)
       : rest.siteContent;
-    return { ...rest, siteContent: sanitizedSiteContent, isStripeConnected: !!stripeAccountId };
+    return {
+      ...rest,
+      siteContent: sanitizedSiteContent,
+      isStripeConnected: !!stripeAccountId,
+    };
   }),
 
   simplifiedGetWithProducts: publicProcedure.query(async ({ ctx }) => {
@@ -131,7 +137,9 @@ export const businessRouter = createTRPCRouter({
     // Swap in the preview draft if the current user is an authorized owner/manager.
     const sc = businessData.siteContent;
     if (sc?.previewCustomFields != null) {
-      const previewBizId = await getAuthorizedPreviewBusinessId(businessData.id);
+      const previewBizId = await getAuthorizedPreviewBusinessId(
+        businessData.id,
+      );
       if (previewBizId) {
         sc.customFields = sc.previewCustomFields;
       }
@@ -191,6 +199,7 @@ export const businessRouter = createTRPCRouter({
             faviconUrl: true,
             customFields: true,
             previewCustomFields: true,
+            socialLinks: true,
           },
         },
         products: {

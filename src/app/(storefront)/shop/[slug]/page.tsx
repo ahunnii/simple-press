@@ -10,6 +10,7 @@ import { HappyBambooProductPage } from "../../_templates/happy-bamboo/products/h
 import { ModernProductPage } from "../../_templates/modern/products/modern-product-page";
 import { NoiseProductPage } from "../../_templates/noise/products/noise-product-page";
 import { PollenProductPage } from "../../_templates/pollen/products/pollen-product-page";
+import { SledgeProductPage } from "../../_templates/sledge/products/sledge-product-page";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -37,6 +38,7 @@ export default async function ProductDetailPage({ params }: Props) {
       "happy-bamboo": HappyBambooProductPage,
       noise: NoiseProductPage,
       pollen: PollenProductPage,
+      sledge: SledgeProductPage,
     }[business.templateId] ?? DefaultProductPage;
 
   return <TemplateComponent product={product} business={business} />;
@@ -48,8 +50,12 @@ export async function generateMetadata({ params }: Props) {
 
   if (!product) return { title: "Product Not Found" };
 
-  const title = product.metaTitle ?? product.name;
-  const description = product.metaDescription ?? product.description;
+  const title = !!product.metaTitle?.trim()
+    ? product.metaTitle.trim()
+    : product.name;
+  const description = !!product.metaDescription?.trim()
+    ? product.metaDescription.trim()
+    : product.description;
 
   return {
     title,

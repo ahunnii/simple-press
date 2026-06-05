@@ -10,6 +10,7 @@ import { HappyBambooTestimonialsPage } from "../_templates/happy-bamboo/testimon
 import { ModernTestimonialsPage } from "../_templates/modern/testimonials/modern-testimonials-page";
 import { NoiseTestimonialsPage } from "../_templates/noise/testimonials/noise-testimonials-page";
 import { PollenTestimonialsPage } from "../_templates/pollen/testimonials/pollen-testimonials-page";
+import { SledgeTestimonialsPage } from "../_templates/sledge/testimonials/sledge-testimonials-page";
 
 export default async function TestimonialsPage() {
   const business = await api.business.simplifiedGet();
@@ -24,6 +25,7 @@ export default async function TestimonialsPage() {
       modern: ModernTestimonialsPage,
       "happy-bamboo": HappyBambooTestimonialsPage,
       noise: NoiseTestimonialsPage,
+      sledge: SledgeTestimonialsPage,
     }[business.templateId] ?? DefaultTestimonialsPage;
 
   return <TemplateComponent business={business} />;

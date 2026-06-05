@@ -11,6 +11,7 @@ import { HappyBambooGenericPage } from "../_templates/happy-bamboo/happy-bamboo-
 import { ModernGenericPage } from "../_templates/modern/modern-generic-page";
 import { NoiseGenericPage } from "../_templates/noise/noise-generic-page";
 import { PollenGenericPage } from "../_templates/pollen/pollen-generic-page";
+import { SledgeGenericPage } from "../_templates/sledge/sledge-generic-page";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -36,6 +37,7 @@ export default async function PageView({ params }: Props) {
       "happy-bamboo": HappyBambooGenericPage,
       noise: NoiseGenericPage,
       modern: ModernGenericPage,
+      sledge: SledgeGenericPage,
     }[business.templateId] ?? DefaultGenericPage;
 
   return <TemplateComponent business={business} page={page} />;

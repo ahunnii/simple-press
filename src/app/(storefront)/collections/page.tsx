@@ -10,6 +10,7 @@ import { HappyBambooCollectionsPage } from "../_templates/happy-bamboo/collectio
 import { ModernCollectionsPage } from "../_templates/modern/collections/modern-collections-page";
 import { NoiseCollectionsPage } from "../_templates/noise/collections/noise-collections-page";
 import { PollenCollectionsPage } from "../_templates/pollen/collections/pollen-collections-page";
+import { SledgeCollectionsPage } from "../_templates/sledge/collections/sledge-collections-page";
 
 export default async function CollectionsPage() {
   const business = await api.business.simplifiedGet();
@@ -26,6 +27,7 @@ export default async function CollectionsPage() {
       modern: ModernCollectionsPage,
       noise: NoiseCollectionsPage,
       pollen: PollenCollectionsPage,
+      sledge: SledgeCollectionsPage,
     }[business.templateId] ?? DefaultCollectionsPage;
 
   return <TemplateComponent collections={collections} business={business} />;

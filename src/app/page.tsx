@@ -18,6 +18,8 @@ import { NoiseHomepage } from "./(storefront)/_templates/noise/homepage/noise-ho
 import { NoiseLayout } from "./(storefront)/_templates/noise/layout/noise-layout";
 import { PollenHomepage } from "./(storefront)/_templates/pollen/homepage/pollen-homepage";
 import { PollenLayout } from "./(storefront)/_templates/pollen/layout/pollen-layout";
+import { SledgeHomepage } from "./(storefront)/_templates/sledge/homepage/sledge-homepage";
+import { SledgeLayout } from "./(storefront)/_templates/sledge/layout/sledge-layout";
 
 // Next 15: searchParams is a Promise.
 type Props = {
@@ -25,7 +27,8 @@ type Props = {
 };
 
 export default async function PlatformLandingPage({ searchParams }: Props) {
-  const params = await (searchParams ?? Promise.resolve<Record<string, string | string[] | undefined>>({}));
+  const params = await (searchParams ??
+    Promise.resolve<Record<string, string | string[] | undefined>>({}));
   const isPreview = params.__preview === "1";
 
   const business = await api.business.simplifiedGetWithProducts();
@@ -44,6 +47,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       bamboo: BambooHomepage,
       "happy-bamboo": HappyBambooHomepage,
       noise: NoiseHomepage,
+      sledge: SledgeHomepage,
     }[business.templateId] ?? DefaultHomePage;
 
   const TemplateLayout =
@@ -56,6 +60,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       pollen: PollenLayout,
       "happy-bamboo": HappyBambooLayout,
       noise: NoiseLayout,
+      sledge: SledgeLayout,
     }[business.templateId] ?? DefaultLayout;
 
   return (

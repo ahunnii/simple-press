@@ -37,6 +37,10 @@ import {
   pollenData,
   pollenFieldGroups,
 } from "~/app/(storefront)/_templates/pollen";
+import {
+  sledgeData,
+  sledgeFieldGroups,
+} from "~/app/(storefront)/_templates/sledge";
 
 export type TemplatePage =
   | "homepage"
@@ -314,6 +318,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...modernFieldGroups,
   ...happyBambooFieldGroups,
   ...noiseFieldGroups,
+  ...sledgeFieldGroups,
   ...elegantFieldGroups,
   ...defaultTemplateFieldGroups,
 };
@@ -365,6 +370,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...modernData,
   ...happyBambooData,
   ...noiseData,
+  ...sledgeData,
   ...elegantData,
   ...defaultTemplateData,
 };
