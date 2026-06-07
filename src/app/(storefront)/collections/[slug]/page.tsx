@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
 
+import { getCanonicalUrl } from "~/lib/canonical";
+import { JsonLd } from "~/components/json-ld";
+import { buildBreadcrumbSchema } from "~/lib/structured-data";
 import { api } from "~/trpc/server";
 
 import { BambooCollectionPage } from "../../_templates/bamboo/collections/bamboo-collection-page";
@@ -43,12 +46,21 @@ export default async function CollectionPage({ params }: Props) {
       sledge: SledgeCollectionPage,
     }[business.templateId] ?? DefaultCollectionPage;
 
+  const breadcrumbSchema = buildBreadcrumbSchema(business, [
+    { name: "Home", path: "/" },
+    { name: "Collections", path: "/collections" },
+    { name: collection.name, path: `/collections/${collection.slug}` },
+  ]);
+
   return (
-    <TemplateComponent
-      business={business}
-      collection={collection}
-      additionalCollections={additionalCollections}
-    />
+    <>
+      <JsonLd data={breadcrumbSchema} />
+      <TemplateComponent
+        business={business}
+        collection={collection}
+        additionalCollections={additionalCollections}
+      />
+    </>
   );
 }
 
@@ -66,12 +78,36 @@ export async function generateMetadata({ params }: Props) {
       return { title: "Collection Not Found" };
     }
 
+    const title =
+      collection.metaTitle ?? `${collection.name} | ${business.name}`;
+    const description =
+      collection.metaDescription ??
+      collection.description ??
+      `Shop ${collection.name} at ${business.name}`;
+
+    // Collection has no ogImage field — fall back to site/business OG image
+    const ogImage =
+      business.siteContent?.ogImage ??
+      business.siteContent?.logoUrl ??
+      "/placeholder.svg";
+
     return {
-      title: collection.metaTitle ?? `${collection.name} | ${business.name}`,
-      description:
-        collection.metaDescription ??
-        collection.description ??
-        `Shop ${collection.name} at ${business.name}`,
+      title,
+      description,
+      alternates: {
+        canonical: getCanonicalUrl(business, `/collections/${slug}`),
+      },
+      openGraph: {
+        title,
+        description,
+        images: [ogImage],
+      },
+      twitter: {
+        card: "summary_large_image" as const,
+        title,
+        description,
+        images: [ogImage],
+      },
     };
   } catch {
     return { title: "Collection Not Found" };

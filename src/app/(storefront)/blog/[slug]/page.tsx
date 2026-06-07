@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { getCanonicalUrl } from "~/lib/canonical";
+import { JsonLd } from "~/components/json-ld";
+import {
+  buildBlogPostingSchema,
+  buildBreadcrumbSchema,
+} from "~/lib/structured-data";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
@@ -56,32 +62,70 @@ export default async function PageView({ params }: Props) {
       bamboo: BambooBlogPostPage,
     }[business.templateId] ?? DefaultBlogPostPage;
 
+  const blogPostingSchema = buildBlogPostingSchema(page, business);
+  const breadcrumbSchema = buildBreadcrumbSchema(business, [
+    { name: "Home", path: "/" },
+    { name: "Blog", path: "/blog" },
+    { name: page.title, path: `/blog/${page.slug}` },
+  ]);
+
   return (
-    <TemplateComponent
-      page={page}
-      relatedPosts={relatedPosts}
-      customFields={customFields}
-      business={business}
-      {...(business.templateId === "sledge"
-        ? { featuredProducts: homepage?.products ?? [] }
-        : {})}
-    />
+    <>
+      <JsonLd data={[blogPostingSchema, breadcrumbSchema]} />
+      <TemplateComponent
+        page={page}
+        relatedPosts={relatedPosts}
+        customFields={customFields}
+        business={business}
+        {...(business.templateId === "sledge"
+          ? { featuredProducts: homepage?.products ?? [] }
+          : {})}
+      />
+    </>
   );
 }
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
-  const page = await api.content
-    .getBlogPostBySlug({ slug })
-    .catch(rethrowTrpcForErrorBoundary);
+  const [page, business] = await Promise.all([
+    api.content
+      .getBlogPostBySlug({ slug })
+      .catch(rethrowTrpcForErrorBoundary),
+    api.business.simplifiedGet(),
+  ]);
 
   if (!page) return { title: "Page Not Found" };
 
-  return {
-    title: !!page.metaTitle ? page.metaTitle : page.title,
-    description: !!page.metaDescription ? page.metaDescription : page.excerpt,
-  } as Metadata;
-}
+  const title = !!page.metaTitle ? page.metaTitle : page.title;
+  const description = !!page.metaDescription
+    ? page.metaDescription
+    : (page.excerpt ?? "");
 
-//TODO: Open Graph metadata for the blog post page
+  const ogImage =
+    page.ogImage ??
+    business?.siteContent?.ogImage ??
+    business?.siteContent?.logoUrl ??
+    "/placeholder.svg";
+
+  return {
+    title,
+    description,
+    ...(business && {
+      alternates: {
+        canonical: getCanonicalUrl(business, `/blog/${slug}`),
+      },
+    }),
+    openGraph: {
+      title,
+      description,
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
+  };
+}

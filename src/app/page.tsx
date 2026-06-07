@@ -1,4 +1,9 @@
 import { api, HydrateClient } from "~/trpc/server";
+import { JsonLd } from "~/components/json-ld";
+import {
+  buildOrganizationSchema,
+  buildWebSiteSchema,
+} from "~/lib/structured-data";
 import { PreviewOverlay } from "~/components/preview/preview-overlay";
 
 import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
@@ -65,6 +70,12 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
 
   return (
     <HydrateClient>
+      <JsonLd
+        data={[
+          buildOrganizationSchema(business),
+          buildWebSiteSchema(business),
+        ]}
+      />
       <TemplateLayout business={business}>
         <TemplateComponent business={business} />
       </TemplateLayout>

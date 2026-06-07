@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { getCanonicalUrl } from "~/lib/canonical";
 import { api } from "~/trpc/server";
 
 import { BambooGenericPage } from "../_templates/bamboo/bamboo-generic-page";
@@ -43,17 +44,23 @@ export default async function PageView({ params }: Props) {
   return <TemplateComponent business={business} page={page} />;
 }
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
-  const page = await api.content.getPageBySlug({
-    slug,
-  });
+  const [page, business] = await Promise.all([
+    api.content.getPageBySlug({ slug }),
+    api.business.simplifiedGet(),
+  ]);
 
   if (!page) return { title: "Page Not Found" };
 
   return {
     title: !!page.metaTitle ? page.metaTitle : page.title,
     description: !!page.metaDescription ? page.metaDescription : page.excerpt,
-  } as Metadata;
+    ...(business && {
+      alternates: {
+        canonical: getCanonicalUrl(business, `/${slug}`),
+      },
+    }),
+  };
 }

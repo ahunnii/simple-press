@@ -7,6 +7,7 @@ import Script from "next/script";
 
 import { env } from "~/env";
 import { checkBusiness } from "~/lib/check-business";
+import { getCanonicalBaseUrl } from "~/lib/canonical";
 import { TRPCReactProvider } from "~/trpc/react";
 import { api } from "~/trpc/server";
 import { TooltipProvider } from "~/components/ui/tooltip";
@@ -23,6 +24,14 @@ export async function generateMetadata() {
       icons: [{ rel: "icon", url: "/favicon.ico" }],
     };
   }
+  const canonicalBase = getCanonicalBaseUrl(business);
+  const ogTitle = business.siteContent?.metaTitle ?? business.name;
+  const ogDescription = business.siteContent?.metaDescription ?? "";
+  const ogImage =
+    business.siteContent?.ogImage ??
+    business.siteContent?.logoUrl ??
+    "/placeholder.svg";
+
   return {
     title: {
       template: `%s | ${business.name}`,
@@ -35,20 +44,20 @@ export async function generateMetadata() {
       business.siteContent?.metaKeywords
         ?.split(",")
         .map((keyword: string) => keyword.trim()) ?? [],
-
+    alternates: {
+      canonical: canonicalBase,
+    },
     openGraph: {
-      title: business.siteContent?.metaTitle ?? business.name,
-      description: business.siteContent?.metaDescription ?? "",
-
-      images: [
-        business.siteContent?.ogImage ??
-          business.siteContent?.logoUrl ??
-          "/placeholder.svg",
-      ],
-      url:
-        business?.customDomain && business.domainStatus === "ACTIVE"
-          ? `https://${business.customDomain}`
-          : `https://${business.subdomain}.${process.env.NEXT_PUBLIC_DOMAIN}`,
+      title: ogTitle,
+      description: ogDescription,
+      images: [ogImage],
+      url: canonicalBase,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description: ogDescription,
+      images: [ogImage],
     },
     icons: [
       { rel: "icon", url: business.siteContent?.faviconUrl ?? "/favicon.ico" },

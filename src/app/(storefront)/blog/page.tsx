@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { getCanonicalUrl } from "~/lib/canonical";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
@@ -48,8 +49,16 @@ export default async function BlogPage() {
   );
 }
 
-export const metadata = {
-  title: "Blog",
-};
+export async function generateMetadata() {
+  const business = await api.business.simplifiedGet().catch(() => null);
+  return {
+    title: "Blog",
+    ...(business && {
+      alternates: {
+        canonical: getCanonicalUrl(business, "/blog"),
+      },
+    }),
+  };
+}
 
 //TODO: Metadata for the blog listing page 'should' allow for the business owner to edit them

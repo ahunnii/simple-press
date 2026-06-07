@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { getCanonicalUrl } from "~/lib/canonical";
 import { api } from "~/trpc/server";
 
 import { BambooTestimonialsPage } from "../_templates/bamboo/testimonials/bamboo-testimonials-page";
@@ -31,7 +32,15 @@ export default async function TestimonialsPage() {
   return <TemplateComponent business={business} />;
 }
 
-export const metadata = {
-  title: "Testimonials",
-  description: "Customer testimonials",
-};
+export async function generateMetadata() {
+  const business = await api.business.simplifiedGet();
+  return {
+    title: "Testimonials",
+    description: "Customer testimonials",
+    ...(business && {
+      alternates: {
+        canonical: getCanonicalUrl(business, "/testimonials"),
+      },
+    }),
+  };
+}

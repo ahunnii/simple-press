@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { getCanonicalUrl } from "~/lib/canonical";
 import { api } from "~/trpc/server";
 
 import { BambooCollectionsPage } from "../_templates/bamboo/collections/bamboo-collections-page";
@@ -33,6 +34,14 @@ export default async function CollectionsPage() {
   return <TemplateComponent collections={collections} business={business} />;
 }
 
-export const metadata = {
-  title: "Collections",
-};
+export async function generateMetadata() {
+  const business = await api.business.simplifiedGet();
+  return {
+    title: "Collections",
+    ...(business && {
+      alternates: {
+        canonical: getCanonicalUrl(business, "/collections"),
+      },
+    }),
+  };
+}

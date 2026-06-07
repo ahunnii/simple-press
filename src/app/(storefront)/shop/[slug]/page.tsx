@@ -1,5 +1,11 @@
 import { notFound } from "next/navigation";
 
+import { getCanonicalUrl } from "~/lib/canonical";
+import { JsonLd } from "~/components/json-ld";
+import {
+  buildBreadcrumbSchema,
+  buildProductSchema,
+} from "~/lib/structured-data";
 import { api } from "~/trpc/server";
 
 import { BambooProductPage } from "../../_templates/bamboo/products/bamboo-product-page";
@@ -41,12 +47,27 @@ export default async function ProductDetailPage({ params }: Props) {
       sledge: SledgeProductPage,
     }[business.templateId] ?? DefaultProductPage;
 
-  return <TemplateComponent product={product} business={business} />;
+  const productSchema = buildProductSchema(product, business);
+  const breadcrumbSchema = buildBreadcrumbSchema(business, [
+    { name: "Home", path: "/" },
+    { name: "Shop", path: "/shop" },
+    { name: product.name, path: `/shop/${product.slug}` },
+  ]);
+
+  return (
+    <>
+      <JsonLd data={[productSchema, breadcrumbSchema]} />
+      <TemplateComponent product={product} business={business} />
+    </>
+  );
 }
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const product = await api.product.get(slug);
+  const [product, business] = await Promise.all([
+    api.product.get(slug),
+    api.business.simplifiedGet(),
+  ]);
 
   if (!product) return { title: "Product Not Found" };
 
@@ -57,23 +78,29 @@ export async function generateMetadata({ params }: Props) {
     ? product.metaDescription.trim()
     : product.description;
 
+  const ogImages = product.ogImage
+    ? [{ url: product.ogImage, width: 1200, height: 630, alt: product.name }]
+    : undefined;
+
   return {
     title,
     description,
     keywords: product.metaKeywords ?? undefined,
+    ...(business && {
+      alternates: {
+        canonical: getCanonicalUrl(business, `/shop/${slug}`),
+      },
+    }),
     openGraph: {
       title,
       description: description ?? "",
-      images: product.ogImage
-        ? [
-            {
-              url: product.ogImage,
-              width: 1200,
-              height: 630,
-              alt: product.name,
-            },
-          ]
-        : undefined,
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image" as const,
+      title,
+      description: description ?? "",
+      images: ogImages,
     },
   };
 }
