@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 
 import { env } from "~/env";
+import { checkBusiness } from "~/lib/check-business";
 import { TRPCReactProvider } from "~/trpc/react";
 import { api } from "~/trpc/server";
 import { TooltipProvider } from "~/components/ui/tooltip";
@@ -60,19 +61,25 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const business = await checkBusiness();
+
+  // Determine which Umami website ID to inject:
+  // - Resolved storefront with its own Umami config → use per-business ID
+  // - Platform domain (no business) → fall back to platform-wide env var
+  const umamiWebsiteId =
+    business?.umamiEnabled && business.umamiWebsiteId
+      ? business.umamiWebsiteId
+      : env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+
   return (
     <html lang="en" className={`${geist.variable}`}>
       <body>
         <Providers>
           {env.NEXT_PUBLIC_ENABLE_UMAMI && (
-            <Script
-              defer
-              src="/umami.js"
-              data-website-id={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-            />
+            <Script defer src="/umami.js" data-website-id={umamiWebsiteId} />
           )}
           <TooltipProvider>
             <TRPCReactProvider>

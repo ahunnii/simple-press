@@ -20,7 +20,13 @@ export const checkBusiness = async () => {
       ],
       status: "active",
     },
-    select: { id: true, name: true, customDomain: true },
+    select: {
+      id: true,
+      name: true,
+      customDomain: true,
+      umamiWebsiteId: true,
+      umamiEnabled: true,
+    },
   });
   return business;
 };
