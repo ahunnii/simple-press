@@ -11,8 +11,6 @@ import { TikTokIcon } from "~/components/icons/tiktok-icon";
 
 import { resolveFields } from "../index";
 
-const PAYMENT_LABELS = ["VISA", "AMEX", "MC", "PAY", "SHOP"] as const;
-
 export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
   const phone = business?.phoneNumber;
@@ -54,12 +52,12 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
 
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
 
-  const shippingPolicy = policies.find((p) => p.slug === "shipping-policy");
-  const returnPolicy = policies.find((p) => p.slug === "refund-policy");
+  // const shippingPolicy = policies.find((p) => p.slug === "shipping-policy");
+  // const returnPolicy = policies.find((p) => p.slug === "refund-policy");
   const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
   const termsOfService = policies.find((p) => p.slug === "terms-of-service");
 
-  const blogEnabled = isEnabled("blog");
+  // const blogEnabled = isEnabled("blog");
 
   return (
     <footer

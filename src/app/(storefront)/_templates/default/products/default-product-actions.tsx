@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Minus, Plus } from "lucide-react";
+import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
@@ -69,7 +69,7 @@ export function DefaultProductActions({
                   onClick={handleDecrement}
                   disabled={quantity <= 1}
                   aria-label="Decrease quantity"
-                  className="flex h-full flex-1 items-center justify-center text-lg font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30 rounded-l-[var(--radius)]"
+                  className="flex h-full flex-1 items-center justify-center rounded-l-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30"
                 >
                   <span aria-hidden="true">−</span>
                 </button>
@@ -84,7 +84,7 @@ export function DefaultProductActions({
                   type="button"
                   onClick={handleIncrement}
                   aria-label="Increase quantity"
-                  className="flex h-full flex-1 items-center justify-center text-lg font-light transition-colors hover:bg-[#f6f6f6] rounded-r-[var(--radius)]"
+                  className="flex h-full flex-1 items-center justify-center rounded-r-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6]"
                 >
                   <span aria-hidden="true">+</span>
                 </button>

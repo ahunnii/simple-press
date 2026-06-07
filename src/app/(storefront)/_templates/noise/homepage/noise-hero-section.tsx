@@ -24,7 +24,7 @@ type NoiseHeroSectionProps = {
 export function NoiseHeroSection({
   heroVideo,
   heroImage,
-  heroOverline,
+
   heroTitle,
   heroTagline,
   heroPrimaryButtonText,
@@ -147,10 +147,7 @@ export function NoiseHeroSection({
             {tagline}
           </p>
 
-          <Link
-            href={btnLink}
-            className="vn-btn-hero vn-focus-on-dark mt-1"
-          >
+          <Link href={btnLink} className="vn-btn-hero vn-focus-on-dark mt-1">
             {btnText}
           </Link>
         </motion.div>

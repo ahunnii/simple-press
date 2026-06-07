@@ -1,10 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
+import { ArrowRight, ShoppingBag } from "lucide-react";
 
-import { formatPrice } from "~/lib/prices";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { useCart } from "~/providers/cart-context";
 

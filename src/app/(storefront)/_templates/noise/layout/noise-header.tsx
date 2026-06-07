@@ -156,9 +156,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     | undefined;
 
   const links = customNav ?? RIGHT_NAV;
-  const mobileNavItems: NavLink[] = customNav
-    ? customNav
-    : [...LEFT_NAV, ...RIGHT_NAV];
+  const mobileNavItems: NavLink[] = customNav ?? [...LEFT_NAV, ...RIGHT_NAV];
 
   const toggleMobileExpanded = (index: number) => {
     setExpandedMobile((prev) => {
@@ -331,9 +329,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     href={child.href}
                     target={child.external ? "_blank" : undefined}
                     rel={child.external ? "noopener noreferrer" : undefined}
-                    aria-current={
-                      isLinkActive(child.href) ? "page" : undefined
-                    }
+                    aria-current={isLinkActive(child.href) ? "page" : undefined}
                     onClick={() => setOpenDropdown(null)}
                     className={cn(
                       "vn-nav-dropdown-link",
@@ -418,9 +414,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                       <Link
                         href={child.href}
                         target={child.external ? "_blank" : undefined}
-                        rel={
-                          child.external ? "noopener noreferrer" : undefined
-                        }
+                        rel={child.external ? "noopener noreferrer" : undefined}
                         onClick={closeMobileMenu}
                         aria-current={
                           isLinkActive(child.href) ? "page" : undefined
@@ -505,9 +499,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
               className="hidden items-center gap-6 md:flex"
               aria-label="Shop navigation"
             >
-              {LEFT_NAV.map((link, i) =>
-                renderDesktopNavLink(link, i, "left"),
-              )}
+              {LEFT_NAV.map((link, i) => renderDesktopNavLink(link, i, "left"))}
             </nav>
           </div>
 
@@ -653,29 +645,34 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                         </p>
                       </div>
                       <ul className="py-1">
-                        {MOBILE_ACCOUNT_LINKS.map(({ href, label, icon: Icon }) => (
-                          <li key={href} role="none">
-                            <Link
-                              href={href}
-                              role="menuitem"
-                              onClick={closeMobileMenu}
-                              className={cn(
-                                "vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 transition-colors",
-                                isLinkActive(href)
-                                  ? "text-[var(--vn-accent)]"
-                                  : "text-[var(--vn-ink-soft)] hover:text-[var(--vn-ink)]",
-                              )}
-                              style={{
-                                background: isLinkActive(href)
-                                  ? "var(--vn-line-soft)"
-                                  : undefined,
-                              }}
-                            >
-                              <Icon className="h-4 w-4 shrink-0" aria-hidden />
-                              {label}
-                            </Link>
-                          </li>
-                        ))}
+                        {MOBILE_ACCOUNT_LINKS.map(
+                          ({ href, label, icon: Icon }) => (
+                            <li key={href} role="none">
+                              <Link
+                                href={href}
+                                role="menuitem"
+                                onClick={closeMobileMenu}
+                                className={cn(
+                                  "vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 transition-colors",
+                                  isLinkActive(href)
+                                    ? "text-[var(--vn-accent)]"
+                                    : "text-[var(--vn-ink-soft)] hover:text-[var(--vn-ink)]",
+                                )}
+                                style={{
+                                  background: isLinkActive(href)
+                                    ? "var(--vn-line-soft)"
+                                    : undefined,
+                                }}
+                              >
+                                <Icon
+                                  className="h-4 w-4 shrink-0"
+                                  aria-hidden
+                                />
+                                {label}
+                              </Link>
+                            </li>
+                          ),
+                        )}
                         {showAdminLink ? (
                           <li role="none">
                             <Link
@@ -703,7 +700,10 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                             onClick={closeMobileMenu}
                             className="vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 text-[var(--vn-ink-soft)] transition-colors hover:text-[var(--vn-ink)]"
                           >
-                            <IconLogout className="h-4 w-4 shrink-0" aria-hidden />
+                            <IconLogout
+                              className="h-4 w-4 shrink-0"
+                              aria-hidden
+                            />
                             Sign out
                           </Link>
                         </li>
@@ -743,7 +743,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                       id={`${accountMenuId}-trigger`}
                       aria-haspopup="menu"
                       aria-expanded={accountMenuOpen}
-                      aria-controls={accountMenuOpen ? accountMenuId : undefined}
+                      aria-controls={
+                        accountMenuOpen ? accountMenuId : undefined
+                      }
                       onClick={() => setAccountMenuOpen((open) => !open)}
                       className={cn(
                         "vn-mobile-action-btn rounded-none border transition-opacity hover:opacity-80",

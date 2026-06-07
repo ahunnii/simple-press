@@ -3,10 +3,6 @@ import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { NoiseCheckoutForm } from "./noise-checkout-form";
 
-/* 3-step stepper matching design — step 1 (Information) is always active here
-   since the noise checkout form handles information + shipping in one screen  */
-const STEPS = ["Information", "Shipping", "Payment"] as const;
-
 export async function NoiseCheckoutPage({
   business,
 }: DefaultCheckoutPageTemplateProps) {

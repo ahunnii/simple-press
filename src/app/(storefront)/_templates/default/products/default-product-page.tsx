@@ -9,7 +9,6 @@ import { computeSavingsLabel } from "~/lib/prices";
 import {
   getListFieldValue,
   isContentEmpty,
-  parseTemplateIconListRows,
   parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
 import { api } from "~/trpc/react";

@@ -16,7 +16,6 @@ import { ModernProductActions } from "./modern-product-actions";
 
 export function ModernProductPage({
   product,
-  business,
 }: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
