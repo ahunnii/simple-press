@@ -11,6 +11,7 @@ import { HappyBambooBlogPage } from "../_templates/happy-bamboo/blog/happy-bambo
 import { ModernBlogPage } from "../_templates/modern/blog/modern-blog-page";
 import { NoiseBlogPage } from "../_templates/noise/blog/noise-blog-page";
 import { PollenBlogPage } from "../_templates/pollen/blog/pollen-blog-page";
+import { SledgeBlogPage } from "../_templates/sledge/blog/sledge-blog-page";
 
 export default async function BlogPage() {
   const business = await api.business
@@ -35,6 +36,7 @@ export default async function BlogPage() {
       bamboo: BambooBlogPage,
       "happy-bamboo": HappyBambooBlogPage,
       noise: NoiseBlogPage,
+      sledge: SledgeBlogPage,
     }[business.templateId] ?? DefaultBlogPage;
 
   return (

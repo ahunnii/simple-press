@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { cn } from "~/lib/utils";
 
 type Testimonial = RouterOutputs["testimonial"]["listRandom"][number];
 
@@ -49,35 +50,17 @@ export function SledgeTestimonials({
   if (!testimonials.length) return null;
 
   return (
-    <section
-      style={{ background: "var(--sl-cream)", padding: "4rem 1.75rem" }}
-      {...sectionAttrs}
-    >
-      <div
-        className="grid grid-cols-1 items-center gap-12 md:grid-cols-2"
-        style={{ maxWidth: "1100px", margin: "0 auto" }}
-      >
+    <section className="sl-section-cream" {...sectionAttrs}>
+      <div className="sl-container grid grid-cols-1 items-center gap-12 md:grid-cols-2">
         {/* Left: text side */}
         <div>
-          <h2
-            className="font-heading font-bold"
-            style={{
-              fontSize: "clamp(3rem, 7vw, 6rem)",
-              color: "var(--sl-coral)",
-              lineHeight: 1.05,
-              marginBottom: "2rem",
-            }}
-          >
+          <h2 className="sl-heading-xl font-heading font-bold">
             {heading ?? "Testimonials"}
           </h2>
 
           {/* Quote carousel */}
           <div
-            style={{
-              minHeight: "160px",
-              position: "relative",
-              marginBottom: "1.5rem",
-            }}
+            className="sl-testimonial-stage"
             aria-live="polite"
             aria-atomic="true"
           >
@@ -85,39 +68,17 @@ export function SledgeTestimonials({
               <div
                 key={t.id}
                 aria-hidden={j !== active}
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  opacity: j === active ? 1 : 0,
-                  transition: "opacity 0.6s ease",
-                }}
+                className={cn(
+                  "sl-testimonial-slide",
+                  j === active ? "opacity-100" : "opacity-0",
+                )}
               >
                 {/* Red accent bar + italic quote */}
-                <div
-                  style={{
-                    borderLeft: "4px solid var(--sl-red)",
-                    paddingLeft: "1.25rem",
-                  }}
-                >
-                  <p
-                    className="font-sans italic"
-                    style={{
-                      fontSize: "clamp(17.5px, 2.25vw, 21.25px)",
-                      color: "var(--sl-ink)",
-                      lineHeight: 1.85,
-                      maxWidth: "52ch",
-                    }}
-                  >
+                <div className="sl-quote-bar">
+                  <p className="sl-quote-body font-sans italic">
                     &ldquo;{t.text}&rdquo;
                   </p>
-                  <p
-                    className="font-sans font-semibold"
-                    style={{
-                      fontSize: "13px",
-                      color: "var(--sl-ink-soft)",
-                      letterSpacing: "0.04em",
-                    }}
-                  >
+                  <p className="font-sans text-[13px] font-semibold tracking-wide text-[var(--sl-ink-soft)]">
                     — {t.customerName}
                   </p>
                 </div>
@@ -128,14 +89,7 @@ export function SledgeTestimonials({
           {/* Navigation dots + pause + Read More */}
           <div>
             {testimonials.length > 1 && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "1.25rem",
-                }}
-              >
+              <div className="mb-5 flex items-center gap-2">
                 {testimonials.map((_, j) => (
                   <button
                     key={j}
@@ -143,17 +97,12 @@ export function SledgeTestimonials({
                     onClick={() => setActive(j)}
                     aria-label={`Go to testimonial ${j + 1}`}
                     aria-current={j === active}
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: 9999,
-                      background:
-                        j === active ? "var(--sl-coral)" : "rgba(0,0,0,0.2)",
-                      border: "none",
-                      cursor: "pointer",
-                      transition: "background 0.3s",
-                      padding: 0,
-                    }}
+                    className={cn(
+                      "sl-testimonial-dot",
+                      j === active
+                        ? "sl-testimonial-dot-active"
+                        : "sl-testimonial-dot-inactive",
+                    )}
                   />
                 ))}
                 {!prefersReduced && (
@@ -166,16 +115,7 @@ export function SledgeTestimonials({
                         : "Pause testimonial rotation"
                     }
                     aria-pressed={paused}
-                    className="inline-flex items-center justify-center transition-opacity hover:opacity-60"
-                    style={{
-                      width: 20,
-                      height: 20,
-                      border: "none",
-                      background: "transparent",
-                      cursor: "pointer",
-                      padding: 0,
-                      color: "var(--sl-coral)",
-                    }}
+                    className="inline-flex size-5 cursor-pointer items-center justify-center border-none bg-transparent p-0 text-[var(--sl-coral)] transition-opacity hover:opacity-60"
                   >
                     {paused ? (
                       <Play className="size-3" aria-hidden="true" />
@@ -195,15 +135,7 @@ export function SledgeTestimonials({
 
         {/* Right: product image */}
         {image && (
-          <div
-            style={{
-              position: "relative",
-              aspectRatio: "4/5",
-              borderRadius: "0.75rem",
-              overflow: "hidden",
-              background: "var(--sl-green)",
-            }}
-          >
+          <div className="sl-media-frame sl-media-frame-green">
             <Image
               src={image}
               alt="Featured product"

@@ -58,7 +58,7 @@ export function SledgeProductActions({
   return (
     <div className="flex flex-col gap-3">
       {showStockCount && (
-        <p className="text-sm font-medium" style={{ color: "var(--sl-coral)" }}>
+        <p className="text-sm font-medium text-[var(--sl-coral)]">
           {stockQty} in stock
         </p>
       )}
@@ -110,7 +110,7 @@ export function SledgeProductActions({
       )}
 
       {inStock && !canAddMore && (
-        <p className="text-xs" style={{ color: "var(--sl-coral)" }}>
+        <p className="text-xs text-[var(--sl-coral)]">
           Maximum available quantity in cart
         </p>
       )}

@@ -1638,6 +1638,12 @@
     --sl-ink: #2b2b2b;
     --sl-ink-soft: #4a4a4a;
     --sl-orange: #fc6434;
+    --sl-border: #e8e8e8;
+    --sl-border-subtle: #f0f0f0;
+    --sl-border-input: #d8d8d8;
+    --sl-border-panel: #d1d5db;
+    --sl-gray-cta: #ececec;
+    --sl-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.1);
 
     /* keep cloned vn-* markup alive */
     --vn-paper: var(--sl-cream);
@@ -1667,9 +1673,816 @@
     h6 {
       @apply font-heading;
     }
+
+    .sl-page-header {
+      font-size: clamp(2.75rem, 6.5vw, 4.75rem);
+
+      color: var(--sl-orange);
+    }
+  }
+
+  /* ─── Sledge: layout & typography utilities ─────────────────────────────── */
+  .sledge .sl-container {
+    max-width: 1100px;
+    margin-inline: auto;
+  }
+
+  .sledge .sl-container-wide {
+    max-width: 1320px;
+    margin-inline: auto;
+  }
+
+  .sledge .sl-container-hero {
+    max-width: 1280px;
+    margin-inline: auto;
+    padding: 2rem 1rem 2.5rem;
+  }
+
+  .sledge .sl-section-green {
+    background: var(--sl-green);
+    padding: 4rem 1.75rem;
+  }
+
+  .sledge .sl-section-cream {
+    background: var(--sl-cream);
+    padding: 4rem 1.75rem;
+  }
+
+  .sledge .sl-eyebrow {
+    color: var(--sl-ink-soft);
+  }
+
+  .sledge .sl-page-title-lg {
+    font-size: clamp(2.5rem, 6.25vw, 4.06rem);
+    color: var(--sl-orange);
+    /* letter-spacing: 0.04em; */
+    line-height: 1.1;
+  }
+
+  .sledge .sl-page-title-md {
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: var(--sl-orange);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .sledge .sl-page-title-checkout {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    color: var(--sl-coral);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .sledge .sl-rail-heading {
+    font-size: clamp(1.95rem, 4.4vw, 3.15rem);
+    color: var(--sl-orange);
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+  }
+
+  .sledge .sl-hero-banner {
+    height: clamp(320px, 45vw, 520px);
+  }
+
+  .sledge .sl-hero-banner-sm {
+    height: clamp(220px, 35vw, 380px);
+  }
+
+  .sledge .sl-cta-pill {
+    background: var(--sl-gray-cta);
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-card-panel {
+    border: 1px solid var(--sl-border);
+    background: #ffffff;
+  }
+
+  .sledge .sl-card-shadow {
+    box-shadow: var(--sl-shadow-card);
+  }
+
+  .sledge .sl-quote-bar {
+    border-left: 4px solid var(--sl-red);
+    padding-left: 1.25rem;
+  }
+
+  .sledge .sl-quote-body {
+    font-size: clamp(17.5px, 2.25vw, 21.25px);
+    color: var(--sl-ink);
+    line-height: 1.85;
+    max-width: 52ch;
+  }
+
+  .sledge .sl-heading-xl {
+    font-size: clamp(3rem, 7vw, 6rem);
+    color: var(--sl-coral);
+    line-height: 1.05;
+    margin-bottom: 2rem;
+  }
+
+  .sledge .sl-heading-lg {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    color: var(--sl-coral);
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+  }
+
+  .sledge .sl-media-frame {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .sledge .sl-media-frame-green {
+    background: var(--sl-green);
+  }
+
+  .sledge .sl-media-frame-cream {
+    background: var(--sl-cream);
+  }
+
+  .sledge .sl-media-frame-dark {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .sledge .sl-media-frame-muted {
+    background: rgba(0, 0, 0, 0.12);
+  }
+
+  .sledge .sl-logo-frame {
+    position: relative;
+    width: min(88%, 360px);
+    aspect-ratio: 5 / 4;
+  }
+
+  .sledge .sl-hero-wordmark {
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    color: var(--sl-coral);
+    line-height: 1;
+    text-align: center;
+  }
+
+  .sledge .sl-hero-tagline {
+    text-align: center;
+    font-size: clamp(20px, 2.3vw, 30px);
+    color: var(--sl-ink);
+    letter-spacing: 0.04em;
+    font-weight: 500;
+    margin: 2.25rem auto 1.75rem;
+  }
+
+  .sledge .sl-hero-cta-wrap {
+    text-align: center;
+    padding-bottom: 0.5rem;
+  }
+
+  .sledge .sl-btn-hero {
+    font-size: 17px;
+    padding: 16px 46px;
+  }
+
+  /* ─── Sledge: about page ────────────────────────────────────────────────── */
+  .sledge .sl-about-grid-desktop {
+    display: grid;
+    grid-template-columns: minmax(160px, 28%) 2px 1fr;
+    row-gap: 4rem;
+  }
+
+  .sledge .sl-about-divider-desktop {
+    grid-column: 2;
+    background: var(--sl-red);
+  }
+
+  .sledge .sl-about-divider-mobile {
+    background: var(--sl-orange);
+    align-self: stretch;
+  }
+
+  .sledge .sl-about-label-mobile {
+    color: var(--sl-ink);
+    /* line-height: 1.4; */
+  }
+
+  .sledge .sl-about-label-desktop {
+    font-size: clamp(20px, 2.1vw, 21px);
+    color: var(--sl-ink);
+    /* line-height: 1.4; */
+  }
+
+  .sledge .sl-about-body-mobile {
+    font-size: clamp(18.7px, 4.97vw, 21.25px);
+    color: var(--sl-ink);
+    line-height: 1.85;
+    white-space: pre-line;
+  }
+
+  .sledge .sl-about-body-desktop {
+    font-size: clamp(19.55px, 2.21vw, 22.1px);
+    color: var(--sl-ink);
+    line-height: 1.85;
+    white-space: pre-line;
+  }
+
+  /* ─── Sledge: header & footer (dark) ────────────────────────────────────── */
+  .sledge .sl-header {
+    background: linear-gradient(
+      90deg,
+      var(--sl-dark) 0%,
+      var(--sl-dark) 70%,
+      #262626 100%
+    );
+  }
+
+  .sledge .sl-footer {
+    background: var(--sl-dark);
+    color: #ffffff;
+    margin-top: 0;
+  }
+
+  .sledge .sl-brand-text {
+    color: #ffffff;
+    font-size: 43.125px;
+  }
+
+  .sledge .sl-brand-logo {
+    position: relative;
+    height: 57.5px;
+    width: 161px;
+  }
+
+  @media (min-width: 640px) {
+    .sledge .sl-brand-logo {
+      height: 69px;
+      width: 207px;
+    }
+  }
+
+  .sledge .sl-nav-active {
+    color: var(--sl-coral);
+  }
+
+  .sledge .sl-nav-inactive {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .sledge .sl-social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 0.4rem;
+    background: var(--sl-coral);
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .sledge .sl-footer-heading {
+    font-size: clamp(3rem, 6vw, 5rem);
+    color: var(--sl-coral);
+    line-height: 1;
+  }
+
+  .sledge .sl-footer-meta {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.04em;
+  }
+
+  .sledge .sl-cart-badge {
+    background: var(--sl-coral);
+    color: #fff;
+    min-width: 20px;
+  }
+
+  .sledge .sl-mobile-menu {
+    background: var(--sl-dark);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .sledge .sl-dropdown-panel {
+    background: var(--sl-dark);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  /* ─── Sledge: account nav ───────────────────────────────────────────────── */
+  .sledge .sl-account-tab-active {
+    background: var(--sl-coral);
+  }
+
+  .sledge .sl-account-tab-inactive {
+    border: 1px solid var(--sl-border-input);
+    color: var(--sl-ink);
+    background: #ffffff;
+  }
+
+  .sledge .sl-account-nav-active {
+    background: var(--sl-cream);
+    color: var(--sl-coral);
+    border-left: 3px solid var(--sl-coral);
+  }
+
+  .sledge .sl-account-nav-inactive {
+    color: var(--sl-ink-soft);
+    border-left: 3px solid transparent;
+  }
+
+  /* ─── Sledge: order status badges ───────────────────────────────────────── */
+  .sledge .sl-status-completed {
+    border-color: #16a34a;
+    color: #16a34a;
+    background: #f0fdf4;
+  }
+
+  .sledge .sl-status-cancelled {
+    border-color: #dc2626;
+    color: #dc2626;
+    background: #fef2f2;
+  }
+
+  .sledge .sl-status-refunded {
+    color: var(--sl-ink-soft);
+    border-color: var(--sl-border-input);
+    background: var(--sl-cream);
+  }
+
+  .sledge .sl-status-default {
+    border-color: var(--sl-border-input);
+    color: var(--sl-ink);
+    background: #ffffff;
+  }
+
+  /* ─── Sledge: product page ──────────────────────────────────────────────── */
+  .sledge .sl-product-title {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+  }
+
+  .sledge .sl-tab-heading {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+  }
+
+  .sledge .sl-related-heading {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+  }
+
+  .sledge .sl-tab-panel {
+    border: 1px solid var(--sl-border-panel);
+  }
+
+  /* ─── Sledge: cart item ─────────────────────────────────────────────────── */
+  .sledge .sl-cart-item-grid {
+    grid-template-columns: 80px 1fr auto auto auto auto;
+  }
+
+  .sledge .sl-cart-thumb {
+    aspect-ratio: 3 / 4;
+    width: 80px;
+    background: var(--sl-green);
+  }
+
+  .sledge .sl-cart-thumb-sm {
+    width: 72px;
+    aspect-ratio: 3 / 4;
+    background: var(--sl-green);
+  }
+
+  .sledge .sl-qty-btn {
+    width: 32px;
+    height: 32px;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-qty-btn-sm {
+    width: 28px;
+    height: 28px;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-qty-input {
+    width: 28px;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-qty-input-sm {
+    width: 24px;
+    color: var(--sl-ink);
+  }
+
+  /* ─── Sledge: shop filters ──────────────────────────────────────────────── */
+  .sledge .sl-shop-filter-group {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--sl-border);
+  }
+
+  .sledge .sl-shop-filter-title {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-shop-filter-toggle {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: var(--sl-ink-soft);
+  }
+
+  .sledge .sl-shop-range {
+    accent-color: var(--sl-coral);
+  }
+
+  .sledge .sl-shop-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--sl-border);
+  }
+
+  .sledge .sl-shop-sort-select {
+    cursor: pointer;
+    border: 1px solid var(--sl-ink);
+    border-radius: var(--radius, 0.25rem);
+    background: #ffffff;
+    padding: 0.375rem 0.625rem;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: var(--sl-ink);
+    outline: none;
+  }
+
+  .sledge .sl-shop-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--sl-ink);
+    background: #ffffff;
+    padding: 0.375rem 0.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
+    transition: opacity 0.15s ease;
+  }
+
+  .sledge .sl-shop-filter-btn:hover,
+  .sledge .sl-shop-filter-btn-active {
+    opacity: 0.7;
+  }
+
+  /* ─── Sledge: testimonial cards ─────────────────────────────────────────── */
+  .sledge .sl-testimonial-card {
+    border: 1px solid #e5e5e5;
+    border-radius: 1.5rem;
+    background: #ffffff;
+    padding: clamp(2rem, 4vw, 3rem) clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .sledge .sl-testimonial-card-label {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.8125rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
+    margin-bottom: 1.25rem;
+  }
+
+  .sledge .sl-testimonial-card-quote {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: clamp(1.125rem, 2.2vw, 1.625rem);
+    line-height: 1.35;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-testimonial-card-attribution {
+    font-family: var(--font-sans);
+    font-size: clamp(0.8125rem, 1.5vw, 0.9375rem);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
+    margin-top: 1.75rem;
+  }
+
+  /* ─── Sledge: testimonial carousel ──────────────────────────────────────── */
+  .sledge .sl-testimonial-stage {
+    min-height: 160px;
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .sledge .sl-testimonial-slide {
+    position: absolute;
+    inset: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .sledge .sl-testimonial-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+    padding: 0;
+  }
+
+  .sledge .sl-testimonial-dot-active {
+    background: var(--sl-coral);
+  }
+
+  .sledge .sl-testimonial-dot-inactive {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .sledge .sl-wave {
+    display: block;
+    line-height: 0;
+    overflow: hidden;
+  }
+
+  .sledge .sl-wave svg {
+    display: block;
+    width: 100%;
+    height: 80px;
+  }
+
+  /* ─── Sledge: intro overlay (legacy noise animation) ───────────────────── */
+  .sledge .sl-intro-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    overflow: hidden;
+    pointer-events: auto;
+  }
+
+  .sledge .sl-intro-curtain {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    overflow: hidden;
+    background: #0e0d0b;
+    transition: transform 1s cubic-bezier(0.7, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .sledge .sl-intro-curtain-left {
+    left: 0;
+    transform: translateX(0);
+  }
+
+  .sledge .sl-intro-curtain-right {
+    right: 0;
+    transform: translateX(0);
+  }
+
+  .sledge .sl-intro-curtain-left[data-open="true"] {
+    transform: translateX(-100%);
+  }
+
+  .sledge .sl-intro-curtain-right[data-open="true"] {
+    transform: translateX(100%);
+  }
+
+  .sledge .sl-intro-seam {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    transition: opacity 0.3s;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .sledge .sl-intro-seam[data-open="true"] {
+    opacity: 0;
+  }
+
+  .sledge .sl-intro-skip {
+    position: absolute;
+    bottom: 28px;
+    right: 32px;
+    z-index: 10;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    font-weight: 500;
+    padding: 8px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: transparent;
+    cursor: pointer;
+    transition: opacity 0.3s;
+    font-family: var(--font-mono, monospace);
+    text-transform: uppercase;
+  }
+
+  .sledge .sl-intro-skip[data-open="true"] {
+    opacity: 0;
+  }
+
+  .sledge .sl-intro-scene-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100vw;
+  }
+
+  .sledge .sl-intro-scene-right {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    height: 100%;
+    width: 100vw;
+  }
+
+  .sledge .sl-intro-grid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .sledge .sl-intro-tile {
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: noiseIntroTileIn 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  }
+
+  .sledge .sl-intro-tile-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .sledge .sl-intro-tile-sheen {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.12),
+      transparent 60%
+    );
+    pointer-events: none;
+  }
+
+  .sledge .sl-intro-tile-sheen-muted {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08),
+      transparent 60%
+    );
+  }
+
+  .sledge .sl-intro-tile-label {
+    position: absolute;
+    left: 10px;
+    bottom: 8px;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.7);
+    font-weight: 500;
+    font-family: var(--font-mono, monospace);
+  }
+
+  .sledge .sl-intro-veil {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at center,
+      rgba(14, 13, 11, 0.55),
+      rgba(14, 13, 11, 0.92) 70%
+    );
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+  }
+
+  .sledge .sl-intro-veil[data-visible="true"] {
+    opacity: 1;
+  }
+
+  .sledge .sl-intro-wordmark-wrap {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #fff;
+    opacity: 0;
+    transition:
+      opacity 0.9s ease,
+      letter-spacing 1.2s ease;
+    letter-spacing: 0.4em;
+    pointer-events: none;
+    width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .sledge .sl-intro-wordmark-wrap[data-visible="true"] {
+    opacity: 1;
+    letter-spacing: 0.22em;
+  }
+
+  .sledge .sl-intro-wordmark {
+    font-family: var(--font-serif, Georgia, serif);
+    font-size: clamp(40px, 7vw, 96px);
+    font-weight: 300;
+    line-height: 1;
+    font-style: italic;
+  }
+
+  .sledge .sl-intro-rule {
+    width: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.4);
+    margin: 22px auto 0;
+    transition: width 1s ease 0.15s;
+  }
+
+  .sledge .sl-intro-rule[data-visible="true"] {
+    width: 80px;
+  }
+
+  .sledge .sl-intro-location {
+    font-size: 11px;
+    letter-spacing: 0.5em;
+    opacity: 0.7;
+    margin-top: 18px;
+    font-weight: 500;
+    font-family: var(--font-mono, monospace);
+  }
+
+  @keyframes noiseIntroTileIn {
+    from {
+      opacity: 0;
+      transform: scale(0.6) translateY(28px);
+      filter: blur(8px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  .sledge .sl-hero-grain {
+    background-image: var(--noise-grain);
+    background-repeat: repeat;
+    background-size: 200px 200px;
   }
 
   /* ─── Sledge: announcement bar ─────────────────────────────────────────── */
+  .sledge .sl-announcement-bar {
+    background: var(--sl-dark);
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: var(--font-sans, sans-serif);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    min-height: 40px;
+  }
+
+  .sledge .sl-announcement-bar p {
+    margin: 0;
+    max-width: 72rem;
+  }
+
+  @media (max-width: 640px) {
+    .sledge .sl-announcement-bar {
+      padding: 10px 12px;
+    }
+
+    .sledge .sl-announcement-bar p {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+    }
+  }
+
   .sledge .vn-topbar {
     background: var(--sl-dark);
     color: #ffffff;
@@ -1855,6 +2668,58 @@
     .sledge .sl-mosaic .sl-m-6 {
       grid-column: 3;
       grid-row: 8 / 12;
+    }
+  }
+
+  .sledge .sledge-collection-img {
+    aspect-ratio: 4 / 5;
+    background: var(--sl-green);
+  }
+
+  .sledge .sledge-collection-meta {
+    margin-top: 0.875rem;
+    padding: 0 0.125rem;
+  }
+
+  .sledge .sledge-collection-meta-compact {
+    margin-top: 0.625rem;
+    padding: 0 0.125rem;
+  }
+
+  .sledge .sledge-collection-name {
+    font-size: clamp(1.375rem, 2vw, 1.75rem);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sledge-collection-name-compact {
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sledge-collection-cta {
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sl-coral);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .sledge .group:hover .sledge-collection-cta {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .sledge .sledge-collection-cta {
+      opacity: 1;
     }
   }
 

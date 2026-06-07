@@ -16,28 +16,14 @@ export function SledgeContactInfoRow({
   return (
     <div className="flex gap-4">
       <Icon
-        className="mt-1 h-5 w-5 shrink-0"
-        style={{ color: "var(--sl-coral)" }}
+        className="mt-1 h-5 w-5 shrink-0 text-[var(--sl-coral)]"
         aria-hidden
       />
       <div>
-        <h3
-          className="mb-2 font-bold uppercase"
-          style={{
-            // 25% larger: clamp(1.25rem, 2.5vw, 1.5625rem)
-            fontSize: "clamp(1.25rem, 2.5vw, 1.5625rem)",
-            color: "var(--sl-coral)",
-            letterSpacing: "0.04em",
-            lineHeight: 1.2,
-          }}
-        >
+        <h3 className="mb-2 text-[clamp(1.25rem,2.5vw,1.5625rem)] leading-[1.2] font-bold tracking-[0.04em] text-[var(--sl-coral)] uppercase">
           {title}
         </h3>
-        <div
-          // 25% increase from text-sm (~0.875rem) → 1.09375rem
-          className="leading-relaxed"
-          style={{ color: "var(--sl-ink)", fontSize: "1.09375rem" }}
-        >
+        <div className="text-[1.09375rem] leading-relaxed text-[var(--sl-ink)]">
           {lines.map((line, i) => {
             const href = links?.[i];
             return href ? (
@@ -45,12 +31,11 @@ export function SledgeContactInfoRow({
                 key={i}
                 href={href}
                 className="block transition-opacity hover:opacity-70"
-                style={{ fontSize: "inherit" }}
               >
                 {line}
               </a>
             ) : (
-              <span key={i} className="block" style={{ fontSize: "inherit" }}>
+              <span key={i} className="block">
                 {line}
               </span>
             );

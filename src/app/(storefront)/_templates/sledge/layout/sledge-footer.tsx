@@ -39,37 +39,18 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
   const termsOfService = policies.find((p) => p.slug === "terms-of-service");
 
   return (
-    <footer
-      style={{
-        background: "var(--sl-dark)",
-        color: "#ffffff",
-        marginTop: 0,
-      }}
-    >
+    <footer className="sl-footer">
       {/* ── Main block ── */}
-      <div className="mx-auto px-7 pt-16 pb-10" style={{ maxWidth: "1320px" }}>
+      <div className="sl-container-wide mx-auto px-7 pt-16 pb-10">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:items-center">
           {/* ── Left: Heads Up heading + notice ── */}
           <div className="col-span-2">
-            <h2
-              className="font-heading mb-4 leading-tight"
-              style={{
-                fontSize: "clamp(3rem, 6vw, 5rem)",
-                color: "var(--sl-coral)",
-                lineHeight: 1,
-              }}
-            >
+            <h2 className="sl-footer-heading font-heading mb-4 leading-tight">
               Heads Up!
             </h2>
 
-            {/* Red accent bar + notice */}
             <div>
-              <p
-                className="font-sans text-lg leading-[1.75] whitespace-pre-wrap"
-                style={{
-                  color: "rgba(255,255,255,0.8)",
-                }}
-              >
+              <p className="font-sans text-lg leading-[1.75] whitespace-pre-wrap text-white/80">
                 {noticeText}
               </p>
             </div>
@@ -82,15 +63,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                 <a
                   href={socialLinks.instagram}
                   aria-label="Instagram"
-                  className="flex items-center justify-center transition-opacity hover:opacity-70"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: "0.4rem",
-                    background: "var(--sl-coral)",
-                    color: "#ffffff",
-                    flexShrink: 0,
-                  }}
+                  className="sl-social-btn transition-opacity hover:opacity-70"
                 >
                   <InstagramIcon className="h-5 w-5" />
                 </a>
@@ -99,15 +72,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                 <a
                   href={socialLinks.facebook}
                   aria-label="Facebook"
-                  className="flex items-center justify-center transition-opacity hover:opacity-70"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: "0.4rem",
-                    background: "var(--sl-coral)",
-                    color: "#ffffff",
-                    flexShrink: 0,
-                  }}
+                  className="sl-social-btn transition-opacity hover:opacity-70"
                 >
                   <FacebookIcon className="h-5 w-5" />
                 </a>
@@ -116,15 +81,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                 <a
                   href={socialLinks.tiktok}
                   aria-label="TikTok"
-                  className="flex items-center justify-center transition-opacity hover:opacity-70"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: "0.4rem",
-                    background: "var(--sl-coral)",
-                    color: "#ffffff",
-                    flexShrink: 0,
-                  }}
+                  className="sl-social-btn transition-opacity hover:opacity-70"
                 >
                   <TikTokIcon className="h-5 w-5" />
                 </a>
@@ -135,40 +92,23 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
       </div>
 
       {/* ── Bottom bar ── */}
-      <div
-        className="mx-auto flex flex-col gap-3 px-7 py-5 sm:flex-row sm:items-center sm:justify-between"
-        style={{
-          maxWidth: "1320px",
-          borderTop: "1px solid rgba(255,255,255,0.12)",
-        }}
-      >
-        {/* Copyright */}
-        <span
-          className="font-sans"
-          style={{
-            fontSize: "12px",
-            color: "rgba(255,255,255,0.5)",
-            letterSpacing: "0.04em",
-          }}
-        >
+      <div className="sl-container-wide mx-auto flex flex-col gap-3 border-t border-white/12 px-7 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <span className="sl-footer-meta font-sans">
           © {new Date().getFullYear()} {name}
         </span>
 
-        {/* Policy links */}
         <div className="flex flex-wrap gap-4">
           {privacyPolicy ? (
             <Link
               href={`/${privacyPolicy.slug}`}
-              className="font-sans transition-colors hover:text-white"
-              style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}
+              className="sl-footer-meta font-sans transition-colors hover:text-white"
             >
               Privacy Policy
             </Link>
           ) : (
             <Link
               href="/platform/policies/privacy-policy"
-              className="font-sans transition-colors hover:text-white"
-              style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}
+              className="sl-footer-meta font-sans transition-colors hover:text-white"
             >
               Privacy Policy
             </Link>
@@ -177,16 +117,14 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
           {termsOfService ? (
             <Link
               href={`/${termsOfService.slug}`}
-              className="font-sans transition-colors hover:text-white"
-              style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}
+              className="sl-footer-meta font-sans transition-colors hover:text-white"
             >
               Terms of Service
             </Link>
           ) : (
             <Link
               href="/platform/policies/terms-of-service"
-              className="font-sans transition-colors hover:text-white"
-              style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}
+              className="sl-footer-meta font-sans transition-colors hover:text-white"
             >
               Terms of Service
             </Link>
@@ -194,8 +132,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
 
           <Link
             href="/platform/policies/"
-            className="font-sans transition-colors hover:text-white"
-            style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}
+            className="sl-footer-meta font-sans transition-colors hover:text-white"
           >
             Platform Policies
           </Link>

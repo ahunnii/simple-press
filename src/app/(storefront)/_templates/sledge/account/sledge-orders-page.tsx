@@ -2,38 +2,33 @@ import Link from "next/link";
 import { Package } from "lucide-react";
 
 import type { OrdersPageTemplateProps } from "../../types";
+import { cn } from "~/lib/utils";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 import { PageTransition } from "~/components/page-animations";
 
 import { SledgeAccountLayout } from "./sledge-account-layout";
 
-function statusStyle(status: string): React.CSSProperties {
+function statusClass(status: string): string {
   switch (status) {
     case "completed":
-      return { borderColor: "#16a34a", color: "#16a34a", background: "#f0fdf4" };
+      return "sl-status-completed";
     case "cancelled":
-      return { borderColor: "#dc2626", color: "#dc2626", background: "#fef2f2" };
+      return "sl-status-cancelled";
     case "refunded":
-      return {
-        color: "var(--sl-ink-soft)",
-        borderColor: "#d8d8d8",
-        background: "var(--sl-cream)",
-      };
+      return "sl-status-refunded";
     default:
-      return {
-        borderColor: "#d8d8d8",
-        color: "var(--sl-ink)",
-        background: "#ffffff",
-      };
+      return "sl-status-default";
   }
 }
 
 function StatusBadge({ status }: { status: string }) {
   return (
     <span
-      className="inline-block rounded-sm border px-2 py-1 font-sans text-[10px] tracking-[0.12em] uppercase"
-      style={statusStyle(status)}
+      className={cn(
+        "inline-block rounded-sm border px-2 py-1 font-sans text-[10px] tracking-[0.12em] uppercase",
+        statusClass(status),
+      )}
     >
       {status}
     </span>
@@ -46,33 +41,14 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
       <SledgeAccountLayout heading="My Orders">
         {orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-6 py-20 text-center">
-            <div
-              className="flex items-center justify-center rounded-sm"
-              style={{
-                width: "64px",
-                height: "64px",
-                background: "var(--sl-cream)",
-                color: "var(--sl-coral)",
-              }}
-            >
+            <div className="flex h-16 w-16 items-center justify-center rounded-sm bg-[var(--sl-cream)] text-[var(--sl-coral)]">
               <Package className="size-6" />
             </div>
             <div>
-              <p
-                className="uppercase"
-                style={{
-                  fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
-                  color: "var(--sl-coral)",
-                  letterSpacing: "0.04em",
-                  lineHeight: 1,
-                }}
-              >
+              <p className="sl-page-title-md font-heading text-[var(--sl-coral)] uppercase">
                 No orders yet
               </p>
-              <p
-                className="mt-2 font-sans text-sm"
-                style={{ color: "var(--sl-ink-soft)" }}
-              >
+              <p className="sl-eyebrow mt-2 font-sans text-sm">
                 When you place an order, it will appear here.
               </p>
             </div>
@@ -82,18 +58,11 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
           </div>
         ) : (
           <div className="flex flex-col">
-            <div
-              className="mb-0 hidden items-center gap-4 border-b pb-3 md:grid"
-              style={{
-                gridTemplateColumns: "auto 1fr auto auto auto",
-                borderColor: "#e8e8e8",
-              }}
-            >
+            <div className="mb-0 hidden grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 border-b border-[var(--sl-border)] pb-3 md:grid">
               {["Order", "Items", "Date", "Status", "Total"].map((h) => (
                 <span
                   key={h}
-                  className="font-sans text-xs tracking-[0.16em] uppercase"
-                  style={{ color: "var(--sl-ink-soft)" }}
+                  className="sl-eyebrow font-sans text-xs tracking-[0.16em] uppercase"
                 >
                   {h}
                 </span>
@@ -103,17 +72,10 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
             {orders.map((order) => (
               <div
                 key={order.id}
-                className="border-b py-5"
-                style={{ borderColor: "#e8e8e8" }}
+                className="border-b border-[var(--sl-border)] py-5"
               >
-                <div
-                  className="hidden items-center gap-x-4 gap-y-2 md:grid"
-                  style={{ gridTemplateColumns: "auto 1fr auto auto auto" }}
-                >
-                  <span
-                    className="font-sans text-xs tracking-[0.12em] whitespace-nowrap uppercase"
-                    style={{ color: "var(--sl-ink)" }}
-                  >
+                <div className="hidden grid-cols-[auto_1fr_auto_auto_auto] items-center gap-x-4 gap-y-2 md:grid">
+                  <span className="font-sans text-xs tracking-[0.12em] whitespace-nowrap text-[var(--sl-ink)] uppercase">
                     #{order.orderNumber}
                   </span>
 
@@ -121,50 +83,36 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
                     {order.items.slice(0, 2).map((item) => (
                       <span
                         key={item.id}
-                        className="font-sans text-sm tracking-[0.03em] uppercase"
-                        style={{ color: "var(--sl-ink)" }}
+                        className="font-sans text-sm tracking-[0.03em] text-[var(--sl-ink)] uppercase"
                       >
                         {item.productName}
                         {item.quantity > 1 && (
-                          <span
-                            className="ml-1 text-[10px] not-uppercase"
-                            style={{ color: "var(--sl-ink-soft)" }}
-                          >
+                          <span className="sl-eyebrow ml-1 text-[10px] not-uppercase">
                             ×{item.quantity}
                           </span>
                         )}
                       </span>
                     ))}
                     {order.items.length > 2 && (
-                      <span
-                        className="font-sans text-[10px] tracking-[0.12em] uppercase"
-                        style={{ color: "var(--sl-ink-soft)" }}
-                      >
+                      <span className="sl-eyebrow font-sans text-[10px] tracking-[0.12em] uppercase">
                         +{order.items.length - 2}
                       </span>
                     )}
                   </div>
 
-                  <span
-                    className="font-sans text-xs tracking-[0.1em] whitespace-nowrap"
-                    style={{ color: "var(--sl-ink-soft)" }}
-                  >
+                  <span className="sl-eyebrow font-sans text-xs tracking-[0.1em] whitespace-nowrap">
                     {formatDate(order.createdAt)}
                   </span>
 
                   <StatusBadge status={order.status} />
 
                   <div className="flex flex-col items-end gap-1.5">
-                    <span
-                      className="font-sans text-lg tracking-[0.02em]"
-                      style={{ color: "var(--sl-ink)" }}
-                    >
+                    <span className="font-sans text-lg tracking-[0.02em] text-[var(--sl-ink)]">
                       {formatPrice(order.total)}
                     </span>
                     <Link
                       href={`/account/orders/${order.id}`}
-                      className="font-sans text-xs tracking-[0.14em] uppercase transition-opacity hover:opacity-60"
-                      style={{ color: "var(--sl-coral)" }}
+                      className="font-sans text-xs tracking-[0.14em] text-[var(--sl-coral)] uppercase transition-opacity hover:opacity-60"
                     >
                       Details →
                     </Link>
@@ -173,16 +121,10 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
 
                 <div className="flex flex-col gap-3 md:hidden">
                   <div className="flex items-center justify-between gap-3">
-                    <span
-                      className="font-sans text-xs tracking-[0.12em] uppercase"
-                      style={{ color: "var(--sl-ink)" }}
-                    >
+                    <span className="font-sans text-xs tracking-[0.12em] text-[var(--sl-ink)] uppercase">
                       #{order.orderNumber}
                     </span>
-                    <span
-                      className="font-sans text-xs"
-                      style={{ color: "var(--sl-ink-soft)" }}
-                    >
+                    <span className="sl-eyebrow font-sans text-xs">
                       {formatDate(order.createdAt)}
                     </span>
                   </div>
@@ -191,15 +133,11 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
                     {order.items.slice(0, 2).map((item) => (
                       <span
                         key={item.id}
-                        className="font-sans text-sm tracking-[0.03em] uppercase"
-                        style={{ color: "var(--sl-ink)" }}
+                        className="font-sans text-sm tracking-[0.03em] text-[var(--sl-ink)] uppercase"
                       >
                         {item.productName}
                         {item.quantity > 1 && (
-                          <span
-                            className="ml-1 text-[10px]"
-                            style={{ color: "var(--sl-ink-soft)" }}
-                          >
+                          <span className="sl-eyebrow ml-1 text-[10px]">
                             ×{item.quantity}
                           </span>
                         )}
@@ -210,16 +148,12 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
                   <div className="flex items-center justify-between gap-3">
                     <StatusBadge status={order.status} />
                     <div className="flex items-center gap-3">
-                      <span
-                        className="font-sans text-base tracking-[0.02em]"
-                        style={{ color: "var(--sl-ink)" }}
-                      >
+                      <span className="font-sans text-base tracking-[0.02em] text-[var(--sl-ink)]">
                         {formatPrice(order.total)}
                       </span>
                       <Link
                         href={`/account/orders/${order.id}`}
-                        className="font-sans text-xs tracking-[0.14em] uppercase"
-                        style={{ color: "var(--sl-coral)" }}
+                        className="font-sans text-xs tracking-[0.14em] text-[var(--sl-coral)] uppercase"
                       >
                         Details →
                       </Link>

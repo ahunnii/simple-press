@@ -100,9 +100,6 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const isParentActive = (link: NavLink) =>
     link.children?.some((c) => isLinkActive(c.href)) ?? false;
 
-  const navLinkColor = (active: boolean) =>
-    active ? "var(--sl-coral)" : "rgba(255,255,255,0.85)";
-
   const userMenu = session?.user && (
     <UserButton
       size="icon"
@@ -130,24 +127,14 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const authLink = !session?.user && (
     <Link href="/auth/sign-in" aria-label="Account">
       <User
-        className="h-[18px] w-[18px] transition-opacity hover:opacity-70"
-        style={{ color: "rgba(255,255,255,0.8)" }}
+        className="h-[18px] w-[18px] text-white/80 transition-opacity hover:opacity-70"
         strokeWidth={1.4}
       />
     </Link>
   );
 
-  // Brand mark — logo image, falling back to the name in Amatic SC.
-  // 15% larger: h-10 => h-[57.5px], sm:h-12 => sm:h-[69px], w-28 => w-[161px], sm:w-36 => sm:w-[207px]
-  // Tailwind does not have h-[57.5px] or w-[161px]; using inline style for 15% increase.
   const brand = logoUrl ? (
-    <div
-      className="relative"
-      style={{
-        height: "57.5px", // 50px * 1.15 = 57.5px (original 50px from prior code)
-        width: "161px", // 140px * 1.15 = 161px (original 140px from prior code)
-      }}
-    >
+    <div className="sl-brand-logo">
       <Image
         src={logoUrl}
         alt={businessName}
@@ -156,31 +143,17 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
         className="object-contain object-left"
         priority
       />
-      <style jsx>{`
-        @media (min-width: 640px) {
-          div[style] {
-            height: 69px !important; /* 60px * 1.15 = 69px (original sm 60px from prior code) */
-            width: 207px !important; /* 180px * 1.15 = 207px (original sm 180px from prior code) */
-          }
-        }
-      `}</style>
     </div>
   ) : (
-    <span
-      className="font-heading leading-none"
-      style={{ color: "#ffffff", fontSize: "43.125px" }} // 37.5px * 1.15 = 43.125px
-    >
+    <span className="sl-brand-text font-heading leading-none">
       {businessName}
     </span>
   );
 
   return (
     <>
-      <header
-        className="sticky top-0 z-50 w-full"
-        style={{ background: "var(--sl-dark)" }}
-      >
-        <div className="mx-auto grid h-[120px] w-full max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6">
+      <header className="sl-header sticky top-0 z-50 w-full">
+        <div className="mx-auto grid h-[120px] w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6">
           {/* ── Left: logo (desktop) / hamburger (mobile) ── */}
           <div className="flex items-center justify-start">
             {/* Mobile menu trigger */}
@@ -189,11 +162,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 rounded-none"
-                  style={{
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    color: "rgba(255,255,255,0.8)",
-                  }}
+                  className="h-9 w-9 rounded-none border border-white/20 text-white/80"
                   aria-label="Open menu"
                 >
                   <Menu className="h-5 w-5" />
@@ -201,27 +170,14 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
               </SheetTrigger>
               <SheetContent
                 side="left"
-                className="flex w-[min(100vw-1rem,27.5rem)] flex-col gap-0 rounded-none p-0"
-                style={{
-                  background: "var(--sl-dark)",
-                  borderRight: "1px solid rgba(255,255,255,0.1)",
-                }}
+                className="sl-mobile-menu flex w-[min(100vw-1rem,27.5rem)] flex-col gap-0 rounded-none p-0"
               >
-                <div
-                  className="border-b px-6 pt-12 pb-6"
-                  style={{ borderColor: "rgba(255,255,255,0.1)" }}
-                >
-                  <SheetTitle
-                    className="font-heading text-5xl leading-none"
-                    style={{ color: "var(--sl-coral)" }}
-                  >
+                <div className="border-b border-white/10 px-6 pt-12 pb-6">
+                  <SheetTitle className="font-heading text-5xl leading-none text-[var(--sl-coral)]">
                     {businessName}
                   </SheetTitle>
                   {footerTagline && (
-                    <SheetDescription
-                      className="mt-3 text-[15px] leading-relaxed"
-                      style={{ color: "rgba(255,255,255,0.55)" }}
-                    >
+                    <SheetDescription className="mt-3 text-[15px] leading-relaxed text-white/55">
                       {footerTagline}
                     </SheetDescription>
                   )}
@@ -235,8 +191,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     link.children?.length ? (
                       <div
                         key={link.href + link.label}
-                        className="border-b"
-                        style={{ borderColor: "rgba(255,255,255,0.1)" }}
+                        className="border-b border-white/10"
                       >
                         <button
                           type="button"
@@ -244,8 +199,12 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                           aria-expanded={
                             expandedMobile.has(i) ? "true" : "false"
                           }
-                          className="font-heading flex w-full items-center justify-between py-4 text-3xl transition-colors"
-                          style={{ color: navLinkColor(isParentActive(link)) }}
+                          className={cn(
+                            "font-heading flex w-full items-center justify-between py-4 text-3xl transition-colors",
+                            isParentActive(link)
+                              ? "sl-nav-active"
+                              : "sl-nav-inactive",
+                          )}
                         >
                           {link.label}
                           <ChevronDown
@@ -272,10 +231,12 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                                 aria-current={
                                   isLinkActive(child.href) ? "page" : undefined
                                 }
-                                className="font-heading block py-2.5 text-2xl transition-colors"
-                                style={{
-                                  color: navLinkColor(isLinkActive(child.href)),
-                                }}
+                                className={cn(
+                                  "font-heading block py-2.5 text-2xl transition-colors",
+                                  isLinkActive(child.href)
+                                    ? "sl-nav-active"
+                                    : "sl-nav-inactive",
+                                )}
                               >
                                 {child.label}
                               </Link>
@@ -293,11 +254,12 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                         aria-current={
                           isLinkActive(link.href) ? "page" : undefined
                         }
-                        className="font-heading flex items-center border-b py-4 text-3xl transition-colors"
-                        style={{
-                          borderColor: "rgba(255,255,255,0.1)",
-                          color: navLinkColor(isLinkActive(link.href)),
-                        }}
+                        className={cn(
+                          "font-heading flex items-center border-b border-white/10 py-4 text-3xl transition-colors",
+                          isLinkActive(link.href)
+                            ? "sl-nav-active"
+                            : "sl-nav-inactive",
+                        )}
                       >
                         {link.label}
                       </Link>
@@ -305,17 +267,11 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                   )}
                 </nav>
 
-                <div
-                  className="flex items-center justify-between border-t px-7 py-5"
-                  style={{ borderColor: "rgba(255,255,255,0.1)" }}
-                >
+                <div className="flex items-center justify-between border-t border-white/10 px-7 py-5">
                   {session?.user ? (
                     <div className="flex items-center gap-4">
                       {userMenu}
-                      <span
-                        className="text-[13.75px] tracking-[0.14em] uppercase"
-                        style={{ color: "rgba(255,255,255,0.5)" }}
-                      >
+                      <span className="text-[13.75px] tracking-[0.14em] text-white/50 uppercase">
                         Account
                       </span>
                     </div>
@@ -323,16 +279,12 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     <Link
                       href="/auth/sign-in"
                       onClick={() => setMobileOpen(false)}
-                      className="text-[15px] font-semibold tracking-[0.14em] uppercase transition-colors hover:opacity-80"
-                      style={{ color: "rgba(255,255,255,0.6)" }}
+                      className="text-[15px] font-semibold tracking-[0.14em] text-white/60 uppercase transition-colors hover:opacity-80"
                     >
                       Login →
                     </Link>
                   )}
-                  <span
-                    className="text-[13.75px] tracking-[0.14em] uppercase"
-                    style={{ color: "rgba(255,255,255,0.4)" }}
-                  >
+                  <span className="text-[13.75px] tracking-[0.14em] text-white/40 uppercase">
                     {new Date().getFullYear()}
                   </span>
                 </div>
@@ -379,9 +331,10 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                       }
                       className={cn(
                         "vn-nav-link font-heading flex cursor-pointer items-center gap-1 border-none bg-transparent text-[27.5px] leading-none whitespace-nowrap transition-colors",
-                        isParentActive(link) ? "vn-active" : "",
+                        isParentActive(link)
+                          ? "vn-active sl-nav-active"
+                          : "sl-nav-inactive",
                       )}
-                      style={{ color: navLinkColor(isParentActive(link)) }}
                     >
                       {link.label}
                       <ChevronDown
@@ -395,13 +348,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
 
                     {openDropdown === i && (
                       <div className="absolute top-full left-0 z-10 pt-2">
-                        <div
-                          className="min-w-[200px] overflow-hidden rounded-none py-1 shadow-lg"
-                          style={{
-                            background: "var(--sl-dark)",
-                            border: "1px solid rgba(255,255,255,0.12)",
-                          }}
-                        >
+                        <div className="sl-dropdown-panel min-w-[200px] overflow-hidden rounded-none py-1 shadow-lg">
                           {link.children.map((child) => (
                             <Link
                               key={child.href}
@@ -437,9 +384,10 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     aria-current={isLinkActive(link.href) ? "page" : undefined}
                     className={cn(
                       "vn-nav-link font-heading text-[27.5px] leading-none whitespace-nowrap transition-colors",
-                      isLinkActive(link.href) ? "vn-active" : "",
+                      isLinkActive(link.href)
+                        ? "vn-active sl-nav-active"
+                        : "sl-nav-inactive",
                     )}
-                    style={{ color: navLinkColor(isLinkActive(link.href)) }}
                   >
                     {link.label}
                   </Link>
@@ -452,20 +400,14 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
             <Link
               href="/cart"
               aria-label="Open cart"
-              className="relative flex items-center transition-opacity hover:opacity-70"
-              style={{ color: "rgba(255,255,255,0.8)" }}
+              className="relative flex items-center text-white/80 transition-opacity hover:opacity-70"
             >
               <ShoppingBag className="h-[25px] w-[25px]" strokeWidth={1.4} />
               {itemCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-2.5 -right-2.5 flex h-5 w-5 items-center justify-center rounded-full text-[11.25px] font-semibold"
-                  style={{
-                    background: "var(--sl-coral)",
-                    color: "#fff",
-                    minWidth: "20px",
-                  }}
+                  className="sl-cart-badge absolute -top-2.5 -right-2.5 flex h-5 w-5 items-center justify-center rounded-full text-[11.25px] font-semibold"
                 >
                   {itemCount}
                 </motion.span>

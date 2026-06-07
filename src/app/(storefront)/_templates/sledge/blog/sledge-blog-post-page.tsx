@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import type { RouterOutputs } from "~/trpc/react";
 import {
   FadeIn,
   PageTransition,
@@ -14,6 +15,7 @@ import {
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "../index";
+import { SledgeProductRail } from "../shared/sledge-product-rail";
 
 function fmtDate(d: Date | string) {
   const dt = typeof d === "string" ? new Date(d) : d;
@@ -24,11 +26,16 @@ function fmtDate(d: Date | string) {
   });
 }
 
+type FeaturedProduct = NonNullable<
+  RouterOutputs["business"]["getHomepage"]
+>["products"][number];
+
 type SledgeBlogPostPageProps = DefaultBlogPostPageTemplateProps & {
   business?: {
     name?: string | null;
     siteContent?: { customFields?: unknown } | null;
   } | null;
+  featuredProducts?: FeaturedProduct[];
 };
 
 const PROSE =
@@ -38,6 +45,7 @@ export function SledgeBlogPostPage({
   page,
   relatedPosts,
   business,
+  featuredProducts = [],
 }: SledgeBlogPostPageProps) {
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
@@ -46,63 +54,38 @@ export function SledgeBlogPostPage({
     "sledge.global.shop-cta-text",
     "sledge.global.shop-cta-link",
     "sledge.blog.post-shop-cta-heading",
-    "sledge.blog.post-shop-cta-subheading",
   ]);
 
   const shopCtaText = f["sledge.global.shop-cta-text"] ?? "Browse Shop";
   const shopCtaLink = f["sledge.global.shop-cta-link"] ?? "/shop";
   const shopCtaHeading =
     f["sledge.blog.post-shop-cta-heading"] ?? "Trending Now";
-  const shopCtaSubheading =
-    f["sledge.blog.post-shop-cta-subheading"] ??
-    "Explore one-of-a-kind pieces from the studio.";
 
   const filtered = relatedPosts.filter((p) => p.slug !== page.slug).slice(0, 3);
 
   return (
     <PageTransition>
-      <header
-        className="px-7 pt-16 pb-8 md:pt-20"
-        style={{ background: "#ffffff" }}
-      >
-        <FadeIn style={{ maxWidth: "820px", margin: "0 auto" }}>
+      <header className="bg-white px-7 pt-16 pb-8 md:pt-20">
+        <FadeIn className="mx-auto max-w-[820px]">
           <Link
             href="/blog"
-            className="mb-6 inline-block font-sans text-xs tracking-[0.18em] uppercase transition-opacity hover:opacity-60"
-            style={{ color: "var(--sl-ink-soft)" }}
+            className="sl-eyebrow mb-6 inline-block font-sans text-xs tracking-[0.18em] uppercase transition-opacity hover:opacity-60"
           >
             ← Back to Blog
           </Link>
 
-          <h1
-            className="uppercase"
-            style={{
-              fontSize: "clamp(2rem, 5vw, 3.25rem)",
-              color: "var(--sl-coral)",
-              letterSpacing: "0.04em",
-              lineHeight: 1.1,
-            }}
-          >
+          <h1 className="sl-page-title-md font-heading text-[var(--sl-coral)] uppercase">
             {page.title}
           </h1>
 
-          <p
-            className="mt-6 font-sans text-xs tracking-[0.14em] uppercase"
-            style={{ color: "var(--sl-ink-soft)" }}
-          >
+          <p className="sl-eyebrow mt-6 font-sans text-xs tracking-[0.14em] uppercase">
             {fmtDate(page.createdAt)}
           </p>
         </FadeIn>
       </header>
 
-      <div
-        className="relative mx-auto w-full overflow-hidden px-7"
-        style={{ maxWidth: "1100px" }}
-      >
-        <div
-          className="relative w-full overflow-hidden rounded-sm"
-          style={{ aspectRatio: "21/9", background: "var(--sl-green)" }}
-        >
+      <div className="sl-container relative mx-auto w-full overflow-hidden px-7">
+        <div className="relative aspect-[21/9] w-full overflow-hidden rounded-sm bg-[var(--sl-green)]">
           {page.image ? (
             <Image
               src={page.image}
@@ -113,20 +96,14 @@ export function SledgeBlogPostPage({
               sizes="(max-width: 1100px) 100vw, 1100px"
             />
           ) : (
-            <div
-              className="sledge-card-placeholder absolute inset-0 flex items-center justify-center"
-              style={{ background: "var(--sl-green)" }}
-            >
+            <div className="sledge-card-placeholder absolute inset-0 flex items-center justify-center bg-[var(--sl-green)]">
               <span className="sledge-card-placeholder-num select-none">★</span>
             </div>
           )}
         </div>
       </div>
 
-      <section
-        className="px-7 py-14 md:py-16"
-        style={{ background: "#ffffff" }}
-      >
+      <section className="bg-white px-7 py-14 md:py-16">
         <FadeIn className="mx-auto w-full max-w-3xl">
           <TiptapRenderer
             content={page.content as TiptapJSON}
@@ -135,58 +112,22 @@ export function SledgeBlogPostPage({
         </FadeIn>
       </section>
 
-      <section className="px-7 py-12" style={{ background: "var(--sl-cream)" }}>
-        <FadeIn className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2
-              className="uppercase"
-              style={{
-                fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
-                color: "var(--sl-coral)",
-                letterSpacing: "0.04em",
-                lineHeight: 1,
-              }}
-            >
-              {shopCtaHeading}
-            </h2>
-            <p
-              className="mt-2 font-sans text-sm leading-relaxed"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
-              {shopCtaSubheading}
-            </p>
-          </div>
-          <Link href={shopCtaLink} className="sl-btn flex-shrink-0 text-xs">
-            {shopCtaText} →
-          </Link>
-        </FadeIn>
-      </section>
+      <SledgeProductRail
+        heading={shopCtaHeading}
+        ctaText={shopCtaText}
+        ctaHref={shopCtaLink}
+        products={featuredProducts}
+      />
 
       {filtered.length > 0 && (
-        <section
-          className="mx-auto w-full px-7 py-16"
-          style={{ maxWidth: "1100px", background: "#ffffff" }}
-        >
+        <section className="sl-container mx-auto w-full bg-white px-7 py-16">
           <FadeIn className="mb-10 flex items-center justify-between">
-            <h2
-              className="uppercase"
-              style={{
-                fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
-                color: "var(--sl-coral)",
-                letterSpacing: "0.04em",
-                lineHeight: 1,
-              }}
-            >
+            <h2 className="sl-page-title-md font-heading text-[var(--sl-coral)] uppercase">
               More Posts
             </h2>
             <Link
               href="/blog"
-              className="hidden font-sans text-xs tracking-[0.18em] uppercase transition-opacity hover:opacity-60 md:inline-flex"
-              style={{
-                border: "1px solid var(--sl-ink)",
-                color: "var(--sl-ink)",
-                padding: "8px 16px",
-              }}
+              className="hidden border border-[var(--sl-ink)] px-4 py-2 font-sans text-xs tracking-[0.18em] text-[var(--sl-ink)] uppercase transition-opacity hover:opacity-60 md:inline-flex"
             >
               View All →
             </Link>
@@ -199,13 +140,7 @@ export function SledgeBlogPostPage({
             {filtered.map((post, i) => (
               <StaggerItem key={post.slug}>
                 <Link href={`/blog/${post.slug}`} className="group block">
-                  <div
-                    className="relative mb-4 overflow-hidden rounded-sm"
-                    style={{
-                      aspectRatio: "4/3",
-                      background: "var(--sl-green)",
-                    }}
-                  >
+                  <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-sm bg-[var(--sl-green)]">
                     {post.image ? (
                       <Image
                         src={post.image}
@@ -215,10 +150,7 @@ export function SledgeBlogPostPage({
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
                     ) : (
-                      <div
-                        className="sledge-card-placeholder absolute inset-0 flex items-center justify-center"
-                        style={{ background: "var(--sl-green)" }}
-                      >
+                      <div className="sledge-card-placeholder absolute inset-0 flex items-center justify-center bg-[var(--sl-green)]">
                         <span className="sledge-card-placeholder-num select-none">
                           {String.fromCharCode(65 + (i % 6))}
                         </span>
@@ -226,16 +158,10 @@ export function SledgeBlogPostPage({
                     )}
                   </div>
 
-                  <p
-                    className="mb-2 font-sans text-xs tracking-[0.12em] uppercase"
-                    style={{ color: "var(--sl-ink-soft)" }}
-                  >
+                  <p className="sl-eyebrow mb-2 font-sans text-xs tracking-[0.12em] uppercase">
                     {fmtDate(post.createdAt)}
                   </p>
-                  <h4
-                    className="font-sans text-base leading-tight tracking-[0.04em] uppercase transition-opacity group-hover:opacity-70"
-                    style={{ color: "var(--sl-ink)" }}
-                  >
+                  <h4 className="font-sans text-base leading-tight tracking-[0.04em] text-[var(--sl-ink)] uppercase transition-opacity group-hover:opacity-70">
                     {post.title}
                   </h4>
                 </Link>

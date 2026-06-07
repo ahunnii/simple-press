@@ -56,7 +56,7 @@ export async function SledgeHomepage(_props?: DefaultHomepageTemplateProps) {
 
   return (
     <HydrateClient>
-      <div className="bg-sl-cream">
+      <div className="bg-[var(--sl-cream)]">
         {/* 1. Animated mosaic gallery hero */}
         <SledgeMosaicHero
           images={introImages}
@@ -72,7 +72,7 @@ export async function SledgeHomepage(_props?: DefaultHomepageTemplateProps) {
           businessName={businessName}
         />
         {/* Wave cream → green */}
-        <div style={{ background: "var(--sl-cream)" }}>
+        <div className="bg-[var(--sl-cream)]">
           <SledgeWave to="green" />
         </div>
         {/* 2. Get to Know Judy — grass-green block */}
@@ -87,7 +87,7 @@ export async function SledgeHomepage(_props?: DefaultHomepageTemplateProps) {
           sectionAttrs={sectionGroupAttr("homepage", "getToKnow")}
         />
         {/* Wave green → cream */}
-        <div style={{ background: "var(--sl-green)" }}>
+        <div className="bg-[var(--sl-green)]">
           <SledgeWave to="cream" />
         </div>
         {/* 3. Testimonials — pale-green block */}
@@ -102,13 +102,7 @@ export async function SledgeHomepage(_props?: DefaultHomepageTemplateProps) {
           />
         )}
         {/* Wave cream → green (or cream → green if testimonials hidden) */}
-        <div
-          style={{
-            background: flags.isEnabled("testimonials")
-              ? "var(--sl-cream)"
-              : "var(--sl-cream)",
-          }}
-        >
+        <div className="bg-[var(--sl-cream)]">
           <SledgeWave to="green" />
         </div>
         {/* 4. Subscribe — grass-green block */}

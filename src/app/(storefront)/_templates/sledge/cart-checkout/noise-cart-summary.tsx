@@ -35,55 +35,29 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
     untilFree > 0;
 
   return (
-    <div
-      className="overflow-hidden rounded-sm bg-white"
-      style={{ boxShadow: "0 4px 24px rgba(0, 0, 0, 0.08)" }}
-    >
-      <div className="border-b px-6 pt-6 pb-4" style={{ borderColor: "#e8e8e8" }}>
-        <h3
-          className="uppercase"
-          style={{
-            fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
-            color: "var(--sl-coral)",
-            letterSpacing: "0.04em",
-            lineHeight: 1,
-          }}
-        >
+    <div className="sl-card-shadow overflow-hidden rounded-sm bg-white">
+      <div className="border-b border-[var(--sl-border)] px-6 pt-6 pb-4">
+        <h3 className="sl-tab-heading uppercase text-[var(--sl-coral)] tracking-[0.04em] leading-none">
           Order Summary
         </h3>
       </div>
 
-      <div
-        className="flex flex-col gap-3 border-b px-6 py-5"
-        style={{ borderColor: "#e8e8e8" }}
-      >
+      <div className="flex flex-col gap-3 border-b border-[var(--sl-border)] px-6 py-5">
         <div className="flex items-baseline justify-between">
-          <span
-            className="font-sans text-xs tracking-[0.14em] uppercase"
-            style={{ color: "var(--sl-ink-soft)" }}
-          >
+          <span className="font-sans text-xs tracking-[0.14em] text-[var(--sl-ink-soft)] uppercase">
             Subtotal — {itemCount} {itemCount === 1 ? "item" : "items"}
           </span>
-          <span
-            className="font-sans text-sm tracking-[0.04em]"
-            style={{ color: "var(--sl-ink)" }}
-          >
+          <span className="font-sans text-sm tracking-[0.04em] text-[var(--sl-ink)]">
             {formatPrice(subtotal)}
           </span>
         </div>
         <div className="flex items-baseline justify-between">
-          <span
-            className="font-sans text-xs tracking-[0.14em] uppercase"
-            style={{ color: "var(--sl-ink-soft)" }}
-          >
+          <span className="font-sans text-xs tracking-[0.14em] text-[var(--sl-ink-soft)] uppercase">
             Est. shipping
           </span>
-          <span
-            className="font-sans text-sm tracking-[0.04em]"
-            style={{ color: "var(--sl-ink)" }}
-          >
+          <span className="font-sans text-sm tracking-[0.04em] text-[var(--sl-ink)]">
             {shipping === 0 ? (
-              <span style={{ color: "var(--sl-ink-soft)" }}>Free</span>
+              <span className="text-[var(--sl-ink-soft)]">Free</span>
             ) : (
               formatPrice(shipping)
             )}
@@ -92,67 +66,42 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
       </div>
 
       {showFreeBar && untilFree !== null && progress !== null && (
-        <div
-          className="border-b px-6 py-4"
-          style={{ borderColor: "#e8e8e8" }}
-        >
+        <div className="border-b border-[var(--sl-border)] px-6 py-4">
           <div className="mb-2 flex justify-between">
-            <span
-              className="font-sans text-xs tracking-[0.12em] uppercase"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <span className="font-sans text-xs tracking-[0.12em] text-[var(--sl-ink-soft)] uppercase">
               Free shipping at{" "}
               {shippingConfig.freeShippingThreshold
                 ? formatPrice(shippingConfig.freeShippingThreshold)
                 : ""}
             </span>
-            <span
-              className="font-sans text-xs tracking-[0.12em] uppercase"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <span className="font-sans text-xs tracking-[0.12em] text-[var(--sl-ink-soft)] uppercase">
               {Math.round(progress * 100)}%
             </span>
           </div>
-          <div
-            className="relative h-1.5 w-full overflow-hidden rounded-full"
-            style={{ background: "var(--sl-cream)" }}
-          >
+          <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-[var(--sl-cream)]">
             <div
-              className="absolute inset-y-0 left-0 rounded-full transition-all"
+              className="absolute inset-y-0 left-0 rounded-full bg-[var(--sl-coral)] transition-all"
               style={{
                 width: `${Math.min(100, Math.round(progress * 100))}%`,
-                background: "var(--sl-coral)",
               }}
             />
           </div>
-          <p
-            className="mt-2 font-sans text-xs tracking-[0.12em] uppercase"
-            style={{ color: "var(--sl-ink-soft)" }}
-          >
+          <p className="mt-2 font-sans text-xs tracking-[0.12em] text-[var(--sl-ink-soft)] uppercase">
             {formatPrice(untilFree)} to go
           </p>
         </div>
       )}
 
-      <div
-        className="flex items-baseline justify-between border-b px-6 py-5"
-        style={{ borderColor: "#e8e8e8", background: "var(--sl-cream)" }}
-      >
-        <span
-          className="font-sans text-xs tracking-[0.18em] uppercase"
-          style={{ color: "var(--sl-ink-soft)" }}
-        >
+      <div className="flex items-baseline justify-between border-b border-[var(--sl-border)] bg-[var(--sl-cream)] px-6 py-5">
+        <span className="font-sans text-xs tracking-[0.18em] text-[var(--sl-ink-soft)] uppercase">
           Estimated total
         </span>
-        <div
-          className="font-sans text-2xl tracking-[0.02em] uppercase md:text-3xl"
-          style={{ color: "var(--sl-ink)" }}
-        >
+        <div className="font-sans text-2xl tracking-[0.02em] text-[var(--sl-ink)] uppercase md:text-3xl">
           {formatPrice(estimatedTotal)}
         </div>
       </div>
 
-      <div className="px-6 py-5" style={{ borderColor: "#e8e8e8" }}>
+      <div className="px-6 py-5">
         <Link
           href="/checkout"
           onClick={() => setIsOpen(false)}
@@ -166,21 +115,10 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
       <div className="grid grid-cols-1 gap-3 px-6 pb-6">
         {REASSURANCE.map((note) => (
           <div key={note.icon} className="flex items-start gap-2.5">
-            <span
-              className="flex flex-shrink-0 items-center justify-center rounded-sm font-sans text-xs"
-              style={{
-                width: "22px",
-                height: "22px",
-                background: "var(--sl-cream)",
-                color: "var(--sl-coral)",
-              }}
-            >
+            <span className="flex size-[22px] flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]">
               {note.icon}
             </span>
-            <p
-              className="font-sans text-xs leading-relaxed tracking-[0.08em] uppercase"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <p className="font-sans text-xs leading-relaxed tracking-[0.08em] text-[var(--sl-ink-soft)] uppercase">
               {note.text}
             </p>
           </div>

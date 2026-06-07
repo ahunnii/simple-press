@@ -5,7 +5,7 @@ import { Amatic_SC, Raleway } from "next/font/google";
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { getSession } from "~/server/better-auth/server";
 
-import { NoiseAnnouncementBar } from "./noise-announcement-bar";
+import { SledgeAnnouncementBar } from "./sledge-announcement-bar";
 import { NoiseFooter } from "./sledge-footer";
 import { NoiseHeader } from "./sledge-header";
 
@@ -30,12 +30,11 @@ export async function SledgeLayout({
     <div className={`${fontSans.variable} ${fontHeading.variable} sledge`}>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-9999 focus:rounded focus:px-4 focus:py-2 focus:shadow-lg"
-        style={{ background: "var(--vn-paper)", color: "var(--vn-ink)" }}
+        className="sr-only bg-[var(--sl-cream)] text-[var(--sl-ink)] focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-9999 focus:rounded focus:px-4 focus:py-2 focus:shadow-lg"
       >
         Skip to main content
       </a>
-      <NoiseAnnouncementBar businessId={business.id} />
+      <SledgeAnnouncementBar businessId={business.id} />
       <NoiseHeader business={business} session={session ?? null} />
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}

@@ -25,25 +25,12 @@ export function SledgeAccountLayout({ children, heading }: Props) {
 
   return (
     <>
-      <section className="border-b bg-white px-7 pt-14 pb-8 md:pb-10" style={{ borderColor: "#e8e8e8" }}>
+      <section className="border-b border-[var(--sl-border)] bg-white px-7 pt-14 pb-8 md:pb-10">
         <div className="mx-auto max-w-7xl">
-          <p
-            className="mb-3 font-sans text-xs tracking-[0.18em] uppercase"
-            style={{ color: "var(--sl-ink-soft)" }}
-          >
+          <p className="sl-eyebrow mb-3 font-sans text-xs tracking-[0.18em] uppercase">
             My Account
           </p>
-          <h1
-            className="font-heading uppercase"
-            style={{
-              fontSize: "clamp(2rem, 5vw, 3rem)",
-              color: "var(--sl-orange)",
-              letterSpacing: "0.04em",
-              lineHeight: 1,
-            }}
-          >
-            {heading}
-          </h1>
+          <h1 className="sl-page-title-md font-heading uppercase">{heading}</h1>
         </div>
 
         <nav
@@ -58,17 +45,10 @@ export function SledgeAccountLayout({ children, heading }: Props) {
                 href={href}
                 className={cn(
                   "flex flex-shrink-0 items-center gap-1.5 rounded-sm px-3 py-2 font-sans text-[10px] tracking-[0.16em] uppercase transition-all",
-                  active ? "text-white" : "",
-                )}
-                style={
                   active
-                    ? { background: "var(--sl-coral)" }
-                    : {
-                        border: "1px solid #d8d8d8",
-                        color: "var(--sl-ink)",
-                        background: "#ffffff",
-                      }
-                }
+                    ? "sl-account-tab-active text-white"
+                    : "sl-account-tab-inactive",
+                )}
               >
                 <Icon className="h-3 w-3" aria-hidden />
                 {label}
@@ -91,19 +71,10 @@ export function SledgeAccountLayout({ children, heading }: Props) {
                       href={href}
                       className={cn(
                         "flex items-center gap-3 rounded-sm py-2.5 pr-4 pl-3 font-sans text-xs tracking-[0.16em] uppercase transition-colors",
-                      )}
-                      style={
                         active
-                          ? {
-                              background: "var(--sl-cream)",
-                              color: "var(--sl-coral)",
-                              borderLeft: "3px solid var(--sl-coral)",
-                            }
-                          : {
-                              color: "var(--sl-ink-soft)",
-                              borderLeft: "3px solid transparent",
-                            }
-                      }
+                          ? "sl-account-nav-active"
+                          : "sl-account-nav-inactive",
+                      )}
                     >
                       <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
                       {label}

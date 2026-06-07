@@ -15,32 +15,18 @@ export function SledgeGenericPage({ page }: Props) {
   const isPolicyPage = page.type === "policy";
 
   return (
-    <PageTransition className="bg-white">
+    <PageTransition>
       <section className="px-7 pt-16 pb-10 md:pt-20 md:pb-12">
         <FadeIn className="mx-auto max-w-7xl">
-          <p
-            className="mb-4 font-sans text-xs tracking-[0.18em] uppercase"
-            style={{ color: "var(--sl-ink-soft)" }}
-          >
+          <p className="sl-eyebrow mb-4 font-sans text-xs tracking-[0.18em] uppercase">
             {isPolicyPage ? "Legal" : ""}
           </p>
-          <h1
-            className="font-heading uppercase"
-            style={{
-              fontSize: "clamp(2.5rem, 6.25vw, 4.06rem)",
-              color: "var(--sl-orange)",
-              letterSpacing: "0.04em",
-              lineHeight: 1.1,
-            }}
-          >
+          <h1 className="sl-page-title-lg font-heading font-semibold uppercase">
             {page.title}
           </h1>
 
           {page.excerpt && (
-            <p
-              className="mt-5 max-w-7xl font-sans text-sm leading-relaxed md:text-base"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <p className="sl-eyebrow mt-5 max-w-7xl font-sans text-sm leading-relaxed md:text-base">
               {page.excerpt}
             </p>
           )}

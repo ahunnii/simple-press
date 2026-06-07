@@ -4,9 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { SlidersHorizontal, X } from "lucide-react";
 
+import type { SortOption } from "~/hooks/use-shop-filters";
 import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
+import { cn } from "~/lib/utils";
 import {
   FadeIn,
   StaggerContainer,
@@ -37,24 +39,15 @@ function FilterGroup({
 }) {
   const [open, setOpen] = useState(true);
   return (
-    <div className="mb-5 border-b pb-5">
+    <div className="sl-shop-filter-group">
       <button
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         className="flex w-full items-center justify-between py-1"
       >
-        <span
-          className="font-mono text-[10px] tracking-[0.22em] uppercase"
-          style={{ color: "var(--vn-ink)" }}
-        >
-          {title}
-        </span>
-        <span
-          aria-hidden="true"
-          className="font-mono text-sm"
-          style={{ color: "var(--vn-steel-mist)" }}
-        >
+        <span className="sl-shop-filter-title">{title}</span>
+        <span aria-hidden="true" className="sl-shop-filter-toggle">
           {open ? "−" : "+"}
         </span>
       </button>
@@ -84,23 +77,19 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
   const filterPanel = (
     <>
       <FilterGroup title="Availability">
-        <label className="flex cursor-pointer items-center gap-2.5 font-sans text-[13px]">
+        <label className="sl-eyebrow flex cursor-pointer items-center gap-2.5 font-sans text-sm">
           <input
             type="checkbox"
             checked={inStockOnly}
             onChange={(e) => handleInStock(e.target.checked)}
-            className="accent-foreground"
-            style={{ accentColor: "var(--vn-ink)" }}
+            className="accent-[var(--sl-coral)]"
           />
           In stock ({inStockCount})
         </label>
       </FilterGroup>
 
       <FilterGroup title="Price">
-        <div
-          className="mb-2 flex justify-between font-mono text-[11px]"
-          style={{ color: "var(--vn-steel-mist)" }}
-        >
+        <div className="sl-eyebrow mb-2 flex justify-between font-sans text-xs">
           <span>$0</span>
           <span>{formatPrice(localPriceMax)}</span>
         </div>
@@ -116,15 +105,13 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
             commitPriceMax(Number((e.target as HTMLInputElement).value))
           }
           onKeyUp={() => commitPriceMax(localPriceMax)}
-          className="w-full"
-          style={{ accentColor: "var(--vn-ink)" }}
+          className="sl-shop-range w-full"
         />
         {priceMax !== null && (
           <button
             type="button"
             onClick={() => commitPriceMax(maxPrice)}
-            className="mt-2 font-mono text-[10px] tracking-[0.16em] uppercase underline"
-            style={{ color: "var(--vn-steel-mist)" }}
+            className="sl-eyebrow mt-2 font-sans text-xs tracking-[0.12em] uppercase underline transition-opacity hover:opacity-70"
           >
             Clear
           </button>
@@ -133,11 +120,10 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
 
       {collections.length > 0 && (
         <FilterGroup title="Collections">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             <Link
               href="/shop"
-              className="font-sans text-[13px] transition-colors"
-              style={{ color: "var(--vn-ink)" }}
+              className="font-sans text-sm font-medium tracking-[0.06em] text-[var(--sl-coral)] uppercase transition-opacity hover:opacity-70"
             >
               All pieces
             </Link>
@@ -145,11 +131,10 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
               <Link
                 key={col.id}
                 href={`/collections/${col.slug}`}
-                className="flex items-baseline justify-between font-sans text-[13px] transition-colors hover:opacity-70"
-                style={{ color: "var(--vn-steel-mist)" }}
+                className="sl-eyebrow flex items-baseline justify-between font-sans text-sm transition-opacity hover:opacity-70"
               >
                 <span>{col.name}</span>
-                <span className="font-mono text-[10px]">{col.count}</span>
+                <span className="text-xs tracking-[0.1em]">{col.count}</span>
               </Link>
             ))}
           </div>
@@ -160,32 +145,16 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
 
   const productGrid = (
     <div>
-      {/* Sort + count bar */}
-      <div className="mb-8 flex items-center justify-between border-b pb-5">
-        <span
-          className="hidden font-mono text-[11px] tracking-[0.14em] uppercase md:block"
-          style={{ color: "var(--vn-steel-mist)" }}
-        >
+      <div className="sl-shop-toolbar">
+        <span className="sl-eyebrow hidden font-sans text-xs tracking-[0.14em] uppercase md:block">
           {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
         </span>
-        <label
-          className="ml-auto flex items-center gap-3 font-mono text-[11px] tracking-[0.14em] uppercase"
-          style={{ color: "var(--vn-steel-mist)" }}
-        >
+        <label className="sl-eyebrow ml-auto flex items-center gap-3 font-sans text-xs tracking-[0.14em] uppercase">
           Sort
           <select
             value={sortParam}
-            onChange={(e) =>
-              handleSort(e.target.value as keyof typeof SORT_LABELS)
-            }
-            className="cursor-pointer font-sans text-[13px] outline-none"
-            style={{
-              padding: "6px 10px",
-              border: "1px solid var(--vn-ink)",
-
-              color: "var(--vn-ink)",
-              fontFamily: "inherit",
-            }}
+            onChange={(e) => handleSort(e.target.value as SortOption)}
+            className="sl-shop-sort-select"
           >
             {Object.entries(SORT_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
@@ -198,17 +167,13 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
 
       {filtered.length === 0 ? (
         <FadeIn className="py-24 text-center">
-          <p
-            className="font-serif text-2xl font-light italic"
-            style={{ color: "var(--vn-steel-mist)" }}
-          >
+          <p className="sl-eyebrow font-sans text-base">
             No pieces match your filters.
           </p>
           <button
             type="button"
             onClick={clearFilters}
-            className="mt-6 font-mono text-[11px] tracking-[0.2em] uppercase underline"
-            style={{ color: "var(--vn-ink)" }}
+            className="mt-6 font-sans text-xs tracking-[0.16em] text-[var(--sl-ink)] uppercase underline transition-opacity hover:opacity-70"
           >
             Clear filters
           </button>
@@ -216,8 +181,8 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
       ) : (
         <StaggerContainer
           key={filtered.map((p) => p.id).join(",")}
-          className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
-          staggerDelay={0.06}
+          className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-3"
+          staggerDelay={0.07}
         >
           {filtered.map((product, index) => (
             <StaggerItem key={product.id}>
@@ -230,32 +195,20 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
   );
 
   return (
-    <section className="mx-auto max-w-7xl px-5 pt-10 pb-16 sm:px-7">
-      {/* Mobile filter toggle */}
-      <div
-        className="mb-6 flex items-center justify-between md:hidden"
-        style={{
-          borderBottom: "1px solid var(--vn-rule)",
-          paddingBottom: "12px",
-        }}
-      >
-        <span
-          className="font-mono text-[11px] tracking-[0.14em] uppercase"
-          style={{ color: "var(--vn-steel-mist)" }}
-        >
+    <section className="mx-auto max-w-7xl px-7 pt-2 pb-16 md:pb-20">
+      <div className="sl-shop-toolbar mb-6 md:hidden">
+        <span className="sl-eyebrow font-sans text-xs tracking-[0.14em] uppercase">
           {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
         </span>
         <button
           type="button"
           onClick={() => setMobileFiltersOpen((v) => !v)}
-          className="flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase transition-opacity hover:opacity-70"
-          style={{
-            border: "1px solid var(--vn-ink)",
-            padding: "6px 12px",
-            color: "var(--vn-ink)",
-          }}
+          className={cn(
+            "sl-shop-filter-btn",
+            mobileFiltersOpen && "sl-shop-filter-btn-active",
+          )}
           aria-expanded={mobileFiltersOpen}
-          aria-controls="noise-mobile-filters"
+          aria-controls="sledge-shop-mobile-filters"
         >
           {mobileFiltersOpen ? (
             <>
@@ -271,33 +224,24 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
         </button>
       </div>
 
-      {/* Mobile filter panel (collapsed by default) */}
       {mobileFiltersOpen && (
         <div
-          id="noise-mobile-filters"
-          className="mb-8 border-b pb-6 md:hidden"
-          style={{ borderColor: "var(--vn-rule)" }}
+          id="sledge-shop-mobile-filters"
+          className="mb-8 border-b border-[var(--sl-border)] pb-6 md:hidden"
         >
           {filterPanel}
         </div>
       )}
 
-      {/* Mobile: product grid only (no sidebar) */}
       <div className="md:hidden">{productGrid}</div>
 
-      {/* Desktop: 2-column sidebar + grid */}
-      <div
-        className="mx-auto hidden md:grid"
-        style={{
-          maxWidth: "1440px",
-          gridTemplateColumns: "240px 1fr",
-          gap: "48px",
-        }}
-      >
-        {/* ── Filters sidebar ── */}
-        <aside className="pt-1">{filterPanel}</aside>
-
-        {/* ── Product grid ── */}
+      <div className="hidden grid-cols-[220px_1fr] gap-12 md:grid lg:grid-cols-[240px_1fr] lg:gap-14">
+        <aside className="pt-1">
+          <p className="sl-eyebrow mb-6 font-sans text-xs tracking-[0.18em] uppercase">
+            Filter by
+          </p>
+          {filterPanel}
+        </aside>
         {productGrid}
       </div>
     </section>

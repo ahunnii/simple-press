@@ -12,6 +12,7 @@ import { HappyBambooBlogPostPage } from "../../_templates/happy-bamboo/blog/happ
 import { ModernBlogPostPage } from "../../_templates/modern/blog/modern-blog-post-page";
 import { NoiseBlogPostPage } from "../../_templates/noise/blog/noise-blog-post-page";
 import { PollenBlogPostPage } from "../../_templates/pollen/blog/pollen-blog-post-page";
+import { SledgeBlogPostPage } from "../../_templates/sledge/blog/sledge-blog-post-page";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -25,6 +26,11 @@ export default async function PageView({ params }: Props) {
   const relatedPosts = await api.content
     .getBlogPages()
     .catch(rethrowTrpcForErrorBoundary);
+
+  const homepage =
+    business.templateId === "sledge"
+      ? await api.business.getHomepage().catch(rethrowTrpcForErrorBoundary)
+      : null;
 
   const page = await api.content
     .getBlogPostBySlug({
@@ -42,6 +48,7 @@ export default async function PageView({ params }: Props) {
     {
       "happy-bamboo": HappyBambooBlogPostPage,
       noise: NoiseBlogPostPage,
+      sledge: SledgeBlogPostPage,
       "dark-trend": DarkTrendBlogPostPage,
       elegant: ElegantBlogPostPage,
       modern: ModernBlogPostPage,
@@ -55,6 +62,9 @@ export default async function PageView({ params }: Props) {
       relatedPosts={relatedPosts}
       customFields={customFields}
       business={business}
+      {...(business.templateId === "sledge"
+        ? { featuredProducts: homepage?.products ?? [] }
+        : {})}
     />
   );
 }

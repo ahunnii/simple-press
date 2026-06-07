@@ -42,33 +42,14 @@ export function NoiseCartContents({ business }: Props) {
       <PageTransition className="bg-white">
         <section className="flex flex-col items-center justify-center px-7 py-32 text-center">
           <FadeIn direction="up" className="flex flex-col items-center gap-6">
-            <div
-              className="flex items-center justify-center rounded-sm"
-              style={{
-                width: "72px",
-                height: "72px",
-                background: "var(--sl-cream)",
-                color: "var(--sl-coral)",
-              }}
-            >
+            <div className="flex size-[72px] items-center justify-center rounded-sm bg-[var(--sl-cream)] text-[var(--sl-coral)]">
               <ShoppingBag className="size-7" />
             </div>
             <div>
-              <h1
-                className="uppercase"
-                style={{
-                  fontSize: "clamp(2rem, 5vw, 3rem)",
-                  color: "var(--sl-coral)",
-                  letterSpacing: "0.04em",
-                  lineHeight: 1,
-                }}
-              >
+              <h1 className="sl-page-title-md uppercase text-[var(--sl-coral)]">
                 Your bag is empty
               </h1>
-              <p
-                className="mx-auto mt-3 max-w-xs font-sans text-sm leading-relaxed"
-                style={{ color: "var(--sl-ink-soft)" }}
-              >
+              <p className="sl-eyebrow mx-auto mt-3 max-w-xs font-sans text-sm leading-relaxed">
                 Browse the shop and add pieces you love.
               </p>
             </div>
@@ -83,26 +64,10 @@ export function NoiseCartContents({ business }: Props) {
 
   return (
     <PageTransition>
-      <section
-        className="pt-16 pb-10 md:pt-20 md:pb-12"
-        style={{ background: "#ffffff" }}
-      >
+      <section className="bg-white pt-16 pb-10 md:pt-20 md:pb-12">
         <FadeIn className="mx-auto w-full max-w-7xl">
-          <h1
-            className="uppercase"
-            style={{
-              fontSize: "clamp(2.5rem, 6vw, 4rem)",
-              color: "var(--sl-coral)",
-              letterSpacing: "0.04em",
-              lineHeight: 1,
-            }}
-          >
-            Your Cart
-          </h1>
-          <p
-            className="mt-4 font-sans text-sm leading-relaxed md:text-base"
-            style={{ color: "var(--sl-ink-soft)" }}
-          >
+          <h1 className="sl-page-title-checkout uppercase">Your Cart</h1>
+          <p className="sl-eyebrow mt-4 font-sans text-sm leading-relaxed md:text-base">
             {items.length} {items.length === 1 ? "item" : "items"} ready to
             checkout.
           </p>
@@ -111,27 +76,20 @@ export function NoiseCartContents({ business }: Props) {
             untilFree !== null &&
             progress !== null &&
             untilFree > 0 && (
-              <div className="mt-8" style={{ maxWidth: "480px" }}>
+              <div className="mt-8 max-w-[480px]">
                 <div className="mb-2 flex justify-between">
-                  <span
-                    className="font-sans text-xs tracking-[0.14em] uppercase"
-                    style={{ color: "var(--sl-ink-soft)" }}
-                  >
+                  <span className="sl-eyebrow font-sans text-xs tracking-[0.14em] uppercase">
                     {formatPrice(untilFree)} to free shipping
                   </span>
-                  <span
-                    className="font-sans text-xs tracking-[0.14em] uppercase"
-                    style={{ color: "var(--sl-ink-soft)" }}
-                  >
+                  <span className="sl-eyebrow font-sans text-xs tracking-[0.14em] uppercase">
                     {Math.round(progress * 100)}%
                   </span>
                 </div>
-                <div className="relative h-1.5 w-full overflow-hidden rounded-full">
+                <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-[var(--sl-cream)]">
                   <div
-                    className="absolute inset-y-0 left-0 rounded-full transition-all"
+                    className="absolute inset-y-0 left-0 rounded-full bg-[var(--sl-coral)] transition-all"
                     style={{
                       width: `${Math.min(100, Math.round(progress * 100))}%`,
-                      background: "var(--sl-coral)",
                     }}
                   />
                 </div>
@@ -140,44 +98,20 @@ export function NoiseCartContents({ business }: Props) {
         </FadeIn>
       </section>
 
-      <div
-        className="mx-auto flex max-w-7xl flex-col gap-0 lg:grid lg:grid-cols-[1fr_380px]"
-        style={{ background: "#ffffff" }}
-      >
-        <div
-          className="px-7 py-8 lg:border-r"
-          style={{ borderColor: "#e8e8e8" }}
-        >
-          <div
-            className="mb-0 hidden items-center gap-4 border-b pb-3 sm:grid"
-            style={{
-              gridTemplateColumns: "80px 1fr auto auto auto auto",
-              borderColor: "#e8e8e8",
-            }}
-          >
+      <div className="mx-auto flex max-w-7xl flex-col gap-0 bg-white lg:grid lg:grid-cols-[1fr_380px]">
+        <div className="border-[var(--sl-border)] px-7 py-8 lg:border-r">
+          <div className="sl-cart-item-grid mb-0 hidden items-center gap-4 border-b border-[var(--sl-border)] pb-3 sm:grid">
             <span />
-            <span
-              className="font-sans text-xs tracking-[0.18em] uppercase"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <span className="sl-eyebrow font-sans text-xs tracking-[0.18em] uppercase">
               Item
             </span>
-            <span
-              className="text-right font-sans text-xs tracking-[0.18em] uppercase"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <span className="sl-eyebrow text-right font-sans text-xs tracking-[0.18em] uppercase">
               Price
             </span>
-            <span
-              className="text-center font-sans text-xs tracking-[0.18em] uppercase"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <span className="sl-eyebrow text-center font-sans text-xs tracking-[0.18em] uppercase">
               Qty
             </span>
-            <span
-              className="text-right font-sans text-xs tracking-[0.18em] uppercase"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <span className="sl-eyebrow text-right font-sans text-xs tracking-[0.18em] uppercase">
               Total
             </span>
             <span />
@@ -193,15 +127,11 @@ export function NoiseCartContents({ business }: Props) {
           <div className="mt-6 flex items-center justify-between">
             <Link
               href="/shop"
-              className="flex items-center gap-3 font-sans text-xs tracking-[0.18em] uppercase transition-opacity hover:opacity-60"
-              style={{ color: "var(--sl-ink)" }}
+              className="flex items-center gap-3 font-sans text-xs tracking-[0.18em] text-[var(--sl-ink)] uppercase transition-opacity hover:opacity-60"
             >
               ← Continue Shopping
             </Link>
-            <span
-              className="font-sans text-xs tracking-[0.14em] uppercase"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <span className="sl-eyebrow font-sans text-xs tracking-[0.14em] uppercase">
               {items.length} {items.length === 1 ? "item" : "items"}
             </span>
           </div>

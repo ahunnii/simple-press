@@ -27,20 +27,11 @@ type CheckoutFormProps = {
 const LBL =
   "text-xs font-medium uppercase tracking-[0.2em] text-[var(--sl-ink)]";
 const INP =
-  "rounded-sm border-[#d8d8d8] font-sans text-sm focus-visible:border-[var(--sl-coral)] focus-visible:ring-0 focus-visible:ring-offset-0";
+  "rounded-sm border-[var(--sl-border-input)] font-sans text-sm focus-visible:border-[var(--sl-coral)] focus-visible:ring-0 focus-visible:ring-offset-0";
 
 function SectionHead({ children }: { children: React.ReactNode }) {
   return (
-    <h4
-      className="mb-5 border-b pb-3 uppercase"
-      style={{
-        fontSize: "clamp(1.1rem, 2.5vw, 1.35rem)",
-        color: "var(--sl-coral)",
-        letterSpacing: "0.04em",
-        lineHeight: 1,
-        borderColor: "#e8e8e8",
-      }}
-    >
+    <h4 className="sl-tab-heading mb-5 border-b border-[var(--sl-border)] pb-3 uppercase text-[var(--sl-coral)] tracking-[0.04em] leading-none">
       {children}
     </h4>
   );
@@ -75,15 +66,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center gap-6 py-20 text-center">
-        <p
-          className="uppercase"
-          style={{
-            fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
-            color: "var(--sl-coral)",
-            letterSpacing: "0.04em",
-            lineHeight: 1,
-          }}
-        >
+        <p className="sl-tab-heading uppercase text-[var(--sl-coral)] tracking-[0.04em] leading-none">
           Nothing to checkout
         </p>
         <Link href="/shop" className="sl-btn text-xs">
@@ -208,27 +191,16 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   onClick={() => setDeliveryMethod(method)}
                   className={cn(
                     "cursor-pointer px-4 py-2 font-sans text-xs tracking-[0.16em] uppercase transition-all",
-                    deliveryMethod === method ? "sl-btn" : "",
-                  )}
-                  style={
                     deliveryMethod === method
-                      ? undefined
-                      : {
-                          border: "1px solid #d8d8d8",
-                          color: "var(--sl-ink)",
-                          borderRadius: "var(--radius, 0.5rem)",
-                          background: "#ffffff",
-                        }
-                  }
+                      ? "sl-btn"
+                      : "sl-account-tab-inactive",
+                  )}
                 >
                   {method === "ship" ? "Ship to address" : "Studio pickup"}
                 </button>
               ))}
             </div>
-            <p
-              className="font-sans text-xs tracking-[0.12em] uppercase"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <p className="font-sans text-xs tracking-[0.12em] text-[var(--sl-ink-soft)] uppercase">
               {deliveryMethod === "pickup"
                 ? "No shipping charge — contact us for pick-up details."
                 : "Shipping cost based on your store's settings."}
@@ -239,10 +211,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
         {deliveryMethod === "ship" && (
           <fieldset className="flex flex-col gap-5">
             <SectionHead>Shipping Address</SectionHead>
-            <p
-              className="-mt-2 font-sans text-xs tracking-[0.12em] uppercase"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <p className="-mt-2 font-sans text-xs tracking-[0.12em] text-[var(--sl-ink-soft)] uppercase">
               Pre-filled at Stripe — you can confirm or edit before paying.
             </p>
 
@@ -384,21 +353,10 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
               { ic: "↺", text: "All sales final — order what you love" },
             ].map((note) => (
               <div key={note.ic} className="flex items-start gap-2.5">
-                <span
-                  className="flex flex-shrink-0 items-center justify-center rounded-sm font-sans text-xs"
-                  style={{
-                    width: "22px",
-                    height: "22px",
-                    background: "var(--sl-cream)",
-                    color: "var(--sl-coral)",
-                  }}
-                >
+                <span className="flex size-[22px] flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]">
                   {note.ic}
                 </span>
-                <p
-                  className="font-sans text-xs leading-relaxed tracking-[0.08em] uppercase"
-                  style={{ color: "var(--sl-ink-soft)" }}
-                >
+                <p className="font-sans text-xs leading-relaxed tracking-[0.08em] text-[var(--sl-ink-soft)] uppercase">
                   {note.text}
                 </p>
               </div>

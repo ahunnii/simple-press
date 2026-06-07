@@ -32,17 +32,15 @@ type Slot =
 function buildSlots(images: ImageEntry[]): Slot[] {
   const count = Math.min(images.length, TOTAL_TILES);
 
-  // Determine which slot indices receive images
   const imageSlotIndices = new Set<number>();
   if (count === 1) {
-    imageSlotIndices.add(5); // center-left of the grid
+    imageSlotIndices.add(5);
   } else if (count > 1) {
     for (let i = 0; i < count; i++) {
       imageSlotIndices.add(Math.round((i * (TOTAL_TILES - 1)) / (count - 1)));
     }
   }
 
-  // Build the final 12-slot array
   let imgIdx = 0;
   let colorIdx = 0;
   return Array.from({ length: TOTAL_TILES }, (_, i): Slot => {
@@ -67,9 +65,6 @@ export function NoiseIntroOverlay({
   wordmark?: string;
   locationTag?: string;
 }) {
-  // phase 0: tiles fly in (0–1300ms)
-  // phase 1: logo crystallizes (1300–2700ms)
-  // phase 2: curtain opens (2700–3700ms)
   const [phase, setPhase] = useState(0);
   const skippedRef = useRef(false);
   const onDoneRef = useRef(onDone);
@@ -77,6 +72,8 @@ export function NoiseIntroOverlay({
   const skipBtnRef = useRef<HTMLButtonElement>(null);
 
   const slots = buildSlots(images ?? []);
+  const curtainOpen = phase >= 2;
+  const logoVisible = phase >= 1;
 
   const skip = useCallback(() => {
     skippedRef.current = true;
@@ -84,7 +81,6 @@ export function NoiseIntroOverlay({
   }, []);
 
   useEffect(() => {
-    // Reduced motion: skip the whole timed sequence immediately (WCAG 2.3.3)
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       skip();
       return;
@@ -105,9 +101,6 @@ export function NoiseIntroOverlay({
     };
   }, [skip]);
 
-  // Focus management: focus the skip control on open, trap focus on it
-  // (the overlay is modal and Skip is its only interactive element), and
-  // allow Escape to dismiss (WCAG 2.1.2 / 2.4.3).
   useEffect(() => {
     skipBtnRef.current?.focus();
 
@@ -129,117 +122,54 @@ export function NoiseIntroOverlay({
       role="dialog"
       aria-modal="true"
       aria-label="Intro animation"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 1000,
-        overflow: "hidden",
-        pointerEvents: "auto",
-      }}
+      className="sl-intro-overlay"
     >
-      {/* Left curtain half */}
       <div
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: 0,
-          width: "50%",
-          overflow: "hidden",
-          background: "#0e0d0b",
-          transition: "transform 1s cubic-bezier(.7,0,.2,1)",
-          transform: phase >= 2 ? "translateX(-100%)" : "translateX(0)",
-          willChange: "transform",
-        }}
+        data-open={curtainOpen ? "true" : "false"}
+        className="sl-intro-curtain sl-intro-curtain-left"
       >
         <IntroScene
           slots={slots}
           tileDelays={TILE_DELAYS}
-          phase={phase}
+          logoVisible={logoVisible}
           half="left"
           wordmark={wordmark}
           locationTag={locationTag}
         />
       </div>
 
-      {/* Right curtain half */}
       <div
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          right: 0,
-          width: "50%",
-          overflow: "hidden",
-          background: "#0e0d0b",
-          transition: "transform 1s cubic-bezier(.7,0,.2,1)",
-          transform: phase >= 2 ? "translateX(100%)" : "translateX(0)",
-          willChange: "transform",
-        }}
+        data-open={curtainOpen ? "true" : "false"}
+        className="sl-intro-curtain sl-intro-curtain-right"
       >
         <IntroScene
           slots={slots}
           tileDelays={TILE_DELAYS}
-          phase={phase}
+          logoVisible={logoVisible}
           half="right"
           wordmark={wordmark}
           locationTag={locationTag}
         />
       </div>
 
-      {/* Hairline split — sells the curtain seam */}
       <div
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: "50%",
-          width: 1,
-          background: "rgba(255,255,255,.08)",
-          opacity: phase >= 2 ? 0 : 1,
-          transition: "opacity .3s",
-          zIndex: 5,
-          pointerEvents: "none",
-        }}
+        data-open={curtainOpen ? "true" : "false"}
+        className="sl-intro-seam"
+        aria-hidden="true"
       />
 
-      {/* Skip button */}
       <button
         ref={skipBtnRef}
         type="button"
         onClick={skip}
         aria-label="Skip intro animation"
-        className="vn-focus-on-dark"
-        style={{
-          position: "absolute",
-          bottom: 28,
-          right: 32,
-          zIndex: 10,
-          color: "rgba(255,255,255,.55)",
-          fontSize: 11,
-          letterSpacing: ".28em",
-          fontWeight: 500,
-          padding: "8px 14px",
-          border: "1px solid rgba(255,255,255,.18)",
-          background: "transparent",
-          cursor: "pointer",
-          opacity: phase >= 2 ? 0 : 1,
-          transition: "opacity .3s",
-          fontFamily: "var(--font-mono, monospace)",
-          textTransform: "uppercase",
-        }}
+        data-open={curtainOpen ? "true" : "false"}
+        className="sl-intro-skip vn-focus-on-dark"
       >
         SKIP →
       </button>
-
-      <style>{`
-        @keyframes noiseIntroTileIn {
-          from { opacity: 0; transform: scale(.6) translateY(28px); filter: blur(8px); }
-          to   { opacity: 1; transform: scale(1) translateY(0);    filter: blur(0); }
-        }
-      `}</style>
     </div>
   );
 }
@@ -247,49 +177,32 @@ export function NoiseIntroOverlay({
 function IntroScene({
   slots,
   tileDelays,
-  phase,
+  logoVisible,
   half,
   wordmark,
   locationTag,
 }: {
   slots: Slot[];
   tileDelays: number[];
-  phase: number;
+  logoVisible: boolean;
   half: "left" | "right";
   wordmark?: string;
   locationTag?: string;
 }) {
   return (
     <div
-      style={{
-        position: "absolute",
-        top: 0,
-        height: "100%",
-        width: "100vw",
-        ...(half === "left" ? { left: 0 } : { left: "-100%" }),
-      }}
+      className={
+        half === "left" ? "sl-intro-scene-left" : "sl-intro-scene-right"
+      }
     >
-      {/* 4 × 3 tile grid */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gridTemplateRows: "repeat(3, 1fr)",
-          gap: 6,
-          padding: 6,
-        }}
-      >
+      <div className="sl-intro-grid">
         {slots.map((slot, i) => (
           <div
             key={i}
+            className="sl-intro-tile"
             style={{
-              position: "relative",
-              overflow: "hidden",
               ...(slot.kind === "color" ? { background: slot.c } : {}),
-              opacity: 0,
-              animation: `noiseIntroTileIn .55s cubic-bezier(.2,.7,.2,1) ${tileDelays[i]}ms forwards`,
+              animationDelay: `${tileDelays[i]}ms`,
             }}
           >
             {slot.kind === "image" ? (
@@ -298,126 +211,40 @@ function IntroScene({
                 <img
                   src={slot.url}
                   alt={slot.altText}
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
+                  className="sl-intro-tile-img"
                 />
-                {/* Gloss sheen */}
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      "linear-gradient(135deg, rgba(255,255,255,.12), transparent 60%)",
-                    pointerEvents: "none",
-                  }}
-                />
+                <div className="sl-intro-tile-sheen" />
               </>
             ) : (
               <>
-                {/* Gloss sheen */}
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      "linear-gradient(135deg, rgba(255,255,255,.08), transparent 60%)",
-                    pointerEvents: "none",
-                  }}
-                />
-                {/* Tile label */}
-                <div
-                  style={{
-                    position: "absolute",
-                    left: 10,
-                    bottom: 8,
-                    fontSize: 9,
-                    letterSpacing: ".22em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,.85)",
-                    // Scrim so the label stays legible on light tiles/images
-                    textShadow: "0 1px 5px rgba(0,0,0,.7)",
-                    fontWeight: 500,
-                    fontFamily: "var(--font-mono, monospace)",
-                  }}
-                >
-                  {slot.t}
-                </div>
+                <div className="sl-intro-tile-sheen sl-intro-tile-sheen-muted" />
+                <div className="sl-intro-tile-label">{slot.t}</div>
               </>
             )}
           </div>
         ))}
       </div>
 
-      {/* Radial veil — darkens for logo reveal */}
       <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "radial-gradient(circle at center, rgba(14,13,11,.55), rgba(14,13,11,.92) 70%)",
-          opacity: phase >= 1 ? 1 : 0,
-          transition: "opacity .8s ease",
-          pointerEvents: "none",
-        }}
+        data-visible={logoVisible ? "true" : "false"}
+        className="sl-intro-veil"
+        aria-hidden="true"
       />
 
-      {/* Centered wordmark */}
       <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          transform: "translate(-50%, -50%)",
-          textAlign: "center",
-          color: "#fff",
-          opacity: phase >= 1 ? 1 : 0,
-          transition: "opacity .9s ease, letter-spacing 1.2s ease",
-          letterSpacing: phase >= 1 ? ".22em" : ".4em",
-          pointerEvents: "none",
-          width: "100%",
-          paddingLeft: "1rem",
-          paddingRight: "1rem",
-        }}
+        data-visible={logoVisible ? "true" : "false"}
+        className="sl-intro-wordmark-wrap"
+        aria-hidden="true"
       >
-        <div
-          style={{
-            fontFamily: "var(--font-serif, Georgia, serif)",
-            fontSize: "clamp(40px, 7vw, 96px)",
-            fontWeight: 300,
-            lineHeight: 1,
-            fontStyle: "italic",
-          }}
-        >
+        <div className="sl-intro-wordmark">
           {wordmark ? wordmark.toUpperCase() : ""}
         </div>
-        {/* Hairline rule */}
         <div
-          style={{
-            width: phase >= 1 ? 80 : 0,
-            height: 1,
-            background: "rgba(255,255,255,.4)",
-            margin: "22px auto 0",
-            transition: "width 1s ease .15s",
-          }}
+          data-visible={logoVisible ? "true" : "false"}
+          className="sl-intro-rule"
         />
         {locationTag && (
-          <div
-            style={{
-              fontSize: 11,
-              letterSpacing: ".5em",
-              opacity: 0.7,
-              marginTop: 18,
-              fontWeight: 500,
-              fontFamily: "var(--font-mono, monospace)",
-            }}
-          >
-            {locationTag}
-          </div>
+          <div className="sl-intro-location">{locationTag}</div>
         )}
       </div>
     </div>

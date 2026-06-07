@@ -66,10 +66,7 @@ export function SledgeOrderConfirmation({ business }: Props) {
   if (loading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center bg-white">
-        <p
-          className="font-sans text-sm tracking-[0.12em] uppercase"
-          style={{ color: "var(--sl-ink-soft)" }}
-        >
+        <p className="sl-eyebrow font-sans text-sm tracking-[0.12em] uppercase">
           Confirming your order…
         </p>
       </div>
@@ -79,15 +76,7 @@ export function SledgeOrderConfirmation({ business }: Props) {
   if (!sessionId) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-6 bg-white px-7 text-center">
-        <p
-          className="uppercase"
-          style={{
-            fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
-            color: "var(--sl-coral)",
-            letterSpacing: "0.04em",
-            lineHeight: 1,
-          }}
-        >
+        <p className="sl-tab-heading uppercase text-[var(--sl-coral)] tracking-[0.04em] leading-none">
           No order found
         </p>
         <Link href="/shop" className="sl-btn text-xs">
@@ -101,61 +90,27 @@ export function SledgeOrderConfirmation({ business }: Props) {
     <>
       <section className="bg-white px-7 pt-16 pb-10 md:pt-20 md:pb-14">
         <div className="mx-auto max-w-3xl text-center">
-          <div
-            className="mx-auto mb-6 flex items-center justify-center rounded-full"
-            style={{
-              width: "72px",
-              height: "72px",
-              background: "var(--sl-cream)",
-              color: "var(--sl-coral)",
-            }}
-          >
+          <div className="mx-auto mb-6 flex size-[72px] items-center justify-center rounded-full bg-[var(--sl-cream)] text-[var(--sl-coral)]">
             <CheckCircle2 className="size-8" aria-hidden />
           </div>
 
-          <p
-            className="mb-3 font-sans text-xs tracking-[0.18em] uppercase"
-            style={{ color: "var(--sl-ink-soft)" }}
-          >
+          <p className="sl-eyebrow mb-3 font-sans text-xs tracking-[0.18em] uppercase">
             Thank you · {business.name}
           </p>
-          <h1
-            className="font-heading uppercase"
-            style={{
-              fontSize: "clamp(2.5rem, 6vw, 4rem)",
-              color: "var(--sl-orange)",
-              letterSpacing: "0.04em",
-              lineHeight: 1,
-            }}
-          >
+          <h1 className="sl-page-title-checkout font-heading uppercase text-[var(--sl-orange)]">
             Order Placed!
           </h1>
-          <p
-            className="mx-auto mt-5 max-w-lg font-sans text-sm leading-relaxed md:text-base"
-            style={{ color: "var(--sl-ink-soft)" }}
-          >
+          <p className="sl-eyebrow mx-auto mt-5 max-w-lg font-sans text-sm leading-relaxed md:text-base">
             Your order is confirmed and queued for preparation. We&apos;ll have
             everything packed and on its way soon.
           </p>
 
           {orderDetails?.amount_total ? (
-            <div
-              className="mx-auto mt-8 inline-flex items-baseline gap-4 rounded-sm px-6 py-4"
-              style={{
-                background: "var(--sl-cream)",
-                border: "1px solid #e8e8e8",
-              }}
-            >
-              <span
-                className="font-sans text-xs tracking-[0.16em] uppercase"
-                style={{ color: "var(--sl-ink-soft)" }}
-              >
+            <div className="sl-card-panel mx-auto mt-8 inline-flex items-baseline gap-4 rounded-sm px-6 py-4">
+              <span className="font-sans text-xs tracking-[0.16em] text-[var(--sl-ink-soft)] uppercase">
                 Order total
               </span>
-              <span
-                className="font-sans text-2xl tracking-[0.02em]"
-                style={{ color: "var(--sl-ink)" }}
-              >
+              <span className="font-sans text-2xl tracking-[0.02em] text-[var(--sl-ink)]">
                 {formatPrice(orderDetails.amount_total)}
               </span>
             </div>
@@ -163,62 +118,30 @@ export function SledgeOrderConfirmation({ business }: Props) {
         </div>
       </section>
 
-      <section
-        className="px-7 py-12"
-        style={{ background: "var(--sl-cream)" }}
-      >
+      <section className="bg-[var(--sl-cream)] px-7 py-12">
         <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-2">
           {orderDetails?.customer_email && (
-            <div
-              className="rounded-sm bg-white p-6"
-              style={{
-                border: "1px solid #e8e8e8",
-                boxShadow: "0 2px 12px rgba(0, 0, 0, 0.04)",
-              }}
-            >
-              <h2
-                className="mb-3 font-sans text-[10px] tracking-[0.18em] uppercase"
-                style={{ color: "var(--sl-coral)" }}
-              >
+            <div className="sl-card-panel sl-card-shadow rounded-sm p-6">
+              <h2 className="mb-3 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral)] uppercase">
                 Confirmation sent to
               </h2>
-              <p className="font-sans text-sm" style={{ color: "var(--sl-ink)" }}>
+              <p className="font-sans text-sm text-[var(--sl-ink)]">
                 {orderDetails.customer_email}
               </p>
             </div>
           )}
 
-          <div
-            className="rounded-sm bg-white p-6 md:col-span-2"
-            style={{
-              border: "1px solid #e8e8e8",
-              boxShadow: "0 2px 12px rgba(0, 0, 0, 0.04)",
-            }}
-          >
-            <h2
-              className="mb-5 font-sans text-[10px] tracking-[0.18em] uppercase"
-              style={{ color: "var(--sl-coral)" }}
-            >
+          <div className="sl-card-panel sl-card-shadow rounded-sm p-6 md:col-span-2">
+            <h2 className="mb-5 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral)] uppercase">
               What happens next
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               {NEXT_STEPS.map((step) => (
                 <div key={step.icon} className="flex items-start gap-3">
-                  <span
-                    className="flex flex-shrink-0 items-center justify-center rounded-sm font-sans text-xs"
-                    style={{
-                      width: "24px",
-                      height: "24px",
-                      background: "var(--sl-cream)",
-                      color: "var(--sl-coral)",
-                    }}
-                  >
+                  <span className="flex size-6 flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]">
                     {step.icon}
                   </span>
-                  <p
-                    className="font-sans text-sm leading-relaxed"
-                    style={{ color: "var(--sl-ink-soft)" }}
-                  >
+                  <p className="font-sans text-sm leading-relaxed text-[var(--sl-ink-soft)]">
                     {step.text}
                   </p>
                 </div>
@@ -228,28 +151,20 @@ export function SledgeOrderConfirmation({ business }: Props) {
         </div>
       </section>
 
-      <section className="border-t bg-white px-7 py-10" style={{ borderColor: "#e8e8e8" }}>
+      <section className="border-t border-[var(--sl-border)] bg-white px-7 py-10">
         <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:justify-center">
           <Link href="/shop" className="sl-btn flex-1 justify-center text-xs sm:flex-none">
             Continue Shopping
           </Link>
           <Link
             href="/account/orders"
-            className="flex flex-1 items-center justify-center rounded-sm px-5 py-2.5 font-sans text-xs tracking-[0.16em] uppercase transition-opacity hover:opacity-70 sm:flex-none"
-            style={{
-              border: "1px solid var(--sl-ink)",
-              color: "var(--sl-ink)",
-            }}
+            className="flex flex-1 items-center justify-center rounded-sm border border-[var(--sl-ink)] px-5 py-2.5 font-sans text-xs tracking-[0.16em] text-[var(--sl-ink)] uppercase transition-opacity hover:opacity-70 sm:flex-none"
           >
             View My Orders →
           </Link>
           <Link
             href="/"
-            className="flex flex-1 items-center justify-center rounded-sm px-5 py-2.5 font-sans text-xs tracking-[0.16em] uppercase transition-opacity hover:opacity-70 sm:flex-none"
-            style={{
-              border: "1px solid #d8d8d8",
-              color: "var(--sl-ink-soft)",
-            }}
+            className="sl-account-tab-inactive flex flex-1 items-center justify-center rounded-sm px-5 py-2.5 font-sans text-xs tracking-[0.16em] uppercase transition-opacity hover:opacity-70 sm:flex-none"
           >
             Back to Home
           </Link>

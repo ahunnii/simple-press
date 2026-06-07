@@ -5,6 +5,10 @@ import { noiseAboutData, noiseAboutFieldGroups } from "./about";
 import { noiseBlogData, noiseBlogFieldGroups } from "./blog";
 import { sledgeContactData, sledgeContactFieldGroups } from "./contact";
 import { noiseHomepageData, noiseHomepageFieldGroups } from "./homepage";
+import {
+  sledgeTestimonialsData,
+  sledgeTestimonialsFieldGroups,
+} from "./testimonials";
 
 // ─── Shop Page ────────────────────────────────────────────────────────────────
 
@@ -65,7 +69,7 @@ const globalBrandingData: TemplateField[] = [
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "What's New",
+    defaultValue: "Browse Shop",
   },
   {
     key: "sledge.global.shop-cta-link",
@@ -167,6 +171,7 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...noiseAboutFieldGroups,
   ...noiseBlogFieldGroups,
   ...sledgeContactFieldGroups,
+  ...sledgeTestimonialsFieldGroups,
   {
     id: "global.product",
     title: "Product Page",
@@ -210,6 +215,7 @@ export const sledgeData = {
     ...globalBrandingData,
     ...globalAuthenticationData,
     ...globalProductData,
+    ...sledgeTestimonialsData,
   ],
 };
 

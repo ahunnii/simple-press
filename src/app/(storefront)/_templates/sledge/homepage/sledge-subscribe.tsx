@@ -48,25 +48,11 @@ export function SledgeSubscribe({
     socialLinks?.instagram ?? socialLinks?.facebook ?? socialLinks?.tiktok;
 
   return (
-    <section
-      style={{ background: "var(--sl-green)", padding: "4rem 1.75rem" }}
-      {...sectionAttrs}
-    >
-      <div
-        className="grid grid-cols-1 items-center gap-12 md:grid-cols-2"
-        style={{ maxWidth: "1100px", margin: "0 auto" }}
-      >
+    <section className="sl-section-green" {...sectionAttrs}>
+      <div className="sl-container grid grid-cols-1 items-center gap-12 md:grid-cols-2">
         {/* Left: product image */}
         {image && (
-          <div
-            style={{
-              position: "relative",
-              aspectRatio: "4/5",
-              borderRadius: "0.75rem",
-              overflow: "hidden",
-              background: "var(--sl-cream)",
-            }}
-          >
+          <div className="sl-media-frame sl-media-frame-cream">
             <Image
               src={image}
               alt="Featured product"
@@ -79,15 +65,7 @@ export function SledgeSubscribe({
 
         {/* Right: subscribe form */}
         <div>
-          <h2
-            className="font-heading"
-            style={{
-              fontSize: "clamp(2.5rem, 6vw, 5rem)",
-              color: "var(--sl-coral)",
-              lineHeight: 1.05,
-              marginBottom: "1.5rem",
-            }}
-          >
+          <h2 className="sl-heading-lg font-heading">
             {heading ?? "Subscribe for the latest drops"}
           </h2>
 
@@ -118,15 +96,7 @@ export function SledgeSubscribe({
                 <a
                   href={socialLinks.instagram}
                   aria-label="Instagram"
-                  className="flex items-center justify-center transition-opacity hover:opacity-70"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: "0.4rem",
-                    background: "var(--sl-coral)",
-                    color: "#ffffff",
-                    flexShrink: 0,
-                  }}
+                  className="sl-social-btn transition-opacity hover:opacity-70"
                 >
                   <InstagramIcon className="h-5 w-5" />
                 </a>
@@ -135,15 +105,7 @@ export function SledgeSubscribe({
                 <a
                   href={socialLinks.facebook}
                   aria-label="Facebook"
-                  className="flex items-center justify-center transition-opacity hover:opacity-70"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: "0.4rem",
-                    background: "var(--sl-coral)",
-                    color: "#ffffff",
-                    flexShrink: 0,
-                  }}
+                  className="sl-social-btn transition-opacity hover:opacity-70"
                 >
                   <FacebookIcon className="h-5 w-5" />
                 </a>
@@ -152,15 +114,7 @@ export function SledgeSubscribe({
                 <a
                   href={socialLinks.tiktok}
                   aria-label="TikTok"
-                  className="flex items-center justify-center transition-opacity hover:opacity-70"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: "0.4rem",
-                    background: "var(--sl-coral)",
-                    color: "#ffffff",
-                    flexShrink: 0,
-                  }}
+                  className="sl-social-btn transition-opacity hover:opacity-70"
                 >
                   <TikTokIcon className="h-5 w-5" />
                 </a>

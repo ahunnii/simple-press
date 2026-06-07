@@ -38,21 +38,10 @@ export function SledgeContactForm({ formTitle }: Props) {
   if (isSuccess) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-        <p
-          className="uppercase"
-          style={{
-            fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
-            color: "var(--sl-coral)",
-            letterSpacing: "0.04em",
-            lineHeight: 1,
-          }}
-        >
+        <p className="sl-page-title-md font-heading text-(--sl-coral) uppercase">
           Message sent!
         </p>
-        <p
-          className="text-sm"
-          style={{ color: "var(--sl-ink-soft)", lineHeight: 1.7 }}
-        >
+        <p className="sl-eyebrow text-sm leading-[1.7]">
           Thank you for reaching out. We&apos;ll get back to you soon.
         </p>
         <button
@@ -68,15 +57,7 @@ export function SledgeContactForm({ formTitle }: Props) {
 
   return (
     <div>
-      <h2
-        className="mb-8 uppercase"
-        style={{
-          fontSize: "clamp(1.5rem, 4vw, 2.25rem)",
-          color: "var(--sl-coral)",
-          letterSpacing: "0.04em",
-          lineHeight: 1,
-        }}
-      >
+      <h2 className="sl-rail-heading font-heading mb-8 font-semibold text-(--sl-orange) uppercase">
         {formTitle}
       </h2>
 

@@ -51,30 +51,15 @@ export function SledgeShopPage({ business }: DefaultProductsPageTemplateProps) {
     <PageTransition className="bg-white">
       {/* ── Centered page header (design: "Collection" overline + h1) ── */}
       <section
-        className="mx-auto w-full max-w-7xl px-6 pt-14 pb-14 text-center"
+        className="mx-auto max-w-7xl px-7 pt-16 pb-10 md:pt-20 md:pb-12"
         {...sectionGroupAttr("shop", "listing")}
       >
         <FadeIn className="text-left">
-          <h1
-            className="font-heading leading-none font-semibold tracking-tight"
-            style={{
-              fontSize: "clamp(2.8rem, 6vw, 4.5rem)",
-              letterSpacing: "-0.025em",
-              color: "var(--sl-orange)",
-            }}
-          >
+          <h1 className="sl-page-title-lg font-heading font-semibold uppercase">
             {shopHeading}
           </h1>
           {shopIntro && (
-            <p
-              className="mx-auto mt-5 font-sans"
-              style={{
-                fontSize: "15px",
-                lineHeight: 1.85,
-                color: "var(--vn-steel-mist)",
-                maxWidth: "56ch",
-              }}
-            >
+            <p className="sl-eyebrow mx-auto mt-5 max-w-[56ch] font-sans text-[15px] leading-[1.85]">
               {shopIntro}
             </p>
           )}

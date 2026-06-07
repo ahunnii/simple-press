@@ -15,10 +15,7 @@ export function SledgeOrderSuccessPage({
       <Suspense
         fallback={
           <div className="flex min-h-[40vh] items-center justify-center bg-white">
-            <p
-              className="font-sans text-sm tracking-[0.12em] uppercase"
-              style={{ color: "var(--sl-ink-soft)" }}
-            >
+            <p className="sl-eyebrow font-sans text-sm tracking-[0.12em] uppercase">
               Confirming your order…
             </p>
           </div>

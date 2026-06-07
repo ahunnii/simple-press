@@ -31,23 +31,19 @@ function FilterGroup({
 }) {
   const [open, setOpen] = useState(true);
   return (
-    <div className="mb-5 border-b pb-5" style={{ borderColor: "#e8e8e8" }}>
+    <div className="mb-5 border-b border-[var(--sl-border)] pb-5">
       <button
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         className="flex w-full items-center justify-between py-1"
       >
-        <span
-          className="font-sans text-xs font-medium tracking-[0.18em] uppercase"
-          style={{ color: "var(--sl-ink)" }}
-        >
+        <span className="font-sans text-xs font-medium tracking-[0.18em] text-[var(--sl-ink)] uppercase">
           {title}
         </span>
         <span
           aria-hidden="true"
-          className="font-sans text-sm"
-          style={{ color: "var(--sl-ink-soft)" }}
+          className="font-sans text-sm text-[var(--sl-ink-soft)]"
         >
           {open ? "−" : "+"}
         </span>
@@ -57,7 +53,7 @@ function FilterGroup({
   );
 }
 
-export function NoiseCollectionClient({
+export function SledgeCollectionClient({
   products,
   backHref = "/collections",
   backLabel = "All Collections",
@@ -83,32 +79,25 @@ export function NoiseCollectionClient({
     <>
       <Link
         href={backHref}
-        className="mb-6 block font-sans text-xs tracking-[0.16em] uppercase transition-opacity hover:opacity-60 md:hidden"
-        style={{ color: "var(--sl-ink-soft)" }}
+        className="sl-eyebrow mb-6 block font-sans text-xs tracking-[0.16em] uppercase transition-opacity hover:opacity-60 md:hidden"
       >
         ← {backLabel}
       </Link>
 
       <FilterGroup title="Availability">
-        <label
-          className="flex cursor-pointer items-center gap-2.5 font-sans text-sm"
-          style={{ color: "var(--sl-ink-soft)" }}
-        >
+        <label className="sl-eyebrow flex cursor-pointer items-center gap-2.5 font-sans text-sm">
           <input
             type="checkbox"
             checked={inStockOnly}
             onChange={(e) => handleInStock(e.target.checked)}
-            style={{ accentColor: "var(--sl-coral)" }}
+            className="accent-[var(--sl-coral)]"
           />
           In stock ({inStockCount})
         </label>
       </FilterGroup>
 
       <FilterGroup title="Price">
-        <div
-          className="mb-2 flex justify-between font-sans text-xs"
-          style={{ color: "var(--sl-ink-soft)" }}
-        >
+        <div className="sl-eyebrow mb-2 flex justify-between font-sans text-xs">
           <span>$0</span>
           <span>{formatPrice(localPriceMax)}</span>
         </div>
@@ -124,15 +113,13 @@ export function NoiseCollectionClient({
             commitPriceMax(Number((e.target as HTMLInputElement).value))
           }
           onKeyUp={() => commitPriceMax(localPriceMax)}
-          className="w-full"
-          style={{ accentColor: "var(--sl-coral)" }}
+          className="w-full accent-[var(--sl-coral)]"
         />
         {priceMax !== null && (
           <button
             type="button"
             onClick={() => commitPriceMax(maxPrice)}
-            className="mt-2 font-sans text-xs tracking-[0.12em] uppercase underline"
-            style={{ color: "var(--sl-ink-soft)" }}
+            className="sl-eyebrow mt-2 font-sans text-xs tracking-[0.12em] uppercase underline"
           >
             Clear
           </button>
@@ -143,32 +130,16 @@ export function NoiseCollectionClient({
 
   const productGrid = (
     <div>
-      <div
-        className="mb-8 flex items-center justify-between border-b pb-5"
-        style={{ borderColor: "#e8e8e8" }}
-      >
-        <span
-          className="hidden font-sans text-xs tracking-[0.14em] uppercase md:block"
-          style={{ color: "var(--sl-ink-soft)" }}
-        >
+      <div className="mb-8 flex items-center justify-between border-b border-[var(--sl-border)] pb-5">
+        <span className="sl-eyebrow hidden font-sans text-xs tracking-[0.14em] uppercase md:block">
           {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
         </span>
-        <label
-          className="ml-auto flex items-center gap-3 font-sans text-xs tracking-[0.14em] uppercase"
-          style={{ color: "var(--sl-ink-soft)" }}
-        >
+        <label className="sl-eyebrow ml-auto flex items-center gap-3 font-sans text-xs tracking-[0.14em] uppercase">
           Sort
           <select
             value={sortParam}
             onChange={(e) => handleSort(e.target.value as SortOption)}
-            className="cursor-pointer rounded-sm font-sans text-sm outline-none"
-            style={{
-              padding: "6px 10px",
-              border: "1px solid var(--sl-ink)",
-              color: "var(--sl-ink)",
-              fontFamily: "inherit",
-              background: "#ffffff",
-            }}
+            className="cursor-pointer rounded-sm border border-[var(--sl-ink)] bg-white px-2.5 py-1.5 font-sans text-sm text-[var(--sl-ink)] outline-none"
           >
             {Object.entries(SORT_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
@@ -181,17 +152,13 @@ export function NoiseCollectionClient({
 
       {filtered.length === 0 ? (
         <FadeIn className="py-24 text-center">
-          <p
-            className="font-sans text-base"
-            style={{ color: "var(--sl-ink-soft)" }}
-          >
+          <p className="sl-eyebrow font-sans text-base">
             No pieces match your filters.
           </p>
           <button
             type="button"
             onClick={clearFilters}
-            className="mt-6 font-sans text-xs tracking-[0.16em] uppercase underline"
-            style={{ color: "var(--sl-ink)" }}
+            className="mt-6 font-sans text-xs tracking-[0.16em] text-[var(--sl-ink)] uppercase underline"
           >
             Clear filters
           </button>
@@ -214,28 +181,14 @@ export function NoiseCollectionClient({
 
   return (
     <section className="mx-auto max-w-7xl px-5 pt-2 pb-16 sm:px-7">
-      <div
-        className="mb-6 flex items-center justify-between md:hidden"
-        style={{
-          borderBottom: "1px solid #e8e8e8",
-          paddingBottom: "12px",
-        }}
-      >
-        <span
-          className="font-sans text-xs tracking-[0.14em] uppercase"
-          style={{ color: "var(--sl-ink-soft)" }}
-        >
+      <div className="mb-6 flex items-center justify-between border-b border-[var(--sl-border)] pb-3 md:hidden">
+        <span className="sl-eyebrow font-sans text-xs tracking-[0.14em] uppercase">
           {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
         </span>
         <button
           type="button"
           onClick={() => setMobileFiltersOpen((v) => !v)}
-          className="flex items-center gap-2 font-sans text-[10px] tracking-[0.18em] uppercase transition-opacity hover:opacity-70"
-          style={{
-            border: "1px solid var(--sl-ink)",
-            padding: "6px 12px",
-            color: "var(--sl-ink)",
-          }}
+          className="flex items-center gap-2 border border-[var(--sl-ink)] px-3 py-1.5 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-ink)] uppercase transition-opacity hover:opacity-70"
           aria-expanded={mobileFiltersOpen}
           aria-controls="sledge-collection-mobile-filters"
         >
@@ -256,8 +209,7 @@ export function NoiseCollectionClient({
       {mobileFiltersOpen && (
         <div
           id="sledge-collection-mobile-filters"
-          className="mb-8 border-b pb-6 md:hidden"
-          style={{ borderColor: "#e8e8e8" }}
+          className="mb-8 border-b border-[var(--sl-border)] pb-6 md:hidden"
         >
           {filterPanel}
         </div>
@@ -265,19 +217,11 @@ export function NoiseCollectionClient({
 
       <div className="md:hidden">{productGrid}</div>
 
-      <div
-        className="mx-auto hidden md:grid"
-        style={{
-          maxWidth: "1440px",
-          gridTemplateColumns: "240px 1fr",
-          gap: "48px",
-        }}
-      >
+      <div className="mx-auto hidden max-w-[1440px] grid-cols-[240px_1fr] gap-12 md:grid">
         <aside className="pt-1">
           <Link
             href={backHref}
-            className="mb-6 block font-sans text-xs tracking-[0.16em] uppercase transition-opacity hover:opacity-60"
-            style={{ color: "var(--sl-ink-soft)" }}
+            className="sl-eyebrow mb-6 block font-sans text-xs tracking-[0.16em] uppercase transition-opacity hover:opacity-60"
           >
             ← {backLabel}
           </Link>

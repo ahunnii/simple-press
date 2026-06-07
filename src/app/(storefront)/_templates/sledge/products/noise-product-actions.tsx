@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { cn } from "~/lib/utils";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { formatPrice } from "~/lib/prices";
 import { useProduct } from "~/hooks/use-product";
@@ -47,41 +48,20 @@ export function NoiseProductActions({
   return (
     <>
       {/* Price row — lives here so it reacts to variant changes */}
-      <div
-        className="flex items-baseline justify-between border-t pt-5"
-        style={{ borderColor: "var(--vn-ink)" }}
-      >
-        <div
-          className="font-serif leading-none italic"
-          style={{
-            fontSize: "clamp(2.4rem, 4vw, 3rem)",
-            letterSpacing: "-0.01em",
-          }}
-        >
+      <div className="flex items-baseline justify-between border-t border-[var(--sl-ink)] pt-5">
+        <div className="font-serif text-[clamp(2.4rem,4vw,3rem)] leading-none tracking-[-0.01em] italic">
           {priceMajor}
-          <span
-            style={{
-              fontSize: "0.45em",
-              color: "var(--vn-steel)",
-              marginLeft: "2px",
-            }}
-          >
+          <span className="ml-0.5 text-[0.45em] text-[var(--sl-green)]">
             .{priceMinor}
           </span>
           {isOnSale && displayCompareAtPrice && (
-            <span
-              className="ml-3 font-sans font-normal line-through"
-              style={{ fontSize: "1.2rem", color: "var(--vn-steel-mist)" }}
-            >
+            <span className="ml-3 font-sans text-[1.2rem] font-normal text-[var(--sl-ink-soft)] line-through">
               {formatPrice(displayCompareAtPrice)}
             </span>
           )}
         </div>
         {product.sku && (
-          <div
-            className="text-right font-mono text-[11px] tracking-[0.16em] uppercase"
-            style={{ color: "var(--vn-steel)" }}
-          >
+          <div className="text-right font-mono text-[11px] tracking-[0.16em] text-[var(--sl-green)] uppercase">
             SKU · {product.sku}
           </div>
         )}
@@ -94,13 +74,7 @@ export function NoiseProductActions({
           setSelectedVariantId={setSelectedVariantId}
         />
       ) : additionalFields?.comingSoon ? (
-        <div
-          className="border px-5 py-4"
-          style={{
-            borderColor: "var(--vn-rule)",
-            background: "var(--vn-bone)",
-          }}
-        >
+        <div className="border border-[var(--vn-rule)] bg-[var(--sl-cream)] px-5 py-4">
           <p className="font-mono text-[10px] tracking-[0.2em] uppercase">
             Coming Soon
           </p>
@@ -111,12 +85,7 @@ export function NoiseProductActions({
       ) : !inStock ? (
         <button
           disabled
-          className="w-full cursor-not-allowed py-4 font-mono text-[11px] tracking-[0.24em] uppercase opacity-40"
-          style={{
-            background: "var(--vn-ink)",
-            color: "var(--vn-bone)",
-            border: "1.5px solid var(--vn-ink)",
-          }}
+          className="w-full cursor-not-allowed border-[1.5px] border-[var(--sl-ink)] bg-[var(--sl-ink)] py-4 font-mono text-[11px] tracking-[0.24em] text-[var(--sl-cream)] uppercase opacity-40"
         >
           Sold Out
         </button>
@@ -125,28 +94,20 @@ export function NoiseProductActions({
           {canAddMore && (
             <div className="flex items-stretch gap-3">
               {/* Qty stepper */}
-              <div
-                className="flex items-center"
-                style={{ border: "1.5px solid var(--vn-ink)" }}
-              >
+              <div className="flex items-center border-[1.5px] border-[var(--sl-ink)]">
                 <button
-                  className="hover:bg-foreground hover:text-background flex items-center justify-center font-mono transition-colors"
-                  style={{ width: "44px", height: "100%", minHeight: "52px" }}
+                  className="hover:bg-foreground hover:text-background flex h-full min-h-[52px] w-11 items-center justify-center font-mono transition-colors"
                   onClick={handleDecrement}
                   disabled={quantity <= 1}
                   aria-label="Decrease quantity"
                 >
                   <Minus className="size-3.5" />
                 </button>
-                <span
-                  className="text-center font-mono text-sm font-medium"
-                  style={{ width: "42px" }}
-                >
+                <span className="w-[42px] text-center font-mono text-sm font-medium">
                   {quantity}
                 </span>
                 <button
-                  className="hover:bg-foreground hover:text-background flex items-center justify-center font-mono transition-colors"
-                  style={{ width: "44px", height: "100%", minHeight: "52px" }}
+                  className="hover:bg-foreground hover:text-background flex h-full min-h-[52px] w-11 items-center justify-center font-mono transition-colors"
                   onClick={handleIncrement}
                   aria-label="Increase quantity"
                 >
@@ -157,12 +118,12 @@ export function NoiseProductActions({
               {/* Add to bag */}
               <button
                 onClick={addToCart}
-                className="flex flex-1 items-center justify-between px-5 py-4 font-mono text-[12px] tracking-[0.24em] uppercase transition-all"
-                style={{
-                  background: isAdded ? "var(--vn-steel)" : "var(--vn-ink)",
-                  color: "var(--vn-bone)",
-                  border: `1.5px solid ${isAdded ? "var(--vn-steel)" : "var(--vn-ink)"}`,
-                }}
+                className={cn(
+                  "flex flex-1 items-center justify-between border-[1.5px] px-5 py-4 font-mono text-[12px] tracking-[0.24em] text-[var(--sl-cream)] uppercase transition-all",
+                  isAdded
+                    ? "border-[var(--sl-green)] bg-[var(--sl-green)]"
+                    : "border-[var(--sl-ink)] bg-[var(--sl-ink)]",
+                )}
               >
                 <span className="flex items-center gap-2">
                   {isAdded ? (
@@ -202,16 +163,12 @@ export function NoiseProductActions({
         <div className="flex flex-wrap gap-2">
           {trustBadges.map((badge, i) => (
             <div key={`${badge.label}-${i}`} className="vn-stamp text-[9.5px]">
-              <badge.Icon
-                className="size-3.5"
-                style={{ color: "var(--vn-steel)" }}
-              />
+              <badge.Icon className="size-3.5 text-[var(--sl-green)]" />
               {badge.label}
             </div>
           ))}
         </div>
       )}
-
     </>
   );
 }

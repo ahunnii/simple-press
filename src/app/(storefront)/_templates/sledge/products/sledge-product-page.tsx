@@ -14,13 +14,14 @@ import {
   isContentEmpty,
   parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "..";
-import { NoiseProductCard } from "../shared/sledge-product-card";
+import { SledgeProductRail } from "../shared/sledge-product-rail";
 import { SledgeProductActions } from "./sledge-product-actions";
 
 export function SledgeProductPage({
@@ -69,7 +70,12 @@ export function SledgeProductPage({
     "sledge.global.product-question-description",
     "sledge.global.product-care-instructions",
     "sledge.global.product-shipping-details",
+    "sledge.global.shop-cta-text",
+    "sledge.global.shop-cta-link",
   ]);
+
+  const shopCtaText = f["sledge.global.shop-cta-text"] ?? "Browse Shop";
+  const shopCtaHref = f["sledge.global.shop-cta-link"] ?? "/shop";
 
   const globalProductTrustBadges = parseTemplateTrustBadgesListRows(
     getListFieldValue(
@@ -99,10 +105,7 @@ export function SledgeProductPage({
             {/* ── Left: Gallery ── */}
             <div>
               {/* Main image */}
-              <div
-                className="relative overflow-hidden bg-gray-100"
-                style={{ aspectRatio: "1 / 1" }}
-              >
+              <div className="relative aspect-square overflow-hidden bg-gray-100">
                 {activeImage ? (
                   <Image
                     src={activeImage.url}
@@ -138,15 +141,12 @@ export function SledgeProductPage({
                       key={img.id}
                       type="button"
                       onClick={() => setActiveImg(i)}
-                      className="relative shrink-0 overflow-hidden transition-opacity hover:opacity-80"
-                      style={{
-                        width: "72px",
-                        height: "72px",
-                        border:
-                          activeImg === i
-                            ? "2px solid var(--sl-coral)"
-                            : "2px solid #d1d5db",
-                      }}
+                      className={cn(
+                        "relative size-[72px] shrink-0 overflow-hidden transition-opacity hover:opacity-80",
+                        activeImg === i
+                          ? "border-2 border-[var(--sl-coral)]"
+                          : "border-2 border-[var(--sl-border-panel)]",
+                      )}
                       aria-label={`View image ${i + 1}`}
                     >
                       <Image
@@ -165,10 +165,7 @@ export function SledgeProductPage({
             {/* ── Right: Product details ── */}
             <div className="flex flex-col gap-4">
               {/* Product name */}
-              <h1
-                className="font-heading leading-tight"
-                style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)" }}
-              >
+              <h1 className="sl-product-title font-heading leading-tight">
                 {product.name}
               </h1>
 
@@ -186,10 +183,7 @@ export function SledgeProductPage({
 
               {/* Description */}
               {product.description && (
-                <p
-                  className="text-sm leading-relaxed"
-                  style={{ color: "var(--sl-ink-soft)" }}
-                >
+                <p className="sl-eyebrow text-sm leading-relaxed">
                   {product.description}
                 </p>
               )}
@@ -233,7 +227,7 @@ export function SledgeProductPage({
                   {f["sledge.global.product-care-instructions"] && (
                     <details
                       open
-                      className="group border-b border-[#e8e8e8] py-5 first:border-t"
+                      className="group border-t border-b border-[var(--sl-border)] py-5"
                     >
                       <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium select-none [&::-webkit-details-marker]:hidden">
                         Care Instructions
@@ -244,16 +238,13 @@ export function SledgeProductPage({
                           +
                         </span>
                       </summary>
-                      <p
-                        className="pt-3.5 text-sm leading-[1.7]"
-                        style={{ color: "var(--sl-ink-soft)" }}
-                      >
+                      <p className="sl-eyebrow pt-3.5 text-sm leading-[1.7]">
                         {f["sledge.global.product-care-instructions"]}
                       </p>
                     </details>
                   )}
                   {f["sledge.global.product-shipping-details"] && (
-                    <details className="group border-b border-[#e8e8e8] py-5 first:border-t">
+                    <details className="group border-b border-[var(--sl-border)] py-5 first:border-t">
                       <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium select-none [&::-webkit-details-marker]:hidden">
                         Shipping &amp; Returns
                         <span
@@ -263,10 +254,7 @@ export function SledgeProductPage({
                           +
                         </span>
                       </summary>
-                      <p
-                        className="pt-3.5 text-sm leading-[1.7]"
-                        style={{ color: "var(--sl-ink-soft)" }}
-                      >
+                      <p className="sl-eyebrow pt-3.5 text-sm leading-[1.7]">
                         {f["sledge.global.product-shipping-details"]}
                       </p>
                     </details>
@@ -276,12 +264,11 @@ export function SledgeProductPage({
 
               {/* Category */}
               {firstCollection && (
-                <p className="text-xs" style={{ color: "var(--sl-ink-soft)" }}>
+                <p className="sl-eyebrow text-xs">
                   Category:{" "}
                   <Link
                     href={`/collections/${firstCollection.slug}`}
-                    className="underline hover:no-underline"
-                    style={{ color: "var(--sl-coral)" }}
+                    className="text-[var(--sl-coral)] underline hover:no-underline"
                   >
                     {firstCollection.name}
                   </Link>
@@ -296,25 +283,19 @@ export function SledgeProductPage({
       <div className="bg-white pb-14">
         <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
           {/* Tab buttons */}
-          <div className="flex" style={{ marginBottom: "-1px" }}>
+          <div className="-mb-px flex">
             {(["description", "additional"] as const).map((tab, i) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
-                className="px-5 py-2.5 text-sm transition-colors"
-                style={{
-                  border: "1px solid #d1d5db",
-                  borderLeft: i > 0 ? "none" : "1px solid #d1d5db",
-                  borderBottom:
-                    activeTab === tab ? "1px solid white" : "1px solid #d1d5db",
-                  background: activeTab === tab ? "white" : "#f5f5f5",
-                  color:
-                    activeTab === tab ? "var(--sl-ink)" : "var(--sl-ink-soft)",
-                  position: "relative",
-                  zIndex: activeTab === tab ? 1 : 0,
-                  fontFamily: "var(--font-sans)",
-                }}
+                className={cn(
+                  "relative px-5 py-2.5 font-sans text-sm transition-colors",
+                  i > 0 ? "border-l-0" : "",
+                  activeTab === tab
+                    ? "z-1 border border-[var(--sl-border-panel)] border-b-white bg-white text-[var(--sl-ink)]"
+                    : "z-0 border border-[var(--sl-border-panel)] bg-[#f5f5f5] text-[var(--sl-ink-soft)]",
+                )}
               >
                 {tab === "description"
                   ? "Description"
@@ -324,20 +305,14 @@ export function SledgeProductPage({
           </div>
 
           {/* Tab content */}
-          <div className="bg-white p-8" style={{ border: "1px solid #d1d5db" }}>
+          <div className="sl-tab-panel bg-white p-8">
             {activeTab === "description" && (
               <div>
-                <h2
-                  className="font-heading mb-4"
-                  style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)" }}
-                >
+                <h2 className="sl-tab-heading font-heading mb-4">
                   Description
                 </h2>
                 {product.description && (
-                  <p
-                    className="leading-relaxed"
-                    style={{ fontSize: "15px", color: "var(--sl-ink-soft)" }}
-                  >
+                  <p className="sl-eyebrow text-[15px] leading-relaxed">
                     {product.description}
                   </p>
                 )}
@@ -350,8 +325,7 @@ export function SledgeProductPage({
                 {!isAdditionalEmpty && (
                   <details
                     open
-                    className="group border-b py-5 first:border-t"
-                    style={{ borderColor: "#e8e8e8" }}
+                    className="group border-b border-[var(--sl-border)] py-5 first:border-t"
                   >
                     <summary className="flex cursor-pointer list-none items-center justify-between font-medium select-none [&::-webkit-details-marker]:hidden">
                       Details
@@ -362,13 +336,7 @@ export function SledgeProductPage({
                         +
                       </span>
                     </summary>
-                    <div
-                      className="pt-3.5 leading-[1.7]"
-                      style={{
-                        fontSize: "15px",
-                        color: "var(--sl-ink-soft)",
-                      }}
-                    >
+                    <div className="sl-eyebrow pt-3.5 text-[15px] leading-[1.7]">
                       <TiptapRenderer
                         content={
                           additionalFields?.additionalInformation as TiptapJSON
@@ -380,10 +348,7 @@ export function SledgeProductPage({
 
                 {/* Shipping & Returns */}
                 {f["sledge.global.product-shipping-description"] && (
-                  <details
-                    className="group border-b py-5 first:border-t"
-                    style={{ borderColor: "#e8e8e8" }}
-                  >
+                  <details className="group border-b border-[var(--sl-border)] py-5 first:border-t">
                     <summary className="flex cursor-pointer list-none items-center justify-between font-medium select-none [&::-webkit-details-marker]:hidden">
                       Shipping &amp; Returns
                       <span
@@ -393,13 +358,7 @@ export function SledgeProductPage({
                         +
                       </span>
                     </summary>
-                    <div
-                      className="pt-3.5 leading-[1.7]"
-                      style={{
-                        fontSize: "15px",
-                        color: "var(--sl-ink-soft)",
-                      }}
-                    >
+                    <div className="sl-eyebrow pt-3.5 text-[15px] leading-[1.7]">
                       <p>{f["sledge.global.product-shipping-description"]}</p>
                     </div>
                   </details>
@@ -407,10 +366,7 @@ export function SledgeProductPage({
 
                 {/* Ask a question */}
                 {f["sledge.global.product-question-description"] && (
-                  <details
-                    className="group border-b py-5 first:border-t"
-                    style={{ borderColor: "#e8e8e8" }}
-                  >
+                  <details className="group border-b border-[var(--sl-border)] py-5 first:border-t">
                     <summary className="flex cursor-pointer list-none items-center justify-between font-medium select-none [&::-webkit-details-marker]:hidden">
                       Ask a Question
                       <span
@@ -420,19 +376,12 @@ export function SledgeProductPage({
                         +
                       </span>
                     </summary>
-                    <div
-                      className="pt-3.5 leading-[1.7]"
-                      style={{
-                        fontSize: "15px",
-                        color: "var(--sl-ink-soft)",
-                      }}
-                    >
+                    <div className="sl-eyebrow pt-3.5 text-[15px] leading-[1.7]">
                       <p>
                         {f["sledge.global.product-question-description"]}{" "}
                         <Link
                           href="/contact"
-                          className="underline hover:no-underline"
-                          style={{ color: "var(--sl-coral)" }}
+                          className="text-[var(--sl-coral)] underline hover:no-underline"
                         >
                           You can reach out to us here.
                         </Link>
@@ -446,28 +395,12 @@ export function SledgeProductPage({
         </div>
       </div>
 
-      {/* ── Related products ── */}
-      {relatedProducts && relatedProducts.length > 0 && (
-        <section className="bg-white pb-16">
-          <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
-            <h2
-              className="font-heading mb-8"
-              style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)" }}
-            >
-              Related Products
-            </h2>
-            <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-              {relatedProducts.slice(0, 4).map((p, index) => (
-                <NoiseProductCard
-                  key={p.id}
-                  product={p as Product}
-                  index={index}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      <SledgeProductRail
+        heading="Related Products"
+        ctaText={shopCtaText}
+        ctaHref={shopCtaHref}
+        products={(relatedProducts ?? []) as Product[]}
+      />
 
       {/* ── Lightbox ── */}
       <AnimatePresence>
