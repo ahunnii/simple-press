@@ -30,7 +30,7 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
         <div className="container mx-auto px-4">
           <FadeIn className="text-center">
             <Badge className="mb-4">
-              <Leaf className="mr-1 h-3 w-3" />
+              <Leaf className="mr-1 h-3 w-3" aria-hidden="true" />
               Stories & Insights
             </Badge>
             <h1 className="mb-4 text-4xl font-bold md:text-5xl">
@@ -45,7 +45,7 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
             <div className="mx-auto mt-8 max-w-md">
               <InputGroup>
                 <InputGroupAddon>
-                  <Search className="text-muted-foreground h-4 w-4" />
+                  <Search className="text-muted-foreground h-4 w-4" aria-hidden="true" />
                 </InputGroupAddon>
                 <InputGroupInput
                   type="search"
@@ -56,7 +56,10 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
                 />
               </InputGroup>
               {query.trim() !== "" && (
-                <p className="text-muted-foreground mt-2 text-sm">
+                <p
+                  role="status"
+                  className="text-muted-foreground mt-2 text-sm"
+                >
                   {filtered.length === 0
                     ? "No articles found. Try a different keyword."
                     : `${filtered.length} article${filtered.length !== 1 ? "s" : ""} found`}
@@ -93,7 +96,7 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
                   </div>
                   <div className="bg-card flex flex-col justify-center p-8 md:p-12">
                     <Badge variant="secondary" className="mb-4 w-fit">
-                      <Tag className="mr-1 h-3 w-3" />
+                      <Tag className="mr-1 h-3 w-3" aria-hidden="true" />
                       Latest Post
                     </Badge>
                     <h2 className="text-foreground group-hover:text-primary mb-4 text-2xl leading-snug font-bold transition-colors md:text-3xl">
@@ -104,7 +107,7 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
                     </p>
                     <div className="text-muted-foreground mb-8 flex flex-wrap items-center gap-4 text-sm">
                       <span className="flex items-center gap-1.5">
-                        <CalendarDays className="h-4 w-4" />
+                        <CalendarDays className="h-4 w-4" aria-hidden="true" />
                         {/* {formatDate(featuredResult.createdAt)} */}
                       </span>
                       {/* <span className="flex items-center gap-1.5">
@@ -114,7 +117,10 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
                     </div>
                     <div className="text-primary flex items-center gap-2 font-semibold">
                       Read Article
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      <ArrowRight
+                        className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                        aria-hidden="true"
+                      />
                     </div>
                   </div>
                 </div>
@@ -171,7 +177,7 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
                         </p>
                         <div className="text-muted-foreground flex items-center gap-4 text-xs">
                           <span className="flex items-center gap-1.5">
-                            <CalendarDays className="h-3.5 w-3.5" />
+                            <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
                             {/* {formatDate(post.createdAt)} */}
                           </span>
                         </div>
@@ -184,7 +190,7 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
           ) : (
             <FadeIn>
               <div className="text-muted-foreground flex flex-col items-center py-16 text-center">
-                <Search className="mb-4 h-10 w-10 opacity-30" />
+                <Search className="mb-4 h-10 w-10 opacity-30" aria-hidden="true" />
                 <p className="text-lg font-medium">
                   No articles matched &ldquo;{query}&rdquo;
                 </p>

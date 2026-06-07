@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
@@ -17,6 +18,7 @@ type Props = {
 
 export function NoiseProductCard({ product, index }: Props) {
   const { addItem } = useCart();
+  const [isAdded, setIsAdded] = useState(false);
 
   const productStatus = checkProductStatus({
     price: product.price,
@@ -55,6 +57,7 @@ export function NoiseProductCard({ product, index }: Props) {
     if (productStatus.disableCart) return;
     addItem({
       productId: product.id,
+      productSlug: product.slug,
       variantId: null,
       productName: product.name,
       variantName: null,
@@ -66,6 +69,8 @@ export function NoiseProductCard({ product, index }: Props) {
       sku: null,
       maxInventory: productStatus.maxInventory,
     });
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
   };
 
   return (
@@ -78,7 +83,7 @@ export function NoiseProductCard({ product, index }: Props) {
         {productImage !== "/placeholder.svg" ? (
           <Image
             src={productImage}
-            alt={product.name ?? "Product image"}
+            alt=""
             fill
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -200,6 +205,10 @@ export function NoiseProductCard({ product, index }: Props) {
           </span>
 
         </div>
+      </div>
+      {/* S-2: live region for add-to-cart announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {isAdded ? `${product.name} added to bag` : ""}
       </div>
     </div>
   );

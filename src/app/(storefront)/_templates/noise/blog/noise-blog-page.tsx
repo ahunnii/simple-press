@@ -107,6 +107,7 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
               height="14"
               viewBox="0 0 16 16"
               fill="none"
+              aria-hidden="true"
               className="flex-shrink-0 opacity-50"
               style={{ color: "var(--vn-ink)" }}
             >
@@ -129,7 +130,7 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
               placeholder="Search the archive…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="flex-1 bg-transparent font-mono text-[12px] tracking-[0.12em] uppercase outline-none placeholder:opacity-40"
+              className="flex-1 bg-transparent font-mono text-[12px] tracking-[0.12em] uppercase outline-none placeholder:opacity-60"
               style={{ color: "var(--vn-ink)" }}
               aria-label="Search blog posts"
             />
@@ -137,13 +138,16 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
               <span
                 className="flex-shrink-0 font-mono text-[9.5px] tracking-[0.18em] uppercase"
                 style={{ color: "var(--vn-steel-mist)" }}
+                aria-live="polite"
+                aria-atomic="true"
               >
                 {filtered.length} result{filtered.length !== 1 ? "s" : ""}
               </span>
             ) : (
               <span
-                className="flex-shrink-0 font-mono text-[9px] tracking-[0.22em] uppercase opacity-40"
-                style={{ color: "var(--vn-ink)" }}
+                aria-hidden="true"
+                className="flex-shrink-0 font-mono text-[9px] tracking-[0.22em] uppercase"
+                style={{ color: "var(--vn-steel-mist)" }}
               >
                 Search
               </span>

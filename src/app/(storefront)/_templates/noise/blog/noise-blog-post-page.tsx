@@ -240,12 +240,12 @@ export function NoiseBlogPostPage({
                   >
                     {fmtDate(post.createdAt)}
                   </p>
-                  <h4
+                  <h3
                     className="font-serif leading-[1.1] tracking-tight italic transition-opacity group-hover:opacity-70"
                     style={{ fontSize: "20px", letterSpacing: "-0.005em" }}
                   >
                     {post.title}
-                  </h4>
+                  </h3>
                 </Link>
               </StaggerItem>
             ))}

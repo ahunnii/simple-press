@@ -162,12 +162,18 @@ export function HappyBambooProductCard({
                 <Button
                   type="button"
                   size="sm"
-                  className="gap-1.5"
+                  className={`gap-1.5 ${productStatus.disableCart ? "aria-disabled:cursor-not-allowed aria-disabled:opacity-50" : ""}`}
                   onClick={handleAddToCart}
-                  disabled={productStatus.disableCart}
-                  aria-label={`Add ${product.name} to cart`}
+                  aria-disabled={productStatus.disableCart}
+                  aria-label={
+                    productStatus.comingSoon
+                      ? `${product.name} — coming soon`
+                      : productStatus.isOutOfStock
+                        ? `${product.name} — out of stock`
+                        : `Add ${product.name} to cart`
+                  }
                 >
-                  <ShoppingCart className="h-4 w-4 shrink-0" />
+                  <ShoppingCart className="h-4 w-4 shrink-0" aria-hidden="true" />
                   {productStatus.comingSoon
                     ? "Coming Soon"
                     : productStatus.isOutOfStock

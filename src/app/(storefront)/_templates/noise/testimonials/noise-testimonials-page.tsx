@@ -210,6 +210,7 @@ function TestimonialCard({ t, i }: { t: TWithRating; i: number }) {
         }}
       >
         <span
+          aria-hidden="true"
           style={{
             fontSize: "14px",
             letterSpacing: "0.16em",
@@ -221,6 +222,7 @@ function TestimonialCard({ t, i }: { t: TWithRating; i: number }) {
             {"★".repeat(5 - stars)}
           </span>
         </span>
+        <span className="sr-only">Rated {stars} out of 5 stars</span>
         <span
           className="font-mono text-[10px] tracking-[0.14em] uppercase"
           style={{ color: "var(--vn-steel-mist)" }}

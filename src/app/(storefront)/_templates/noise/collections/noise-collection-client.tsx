@@ -37,6 +37,7 @@ function FilterGroup({
       <button
         type="button"
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
         className="flex w-full items-center justify-between py-1"
       >
         <span
@@ -46,6 +47,7 @@ function FilterGroup({
           {title}
         </span>
         <span
+          aria-hidden="true"
           className="font-mono text-sm"
           style={{ color: "var(--vn-steel-mist)" }}
         >
@@ -84,7 +86,7 @@ export function NoiseCollectionClient({
         style={{ maxWidth: "1440px", gridTemplateColumns: "240px 1fr" }}
       >
         {/* ── Filters sidebar ── */}
-        <aside className="hidden pt-1 md:block">
+        <aside className="hidden pt-1 md:block" aria-label="Product filters">
           <Link
             href={backHref}
             className="mb-6 block font-mono text-[10px] tracking-[0.18em] uppercase transition-opacity hover:opacity-60"
@@ -119,7 +121,7 @@ export function NoiseCollectionClient({
             <input
               type="range"
               min={0}
-              title="Price slider"
+              aria-label={`Maximum price, currently ${formatPrice(localPriceMax)}`}
               max={maxPrice || 1000}
               value={localPriceMax}
               onChange={(e) => setLocalPriceMax(Number(e.target.value))}
@@ -153,6 +155,8 @@ export function NoiseCollectionClient({
             <span
               className="font-mono text-[11px] tracking-[0.14em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
+              aria-live="polite"
+              aria-atomic="true"
             >
               {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
             </span>

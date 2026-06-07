@@ -50,7 +50,10 @@ export function NoiseProductRail({
         {/* Rail header */}
         <FadeIn className="border-foreground/20 mb-12 flex flex-col items-center justify-center space-y-4 pb-7">
           {overline && (
-            <p className="font-mono text-[10px] tracking-[.22em] uppercase opacity-50">
+            <p
+              className="font-mono text-[10px] tracking-[.22em] uppercase"
+              style={{ color: "var(--vn-steel-mist)" }}
+            >
               {overline}
             </p>
           )}

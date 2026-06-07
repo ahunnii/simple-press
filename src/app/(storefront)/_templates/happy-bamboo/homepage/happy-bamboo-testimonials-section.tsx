@@ -58,7 +58,7 @@ export function HappyBambooTestimonialsSection({
             <StaggerItem key={testimonial.id}>
               <Card className="h-full">
                 <CardContent className="flex h-full flex-col p-8">
-                  <Quote className="text-primary/30 mb-4 h-8 w-8" />
+                  <Quote className="text-primary/30 mb-4 h-8 w-8" aria-hidden="true" />
                   <p className="text-foreground flex-1 text-lg leading-relaxed">
                     &ldquo;{testimonial.text}&rdquo;
                   </p>

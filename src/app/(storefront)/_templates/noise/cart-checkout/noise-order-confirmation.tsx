@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -32,6 +32,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
     payment_status: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const confirmationH1Ref = useRef<HTMLHeadingElement>(null);
 
   const sessionId = searchParams.get("session_id");
 
@@ -62,9 +63,18 @@ export function NoiseOrderConfirmation({ business }: Props) {
     void fetchOrderDetails();
   }, [sessionId, clearCart]);
 
+  // Focus the h1 once the confirmed state renders
+  useEffect(() => {
+    if (!loading && sessionId) {
+      const id = setTimeout(() => confirmationH1Ref.current?.focus(), 0);
+      return () => clearTimeout(id);
+    }
+  }, [loading, sessionId]);
+
   if (loading) {
     return (
       <div
+        role="status"
         className="flex min-h-[40vh] items-center justify-center"
         style={{ background: "var(--vn-paper)" }}
       >
@@ -114,6 +124,8 @@ export function NoiseOrderConfirmation({ business }: Props) {
               Transmission confirmed · {business.name}
             </p>
             <h1
+              ref={confirmationH1Ref}
+              tabIndex={-1}
               className="font-serif italic leading-[0.95] tracking-tight"
               style={{
                 fontSize: "clamp(3rem, 6vw, 5.5rem)",
@@ -157,12 +169,12 @@ export function NoiseOrderConfirmation({ business }: Props) {
         <div className="flex flex-col gap-8 px-7 py-14">
           {orderDetails?.customer_email && (
             <div>
-              <h5
+              <h2
                 className="font-mono text-[9px] tracking-[0.22em] uppercase mb-3"
                 style={{ color: "var(--vn-steel-mist)" }}
               >
                 Confirmation sent to
-              </h5>
+              </h2>
               <p
                 className="font-mono text-[12px] tracking-[0.08em]"
                 style={{ color: "var(--vn-bone)" }}
@@ -173,16 +185,17 @@ export function NoiseOrderConfirmation({ business }: Props) {
           )}
 
           <div>
-            <h5
+            <h2
               className="font-mono text-[9px] tracking-[0.22em] uppercase mb-5"
               style={{ color: "var(--vn-steel-mist)" }}
             >
               What happens next
-            </h5>
+            </h2>
             <div className="flex flex-col gap-3.5">
               {NEXT_STEPS.map((step) => (
                 <div key={step.icon} className="flex gap-3 items-start">
                   <span
+                    aria-hidden="true"
                     className="flex-shrink-0 flex items-center justify-center border font-serif italic"
                     style={{
                       width: "24px",

@@ -53,7 +53,7 @@ export function BambooBlogPostPage({
                 href="/blog"
                 className="text-muted-foreground hover:text-primary mb-8 inline-flex items-center gap-2 text-sm font-medium transition-colors"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 Back to blog
               </Link>
             </FadeIn>
@@ -113,9 +113,9 @@ export function BambooBlogPostPage({
                       </div>
                       <div>
                         {ctaHeading ? (
-                          <h3 className="text-foreground font-heading mb-2 text-xl font-bold">
+                          <h2 className="text-foreground font-heading mb-2 text-xl font-bold">
                             {ctaHeading}
-                          </h3>
+                          </h2>
                         ) : null}
                         {ctaBody ? (
                           <p className="text-muted-foreground mb-4 text-sm leading-relaxed whitespace-pre-line">

@@ -24,7 +24,14 @@ export function HappyBambooVariantSelector({
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
 
+  const addToCartDisabled =
+    !selectedVariant ||
+    (product.trackInventory &&
+      selectedVariant.inventoryQty === 0 &&
+      !product.allowBackorders);
+
   const handleAddToCart = () => {
+    if (addToCartDisabled) return;
     if (!selectedVariant) return;
 
     addItem(
@@ -74,15 +81,17 @@ export function HappyBambooVariantSelector({
                   selectedVariant?.id === variant.id ? "default" : "outline"
                 }
                 onClick={() => {
+                  if (outOfStock) return;
                   setSelectedVariant(variant);
                   setSelectedVariantId(variant.id);
                 }}
-                disabled={outOfStock}
+                aria-pressed={selectedVariant?.id === variant.id}
+                aria-disabled={outOfStock}
                 className={`bamboo-variant-btn ${
                   selectedVariant?.id === variant.id
                     ? "bamboo-variant-btn--selected"
                     : "bamboo-variant-btn--unselected"
-                } ${outOfStock ? "bamboo-variant-btn--disabled" : ""}`}
+                } ${outOfStock ? "bamboo-variant-btn--disabled aria-disabled:cursor-not-allowed aria-disabled:opacity-50" : ""}`}
               >
                 {variant.name}
                 {outOfStock && " (Out of Stock)"}
@@ -94,7 +103,7 @@ export function HappyBambooVariantSelector({
       </div>
 
       {selectedVariant && product.trackInventory && (
-        <span className="text-sm">
+        <span role="status" aria-live="polite" className="text-sm">
           {selectedVariant?.inventoryQty ?? 0} available
         </span>
       )}
@@ -139,17 +148,12 @@ export function HappyBambooVariantSelector({
         <Button
           type="button"
           onClick={handleAddToCart}
-          disabled={
-            !selectedVariant ||
-            (product.trackInventory &&
-              selectedVariant.inventoryQty === 0 &&
-              !product.allowBackorders)
-          }
-          className={`flex-1 ${!selectedVariant || (product.trackInventory && selectedVariant.inventoryQty === 0 && !product.allowBackorders) ? "cursor-not-allowed opacity-50" : ""}`}
+          aria-disabled={addToCartDisabled}
+          className={`flex-1 ${addToCartDisabled ? "aria-disabled:cursor-not-allowed aria-disabled:opacity-50 cursor-not-allowed opacity-50" : ""}`}
         >
           {isAdded ? (
             <>
-              <Check className="h-4 w-4" />
+              <Check className="h-4 w-4" aria-hidden="true" />
               Added to Cart
             </>
           ) : (
@@ -157,6 +161,9 @@ export function HappyBambooVariantSelector({
           )}
         </Button>
       </div>
+      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {isAdded ? "Added to cart" : ""}
+      </span>
     </div>
   );
 }

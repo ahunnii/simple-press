@@ -30,7 +30,10 @@ export function NoiseIntroWrapper({
           locationTag={locationTag}
         />
       )}
-      {children}
+      {/* While the intro overlay is playing, hide page content from the accessibility tree */}
+      <div inert={!done ? true : undefined}>
+        {children}
+      </div>
     </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Package } from "lucide-react";
@@ -29,6 +29,7 @@ export function BambooOrderConfirmation({ business }: Props) {
     payment_status: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const confirmedHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const sessionId = searchParams.get("session_id");
 
@@ -67,9 +68,16 @@ export function BambooOrderConfirmation({ business }: Props) {
     void fetchOrderDetails();
   }, [sessionId, clearCart]);
 
+  // M-4: Move focus to the "Order Confirmed!" heading once loading is done
+  useEffect(() => {
+    if (!loading && sessionId) {
+      confirmedHeadingRef.current?.focus();
+    }
+  }, [loading, sessionId]);
+
   if (loading) {
     return (
-      <div className="mx-auto max-w-2xl text-center">
+      <div className="mx-auto max-w-2xl text-center" role="status">
         <p className="text-muted-foreground">Loading order details...</p>
       </div>
     );
@@ -93,7 +101,11 @@ export function BambooOrderConfirmation({ business }: Props) {
         <div className="bg-primary/10 mb-6 inline-flex size-16 items-center justify-center rounded-full" aria-hidden="true">
           <CheckCircle2 className="text-primary size-8" />
         </div>
-        <h1 className="font-heading text-foreground text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+        <h1
+          ref={confirmedHeadingRef}
+          tabIndex={-1}
+          className="font-heading text-foreground text-3xl font-bold tracking-tight outline-none md:text-4xl lg:text-5xl"
+        >
           Order Confirmed!
         </h1>
         <p className="text-muted-foreground mt-3 text-lg">

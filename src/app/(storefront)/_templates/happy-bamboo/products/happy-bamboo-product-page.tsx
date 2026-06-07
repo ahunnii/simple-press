@@ -63,7 +63,7 @@ export function HappyBambooProductPage({
             className="text-muted-foreground mb-6 gap-1"
           >
             <Link href="/shop">
-              <ArrowLeft className="size-4" />
+              <ArrowLeft className="size-4" aria-hidden="true" />
               Back to Shop
             </Link>
           </Button>
@@ -131,7 +131,7 @@ export function HappyBambooProductPage({
                   key={`${badge.label}-${i}`}
                   className="bg-secondary/60 flex items-center gap-2 rounded-lg px-3 py-2"
                 >
-                  <badge.Icon className="text-primary size-4" />
+                  <badge.Icon className="text-primary size-4" aria-hidden="true" />
                   <span className="text-secondary-foreground text-xs font-medium">
                     {badge.label}
                   </span>

@@ -36,7 +36,7 @@ export function HappyBambooHeroSection({
       <div className="absolute inset-0 z-0">
         <Image
           src={!!heroImage ? heroImage : "/images/hero-bamboo.jpg"}
-          alt={heroImage ? "Hero Image" : "Happy Bamboo Hero Image"}
+          alt=""
           fill
           className="object-cover"
           priority
@@ -74,7 +74,7 @@ export function HappyBambooHeroSection({
 
           <FadeIn delay={0.25}>
             <p className="mb-4 flex items-center gap-2 font-serif text-2xl font-semibold tracking-wide text-white/80 md:text-3xl">
-              <Leaf className="text-primary h-5 w-5 shrink-0" />
+              <Leaf className="text-primary h-5 w-5 shrink-0" aria-hidden="true" />
               {heroTagline}
             </p>
           </FadeIn>
@@ -105,7 +105,10 @@ export function HappyBambooHeroSection({
             >
               <Link href={heroPrimaryButtonLink ?? "/shop"}>
                 {heroPrimaryButtonText}
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                <ArrowRight
+                  className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
               </Link>
             </Button>
           </FadeIn>

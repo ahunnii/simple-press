@@ -51,7 +51,12 @@ export function BambooProductActions({
           </p>
         </div>
       ) : !inStock ? (
-        <Button size="lg" disabled className="flex">
+        <Button
+          size="lg"
+          aria-disabled="true"
+          onClick={(e) => e.preventDefault()}
+          className="flex cursor-not-allowed opacity-50"
+        >
           Out of Stock
         </Button>
       ) : (
@@ -75,7 +80,6 @@ export function BambooProductActions({
                     className="text-foreground w-10 text-center text-base font-semibold"
                     aria-live="polite"
                     aria-atomic="true"
-                    aria-label={`Quantity: ${quantity}`}
                   >
                     {quantity}
                   </span>
@@ -96,16 +100,24 @@ export function BambooProductActions({
                 >
                   {isAdded ? (
                     <>
-                      <Check className="h-4 w-4" />
+                      <Check className="h-4 w-4" aria-hidden="true" />
                       Added to Cart
                     </>
                   ) : (
                     <>
-                      <ShoppingBag className="size-5" />
+                      <ShoppingBag className="size-5" aria-hidden="true" />
                       Add to Cart - {formatPrice(displayPrice)}
                     </>
                   )}
                 </Button>
+                {/* S-1: live region announces add-to-cart confirmation */}
+                <div
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="sr-only"
+                >
+                  {isAdded ? `${product.name} added to cart` : ""}
+                </div>
               </div>
               {product.trackInventory &&
                 product.allowBackorders &&

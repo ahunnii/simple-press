@@ -56,28 +56,32 @@ export function BambooVariantSelector({
           Select Variant
         </Label>
         <div className="flex flex-wrap gap-3" role="group" aria-labelledby="variant-label">
-          {product.variants.map((variant) => (
-            <Button
-              key={variant.id}
-              variant={
-                selectedVariant?.id === variant.id ? "default" : "outline"
-              }
-              onClick={() => {
-                setSelectedVariant(variant);
-                setSelectedVariantId(variant.id);
-              }}
-              disabled={variant.inventoryQty === 0}
-              aria-pressed={selectedVariant?.id === variant.id}
-              className={`bamboo-variant-btn ${
-                selectedVariant?.id === variant.id
-                  ? "bamboo-variant-btn--selected"
-                  : "bamboo-variant-btn--unselected"
-              } ${variant.inventoryQty === 0 ? "bamboo-variant-btn--disabled" : ""}`}
-            >
-              {variant.name}
-              {variant.inventoryQty === 0 && " (Out of Stock)"}
-            </Button>
-          ))}
+          {product.variants.map((variant) => {
+            const isOutOfStock = variant.inventoryQty === 0;
+            return (
+              <Button
+                key={variant.id}
+                variant={
+                  selectedVariant?.id === variant.id ? "default" : "outline"
+                }
+                onClick={() => {
+                  if (isOutOfStock) return;
+                  setSelectedVariant(variant);
+                  setSelectedVariantId(variant.id);
+                }}
+                aria-disabled={isOutOfStock ? "true" : undefined}
+                aria-pressed={selectedVariant?.id === variant.id}
+                className={`bamboo-variant-btn ${
+                  selectedVariant?.id === variant.id
+                    ? "bamboo-variant-btn--selected"
+                    : "bamboo-variant-btn--unselected"
+                } ${isOutOfStock ? "bamboo-variant-btn--disabled cursor-not-allowed opacity-50" : ""}`}
+              >
+                {variant.name}
+                {isOutOfStock && " (Out of Stock)"}
+              </Button>
+            );
+          })}
         </div>
       </div>
 
@@ -101,7 +105,6 @@ export function BambooVariantSelector({
                 className="text-foreground w-10 text-center text-base font-semibold"
                 aria-live="polite"
                 aria-atomic="true"
-                aria-label={`Quantity: ${quantity}`}
               >
                 {quantity}
               </span>
@@ -128,21 +131,35 @@ export function BambooVariantSelector({
         )}
 
         {/* Add to Cart */}
-        <Button
-          type="button"
-          onClick={handleAddToCart}
-          disabled={!selectedVariant || selectedVariant.inventoryQty === 0}
-          className={`flex-1 ${!selectedVariant || selectedVariant.inventoryQty === 0 ? "cursor-not-allowed opacity-50" : ""}`}
-        >
-          {isAdded ? (
-            <>
-              <Check className="h-4 w-4" />
-              Added to Cart
-            </>
-          ) : (
-            `Add ${quantity} to Cart`
-          )}
-        </Button>
+        {(() => {
+          const isUnavailable = !selectedVariant || selectedVariant.inventoryQty === 0;
+          return (
+            <Button
+              type="button"
+              onClick={() => {
+                if (isUnavailable) return;
+                handleAddToCart();
+              }}
+              aria-disabled={isUnavailable ? "true" : undefined}
+              className={`flex-1 ${isUnavailable ? "cursor-not-allowed opacity-50" : ""}`}
+            >
+              {isAdded ? (
+                <>
+                  <Check className="h-4 w-4" aria-hidden="true" />
+                  Added to Cart
+                </>
+              ) : (
+                `Add ${quantity} to Cart`
+              )}
+            </Button>
+          );
+        })()}
+        {/* S-1: live region announces add-to-cart confirmation */}
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          {isAdded && selectedVariant
+            ? `${product.name} — ${selectedVariant.name} added to cart`
+            : ""}
+        </div>
       </div>
     </div>
   );

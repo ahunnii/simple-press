@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
+
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
@@ -51,17 +53,8 @@ const MOBILE_ACCOUNT_LINKS = [
   { href: "/account/preferences", label: "Preferences", icon: Bell },
 ] as const;
 
-const mobileNavItemVariants = {
-  closed: { opacity: 0, y: 16 },
-  open: { opacity: 1, y: 0 },
-};
-
-const mobileNavListVariants = {
-  closed: {},
-  open: {
-    transition: { staggerChildren: 0.05, delayChildren: 0.08 },
-  },
-};
+// Mobile nav animation variants are computed inside the component
+// to respond to the user's reduced-motion preference.
 
 export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const { itemCount, setIsOpen } = useCart();
@@ -73,6 +66,24 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const accountMenuId = useId();
   const mobileSubmenuId = useId();
+  const mobileDialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const hamburgerButtonRef = useRef<HTMLButtonElement>(null);
+  const reduce = useReducedMotion();
+
+  // S-4: Reduced-motion-aware variants for mobile nav stagger
+  const mobileNavItemVariants = {
+    closed: { opacity: reduce ? 1 : 0, y: reduce ? 0 : 16 },
+    open: { opacity: 1, y: 0 },
+  };
+  const mobileNavListVariants = {
+    closed: {},
+    open: {
+      transition: reduce
+        ? {}
+        : { staggerChildren: 0.05, delayChildren: 0.08 },
+    },
+  };
 
   useEffect(() => {
     if (openDropdown === null) return;
@@ -104,6 +115,70 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     return () => {
       document.body.style.overflow = prev;
     };
+  }, [mobileOpen]);
+
+  // C-1: Focus management for mobile menu dialog
+  // On open: focus the close button; on close: return focus to hamburger
+  useEffect(() => {
+    if (mobileOpen) {
+      // Defer by one tick so the dialog is mounted in the DOM
+      const id = setTimeout(() => closeButtonRef.current?.focus(), 0);
+      return () => clearTimeout(id);
+    } else {
+      hamburgerButtonRef.current?.focus();
+    }
+  }, [mobileOpen]);
+
+  // C-1: Set inert on page content siblings while mobile menu is open
+  useEffect(() => {
+    const siblings: Element[] = [];
+    const main = document.querySelector("main");
+    const footer = document.querySelector("footer");
+    // Announcement bar renders above the header — target it by its role/class
+    const announcementBar = document.querySelector("[data-announcement-bar]");
+    if (main) siblings.push(main);
+    if (footer) siblings.push(footer);
+    if (announcementBar) siblings.push(announcementBar);
+
+    if (mobileOpen) {
+      siblings.forEach((el) => el.setAttribute("inert", ""));
+    } else {
+      siblings.forEach((el) => el.removeAttribute("inert"));
+    }
+    return () => {
+      siblings.forEach((el) => el.removeAttribute("inert"));
+    };
+  }, [mobileOpen]);
+
+  // C-1: Tab focus trap inside the mobile menu dialog
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const dialog = mobileDialogRef.current;
+      if (!dialog) return;
+      const focusableSelectors =
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(focusableSelectors),
+      ).filter((el) => !el.closest("[inert]"));
+      if (focusable.length === 0) return;
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", handleTab);
+    return () => document.removeEventListener("keydown", handleTab);
   }, [mobileOpen]);
 
   useEffect(() => {
@@ -294,6 +369,11 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
           className="relative"
           onMouseEnter={() => setOpenDropdown(key)}
           onMouseLeave={() => setOpenDropdown(null)}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+              setOpenDropdown(null);
+            }
+          }}
         >
           <button
             type="button"
@@ -337,6 +417,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     )}
                   >
                     {child.label}
+                    {child.external && (
+                      <span className="sr-only">(opens in new tab)</span>
+                    )}
                   </Link>
                 ))}
               </div>
@@ -362,6 +445,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
         }}
       >
         {link.label}
+        {link.external && (
+          <span className="sr-only">(opens in new tab)</span>
+        )}
       </Link>
     );
   };
@@ -427,6 +513,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                         )}
                       >
                         {child.label}
+                        {child.external && (
+                          <span className="sr-only">(opens in new tab)</span>
+                        )}
                       </Link>
                     </li>
                   ))}
@@ -459,6 +548,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
           )}
         >
           {link.label}
+          {link.external && (
+            <span className="sr-only">(opens in new tab)</span>
+          )}
         </Link>
       </motion.li>
     );
@@ -477,15 +569,17 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
           {/* ── Left: mobile menu + shop/collection links ── */}
           <div className="flex items-center gap-6">
             <Button
+              ref={hamburgerButtonRef}
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-none md:hidden"
+              className="h-11 w-11 rounded-none md:hidden"
               style={{
                 border: "1px solid var(--vn-rule)",
                 color: "var(--vn-ink-soft)",
               }}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
+              aria-controls="noise-mobile-menu"
               onClick={() => setMobileOpen((open) => !open)}
             >
               {mobileOpen ? (
@@ -523,15 +617,17 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
 
             <button
               onClick={() => setIsOpen(true)}
-              aria-label="Open cart"
-              className="relative flex items-center transition-opacity hover:opacity-60"
+              aria-label={itemCount > 0 ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}` : "Open cart"}
+              className="relative flex items-center p-3 -m-3 transition-opacity hover:opacity-60"
               style={{ color: "var(--vn-ink-soft)" }}
             >
               <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.4} />
               {itemCount > 0 && (
                 <motion.span
-                  initial={{ scale: 0 }}
+                  aria-hidden="true"
+                  initial={{ scale: reduce ? 1 : 0 }}
                   animate={{ scale: 1 }}
+                  transition={{ duration: reduce ? 0 : 0.2 }}
                   className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] font-semibold"
                   style={{
                     background: "var(--vn-accent)",
@@ -551,22 +647,24 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
       <AnimatePresence>
         {mobileOpen ? (
           <motion.div
+            ref={mobileDialogRef}
             key="mobile-menu"
+            id="noise-mobile-menu"
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation"
             className="vn-mobile-menu fixed inset-0 z-[60] flex flex-col md:hidden"
-            initial={{ opacity: 0 }}
+            initial={{ opacity: reduce ? 1 : 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            exit={{ opacity: reduce ? 1 : 0 }}
+            transition={{ duration: reduce ? 0 : 0.25 }}
           >
             <motion.div
               className="flex min-h-0 flex-1 flex-col"
-              initial={{ y: 24 }}
+              initial={{ y: reduce ? 0 : 24 }}
               animate={{ y: 0 }}
-              exit={{ y: 16 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              exit={{ y: reduce ? 0 : 16 }}
+              transition={{ duration: reduce ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               <div
                 className="flex shrink-0 items-center justify-between border-b px-5 py-4 sm:px-6"
@@ -582,6 +680,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                   {mobileBrand}
                 </Link>
                 <button
+                  ref={closeButtonRef}
                   type="button"
                   onClick={closeMobileMenu}
                   aria-label="Close menu"
@@ -619,15 +718,14 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
               >
                 <AnimatePresence>
                   {accountMenuOpen && session?.user ? (
-                    <motion.div
+                    <motion.nav
                       ref={accountMenuRef}
                       id={accountMenuId}
-                      role="menu"
                       aria-label="Account menu"
-                      initial={{ opacity: 0, y: 12 }}
+                      initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 12 }}
-                      transition={{ duration: 0.2 }}
+                      exit={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 12 }}
+                      transition={{ duration: reduce ? 0 : 0.2 }}
                       className="vn-mobile-account-panel absolute right-5 bottom-full left-5 mb-2 overflow-hidden rounded-none shadow-lg sm:right-6 sm:left-6"
                     >
                       <div
@@ -647,10 +745,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                       <ul className="py-1">
                         {MOBILE_ACCOUNT_LINKS.map(
                           ({ href, label, icon: Icon }) => (
-                            <li key={href} role="none">
+                            <li key={href}>
                               <Link
                                 href={href}
-                                role="menuitem"
                                 onClick={closeMobileMenu}
                                 className={cn(
                                   "vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 transition-colors",
@@ -674,10 +771,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                           ),
                         )}
                         {showAdminLink ? (
-                          <li role="none">
+                          <li>
                             <Link
                               href="/admin"
-                              role="menuitem"
                               onClick={closeMobileMenu}
                               className="vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 text-[var(--vn-ink-soft)] transition-colors hover:text-[var(--vn-ink)]"
                             >
@@ -690,13 +786,11 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                           </li>
                         ) : null}
                         <li
-                          role="none"
                           className="border-t"
                           style={{ borderColor: "var(--vn-line-soft)" }}
                         >
                           <Link
                             href="/auth/sign-out"
-                            role="menuitem"
                             onClick={closeMobileMenu}
                             className="vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 text-[var(--vn-ink-soft)] transition-colors hover:text-[var(--vn-ink)]"
                           >
@@ -708,7 +802,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                           </Link>
                         </li>
                       </ul>
-                    </motion.div>
+                    </motion.nav>
                   ) : null}
                 </AnimatePresence>
 
@@ -716,6 +810,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                   <button
                     type="button"
                     onClick={openCart}
+                    aria-label={itemCount > 0 ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}` : "Open cart"}
                     className="vn-mobile-action-btn relative rounded-none transition-opacity hover:opacity-80"
                     style={{
                       border: "1px solid var(--vn-rule)",
@@ -723,9 +818,10 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     }}
                   >
                     <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-                    Cart
+                    <span aria-hidden="true">Cart</span>
                     {itemCount > 0 ? (
                       <span
+                        aria-hidden="true"
                         className="ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[9px] font-semibold"
                         style={{
                           background: "var(--vn-accent)",
@@ -741,7 +837,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     <button
                       type="button"
                       id={`${accountMenuId}-trigger`}
-                      aria-haspopup="menu"
+                      aria-haspopup="true"
                       aria-expanded={accountMenuOpen}
                       aria-controls={
                         accountMenuOpen ? accountMenuId : undefined

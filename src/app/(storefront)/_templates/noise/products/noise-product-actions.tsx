@@ -110,7 +110,8 @@ export function NoiseProductActions({
         </div>
       ) : !inStock ? (
         <button
-          disabled
+          aria-disabled="true"
+          onClick={(e) => e.preventDefault()}
           className="w-full cursor-not-allowed py-4 font-mono text-[11px] tracking-[0.24em] uppercase opacity-40"
           style={{
             background: "var(--vn-ink)",
@@ -141,6 +142,8 @@ export function NoiseProductActions({
                 <span
                   className="text-center font-mono text-sm font-medium"
                   style={{ width: "42px" }}
+                  aria-live="polite"
+                  aria-atomic="true"
                 >
                   {quantity}
                 </span>
@@ -212,6 +215,10 @@ export function NoiseProductActions({
         </div>
       )}
 
+      {/* S-2: live region for add-to-cart announcements (no-variant path) */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {isAdded ? `${product.name} added to bag` : ""}
+      </div>
     </>
   );
 }

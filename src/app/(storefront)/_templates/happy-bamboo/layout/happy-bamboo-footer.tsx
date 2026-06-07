@@ -52,7 +52,7 @@ export async function HappyBambooFooter({
           {/* Brand */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
-              <Leaf className="text-muted h-8 w-8" />
+              <Leaf className="text-muted h-8 w-8" aria-hidden="true" />
               <span className="text-muted font-serif text-xl font-bold">
                 Support Happy Bamboo Toilet Tissue
               </span>
@@ -70,7 +70,7 @@ export async function HappyBambooFooter({
                   className="text-muted hover:text-primary transition-colors"
                   aria-label="Facebook"
                 >
-                  <FacebookIcon className="h-5 w-5" />
+                  <FacebookIcon className="h-5 w-5" aria-hidden="true" />
                 </a>
               )}
 
@@ -80,7 +80,7 @@ export async function HappyBambooFooter({
                   className="text-muted hover:text-primary transition-colors"
                   aria-label="Instagram"
                 >
-                  <InstagramIcon className="h-5 w-5" />
+                  <InstagramIcon className="h-5 w-5" aria-hidden="true" />
                 </a>
               )}
               {socialLinks?.twitter && (
@@ -89,7 +89,7 @@ export async function HappyBambooFooter({
                   className="text-muted hover:text-primary transition-colors"
                   aria-label="Twitter"
                 >
-                  <TwitterLogoIcon className="h-5 w-5" />
+                  <TwitterLogoIcon className="h-5 w-5" aria-hidden="true" />
                 </a>
               )}
               {socialLinks?.tiktok && (
@@ -98,7 +98,7 @@ export async function HappyBambooFooter({
                   className="text-muted hover:text-primary transition-colors"
                   aria-label="TikTok"
                 >
-                  <TikTokIcon className="h-5 w-5" />
+                  <TikTokIcon className="h-5 w-5" aria-hidden="true" />
                 </a>
               )}
             </div>
@@ -109,13 +109,14 @@ export async function HappyBambooFooter({
             <h4 className="text-muted mb-4 font-semibold">Quick Links</h4>
             <ul className="flex flex-col space-y-2">
               {(navigationItems ?? quickLinks).map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="text-muted hover:text-primary text-sm transition-colors"
-                >
-                  {link.label}
-                </Link>
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-muted hover:text-primary text-sm transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>

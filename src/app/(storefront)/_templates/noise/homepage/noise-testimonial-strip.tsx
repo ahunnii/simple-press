@@ -57,9 +57,10 @@ export function NoiseTestimonialStrip({
         </p>
 
         {/* Quote carousel — stack all, fade active */}
+        {/* Only announce via live region when NOT auto-rotating (i.e. user paused, reduced motion, or navigating manually) */}
         <div
           style={{ minHeight: "160px", position: "relative" }}
-          aria-live="polite"
+          aria-live={paused || prefersReduced || testimonials.length <= 1 ? "polite" : "off"}
           aria-atomic="true"
         >
           {testimonials.map((t, j) => (
@@ -109,17 +110,30 @@ export function NoiseTestimonialStrip({
                   aria-label={`Go to testimonial ${j + 1}`}
                   aria-current={j === active}
                   style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: 9999,
-                    background:
-                      j === active ? "var(--vn-ink)" : "rgba(0,0,0,.18)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 44,
+                    height: 44,
+                    background: "transparent",
                     border: "none",
                     cursor: "pointer",
-                    transition: "background .3s",
                     padding: 0,
                   }}
-                />
+                >
+                  <span
+                    style={{
+                      display: "block",
+                      width: 6,
+                      height: 6,
+                      borderRadius: 9999,
+                      background:
+                        j === active ? "var(--vn-ink)" : "rgba(0,0,0,.18)",
+                      transition: "background .3s",
+                      flexShrink: 0,
+                    }}
+                  />
+                </button>
               ))}
             </div>
             {!prefersReduced && (

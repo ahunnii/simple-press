@@ -40,7 +40,7 @@ export async function BambooCheckoutPage({
               className="text-muted-foreground mb-4 gap-1"
             >
               <Link href="/cart">
-                <ArrowLeft className="size-4" />
+                <ArrowLeft className="size-4" aria-hidden="true" />
                 Back to Cart
               </Link>
             </Button>

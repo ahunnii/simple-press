@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { cn } from "~/lib/utils";
 
@@ -32,16 +32,38 @@ export function ProductGalleryHorizontal({
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const hasMultipleImages = images.length > 1;
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const enlargeBtnRef = useRef<HTMLButtonElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+
+  // Move focus to close button when lightbox opens
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const t = setTimeout(() => closeBtnRef.current?.focus(), 50);
+    return () => clearTimeout(t);
+  }, [lightboxOpen]);
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    setTimeout(() => enlargeBtnRef.current?.focus(), 50);
+  };
 
   useEffect(() => {
-    if (!enableLightbox) return;
-
-    if (!lightboxOpen) return;
+    if (!enableLightbox || !lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "Escape") {
+        closeLightbox();
+        return;
+      }
+      // Focus trap — only the close button is interactive in the lightbox
+      if (e.key === "Tab") {
+        e.preventDefault();
+        closeBtnRef.current?.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+
   }, [enableLightbox, lightboxOpen]);
 
   return (
@@ -56,6 +78,7 @@ export function ProductGalleryHorizontal({
 
         {enableLightbox ? (
           <button
+            ref={enlargeBtnRef}
             type="button"
             onClick={() => setLightboxOpen(true)}
             className={cn(
@@ -67,10 +90,10 @@ export function ProductGalleryHorizontal({
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedImage}
-                initial={{ opacity: 0 }}
+                initial={shouldReduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
                 className="absolute inset-0"
               >
                 <Image
@@ -94,10 +117,10 @@ export function ProductGalleryHorizontal({
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedImage}
-                initial={{ opacity: 0 }}
+                initial={shouldReduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
                 className="absolute inset-0"
               >
                 <Image
@@ -127,6 +150,7 @@ export function ProductGalleryHorizontal({
                 type="button"
                 onClick={() => setSelectedImage(i)}
                 aria-label={`View image ${i + 1}`}
+                aria-pressed={selectedImage === i}
                 className={cn(
                   `relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border transition-all duration-200 ${
                     selectedImage === i
@@ -152,18 +176,25 @@ export function ProductGalleryHorizontal({
       <AnimatePresence>
         {lightboxOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-            onClick={() => setLightboxOpen(false)}
+            onClick={closeLightbox}
           >
             <motion.div
-              initial={{ scale: 0.92, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`${productName} — enlarged image`}
+              initial={
+                shouldReduceMotion ? false : { scale: 0.92, opacity: 0 }
+              }
+              animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
+              exit={
+                shouldReduceMotion ? undefined : { scale: 0.92, opacity: 0 }
+              }
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
               className="relative max-h-[90vh] max-w-[90vw]"
               onClick={(e) => e.stopPropagation()}
             >
@@ -175,8 +206,9 @@ export function ProductGalleryHorizontal({
                 className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
               />
               <button
+                ref={closeBtnRef}
                 type="button"
-                onClick={() => setLightboxOpen(false)}
+                onClick={closeLightbox}
                 aria-label="Close"
                 className="bg-background/80 hover:bg-background absolute top-3 right-3 rounded-full p-1.5 backdrop-blur-sm transition-colors"
               >

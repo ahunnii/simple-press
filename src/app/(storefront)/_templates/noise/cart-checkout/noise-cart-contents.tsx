@@ -110,7 +110,7 @@ export function NoiseCartContents({ business }: Props) {
                   {Math.round(progress * 100)}%
                 </span>
               </div>
-              <div className="h-px w-full relative" style={{ background: "var(--vn-rule)" }}>
+              <div aria-hidden="true" className="h-px w-full relative" style={{ background: "var(--vn-rule)" }}>
                 <div
                   className="absolute inset-y-0 left-0 transition-all"
                   style={{

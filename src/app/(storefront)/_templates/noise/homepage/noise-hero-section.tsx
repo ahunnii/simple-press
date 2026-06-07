@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Pause, Play } from "lucide-react";
 import { motion } from "motion/react";
+
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 type NoiseHeroSectionProps = {
   heroVideo?: string;
@@ -34,10 +37,39 @@ export function NoiseHeroSection({
   locationTag,
 }: NoiseHeroSectionProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const reduce = useReducedMotion();
+  const [videoPaused, setVideoPaused] = useState(false);
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.playbackRate = 0.5;
   }, [heroVideo]);
+
+  // S-1: Respect reduced-motion preference — pause video when reduce is true
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (reduce) {
+      video.pause();
+      setVideoPaused(true);
+    } else if (!videoPaused) {
+      void video.play().catch(() => {
+        // autoplay may be blocked; ignore
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reduce]);
+
+  const toggleVideo = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      void video.play().catch(() => undefined);
+      setVideoPaused(false);
+    } else {
+      video.pause();
+      setVideoPaused(true);
+    }
+  };
 
   const title = heroTitle ?? "Made with intention.";
   const tagline =
@@ -60,7 +92,7 @@ export function NoiseHeroSection({
         <video
           ref={videoRef}
           src={heroVideo}
-          autoPlay
+          autoPlay={!reduce}
           muted
           loop
           playsInline
@@ -117,9 +149,9 @@ export function NoiseHeroSection({
       {/* Centered content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ duration: reduce ? 0 : 0.9, ease: [0.25, 0.1, 0.25, 1] }}
           className="flex flex-col items-center gap-6"
           style={{ maxWidth: "860px", width: "100%" }}
         >
@@ -152,6 +184,30 @@ export function NoiseHeroSection({
           </Link>
         </motion.div>
       </div>
+
+      {/* S-1: Video pause/play toggle (WCAG 2.2.2) — only shown when heroVideo is set */}
+      {heroVideo && (
+        <button
+          type="button"
+          onClick={toggleVideo}
+          aria-pressed={videoPaused}
+          aria-label={videoPaused ? "Play background video" : "Pause background video"}
+          className="vn-focus-on-dark absolute right-5 bottom-14 flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[9px] tracking-[0.22em] uppercase transition-opacity hover:opacity-80"
+          style={{
+            borderColor: "rgba(255,255,255,0.4)",
+            color: "rgba(255,255,255,0.85)",
+            background: "rgba(0,0,0,0.35)",
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          {videoPaused ? (
+            <Play className="h-2.5 w-2.5" aria-hidden="true" />
+          ) : (
+            <Pause className="h-2.5 w-2.5" aria-hidden="true" />
+          )}
+          {videoPaused ? "Play" : "Pause"}
+        </button>
+      )}
 
       {/* Bottom credit strip */}
       {(wordmark ?? locationTag) && (

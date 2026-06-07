@@ -104,6 +104,9 @@ export function BambooMobileNav({
                         )}
                       >
                         {child.label}
+                        {child.external && (
+                          <span className="sr-only"> (opens in new tab)</span>
+                        )}
                       </Link>
                     ))}
                   </div>
@@ -125,6 +128,9 @@ export function BambooMobileNav({
                 )}
               >
                 {link.label}
+                {link.external && (
+                  <span className="sr-only"> (opens in new tab)</span>
+                )}
               </Link>
             ),
           )}

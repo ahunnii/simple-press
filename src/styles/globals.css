@@ -148,6 +148,17 @@
   }
 }
 
+/* ── Variant selector buttons (N-5) ── */
+.bamboo .bamboo-variant-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bamboo .bamboo-variant-btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
 .happy-bamboo {
   --background: oklch(1 0 0);
   --foreground: oklch(0.148 0.004 228.8);
@@ -285,7 +296,10 @@
 @media (prefers-reduced-motion: reduce) {
   .default-template *,
   .default-template *::before,
-  .default-template *::after {
+  .default-template *::after,
+  .happy-bamboo *,
+  .happy-bamboo *::before,
+  .happy-bamboo *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

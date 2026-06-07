@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -38,12 +38,17 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+  const triggerRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
-  // Close desktop dropdown on Escape
+  // Close desktop dropdown on Escape, returning focus to trigger
   useEffect(() => {
     if (openDropdown === null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenDropdown(null);
+      if (e.key === "Escape") {
+        const trigger = triggerRefs.current.get(openDropdown);
+        setOpenDropdown(null);
+        trigger?.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -123,11 +128,22 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
                 className="relative"
                 onMouseEnter={() => setOpenDropdown(i)}
                 onMouseLeave={() => setOpenDropdown(null)}
+                onBlur={(e) => {
+                  // Close when focus leaves the wrapper entirely
+                  if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                    setOpenDropdown(null);
+                  }
+                }}
               >
                 <button
                   type="button"
+                  ref={(el) => {
+                    if (el) triggerRefs.current.set(i, el);
+                    else triggerRefs.current.delete(i);
+                  }}
                   aria-haspopup="true"
                   aria-expanded={openDropdown === i ? "true" : "false"}
+                  aria-controls={`bamboo-nav-dropdown-${i}`}
                   onClick={() => setOpenDropdown(openDropdown === i ? null : i)}
                   className={cn(
                     "flex cursor-pointer items-center gap-1 border-none bg-transparent p-0 text-sm font-medium transition-colors",
@@ -147,7 +163,10 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
                 </button>
 
                 {openDropdown === i && (
-                  <div className="absolute top-full left-0 z-10 pt-2">
+                  <div
+                    id={`bamboo-nav-dropdown-${i}`}
+                    className="absolute top-full left-0 z-10 pt-2"
+                  >
                     <div className="bg-background border-border/60 min-w-[160px] overflow-hidden rounded-(--radius) border shadow-sm">
                       {link.children.map((child) => (
                         <Link
@@ -169,6 +188,9 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
                           )}
                         >
                           {child.label}
+                          {child.external && (
+                            <span className="sr-only"> (opens in new tab)</span>
+                          )}
                         </Link>
                       ))}
                     </div>
@@ -189,6 +211,9 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
                 }`}
               >
                 {link.label}
+                {link.external && (
+                  <span className="sr-only"> (opens in new tab)</span>
+                )}
               </Link>
             ),
           )}
@@ -207,7 +232,7 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
               href="/cart"
               aria-label={`Shopping cart with ${itemCount} items`}
             >
-              <span className="relative">
+              <span className="relative" aria-hidden="true">
                 <ShoppingBag className="size-5" />
                 {itemCount > 0 && (
                   <span className="bg-primary text-primary-foreground absolute -top-2 -right-2 flex size-4 items-center justify-center rounded-full text-[10px] font-bold">
@@ -225,7 +250,7 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
           >
-            <Menu className="size-5" />
+            <Menu className="size-5" aria-hidden="true" />
           </Button>
         </div>
       </div>

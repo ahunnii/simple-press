@@ -35,20 +35,20 @@ export function BambooCollectionPage({
             <div className="mx-auto w-full max-w-7xl">
               <Link
                 href="/collections"
-                className="mb-4 inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-white"
+                className="mb-4 inline-flex items-center gap-2 text-sm text-white/90 transition-colors hover:text-white"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 All Collections
               </Link>
               <h1 className="font-heading text-4xl font-bold text-white md:text-5xl">
                 {collection.name}
               </h1>
               {collection.description && (
-                <p className="mt-3 max-w-xl text-white/80">
+                <p className="mt-3 max-w-xl text-white/90">
                   {collection.description}
                 </p>
               )}
-              <p className="mt-3 text-sm text-white/60">
+              <p className="mt-3 text-sm text-white/80">
                 {products.length}{" "}
                 {products.length === 1 ? "product" : "products"}
               </p>
@@ -62,7 +62,7 @@ export function BambooCollectionPage({
               href="/collections"
               className="text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-2 text-sm transition-colors"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               All Collections
             </Link>
             <h1 className="font-heading text-foreground text-4xl font-bold md:text-5xl">
@@ -166,7 +166,7 @@ export function BambooCollectionPage({
                           {count} {count === 1 ? "product" : "products"}
                         </p>
                       </div>
-                      <ArrowRight className="text-primary h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      <ArrowRight className="text-primary h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                     </div>
                   </Link>
                 );

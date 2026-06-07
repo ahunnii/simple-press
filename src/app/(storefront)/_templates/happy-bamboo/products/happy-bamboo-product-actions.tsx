@@ -51,7 +51,12 @@ export function HappyBambooProductActions({
           </p>
         </div>
       ) : !inStock ? (
-        <Button size="lg" disabled className="flex">
+        <Button
+          size="lg"
+          aria-disabled={true}
+          onClick={(e) => e.preventDefault()}
+          className="flex aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+        >
           Out of Stock
         </Button>
       ) : (
@@ -87,17 +92,25 @@ export function HappyBambooProductActions({
                 <Button size="lg" onClick={addToCart} className="flex">
                   {isAdded ? (
                     <>
-                      <Check className="h-4 w-4" />
+                      <Check className="h-4 w-4" aria-hidden="true" />
                       Added to Cart
                     </>
                   ) : (
                     <>
-                      <ShoppingBag className="size-5" />
+                      <ShoppingBag className="size-5" aria-hidden="true" />
                       Add to Cart - {formatPrice(displayPrice)}
                     </>
                   )}
                 </Button>
               </div>
+              <span
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                className="sr-only"
+              >
+                {isAdded ? "Added to cart" : ""}
+              </span>
               {product.trackInventory &&
                 product.allowBackorders &&
                 (product.inventoryQty ?? 0) === 0 && (

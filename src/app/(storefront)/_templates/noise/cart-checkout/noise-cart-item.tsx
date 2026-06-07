@@ -15,7 +15,7 @@ type Props = {
 
 export function NoiseCartItem({ item, index }: Props) {
   const { updateQuantity, removeItem } = useCart();
-  const { productId, variantId, productName, variantName, price, quantity, imageUrl, sku } = item;
+  const { productId, productSlug, variantId, productName, variantName, price, quantity, imageUrl, sku } = item;
 
   const lineTotal = price * quantity;
 
@@ -36,7 +36,7 @@ export function NoiseCartItem({ item, index }: Props) {
         >
           <Image
             src={imageUrl ?? "/placeholder.svg"}
-            alt={productName}
+            alt=""
             fill
             className="object-cover"
             sizes="80px"
@@ -52,7 +52,7 @@ export function NoiseCartItem({ item, index }: Props) {
         {/* Info */}
         <div className="flex flex-col gap-1.5 min-w-0">
           <Link
-            href={`/shop/${productId}`}
+            href={`/shop/${productSlug ?? productId}`}
             className="font-serif italic leading-[1.1] tracking-tight hover:opacity-70 transition-opacity"
             style={{ fontSize: "20px", letterSpacing: "-0.005em" }}
           >
@@ -95,7 +95,7 @@ export function NoiseCartItem({ item, index }: Props) {
         >
           <button
             className="flex items-center justify-center font-mono transition-colors hover:bg-foreground hover:text-background"
-            style={{ width: "32px", height: "32px" }}
+            style={{ width: "44px", height: "44px" }}
             onClick={() => updateQuantity(productId, variantId, quantity - 1)}
             disabled={quantity <= 1}
             aria-label="Decrease quantity"
@@ -104,13 +104,15 @@ export function NoiseCartItem({ item, index }: Props) {
           </button>
           <span
             className="font-mono text-sm text-center"
-            style={{ width: "28px" }}
+            style={{ width: "32px" }}
+            aria-live="polite"
+            aria-atomic="true"
           >
             {quantity}
           </span>
           <button
             className="flex items-center justify-center font-mono transition-colors hover:bg-foreground hover:text-background"
-            style={{ width: "32px", height: "32px" }}
+            style={{ width: "44px", height: "44px" }}
             onClick={() => updateQuantity(productId, variantId, quantity + 1)}
             aria-label="Increase quantity"
           >
@@ -129,8 +131,8 @@ export function NoiseCartItem({ item, index }: Props) {
         {/* Remove × */}
         <button
           onClick={() => removeItem(productId, variantId)}
-          className="font-mono text-lg leading-none self-center transition-opacity hover:opacity-50"
-          style={{ color: "var(--vn-steel-mist)" }}
+          className="font-mono text-lg leading-none self-center transition-opacity hover:opacity-50 flex items-center justify-center"
+          style={{ color: "var(--vn-steel-mist)", minWidth: "44px", minHeight: "44px" }}
           aria-label={`Remove ${productName}`}
         >
           ×
@@ -146,7 +148,7 @@ export function NoiseCartItem({ item, index }: Props) {
         >
           <Image
             src={imageUrl ?? "/placeholder.svg"}
-            alt={productName}
+            alt=""
             fill
             className="object-cover"
             sizes="72px"
@@ -165,7 +167,7 @@ export function NoiseCartItem({ item, index }: Props) {
           <div className="flex items-start justify-between gap-2">
             <div className="flex flex-col gap-1 min-w-0">
               <Link
-                href={`/shop/${productId}`}
+                href={`/shop/${productSlug ?? productId}`}
                 className="font-serif italic leading-[1.1] tracking-tight hover:opacity-70 transition-opacity"
                 style={{ fontSize: "17px", letterSpacing: "-0.005em" }}
               >
@@ -182,8 +184,8 @@ export function NoiseCartItem({ item, index }: Props) {
             </div>
             <button
               onClick={() => removeItem(productId, variantId)}
-              className="font-mono text-lg leading-none flex-shrink-0 transition-opacity hover:opacity-50"
-              style={{ color: "var(--vn-steel-mist)" }}
+              className="font-mono text-lg leading-none flex-shrink-0 transition-opacity hover:opacity-50 flex items-center justify-center"
+              style={{ color: "var(--vn-steel-mist)", minWidth: "44px", minHeight: "44px" }}
               aria-label={`Remove ${productName}`}
             >
               ×
@@ -198,7 +200,7 @@ export function NoiseCartItem({ item, index }: Props) {
             >
               <button
                 className="flex items-center justify-center font-mono transition-colors hover:bg-foreground hover:text-background"
-                style={{ width: "28px", height: "28px" }}
+                style={{ width: "44px", height: "44px" }}
                 onClick={() => updateQuantity(productId, variantId, quantity - 1)}
                 disabled={quantity <= 1}
                 aria-label="Decrease quantity"
@@ -207,13 +209,15 @@ export function NoiseCartItem({ item, index }: Props) {
               </button>
               <span
                 className="font-mono text-sm text-center"
-                style={{ width: "24px" }}
+                style={{ width: "32px" }}
+                aria-live="polite"
+                aria-atomic="true"
               >
                 {quantity}
               </span>
               <button
                 className="flex items-center justify-center font-mono transition-colors hover:bg-foreground hover:text-background"
-                style={{ width: "28px", height: "28px" }}
+                style={{ width: "44px", height: "44px" }}
                 onClick={() => updateQuantity(productId, variantId, quantity + 1)}
                 aria-label="Increase quantity"
               >

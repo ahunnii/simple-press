@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 
 import { useContactForm } from "~/hooks/use-contact-form";
@@ -29,28 +30,40 @@ export function NoiseContactForm() {
     resetSuccess,
   } = useContactForm({ messageMaxLength: 400 });
 
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (isSuccess) {
+      successHeadingRef.current?.focus();
+    }
+  }, [isSuccess]);
+
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
 
   if (isSuccess) {
     return (
       <div
+        role="status"
         className="border-foreground flex flex-col items-center justify-center gap-6 border py-16 text-center"
         style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
       >
         <div
+          aria-hidden="true"
           className="font-serif leading-none italic"
           style={{ fontSize: "48px", opacity: 0.3 }}
         >
           ✓
         </div>
         <div>
-          <p
+          <h2
+            ref={successHeadingRef}
+            tabIndex={-1}
             className="font-serif leading-none italic"
             style={{ fontSize: "28px", letterSpacing: "-0.01em" }}
           >
             Message sent!
-          </p>
+          </h2>
           <p
             className="mt-2 font-mono text-[10px] tracking-[0.2em] uppercase"
             style={{ color: "var(--vn-steel-mist)" }}

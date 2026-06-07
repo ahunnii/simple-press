@@ -28,20 +28,20 @@ type CheckoutFormProps = {
 const LBL = "font-mono text-[9.5px] tracking-[0.22em] uppercase";
 const INP = "rounded-none border-border font-sans text-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-foreground";
 
-/* Section heading separator */
+/* Section heading separator — renders as a <legend> for fieldset grouping */
 function SectionHead({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="flex items-center gap-4 border-b pb-3 mb-5"
+    <legend
+      className="flex w-full items-center gap-4 border-b pb-3 mb-5 float-none"
       style={{ borderColor: "var(--vn-ink)" }}
     >
-      <h4
+      <span
         className="font-mono text-[10px] tracking-[0.28em] uppercase"
         style={{ color: "var(--vn-steel)" }}
       >
         {children}
-      </h4>
-    </div>
+      </span>
+    </legend>
   );
 }
 
@@ -97,6 +97,12 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
     >
       {/* Left — fields */}
       <div className="flex-1 flex flex-col gap-10">
+        <p
+          className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
+          style={{ color: "var(--vn-steel-mist)" }}
+        >
+          Fields marked * are required
+        </p>
 
         {/* Contact */}
         <fieldset className="flex flex-col gap-5">
@@ -164,6 +170,8 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                 }}
                 placeholder="VND-SUMMER-26"
                 autoComplete="off"
+                aria-invalid={!!discountFieldError}
+                aria-describedby={discountFieldError ? "discount-code-error" : undefined}
                 className={cn(INP, "font-mono tracking-[0.1em]")}
               />
             </div>
@@ -182,12 +190,19 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
             </button>
           </div>
           {discountFieldError && (
-            <p className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-destructive">
+            <p
+              id="discount-code-error"
+              role="alert"
+              className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-destructive"
+            >
               {discountFieldError}
             </p>
           )}
           {discountCodeLabel && discountAmount > 0 && (
-            <p className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-green-600">
+            <p
+              role="status"
+              className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-green-600"
+            >
               Code <span className="font-semibold">{discountCodeLabel}</span> applied.
             </p>
           )}
@@ -202,6 +217,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                 <button
                   key={method}
                   type="button"
+                  aria-pressed={deliveryMethod === method}
                   onClick={() => setDeliveryMethod(method)}
                   className="vn-stamp text-[10px] transition-all"
                   style={
@@ -379,6 +395,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
             ].map((note) => (
               <div key={note.ic} className="flex gap-2.5 items-start">
                 <span
+                  aria-hidden="true"
                   className="flex-shrink-0 flex items-center justify-center border font-serif italic"
                   style={{
                     width: "22px",

@@ -67,9 +67,9 @@ export function BambooContactPage({
                       <info.icon className="text-primary size-5" />
                     </div>
                     <div>
-                      <h3 className="text-foreground text-sm font-semibold">
+                      <h2 className="text-foreground text-sm font-semibold">
                         {info.label}
-                      </h3>
+                      </h2>
                       {info.href ? (
                         <a
                           href={info.href}

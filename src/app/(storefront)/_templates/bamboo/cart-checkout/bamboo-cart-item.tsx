@@ -38,9 +38,9 @@ export function BambooCartItem({ item }: Props) {
       <div className="flex flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h3 className="text-card-foreground font-heading text-sm font-semibold sm:text-base">
+            <h2 className="text-card-foreground font-heading text-sm font-semibold sm:text-base">
               {productName}
-            </h3>
+            </h2>
             {variantName && (
               <p className="text-muted-foreground text-xs sm:text-sm">
                 {variantName}
@@ -57,7 +57,7 @@ export function BambooCartItem({ item }: Props) {
             onClick={() => removeItem(productId, variantId)}
             aria-label={`Remove ${productName} from cart`}
           >
-            <X className="size-4" />
+            <X className="size-4" aria-hidden="true" />
           </Button>
         </div>
         <div className="mt-auto flex items-center justify-between">
@@ -76,7 +76,6 @@ export function BambooCartItem({ item }: Props) {
               className="text-foreground w-8 text-center text-sm font-medium"
               aria-live="polite"
               aria-atomic="true"
-              aria-label={`Quantity: ${quantity}`}
             >
               {quantity}
             </span>

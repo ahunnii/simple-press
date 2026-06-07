@@ -69,7 +69,11 @@ export function HappyBambooOrderConfirmation({ business }: Props) {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-2xl text-center">
+      <div
+        className="mx-auto max-w-2xl text-center"
+        role="status"
+        aria-live="polite"
+      >
         <p className="text-muted-foreground">Loading order details...</p>
       </div>
     );
@@ -91,7 +95,7 @@ export function HappyBambooOrderConfirmation({ business }: Props) {
       {/* Success Header */}
       <div className="mb-12 text-center">
         <div className="bg-primary/10 mb-6 inline-flex size-16 items-center justify-center rounded-full">
-          <CheckCircle2 className="text-primary size-8" />
+          <CheckCircle2 className="text-primary size-8" aria-hidden="true" />
         </div>
         <h1 className="font-heading text-foreground text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
           Order Confirmed!
@@ -106,7 +110,7 @@ export function HappyBambooOrderConfirmation({ business }: Props) {
         <CardContent className="p-8">
           <div className="flex items-start gap-4">
             <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-full">
-              <Package className="text-primary size-5" />
+              <Package className="text-primary size-5" aria-hidden="true" />
             </div>
             <div className="flex-1">
               <h2 className="text-foreground mb-3 text-xl font-semibold">
@@ -114,15 +118,15 @@ export function HappyBambooOrderConfirmation({ business }: Props) {
               </h2>
               <ul className="text-muted-foreground space-y-2">
                 <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
+                  <span className="text-primary" aria-hidden="true">•</span>
                   <span>You&apos;ll receive an email confirmation shortly</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
+                  <span className="text-primary" aria-hidden="true">•</span>
                   <span>We&apos;ll notify you when your order ships</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
+                  <span className="text-primary" aria-hidden="true">•</span>
                   <span>Track your order status via email</span>
                 </li>
               </ul>

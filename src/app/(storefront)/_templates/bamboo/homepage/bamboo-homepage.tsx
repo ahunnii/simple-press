@@ -166,7 +166,7 @@ export async function BambooHomepage() {
             {homepage?.products?.length === 0 && (
               <StaggerItem key="no-products">
                 <div className="flex flex-col items-center justify-center">
-                  <Package className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                  <Package className="text-muted-foreground/50 mb-4 h-12 w-12" aria-hidden="true" />
                   <p className="text-muted-foreground text-lg">
                     No products found
                   </p>

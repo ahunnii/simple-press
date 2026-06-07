@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 import { useContactForm } from "~/hooks/use-contact-form";
@@ -34,17 +35,30 @@ export function BambooContactForm() {
     resetSuccess,
   } = useContactForm({ messageMaxLength: 180 });
 
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
+
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
 
+  // M-3: Move focus to the success heading when the form succeeds
+  useEffect(() => {
+    if (isSuccess) {
+      successHeadingRef.current?.focus();
+    }
+  }, [isSuccess]);
+
   if (isSuccess) {
     return (
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="border-primary/20 bg-primary/5" role="status">
         <CardContent className="flex flex-col items-center gap-4 p-12 text-center">
           <div className="bg-primary/10 flex size-16 items-center justify-center rounded-full">
-            <CheckCircle2 className="text-primary size-8" />
+            <CheckCircle2 className="text-primary size-8" aria-hidden="true" />
           </div>
-          <h2 className="text-foreground font-heading text-xl font-semibold">
+          <h2
+            ref={successHeadingRef}
+            tabIndex={-1}
+            className="text-foreground font-heading text-xl font-semibold outline-none"
+          >
             Message Sent
           </h2>
           <p className="text-muted-foreground">
@@ -66,6 +80,11 @@ export function BambooContactForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex w-full flex-col gap-5"
       >
+        {/* M-7: required field explanation */}
+        <p className="text-muted-foreground text-sm">
+          Fields marked with * are required.
+        </p>
+
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
@@ -144,7 +163,7 @@ export function BambooContactForm() {
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="size-4 animate-spin" />
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               Sending...
             </>
           ) : (

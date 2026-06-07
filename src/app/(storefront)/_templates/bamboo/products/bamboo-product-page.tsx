@@ -66,7 +66,7 @@ export function BambooProductPage({
             className="text-muted-foreground mb-6 gap-1"
           >
             <Link href="/shop">
-              <ArrowLeft className="size-4" />
+              <ArrowLeft className="size-4" aria-hidden="true" />
               Back to Shop
             </Link>
           </Button>

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
+
 import type { ShippingConfig } from "~/lib/shipping-utils";
 import { formatPrice } from "~/lib/prices";
 import {
@@ -27,6 +29,7 @@ type NoiseCartDrawerProps = {
 export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
   const { items, subtotal, isOpen, setIsOpen, updateQuantity, removeItem } =
     useCart();
+  const reduce = useReducedMotion();
 
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
   const progress = getFreeShippingProgress(subtotal, shippingConfig);
@@ -122,9 +125,10 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                   <motion.div
                     key={`${item.productId}-${item.variantId ?? "base"}`}
                     layout
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: reduce ? 1 : 0, x: reduce ? 0 : 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
+                    exit={{ opacity: reduce ? 1 : 0, x: reduce ? 0 : -20 }}
+                    transition={{ duration: reduce ? 0 : undefined }}
                     className="grid items-center gap-3.5 border-b px-6 py-4"
                     style={{
                       gridTemplateColumns: "80px 1fr auto",
@@ -143,7 +147,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                     >
                       <Image
                         src={item.imageUrl ?? "/placeholder.svg"}
-                        alt={item.productName}
+                        alt=""
                         fill
                         className="object-cover"
                         sizes="80px"
@@ -175,7 +179,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                         >
                           <button
                             className="flex items-center justify-center transition-colors hover:bg-foreground hover:text-background disabled:opacity-30"
-                            style={{ width: "24px", height: "24px" }}
+                            style={{ width: "36px", height: "36px" }}
                             onClick={() =>
                               updateQuantity(
                                 item.productId,
@@ -190,13 +194,15 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                           </button>
                           <span
                             className="font-mono text-[12px] text-center"
-                            style={{ width: "24px" }}
+                            style={{ width: "28px" }}
+                            aria-live="polite"
+                            aria-atomic="true"
                           >
                             {item.quantity}
                           </span>
                           <button
                             className="flex items-center justify-center transition-colors hover:bg-foreground hover:text-background"
-                            style={{ width: "24px", height: "24px" }}
+                            style={{ width: "36px", height: "36px" }}
                             onClick={() =>
                               updateQuantity(
                                 item.productId,
@@ -243,6 +249,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
               {showFreeBar && untilFree !== null && progress !== null && (
                 <div className="mb-1">
                   <div
+                    aria-hidden="true"
                     className="h-px w-full relative mb-1.5"
                     style={{ background: "var(--vn-rule)" }}
                   >

@@ -69,7 +69,7 @@ export function HappyBambooFeaturedProducts({
           <Button size="lg" asChild>
             <Link href={featuredButtonLink ?? "/shop"}>
               {featuredButtonText}
-              <ArrowRight className="size-4" />
+              <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </Button>
         </div>

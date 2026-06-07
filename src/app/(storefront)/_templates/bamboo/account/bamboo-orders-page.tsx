@@ -73,7 +73,6 @@ export function BambooOrdersPage({ orders }: OrdersPageTemplateProps) {
                       <div className="flex flex-col items-end gap-2">
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${statusClass(order.status)}`}
-                          aria-label={`Status: ${order.status}`}
                         >
                           {order.status}
                         </span>

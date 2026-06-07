@@ -137,6 +137,10 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                 }}
                 placeholder="Discount Code"
                 autoComplete="off"
+                aria-invalid={!!discountFieldError}
+                aria-describedby={
+                  discountFieldError ? "discount-code-error" : undefined
+                }
               />
             </div>
             <Button
@@ -151,7 +155,7 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
             >
               {isValidatingDiscount ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
                   Checking…
                 </>
               ) : (
@@ -160,7 +164,13 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
             </Button>
           </div>
           {discountFieldError && (
-            <p className="text-destructive text-sm">{discountFieldError}</p>
+            <p
+              id="discount-code-error"
+              role="alert"
+              className="text-destructive text-sm"
+            >
+              {discountFieldError}
+            </p>
           )}
           {discountCodeLabel && discountAmount > 0 && (
             <p className="text-sm text-green-600">
@@ -183,6 +193,7 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                 type="button"
                 variant={deliveryMethod === "ship" ? "default" : "outline"}
                 onClick={() => setDeliveryMethod("ship")}
+                aria-pressed={deliveryMethod === "ship"}
                 style={
                   deliveryMethod === "ship"
                     ? { backgroundColor: primaryColor }
@@ -195,6 +206,7 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                 type="button"
                 variant={deliveryMethod === "pickup" ? "default" : "outline"}
                 onClick={() => setDeliveryMethod("pickup")}
+                aria-pressed={deliveryMethod === "pickup"}
                 style={
                   deliveryMethod === "pickup"
                     ? { backgroundColor: primaryColor }

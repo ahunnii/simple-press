@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
@@ -32,14 +34,34 @@ export function NoiseProductPage({
 
   const [activeImg, setActiveImg] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const lightboxCloseRef = useRef<HTMLButtonElement>(null);
+  const enlargeTriggerRef = useRef<HTMLButtonElement>(null);
+  const reduce = useReducedMotion();
 
+  // C-2: Escape key for lightbox
   useEffect(() => {
     if (!lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "Escape") {
+        setLightboxOpen(false);
+      } else if (e.key === "Tab") {
+        // Trap focus on the single close button
+        e.preventDefault();
+        lightboxCloseRef.current?.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxOpen]);
+
+  // C-2: Focus close button on open; return focus to trigger on close
+  useEffect(() => {
+    if (lightboxOpen) {
+      const id = setTimeout(() => lightboxCloseRef.current?.focus(), 0);
+      return () => clearTimeout(id);
+    } else {
+      enlargeTriggerRef.current?.focus();
+    }
   }, [lightboxOpen]);
 
   // Reset active image when product changes
@@ -78,42 +100,56 @@ export function NoiseProductPage({
           borderBottom: "1px solid var(--vn-line-soft) ",
         }}
       >
-        <div className="flex items-center gap-2 font-mono text-[10.5px] tracking-[0.2em] uppercase">
-          <Link
-            href="/"
-            className="transition-opacity hover:opacity-60"
-            style={{ color: "var(--vn-steel-mist)" }}
+        <nav aria-label="Breadcrumb">
+          <ol
+            className="flex items-center gap-2 font-mono text-[10.5px] tracking-[0.2em] uppercase"
+            style={{ listStyle: "none", margin: 0, padding: 0 }}
           >
-            Home
-          </Link>
-          <span style={{ color: "var(--vn-rule)" }}>/</span>
-          <Link
-            href="/shop"
-            className="transition-opacity hover:opacity-60"
-            style={{ color: "var(--vn-steel-mist)" }}
-          >
-            Shop
-          </Link>
-          {firstCollection && (
-            <>
-              <span style={{ color: "var(--vn-rule)" }}>/</span>
+            <li>
               <Link
-                href={`/collections/${firstCollection.slug}`}
+                href="/"
                 className="transition-opacity hover:opacity-60"
                 style={{ color: "var(--vn-steel-mist)" }}
               >
-                {firstCollection.name}
+                Home
               </Link>
-            </>
-          )}
-          <span style={{ color: "var(--vn-rule)" }}>/</span>
-          <span
-            className="max-w-[30ch] truncate"
-            style={{ color: "var(--vn-ink)" }}
-          >
-            {product.name}
-          </span>
-        </div>
+            </li>
+            <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>/</li>
+            <li>
+              <Link
+                href="/shop"
+                className="transition-opacity hover:opacity-60"
+                style={{ color: "var(--vn-steel-mist)" }}
+              >
+                Shop
+              </Link>
+            </li>
+            {firstCollection && (
+              <>
+                <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>/</li>
+                <li>
+                  <Link
+                    href={`/collections/${firstCollection.slug}`}
+                    className="transition-opacity hover:opacity-60"
+                    style={{ color: "var(--vn-steel-mist)" }}
+                  >
+                    {firstCollection.name}
+                  </Link>
+                </li>
+              </>
+            )}
+            <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>/</li>
+            <li>
+              <span
+                className="max-w-[30ch] truncate"
+                style={{ color: "var(--vn-ink)" }}
+                aria-current="page"
+              >
+                {product.name}
+              </span>
+            </li>
+          </ol>
+        </nav>
         {product.sku && (
           <span
             className="ml-4 hidden flex-shrink-0 font-mono text-[10px] tracking-[0.16em] uppercase md:block"
@@ -144,6 +180,8 @@ export function NoiseProductPage({
               <button
                 key={img.id}
                 onClick={() => setActiveImg(i)}
+                aria-label={`View image ${i + 1}`}
+                aria-pressed={activeImg === i}
                 className="relative overflow-hidden transition-all"
                 style={{
                   aspectRatio: "4 / 5",
@@ -156,11 +194,10 @@ export function NoiseProductPage({
                     activeImg === i ? "2px solid var(--vn-bone)" : "none",
                   outlineOffset: "-4px",
                 }}
-                aria-label={`View image ${i + 1}`}
               >
                 <Image
                   src={img.url}
-                  alt={`View ${i + 1}`}
+                  alt=""
                   fill
                   className="object-cover"
                   sizes="80px"
@@ -203,6 +240,7 @@ export function NoiseProductPage({
           >
             {activeImage ? (
               <button
+                ref={enlargeTriggerRef}
                 type="button"
                 onClick={() => setLightboxOpen(true)}
                 className={cn("cursor-zoom-in")}
@@ -297,6 +335,8 @@ export function NoiseProductPage({
               <button
                 key={img.id}
                 onClick={() => setActiveImg(i)}
+                aria-label={`View image ${i + 1}`}
+                aria-pressed={activeImg === i}
                 className="relative overflow-hidden"
                 style={{
                   aspectRatio: "4 / 5",
@@ -306,11 +346,10 @@ export function NoiseProductPage({
                       ? "1px solid var(--vn-ink)"
                       : "1px solid var(--vn-rule)",
                 }}
-                aria-label={`View image ${i + 1}`}
               >
                 <Image
                   src={img.url}
-                  alt={`View ${i + 1}`}
+                  alt=""
                   fill
                   className="object-cover"
                   sizes="25vw"
@@ -394,18 +433,21 @@ export function NoiseProductPage({
       <AnimatePresence>
         {lightboxOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${product.name ?? "Product"} image, enlarged view`}
+            initial={{ opacity: reduce ? 1 : 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            exit={{ opacity: reduce ? 1 : 0 }}
+            transition={{ duration: reduce ? 0 : 0.2 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
             onClick={() => setLightboxOpen(false)}
           >
             <motion.div
-              initial={{ scale: 0.92, opacity: 0 }}
+              initial={{ scale: reduce ? 1 : 0.92, opacity: reduce ? 1 : 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              exit={{ scale: reduce ? 1 : 0.92, opacity: reduce ? 1 : 0 }}
+              transition={{ duration: reduce ? 0 : 0.2 }}
               className="relative max-h-[90vh] max-w-[90vw]"
               onClick={(e) => e.stopPropagation()}
             >
@@ -417,10 +459,11 @@ export function NoiseProductPage({
                 className="max-h-[90vh] max-w-[90vw] rounded-none object-contain"
               />
               <button
+                ref={lightboxCloseRef}
                 type="button"
                 onClick={() => setLightboxOpen(false)}
-                aria-label="Close"
-                className="bg-background/80 hover:bg-background absolute top-3 right-3 rounded-full p-1.5 backdrop-blur-sm transition-colors"
+                aria-label="Close image viewer"
+                className="bg-background/80 hover:bg-background absolute top-3 right-3 rounded-full p-2.5 backdrop-blur-sm transition-colors"
               >
                 <X className="size-5" />
               </button>

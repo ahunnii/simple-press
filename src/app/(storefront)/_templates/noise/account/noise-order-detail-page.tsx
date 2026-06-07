@@ -101,9 +101,9 @@ export function NoiseOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
           <div className="flex flex-col gap-4">
             {addr && (
               <div className="border border-foreground/20 p-5">
-                <h5 className="font-mono text-[9px] tracking-[0.22em] uppercase mb-4" style={{ color: "var(--vn-steel-mist)" }}>
+                <h2 className="font-mono text-[9px] tracking-[0.22em] uppercase mb-4" style={{ color: "var(--vn-steel-mist)" }}>
                   Shipping Address
-                </h5>
+                </h2>
                 <address className="not-italic flex flex-col gap-1">
                   <p className="font-sans text-sm">{addr.firstName} {addr.lastName}</p>
                   <p className="font-sans text-sm" style={{ color: "var(--vn-steel-mist)" }}>{addr.address1}</p>
@@ -118,9 +118,9 @@ export function NoiseOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
 
             {order.shipments && order.shipments.length > 0 && (
               <div className="border border-foreground/20 p-5">
-                <h5 className="font-mono text-[9px] tracking-[0.22em] uppercase mb-4" style={{ color: "var(--vn-steel-mist)" }}>
+                <h2 className="font-mono text-[9px] tracking-[0.22em] uppercase mb-4" style={{ color: "var(--vn-steel-mist)" }}>
                   Shipments
-                </h5>
+                </h2>
                 <div className="flex flex-col gap-4">
                   {order.shipments.map((shipment) => (
                     <div key={shipment.id} className="flex flex-col gap-1">
@@ -136,6 +136,7 @@ export function NoiseOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                         <Link href={shipment.trackingUrl} target="_blank" rel="noopener noreferrer"
                           className="vn-stamp text-[9.5px] w-fit transition-all hover:bg-foreground hover:text-background">
                           Track shipment →
+                          <span className="sr-only">(opens in new tab)</span>
                         </Link>
                       )}
                     </div>

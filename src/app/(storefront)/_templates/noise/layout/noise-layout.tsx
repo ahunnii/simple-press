@@ -8,6 +8,7 @@ import { getSession } from "~/server/better-auth/server";
 import { NoiseAnnouncementBar } from "./noise-announcement-bar";
 import { NoiseFooter } from "./noise-footer";
 import { NoiseHeader } from "./noise-header";
+import { NoiseRouteAnnouncer } from "./noise-route-announcer";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -45,6 +46,7 @@ export async function NoiseLayout({
       >
         Skip to main content
       </a>
+      <NoiseRouteAnnouncer />
       <NoiseAnnouncementBar businessId={business.id} />
       <NoiseHeader business={business} session={session ?? null} />
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">

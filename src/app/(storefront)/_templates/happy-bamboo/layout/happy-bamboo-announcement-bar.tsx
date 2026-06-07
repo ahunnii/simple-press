@@ -36,6 +36,7 @@ export function HappyBambooAnnouncementBar() {
             rel="noopener noreferrer"
           >
             Shop now
+            <span className="sr-only"> (opens in new tab)</span>
           </a>
         ) : (
           <Link

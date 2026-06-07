@@ -7,6 +7,8 @@ import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
+
+
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
   setSelectedVariantId: (variantId: string | null) => void;
@@ -65,12 +67,15 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
                 key={variant.id}
                 type="button"
                 aria-pressed={selectedVariant?.id === variant.id}
+                aria-disabled={outOfStock ? "true" : undefined}
                 onClick={() => {
+                  if (outOfStock) return;
                   setSelectedVariant(variant);
                   setSelectedVariantId(variant.id);
                 }}
-                disabled={outOfStock}
-                className={`border px-4 py-2 font-sans text-xs tracking-wider transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                className={`border px-4 py-2 font-sans text-xs tracking-wider transition-colors ${
+                  outOfStock ? "cursor-not-allowed opacity-40" : ""
+                } ${
                   selectedVariant?.id === variant.id
                     ? "border-foreground bg-foreground text-background"
                     : "border-border text-foreground hover:border-foreground bg-transparent"
@@ -101,10 +106,15 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
               className="size-10 rounded-none"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
               disabled={quantity <= 1}
+              aria-label="Decrease quantity"
             >
-              <Minus className="size-3.5" />
+              <Minus className="size-3.5" aria-hidden="true" />
             </Button>
-            <span className="text-foreground w-10 text-center font-sans text-sm font-medium">
+            <span
+              className="text-foreground w-10 text-center font-sans text-sm font-medium"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               {quantity}
             </span>
             <Button
@@ -118,34 +128,48 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
                     : quantity + 1,
                 )
               }
+              aria-label="Increase quantity"
             >
-              <Plus className="size-3.5" />
+              <Plus className="size-3.5" aria-hidden="true" />
             </Button>
           </div>
         )}
 
         {/* Add to Cart */}
-        <Button
-          type="button"
-          onClick={handleAddToCart}
-          disabled={
+        {(() => {
+          const isUnavailable =
             !selectedVariant ||
             (product.trackInventory &&
               (selectedVariant?.inventoryQty ?? 0) === 0 &&
-              !product.allowBackorders)
-          }
-          className="flex-1 rounded-none font-sans text-[10px] tracking-[0.25em] uppercase"
-          size="lg"
-        >
-          {isAdded ? (
-            <>
-              <Check className="mr-2 h-3.5 w-3.5" />
-              Added
-            </>
-          ) : (
-            `Add ${quantity} to Cart`
-          )}
-        </Button>
+              !product.allowBackorders);
+          return (
+            <Button
+              type="button"
+              aria-disabled={isUnavailable ? "true" : undefined}
+              onClick={() => {
+                if (isUnavailable) return;
+                handleAddToCart();
+              }}
+              className={`flex-1 rounded-none font-sans text-[10px] tracking-[0.25em] uppercase ${isUnavailable ? "cursor-not-allowed opacity-50" : ""}`}
+              size="lg"
+            >
+              {isAdded ? (
+                <>
+                  <Check className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+                  Added
+                </>
+              ) : (
+                `Add ${quantity} to Cart`
+              )}
+            </Button>
+          );
+        })()}
+      </div>
+      {/* S-2: live region for add-to-cart announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {isAdded && selectedVariant
+          ? `${product.name} — ${selectedVariant.name} added to bag`
+          : ""}
       </div>
     </div>
   );

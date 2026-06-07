@@ -73,7 +73,7 @@ export function BambooCollectionsPage({
                         </span>
                         <span className="text-primary flex items-center gap-1 text-sm font-medium">
                           Shop now
-                          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                         </span>
                       </div>
                     </div>

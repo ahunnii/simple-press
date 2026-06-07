@@ -116,6 +116,7 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
           </div>
           {/* Progress bar — ink fill on bone bg */}
           <div
+            aria-hidden="true"
             className="h-px w-full relative"
             style={{ background: "var(--vn-rule)" }}
           >
@@ -187,6 +188,7 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
         {REASSURANCE.map((note) => (
           <div key={note.icon} className="flex gap-2.5 items-start">
             <span
+              aria-hidden="true"
               className="flex-shrink-0 flex items-center justify-center border font-serif italic"
               style={{
                 width: "22px",

@@ -151,7 +151,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                   {socialLinks?.instagram && (
                     <a
                       href={socialLinks.instagram}
-                      className="transition-opacity hover:opacity-60"
+                      className="flex items-center justify-center p-3 -m-3 transition-opacity hover:opacity-60"
                       style={{ color: "var(--vn-steel-mist)" }}
                       aria-label="Instagram"
                     >
@@ -161,7 +161,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                   {socialLinks?.facebook && (
                     <a
                       href={socialLinks.facebook}
-                      className="transition-opacity hover:opacity-60"
+                      className="flex items-center justify-center p-3 -m-3 transition-opacity hover:opacity-60"
                       style={{ color: "var(--vn-steel-mist)" }}
                       aria-label="Facebook"
                     >
@@ -171,7 +171,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                   {socialLinks?.twitter && (
                     <a
                       href={socialLinks.twitter}
-                      className="transition-opacity hover:opacity-60"
+                      className="flex items-center justify-center p-3 -m-3 transition-opacity hover:opacity-60"
                       style={{ color: "var(--vn-steel-mist)" }}
                       aria-label="X / Twitter"
                     >
@@ -181,7 +181,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                   {socialLinks?.tiktok && (
                     <a
                       href={socialLinks.tiktok}
-                      className="transition-opacity hover:opacity-60"
+                      className="flex items-center justify-center p-3 -m-3 transition-opacity hover:opacity-60"
                       style={{ color: "var(--vn-steel-mist)" }}
                       aria-label="TikTok"
                     >
@@ -226,7 +226,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
             <div>
               {(address ?? email ?? phone) && (
                 <>
-                  <h4
+                  <h2
                     className="mb-5 font-mono"
                     style={{
                       fontSize: "10.5px",
@@ -236,7 +236,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                     }}
                   >
                     Contact
-                  </h4>
+                  </h2>
                 </>
               )}
 
@@ -370,7 +370,7 @@ function FooterCol({
 }) {
   return (
     <div className={className}>
-      <h4
+      <h2
         className="mb-5 font-mono"
         style={{
           fontSize: "10.5px",
@@ -380,7 +380,7 @@ function FooterCol({
         }}
       >
         {title}
-      </h4>
+      </h2>
       <ul className="flex flex-col gap-3">
         {links.map((link) => (
           <li key={link.href}>

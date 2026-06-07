@@ -120,9 +120,13 @@ export function HappyBambooShopClient({
         {/* Controls */}
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative w-full sm:max-w-xs">
-            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Search
+              aria-hidden="true"
+              className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+            />
             <Input
               placeholder="Search products…"
+              aria-label="Search products"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -134,7 +138,7 @@ export function HappyBambooShopClient({
               value={sort}
               onValueChange={(v) => setSort(v as SortOption)}
             >
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-48" aria-label="Sort products">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -152,7 +156,7 @@ export function HappyBambooShopClient({
                 onClick={clearFilters}
                 className="text-muted-foreground gap-1.5"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
                 Clear
               </Button>
             )}
@@ -164,6 +168,7 @@ export function HappyBambooShopClient({
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={() => setActiveCollectionId(null)}
+              aria-pressed={activeCollectionId === null}
               className={cn(
                 "rounded-full border px-3.5 py-1 text-sm font-medium transition-colors",
                 activeCollectionId === null
@@ -181,6 +186,7 @@ export function HappyBambooShopClient({
                     c.id === activeCollectionId ? null : c.id,
                   )
                 }
+                aria-pressed={activeCollectionId === c.id}
                 className={cn(
                   "rounded-full border px-3.5 py-1 text-sm font-medium transition-colors",
                   activeCollectionId === c.id

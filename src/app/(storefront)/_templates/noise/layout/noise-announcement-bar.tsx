@@ -26,6 +26,7 @@ export function NoiseAnnouncementBar({ businessId: _ }: NoiseAnnouncementBarProp
       className="vn-topbar"
       role="region"
       aria-label="Promotion"
+      data-announcement-bar
     >
       <p className="font-mono text-[11px] tracking-[0.22em] uppercase">
         {data.bannerText}
@@ -40,6 +41,7 @@ export function NoiseAnnouncementBar({ businessId: _ }: NoiseAnnouncementBarProp
           rel="noopener noreferrer"
         >
           Shop →
+          <span className="sr-only">(opens in new tab)</span>
         </a>
       ) : (
         <Link

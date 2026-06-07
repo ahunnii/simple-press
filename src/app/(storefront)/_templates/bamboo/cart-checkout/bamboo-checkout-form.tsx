@@ -76,6 +76,10 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-8 lg:flex-row">
       <div className="flex-1 space-y-8">
+        {/* M-7: required field explanation */}
+        <p className="text-muted-foreground text-sm">
+          Fields marked with * are required.
+        </p>
         <fieldset className="flex flex-col gap-4">
           <legend className="text-foreground font-heading pb-4 text-lg font-semibold">
             Contact Information
@@ -149,7 +153,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
             >
               {isValidatingDiscount ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
                   Checking…
                 </>
               ) : (
@@ -161,7 +165,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
             <p id="discount-error" className="text-destructive text-sm" role="alert">{discountFieldError}</p>
           )}
           {discountCodeLabel && discountAmount > 0 && (
-            <p className="text-sm text-green-700">
+            <p className="text-sm text-green-700" role="status">
               Code{" "}
               <span className="font-mono font-semibold">
                 {discountCodeLabel}
@@ -397,7 +401,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
                   Processing...
                 </>
               ) : (
