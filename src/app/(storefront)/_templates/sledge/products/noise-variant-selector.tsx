@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
 
 type Props = {
@@ -44,9 +44,8 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Variant Selection */}
       <div>
-        <p className="text-muted-foreground mb-3 font-sans text-[9px] tracking-[0.3em] uppercase">
+        <p className="sl-eyebrow mb-3 font-sans text-xs tracking-[0.18em] uppercase">
           Select Variant
         </p>
         <div className="flex flex-wrap gap-2">
@@ -59,22 +58,24 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
               product.trackInventory &&
               variant.inventoryQty === 0 &&
               !!product.allowBackorders;
+            const isSelected = selectedVariant?.id === variant.id;
 
             return (
               <button
                 key={variant.id}
                 type="button"
-                aria-pressed={selectedVariant?.id === variant.id}
+                aria-pressed={isSelected}
                 onClick={() => {
                   setSelectedVariant(variant);
                   setSelectedVariantId(variant.id);
                 }}
                 disabled={outOfStock}
-                className={`border px-4 py-2 font-sans text-xs tracking-wider transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                  selectedVariant?.id === variant.id
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border text-foreground hover:border-foreground bg-transparent"
-                }`}
+                className={cn(
+                  "rounded-sm border px-4 py-2 font-sans text-xs tracking-[0.08em] uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+                  isSelected
+                    ? "border-[var(--sl-ink)] bg-[var(--sl-ink)] text-white"
+                    : "border-[var(--sl-border-input)] bg-white text-[var(--sl-ink)] hover:border-[var(--sl-ink)]",
+                )}
               >
                 {variant.name}
                 {outOfStock && " (Out of Stock)"}
@@ -86,31 +87,29 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
       </div>
 
       {selectedVariant && product.trackInventory && (
-        <p className="text-muted-foreground font-sans text-xs">
+        <p className="sl-eyebrow font-sans text-xs tracking-[0.12em] uppercase">
           {selectedVariant.inventoryQty ?? 0} in stock
         </p>
       )}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        {/* Quantity */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
         {selectedVariant && (
-          <div className="border-border flex items-center border">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-10 rounded-none"
+          <div className="flex items-center rounded-sm border border-[var(--sl-ink)]">
+            <button
+              type="button"
+              className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
               disabled={quantity <= 1}
+              aria-label="Decrease quantity"
             >
               <Minus className="size-3.5" />
-            </Button>
-            <span className="text-foreground w-10 text-center font-sans text-sm font-medium">
+            </button>
+            <span className="min-w-[40px] text-center font-sans text-sm font-medium">
               {quantity}
             </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-10 rounded-none"
+            <button
+              type="button"
+              className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70"
               onClick={() =>
                 setQuantity(
                   product.trackInventory
@@ -118,14 +117,14 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
                     : quantity + 1,
                 )
               }
+              aria-label="Increase quantity"
             >
               <Plus className="size-3.5" />
-            </Button>
+            </button>
           </div>
         )}
 
-        {/* Add to Cart */}
-        <Button
+        <button
           type="button"
           onClick={handleAddToCart}
           disabled={
@@ -134,18 +133,20 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
               (selectedVariant?.inventoryQty ?? 0) === 0 &&
               !product.allowBackorders)
           }
-          className="flex-1 rounded-none font-sans text-[10px] tracking-[0.25em] uppercase"
-          size="lg"
+          className={cn(
+            "sl-btn flex-1 disabled:cursor-not-allowed disabled:opacity-40",
+            isAdded && "bg-[var(--sl-green)]",
+          )}
         >
           {isAdded ? (
             <>
-              <Check className="mr-2 h-3.5 w-3.5" />
-              Added
+              <Check className="size-4" />
+              Added!
             </>
           ) : (
             `Add ${quantity} to Cart`
           )}
-        </Button>
+        </button>
       </div>
     </div>
   );

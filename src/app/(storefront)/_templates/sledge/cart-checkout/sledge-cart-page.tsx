@@ -1,9 +1,9 @@
 import type { DefaultCartPageTemplateProps } from "../../types";
 
-import { NoiseCartContents } from "./noise-cart-contents";
+import { SledgeCartContents } from "./sledge-cart-contents";
 
 export async function SledgeCartPage({
   business,
 }: DefaultCartPageTemplateProps) {
-  return <NoiseCartContents business={business} />;
+  return <SledgeCartContents business={business} />;
 }

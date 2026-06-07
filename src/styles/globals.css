@@ -480,6 +480,135 @@
   background: var(--vn-ink);
 }
 
+.noise .vn-mobile-menu,
+.visual-noise .vn-mobile-menu {
+  background: var(--vn-bone);
+  color: var(--vn-ink);
+}
+
+.noise .vn-mobile-nav-active,
+.visual-noise .vn-mobile-nav-active {
+  color: var(--vn-ink);
+  font-weight: 600;
+}
+
+.noise .vn-mobile-nav-inactive,
+.visual-noise .vn-mobile-nav-inactive {
+  color: var(--vn-ink-soft);
+}
+
+.noise .vn-mobile-nav-inactive:hover,
+.visual-noise .vn-mobile-nav-inactive:hover {
+  color: var(--vn-ink);
+}
+
+.noise .vn-mobile-nav-list,
+.visual-noise .vn-mobile-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.noise .vn-mobile-nav-link,
+.visual-noise .vn-mobile-nav-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.875rem 0.25rem;
+  font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
+  font-size: 0.875rem;
+  line-height: 1.25;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.noise .vn-mobile-nav-link-child,
+.visual-noise .vn-mobile-nav-link-child {
+  min-height: 2.75rem;
+  padding: 0.75rem 0.25rem 0.75rem 1rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+}
+
+.noise .vn-mobile-nav-link:focus-visible,
+.visual-noise .vn-mobile-nav-link:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 2px;
+}
+
+.noise .vn-mobile-action-btn,
+.visual-noise .vn-mobile-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.noise .vn-mobile-action-btn:focus-visible,
+.visual-noise .vn-mobile-action-btn:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 2px;
+}
+
+.noise .vn-mobile-account-panel,
+.visual-noise .vn-mobile-account-panel {
+  background: var(--vn-paper);
+  border: 1px solid var(--vn-rule);
+}
+
+.noise .vn-dropdown-panel,
+.visual-noise .vn-dropdown-panel {
+  background: var(--vn-paper);
+  border: 1px solid var(--vn-rule);
+  box-shadow: 0 4px 16px rgba(26, 26, 26, 0.08);
+}
+
+.noise .vn-nav-dropdown-link,
+.visual-noise .vn-nav-dropdown-link {
+  display: block;
+  padding: 0.75rem 1.25rem;
+  font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--vn-ink-soft);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.noise .vn-nav-dropdown-link:hover,
+.noise .vn-nav-dropdown-link.vn-active,
+.visual-noise .vn-nav-dropdown-link:hover,
+.visual-noise .vn-nav-dropdown-link.vn-active {
+  color: var(--vn-ink);
+  background: var(--vn-line-soft);
+}
+
+.noise .vn-nav-dropdown-link:focus-visible,
+.visual-noise .vn-nav-dropdown-link:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: -2px;
+}
+
 /* ─── Footer links ──────────────────────────────────────────────────────── */
 .noise .vn-footer-link,
 .visual-noise .vn-footer-link,
@@ -1959,7 +2088,6 @@
 
   .sledge .sl-mobile-menu {
     background: var(--sl-dark);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .sledge .sl-dropdown-panel {
@@ -2017,6 +2145,48 @@
   /* ─── Sledge: product page ──────────────────────────────────────────────── */
   .sledge .sl-product-title {
     font-size: clamp(2rem, 4vw, 3.2rem);
+    color: var(--sl-ink);
+    line-height: 1.05;
+  }
+
+  .sledge .sl-blog-post-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--sl-ink);
+    line-height: 1.08;
+  }
+
+  .sledge .sl-blog-search {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid var(--sl-border-input);
+    border-radius: var(--radius, 0.25rem);
+    background: var(--sl-cream);
+    padding: 0.875rem 1.25rem;
+  }
+
+  .sledge .sl-blog-search input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: var(--sl-ink);
+    outline: none;
+  }
+
+  .sledge .sl-blog-search input::placeholder {
+    color: var(--sl-ink-soft);
+    opacity: 0.6;
+  }
+
+  .sledge .sl-product-accordion summary {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
   }
 
   .sledge .sl-tab-heading {

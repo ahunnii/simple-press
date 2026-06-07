@@ -1,74 +1,206 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
-import { IconLayoutDashboard } from "@tabler/icons-react";
-import { Menu, Search, ShoppingBag, User } from "lucide-react";
-import { motion } from "motion/react";
+import {
+  IconLayoutDashboard,
+  IconLogout,
+  IconPackage,
+} from "@tabler/icons-react";
+import {
+  Bell,
+  BookUser,
+  ChevronDown,
+  ChevronUp,
+  Lock,
+  Menu,
+  Package,
+  Settings,
+  ShoppingBag,
+  User,
+  X,
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-  SheetTrigger,
-} from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
 
 import { NoiseCartDrawer } from "../cart-checkout/noise-cart-drawer";
 import { resolveFields } from "../index";
 
+type NavChild = { label: string; href: string; external?: boolean };
+type NavLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+  children?: NavChild[];
+};
+
+const MOBILE_ACCOUNT_LINKS = [
+  { href: "/account/orders", label: "Orders", icon: Package },
+  { href: "/account/settings", label: "Settings", icon: Settings },
+  { href: "/account/security", label: "Security", icon: Lock },
+  { href: "/account/address-book", label: "Address Book", icon: BookUser },
+  { href: "/account/preferences", label: "Preferences", icon: Bell },
+] as const;
+
+const mobileNavItemVariants = {
+  closed: { opacity: 0, y: 16 },
+  open: { opacity: 1, y: 0 },
+};
+
+const mobileNavListVariants = {
+  closed: {},
+  open: {
+    transition: { staggerChildren: 0.05, delayChildren: 0.08 },
+  },
+};
+
 export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const { itemCount, setIsOpen } = useCart();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [expandedMobile, setExpandedMobile] = useState<Set<number>>(new Set());
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+  const accountMenuId = useId();
+  const mobileSubmenuId = useId();
+
+  useEffect(() => {
+    if (openDropdown === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenDropdown(null);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [openDropdown]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (accountMenuOpen) {
+        setAccountMenuOpen(false);
+      } else {
+        setMobileOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [mobileOpen, accountMenuOpen]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (
+        accountMenuRef.current &&
+        !accountMenuRef.current.contains(e.target as Node)
+      ) {
+        setAccountMenuOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [accountMenuOpen]);
+
+  useEffect(() => {
+    setMobileOpen(false);
+    setAccountMenuOpen(false);
+    setOpenDropdown(null);
+    setExpandedMobile(new Set());
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileOpen) setAccountMenuOpen(false);
+  }, [mobileOpen]);
 
   const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
 
-  // Links shown on the LEFT side of the header (shop/collections)
-  const LEFT_NAV = [
+  const LEFT_NAV: NavLink[] = [
     ...(isEnabled("products") ? [{ href: "/shop", label: "Shop" }] : []),
     ...(isEnabled("collections")
       ? [{ href: "/collections", label: "Collections" }]
       : []),
-  ] as const;
+  ];
 
-  // Links always shown on the RIGHT side (editorial/info pages)
-  const RIGHT_NAV = [
+  const RIGHT_NAV: NavLink[] = [
     { href: "/about", label: "About" },
     ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
     ...(isEnabled("testimonials")
       ? [{ href: "/testimonials", label: "Reviews" }]
       : []),
     { href: "/contact", label: "Contact" },
-  ] as const;
+  ];
 
-  const links =
-    (business?.siteContent?.navigationItems as {
-      label: string;
-      href: string;
-    }[]) ?? RIGHT_NAV;
+  const customNav = business?.siteContent?.navigationItems as
+    | NavLink[]
+    | undefined;
+
+  const links = customNav ?? RIGHT_NAV;
+  const mobileNavItems: NavLink[] = customNav
+    ? customNav
+    : [...LEFT_NAV, ...RIGHT_NAV];
+
+  const toggleMobileExpanded = (index: number) => {
+    setExpandedMobile((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  };
+
+  const closeMobileMenu = () => {
+    setAccountMenuOpen(false);
+    setMobileOpen(false);
+  };
+
+  const openCart = () => {
+    closeMobileMenu();
+    setIsOpen(true);
+  };
 
   const businessName = business?.name ?? "";
+  const logoUrl = business?.siteContent?.logoUrl;
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
-  const g = resolveFields(customFields, [
-    "noise.global.location-tag",
-    "noise.global.footer-tagline",
-  ]);
+  const g = resolveFields(customFields, ["noise.global.location-tag"]);
   const locationTag = g["noise.global.location-tag"] ?? "";
-  const footerTagline = g["noise.global.footer-tagline"] ?? "";
+
+  const isLinkActive = (href: string) =>
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(href + "/");
+
+  const isParentActive = (link: NavLink) =>
+    link.children?.some((c) => isLinkActive(c.href)) ?? false;
+
+  const showAdminLink =
+    session?.user?.platformRole === "PLATFORM_ADMIN" ||
+    !!session?.session?.membershipId;
 
   const userMenu = session?.user && (
     <UserButton
@@ -80,8 +212,12 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
         },
       }}
       additionalLinks={[
-        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
-        !!session?.session?.membershipId
+        {
+          icon: <IconPackage className="h-4 w-4" />,
+          label: "Orders",
+          href: "/account/orders",
+        },
+        ...(showAdminLink
           ? [
               {
                 icon: <IconLayoutDashboard className="h-4 w-4" />,
@@ -104,104 +240,295 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     </Link>
   );
 
-  const allNavLinks = [...LEFT_NAV, ...links];
+  const brand = logoUrl ? (
+    <div className="relative h-14 w-28">
+      <Image
+        src={logoUrl}
+        alt={businessName}
+        fill
+        sizes="112px"
+        className="object-contain"
+      />
+    </div>
+  ) : (
+    <>
+      <span>{businessName.toUpperCase()}</span>
+      {locationTag ? (
+        <span className="vn-wordmark-sub">{locationTag}</span>
+      ) : null}
+    </>
+  );
+
+  const mobileBrand = logoUrl ? (
+    <div className="relative h-14 w-28">
+      <Image
+        src={logoUrl}
+        alt={businessName}
+        fill
+        sizes="112px"
+        className="object-contain object-left"
+      />
+    </div>
+  ) : (
+    <span>{businessName.toUpperCase()}</span>
+  );
+
+  const dropdownKey = (side: "left" | "right", index: number) =>
+    `${side}-${index}`;
+
+  const renderDesktopNavLink = (
+    link: NavLink,
+    index: number,
+    side: "left" | "right",
+  ) => {
+    const key = dropdownKey(side, index);
+    const active = isLinkActive(link.href);
+    const parentActive = isParentActive(link);
+    const inactiveColor = "var(--vn-ink-soft)";
+    const activeColor = "var(--vn-ink)";
+
+    if (link.children?.length) {
+      const isOpen = openDropdown === key;
+
+      return (
+        <div
+          key={link.href + link.label}
+          className="relative"
+          onMouseEnter={() => setOpenDropdown(key)}
+          onMouseLeave={() => setOpenDropdown(null)}
+        >
+          <button
+            type="button"
+            aria-haspopup="true"
+            aria-expanded={isOpen}
+            onClick={() => setOpenDropdown(isOpen ? null : key)}
+            className={cn(
+              "vn-nav-link flex cursor-pointer items-center gap-1 border-none bg-transparent font-mono text-[10.5px] tracking-[0.22em] uppercase transition-colors",
+              parentActive
+                ? "text-foreground vn-active"
+                : "hover:text-foreground",
+            )}
+            style={{
+              color: parentActive ? activeColor : inactiveColor,
+            }}
+          >
+            {link.label}
+            <ChevronDown
+              className={cn(
+                "h-3 w-3 transition-transform duration-200",
+                isOpen ? "rotate-180" : "",
+              )}
+              aria-hidden="true"
+            />
+          </button>
+
+          {isOpen ? (
+            <div className="absolute top-full left-0 z-10 pt-2">
+              <div className="vn-dropdown-panel min-w-[180px] overflow-hidden rounded-none py-1">
+                {link.children.map((child) => (
+                  <Link
+                    key={child.href}
+                    href={child.href}
+                    target={child.external ? "_blank" : undefined}
+                    rel={child.external ? "noopener noreferrer" : undefined}
+                    aria-current={
+                      isLinkActive(child.href) ? "page" : undefined
+                    }
+                    onClick={() => setOpenDropdown(null)}
+                    className={cn(
+                      "vn-nav-dropdown-link",
+                      isLinkActive(child.href) ? "vn-active" : "",
+                    )}
+                  >
+                    {child.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+
+    return (
+      <Link
+        key={link.href + link.label}
+        href={link.href}
+        target={link.external ? "_blank" : undefined}
+        rel={link.external ? "noopener noreferrer" : undefined}
+        aria-current={active ? "page" : undefined}
+        className={cn(
+          "vn-nav-link font-mono text-[10.5px] tracking-[0.22em] uppercase transition-colors",
+          active ? "text-foreground vn-active" : "hover:text-foreground",
+        )}
+        style={{
+          color: active ? activeColor : inactiveColor,
+        }}
+      >
+        {link.label}
+      </Link>
+    );
+  };
+
+  const renderMobileNavLink = (link: NavLink, i: number) => {
+    const submenuId = `${mobileSubmenuId}-${i}`;
+
+    if (link.children?.length) {
+      return (
+        <motion.li
+          key={link.href + link.label}
+          variants={mobileNavItemVariants}
+          className="border-b"
+          style={{ borderColor: "var(--vn-line-soft)" }}
+        >
+          <button
+            type="button"
+            onClick={() => toggleMobileExpanded(i)}
+            aria-expanded={expandedMobile.has(i)}
+            aria-controls={submenuId}
+            className={cn(
+              "vn-mobile-nav-link justify-between transition-colors",
+              isParentActive(link)
+                ? "vn-mobile-nav-active"
+                : "vn-mobile-nav-inactive",
+            )}
+          >
+            {link.label}
+            <ChevronDown
+              className={cn(
+                "h-5 w-5 shrink-0 transition-transform duration-200",
+                expandedMobile.has(i) ? "rotate-180" : "",
+              )}
+              aria-hidden="true"
+            />
+          </button>
+          <AnimatePresence initial={false}>
+            {expandedMobile.has(i) ? (
+              <motion.div
+                id={submenuId}
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <ul className="vn-mobile-nav-list pb-2">
+                  {link.children.map((child) => (
+                    <li key={child.href}>
+                      <Link
+                        href={child.href}
+                        target={child.external ? "_blank" : undefined}
+                        rel={
+                          child.external ? "noopener noreferrer" : undefined
+                        }
+                        onClick={closeMobileMenu}
+                        aria-current={
+                          isLinkActive(child.href) ? "page" : undefined
+                        }
+                        className={cn(
+                          "vn-mobile-nav-link vn-mobile-nav-link-child transition-colors",
+                          isLinkActive(child.href)
+                            ? "vn-mobile-nav-active"
+                            : "vn-mobile-nav-inactive",
+                        )}
+                      >
+                        {child.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </motion.li>
+      );
+    }
+
+    return (
+      <motion.li
+        key={link.href + link.label}
+        variants={mobileNavItemVariants}
+        className="border-b"
+        style={{ borderColor: "var(--vn-line-soft)" }}
+      >
+        <Link
+          href={link.href}
+          target={link.external ? "_blank" : undefined}
+          rel={link.external ? "noopener noreferrer" : undefined}
+          onClick={closeMobileMenu}
+          aria-current={isLinkActive(link.href) ? "page" : undefined}
+          className={cn(
+            "vn-mobile-nav-link transition-colors",
+            isLinkActive(link.href)
+              ? "vn-mobile-nav-active"
+              : "vn-mobile-nav-inactive",
+          )}
+        >
+          {link.label}
+        </Link>
+      </motion.li>
+    );
+  };
 
   return (
     <>
       <header
         className="bg-background sticky top-0 z-50 w-full"
-        style={{
-          // background: "var(--vn-bone)",
-          borderBottom: "1px solid var(--vn-line-soft) ",
-        }}
+        style={{ borderBottom: "1px solid var(--vn-line-soft)" }}
       >
         <div
           className="mx-auto grid w-full max-w-[1440px] items-center gap-6 px-4 py-4 sm:px-6 sm:py-[18px]"
-          style={{
-            gridTemplateColumns: "1fr auto 1fr",
-          }}
+          style={{ gridTemplateColumns: "1fr auto 1fr" }}
         >
-          {/* ── Left: search + shop/collection links ── */}
+          {/* ── Left: mobile menu + shop/collection links ── */}
           <div className="flex items-center gap-6">
-            {/* Left nav links (desktop only) */}
-            <nav className="hidden items-center gap-6 md:flex">
-              {LEFT_NAV.map((link) => {
-                const active =
-                  pathname === link.href ||
-                  pathname.startsWith(link.href + "/");
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      "vn-nav-link font-mono text-[10.5px] tracking-[0.22em] uppercase transition-colors",
-                      active
-                        ? "text-foreground vn-active"
-                        : "hover:text-foreground",
-                    )}
-                    style={{
-                      color: active ? "var(--vn-ink)" : "var(--vn-ink-soft)",
-                    }}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-none md:hidden"
+              style={{
+                border: "1px solid var(--vn-rule)",
+                color: "var(--vn-ink-soft)",
+              }}
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen((open) => !open)}
+            >
+              {mobileOpen ? (
+                <X className="h-4 w-4" />
+              ) : (
+                <Menu className="h-4 w-4" />
+              )}
+            </Button>
+
+            <nav
+              className="hidden items-center gap-6 md:flex"
+              aria-label="Shop navigation"
+            >
+              {LEFT_NAV.map((link, i) =>
+                renderDesktopNavLink(link, i, "left"),
+              )}
             </nav>
           </div>
 
           {/* ── Center: wordmark ── */}
           <Link href="/" className="vn-wordmark" aria-label="Home">
-            {business.siteContent?.logoUrl ? (
-              <div className="relative h-14 w-28">
-                <Image
-                  src={business.siteContent.logoUrl}
-                  alt={businessName}
-                  fill
-                  sizes="112px"
-                  className="object-contain"
-                />
-              </div>
-            ) : (
-              <>
-                <span>{businessName.toUpperCase()}</span>
-                {locationTag && (
-                  <span className="vn-wordmark-sub">{locationTag}</span>
-                )}
-              </>
-            )}
+            {brand}
           </Link>
 
           {/* ── Right: editorial links + account + bag ── */}
           <div className="flex items-center justify-end gap-6">
-            {/* Right nav links (desktop only) */}
-            <nav className="hidden items-center gap-6 md:flex">
-              {links.map((link) => {
-                const active = pathname === link.href;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      "vn-nav-link font-mono text-[10.5px] tracking-[0.22em] uppercase transition-colors",
-                      active
-                        ? "text-foreground vn-active"
-                        : "hover:text-foreground",
-                    )}
-                    style={{
-                      color: active ? "var(--vn-ink)" : "var(--vn-ink-soft)",
-                    }}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
+            <nav
+              className="hidden items-center gap-6 md:flex"
+              aria-label="Primary navigation"
+            >
+              {links.map((link, i) => renderDesktopNavLink(link, i, "right"))}
             </nav>
 
-            {/* Account */}
-            {session?.user ? userMenu : authLink}
+            <div className="hidden md:block">
+              {session?.user ? userMenu : authLink}
+            </div>
 
-            {/* Bag */}
             <button
               onClick={() => setIsOpen(true)}
               aria-label="Open cart"
@@ -224,115 +551,237 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                 </motion.span>
               )}
             </button>
-
-            {/* Mobile menu trigger */}
-            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-              <SheetTrigger asChild className="md:hidden">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-none"
-                  style={{
-                    border: "1px solid var(--vn-rule)",
-                    color: "var(--vn-ink-soft)",
-                  }}
-                  aria-label="Open menu"
-                >
-                  <Menu className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="right"
-                className="flex w-[min(100vw-1rem,22rem)] flex-col gap-0 rounded-none p-0"
-                style={{
-                  // background: "var(--vn-bone)",
-                  borderLeft: "1px solid var(--vn-rule)",
-                }}
-              >
-                <div
-                  className="border-b px-6 pt-12 pb-6"
-                  style={{ borderColor: "var(--vn-rule)" }}
-                >
-                  <SheetTitle
-                    className="vn-wordmark"
-                    style={{ alignItems: "flex-start" }}
-                  >
-                    <span>{businessName.toUpperCase()}</span>
-                    {locationTag && (
-                      <span className="vn-wordmark-sub">{locationTag}</span>
-                    )}
-                  </SheetTitle>
-                  {footerTagline && (
-                    <SheetDescription
-                      className="mt-2 font-mono text-[9px] tracking-[0.3em] uppercase"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                    >
-                      {footerTagline}
-                    </SheetDescription>
-                  )}
-                </div>
-
-                <nav
-                  className="flex flex-1 flex-col gap-0 overflow-y-auto overscroll-contain p-4"
-                  aria-label="Mobile navigation"
-                >
-                  {allNavLinks.map((link) => {
-                    const active = pathname === link.href;
-                    return (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center border-b py-4 font-mono text-[10px] tracking-[0.3em] uppercase transition-colors"
-                        style={{
-                          borderColor: "var(--vn-line-soft)",
-                          color: active
-                            ? "var(--vn-ink)"
-                            : "var(--vn-steel-mist)",
-                        }}
-                      >
-                        {link.label}
-                      </Link>
-                    );
-                  })}
-                </nav>
-
-                <div
-                  className="flex items-center justify-between border-t px-6 py-4"
-                  style={{ borderColor: "var(--vn-rule)" }}
-                >
-                  {session?.user ? (
-                    <div className="flex items-center gap-3">
-                      {userMenu}
-                      <span
-                        className="font-mono text-[9px] tracking-[0.3em] uppercase"
-                        style={{ color: "var(--vn-steel-mist)" }}
-                      >
-                        Account
-                      </span>
-                    </div>
-                  ) : (
-                    <Link
-                      href="/auth/sign-in"
-                      onClick={() => setMobileOpen(false)}
-                      className="font-mono text-[10px] tracking-[0.22em] uppercase transition-colors hover:opacity-80"
-                      style={{ color: "var(--vn-steel-mist)" }}
-                    >
-                      Login →
-                    </Link>
-                  )}
-                  <span
-                    className="font-mono text-[9px] tracking-[0.3em] uppercase"
-                    style={{ color: "var(--vn-steel-mist)" }}
-                  >
-                    {new Date().getFullYear()}
-                  </span>
-                </div>
-              </SheetContent>
-            </Sheet>
           </div>
         </div>
       </header>
+
+      {/* Full-screen mobile navigation */}
+      <AnimatePresence>
+        {mobileOpen ? (
+          <motion.div
+            key="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation"
+            className="vn-mobile-menu fixed inset-0 z-[60] flex flex-col md:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <motion.div
+              className="flex min-h-0 flex-1 flex-col"
+              initial={{ y: 24 }}
+              animate={{ y: 0 }}
+              exit={{ y: 16 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div
+                className="flex shrink-0 items-center justify-between border-b px-5 py-4 sm:px-6"
+                style={{ borderColor: "var(--vn-rule)" }}
+              >
+                <Link
+                  href="/"
+                  onClick={closeMobileMenu}
+                  aria-label="Home"
+                  className="vn-wordmark min-w-0 flex-1 justify-start"
+                  style={{ alignItems: "flex-start" }}
+                >
+                  {mobileBrand}
+                </Link>
+                <button
+                  type="button"
+                  onClick={closeMobileMenu}
+                  aria-label="Close menu"
+                  className="ml-4 flex h-11 w-11 shrink-0 items-center justify-center rounded-none transition-opacity hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{
+                    border: "1px solid var(--vn-rule)",
+                    color: "var(--vn-ink-soft)",
+                    outlineColor: "var(--vn-ink)",
+                  }}
+                >
+                  <X className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </div>
+
+              <nav
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6 sm:px-6"
+                aria-label="Mobile navigation"
+              >
+                <motion.ul
+                  className="vn-mobile-nav-list"
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  variants={mobileNavListVariants}
+                >
+                  {mobileNavItems.map((link, i) =>
+                    renderMobileNavLink(link, i),
+                  )}
+                </motion.ul>
+              </nav>
+
+              <div
+                className="relative shrink-0 border-t px-5 py-4 sm:px-6"
+                style={{ borderColor: "var(--vn-rule)" }}
+              >
+                <AnimatePresence>
+                  {accountMenuOpen && session?.user ? (
+                    <motion.div
+                      ref={accountMenuRef}
+                      id={accountMenuId}
+                      role="menu"
+                      aria-label="Account menu"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 12 }}
+                      transition={{ duration: 0.2 }}
+                      className="vn-mobile-account-panel absolute right-5 bottom-full left-5 mb-2 overflow-hidden rounded-none shadow-lg sm:right-6 sm:left-6"
+                    >
+                      <div
+                        className="border-b px-4 py-3"
+                        style={{ borderColor: "var(--vn-line-soft)" }}
+                      >
+                        <p className="font-mono text-[9px] tracking-[0.3em] text-[var(--vn-steel-mist)] uppercase">
+                          Signed in as
+                        </p>
+                        <p
+                          className="mt-1 truncate font-sans text-sm"
+                          style={{ color: "var(--vn-ink-soft)" }}
+                        >
+                          {session.user.name ?? session.user.email}
+                        </p>
+                      </div>
+                      <ul className="py-1">
+                        {MOBILE_ACCOUNT_LINKS.map(({ href, label, icon: Icon }) => (
+                          <li key={href} role="none">
+                            <Link
+                              href={href}
+                              role="menuitem"
+                              onClick={closeMobileMenu}
+                              className={cn(
+                                "vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 transition-colors",
+                                isLinkActive(href)
+                                  ? "text-[var(--vn-accent)]"
+                                  : "text-[var(--vn-ink-soft)] hover:text-[var(--vn-ink)]",
+                              )}
+                              style={{
+                                background: isLinkActive(href)
+                                  ? "var(--vn-line-soft)"
+                                  : undefined,
+                              }}
+                            >
+                              <Icon className="h-4 w-4 shrink-0" aria-hidden />
+                              {label}
+                            </Link>
+                          </li>
+                        ))}
+                        {showAdminLink ? (
+                          <li role="none">
+                            <Link
+                              href="/admin"
+                              role="menuitem"
+                              onClick={closeMobileMenu}
+                              className="vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 text-[var(--vn-ink-soft)] transition-colors hover:text-[var(--vn-ink)]"
+                            >
+                              <IconLayoutDashboard
+                                className="h-4 w-4 shrink-0"
+                                aria-hidden
+                              />
+                              Admin
+                            </Link>
+                          </li>
+                        ) : null}
+                        <li
+                          role="none"
+                          className="border-t"
+                          style={{ borderColor: "var(--vn-line-soft)" }}
+                        >
+                          <Link
+                            href="/auth/sign-out"
+                            role="menuitem"
+                            onClick={closeMobileMenu}
+                            className="vn-mobile-nav-link vn-mobile-nav-link-child gap-3 px-4 text-[var(--vn-ink-soft)] transition-colors hover:text-[var(--vn-ink)]"
+                          >
+                            <IconLogout className="h-4 w-4 shrink-0" aria-hidden />
+                            Sign out
+                          </Link>
+                        </li>
+                      </ul>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={openCart}
+                    className="vn-mobile-action-btn relative rounded-none transition-opacity hover:opacity-80"
+                    style={{
+                      border: "1px solid var(--vn-rule)",
+                      color: "var(--vn-ink-soft)",
+                    }}
+                  >
+                    <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+                    Cart
+                    {itemCount > 0 ? (
+                      <span
+                        className="ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[9px] font-semibold"
+                        style={{
+                          background: "var(--vn-accent)",
+                          color: "#fff",
+                        }}
+                      >
+                        {itemCount}
+                      </span>
+                    ) : null}
+                  </button>
+
+                  {session?.user ? (
+                    <button
+                      type="button"
+                      id={`${accountMenuId}-trigger`}
+                      aria-haspopup="menu"
+                      aria-expanded={accountMenuOpen}
+                      aria-controls={accountMenuOpen ? accountMenuId : undefined}
+                      onClick={() => setAccountMenuOpen((open) => !open)}
+                      className={cn(
+                        "vn-mobile-action-btn rounded-none border transition-opacity hover:opacity-80",
+                        accountMenuOpen
+                          ? "border-[var(--vn-accent)] text-[var(--vn-accent)]"
+                          : "border-[var(--vn-rule)] text-[var(--vn-ink-soft)]",
+                      )}
+                    >
+                      <User className="h-4 w-4" aria-hidden="true" />
+                      Account
+                      <ChevronUp
+                        className={cn(
+                          "h-3.5 w-3.5 transition-transform duration-200",
+                          accountMenuOpen ? "rotate-180" : "",
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+                  ) : (
+                    <Link
+                      href="/auth/sign-in"
+                      onClick={closeMobileMenu}
+                      className="vn-mobile-action-btn rounded-none border transition-opacity hover:opacity-80"
+                      style={{
+                        borderColor: "var(--vn-rule)",
+                        color: "var(--vn-ink-soft)",
+                      }}
+                    >
+                      <User className="h-4 w-4" aria-hidden="true" />
+                      Login
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       <NoiseCartDrawer shippingConfig={shippingConfigFromBusiness(business)} />
     </>

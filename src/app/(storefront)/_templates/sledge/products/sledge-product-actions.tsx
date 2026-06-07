@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
+import { cn } from "~/lib/utils";
 import { useProduct } from "~/hooks/use-product";
 
 import { NoiseVariantSelector } from "./noise-variant-selector";
@@ -36,16 +37,17 @@ export function SledgeProductActions({
 
   if (additionalFields?.comingSoon) {
     return (
-      <div className="rounded border border-gray-200 bg-gray-50 px-4 py-3">
-        <p className="text-sm font-semibold">Coming Soon</p>
-        <p className="mt-1 text-xs text-gray-500">
+      <div className="rounded-sm border border-[var(--sl-border)] bg-[var(--sl-cream)] px-5 py-4">
+        <p className="font-sans text-xs font-semibold tracking-[0.18em] text-[var(--sl-ink)] uppercase">
+          Coming Soon
+        </p>
+        <p className="sl-eyebrow mt-1.5 font-sans text-sm">
           This item isn&apos;t available yet. Check back soon.
         </p>
       </div>
     );
   }
 
-  /* Products with variants — NoiseVariantSelector handles its own add-to-cart */
   if (Object.keys(variantOptions).length > 0) {
     return (
       <NoiseVariantSelector
@@ -58,7 +60,7 @@ export function SledgeProductActions({
   return (
     <div className="flex flex-col gap-3">
       {showStockCount && (
-        <p className="text-sm font-medium text-[var(--sl-coral)]">
+        <p className="sl-eyebrow font-sans text-xs tracking-[0.14em] text-[var(--sl-coral)] uppercase">
           {stockQty} in stock
         </p>
       )}
@@ -66,29 +68,29 @@ export function SledgeProductActions({
       {product.trackInventory &&
         product.allowBackorders &&
         (product.inventoryQty ?? 0) === 0 && (
-          <p className="text-sm text-gray-500">
+          <p className="sl-eyebrow font-sans text-xs tracking-[0.12em] uppercase">
             Backordered — ships when available
           </p>
         )}
 
       {inStock && canAddMore && (
         <div className="flex items-stretch gap-3">
-          <div className="flex items-center border border-gray-300">
+          <div className="flex items-center rounded-sm border border-[var(--sl-ink)]">
             <button
               type="button"
-              className="flex min-h-[46px] items-center justify-center px-3 transition-colors hover:bg-gray-100"
+              className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70"
               onClick={handleDecrement}
               disabled={quantity <= 1}
               aria-label="Decrease quantity"
             >
               <Minus className="size-3.5" />
             </button>
-            <span className="min-w-[40px] text-center text-sm font-medium">
+            <span className="min-w-[40px] text-center font-sans text-sm font-medium">
               {quantity}
             </span>
             <button
               type="button"
-              className="flex min-h-[46px] items-center justify-center px-3 transition-colors hover:bg-gray-100"
+              className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70"
               onClick={handleIncrement}
               aria-label="Increase quantity"
             >
@@ -96,7 +98,11 @@ export function SledgeProductActions({
             </button>
           </div>
 
-          <button type="button" onClick={addToCart} className="sl-btn flex-1">
+          <button
+            type="button"
+            onClick={addToCart}
+            className={cn("sl-btn flex-1", isAdded && "bg-[var(--sl-green)]")}
+          >
             {isAdded ? (
               <>
                 <Check className="size-4" />
@@ -110,7 +116,7 @@ export function SledgeProductActions({
       )}
 
       {inStock && !canAddMore && (
-        <p className="text-xs text-[var(--sl-coral)]">
+        <p className="sl-eyebrow font-sans text-xs tracking-[0.12em] text-[var(--sl-coral)] uppercase">
           Maximum available quantity in cart
         </p>
       )}
@@ -119,7 +125,7 @@ export function SledgeProductActions({
         <button
           type="button"
           disabled
-          className="w-full cursor-not-allowed rounded border border-gray-300 py-3 text-sm font-medium text-gray-400"
+          className="w-full cursor-not-allowed rounded-sm border border-[var(--sl-border-input)] py-3 font-sans text-xs tracking-[0.16em] text-[var(--sl-ink-soft)] uppercase"
         >
           Sold Out
         </button>

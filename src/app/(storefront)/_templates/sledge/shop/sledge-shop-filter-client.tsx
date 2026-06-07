@@ -195,7 +195,7 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
   );
 
   return (
-    <section className="mx-auto max-w-7xl px-7 pt-2 pb-16 md:pb-20">
+    <section className="mx-auto w-full max-w-7xl px-7 pt-2 pb-16 md:pb-20">
       <div className="sl-shop-toolbar mb-6 md:hidden">
         <span className="sl-eyebrow font-sans text-xs tracking-[0.14em] uppercase">
           {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
