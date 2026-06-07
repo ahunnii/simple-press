@@ -11,6 +11,7 @@ import { HappyBambooAddressBookPage } from "../../_templates/happy-bamboo/accoun
 import { ModernAddressBookPage } from "../../_templates/modern/account/modern-address-book-page";
 import { NoiseAddressBookPage } from "../../_templates/noise/account/noise-address-book-page";
 import { PollenAddressBookPage } from "../../_templates/pollen/account/pollen-address-book-page";
+import { SledgeAddressBookPage } from "../../_templates/sledge/account/sledge-address-book-page";
 
 export const metadata = {
   title: "Address Book",
@@ -35,6 +36,7 @@ export default async function AddressBookPage() {
       bamboo: BambooAddressBookPage,
       "dark-trend": DarkTrendAddressBookPage,
       noise: NoiseAddressBookPage,
+      sledge: SledgeAddressBookPage,
       modern: ModernAddressBookPage,
       elegant: ElegantAddressBookPage,
       pollen: PollenAddressBookPage,

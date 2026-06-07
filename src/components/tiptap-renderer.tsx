@@ -7,8 +7,8 @@ import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import { generateHTML } from "@tiptap/html";
-import { Images } from "lucide-react";
 import StarterKit from "@tiptap/starter-kit";
+import { Images } from "lucide-react";
 
 import { api } from "~/trpc/react";
 import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
@@ -45,10 +45,14 @@ const extensions = [
 
 /** Renders a single gallery by id (for storefront page content). */
 function GalleryBlock({ galleryId }: { galleryId: string }) {
-  const { data: gallery, isLoading, error } = api.gallery.getByIdPublic.useQuery(
-    galleryId,
-    { enabled: !!galleryId, retry: false },
-  );
+  const {
+    data: gallery,
+    isLoading,
+    error,
+  } = api.gallery.getByIdPublic.useQuery(galleryId, {
+    enabled: !!galleryId,
+    retry: false,
+  });
 
   if (!galleryId) return null;
 
@@ -72,7 +76,7 @@ function GalleryBlock({ galleryId }: { galleryId: string }) {
   if (!gallery) return null;
 
   return (
-    <div className="my-6 overflow-hidden rounded-lg border border-gray-200">
+    <div className="my-6 rounded-lg">
       <GalleryRenderer
         gallery={{
           name: gallery.name,
@@ -82,6 +86,8 @@ function GalleryBlock({ galleryId }: { galleryId: string }) {
           gap: gallery.gap,
           showCaptions: gallery.showCaptions,
           enableLightbox: gallery.enableLightbox,
+          aspectRatio: gallery.aspectRatio,
+          captionStyle: gallery.captionStyle,
           images: gallery.images.map((img) => ({
             id: img.id,
             url: img.url,

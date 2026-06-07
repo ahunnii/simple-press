@@ -11,6 +11,7 @@ import { HappyBambooOrderDetailPage } from "../../../_templates/happy-bamboo/acc
 import { ModernOrderDetailPage } from "../../../_templates/modern/account/modern-order-detail-page";
 import { NoiseOrderDetailPage } from "../../../_templates/noise/account/noise-order-detail-page";
 import { PollenOrderDetailPage } from "../../../_templates/pollen/account/pollen-order-detail-page";
+import { SledgeOrderDetailPage } from "../../../_templates/sledge/account/sledge-order-detail-page";
 
 export const metadata = {
   title: "Order Details",
@@ -46,6 +47,7 @@ export default async function OrderDetailPage({ params }: Props) {
       bamboo: BambooOrderDetailPage,
       "happy-bamboo": HappyBambooOrderDetailPage,
       noise: NoiseOrderDetailPage,
+      sledge: SledgeOrderDetailPage,
     }[business.templateId] ?? DefaultOrderDetailPage;
 
   return <TemplateComponent business={business} order={order} />;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -29,22 +29,19 @@ export function SledgeMosaicHero({
 }: SledgeMosaicHeroProps) {
   const [visible, setVisible] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const mountedRef = useRef(false);
 
   useEffect(() => {
-    if (mountedRef.current) return;
-    mountedRef.current = true;
-
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(mq.matches);
 
     if (mq.matches) {
       setVisible(true);
-    } else {
-      // Tick after mount so the CSS transition runs.
-      const t = requestAnimationFrame(() => setVisible(true));
-      return () => cancelAnimationFrame(t);
+      return;
     }
+
+    // Tick after mount so the CSS transition runs.
+    const t = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(t);
   }, []);
 
   const tiles = images.slice(0, MAX_TILES);

@@ -1653,7 +1653,6 @@
     --font-mono: var(--font-sans);
     --radius: 0.5rem;
 
-    background: var(--sl-cream);
     color: var(--sl-ink);
 
     * {
@@ -1953,6 +1952,40 @@
 
   .sledge .group:hover .sledge-cta-reveal {
     opacity: 1;
+  }
+
+  /* ─── Sledge: account pages (auth cards, address book, preferences) ─── */
+  .sledge .sl-account-content .rounded-lg.border,
+  .sledge .sl-account-content [class*="rounded-lg"][class*="border"] {
+    border-color: #e8e8e8 !important;
+    border-radius: var(--radius, 0.5rem);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  .sledge .sl-account-content .bg-primary {
+    background-color: var(--sl-coral) !important;
+  }
+
+  .sledge .sl-account-content .text-primary {
+    color: var(--sl-coral) !important;
+  }
+
+  .sledge .sl-account-content button.bg-primary,
+  .sledge .sl-account-content [data-slot="button"].bg-primary {
+    background-color: var(--sl-coral) !important;
+    border-radius: var(--radius, 0.5rem);
+  }
+
+  .sledge .sl-account-content button.bg-primary:hover {
+    background-color: var(--sl-coral-deep) !important;
+  }
+
+  .sledge .sl-account-content h2,
+  .sledge .sl-account-content h3 {
+    font-family: var(--font-heading, sans-serif);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--sl-orange);
   }
 }
 

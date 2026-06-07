@@ -11,6 +11,7 @@ import { HappyBambooPreferencesPage } from "../../_templates/happy-bamboo/accoun
 import { ModernPreferencesPage } from "../../_templates/modern/account/modern-preferences-page";
 import { NoisePreferencesPage } from "../../_templates/noise/account/noise-preferences-page";
 import { PollenPreferencesPage } from "../../_templates/pollen/account/pollen-preferences-page";
+import { SledgePreferencesPage } from "../../_templates/sledge/account/sledge-preferences-page";
 
 export const metadata = {
   title: "Preferences",
@@ -35,6 +36,7 @@ export default async function PreferencesPage() {
       bamboo: BambooPreferencesPage,
       "dark-trend": DarkTrendPreferencesPage,
       noise: NoisePreferencesPage,
+      sledge: SledgePreferencesPage,
       modern: ModernPreferencesPage,
       elegant: ElegantPreferencesPage,
       pollen: PollenPreferencesPage,

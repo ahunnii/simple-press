@@ -60,61 +60,99 @@ export async function SledgeAboutPage({
 
   return (
     <>
-      {/* ── Hero: cream left / editorial image right ── */}
+      {/* ── Hero: full-width banner ── */}
       <section
-        className="grid grid-cols-1 md:grid-cols-2"
-        style={{ minHeight: "360px" }}
+        className="relative w-full"
+        style={{ height: "clamp(320px, 45vw, 520px)" }}
         {...sectionGroupAttr("about", "hero")}
       >
-        <div
-          className="hidden md:block"
-          style={{ background: "var(--sl-cream)", minHeight: "360px" }}
-        />
         {heroImage ? (
-          <div className="relative" style={{ minHeight: "360px" }}>
-            <Image
-              src={heroImage}
-              alt={heading}
-              fill
-              className="object-cover object-top"
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </div>
+          <Image
+            src={heroImage}
+            alt={heading}
+            fill
+            className="object-cover object-center"
+            priority
+            sizes="100vw"
+          />
         ) : (
-          <div style={{ background: "var(--sl-green)", minHeight: "360px" }} />
+          <div
+            className="absolute inset-0"
+            style={{ background: "var(--sl-green)" }}
+          />
         )}
       </section>
 
       {/* ── Heading + three labeled content rows ── */}
       <section
-        className="px-7 py-16"
+        className="px-7 py-16 md:py-20"
         style={{ background: "#ffffff" }}
         {...sectionGroupAttr("about", "main")}
       >
-        <FadeIn className="mx-auto" style={{ maxWidth: "1100px" }}>
+        <FadeIn className="mx-auto max-w-7xl">
           <h1
-            className="mb-14 uppercase"
+            className="font-heading mb-12 font-bold uppercase md:mb-16"
             style={{
-              fontSize: "clamp(2rem, 5vw, 3.5rem)",
-              color: "var(--sl-coral)",
-              letterSpacing: "0.04em",
-              lineHeight: 1,
+              fontSize: "clamp(3.6rem, 8.5vw, 6.2rem)",
+              color: "var(--sl-orange)",
+              letterSpacing: "0.02em",
+              lineHeight: 1.05,
             }}
           >
             {heading}
           </h1>
 
+          {/* Mobile: stacked label + body per section */}
+          <div className="flex flex-col gap-12 md:hidden">
+            {sections.map((section, i) => (
+              <div
+                key={i}
+                className="grid grid-cols-[minmax(0,9.5rem)_2px_1fr] gap-x-5"
+              >
+                <span
+                  className="self-start font-serif font-normal italic"
+                  style={{
+                    fontSize: "20px",
+                    color: "var(--sl-ink)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {section.label}
+                </span>
+                <div
+                  style={{
+                    background: "var(--sl-orange)",
+                    alignSelf: "stretch",
+                  }}
+                />
+                {section.body ? (
+                  <p
+                    className="font-serif font-normal italic"
+                    style={{
+                      fontSize: "clamp(22px, 5.85vw, 25px)",
+                      color: "var(--sl-ink)",
+                      lineHeight: 1.85,
+                      whiteSpace: "pre-line",
+                    }}
+                  >
+                    {section.body}
+                  </p>
+                ) : (
+                  <div />
+                )}
+              </div>
+            ))}
+          </div>
+
           {/*
-           * 3-column grid: label | 3px red divider | content
-           * The divider div spans all 3 content rows so the red line is
-           * continuous even across rowGap space.
+           * Desktop: label | orange divider | content
+           * The divider spans all rows so the line stays continuous.
            */}
           <div
+            className="hidden w-full md:grid"
             style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(90px, 160px) 3px 1fr",
-              rowGap: "2.5rem",
+              gridTemplateColumns: "minmax(160px, 28%) 2px 1fr",
+              rowGap: "4rem",
             }}
           >
             <div
@@ -131,16 +169,16 @@ export async function SledgeAboutPage({
                   style={{
                     gridColumn: 1,
                     gridRow: i + 1,
-                    paddingRight: "1.5rem",
+                    paddingRight: "2rem",
                     alignSelf: "start",
                   }}
                 >
                   <span
-                    className="italic"
+                    className="font-normal italic"
                     style={{
-                      fontSize: "clamp(14px, 1.8vw, 16px)",
+                      fontSize: "clamp(20px, 2.1vw, 21px)",
                       color: "var(--sl-ink)",
-                      fontFamily: "var(--font-sans)",
+                      lineHeight: 1.4,
                     }}
                   >
                     {section.label}
@@ -150,16 +188,18 @@ export async function SledgeAboutPage({
                   style={{
                     gridColumn: 3,
                     gridRow: i + 1,
-                    paddingLeft: "2rem",
+                    paddingLeft: "2.5rem",
                   }}
                 >
                   {section.body && (
                     <p
-                      className="italic"
+                      className="font-normal italic"
                       style={{
-                        fontSize: "clamp(14px, 1.8vw, 16px)",
+                        fontSize: "clamp(23px, 2.6vw, 26px)",
                         color: "var(--sl-ink)",
                         lineHeight: 1.85,
+                        // maxWidth: "62ch",
+                        whiteSpace: "pre-line",
                       }}
                     >
                       {section.body}
@@ -175,28 +215,28 @@ export async function SledgeAboutPage({
       {/* ── Trending Now product rail ── */}
       {products.length > 0 && (
         <section
-          className="px-7 py-16"
-          style={{ background: "var(--vn-paper)" }}
+          className="px-7 py-16 md:py-20"
+          style={{ background: "#ffffff" }}
           {...sectionGroupAttr("about", "products")}
         >
-          <div style={{ maxWidth: "1440px", margin: "0 auto" }}>
-            <FadeIn className="mb-12 flex items-center justify-between">
+          <div className="mx-auto max-w-7xl">
+            <FadeIn className="mb-12 flex items-end justify-between gap-6">
               <h2
-                className="uppercase"
+                className="font-heading font-bold uppercase"
                 style={{
-                  fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
-                  color: "var(--sl-coral)",
-                  letterSpacing: "0.04em",
-                  lineHeight: 1,
+                  fontSize: "clamp(2.6rem, 5.85vw, 4.2rem)",
+                  color: "var(--sl-orange)",
+                  letterSpacing: "0.02em",
+                  lineHeight: 1.05,
                 }}
               >
                 Trending Now
               </h2>
               <Link
                 href={shopCtaHref}
-                className="flex shrink-0 items-center gap-2 px-4 py-2 font-sans text-xs tracking-[.2em] uppercase transition-opacity hover:opacity-60"
+                className="flex shrink-0 items-center gap-2 px-4 py-2.5 font-sans text-[14px] font-medium tracking-[.18em] uppercase transition-opacity hover:opacity-70"
                 style={{
-                  border: "1px solid var(--sl-ink)",
+                  background: "#ececec",
                   color: "var(--sl-ink)",
                 }}
               >

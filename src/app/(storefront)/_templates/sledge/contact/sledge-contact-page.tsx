@@ -127,28 +127,28 @@ export async function SledgeContactPage({
       {/* ── Trending Now product rail ── */}
       {products.length > 0 && (
         <section
-          className="px-7 py-16"
-          style={{ background: "var(--vn-paper)" }}
-          {...sectionGroupAttr("contact", "products")}
+          className="px-7 py-16 md:py-20"
+          style={{ background: "#ffffff" }}
+          {...sectionGroupAttr("about", "products")}
         >
-          <div style={{ maxWidth: "1440px", margin: "0 auto" }}>
-            <FadeIn className="mb-12 flex items-center justify-between">
+          <div className="mx-auto max-w-7xl">
+            <FadeIn className="mb-12 flex items-end justify-between gap-6">
               <h2
-                className="uppercase"
+                className="font-heading font-bold uppercase"
                 style={{
-                  fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
-                  color: "var(--sl-coral)",
-                  letterSpacing: "0.04em",
-                  lineHeight: 1,
+                  fontSize: "clamp(2.6rem, 5.85vw, 4.2rem)",
+                  color: "var(--sl-orange)",
+                  letterSpacing: "0.02em",
+                  lineHeight: 1.05,
                 }}
               >
-                {trendingHeading}
+                Trending Now
               </h2>
               <Link
                 href={shopCtaHref}
-                className="flex shrink-0 items-center gap-2 px-4 py-2 font-sans text-xs tracking-[.2em] uppercase transition-opacity hover:opacity-60"
+                className="flex shrink-0 items-center gap-2 px-4 py-2.5 font-sans text-[14px] font-medium tracking-[.18em] uppercase transition-opacity hover:opacity-70"
                 style={{
-                  border: "1px solid var(--sl-ink)",
+                  background: "#ececec",
                   color: "var(--sl-ink)",
                 }}
               >

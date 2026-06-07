@@ -10,6 +10,7 @@ import { HappyBambooOrderSuccessPage } from "../../_templates/happy-bamboo/cart-
 import { ModernOrderSuccessPage } from "../../_templates/modern/cart-checkout/modern-order-success-page";
 import { NoiseOrderSuccessPage } from "../../_templates/noise/cart-checkout/noise-order-success-page";
 import { PollenOrderSuccessPage } from "../../_templates/pollen/cart-checkout/pollen-order-success-page";
+import { SledgeOrderSuccessPage } from "../../_templates/sledge/cart-checkout/sledge-order-success-page";
 
 export default async function OrderSuccessPage() {
   const business = await api.business.simplifiedGet();
@@ -24,6 +25,7 @@ export default async function OrderSuccessPage() {
       "happy-bamboo": HappyBambooOrderSuccessPage,
       modern: ModernOrderSuccessPage,
       pollen: PollenOrderSuccessPage,
+      sledge: SledgeOrderSuccessPage,
     }[business.templateId] ?? DefaultOrderSuccessPage;
 
   return <TemplateComponent business={business} />;

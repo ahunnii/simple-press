@@ -88,7 +88,7 @@ export function SledgeContactForm({ formTitle }: Props) {
         >
           {error && (
             <Alert variant="destructive" className="rounded-sm">
-              <AlertDescription className="text-xs uppercase tracking-wider">
+              <AlertDescription className="text-xs tracking-wider uppercase">
                 {error}
               </AlertDescription>
             </Alert>
@@ -97,7 +97,7 @@ export function SledgeContactForm({ formTitle }: Props) {
           <InputFormField
             form={form}
             name="name"
-            label="Name *"
+            label="Name"
             labelClassName="text-xs font-medium uppercase tracking-[0.2em] text-(--sl-ink)"
             placeholder="E.g. John Doe"
             required
@@ -106,7 +106,7 @@ export function SledgeContactForm({ formTitle }: Props) {
           <InputFormField
             form={form}
             name="email"
-            label="Email Address *"
+            label="Email Address"
             labelClassName="text-xs font-medium uppercase tracking-[0.2em] text-(--sl-ink)"
             type="email"
             placeholder="E.g. john@doe.com"
@@ -116,7 +116,7 @@ export function SledgeContactForm({ formTitle }: Props) {
           <TextareaFormField
             form={form}
             name="message"
-            label="Message *"
+            label="Message"
             labelClassName="text-xs font-medium uppercase tracking-[0.2em] text-(--sl-ink)"
             placeholder="E.g. Your work is awesome!"
             required

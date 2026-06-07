@@ -33281,6 +33281,7 @@ export namespace Prisma {
     columns: number | null
     gap: number | null
     aspectRatio: string | null
+    captionStyle: string | null
     showCaptions: boolean | null
     enableLightbox: boolean | null
     businessId: string | null
@@ -33297,6 +33298,7 @@ export namespace Prisma {
     columns: number | null
     gap: number | null
     aspectRatio: string | null
+    captionStyle: string | null
     showCaptions: boolean | null
     enableLightbox: boolean | null
     businessId: string | null
@@ -33313,6 +33315,7 @@ export namespace Prisma {
     columns: number
     gap: number
     aspectRatio: number
+    captionStyle: number
     showCaptions: number
     enableLightbox: number
     businessId: number
@@ -33341,6 +33344,7 @@ export namespace Prisma {
     columns?: true
     gap?: true
     aspectRatio?: true
+    captionStyle?: true
     showCaptions?: true
     enableLightbox?: true
     businessId?: true
@@ -33357,6 +33361,7 @@ export namespace Prisma {
     columns?: true
     gap?: true
     aspectRatio?: true
+    captionStyle?: true
     showCaptions?: true
     enableLightbox?: true
     businessId?: true
@@ -33373,6 +33378,7 @@ export namespace Prisma {
     columns?: true
     gap?: true
     aspectRatio?: true
+    captionStyle?: true
     showCaptions?: true
     enableLightbox?: true
     businessId?: true
@@ -33476,6 +33482,7 @@ export namespace Prisma {
     columns: number
     gap: number
     aspectRatio: string | null
+    captionStyle: string | null
     showCaptions: boolean
     enableLightbox: boolean
     businessId: string
@@ -33511,6 +33518,7 @@ export namespace Prisma {
     columns?: boolean
     gap?: boolean
     aspectRatio?: boolean
+    captionStyle?: boolean
     showCaptions?: boolean
     enableLightbox?: boolean
     businessId?: boolean
@@ -33530,6 +33538,7 @@ export namespace Prisma {
     columns?: boolean
     gap?: boolean
     aspectRatio?: boolean
+    captionStyle?: boolean
     showCaptions?: boolean
     enableLightbox?: boolean
     businessId?: boolean
@@ -33547,6 +33556,7 @@ export namespace Prisma {
     columns?: boolean
     gap?: boolean
     aspectRatio?: boolean
+    captionStyle?: boolean
     showCaptions?: boolean
     enableLightbox?: boolean
     businessId?: boolean
@@ -33564,12 +33574,13 @@ export namespace Prisma {
     columns?: boolean
     gap?: boolean
     aspectRatio?: boolean
+    captionStyle?: boolean
     showCaptions?: boolean
     enableLightbox?: boolean
     businessId?: boolean
   }
 
-  export type GalleryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "description" | "layout" | "columns" | "gap" | "aspectRatio" | "showCaptions" | "enableLightbox" | "businessId", ExtArgs["result"]["gallery"]>
+  export type GalleryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "description" | "layout" | "columns" | "gap" | "aspectRatio" | "captionStyle" | "showCaptions" | "enableLightbox" | "businessId", ExtArgs["result"]["gallery"]>
   export type GalleryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     images?: boolean | Gallery$imagesArgs<ExtArgs>
@@ -33599,6 +33610,7 @@ export namespace Prisma {
       columns: number
       gap: number
       aspectRatio: string | null
+      captionStyle: string | null
       showCaptions: boolean
       enableLightbox: boolean
       businessId: string
@@ -34037,6 +34049,7 @@ export namespace Prisma {
     readonly columns: FieldRef<"Gallery", 'Int'>
     readonly gap: FieldRef<"Gallery", 'Int'>
     readonly aspectRatio: FieldRef<"Gallery", 'String'>
+    readonly captionStyle: FieldRef<"Gallery", 'String'>
     readonly showCaptions: FieldRef<"Gallery", 'Boolean'>
     readonly enableLightbox: FieldRef<"Gallery", 'Boolean'>
     readonly businessId: FieldRef<"Gallery", 'String'>
@@ -42147,6 +42160,7 @@ export namespace Prisma {
     columns: 'columns',
     gap: 'gap',
     aspectRatio: 'aspectRatio',
+    captionStyle: 'captionStyle',
     showCaptions: 'showCaptions',
     enableLightbox: 'enableLightbox',
     businessId: 'businessId'
@@ -44935,6 +44949,7 @@ export namespace Prisma {
     columns?: IntFilter<"Gallery"> | number
     gap?: IntFilter<"Gallery"> | number
     aspectRatio?: StringNullableFilter<"Gallery"> | string | null
+    captionStyle?: StringNullableFilter<"Gallery"> | string | null
     showCaptions?: BoolFilter<"Gallery"> | boolean
     enableLightbox?: BoolFilter<"Gallery"> | boolean
     businessId?: StringFilter<"Gallery"> | string
@@ -44953,6 +44968,7 @@ export namespace Prisma {
     columns?: SortOrder
     gap?: SortOrder
     aspectRatio?: SortOrderInput | SortOrder
+    captionStyle?: SortOrderInput | SortOrder
     showCaptions?: SortOrder
     enableLightbox?: SortOrder
     businessId?: SortOrder
@@ -44975,6 +44991,7 @@ export namespace Prisma {
     columns?: IntFilter<"Gallery"> | number
     gap?: IntFilter<"Gallery"> | number
     aspectRatio?: StringNullableFilter<"Gallery"> | string | null
+    captionStyle?: StringNullableFilter<"Gallery"> | string | null
     showCaptions?: BoolFilter<"Gallery"> | boolean
     enableLightbox?: BoolFilter<"Gallery"> | boolean
     businessId?: StringFilter<"Gallery"> | string
@@ -44993,6 +45010,7 @@ export namespace Prisma {
     columns?: SortOrder
     gap?: SortOrder
     aspectRatio?: SortOrderInput | SortOrder
+    captionStyle?: SortOrderInput | SortOrder
     showCaptions?: SortOrder
     enableLightbox?: SortOrder
     businessId?: SortOrder
@@ -45017,6 +45035,7 @@ export namespace Prisma {
     columns?: IntWithAggregatesFilter<"Gallery"> | number
     gap?: IntWithAggregatesFilter<"Gallery"> | number
     aspectRatio?: StringNullableWithAggregatesFilter<"Gallery"> | string | null
+    captionStyle?: StringNullableWithAggregatesFilter<"Gallery"> | string | null
     showCaptions?: BoolWithAggregatesFilter<"Gallery"> | boolean
     enableLightbox?: BoolWithAggregatesFilter<"Gallery"> | boolean
     businessId?: StringWithAggregatesFilter<"Gallery"> | string
@@ -48450,6 +48469,7 @@ export namespace Prisma {
     columns?: number
     gap?: number
     aspectRatio?: string | null
+    captionStyle?: string | null
     showCaptions?: boolean
     enableLightbox?: boolean
     business: BusinessCreateNestedOneWithoutGalleriesInput
@@ -48467,6 +48487,7 @@ export namespace Prisma {
     columns?: number
     gap?: number
     aspectRatio?: string | null
+    captionStyle?: string | null
     showCaptions?: boolean
     enableLightbox?: boolean
     businessId: string
@@ -48484,6 +48505,7 @@ export namespace Prisma {
     columns?: IntFieldUpdateOperationsInput | number
     gap?: IntFieldUpdateOperationsInput | number
     aspectRatio?: NullableStringFieldUpdateOperationsInput | string | null
+    captionStyle?: NullableStringFieldUpdateOperationsInput | string | null
     showCaptions?: BoolFieldUpdateOperationsInput | boolean
     enableLightbox?: BoolFieldUpdateOperationsInput | boolean
     business?: BusinessUpdateOneRequiredWithoutGalleriesNestedInput
@@ -48501,6 +48523,7 @@ export namespace Prisma {
     columns?: IntFieldUpdateOperationsInput | number
     gap?: IntFieldUpdateOperationsInput | number
     aspectRatio?: NullableStringFieldUpdateOperationsInput | string | null
+    captionStyle?: NullableStringFieldUpdateOperationsInput | string | null
     showCaptions?: BoolFieldUpdateOperationsInput | boolean
     enableLightbox?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
@@ -48518,6 +48541,7 @@ export namespace Prisma {
     columns?: number
     gap?: number
     aspectRatio?: string | null
+    captionStyle?: string | null
     showCaptions?: boolean
     enableLightbox?: boolean
     businessId: string
@@ -48534,6 +48558,7 @@ export namespace Prisma {
     columns?: IntFieldUpdateOperationsInput | number
     gap?: IntFieldUpdateOperationsInput | number
     aspectRatio?: NullableStringFieldUpdateOperationsInput | string | null
+    captionStyle?: NullableStringFieldUpdateOperationsInput | string | null
     showCaptions?: BoolFieldUpdateOperationsInput | boolean
     enableLightbox?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -48549,6 +48574,7 @@ export namespace Prisma {
     columns?: IntFieldUpdateOperationsInput | number
     gap?: IntFieldUpdateOperationsInput | number
     aspectRatio?: NullableStringFieldUpdateOperationsInput | string | null
+    captionStyle?: NullableStringFieldUpdateOperationsInput | string | null
     showCaptions?: BoolFieldUpdateOperationsInput | boolean
     enableLightbox?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
@@ -51267,6 +51293,7 @@ export namespace Prisma {
     columns?: SortOrder
     gap?: SortOrder
     aspectRatio?: SortOrder
+    captionStyle?: SortOrder
     showCaptions?: SortOrder
     enableLightbox?: SortOrder
     businessId?: SortOrder
@@ -51288,6 +51315,7 @@ export namespace Prisma {
     columns?: SortOrder
     gap?: SortOrder
     aspectRatio?: SortOrder
+    captionStyle?: SortOrder
     showCaptions?: SortOrder
     enableLightbox?: SortOrder
     businessId?: SortOrder
@@ -51304,6 +51332,7 @@ export namespace Prisma {
     columns?: SortOrder
     gap?: SortOrder
     aspectRatio?: SortOrder
+    captionStyle?: SortOrder
     showCaptions?: SortOrder
     enableLightbox?: SortOrder
     businessId?: SortOrder
@@ -56106,6 +56135,7 @@ export namespace Prisma {
     columns?: number
     gap?: number
     aspectRatio?: string | null
+    captionStyle?: string | null
     showCaptions?: boolean
     enableLightbox?: boolean
     images?: GalleryImageCreateNestedManyWithoutGalleryInput
@@ -56122,6 +56152,7 @@ export namespace Prisma {
     columns?: number
     gap?: number
     aspectRatio?: string | null
+    captionStyle?: string | null
     showCaptions?: boolean
     enableLightbox?: boolean
     images?: GalleryImageUncheckedCreateNestedManyWithoutGalleryInput
@@ -56725,6 +56756,7 @@ export namespace Prisma {
     columns?: IntFilter<"Gallery"> | number
     gap?: IntFilter<"Gallery"> | number
     aspectRatio?: StringNullableFilter<"Gallery"> | string | null
+    captionStyle?: StringNullableFilter<"Gallery"> | string | null
     showCaptions?: BoolFilter<"Gallery"> | boolean
     enableLightbox?: BoolFilter<"Gallery"> | boolean
     businessId?: StringFilter<"Gallery"> | string
@@ -62922,6 +62954,7 @@ export namespace Prisma {
     columns?: number
     gap?: number
     aspectRatio?: string | null
+    captionStyle?: string | null
     showCaptions?: boolean
     enableLightbox?: boolean
     business: BusinessCreateNestedOneWithoutGalleriesInput
@@ -62938,6 +62971,7 @@ export namespace Prisma {
     columns?: number
     gap?: number
     aspectRatio?: string | null
+    captionStyle?: string | null
     showCaptions?: boolean
     enableLightbox?: boolean
     businessId: string
@@ -62970,6 +63004,7 @@ export namespace Prisma {
     columns?: IntFieldUpdateOperationsInput | number
     gap?: IntFieldUpdateOperationsInput | number
     aspectRatio?: NullableStringFieldUpdateOperationsInput | string | null
+    captionStyle?: NullableStringFieldUpdateOperationsInput | string | null
     showCaptions?: BoolFieldUpdateOperationsInput | boolean
     enableLightbox?: BoolFieldUpdateOperationsInput | boolean
     business?: BusinessUpdateOneRequiredWithoutGalleriesNestedInput
@@ -62986,6 +63021,7 @@ export namespace Prisma {
     columns?: IntFieldUpdateOperationsInput | number
     gap?: IntFieldUpdateOperationsInput | number
     aspectRatio?: NullableStringFieldUpdateOperationsInput | string | null
+    captionStyle?: NullableStringFieldUpdateOperationsInput | string | null
     showCaptions?: BoolFieldUpdateOperationsInput | boolean
     enableLightbox?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
@@ -64928,6 +64964,7 @@ export namespace Prisma {
     columns?: number
     gap?: number
     aspectRatio?: string | null
+    captionStyle?: string | null
     showCaptions?: boolean
     enableLightbox?: boolean
   }
@@ -65588,6 +65625,7 @@ export namespace Prisma {
     columns?: IntFieldUpdateOperationsInput | number
     gap?: IntFieldUpdateOperationsInput | number
     aspectRatio?: NullableStringFieldUpdateOperationsInput | string | null
+    captionStyle?: NullableStringFieldUpdateOperationsInput | string | null
     showCaptions?: BoolFieldUpdateOperationsInput | boolean
     enableLightbox?: BoolFieldUpdateOperationsInput | boolean
     images?: GalleryImageUpdateManyWithoutGalleryNestedInput
@@ -65604,6 +65642,7 @@ export namespace Prisma {
     columns?: IntFieldUpdateOperationsInput | number
     gap?: IntFieldUpdateOperationsInput | number
     aspectRatio?: NullableStringFieldUpdateOperationsInput | string | null
+    captionStyle?: NullableStringFieldUpdateOperationsInput | string | null
     showCaptions?: BoolFieldUpdateOperationsInput | boolean
     enableLightbox?: BoolFieldUpdateOperationsInput | boolean
     images?: GalleryImageUncheckedUpdateManyWithoutGalleryNestedInput
@@ -65620,6 +65659,7 @@ export namespace Prisma {
     columns?: IntFieldUpdateOperationsInput | number
     gap?: IntFieldUpdateOperationsInput | number
     aspectRatio?: NullableStringFieldUpdateOperationsInput | string | null
+    captionStyle?: NullableStringFieldUpdateOperationsInput | string | null
     showCaptions?: BoolFieldUpdateOperationsInput | boolean
     enableLightbox?: BoolFieldUpdateOperationsInput | boolean
   }

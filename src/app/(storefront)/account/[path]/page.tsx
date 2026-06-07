@@ -18,6 +18,8 @@ import { NoiseAccountSecurityPage } from "../../_templates/noise/account/noise-a
 import { NoiseAccountSettingsPage } from "../../_templates/noise/account/noise-account-settings-page";
 import { PollenAccountSecurityPage } from "../../_templates/pollen/account/pollen-account-security-page";
 import { PollenAccountSettingsPage } from "../../_templates/pollen/account/pollen-account-settings-page";
+import { SledgeAccountSecurityPage } from "../../_templates/sledge/account/sledge-account-security-page";
+import { SledgeAccountSettingsPage } from "../../_templates/sledge/account/sledge-account-settings-page";
 
 export const dynamicParams = false;
 
@@ -41,6 +43,7 @@ export default async function AccountPage({ params }: Props) {
       "happy-bamboo": HappyBambooAccountSecurityPage,
       bamboo: BambooAccountSecurityPage,
       noise: NoiseAccountSecurityPage,
+      sledge: SledgeAccountSecurityPage,
       modern: ModernAccountSecurityPage,
       elegant: ElegantAccountSecurityPage,
       pollen: PollenAccountSecurityPage,
@@ -52,6 +55,7 @@ export default async function AccountPage({ params }: Props) {
       "happy-bamboo": HappyBambooAccountSettingsPage,
       bamboo: BambooAccountSettingsPage,
       noise: NoiseAccountSettingsPage,
+      sledge: SledgeAccountSettingsPage,
       modern: ModernAccountSettingsPage,
       elegant: ElegantAccountSettingsPage,
       pollen: PollenAccountSettingsPage,

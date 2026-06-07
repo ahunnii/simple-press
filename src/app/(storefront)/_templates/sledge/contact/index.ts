@@ -11,6 +11,7 @@ const contactPageData: TemplateField[] = [
     page: "contact",
     group: "contact.info",
     gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "sledge.contact.location-heading",

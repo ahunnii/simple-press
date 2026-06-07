@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
-import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
+import { formatPrice } from "~/lib/prices";
 import {
   getAmountUntilFreeShipping,
   getFreeShippingProgress,
   SHIPPING_TYPES,
+  shippingConfigFromBusiness,
 } from "~/lib/shipping-utils";
-import { formatPrice } from "~/lib/prices";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { useCart } from "~/providers/cart-context";
 
@@ -39,11 +39,8 @@ export function NoiseCartContents({ business }: Props) {
 
   if (items.length === 0) {
     return (
-      <PageTransition>
-        <section
-          className="flex flex-col items-center justify-center px-7 py-32 text-center"
-          style={{ background: "#ffffff" }}
-        >
+      <PageTransition className="bg-white">
+        <section className="flex flex-col items-center justify-center px-7 py-32 text-center">
           <FadeIn direction="up" className="flex flex-col items-center gap-6">
             <div
               className="flex items-center justify-center rounded-sm"
@@ -87,10 +84,10 @@ export function NoiseCartContents({ business }: Props) {
   return (
     <PageTransition>
       <section
-        className="px-7 pt-16 pb-10 md:pt-20 md:pb-12"
+        className="pt-16 pb-10 md:pt-20 md:pb-12"
         style={{ background: "#ffffff" }}
       >
-        <FadeIn style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <FadeIn className="mx-auto w-full max-w-7xl">
           <h1
             className="uppercase"
             style={{
@@ -110,41 +107,41 @@ export function NoiseCartContents({ business }: Props) {
             checkout.
           </p>
 
-          {hasFreeBar && untilFree !== null && progress !== null && untilFree > 0 && (
-            <div className="mt-8" style={{ maxWidth: "480px" }}>
-              <div className="mb-2 flex justify-between">
-                <span
-                  className="font-sans text-xs tracking-[0.14em] uppercase"
-                  style={{ color: "var(--sl-ink-soft)" }}
-                >
-                  {formatPrice(untilFree)} to free shipping
-                </span>
-                <span
-                  className="font-sans text-xs tracking-[0.14em] uppercase"
-                  style={{ color: "var(--sl-ink-soft)" }}
-                >
-                  {Math.round(progress * 100)}%
-                </span>
+          {hasFreeBar &&
+            untilFree !== null &&
+            progress !== null &&
+            untilFree > 0 && (
+              <div className="mt-8" style={{ maxWidth: "480px" }}>
+                <div className="mb-2 flex justify-between">
+                  <span
+                    className="font-sans text-xs tracking-[0.14em] uppercase"
+                    style={{ color: "var(--sl-ink-soft)" }}
+                  >
+                    {formatPrice(untilFree)} to free shipping
+                  </span>
+                  <span
+                    className="font-sans text-xs tracking-[0.14em] uppercase"
+                    style={{ color: "var(--sl-ink-soft)" }}
+                  >
+                    {Math.round(progress * 100)}%
+                  </span>
+                </div>
+                <div className="relative h-1.5 w-full overflow-hidden rounded-full">
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(100, Math.round(progress * 100))}%`,
+                      background: "var(--sl-coral)",
+                    }}
+                  />
+                </div>
               </div>
-              <div
-                className="relative h-1.5 w-full overflow-hidden rounded-full"
-                style={{ background: "var(--sl-cream)" }}
-              >
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full transition-all"
-                  style={{
-                    width: `${Math.min(100, Math.round(progress * 100))}%`,
-                    background: "var(--sl-coral)",
-                  }}
-                />
-              </div>
-            </div>
-          )}
+            )}
         </FadeIn>
       </section>
 
       <div
-        className="flex flex-col gap-0 lg:grid lg:grid-cols-[1fr_380px]"
+        className="mx-auto flex max-w-7xl flex-col gap-0 lg:grid lg:grid-cols-[1fr_380px]"
         style={{ background: "#ffffff" }}
       >
         <div
@@ -210,7 +207,7 @@ export function NoiseCartContents({ business }: Props) {
           </div>
         </div>
 
-        <div className="px-7 py-8 lg:px-6" style={{ background: "var(--sl-cream)" }}>
+        <div className="px-7 py-8 lg:px-6">
           <div className="sticky top-24">
             <NoiseCartSummary shippingConfig={shippingConfig} />
           </div>

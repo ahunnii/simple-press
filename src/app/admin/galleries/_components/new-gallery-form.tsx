@@ -61,6 +61,8 @@ export function NewGalleryForm() {
       layout: "grid",
       columns: 3,
       gap: 16,
+      aspectRatio: "1:1",
+      captionStyle: "overlay",
       showCaptions: true,
       enableLightbox: true,
     },
@@ -92,6 +94,8 @@ export function NewGalleryForm() {
   const layout = form.watch("layout");
   const columns = form.watch("columns");
   const gap = form.watch("gap");
+  const aspectRatio = form.watch("aspectRatio");
+  const showCaptions = form.watch("showCaptions");
   const isDirty = form.formState.isDirty;
 
   return (
@@ -369,6 +373,36 @@ export function NewGalleryForm() {
                   />
                 </>
               )}
+
+              {layout === "grid" && (
+                <FormField
+                  control={form.control}
+                  name="aspectRatio"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Aspect Ratio</FormLabel>
+                      <Select
+                        value={field.value ?? "1:1"}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="1:1">1:1 — Square</SelectItem>
+                          <SelectItem value="4:3">4:3 — Landscape</SelectItem>
+                          <SelectItem value="16:9">16:9 — Widescreen</SelectItem>
+                          <SelectItem value="3:4">3:4 — Portrait</SelectItem>
+                          <SelectItem value="original">Original — Natural size</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </CardContent>
           </Card>
 
@@ -405,6 +439,34 @@ export function NewGalleryForm() {
                 )}
               />
 
+              {showCaptions && (
+                <FormField
+                  control={form.control}
+                  name="captionStyle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Caption Style</FormLabel>
+                      <Select
+                        value={field.value ?? "overlay"}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="overlay">Always visible</SelectItem>
+                          <SelectItem value="hover">Show on hover</SelectItem>
+                          <SelectItem value="below">Below image</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
               <FormField
                 control={form.control}
                 name="enableLightbox"
@@ -439,7 +501,7 @@ export function NewGalleryForm() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <LayoutPreview layout={layout} columns={columns} gap={gap} />
+              <LayoutPreview layout={layout} columns={columns} gap={gap} aspectRatio={aspectRatio} />
             </CardContent>
           </Card>
         </div>

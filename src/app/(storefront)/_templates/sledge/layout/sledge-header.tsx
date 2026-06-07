@@ -138,29 +138,29 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   );
 
   // Brand mark — logo image, falling back to the name in Amatic SC.
-  // 25% larger: h-10 => h-[62.5px], sm:h-12 => sm:h-[75px], w-28 => w-[175px], sm:w-36 => sm:w-[225px]
-  // Tailwind does not have h-[62.5px] or w-[175px]; using inline style for 25% increase.
+  // 15% larger: h-10 => h-[57.5px], sm:h-12 => sm:h-[69px], w-28 => w-[161px], sm:w-36 => sm:w-[207px]
+  // Tailwind does not have h-[57.5px] or w-[161px]; using inline style for 15% increase.
   const brand = logoUrl ? (
     <div
       className="relative"
       style={{
-        height: "100px", // 50px * 1.25 = 62.5px (original 50px from prior code)
-        width: "100px", // 140px * 1.25 = 175px (original 140px from prior code)
+        height: "57.5px", // 50px * 1.15 = 57.5px (original 50px from prior code)
+        width: "161px", // 140px * 1.15 = 161px (original 140px from prior code)
       }}
     >
       <Image
         src={logoUrl}
         alt={businessName}
         fill
-        sizes="100px"
+        sizes="161px"
         className="object-contain object-left"
         priority
       />
       <style jsx>{`
         @media (min-width: 640px) {
           div[style] {
-            height: 75px !important; /* 60px * 1.25 = 75px (original sm 60px from prior code) */
-            width: 225px !important; /* 180px * 1.25 = 225px (original sm 180px from prior code) */
+            height: 69px !important; /* 60px * 1.15 = 69px (original sm 60px from prior code) */
+            width: 207px !important; /* 180px * 1.15 = 207px (original sm 180px from prior code) */
           }
         }
       `}</style>
@@ -168,7 +168,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   ) : (
     <span
       className="font-heading leading-none"
-      style={{ color: "#ffffff", fontSize: "46.875px" }} // 37.5px * 1.25 = 46.875px
+      style={{ color: "#ffffff", fontSize: "43.125px" }} // 37.5px * 1.15 = 43.125px
     >
       {businessName}
     </span>
@@ -449,10 +449,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
 
             {session?.user ? userMenu : authLink}
 
-            <button
-              onClick={() => setIsOpen(true)}
+            <Link
+              href="/cart"
               aria-label="Open cart"
-              type="button"
               className="relative flex items-center transition-opacity hover:opacity-70"
               style={{ color: "rgba(255,255,255,0.8)" }}
             >
@@ -471,7 +470,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                   {itemCount}
                 </motion.span>
               )}
-            </button>
+            </Link>
           </div>
         </div>
       </header>

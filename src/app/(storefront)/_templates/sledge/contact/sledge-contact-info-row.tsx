@@ -7,7 +7,12 @@ type Props = {
   links?: (string | null)[];
 };
 
-export function SledgeContactInfoRow({ icon: Icon, title, lines, links }: Props) {
+export function SledgeContactInfoRow({
+  icon: Icon,
+  title,
+  lines,
+  links,
+}: Props) {
   return (
     <div className="flex gap-4">
       <Icon
@@ -17,9 +22,10 @@ export function SledgeContactInfoRow({ icon: Icon, title, lines, links }: Props)
       />
       <div>
         <h3
-          className="mb-2 uppercase"
+          className="mb-2 font-bold uppercase"
           style={{
-            fontSize: "clamp(1rem, 2vw, 1.25rem)",
+            // 25% larger: clamp(1.25rem, 2.5vw, 1.5625rem)
+            fontSize: "clamp(1.25rem, 2.5vw, 1.5625rem)",
             color: "var(--sl-coral)",
             letterSpacing: "0.04em",
             lineHeight: 1.2,
@@ -28,8 +34,9 @@ export function SledgeContactInfoRow({ icon: Icon, title, lines, links }: Props)
           {title}
         </h3>
         <div
-          className="text-sm leading-relaxed"
-          style={{ color: "var(--sl-ink)" }}
+          // 25% increase from text-sm (~0.875rem) → 1.09375rem
+          className="leading-relaxed"
+          style={{ color: "var(--sl-ink)", fontSize: "1.09375rem" }}
         >
           {lines.map((line, i) => {
             const href = links?.[i];
@@ -38,11 +45,12 @@ export function SledgeContactInfoRow({ icon: Icon, title, lines, links }: Props)
                 key={i}
                 href={href}
                 className="block transition-opacity hover:opacity-70"
+                style={{ fontSize: "inherit" }}
               >
                 {line}
               </a>
             ) : (
-              <span key={i} className="block">
+              <span key={i} className="block" style={{ fontSize: "inherit" }}>
                 {line}
               </span>
             );

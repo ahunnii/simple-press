@@ -90,6 +90,8 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
       layout: gallery.layout as GalleryUpdateData["layout"],
       columns: gallery.columns,
       gap: gallery.gap,
+      aspectRatio: (gallery.aspectRatio ?? "1:1") as GalleryUpdateData["aspectRatio"],
+      captionStyle: (gallery.captionStyle ?? "overlay") as GalleryUpdateData["captionStyle"],
       showCaptions: gallery.showCaptions,
       enableLightbox: gallery.enableLightbox,
     },
@@ -142,6 +144,8 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
         layout: data.layout as GalleryUpdateData["layout"],
         columns: data.columns,
         gap: data.gap,
+        aspectRatio: (data.aspectRatio ?? "1:1") as GalleryUpdateData["aspectRatio"],
+        captionStyle: (data.captionStyle ?? "overlay") as GalleryUpdateData["captionStyle"],
         showCaptions: data.showCaptions,
         enableLightbox: data.enableLightbox,
       });
@@ -259,6 +263,7 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
   const isDeleting = deleteGalleryMutation.isPending;
 
   const layout = form.watch("layout");
+  const showCaptions = form.watch("showCaptions");
 
   return (
     <>
@@ -518,6 +523,36 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
                     </>
                   )}
 
+                  {layout === "grid" && (
+                    <FormField
+                      control={form.control}
+                      name="aspectRatio"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Aspect Ratio</FormLabel>
+                          <Select
+                            value={field.value ?? "1:1"}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="1:1">1:1 — Square</SelectItem>
+                              <SelectItem value="4:3">4:3 — Landscape</SelectItem>
+                              <SelectItem value="16:9">16:9 — Widescreen</SelectItem>
+                              <SelectItem value="3:4">3:4 — Portrait</SelectItem>
+                              <SelectItem value="original">Original — Natural size</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
                   <FormField
                     control={form.control}
                     name="showCaptions"
@@ -536,6 +571,34 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
                       </FormItem>
                     )}
                   />
+
+                  {showCaptions && (
+                    <FormField
+                      control={form.control}
+                      name="captionStyle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Caption Style</FormLabel>
+                          <Select
+                            value={field.value ?? "overlay"}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="overlay">Always visible</SelectItem>
+                              <SelectItem value="hover">Show on hover</SelectItem>
+                              <SelectItem value="below">Below image</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
                   <FormField
                     control={form.control}

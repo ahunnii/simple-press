@@ -56,70 +56,70 @@ export async function SledgeHomepage(_props?: DefaultHomepageTemplateProps) {
 
   return (
     <HydrateClient>
-      {/* 1. Animated mosaic gallery hero */}
-      <SledgeMosaicHero
-        images={introImages}
-        logoUrl={logoUrl}
-        tagline={
-          f["sledge.homepage.hero-tagline"] ??
-          "BE DIFFERENT. BE UNIQUELY YOU. BE OUTRAGEOUS."
-        }
-        ctaText={f["sledge.homepage.hero-primary-button-text"] ?? "What's New"}
-        ctaHref={f["sledge.homepage.hero-primary-button-link"] ?? "/shop"}
-        businessName={businessName}
-      />
-
-      {/* Wave cream → green */}
-      <div style={{ background: "var(--sl-cream)" }}>
-        <SledgeWave to="green" />
-      </div>
-
-      {/* 2. Get to Know Judy — grass-green block */}
-      <SledgeGetToKnow
-        heading={
-          f["sledge.homepage.get-to-know-overline"] ?? "Get to Know Judy"
-        }
-        body={f["sledge.homepage.get-to-know-quote"] ?? undefined}
-        image={f["sledge.homepage.get-to-know-image"] ?? undefined}
-        primary={{ text: "Find Out More", href: "/about" }}
-        secondary={{ text: "Contact Judy", href: "/contact" }}
-        sectionAttrs={sectionGroupAttr("homepage", "getToKnow")}
-      />
-
-      {/* Wave green → cream */}
-      <div style={{ background: "var(--sl-green)" }}>
-        <SledgeWave to="cream" />
-      </div>
-
-      {/* 3. Testimonials — pale-green block */}
-      {flags.isEnabled("testimonials") && (
-        <SledgeTestimonials
-          heading={f["sledge.homepage-testimonials-heading"] ?? "Testimonials"}
-          testimonials={testimonials}
-          image={f["sledge.homepage-guarantee-image"] ?? undefined}
-          sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
+      <div className="bg-sl-cream">
+        {/* 1. Animated mosaic gallery hero */}
+        <SledgeMosaicHero
+          images={introImages}
+          logoUrl={logoUrl}
+          tagline={
+            f["sledge.homepage.hero-tagline"] ??
+            "BE DIFFERENT. BE UNIQUELY YOU. BE OUTRAGEOUS."
+          }
+          ctaText={
+            f["sledge.homepage.hero-primary-button-text"] ?? "What's New"
+          }
+          ctaHref={f["sledge.homepage.hero-primary-button-link"] ?? "/shop"}
+          businessName={businessName}
         />
-      )}
-
-      {/* Wave cream → green (or cream → green if testimonials hidden) */}
-      <div
-        style={{
-          background: flags.isEnabled("testimonials")
-            ? "var(--sl-cream)"
-            : "var(--sl-cream)",
-        }}
-      >
-        <SledgeWave to="green" />
+        {/* Wave cream → green */}
+        <div style={{ background: "var(--sl-cream)" }}>
+          <SledgeWave to="green" />
+        </div>
+        {/* 2. Get to Know Judy — grass-green block */}
+        <SledgeGetToKnow
+          heading={
+            f["sledge.homepage.get-to-know-overline"] ?? "Get to Know Judy"
+          }
+          body={f["sledge.homepage.get-to-know-quote"] ?? undefined}
+          image={f["sledge.homepage.get-to-know-image"] ?? undefined}
+          primary={{ text: "Find Out More", href: "/about" }}
+          secondary={{ text: "Contact Judy", href: "/contact" }}
+          sectionAttrs={sectionGroupAttr("homepage", "getToKnow")}
+        />
+        {/* Wave green → cream */}
+        <div style={{ background: "var(--sl-green)" }}>
+          <SledgeWave to="cream" />
+        </div>
+        {/* 3. Testimonials — pale-green block */}
+        {flags.isEnabled("testimonials") && (
+          <SledgeTestimonials
+            heading={
+              f["sledge.homepage-testimonials-heading"] ?? "Testimonials"
+            }
+            testimonials={testimonials}
+            image={f["sledge.homepage-guarantee-image"] ?? undefined}
+            sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
+          />
+        )}
+        {/* Wave cream → green (or cream → green if testimonials hidden) */}
+        <div
+          style={{
+            background: flags.isEnabled("testimonials")
+              ? "var(--sl-cream)"
+              : "var(--sl-cream)",
+          }}
+        >
+          <SledgeWave to="green" />
+        </div>
+        {/* 4. Subscribe — grass-green block */}
+        <SledgeSubscribe
+          image={f["sledge.homepage-guarantee-image"] ?? undefined}
+          heading={f["sledge.homepage-guarantee-heading"] ?? undefined}
+          body={f["sledge.homepage-guarantee-quote"] ?? undefined}
+          business={homepage}
+          sectionAttrs={sectionGroupAttr("homepage", "subscribe")}
+        />{" "}
       </div>
-
-      {/* 4. Subscribe — grass-green block */}
-      <SledgeSubscribe
-        image={f["sledge.homepage-guarantee-image"] ?? undefined}
-        heading={f["sledge.homepage-guarantee-heading"] ?? undefined}
-        body={f["sledge.homepage-guarantee-quote"] ?? undefined}
-        business={homepage}
-        sectionAttrs={sectionGroupAttr("homepage", "subscribe")}
-      />
     </HydrateClient>
   );
 }

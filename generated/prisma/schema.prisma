@@ -792,9 +792,10 @@ model Gallery {
   layout String @default("grid") // grid | masonry | carousel | collage | justified
 
   // Grid settings
-  columns     Int     @default(3) // 2, 3, 4, 5
-  gap         Int     @default(16) // Gap between images in px
-  aspectRatio String? @default("1:1") // 1:1, 4:3, 16:9, auto
+  columns      Int     @default(3) // 2, 3, 4, 5
+  gap          Int     @default(16) // Gap between images in px
+  aspectRatio  String? @default("1:1") // 1:1, 4:3, 16:9, auto
+  captionStyle String? @default("overlay") // overlay | hover | below
 
   // Display settings
   showCaptions   Boolean @default(true)

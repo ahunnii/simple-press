@@ -519,6 +519,7 @@ exports.Prisma.GalleryScalarFieldEnum = {
   columns: 'columns',
   gap: 'gap',
   aspectRatio: 'aspectRatio',
+  captionStyle: 'captionStyle',
   showCaptions: 'showCaptions',
   enableLightbox: 'enableLightbox',
   businessId: 'businessId'

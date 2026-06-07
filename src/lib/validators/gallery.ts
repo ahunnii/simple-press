@@ -7,7 +7,8 @@ export const galleryCreateSchema = z.object({
   layout: z.enum(["grid", "masonry", "carousel", "collage", "justified"]),
   columns: z.number().min(1).max(5),
   gap: z.number(),
-  aspectRatio: z.string().optional(),
+  aspectRatio: z.enum(["1:1", "4:3", "16:9", "3:4", "original"]).optional(),
+  captionStyle: z.enum(["overlay", "hover", "below"]).optional(),
   showCaptions: z.boolean(),
   enableLightbox: z.boolean(),
 });

@@ -11,6 +11,7 @@ import { HappyBambooOrdersPage } from "../../_templates/happy-bamboo/account/hap
 import { ModernOrdersPage } from "../../_templates/modern/account/modern-orders-page";
 import { NoiseOrdersPage } from "../../_templates/noise/account/noise-orders-page";
 import { PollenOrdersPage } from "../../_templates/pollen/account/pollen-orders-page";
+import { SledgeOrdersPage } from "../../_templates/sledge/account/sledge-orders-page";
 
 export const metadata = {
   title: "My Orders",
@@ -38,6 +39,7 @@ export default async function OrdersPage() {
       bamboo: BambooOrdersPage,
       "happy-bamboo": HappyBambooOrdersPage,
       noise: NoiseOrdersPage,
+      sledge: SledgeOrdersPage,
     }[business.templateId] ?? DefaultOrdersPage;
 
   return <TemplateComponent business={business} orders={orders} />;

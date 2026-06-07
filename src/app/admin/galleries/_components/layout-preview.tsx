@@ -4,9 +4,26 @@ type Props = {
   layout: string;
   columns: number;
   gap: number;
+  aspectRatio?: string;
 };
 
-export function LayoutPreview({ layout, columns, gap }: Props) {
+function aspectClass(ratio: string | undefined): string {
+  switch (ratio) {
+    case "4:3":
+      return "aspect-[4/3]";
+    case "16:9":
+      return "aspect-video";
+    case "3:4":
+      return "aspect-[3/4]";
+    case "original":
+      return "aspect-auto";
+    case "1:1":
+    default:
+      return "aspect-square";
+  }
+}
+
+export function LayoutPreview({ layout, columns, gap, aspectRatio }: Props) {
   const placeholders = Array.from({ length: 6 }, (_, i) => i);
 
   if (layout === "carousel") {
@@ -72,7 +89,7 @@ export function LayoutPreview({ layout, columns, gap }: Props) {
             className="rounded bg-gray-200"
             style={
               i === 0
-                ? { gridColumn: "span 2", gridRow: "span 2", aspectRatio: "2/2" }
+                ? { gridColumn: "span 2", gridRow: "span 2", aspectRatio: "1" }
                 : { aspectRatio: "1/1" }
             }
           />
@@ -113,7 +130,7 @@ export function LayoutPreview({ layout, columns, gap }: Props) {
       }}
     >
       {placeholders.map((i) => (
-        <div key={i} className="aspect-square rounded bg-gray-200" />
+        <div key={i} className={`rounded bg-gray-200 ${aspectClass(aspectRatio)}`} />
       ))}
     </div>
   );
