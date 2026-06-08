@@ -142,7 +142,7 @@ export function DefaultProductPage({
                 </span>
                 {isOnSale && displayCompareAtPrice && (
                   <>
-                    <span className="text-[18px] text-[#a3a3a3] line-through">
+                    <span className="text-[18px] text-[#6b6b6b] line-through">
                       {formatPrice(displayCompareAtPrice)}
                     </span>
                     <span className="inline-flex items-center rounded-[2px] bg-[#0a0a0a] px-2 py-0.5 text-[10px] font-medium tracking-[0.14em] text-white uppercase">

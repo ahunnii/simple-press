@@ -32,7 +32,7 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
   const [loading, setLoading] = useState(true);
 
   const sessionId = searchParams.get("session_id");
-  const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
+  const primaryColor = business.siteContent?.primaryColor ?? "#2563eb";
 
   useEffect(() => {
     if (!sessionId) {
@@ -83,7 +83,7 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
       <div className="mx-auto max-w-2xl text-center">
         <p className="mb-4 text-gray-600">No order found</p>
         <Button asChild>
-          <Link href="/products">Continue Shopping</Link>
+          <Link href="/shop">Continue Shopping</Link>
         </Button>
       </div>
     );
@@ -133,7 +133,7 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
 
       <div className="flex gap-4">
         <Button asChild variant="outline" className="flex-1">
-          <Link href="/products">Continue Shopping</Link>
+          <Link href="/shop">Continue Shopping</Link>
         </Button>
         <Button
           asChild

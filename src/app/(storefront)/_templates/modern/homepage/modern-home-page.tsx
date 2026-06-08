@@ -54,7 +54,7 @@ export async function ModernHomePage() {
         <div className="relative h-[85vh] min-h-[600px]">
           <Image
             src={f["modern.homepage.hero-image"]!}
-            alt={homepage?.name ?? "Hero Image"}
+            alt=""
             fill
             className="object-cover"
             priority
@@ -74,7 +74,7 @@ export async function ModernHomePage() {
                   className="bg-background text-foreground mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
                 >
                   {f["modern.homepage.hero-cta-button-text"]}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </div>
             </div>
@@ -134,7 +134,7 @@ export async function ModernHomePage() {
               className="text-foreground hover:text-muted-foreground hidden items-center gap-1 text-sm font-medium transition-colors md:flex"
             >
               {f["modern.homepage.products-link-text"]}
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
           <div className="mt-12">
@@ -146,7 +146,7 @@ export async function ModernHomePage() {
               className="text-foreground inline-flex items-center gap-1 text-sm font-medium"
             >
               {f["modern.homepage.products-link-text"]}
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -174,13 +174,13 @@ export async function ModernHomePage() {
                 className="border-foreground text-foreground hover:bg-foreground hover:text-background mt-8 inline-flex items-center gap-2 border px-8 py-3 text-sm font-medium tracking-wide transition-colors"
               >
                 {f["modern.homepage.about-cta-button-text"]}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
             <div className="relative aspect-4/3 overflow-hidden rounded-sm">
               <Image
                 src={f["modern.homepage.about-image"]!}
-                alt={homepage?.name ?? "About Image"}
+                alt=""
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"

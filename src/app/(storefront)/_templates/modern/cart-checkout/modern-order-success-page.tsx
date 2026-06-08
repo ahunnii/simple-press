@@ -13,7 +13,7 @@ export function ModernOrderSuccessPage({
     <div className="flex-1 px-4 py-12">
       <Suspense
         fallback={
-          <div className="mx-auto max-w-2xl text-center">
+          <div role="status" className="mx-auto max-w-2xl text-center">
             <p className="text-muted-foreground">Loading your order details…</p>
           </div>
         }

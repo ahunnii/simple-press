@@ -142,7 +142,7 @@ export function DefaultGenericPage({ page }: { page: Page }) {
 
             {/* Article body */}
             <div className="min-w-0">
-              <p className="mb-8 text-[12px] font-medium tracking-[0.1em] text-[#a3a3a3] uppercase">
+              <p className="mb-8 text-[12px] font-medium tracking-[0.1em] text-[#6b6b6b] uppercase">
                 Last updated · {formatUpdated(page.updatedAt)}
               </p>
 

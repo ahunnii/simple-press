@@ -95,7 +95,7 @@ export function DefaultSignUpPage({
               ].map((benefit) => (
                 <div key={benefit} className="flex items-start gap-3">
                   <div className="bg-primary-foreground/20 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                    <CheckCircle2 className="h-4 w-4" />
+                    <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <p className="text-primary-foreground/90 text-sm">
                     {benefit}
@@ -126,7 +126,7 @@ export function DefaultSignUpPage({
               rel="noopener noreferrer"
               className="hover:text-foreground underline"
             >
-              SimplePress
+              SimplePress<span className="sr-only"> (opens in new tab)</span>
             </Link>
           </div>
         </div>

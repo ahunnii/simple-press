@@ -29,7 +29,7 @@ export function ModernOrdersPage({ orders }: OrdersPageTemplateProps) {
       {orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="bg-accent/10 mb-4 flex size-16 items-center justify-center rounded-full">
-            <Package className="text-accent size-8" />
+            <Package className="text-accent size-8" aria-hidden="true" />
           </div>
           <h2 className="text-foreground mb-2 font-serif text-xl">
             No orders yet
@@ -41,7 +41,7 @@ export function ModernOrdersPage({ orders }: OrdersPageTemplateProps) {
             href="/shop"
             className="bg-primary text-primary-foreground inline-flex items-center gap-2 px-6 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
           >
-            Start Shopping <ArrowRight className="h-4 w-4" />
+            Start Shopping <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
       ) : (
@@ -97,7 +97,9 @@ export function ModernOrdersPage({ orders }: OrdersPageTemplateProps) {
                   href={`/account/orders/${order.id}`}
                   className="text-accent mt-4 inline-flex items-center gap-1 text-sm font-medium hover:underline"
                 >
-                  View Details <ArrowRight className="h-3 w-3" />
+                  View Details
+                  <span className="sr-only"> for order #{order.orderNumber}</span>
+                  <ArrowRight className="h-3 w-3" aria-hidden="true" />
                 </Link>
               </div>
             </div>

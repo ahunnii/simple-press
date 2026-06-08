@@ -33,11 +33,13 @@ export function ModernCartItem({ item }: Props) {
     <div className="border-border flex gap-6 border-b py-8 first:pt-0 last:border-b-0">
       <Link
         href={`/shop/${productId}`}
+        tabIndex={-1}
+        aria-hidden="true"
         className="bg-muted relative h-28 w-28 shrink-0 overflow-hidden rounded-sm"
       >
         <Image
           src={imageUrl ?? "/placeholder.svg"}
-          alt={productName}
+          alt=""
           fill
           className="object-cover"
           sizes="112px"
@@ -81,30 +83,37 @@ export function ModernCartItem({ item }: Props) {
             className="text-muted-foreground hover:text-foreground transition-colors"
             aria-label={`Remove ${productName} from cart`}
           >
-            <X className="h-4 w-4" />
+            <X aria-hidden="true" className="h-4 w-4" />
           </button>
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="border-border flex items-center border">
+          <div
+            role="group"
+            aria-label={`Quantity of ${productName}`}
+            className="border-border flex items-center border"
+          >
             <button
               type="button"
               onClick={() => updateQuantity(productId, variantId, quantity - 1)}
               className="text-foreground hover:bg-muted flex h-8 w-8 items-center justify-center transition-colors"
-              aria-label="Decrease quantity"
+              aria-label={`Decrease quantity of ${productName}`}
             >
-              <Minus className="h-3 w-3" />
+              <Minus aria-hidden="true" className="h-3 w-3" />
             </button>
-            <span className="border-border text-foreground flex h-8 w-10 items-center justify-center border-x text-xs font-medium">
+            <span
+              aria-live="polite"
+              className="border-border text-foreground flex h-8 w-10 items-center justify-center border-x text-xs font-medium"
+            >
               {quantity}
             </span>
             <button
               type="button"
               onClick={() => updateQuantity(productId, variantId, quantity + 1)}
               className="text-foreground hover:bg-muted flex h-8 w-8 items-center justify-center transition-colors"
-              aria-label="Increase quantity"
+              aria-label={`Increase quantity of ${productName}`}
             >
-              <Plus className="h-3 w-3" />
+              <Plus aria-hidden="true" className="h-3 w-3" />
             </button>
           </div>
           <p className="text-foreground text-sm font-medium">

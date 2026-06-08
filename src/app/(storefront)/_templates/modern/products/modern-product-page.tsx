@@ -48,7 +48,7 @@ export function ModernProductPage({
             href="/shop"
             className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2 text-sm transition-colors"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to Shop
           </Link>
         </div>
@@ -86,7 +86,8 @@ export function ModernProductPage({
                     key={index}
                     type="button"
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`bg-muted relative aspect-square w-16 overflow-hidden rounded-sm transition-all focus:outline-none ${
+                    aria-pressed={selectedImageIndex === index}
+                    className={`bg-muted relative aspect-square w-16 overflow-hidden rounded-sm transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                       selectedImageIndex === index
                         ? "ring-foreground ring-1 ring-offset-1"
                         : "opacity-60 hover:opacity-100"

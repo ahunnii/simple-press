@@ -122,9 +122,13 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   aria-label="Search blog posts"
-                  className="w-full bg-transparent text-sm text-[#0a0a0a] placeholder:text-[#a3a3a3] focus:outline-none"
+                  className="w-full bg-transparent text-sm text-[#0a0a0a] placeholder:text-[#767676]"
                 />
               </div>
+              {/* Live region: announces filtered result count to screen readers */}
+              <p className="sr-only" aria-live="polite" aria-atomic="true">
+                {query.trim() ? `${filtered.length} post${filtered.length === 1 ? "" : "s"} found` : ""}
+              </p>
 
               {query.trim() ? (
                 /* Search results */

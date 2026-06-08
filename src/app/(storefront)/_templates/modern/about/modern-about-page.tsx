@@ -61,7 +61,7 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
             <div className="relative aspect-4/3 overflow-hidden rounded-sm">
               <Image
                 src={f["modern.about.mission-image"]!}
-                alt={f["modern.about.mission-tagline"]!}
+                alt=""
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -91,7 +91,7 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="text-center">
             <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-              {f["modern.about.values-subheader"]}
+              {f["modern.about.values-tagline"]}
             </p>
             <h2 className="text-foreground mt-2 font-serif text-3xl md:text-4xl">
               {f["modern.about.values-header"]}
@@ -162,7 +162,7 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
             className="bg-primary-foreground text-primary mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
           >
             {f["modern.about.cta-button-text"]}
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
       </section>

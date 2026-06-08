@@ -65,8 +65,10 @@ export function ModernBlogPage({ pages, customFields }: Props) {
       <section className="bg-background py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-10 max-w-md">
-            <div className="border-border bg-background flex items-center gap-2 rounded-xl border px-3 py-2 shadow-sm">
-              <Search className="text-muted-foreground h-4 w-4 shrink-0" />
+            {/* S-1: focus indicator on the wrapper div; input itself ring-free */}
+            <div className="border-border bg-background focus-within:ring-ring flex items-center gap-2 rounded-xl border px-3 py-2 shadow-sm focus-within:ring-2">
+              {/* M-2: decorative Search icon hidden from AT */}
+              <Search className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden="true" />
               <Input
                 type="search"
                 placeholder="Search posts..."
@@ -76,8 +78,9 @@ export function ModernBlogPage({ pages, customFields }: Props) {
                 className="border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
+            {/* S-8: role="status" announces result count as user types */}
             {query.trim() ? (
-              <p className="text-muted-foreground mt-2 text-center text-sm">
+              <p role="status" className="text-muted-foreground mt-2 text-center text-sm">
                 {filtered.length === 0
                   ? "No posts match your search."
                   : `${filtered.length} post${filtered.length !== 1 ? "s" : ""} found`}
@@ -109,18 +112,22 @@ export function ModernBlogPage({ pages, customFields }: Props) {
                   >
                     <div className="grid gap-0 lg:grid-cols-2 lg:items-stretch">
                       <div className="relative aspect-4/3 min-h-[220px] lg:aspect-auto lg:min-h-[280px]">
+                        {/* M-1: alt="" — decorative; title is in the h2 below in the same link */}
+                        {/* M-11: motion-reduce disables zoom animation */}
                         <Image
                           src={featuredResult.image ?? "/placeholder.svg"}
-                          alt={featuredResult.title}
+                          alt=""
                           fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                           priority
                           sizes="(max-width: 1024px) 100vw, 50vw"
                         />
                       </div>
                       <div className="flex flex-col justify-center p-8 lg:p-10">
                         <p className="text-primary mb-2 text-xs font-medium tracking-[0.2em] uppercase">
-                          {formatDate(featuredResult.createdAt)} · Latest
+                          {/* N-1: "·" separator glyph wrapped in aria-hidden */}
+                          {formatDate(featuredResult.createdAt)}{" "}
+                          <span aria-hidden="true">·</span> Latest
                         </p>
                         <h2 className="text-foreground group-hover:text-primary font-serif text-2xl font-light tracking-wide transition-colors md:text-3xl">
                           {featuredResult.title}

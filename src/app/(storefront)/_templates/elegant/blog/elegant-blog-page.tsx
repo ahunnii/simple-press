@@ -9,6 +9,7 @@ import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { resolveFields } from "..";
 import { ElegantNewsletter } from "../homepage/elegant-newsletter";
@@ -42,6 +43,7 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
   const [shown, setShown] = useState(false);
   const [query, setQuery] = useState("");
   const gridReveal = useScrollReveal();
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const t = setTimeout(() => setShown(true), 60);
@@ -71,17 +73,23 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
   const [featured, ...rest] = filtered;
   const gridPosts = query.trim() ? filtered : rest;
 
-  const maskStyle = (delay: number): React.CSSProperties => ({
-    display: "block",
-    transform: shown ? "translateY(0)" : "translateY(110%)",
-    transition: `transform 1.1s ${easeOut} ${delay}s`,
-  });
+  const maskStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? { display: "block" }
+      : {
+          display: "block",
+          transform: shown ? "translateY(0)" : "translateY(110%)",
+          transition: `transform 1.1s ${easeOut} ${delay}s`,
+        };
 
-  const fadeStyle = (delay: number): React.CSSProperties => ({
-    opacity: shown ? 1 : 0,
-    transform: shown ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const fadeStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   if (pages.length === 0) {
     return (
@@ -201,7 +209,7 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
             </span>
             {/* Search input */}
             <label style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-              <Search style={{ width: 13, height: 13, color: "var(--el-ink-soft, #6b6659)" }} />
+              <Search aria-hidden={true} style={{ width: 13, height: 13, color: "var(--el-ink-soft, #6b6659)" }} />
               <input
                 type="search"
                 value={query}
@@ -238,9 +246,11 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
                 gridTemplateColumns: "1.1fr 1fr",
                 gap: 56,
                 alignItems: "center",
-                opacity: shown ? 1 : 0,
-                transform: shown ? "translateY(0)" : "translateY(24px)",
-                transition: `opacity 0.9s ${easeOut} 0.2s, transform 0.9s ${easeOut} 0.2s`,
+                ...(reducedMotion ? {} : {
+                  opacity: shown ? 1 : 0,
+                  transform: shown ? "translateY(0)" : "translateY(24px)",
+                  transition: `opacity 0.9s ${easeOut} 0.2s, transform 0.9s ${easeOut} 0.2s`,
+                }),
               }}>
                 {/* Image */}
                 <div style={{
@@ -345,9 +355,11 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
             {!query.trim() && (
               <div style={{
-                opacity: gridReveal.visible ? 1 : 0,
-                transform: gridReveal.visible ? "translateY(0)" : "translateY(24px)",
-                transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+                ...(reducedMotion ? {} : {
+                  opacity: gridReveal.visible ? 1 : 0,
+                  transform: gridReveal.visible ? "translateY(0)" : "translateY(24px)",
+                  transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+                }),
                 marginBottom: 40,
               }}>
                 <span style={{
@@ -374,9 +386,11 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
                   style={{
                     display: "block",
                     textDecoration: "none",
-                    opacity: gridReveal.visible ? 1 : 0,
-                    transform: gridReveal.visible ? "translateY(0)" : "translateY(24px)",
-                    transition: `opacity 0.7s ${easeOut} ${(i % 3) * 80}ms, transform 0.7s ${easeOut} ${(i % 3) * 80}ms`,
+                    ...(reducedMotion ? {} : {
+                      opacity: gridReveal.visible ? 1 : 0,
+                      transform: gridReveal.visible ? "translateY(0)" : "translateY(24px)",
+                      transition: `opacity 0.7s ${easeOut} ${(i % 3) * 80}ms, transform 0.7s ${easeOut} ${(i % 3) * 80}ms`,
+                    }),
                   }}
                   className="el-post-card group"
                 >

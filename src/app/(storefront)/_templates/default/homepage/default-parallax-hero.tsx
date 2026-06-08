@@ -83,7 +83,7 @@ export function DefaultParallaxHero({
       >
         <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-6 pb-24">
           {eyebrow && (
-            <span className="text-xs font-medium tracking-[0.14em] text-white/60 uppercase">
+            <span className="text-xs font-medium tracking-[0.14em] text-white/80 uppercase">
               {eyebrow}
             </span>
           )}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 type Testimonial = RouterOutputs["testimonial"]["list"][number];
 
@@ -52,6 +53,7 @@ function TestimonialCard({
   index: number;
   visible: boolean;
 }) {
+  const reducedMotion = useReducedMotion();
   const initials = testimonial.customerName.slice(0, 1).toUpperCase();
   const attribution = [testimonial.customerTitle, testimonial.customerCompany]
     .filter(Boolean)
@@ -59,6 +61,7 @@ function TestimonialCard({
 
   return (
     <article
+      aria-label={`Review by ${testimonial.customerName}`}
       style={{
         background: "var(--el-paper, #fbf8f2)",
         border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
@@ -67,9 +70,11 @@ function TestimonialCard({
         display: "flex",
         flexDirection: "column",
         gap: 14,
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(24px)",
-        transition: `opacity 0.7s ${easeOut} ${(index % 3) * 80}ms, transform 0.7s ${easeOut} ${(index % 3) * 80}ms`,
+        ...(reducedMotion ? {} : {
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.7s ${easeOut} ${(index % 3) * 80}ms, transform 0.7s ${easeOut} ${(index % 3) * 80}ms`,
+        }),
       }}
     >
       <Stars />
@@ -180,23 +185,30 @@ export function ElegantTestimonialsClient({
   const featuredReveal = useScrollReveal(0.08);
   const gridReveal = useScrollReveal(0.06);
   const ctaReveal = useScrollReveal(0.1);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const t = setTimeout(() => setShown(true), 60);
     return () => clearTimeout(t);
   }, []);
 
-  const maskStyle = (delay: number): React.CSSProperties => ({
-    display: "block",
-    transform: shown ? "translateY(0)" : "translateY(110%)",
-    transition: `transform 1.1s ${easeOut} ${delay}s`,
-  });
+  const maskStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? { display: "block" }
+      : {
+          display: "block",
+          transform: shown ? "translateY(0)" : "translateY(110%)",
+          transition: `transform 1.1s ${easeOut} ${delay}s`,
+        };
 
-  const fadeStyle = (delay: number): React.CSSProperties => ({
-    opacity: shown ? 1 : 0,
-    transform: shown ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const fadeStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   // Pick the first testimonial as the hero quote, rest go in the grid
   const [heroTestimonial, ...gridTestimonials] = testimonials;
@@ -330,9 +342,11 @@ export function ElegantTestimonialsClient({
               fontSize: "clamp(26px, 3.8vw, 48px)",
               lineHeight: 1.2,
               color: "var(--el-ink-2, #2a2722)",
-              opacity: featuredReveal.visible ? 1 : 0,
-              transform: featuredReveal.visible ? "translateY(0)" : "translateY(24px)",
-              transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+              ...(reducedMotion ? {} : {
+                opacity: featuredReveal.visible ? 1 : 0,
+                transform: featuredReveal.visible ? "translateY(0)" : "translateY(24px)",
+                transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+              }),
             }}>
               <em>&ldquo;</em>{heroTestimonial.text}<em>&rdquo;</em>
             </p>
@@ -343,9 +357,11 @@ export function ElegantTestimonialsClient({
               textTransform: "uppercase",
               color: "var(--el-ink-soft, #6b6659)",
               marginTop: 28,
-              opacity: featuredReveal.visible ? 1 : 0,
-              transform: featuredReveal.visible ? "translateY(0)" : "translateY(24px)",
-              transition: `opacity 0.9s ${easeOut} 0.15s, transform 0.9s ${easeOut} 0.15s`,
+              ...(reducedMotion ? {} : {
+                opacity: featuredReveal.visible ? 1 : 0,
+                transform: featuredReveal.visible ? "translateY(0)" : "translateY(24px)",
+                transition: `opacity 0.9s ${easeOut} 0.15s, transform 0.9s ${easeOut} 0.15s`,
+              }),
             }}>
               {heroTestimonial.customerName}
               {heroTestimonial.customerTitle ? ` · ${heroTestimonial.customerTitle}` : ""}
@@ -404,9 +420,11 @@ export function ElegantTestimonialsClient({
             letterSpacing: "-0.01em",
             color: "var(--el-ink, #1c1a17)",
             marginBottom: 28,
-            opacity: ctaReveal.visible ? 1 : 0,
-            transform: ctaReveal.visible ? "translateY(0)" : "translateY(24px)",
-            transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+            ...(reducedMotion ? {} : {
+              opacity: ctaReveal.visible ? 1 : 0,
+              transform: ctaReveal.visible ? "translateY(0)" : "translateY(24px)",
+              transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+            }),
           }}>
             Want to see for <em style={{ fontStyle: "italic" }}>yourself</em>?
           </h2>
@@ -415,9 +433,11 @@ export function ElegantTestimonialsClient({
             gap: 14,
             justifyContent: "center",
             flexWrap: "wrap",
-            opacity: ctaReveal.visible ? 1 : 0,
-            transform: ctaReveal.visible ? "translateY(0)" : "translateY(24px)",
-            transition: `opacity 0.9s ${easeOut} 0.1s, transform 0.9s ${easeOut} 0.1s`,
+            ...(reducedMotion ? {} : {
+              opacity: ctaReveal.visible ? 1 : 0,
+              transform: ctaReveal.visible ? "translateY(0)" : "translateY(24px)",
+              transition: `opacity 0.9s ${easeOut} 0.1s, transform 0.9s ${easeOut} 0.1s`,
+            }),
           }}>
             <Link
               href="/shop"

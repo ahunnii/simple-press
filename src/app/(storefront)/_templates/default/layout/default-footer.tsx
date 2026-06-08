@@ -179,10 +179,10 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
               {[
                 { href: "/contact", label: "Contact" },
                 ...(shippingPolicy
-                  ? [{ href: shippingPolicy.slug, label: "Shipping" }]
+                  ? [{ href: `/${shippingPolicy.slug}`, label: "Shipping" }]
                   : []),
                 ...(returnPolicy
-                  ? [{ href: returnPolicy.slug, label: "Returns" }]
+                  ? [{ href: `/${returnPolicy.slug}`, label: "Returns" }]
                   : []),
               ].map(({ href, label }) => (
                 <Link
@@ -245,7 +245,7 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
           <div className="flex gap-5">
             {privacyPolicy ? (
               <Link
-                href={privacyPolicy.slug}
+                href={`/${privacyPolicy.slug}`}
                 className="transition-colors hover:text-[#0a0a0a]"
               >
                 Privacy Policy{" "}
@@ -261,7 +261,7 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
 
             {termsOfService ? (
               <Link
-                href={termsOfService.slug}
+                href={`/${termsOfService.slug}`}
                 className="transition-colors hover:text-[#0a0a0a]"
               >
                 Terms of Service

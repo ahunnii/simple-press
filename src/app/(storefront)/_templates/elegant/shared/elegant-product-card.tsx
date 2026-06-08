@@ -8,6 +8,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { useCart } from "~/providers/cart-context";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 type _HomepageProduct =
   NonNullable<RouterOutputs["business"]["getHomepage"]>["products"][number];
@@ -45,6 +46,8 @@ const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 export function ElegantProductCard({ product, index, isVisible }: Props) {
   const { addItem } = useCart();
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   const productStatus = checkProductStatus({
     price: product.price,
@@ -84,17 +87,23 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
       sku: null,
       maxInventory: productStatus.maxInventory,
     });
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
   };
 
   return (
     <article
       aria-label={product.name}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? "translateY(0)" : "translateY(24px)",
-        transition: `opacity 0.7s ${ease} ${index * 80}ms, transform 0.7s ${ease} ${index * 80}ms`,
-        position: "relative",
-      }}
+      style={
+        reducedMotion
+          ? { position: "relative" }
+          : {
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(24px)",
+              transition: `opacity 0.7s ${ease} ${index * 80}ms, transform 0.7s ${ease} ${index * 80}ms`,
+              position: "relative",
+            }
+      }
       className="el-product-card group"
     >
       {/* Image */}
@@ -169,6 +178,7 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
           {productStatus.hasVariants ? (
             <Link
               href={`/shop/${product.slug}`}
+              aria-label={`View options for ${product.name}`}
               style={{
                 flex: 1,
                 padding: "10px 14px",
@@ -195,7 +205,8 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                disabled={productStatus.disableCart}
+                aria-disabled={productStatus.disableCart || undefined}
+                aria-label={`Quick add ${product.name} to bag`}
                 style={{
                   flex: 1,
                   padding: "10px 14px",
@@ -213,10 +224,11 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
                 }}
                 className="el-quick-btn"
               >
-                Quick add
+                {isAdded ? "Added" : "Quick add"}
               </button>
               <Link
                 href={`/shop/${product.slug}`}
+                aria-label={`View ${product.name}`}
                 style={{
                   flex: 1,
                   padding: "10px 14px",
@@ -242,6 +254,11 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
           )}
         </div>
       </div>
+
+      {/* S-3: sr-only live region for quick-add confirmation */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {isAdded ? `Added ${product.name} to bag` : ""}
+      </span>
 
       {/* Meta */}
       <div

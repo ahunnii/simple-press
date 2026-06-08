@@ -22,7 +22,7 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
   if (items.length === 0) {
     return (
       <div className="py-24 text-center">
-        <ShoppingBag className="mx-auto mb-5 h-12 w-12 text-[#a3a3a3]" />
+        <ShoppingBag className="mx-auto mb-5 h-12 w-12 text-[#6b6b6b]" aria-hidden="true" />
         <h2 className="font-serif text-2xl font-medium">Your cart is empty</h2>
         <p className="mt-2 text-sm text-[#6b6b6b]">
           Add some products to get started.
@@ -81,7 +81,7 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
                   type="button"
                   onClick={() => removeItem(item.productId, item.variantId)}
                   aria-label={`Remove ${item.productName}${item.variantName ? ` — ${item.variantName}` : ""} from cart`}
-                  className="shrink-0 text-[#a3a3a3] transition-colors hover:text-[#0a0a0a]"
+                  className="shrink-0 text-[#6b6b6b] transition-colors hover:text-[#0a0a0a]"
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                 </button>

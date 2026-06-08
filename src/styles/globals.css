@@ -341,13 +341,17 @@
 }
 
 /* ─── Default template — accessibility enhancements ─────────────────────────
-   Focus-visible outlines: ensure every interactive element has a visible
-   focus indicator that meets WCAG 2.1 SC 2.4.7 (AA) and 2.4.11 (AA, 2.2).
-   We override the browser default only where the template suppresses it.    */
+   Focus-visible outlines: two-tone indicator (dark outline + white inner ring)
+   that meets WCAG 2.1 SC 2.4.7 / 2.4.11 (AA) on both light and dark surfaces.
+   The white box-shadow renders a 2px ring flush with the element edge; the
+   2px dark outline sits 2px outside that white ring, so the dark ring is
+   visible on light surfaces and the white ring is visible on dark surfaces
+   (hero, selected pills, lightbox backdrop, bg-[#0a0a0a] CTAs).              */
 
 .default-template *:focus-visible {
   outline: 2px solid #0a0a0a;
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px #fff;
 }
 
 /* Respect prefers-reduced-motion for all CSS transitions/animations
@@ -1318,6 +1322,11 @@
   animation-duration: 60s;
 }
 
+/* ── Hero scroll-pulse line ── */
+.elegant .el-scroll-pulse-line {
+  animation: el-scroll-pulse 2.2s var(--el-ease, cubic-bezier(0.22, 1, 0.36, 1)) infinite;
+}
+
 /* ── Reduced-motion overrides ── */
 @media (prefers-reduced-motion: reduce) {
   .elegant .animate-scroll-down,
@@ -1325,6 +1334,9 @@
     animation: none;
   }
   .elegant .el-marquee-track {
+    animation: none;
+  }
+  .elegant .el-scroll-pulse-line {
     animation: none;
   }
   .elegant {
@@ -1449,6 +1461,10 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+.elegant .el-variant-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .elegant .el-variant-btn:focus-visible {
   outline: 2px solid var(--el-sage, #4a5240);
   outline-offset: 2px;
@@ -1510,6 +1526,18 @@
 }
 .elegant .el-collection-product-card:hover .object-cover {
   transform: scale(1.05);
+}
+/* Branded focus indicator for full-card links (matches .el-card-link) —
+   default UA outline applies otherwise, but can hug image content poorly */
+.elegant .el-related-post:focus-visible,
+.elegant .el-featured-post:focus-visible,
+.elegant .el-post-card:focus-visible,
+.elegant .el-collection-cell:focus-visible,
+.elegant .el-other-col:focus-visible,
+.elegant .el-collection-product-card:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 3px;
+  border-radius: 8px;
 }
 .elegant .el-blog-back:hover {
   color: var(--el-ink, #1c1a17) !important;

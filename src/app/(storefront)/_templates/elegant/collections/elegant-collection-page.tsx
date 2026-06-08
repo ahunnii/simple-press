@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -34,6 +35,7 @@ export function ElegantCollectionPage({
   const [shown, setShown] = useState(false);
   const productsReveal = useScrollReveal();
   const othersReveal = useScrollReveal();
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const t = setTimeout(() => setShown(true), 60);
@@ -48,17 +50,23 @@ export function ElegantCollectionPage({
     .filter((c) => c.slug !== collection.slug)
     .slice(0, 3);
 
-  const maskStyle = (delay: number): React.CSSProperties => ({
-    display: "block",
-    transform: shown ? "translateY(0)" : "translateY(110%)",
-    transition: `transform 1.1s ${easeOut} ${delay}s`,
-  });
+  const maskStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? { display: "block" }
+      : {
+          display: "block",
+          transform: shown ? "translateY(0)" : "translateY(110%)",
+          transition: `transform 1.1s ${easeOut} ${delay}s`,
+        };
 
-  const fadeStyle = (delay: number): React.CSSProperties => ({
-    opacity: shown ? 1 : 0,
-    transform: shown ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const fadeStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
@@ -80,7 +88,7 @@ export function ElegantCollectionPage({
               marginBottom: 32,
               transition: `color 0.3s ${ease}`,
             }}>
-              <ArrowLeft style={{ width: 13, height: 13 }} />
+              <ArrowLeft aria-hidden={true} style={{ width: 13, height: 13 }} />
               All collections
             </Link>
           </div>
@@ -194,9 +202,11 @@ export function ElegantCollectionPage({
       <section ref={productsReveal.ref} style={{ padding: "60px 40px 80px" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
           <div style={{
-            opacity: productsReveal.visible ? 1 : 0,
-            transform: productsReveal.visible ? "translateY(0)" : "translateY(24px)",
-            transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+            ...(reducedMotion ? {} : {
+              opacity: productsReveal.visible ? 1 : 0,
+              transform: productsReveal.visible ? "translateY(0)" : "translateY(24px)",
+              transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+            }),
             marginBottom: 40,
           }}>
             <span style={{
@@ -259,9 +269,11 @@ export function ElegantCollectionPage({
                     style={{
                       display: "block",
                       textDecoration: "none",
-                      opacity: productsReveal.visible ? 1 : 0,
-                      transform: productsReveal.visible ? "translateY(0)" : "translateY(24px)",
-                      transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
+                      ...(reducedMotion ? {} : {
+                        opacity: productsReveal.visible ? 1 : 0,
+                        transform: productsReveal.visible ? "translateY(0)" : "translateY(24px)",
+                        transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
+                      }),
                     }}
                     className="el-collection-product-card group"
                   >
@@ -325,9 +337,11 @@ export function ElegantCollectionPage({
         >
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
             <div style={{
-              opacity: othersReveal.visible ? 1 : 0,
-              transform: othersReveal.visible ? "translateY(0)" : "translateY(24px)",
-              transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+              ...(reducedMotion ? {} : {
+                opacity: othersReveal.visible ? 1 : 0,
+                transform: othersReveal.visible ? "translateY(0)" : "translateY(24px)",
+                transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+              }),
               marginBottom: 40,
             }}>
               <span style={{
@@ -364,9 +378,11 @@ export function ElegantCollectionPage({
                   style={{
                     display: "block",
                     textDecoration: "none",
-                    opacity: othersReveal.visible ? 1 : 0,
-                    transform: othersReveal.visible ? "translateY(0)" : "translateY(24px)",
-                    transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
+                    ...(reducedMotion ? {} : {
+                      opacity: othersReveal.visible ? 1 : 0,
+                      transform: othersReveal.visible ? "translateY(0)" : "translateY(24px)",
+                      transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
+                    }),
                   }}
                   className="el-other-col group"
                 >
@@ -387,9 +403,10 @@ export function ElegantCollectionPage({
                         sizes="(max-width: 640px) 100vw, 33vw"
                       />
                     )}
+                    {/* Dark gradient overlay — deepened to 0.8 floor for WCAG 1.4.3 */}
                     <div style={{
                       position: "absolute", inset: 0,
-                      background: "linear-gradient(180deg, transparent 50%, rgba(28,26,23,0.6) 100%)",
+                      background: "linear-gradient(180deg, transparent 50%, rgba(28,26,23,0.8) 100%)",
                     }} />
                     <div style={{
                       position: "absolute", left: 20, right: 20, bottom: 20,
@@ -408,7 +425,7 @@ export function ElegantCollectionPage({
                         letterSpacing: "0.16em",
                         textTransform: "uppercase",
                         marginTop: 4,
-                        opacity: 0.75,
+                        opacity: 0.9,
                         color: "var(--el-paper, #fbf8f2)",
                       }}>
                         {col._count.collectionProducts} items

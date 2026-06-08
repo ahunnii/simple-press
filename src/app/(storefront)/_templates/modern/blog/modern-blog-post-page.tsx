@@ -24,11 +24,12 @@ export function ModernBlogPostPage({
     >
       <section className="bg-background py-8">
         <div className="mx-auto max-w-4xl px-6 lg:px-8">
+          {/* N-1: "←" glyph wrapped in aria-hidden */}
           <Link
             href="/blog"
             className="text-primary inline-flex items-center gap-2 text-sm font-medium hover:underline"
           >
-            ← Back to blog
+            <span aria-hidden="true">←</span> Back to blog
           </Link>
           <div className="text-muted-foreground mt-4 flex flex-wrap items-center gap-2 text-sm">
             <span className="inline-flex items-center gap-1.5">

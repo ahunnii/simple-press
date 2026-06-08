@@ -10,7 +10,7 @@ export function DefaultOrderSuccessPage({
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 }) {
   return (
-    <main className="flex-1 px-4 py-12">
+    <div className="flex-1 px-4 py-12">
       <Suspense
         fallback={
           <div className="mx-auto max-w-2xl text-center">
@@ -20,6 +20,6 @@ export function DefaultOrderSuccessPage({
       >
         <DefaultOrderConfirmation business={business} />
       </Suspense>
-    </main>
+    </div>
   );
 }

@@ -66,7 +66,11 @@ export function ModernCartSummary({ shippingConfig }: Props) {
         <div className="border-border mt-6 border-t pt-6">
           <div className="flex items-center justify-between">
             <span className="text-foreground font-medium">Total</span>
-            <span className="text-foreground text-lg font-medium">
+            <span
+              role="status"
+              aria-live="polite"
+              className="text-foreground text-lg font-medium"
+            >
               {formatPrice(estimatedOrderTotal)}
             </span>
           </div>
@@ -77,7 +81,7 @@ export function ModernCartSummary({ shippingConfig }: Props) {
           className="bg-primary text-primary-foreground mt-8 flex w-full items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
         >
           Proceed to Checkout
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>
       </div>
     </div>

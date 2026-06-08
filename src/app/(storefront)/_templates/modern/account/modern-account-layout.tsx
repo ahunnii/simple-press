@@ -39,27 +39,31 @@ export function ModernAccountLayout({ children, heading }: Props) {
       <section className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
         {/* Mobile: horizontal scrolling tabs */}
         <nav
-          className="mb-8 flex gap-1 overflow-x-auto pb-2 md:hidden"
+          className="mb-8 md:hidden"
           aria-label="Account navigation"
         >
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(href + "/");
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "flex shrink-0 items-center gap-2 rounded-sm px-4 py-2 text-sm font-medium tracking-wide transition-colors",
-                  active
-                    ? "bg-foreground text-background"
-                    : "bg-secondary text-foreground hover:bg-secondary/70",
-                )}
-              >
-                <Icon className="h-4 w-4" aria-hidden />
-                {label}
-              </Link>
-            );
-          })}
+          <ul className="flex gap-1 overflow-x-auto pb-2">
+            {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+              const active = pathname === href || pathname.startsWith(href + "/");
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "flex shrink-0 items-center gap-2 rounded-sm px-4 py-2 text-sm font-medium tracking-wide transition-colors",
+                      active
+                        ? "bg-foreground text-background"
+                        : "bg-secondary text-foreground hover:bg-secondary/70",
+                    )}
+                  >
+                    <Icon className="h-4 w-4" aria-hidden />
+                    {label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         </nav>
 
         {/* Desktop: sidebar + content */}
@@ -73,11 +77,12 @@ export function ModernAccountLayout({ children, heading }: Props) {
                   <li key={href}>
                     <Link
                       href={href}
+                      aria-current={active ? "page" : undefined}
                       className={cn(
                         "flex items-center gap-3 border-l-2 py-2.5 pl-3 pr-4 text-sm font-medium transition-colors",
                         active
                           ? "border-foreground text-foreground"
-                          : "border-transparent text-foreground/50 hover:border-foreground/30 hover:text-foreground",
+                          : "border-transparent text-foreground/70 hover:border-foreground/50 hover:text-foreground",
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0" aria-hidden />

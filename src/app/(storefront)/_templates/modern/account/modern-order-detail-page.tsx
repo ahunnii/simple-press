@@ -127,7 +127,9 @@ export function ModernOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                         rel="noopener noreferrer"
                         className="text-accent inline-flex items-center gap-1 hover:underline"
                       >
-                        Track shipment <ExternalLink className="h-3 w-3" />
+                        Track shipment
+                        <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                        <span className="sr-only"> (opens in new tab)</span>
                       </a>
                     )}
                     <p className="text-muted-foreground mt-1 text-xs">
@@ -190,7 +192,7 @@ export function ModernOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
             href="/account/orders"
             className="text-accent inline-flex items-center gap-1 text-sm font-medium hover:underline"
           >
-            ← Back to orders
+            <span aria-hidden="true">←</span> Back to orders
           </Link>
         </div>
       </div>

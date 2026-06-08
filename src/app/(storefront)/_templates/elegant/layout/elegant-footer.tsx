@@ -88,7 +88,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                   href={socialLinks.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Instagram"
+                  aria-label="Instagram (opens in new tab)"
                   style={{
                     width: 36,
                     height: 36,
@@ -101,7 +101,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                     transition: "border-color 0.3s, color 0.3s",
                   }}
                 >
-                  <Instagram style={{ width: 15, height: 15 }} />
+                  <Instagram aria-hidden={true} style={{ width: 15, height: 15 }} />
                 </a>
               )}
               {socialLinks?.facebook && (
@@ -109,7 +109,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                   href={socialLinks.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Facebook"
+                  aria-label="Facebook (opens in new tab)"
                   style={{
                     width: 36,
                     height: 36,
@@ -121,7 +121,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                     color: "rgba(255,255,255,0.7)",
                   }}
                 >
-                  <Facebook style={{ width: 15, height: 15 }} />
+                  <Facebook aria-hidden={true} style={{ width: 15, height: 15 }} />
                 </a>
               )}
               {socialLinks?.twitter && (
@@ -129,7 +129,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                   href={socialLinks.twitter}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="X / Twitter"
+                  aria-label="X / Twitter (opens in new tab)"
                   style={{
                     width: 36,
                     height: 36,
@@ -141,7 +141,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                     color: "rgba(255,255,255,0.7)",
                   }}
                 >
-                  <Twitter style={{ width: 15, height: 15 }} />
+                  <Twitter aria-hidden={true} style={{ width: 15, height: 15 }} />
                 </a>
               )}
             </div>
@@ -244,7 +244,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
 
 function FooterColHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h4
+    <p
       style={{
         fontFamily: "var(--font-mono, ui-monospace)",
         fontSize: 11,
@@ -256,7 +256,7 @@ function FooterColHeading({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
-    </h4>
+    </p>
   );
 }
 

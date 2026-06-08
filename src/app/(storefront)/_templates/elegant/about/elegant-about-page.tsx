@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { resolveFields } from "..";
 
@@ -38,6 +39,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const [shown, setShown] = useState(false);
   const story = useScrollReveal();
   const values = useScrollReveal();
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const t = setTimeout(() => setShown(true), 60);
@@ -70,17 +72,23 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const hasHeroImage = !!heroImage && heroImage !== "/placeholder.svg";
   const hasStoryImage = !!storyImage && storyImage !== "/placeholder.svg";
 
-  const maskStyle = (delay: number): React.CSSProperties => ({
-    display: "block",
-    transform: shown ? "translateY(0)" : "translateY(110%)",
-    transition: `transform 1.1s ${easeOut} ${delay}s`,
-  });
+  const maskStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? { display: "block" }
+      : {
+          display: "block",
+          transform: shown ? "translateY(0)" : "translateY(110%)",
+          transition: `transform 1.1s ${easeOut} ${delay}s`,
+        };
 
-  const fadeStyle = (visible: boolean, delay: number): React.CSSProperties => ({
-    opacity: visible ? 1 : 0,
-    transform: visible ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const fadeStyle = (visible: boolean, delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>

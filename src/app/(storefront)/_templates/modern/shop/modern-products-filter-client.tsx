@@ -56,16 +56,20 @@ export function ModernProductsFilterClient({
         {/* Desktop */}
         <div className="hidden flex-wrap items-center gap-x-5 gap-y-3 md:flex">
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+            {/* S-6: real label wired to select id */}
+            <label
+              htmlFor="sort-desktop"
+              className="text-muted-foreground cursor-default text-xs font-medium tracking-widest uppercase"
+            >
               Sort
-            </span>
+            </label>
             <select
+              id="sort-desktop"
               value={sortParam}
-              title="Sort by"
               onChange={(e) =>
                 handleSort(e.target.value as Parameters<typeof handleSort>[0])
               }
-              className="border-border bg-background text-foreground cursor-pointer rounded-sm border px-2 py-1.5 text-xs outline-none"
+              className="border-border bg-background text-foreground focus-visible:ring-ring cursor-pointer rounded-sm border px-2 py-1.5 text-xs focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               <option value="featured">Featured</option>
               <option value="price-ascending">Price: Low to High</option>
@@ -94,19 +98,24 @@ export function ModernProductsFilterClient({
 
           <div className="flex min-w-[200px] flex-col gap-1">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+              {/* S-6: real label wired to range id */}
+              <label
+                htmlFor="price-desktop"
+                className="text-muted-foreground cursor-default text-xs font-medium tracking-widest uppercase"
+              >
                 Price
-              </span>
+              </label>
               <span className="text-foreground text-xs">
                 {formatPrice(localPriceMax)}
               </span>
             </div>
             <input
+              id="price-desktop"
               type="range"
               min={0}
               max={maxPrice || 1000}
               value={localPriceMax}
-              title="Maximum price"
+              aria-valuetext={formatPrice(localPriceMax)}
               onChange={(e) => setLocalPriceMax(Number(e.target.value))}
               onPointerUp={(e) =>
                 commitPriceMax(Number((e.target as HTMLInputElement).value))
@@ -140,11 +149,15 @@ export function ModernProductsFilterClient({
                 onClick={clearFilters}
                 className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs underline"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3" aria-hidden="true" />
                 Clear all
               </button>
             )}
-            <span className="text-muted-foreground text-sm">
+            {/* S-8: role="status" for live result count */}
+            <span
+              role="status"
+              className="text-muted-foreground text-sm"
+            >
               {filtered.length} {filtered.length === 1 ? "product" : "products"}
             </span>
           </div>
@@ -153,39 +166,55 @@ export function ModernProductsFilterClient({
         {/* Mobile */}
         <div className="md:hidden">
           <div className="flex items-center justify-between">
+            {/* S-7: aria-expanded + aria-controls */}
             <button
               type="button"
+              aria-expanded={filtersOpen}
+              aria-controls="products-filter-panel"
               onClick={() => setFiltersOpen(!filtersOpen)}
               className="border-border text-foreground flex items-center gap-2 rounded-sm border px-3 py-1.5 text-sm"
             >
-              <SlidersHorizontal className="h-3.5 w-3.5" />
+              <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
               Filters &amp; Sort
               {activeFilterCount > 0 && (
                 <span className="bg-primary text-primary-foreground flex h-4 w-4 items-center justify-center rounded-full text-[10px]">
                   {activeFilterCount}
+                  <span className="sr-only"> active filters</span>
                 </span>
               )}
             </button>
-            <span className="text-muted-foreground text-sm">
-              {filtered.length} {filtered.length === 1 ? "product" : "products"}
+            {/* S-8: role="status" for live result count */}
+            <span
+              role="status"
+              className="text-muted-foreground text-sm"
+            >
+              {filtered.length}{" "}
+              {filtered.length === 1 ? "product" : "products"}
             </span>
           </div>
 
           {filtersOpen && (
-            <div className="border-border mt-4 flex flex-col gap-5 border-t pt-4">
+            <div
+              id="products-filter-panel"
+              className="border-border mt-4 flex flex-col gap-5 border-t pt-4"
+            >
               <div className="flex flex-col gap-2">
-                <span className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+                {/* S-6: real label wired to select id */}
+                <label
+                  htmlFor="sort-mobile"
+                  className="text-muted-foreground cursor-default text-xs font-medium tracking-widest uppercase"
+                >
                   Sort
-                </span>
+                </label>
                 <select
+                  id="sort-mobile"
                   value={sortParam}
-                  title="Sort by"
                   onChange={(e) =>
                     handleSort(
                       e.target.value as Parameters<typeof handleSort>[0],
                     )
                   }
-                  className="border-border bg-background text-foreground cursor-pointer rounded-sm border px-3 py-2 text-sm outline-none"
+                  className="border-border bg-background text-foreground focus-visible:ring-ring cursor-pointer rounded-sm border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
                   <option value="featured">Featured</option>
                   <option value="price-ascending">Price: Low to High</option>
@@ -209,19 +238,24 @@ export function ModernProductsFilterClient({
 
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+                  {/* S-6: real label wired to range id */}
+                  <label
+                    htmlFor="price-mobile"
+                    className="text-muted-foreground cursor-default text-xs font-medium tracking-widest uppercase"
+                  >
                     Price
-                  </span>
+                  </label>
                   <span className="text-foreground text-xs">
                     {formatPrice(localPriceMax)}
                   </span>
                 </div>
                 <input
+                  id="price-mobile"
                   type="range"
                   min={0}
                   max={maxPrice || 1000}
                   value={localPriceMax}
-                  title="Maximum price"
+                  aria-valuetext={formatPrice(localPriceMax)}
                   onChange={(e) => setLocalPriceMax(Number(e.target.value))}
                   onPointerUp={(e) =>
                     commitPriceMax(Number((e.target as HTMLInputElement).value))
@@ -259,7 +293,7 @@ export function ModernProductsFilterClient({
                   }}
                   className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 self-start text-sm underline"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
                   Clear all filters
                 </button>
               )}

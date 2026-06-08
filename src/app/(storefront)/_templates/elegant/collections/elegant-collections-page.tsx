@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -33,6 +34,7 @@ function useScrollReveal() {
 export function ElegantCollectionsPage({ collections }: DefaultCollectionsPageTemplateProps) {
   const [shown, setShown] = useState(false);
   const editorial = useScrollReveal();
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const t = setTimeout(() => setShown(true), 60);
@@ -41,17 +43,23 @@ export function ElegantCollectionsPage({ collections }: DefaultCollectionsPageTe
 
   const list = collections ?? [];
 
-  const maskStyle = (delay: number): React.CSSProperties => ({
-    display: "block",
-    transform: shown ? "translateY(0)" : "translateY(110%)",
-    transition: `transform 1.1s ${easeOut} ${delay}s`,
-  });
+  const maskStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? { display: "block" }
+      : {
+          display: "block",
+          transform: shown ? "translateY(0)" : "translateY(110%)",
+          transition: `transform 1.1s ${easeOut} ${delay}s`,
+        };
 
-  const fadeStyle = (delay: number): React.CSSProperties => ({
-    opacity: shown ? 1 : 0,
-    transform: shown ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const fadeStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
@@ -142,9 +150,11 @@ export function ElegantCollectionsPage({ collections }: DefaultCollectionsPageTe
                         gridColumn: span,
                         display: "block",
                         textDecoration: "none",
-                        opacity: shown ? 1 : 0,
-                        transform: shown ? "translateY(0)" : "translateY(24px)",
-                        transition: `opacity 0.9s ${easeOut} ${(i % 3) * 0.08 + 0.2}s, transform 0.9s ${easeOut} ${(i % 3) * 0.08 + 0.2}s`,
+                        ...(reducedMotion ? {} : {
+                          opacity: shown ? 1 : 0,
+                          transform: shown ? "translateY(0)" : "translateY(24px)",
+                          transition: `opacity 0.9s ${easeOut} ${(i % 3) * 0.08 + 0.2}s, transform 0.9s ${easeOut} ${(i % 3) * 0.08 + 0.2}s`,
+                        }),
                       }}
                     >
                       <div style={{ position: "relative", aspectRatio: aspect, borderRadius: 8, overflow: "hidden", cursor: "pointer" }}>
@@ -160,10 +170,10 @@ export function ElegantCollectionsPage({ collections }: DefaultCollectionsPageTe
                         ) : (
                           <div style={{ position: "absolute", inset: 0, background: "var(--el-cream-2, #ebe6dc)" }} />
                         )}
-                        {/* Dark gradient overlay */}
+                        {/* Dark gradient overlay — deepened to 0.8 floor for WCAG 1.4.3 */}
                         <div style={{
                           position: "absolute", inset: 0,
-                          background: "linear-gradient(180deg, transparent 40%, rgba(28,26,23,0.65) 100%)",
+                          background: "linear-gradient(180deg, transparent 40%, rgba(28,26,23,0.8) 100%)",
                         }} />
                         {/* Collection label */}
                         <div style={{
@@ -175,7 +185,7 @@ export function ElegantCollectionsPage({ collections }: DefaultCollectionsPageTe
                             fontSize: 10,
                             letterSpacing: "0.18em",
                             textTransform: "uppercase",
-                            opacity: 0.75,
+                            opacity: 0.9,
                             marginBottom: 8,
                             color: "var(--el-paper, #fbf8f2)",
                           }}>
@@ -192,7 +202,7 @@ export function ElegantCollectionsPage({ collections }: DefaultCollectionsPageTe
                           {collection.description && (
                             <div style={{
                               fontSize: 14,
-                              opacity: 0.8,
+                              opacity: 0.9,
                               marginTop: 6,
                               lineHeight: 1.45,
                               fontFamily: "var(--font-sans, sans-serif)",
@@ -224,7 +234,7 @@ export function ElegantCollectionsPage({ collections }: DefaultCollectionsPageTe
             className="el-editorial-cta"
             style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}
           >
-            <div style={{
+            <div style={reducedMotion ? {} : {
               opacity: editorial.visible ? 1 : 0,
               transform: editorial.visible ? "translateY(0)" : "translateY(24px)",
               transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
@@ -283,9 +293,11 @@ export function ElegantCollectionsPage({ collections }: DefaultCollectionsPageTe
             </div>
 
             <div style={{
-              opacity: editorial.visible ? 1 : 0,
-              transform: editorial.visible ? "translateY(0)" : "translateY(24px)",
-              transition: `opacity 0.9s ${easeOut} 0.15s, transform 0.9s ${easeOut} 0.15s`,
+              ...(reducedMotion ? {} : {
+                opacity: editorial.visible ? 1 : 0,
+                transform: editorial.visible ? "translateY(0)" : "translateY(24px)",
+                transition: `opacity 0.9s ${easeOut} 0.15s, transform 0.9s ${easeOut} 0.15s`,
+              }),
               position: "relative",
               aspectRatio: "4/5",
               borderRadius: 8,

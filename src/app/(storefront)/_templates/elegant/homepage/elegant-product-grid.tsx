@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { ElegantProductCard } from "../shared/elegant-product-card";
 
@@ -51,14 +52,18 @@ export function ElegantProductGrid({
 }) {
   const { ref: headerRef, visible: headerVisible } = useReveal();
   const { ref: gridRef, visible: gridVisible } = useReveal();
+  const reducedMotion = useReducedMotion();
 
   const products = homepage?.products ?? [];
 
-  const revealStyle = (delay: number): React.CSSProperties => ({
-    opacity: headerVisible ? 1 : 0,
-    transform: headerVisible ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const revealStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: headerVisible ? 1 : 0,
+          transform: headerVisible ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   return (
     <section

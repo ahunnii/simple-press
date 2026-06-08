@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { CheckCircle, Loader2, Send } from "lucide-react";
 
 import { useContactForm } from "~/hooks/use-contact-form";
@@ -33,19 +34,29 @@ export function DefaultContactForm() {
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
 
+  const successRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isSuccess && successRef.current) {
+      successRef.current.focus();
+    }
+  }, [isSuccess]);
+
   if (isSuccess) {
     return (
-      <Alert className="border-green-200 bg-green-50">
-        <CheckCircle className="h-5 w-5 text-green-600" />
-        <AlertDescription className="text-green-800">
-          <strong>Message sent successfully!</strong>
-          <br />
-          We&apos;ve received your message and will get back to you soon.
-        </AlertDescription>
-        <Button variant="outline" onClick={resetSuccess} className="mt-4">
-          Send Another Message
-        </Button>
-      </Alert>
+      <div ref={successRef} tabIndex={-1}>
+        <Alert className="border-green-200 bg-green-50">
+          <CheckCircle className="h-5 w-5 text-green-600" aria-hidden="true" />
+          <AlertDescription className="text-green-800">
+            <strong>Message sent successfully!</strong>
+            <br />
+            We&apos;ve received your message and will get back to you soon.
+          </AlertDescription>
+          <Button variant="outline" onClick={resetSuccess} className="mt-4">
+            Send Another Message
+          </Button>
+        </Alert>
+      </div>
     );
   }
 

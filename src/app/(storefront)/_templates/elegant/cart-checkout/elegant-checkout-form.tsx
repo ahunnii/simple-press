@@ -339,7 +339,7 @@ export function ElegantCheckoutForm({ business }: Props) {
               }}
             >
               {validateDiscountMutation.isPending
-                ? <Loader2 className="h-4 w-4 animate-spin" />
+                ? <Loader2 aria-hidden={true} className="h-4 w-4 animate-spin" />
                 : "Apply"}
             </button>
           </div>
@@ -599,7 +599,7 @@ export function ElegantCheckoutForm({ business }: Props) {
           >
             {isProcessing ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 aria-hidden={true} className="h-4 w-4 animate-spin" />
                 Processing…
               </>
             ) : (

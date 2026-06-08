@@ -78,7 +78,7 @@ export function ModernContactPage({
                 {!!displayEmail && (
                   <div className="flex items-start gap-4">
                     <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <Mail className="text-primary h-4 w-4" />
+                      <Mail className="text-primary h-4 w-4" aria-hidden="true" />
                     </div>
                     <div>
                       <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
@@ -94,7 +94,7 @@ export function ModernContactPage({
                 {!!displayPhone && (
                   <div className="flex items-start gap-4">
                     <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <Phone className="text-primary h-4 w-4" />
+                      <Phone className="text-primary h-4 w-4" aria-hidden="true" />
                     </div>
                     <div>
                       <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
@@ -110,7 +110,7 @@ export function ModernContactPage({
                 {!!displayAddress && (
                   <div className="flex items-start gap-4">
                     <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <MapPin className="text-primary h-4 w-4" />
+                      <MapPin className="text-primary h-4 w-4" aria-hidden="true" />
                     </div>
                     <div>
                       <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">

@@ -9,6 +9,7 @@ import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { formatDate } from "~/lib/utils";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -32,6 +33,7 @@ function useScrollReveal() {
 export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageTemplateProps) {
   const [shown, setShown] = useState(false);
   const keepReading = useScrollReveal();
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const t = setTimeout(() => setShown(true), 60);
@@ -40,17 +42,23 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
 
   const others = relatedPosts.filter((p) => p.slug !== page.slug).slice(0, 3);
 
-  const maskStyle = (delay: number): React.CSSProperties => ({
-    display: "block",
-    transform: shown ? "translateY(0)" : "translateY(110%)",
-    transition: `transform 1.1s ${easeOut} ${delay}s`,
-  });
+  const maskStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? { display: "block" }
+      : {
+          display: "block",
+          transform: shown ? "translateY(0)" : "translateY(110%)",
+          transition: `transform 1.1s ${easeOut} ${delay}s`,
+        };
 
-  const fadeStyle = (delay: number): React.CSSProperties => ({
-    opacity: shown ? 1 : 0,
-    transform: shown ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const fadeStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
@@ -76,7 +84,7 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
               }}
               className="el-blog-back"
             >
-              <ArrowLeft style={{ width: 13, height: 13 }} />
+              <ArrowLeft aria-hidden={true} style={{ width: 13, height: 13 }} />
               Back to journal
             </Link>
           </div>
@@ -233,9 +241,11 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
         >
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
             <div style={{
-              opacity: keepReading.visible ? 1 : 0,
-              transform: keepReading.visible ? "translateY(0)" : "translateY(24px)",
-              transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+              ...(reducedMotion ? {} : {
+                opacity: keepReading.visible ? 1 : 0,
+                transform: keepReading.visible ? "translateY(0)" : "translateY(24px)",
+                transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+              }),
               marginBottom: 40,
             }}>
               <span style={{
@@ -273,9 +283,11 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
                   style={{
                     display: "block",
                     textDecoration: "none",
-                    opacity: keepReading.visible ? 1 : 0,
-                    transform: keepReading.visible ? "translateY(0)" : "translateY(24px)",
-                    transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
+                    ...(reducedMotion ? {} : {
+                      opacity: keepReading.visible ? 1 : 0,
+                      transform: keepReading.visible ? "translateY(0)" : "translateY(24px)",
+                      transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
+                    }),
                   }}
                   className="el-related-post group"
                 >
@@ -306,7 +318,7 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
                   }}>
                     {formatDate(post.createdAt)}
                   </div>
-                  <h4 style={{
+                  <h3 style={{
                     fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
                     fontWeight: 400,
                     fontSize: 22,
@@ -315,7 +327,7 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
                     letterSpacing: "-0.005em",
                   }}>
                     {post.title}
-                  </h4>
+                  </h3>
                 </Link>
               ))}
             </div>

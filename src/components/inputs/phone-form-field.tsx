@@ -501,7 +501,7 @@ export const PhoneFormField = <CurrentForm extends FieldValues>({
         <FormItem className={cn("col-span-full", className)}>
           {label && (
             <FormLabel className={cn(labelClassName)}>
-              {label} {required && <span className="text-red-500">*</span>}
+              {label} {required && <span className="text-red-500" aria-hidden="true">*</span>}
             </FormLabel>
           )}
           <FormControl>

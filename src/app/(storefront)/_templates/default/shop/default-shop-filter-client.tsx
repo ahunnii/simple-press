@@ -36,9 +36,9 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
       {/* Collections */}
       {collections.length > 0 && (
         <div className="pb-6 pt-0">
-          <h4 className="mb-3.5 text-[11px] font-medium tracking-[0.16em] uppercase text-[#6b6b6b]">
+          <h2 className="mb-3.5 text-[11px] font-medium tracking-[0.16em] uppercase text-[#6b6b6b]">
             Collection
-          </h4>
+          </h2>
           <ul className="flex flex-col gap-2">
             <li>
               <label className="flex cursor-pointer items-center gap-2 text-sm">
@@ -87,9 +87,9 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
 
       {/* Availability */}
       <div className="py-6">
-        <h4 className="mb-3.5 text-[11px] font-medium tracking-[0.16em] uppercase text-[#6b6b6b]">
+        <h2 className="mb-3.5 text-[11px] font-medium tracking-[0.16em] uppercase text-[#6b6b6b]">
           Availability
-        </h4>
+        </h2>
         <ul className="flex flex-col gap-2">
           <li>
             <label className="flex cursor-pointer items-center gap-2 text-sm">
@@ -116,7 +116,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
             onClick={clearFilters}
             className="flex items-center gap-1.5 text-xs text-[#6b6b6b] hover:text-[#0a0a0a] transition-colors"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-3.5 w-3.5" aria-hidden="true" />
             Clear filters
           </button>
         </div>
@@ -163,7 +163,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
         <div>
           {/* Toolbar */}
           <div className="mb-6 flex items-center justify-between border-b border-[#e8e8e8] pb-4">
-            <span className="text-sm text-[#6b6b6b]">
+            <span className="text-sm text-[#6b6b6b]" aria-live="polite" aria-atomic="true">
               Showing {filtered.length} product
               {filtered.length !== 1 ? "s" : ""}
             </span>
@@ -175,7 +175,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
                 onChange={(e) =>
                   handleSort(e.target.value as keyof typeof SORT_LABELS)
                 }
-                className="h-9 cursor-pointer appearance-none rounded-[var(--radius)] border border-[#e8e8e8] bg-white px-3 pr-7 text-sm text-[#0a0a0a] transition-colors hover:border-[#0a0a0a] focus:border-[#0a0a0a] focus-visible:outline-none"
+                className="h-9 cursor-pointer appearance-none rounded-[var(--radius)] border border-[#e8e8e8] bg-white px-3 pr-7 text-sm text-[#0a0a0a] transition-colors hover:border-[#0a0a0a] focus:border-[#0a0a0a]"
                 style={{
                   backgroundImage:
                     "linear-gradient(45deg,transparent 50%,#0a0a0a 50%),linear-gradient(135deg,#0a0a0a 50%,transparent 50%)",

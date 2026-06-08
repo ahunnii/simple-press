@@ -53,8 +53,9 @@ export function ModernProductActions({ product }: Props) {
       ) : !inStock ? (
         <button
           type="button"
-          disabled={true}
-          className="boty-shadow bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
+          aria-disabled="true"
+          onClick={(e) => e.preventDefault()}
+          className="boty-shadow bg-primary text-primary-foreground flex flex-1 cursor-not-allowed items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide opacity-50 transition-opacity"
         >
           Out of Stock
         </button>
@@ -63,8 +64,15 @@ export function ModernProductActions({ product }: Props) {
           {canAddMore && (
             <>
               {/* Quantity Selector */}
-              <div className="flex w-fit items-center gap-4">
-                <span className="text-foreground text-xs font-semibold tracking-widest uppercase">
+              <div
+                role="group"
+                aria-label="Quantity"
+                className="flex w-fit items-center gap-4"
+              >
+                <span
+                  aria-hidden="true"
+                  className="text-foreground text-xs font-semibold tracking-widest uppercase"
+                >
                   Quantity
                 </span>
                 <div className="border-border flex items-center border">
@@ -75,9 +83,13 @@ export function ModernProductActions({ product }: Props) {
                     className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
                     aria-label="Decrease quantity"
                   >
-                    <Minus className="h-4 w-4" />
+                    <Minus className="h-4 w-4" aria-hidden="true" />
                   </button>
-                  <span className="border-border text-foreground flex h-10 w-12 items-center justify-center border-x text-sm font-medium">
+                  <span
+                    aria-live="polite"
+                    aria-atomic="true"
+                    className="border-border text-foreground flex h-10 w-12 items-center justify-center border-x text-sm font-medium"
+                  >
                     {quantity}
                   </span>
                   <button
@@ -87,7 +99,7 @@ export function ModernProductActions({ product }: Props) {
                     className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
                     aria-label="Increase quantity"
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -102,17 +114,24 @@ export function ModernProductActions({ product }: Props) {
                 >
                   {isAdded ? (
                     <>
-                      <Check className="h-4 w-4" />
+                      <Check className="h-4 w-4" aria-hidden="true" />
                       Added to Cart
                     </>
                   ) : (
                     <>
-                      <ShoppingBag className="h-4 w-4" />
+                      <ShoppingBag className="h-4 w-4" aria-hidden="true" />
                       Add to Cart
                     </>
                   )}
                 </button>
               </div>
+              <span
+                className="sr-only"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {isAdded ? `${product.name} added to cart` : ""}
+              </span>
               {product.trackInventory &&
                 product.allowBackorders &&
                 (product.inventoryQty ?? 0) === 0 && (

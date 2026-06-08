@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 const testimonials = [
   {
@@ -153,6 +154,7 @@ export function ElegantTestimonials() {
   const [headerVisible, setHeaderVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
 
   const column1 = [testimonials[0], testimonials[3], testimonials[6]];
   const column2 = [testimonials[1], testimonials[4], testimonials[7]];
@@ -196,9 +198,11 @@ export function ElegantTestimonials() {
               color: "var(--el-ink-soft, #6b6659)",
               display: "block",
               marginBottom: 16,
-              opacity: headerVisible ? 1 : 0,
-              transform: headerVisible ? "translateY(0)" : "translateY(24px)",
-              transition: "opacity 0.9s 0.1s, transform 0.9s 0.1s",
+              ...(reducedMotion ? {} : {
+                opacity: headerVisible ? 1 : 0,
+                transform: headerVisible ? "translateY(0)" : "translateY(24px)",
+                transition: "opacity 0.9s 0.1s, transform 0.9s 0.1s",
+              }),
             }}
           >
             Kind Words
@@ -211,9 +215,11 @@ export function ElegantTestimonials() {
               lineHeight: 1.05,
               letterSpacing: "-0.01em",
               color: "var(--el-ink, #1c1a17)",
-              opacity: headerVisible ? 1 : 0,
-              transform: headerVisible ? "translateY(0)" : "translateY(24px)",
-              transition: "opacity 0.9s 0.2s, transform 0.9s 0.2s",
+              ...(reducedMotion ? {} : {
+                opacity: headerVisible ? 1 : 0,
+                transform: headerVisible ? "translateY(0)" : "translateY(24px)",
+                transition: "opacity 0.9s 0.2s, transform 0.9s 0.2s",
+              }),
             }}
           >
             Loved by our community
@@ -240,7 +246,7 @@ export function ElegantTestimonials() {
             }}
             className="el-icon-btn"
           >
-            {isPaused ? <Play size={14} /> : <Pause size={14} />}
+            {isPaused ? <Play aria-hidden={true} size={14} /> : <Pause aria-hidden={true} size={14} />}
           </button>
         </div>
 

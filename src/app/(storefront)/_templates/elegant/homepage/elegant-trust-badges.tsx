@@ -69,6 +69,7 @@ export function ElegantTrustBadges({
           >
             {badge.title}
             <span
+              aria-hidden={true}
               style={{
                 fontSize: 14,
                 fontStyle: "normal",
@@ -126,7 +127,7 @@ export function ElegantTrustBadges({
         }}
         className="el-icon-btn"
       >
-        {isPaused ? <Play size={11} /> : <Pause size={11} />}
+        {isPaused ? <Play aria-hidden={true} size={11} /> : <Pause aria-hidden={true} size={11} />}
       </button>
     </div>
   );

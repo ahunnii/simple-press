@@ -49,10 +49,10 @@ export function ModernVariantSelector({
   return (
     <div className="space-y-6">
       {/* Variant Selection */}
-      <div>
-        <label className="text-foreground mb-3 block text-xs font-semibold tracking-widest uppercase">
+      <div role="group" aria-label="Select variant">
+        <span className="text-foreground mb-3 block text-xs font-semibold tracking-widest uppercase">
           Select Variant
-        </label>
+        </span>
         <div className="flex flex-wrap gap-3">
           {product.variants.map((variant) => {
             const outOfStock =
@@ -69,15 +69,17 @@ export function ModernVariantSelector({
                 key={variant.id}
                 type="button"
                 onClick={() => {
+                  if (outOfStock) return;
                   setSelectedVariant(variant);
                   setSelectedVariantId(variant.id);
                 }}
-                disabled={outOfStock}
+                aria-pressed={selectedVariant?.id === variant.id}
+                aria-disabled={outOfStock ? "true" : undefined}
                 className={`rounded-sm border px-6 py-3 text-sm transition-colors ${
                   selectedVariant?.id === variant.id
                     ? "bg-primary text-primary-foreground hover:opacity-90"
                     : "border-border text-foreground hover:bg-muted"
-                } ${variant.inventoryQty === 0 ? "cursor-not-allowed opacity-50" : ""}`}
+                } ${outOfStock ? "cursor-not-allowed opacity-50" : ""}`}
               >
                 {variant.name}
                 {outOfStock && " (Out of Stock)"}
@@ -90,10 +92,10 @@ export function ModernVariantSelector({
 
       {/* Quantity Selection */}
       {selectedVariant && selectedVariant.inventoryQty > 0 && (
-        <div>
-          <label className="text-foreground mb-3 block text-xs font-semibold tracking-widest uppercase">
+        <div role="group" aria-label="Quantity">
+          <span className="text-foreground mb-3 block text-xs font-semibold tracking-widest uppercase">
             Quantity
-          </label>
+          </span>
           <div className="border-border flex w-fit items-center border">
             <button
               type="button"
@@ -102,9 +104,13 @@ export function ModernVariantSelector({
               className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
               aria-label="Decrease quantity"
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="h-4 w-4" aria-hidden="true" />
             </button>
-            <span className="border-border text-foreground flex h-10 w-24 items-center justify-center border-x text-sm font-medium">
+            <span
+              aria-live="polite"
+              aria-atomic="true"
+              className="border-border text-foreground flex h-10 w-24 items-center justify-center border-x text-sm font-medium"
+            >
               {quantity}
             </span>
             <button
@@ -120,7 +126,7 @@ export function ModernVariantSelector({
               className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
               aria-label="Increase quantity"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
           <p className="text-muted-foreground mt-2 text-sm">
@@ -146,7 +152,7 @@ export function ModernVariantSelector({
         >
           {isAdded ? (
             <>
-              <Check className="h-4 w-4" />
+              <Check className="h-4 w-4" aria-hidden="true" />
               Added to Cart
             </>
           ) : (
@@ -154,6 +160,9 @@ export function ModernVariantSelector({
           )}
         </button>
       </div>
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {isAdded ? `${product.name} added to cart` : ""}
+      </span>
     </div>
   );
 }

@@ -57,6 +57,8 @@ export function ModernProductsPage({
       </div>
 
       <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+        {/* M-10: sr-only h2 bridges the h1 → h3 card skip */}
+        <h2 className="sr-only">Products</h2>
         <ModernProductsFilterClient
           products={products}
           collections={collections}

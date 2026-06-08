@@ -189,13 +189,13 @@ export function ModernCheckoutForm({ business }: Props) {
   };
 
   const inputClass =
-    "border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:border-foreground mt-1 w-full border px-4 py-3 text-sm focus:outline-none";
+    "border-border bg-card text-foreground placeholder:text-muted-foreground/70 focus:border-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-1 w-full border px-4 py-3 text-sm";
   const labelClass = "text-muted-foreground block text-sm";
 
   if (items.length === 0) {
     return (
       <div className="py-20 text-center">
-        <ShoppingBag className="text-muted-foreground/40 mx-auto h-12 w-12" />
+        <ShoppingBag aria-hidden="true" className="text-muted-foreground/40 mx-auto h-12 w-12" />
         <h2 className="text-foreground mt-4 font-serif text-2xl">
           Nothing to check out
         </h2>
@@ -203,11 +203,11 @@ export function ModernCheckoutForm({ business }: Props) {
           Add some items to your cart first.
         </p>
         <Link
-          href="/products"
+          href="/shop"
           className="bg-primary text-primary-foreground mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
         >
           Browse Products
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>
       </div>
     );
@@ -223,6 +223,9 @@ export function ModernCheckoutForm({ business }: Props) {
             <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
               Contact Information
             </h2>
+            <p className="text-muted-foreground mt-2 text-xs">
+              Fields marked with * are required.
+            </p>
             <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="firstName" className={labelClass}>
@@ -232,6 +235,7 @@ export function ModernCheckoutForm({ business }: Props) {
                   id="firstName"
                   type="text"
                   required
+                  autoComplete="given-name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   className={inputClass}
@@ -246,6 +250,7 @@ export function ModernCheckoutForm({ business }: Props) {
                   id="lastName"
                   type="text"
                   required
+                  autoComplete="family-name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   className={inputClass}
@@ -260,6 +265,7 @@ export function ModernCheckoutForm({ business }: Props) {
                   id="email"
                   type="email"
                   required
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={inputClass}
@@ -285,40 +291,56 @@ export function ModernCheckoutForm({ business }: Props) {
 
           {/* Discount Code */}
           <div className="border-border mt-10 border-t pt-10">
-            <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+            <h2
+              id="discount-code-heading"
+              className="text-foreground text-xs font-semibold tracking-widest uppercase"
+            >
               Discount Code
             </h2>
             <div className="mt-6 flex gap-2">
-              <input
-                type="text"
-                value={discountCodeInput}
-                onChange={(e) =>
-                  setDiscountCodeInput(e.target.value.toUpperCase())
-                }
-                placeholder="SAVE20"
-                autoComplete="off"
-                className={`${inputClass} flex-1`}
-              />
+              <div className="flex-1">
+                <label htmlFor="discount-code" className="sr-only">
+                  Discount code
+                </label>
+                <input
+                  id="discount-code"
+                  type="text"
+                  value={discountCodeInput}
+                  onChange={(e) =>
+                    setDiscountCodeInput(e.target.value.toUpperCase())
+                  }
+                  placeholder="SAVE20"
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  aria-invalid={!!discountFieldError}
+                  aria-describedby={
+                    discountFieldError ? "discount-error" : undefined
+                  }
+                  className={`${inputClass} w-full`}
+                />
+              </div>
               <button
                 type="button"
                 onClick={handleApplyDiscount}
                 disabled={
                   validateDiscountMutation.isPending || items.length === 0
                 }
-                className="border-border bg-card text-foreground hover:bg-muted mt-1 border px-6 py-3 text-sm font-medium tracking-wide transition-opacity disabled:opacity-50"
+                aria-label="Apply"
+                className="border-border bg-card text-foreground hover:bg-muted mt-1 inline-flex items-center gap-2 border px-6 py-3 text-sm font-medium tracking-wide transition-opacity disabled:opacity-50"
               >
-                {validateDiscountMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Apply"
+                {validateDiscountMutation.isPending && (
+                  <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
                 )}
+                Apply
               </button>
             </div>
             {discountFieldError && (
-              <p className="mt-2 text-sm text-red-600">{discountFieldError}</p>
+              <p id="discount-error" role="alert" className="mt-2 text-sm text-red-600">
+                {discountFieldError}
+              </p>
             )}
             {discountCodeLabel && discountAmount > 0 && (
-              <p className="mt-2 text-sm text-green-600">
+              <p role="status" className="mt-2 text-sm text-green-700">
                 Code{" "}
                 <span className="font-mono font-semibold">
                   {discountCodeLabel}
@@ -334,10 +356,16 @@ export function ModernCheckoutForm({ business }: Props) {
               <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
                 Delivery
               </h2>
-              <div className="mt-6 flex flex-wrap gap-2">
+              <div
+                role="group"
+                aria-label="Delivery method"
+                aria-describedby="delivery-method-hint"
+                className="mt-6 flex flex-wrap gap-2"
+              >
                 <button
                   type="button"
                   onClick={() => setDeliveryMethod("ship")}
+                  aria-pressed={deliveryMethod === "ship"}
                   className={`border px-6 py-3 text-sm font-medium tracking-wide transition-opacity ${
                     deliveryMethod === "ship"
                       ? "bg-primary text-primary-foreground border-transparent"
@@ -349,6 +377,7 @@ export function ModernCheckoutForm({ business }: Props) {
                 <button
                   type="button"
                   onClick={() => setDeliveryMethod("pickup")}
+                  aria-pressed={deliveryMethod === "pickup"}
                   className={`border px-6 py-3 text-sm font-medium tracking-wide transition-opacity ${
                     deliveryMethod === "pickup"
                       ? "bg-primary text-primary-foreground border-transparent"
@@ -358,7 +387,11 @@ export function ModernCheckoutForm({ business }: Props) {
                   In-store pickup
                 </button>
               </div>
-              <p className="text-muted-foreground mt-3 text-sm">
+              <p
+                id="delivery-method-hint"
+                role="status"
+                className="text-muted-foreground mt-3 text-sm"
+              >
                 {deliveryMethod === "pickup"
                   ? "No shipping charge. You'll pick up your order at the store."
                   : "Shipping cost is based on your store's shipping settings."}
@@ -487,7 +520,7 @@ export function ModernCheckoutForm({ business }: Props) {
                 <div className="bg-muted relative h-16 w-16 shrink-0 overflow-hidden rounded-sm">
                   <Image
                     src={item.imageUrl ?? "/placeholder.svg"}
-                    alt={item.productName}
+                    alt=""
                     fill
                     className="object-cover"
                     sizes="64px"
@@ -522,7 +555,7 @@ export function ModernCheckoutForm({ business }: Props) {
                 <span className="text-foreground">{formatPrice(subtotal)}</span>
               </div>
               {discountAmount > 0 && discountCodeLabel && (
-                <div className="flex items-center justify-between text-sm text-green-600">
+                <div className="flex items-center justify-between text-sm text-green-700">
                   <span>Discount ({discountCodeLabel})</span>
                   <span>-{formatPrice(discountAmount)}</span>
                 </div>
@@ -568,13 +601,13 @@ export function ModernCheckoutForm({ business }: Props) {
           >
             {isProcessing ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
                 Processing...
               </>
             ) : (
               <>
                 Continue to Payment
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight aria-hidden="true" className="h-4 w-4" />
               </>
             )}
           </button>

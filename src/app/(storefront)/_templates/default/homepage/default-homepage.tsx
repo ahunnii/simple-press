@@ -302,7 +302,7 @@ export async function DefaultHomePage({
               },
             ].map((item) => (
               <div key={item.title} className="flex flex-col gap-1.5 px-6 py-8 lg:px-8">
-                <h4 className="text-sm font-medium">{item.title}</h4>
+                <h3 className="text-sm font-medium">{item.title}</h3>
                 <p className="text-[13px] text-[#6b6b6b]">{item.desc}</p>
               </div>
             ))}

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Check } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { resolveFields } from "..";
 
@@ -40,6 +41,7 @@ export function ElegantCTABanner({
   sectionAttrs?: Record<string, string>;
 }) {
   const { ref, visible } = useReveal();
+  const reducedMotion = useReducedMotion();
   const customFields = homepage?.siteContent?.customFields;
 
   const f = resolveFields(customFields, [
@@ -80,9 +82,11 @@ export function ElegantCTABanner({
             alignItems: "center",
             padding: "60px 64px",
             background: hasBg ? undefined : "var(--el-ink, #1c1a17)",
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(24px)",
-            transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+            ...(reducedMotion ? {} : {
+              opacity: visible ? 1 : 0,
+              transform: visible ? "translateY(0)" : "translateY(24px)",
+              transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+            }),
           }}
         >
           {hasBg && (
@@ -134,6 +138,7 @@ export function ElegantCTABanner({
                   }}
                 >
                   <Check
+                    aria-hidden={true}
                     style={{
                       width: 16,
                       height: 16,

@@ -30,11 +30,30 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const [expandedMobile, setExpandedMobile] = useState<Set<number>>(new Set());
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const firstNavLinkRef = useRef<HTMLAnchorElement>(null);
+  // Ref for the first mobile nav item's toggle button (when first item has children)
+  const firstNavToggleRef = useRef<HTMLButtonElement>(null);
+  // Refs map for desktop dropdown trigger buttons (keyed by index)
+  const dropdownTriggerRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
   // Move focus into menu when it opens
   useEffect(() => {
     if (mobileOpen) {
-      const t = setTimeout(() => firstNavLinkRef.current?.focus(), 50);
+      const t = setTimeout(() => {
+        // Prefer the toggle button ref (set when first item has children),
+        // then the link ref (set when first item is a plain link),
+        // then fall back to querying the first focusable element in the nav.
+        if (firstNavToggleRef.current) {
+          firstNavToggleRef.current.focus();
+        } else if (firstNavLinkRef.current) {
+          firstNavLinkRef.current.focus();
+        } else {
+          const nav = document.getElementById("mobile-nav");
+          const first = nav?.querySelector<HTMLElement>(
+            'a[href], button:not([disabled])',
+          );
+          first?.focus();
+        }
+      }, 50);
       return () => clearTimeout(t);
     }
   }, [mobileOpen]);
@@ -76,11 +95,15 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
 
-  // Close desktop dropdown on Escape
+  // Close desktop dropdown on Escape and restore focus to the trigger
   useEffect(() => {
     if (openDropdown === null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenDropdown(null);
+      if (e.key === "Escape") {
+        const triggerEl = dropdownTriggerRefs.current.get(openDropdown);
+        setOpenDropdown(null);
+        triggerEl?.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -162,8 +185,13 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                     onMouseLeave={() => setOpenDropdown(null)}
                   >
                     <button
+                      ref={(el) => {
+                        if (el) dropdownTriggerRefs.current.set(i, el);
+                        else dropdownTriggerRefs.current.delete(i);
+                      }}
                       aria-haspopup="true"
                       aria-expanded={openDropdown === i}
+                      aria-controls={`desktop-dropdown-${i}`}
                       onClick={() =>
                         setOpenDropdown(openDropdown === i ? null : i)
                       }
@@ -183,7 +211,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                     </button>
 
                     {openDropdown === i && (
-                      <div className="absolute left-0 top-full z-10 pt-2">
+                      <div id={`desktop-dropdown-${i}`} className="absolute left-0 top-full z-10 pt-2">
                         <div className="min-w-[160px] overflow-hidden rounded-(--radius) border border-[#e8e8e8] bg-white shadow-sm">
                           {link.children.map((child) => (
                             <Link
@@ -201,6 +229,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                               )}
                             >
                               {child.label}
+                              {child.external && <span className="sr-only"> (opens in new tab)</span>}
                             </Link>
                           ))}
                         </div>
@@ -217,6 +246,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                     className={linkClass(pathname === link.href)}
                   >
                     {link.label}
+                    {link.external && <span className="sr-only"> (opens in new tab)</span>}
                   </Link>
                 ),
               )}
@@ -288,6 +318,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                   {link.children?.length ? (
                     <>
                       <button
+                        ref={i === 0 ? firstNavToggleRef : undefined}
                         onClick={() => toggleMobileExpanded(i)}
                         aria-expanded={expandedMobile.has(i)}
                         className={cn(
@@ -325,6 +356,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                                 )}
                               >
                                 {child.label}
+                                {child.external && <span className="sr-only"> (opens in new tab)</span>}
                               </Link>
                             </li>
                           ))}
@@ -347,6 +379,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                       )}
                     >
                       {link.label}
+                      {link.external && <span className="sr-only"> (opens in new tab)</span>}
                     </Link>
                   )}
                 </li>

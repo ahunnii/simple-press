@@ -50,7 +50,7 @@ export function DefaultProductActions({
           type="button"
           aria-disabled="true"
           onClick={(e) => e.preventDefault()}
-          className="h-12 w-full cursor-not-allowed rounded-[var(--radius)] border border-[#e8e8e8] text-sm font-medium text-[#a3a3a3]"
+          className="h-12 w-full cursor-not-allowed rounded-[var(--radius)] border border-[#e8e8e8] text-sm font-medium text-[#6b6b6b]"
         >
           Out of Stock
         </button>

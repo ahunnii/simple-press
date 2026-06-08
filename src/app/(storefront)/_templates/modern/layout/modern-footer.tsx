@@ -54,15 +54,16 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
               socialLinks?.facebook ??
               socialLinks?.twitter) && (
               <div className="mt-4 flex gap-3">
+                {/* M-7: "(opens in new tab)" appended to aria-label; M-2: aria-hidden on decorative icons */}
                 {socialLinks?.instagram && (
                   <a
                     href={socialLinks.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Instagram"
+                    aria-label="Instagram (opens in new tab)"
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <Instagram className="h-4 w-4" />
+                    <Instagram className="h-4 w-4" aria-hidden="true" />
                   </a>
                 )}
                 {socialLinks?.facebook && (
@@ -70,10 +71,10 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
                     href={socialLinks.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Facebook"
+                    aria-label="Facebook (opens in new tab)"
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <Facebook className="h-4 w-4" />
+                    <Facebook className="h-4 w-4" aria-hidden="true" />
                   </a>
                 )}
                 {socialLinks?.twitter && (
@@ -81,10 +82,10 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
                     href={socialLinks.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Twitter"
+                    aria-label="Twitter (opens in new tab)"
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <TwitterLogoIcon className="h-4 w-4" />
+                    <TwitterLogoIcon className="h-4 w-4" aria-hidden="true" />
                   </a>
                 )}
               </div>
@@ -92,9 +93,10 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
           </div>
 
           <div>
-            <h3 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+            {/* M-10: demoted from h3 to h2 — no h2 ancestor existed after the page h1 */}
+            <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
               Navigate
-            </h3>
+            </h2>
             <ul className="mt-4 flex flex-col gap-3">
               {(navigationItems ?? NAV_LINKS).map((link) => (
                 <li key={link.label + link.href}>
@@ -110,9 +112,10 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
           </div>
 
           <div>
-            <h3 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+            {/* M-10: demoted from h3 to h2 */}
+            <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
               Support
-            </h3>
+            </h2>
             <ul className="mt-4 flex flex-col gap-3">
               <li>
                 <Link
@@ -137,9 +140,10 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
 
           {(email ?? phone ?? address) && (
             <div>
-              <h3 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+              {/* M-10: demoted from h3 to h2 */}
+              <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
                 Contact
-              </h3>
+              </h2>
               <address className="mt-4 flex flex-col gap-3 not-italic">
                 {!!address && (
                   <span className="text-muted-foreground text-sm">

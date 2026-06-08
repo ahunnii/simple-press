@@ -112,12 +112,14 @@ export function ElegantCartDrawer() {
         aria-hidden={true}
       />
 
-      {/* Drawer */}
+      {/* Drawer — inert when closed so keyboard/AT cannot reach invisible contents */}
       <div
         ref={drawerRef}
         role="dialog"
         aria-modal={true}
         aria-label="Shopping bag"
+        aria-hidden={!isOpen}
+        inert={!isOpen ? true : undefined}
         onKeyDown={trapFocus}
         style={{
           position: "fixed",

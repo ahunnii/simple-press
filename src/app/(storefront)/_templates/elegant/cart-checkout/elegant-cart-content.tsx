@@ -23,6 +23,7 @@ export function ElegantCartContent() {
         textAlign: "center",
       }}>
         <ShoppingBag
+          aria-hidden={true}
           style={{ width: 40, height: 40, color: "var(--el-ink-soft, #6b6659)", marginBottom: 20 }}
           strokeWidth={1}
         />
@@ -170,7 +171,7 @@ export function ElegantCartContent() {
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.productId, item.variantId, item.quantity - 1)}
-                    aria-label="Decrease"
+                    aria-label={`Decrease quantity of ${item.productName}`}
                     style={{
                       width: 28, height: 28,
                       display: "inline-flex",
@@ -184,22 +185,26 @@ export function ElegantCartContent() {
                     }}
                     className="el-qty-btn"
                   >
-                    <Minus style={{ width: 12, height: 12 }} />
+                    <Minus aria-hidden={true} style={{ width: 12, height: 12 }} />
                   </button>
-                  <span style={{
-                    minWidth: 24,
-                    textAlign: "center",
-                    fontSize: 14,
-                    fontWeight: 500,
-                    color: "var(--el-ink, #1c1a17)",
-                    fontFamily: "var(--font-sans, sans-serif)",
-                  }}>
+                  <span
+                    aria-live="polite"
+                    aria-atomic="true"
+                    style={{
+                      minWidth: 24,
+                      textAlign: "center",
+                      fontSize: 14,
+                      fontWeight: 500,
+                      color: "var(--el-ink, #1c1a17)",
+                      fontFamily: "var(--font-sans, sans-serif)",
+                    }}
+                  >
                     {item.quantity}
                   </span>
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.productId, item.variantId, item.quantity + 1)}
-                    aria-label="Increase"
+                    aria-label={`Increase quantity of ${item.productName}`}
                     style={{
                       width: 28, height: 28,
                       display: "inline-flex",
@@ -213,7 +218,7 @@ export function ElegantCartContent() {
                     }}
                     className="el-qty-btn"
                   >
-                    <Plus style={{ width: 12, height: 12 }} />
+                    <Plus aria-hidden={true} style={{ width: 12, height: 12 }} />
                   </button>
                 </div>
 
@@ -241,7 +246,7 @@ export function ElegantCartContent() {
           textDecoration: "none",
           fontFamily: "var(--font-mono, ui-monospace)",
         }}>
-          <ArrowLeft style={{ width: 12, height: 12 }} />
+          <ArrowLeft aria-hidden={true} style={{ width: 12, height: 12 }} />
           Continue shopping
         </Link>
       </div>

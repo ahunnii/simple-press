@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -32,6 +32,7 @@ const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
   const { setIsOpen, itemCount } = useCart();
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
@@ -48,6 +49,19 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
+
+  // Close mobile menu on Escape and return focus to hamburger button
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        hamburgerRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
   const links =
     (business?.siteContent?.navigationItems as
@@ -156,6 +170,7 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
 
             {/* Mobile hamburger (hidden on desktop) */}
             <button
+              ref={hamburgerRef}
               type="button"
               className="el-hamburger"
               style={{ ...iconBtnStyle, display: "none" }}
@@ -163,7 +178,6 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
               aria-controls="el-mobile-nav"
-              aria-haspopup="true"
             >
               {menuOpen
                 ? <X aria-hidden={true} style={{ width: 18, height: 18 }} />

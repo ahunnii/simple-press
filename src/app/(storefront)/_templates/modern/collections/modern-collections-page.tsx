@@ -54,11 +54,13 @@ export function ModernCollectionsPage({
                   className="group block"
                 >
                   <div className="relative aspect-4/3 w-full overflow-hidden rounded-sm">
+                    {/* M-1: alt="" — decorative; name is in the h2 below in the same link */}
+                    {/* M-11: motion-reduce disables zoom animation */}
                     <Image
                       src={collection.imageUrl ?? "/placeholder.svg"}
-                      alt={collection.name}
+                      alt=""
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                     <div className="absolute inset-0 bg-black/20 transition-opacity group-hover:bg-black/30" />

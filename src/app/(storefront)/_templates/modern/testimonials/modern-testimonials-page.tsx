@@ -50,33 +50,35 @@ export async function ModernTestimonialsPage({
                     key={t.id}
                     className="bg-card text-card-foreground border-border/80 flex flex-col rounded-3xl border p-6 shadow-sm ring-1 ring-black/4 dark:ring-white/10"
                   >
-                    <p className="text-foreground/80 mb-4 flex-1 font-serif text-xl leading-relaxed font-medium tracking-wide text-pretty">
-                      &ldquo;{t.text}&rdquo;
-                    </p>
-                    <div className="border-border mt-auto flex items-start justify-between gap-3 border-t pt-6">
-                      <div className="flex min-w-0 flex-1 items-center gap-3">
-                        {t.photoUrls?.[0] ? (
-                          // eslint-disable-next-line @next/next/no-img-element -- remote customer photos
-                          <img
-                            src={t.photoUrls[0]}
-                            alt=""
-                            className="h-12 w-12 shrink-0 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="bg-primary/10 text-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-medium">
-                            {t.customerName.slice(0, 1).toUpperCase()}
+                    <figure className="flex flex-col flex-1">
+                      <blockquote className="text-foreground/80 mb-4 flex-1 font-serif text-xl leading-relaxed font-medium tracking-wide text-pretty">
+                        &ldquo;{t.text}&rdquo;
+                      </blockquote>
+                      <figcaption className="border-border mt-auto flex items-start justify-between gap-3 border-t pt-6">
+                        <div className="flex min-w-0 flex-1 items-center gap-3">
+                          {t.photoUrls?.[0] ? (
+                            // eslint-disable-next-line @next/next/no-img-element -- remote customer photos
+                            <img
+                              src={t.photoUrls[0]}
+                              alt=""
+                              className="h-12 w-12 shrink-0 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="bg-primary/10 text-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-medium">
+                              {t.customerName.slice(0, 1).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-foreground text-sm font-semibold">
+                              {t.customerName}
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                              Customer
+                            </p>
                           </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-foreground text-sm font-semibold">
-                            {t.customerName}
-                          </p>
-                          <p className="text-muted-foreground text-xs">
-                            Customer
-                          </p>
                         </div>
-                      </div>
-                    </div>
+                      </figcaption>
+                    </figure>
                     {t.photoUrls && t.photoUrls.length > 1 ? (
                       <div className="mt-4 flex flex-wrap gap-2">
                         {t.photoUrls.slice(1, 5).map((url, i) => (

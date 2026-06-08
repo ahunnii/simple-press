@@ -10,6 +10,7 @@ import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { ProductDetailsAdditionalInfoAccordion } from "~/app/(storefront)/_components/product-page/additional-info-accordion";
 
 import { ElegantProductCard } from "../shared/elegant-product-card";
@@ -36,6 +37,7 @@ export function ElegantProductPage({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<TabKey>("details");
   const tabListRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -51,11 +53,14 @@ export function ElegantProductPage({
     productId: product.id,
   });
 
-  const revealStyle = (delay: number): React.CSSProperties => ({
-    opacity: shown ? 1 : 0,
-    transform: shown ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const revealStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   const handleTabKeyDown = (e: React.KeyboardEvent, currentKey: TabKey) => {
     const keys = TABS.map((t) => t.key);
@@ -180,7 +185,8 @@ export function ElegantProductPage({
                         transition: `opacity 0.3s ${ease}, border-color 0.3s ${ease}`,
                         padding: 0,
                       }}
-                      aria-label={`View image ${index + 1}`}
+                      aria-pressed={selectedImageIndex === index}
+                      aria-label={`View image ${index + 1} of ${product.images.length}`}
                     >
                       <Image
                         src={image.url}
@@ -330,6 +336,7 @@ export function ElegantProductPage({
                     }}
                   >
                     <Check
+                      aria-hidden={true}
                       style={{
                         width: 13,
                         height: 13,
@@ -349,6 +356,7 @@ export function ElegantProductPage({
                     }}
                   >
                     <Check
+                      aria-hidden={true}
                       style={{
                         width: 13,
                         height: 13,
@@ -392,6 +400,7 @@ export function ElegantProductPage({
                           >
                             {Icon && (
                               <Icon
+                                aria-hidden={true}
                                 style={{
                                   width: 22,
                                   height: 22,

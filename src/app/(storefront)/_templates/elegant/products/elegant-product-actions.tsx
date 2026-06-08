@@ -88,7 +88,7 @@ export function ElegantProductActions({
     return (
       <button
         type="button"
-        disabled
+        aria-disabled="true"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -167,7 +167,6 @@ export function ElegantProductActions({
             <span
               aria-live="polite"
               aria-atomic="true"
-              aria-label={`Quantity: ${quantity}`}
               style={{
                 minWidth: 24,
                 textAlign: "center",

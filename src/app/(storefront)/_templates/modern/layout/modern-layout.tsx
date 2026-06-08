@@ -8,10 +8,19 @@ export function ModernLayout({
   children,
 }: DefaultLayoutTemplateProps) {
   return (
-    <main className="min-h-screen font-sans antialiased">
+    <div className="flex min-h-screen flex-col font-sans antialiased">
+      {/* Skip navigation — first focusable element on every page */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-sm focus:bg-foreground focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-background focus:outline-none"
+      >
+        Skip to main content
+      </a>
       <ModernHeader business={business} />
-      {children}
+      <main id="main-content" className="flex-1">
+        {children}
+      </main>
       <ModernFooter business={business} />
-    </main>
+    </div>
   );
 }

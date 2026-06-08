@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { resolveFields } from "..";
 import { ElegantContactForm } from "./elegant-contact-form";
@@ -11,6 +12,7 @@ const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 
 export function ElegantContactPage({ business }: DefaultContactPageTemplateProps) {
   const [shown, setShown] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const t = setTimeout(() => setShown(true), 60);
@@ -35,17 +37,23 @@ export function ElegantContactPage({ business }: DefaultContactPageTemplateProps
   const displayPhone = f["elegant.contact.phone"] ?? business.phoneNumber ?? "";
   const displayAddress = f["elegant.contact.address"] ?? business.businessAddress ?? "";
 
-  const maskStyle = (delay: number): React.CSSProperties => ({
-    display: "block",
-    transform: shown ? "translateY(0)" : "translateY(110%)",
-    transition: `transform 1.1s ${easeOut} ${delay}s`,
-  });
+  const maskStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? { display: "block" }
+      : {
+          display: "block",
+          transform: shown ? "translateY(0)" : "translateY(110%)",
+          transition: `transform 1.1s ${easeOut} ${delay}s`,
+        };
 
-  const fadeStyle = (delay: number): React.CSSProperties => ({
-    opacity: shown ? 1 : 0,
-    transform: shown ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const fadeStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   const contactItems = [
     displayEmail ? { label: "Email", value: displayEmail, href: `mailto:${displayEmail}` } : null,

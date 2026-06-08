@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 import { useContactForm } from "~/hooks/use-contact-form";
@@ -32,13 +33,30 @@ export function ModernContactForm() {
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
 
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (isSuccess) {
+      successHeadingRef.current?.focus();
+    }
+  }, [isSuccess]);
+
   if (isSuccess) {
     return (
-      <div className="mt-8 flex flex-col items-center gap-4 py-12 text-center">
+      <div
+        role="status"
+        className="mt-8 flex flex-col items-center gap-4 py-12 text-center"
+      >
         <div className="bg-accent/10 flex h-12 w-12 items-center justify-center rounded-full">
-          <CheckCircle2 className="text-accent h-6 w-6" />
+          <CheckCircle2 className="text-accent h-6 w-6" aria-hidden="true" />
         </div>
-        <h3 className="text-foreground font-serif text-xl">Message received</h3>
+        <h3
+          ref={successHeadingRef}
+          tabIndex={-1}
+          className="text-foreground font-serif text-xl focus:outline-none"
+        >
+          Message received
+        </h3>
         <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
           Thank you for reaching out. We&apos;ll get back to you within 24
           hours.
@@ -62,13 +80,8 @@ export function ModernContactForm() {
         className="mt-8 flex flex-col gap-6"
       >
         {error && (
-          <Alert
-            variant="destructive"
-            className="border-red-500/50 bg-red-500/10"
-          >
-            <AlertDescription className="text-red-400">
-              {error}
-            </AlertDescription>
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
@@ -144,7 +157,7 @@ export function ModernContactForm() {
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />
               Sending...
             </>
           ) : (

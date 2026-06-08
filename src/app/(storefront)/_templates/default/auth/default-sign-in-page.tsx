@@ -120,7 +120,7 @@ export function DefaultSignInPage({ redirectTo, business }: Props) {
                   rel="noopener noreferrer"
                   className="hover:text-foreground underline"
                 >
-                  SimplePress
+                  SimplePress<span className="sr-only"> (opens in new tab)</span>
                 </Link>
               </>
             )}

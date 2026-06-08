@@ -143,9 +143,9 @@ export function DefaultContactPage({
                     <span className="text-[11px] font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
                       {card.eyebrow}
                     </span>
-                    <h3 className="font-serif text-[20px] font-medium tracking-[-0.01em]">
+                    <h2 className="font-serif text-[20px] font-medium tracking-[-0.01em]">
                       {card.heading}
-                    </h3>
+                    </h2>
                     <p className="text-[13px] leading-relaxed text-[#6b6b6b]">
                       {card.body}
                     </p>

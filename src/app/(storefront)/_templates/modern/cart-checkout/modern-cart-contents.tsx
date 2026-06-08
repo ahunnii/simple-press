@@ -27,7 +27,7 @@ export function ModernCartContents({ business }: Props) {
   if (items.length === 0) {
     return (
       <div className="py-20 text-center">
-        <ShoppingBag className="text-muted-foreground/40 mx-auto h-12 w-12" />
+        <ShoppingBag aria-hidden="true" className="text-muted-foreground/40 mx-auto h-12 w-12" />
         <h2 className="text-foreground mt-4 font-serif text-2xl">
           Your cart is empty
         </h2>
@@ -35,11 +35,11 @@ export function ModernCartContents({ business }: Props) {
           Looks like you have not added any items yet.
         </p>
         <Link
-          href="/products"
+          href="/shop"
           className="bg-primary text-primary-foreground mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
         >
           Start Shopping
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>
       </div>
     );
@@ -51,7 +51,7 @@ export function ModernCartContents({ business }: Props) {
       <div className="lg:col-span-2">
         <div className="flex flex-col">
           {items.map((item) => (
-            <ModernCartItem key={item.productId} item={item} />
+            <ModernCartItem key={`${item.productId}-${item.variantId ?? "base"}`} item={item} />
           ))}
         </div>
       </div>

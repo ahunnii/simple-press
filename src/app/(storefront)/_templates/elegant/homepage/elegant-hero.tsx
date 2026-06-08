@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowRight, Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 type Props = {
   homepage: RouterOutputs["business"]["getHomepage"];
@@ -38,6 +39,7 @@ export function ElegantHero({
   const [shown, setShown] = useState(false);
   const [videoPaused, setVideoPaused] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const t = setTimeout(() => setShown(true), 60);
@@ -67,17 +69,23 @@ export function ElegantHero({
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim() && heroImage !== "/placeholder.svg";
 
-  const revealStyle = (delay: number): React.CSSProperties => ({
-    opacity: shown ? 1 : 0,
-    transform: shown ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const revealStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
-  const maskStyle = (delay: number): React.CSSProperties => ({
-    display: "block",
-    transform: shown ? "translateY(0)" : "translateY(110%)",
-    transition: `transform 1.1s ${easeOut} ${delay}s`,
-  });
+  const maskStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? { display: "block" }
+      : {
+          display: "block",
+          transform: shown ? "translateY(0)" : "translateY(110%)",
+          transition: `transform 1.1s ${easeOut} ${delay}s`,
+        };
 
   return (
     <section
@@ -330,13 +338,13 @@ export function ElegantHero({
           >
             Scroll
             <span
+              className="el-scroll-pulse-line"
               style={{
                 display: "block",
                 width: 1,
                 height: 36,
                 background:
                   "linear-gradient(180deg, var(--el-ink-soft, #6b6659), transparent)",
-                animation: "el-scroll-pulse 2.2s cubic-bezier(0.22,1,0.36,1) infinite",
               }}
             />
           </div>

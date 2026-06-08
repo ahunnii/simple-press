@@ -22,8 +22,15 @@ export function DefaultVariantSelector({
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
 
+  const addToCartDisabled =
+    !selectedVariant ||
+    (product.trackInventory &&
+      selectedVariant.inventoryQty === 0 &&
+      !product.allowBackorders);
+
   const handleAddToCart = () => {
     if (!selectedVariant) return;
+    if (addToCartDisabled) return;
 
     addItem(
       {
@@ -55,7 +62,8 @@ export function DefaultVariantSelector({
 
       {/* Variant pills */}
       <div className="flex flex-col gap-2.5">
-        <span id="variant-label" className="text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+        {/* aria-live="polite" announces the selected variant name to screen readers (N-4) */}
+        <span id="variant-label" aria-live="polite" className="text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
           Select option
           {selectedVariant && (
             <span className="ml-2 font-normal normal-case tracking-normal text-[#0a0a0a]">
@@ -80,13 +88,14 @@ export function DefaultVariantSelector({
                 key={variant.id}
                 type="button"
                 onClick={() => {
+                  if (outOfStock) return;
                   setSelectedVariant(variant);
                   setSelectedVariantId(variant.id);
                 }}
-                disabled={outOfStock}
+                aria-disabled={outOfStock || undefined}
                 aria-pressed={isSelected}
                 aria-label={`${variant.name}${outOfStock ? ", sold out" : isBackorder ? ", pre-order" : ""}`}
-                className={`inline-grid h-10 min-w-12 place-items-center rounded-[var(--radius)] border px-3.5 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                className={`inline-grid h-10 min-w-12 place-items-center rounded-[var(--radius)] border px-3.5 text-sm transition-colors ${outOfStock ? "opacity-40 cursor-not-allowed" : ""} ${
                   isSelected
                     ? "border-[#0a0a0a] bg-[#0a0a0a] text-white"
                     : "border-[#e8e8e8] hover:border-[#0a0a0a]"
@@ -155,13 +164,8 @@ export function DefaultVariantSelector({
             <button
               type="button"
               onClick={handleAddToCart}
-              disabled={
-                !selectedVariant ||
-                (product.trackInventory &&
-                  selectedVariant.inventoryQty === 0 &&
-                  !product.allowBackorders)
-              }
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a] active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-disabled={addToCartDisabled || undefined}
+              className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a] active:translate-y-px ${addToCartDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {isAdded ? (
                 <>

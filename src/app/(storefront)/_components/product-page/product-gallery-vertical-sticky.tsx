@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { cn } from "~/lib/utils";
 
@@ -36,6 +36,7 @@ export function ProductGalleryVertical({
   const hasMultipleImages = images.length > 1;
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const enlargeBtnRef = useRef<HTMLButtonElement>(null);
+  const shouldReduce = useReducedMotion();
 
   // Move focus to close button when lightbox opens
   useEffect(() => {
@@ -94,7 +95,7 @@ export function ProductGalleryVertical({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: shouldReduce ? 0 : 0.25 }}
                 className="absolute inset-0"
               >
                 <Image
@@ -121,7 +122,7 @@ export function ProductGalleryVertical({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: shouldReduce ? 0 : 0.25 }}
                 className="absolute inset-0"
               >
                 <Image
@@ -171,7 +172,7 @@ export function ProductGalleryVertical({
                 key={index}
                 onClick={() => setSelectedImage(index)}
                 className={cn(
-                  `relative aspect-square w-16 overflow-hidden rounded border-2 bg-gray-100 transition-all focus-visible:outline-none ${
+                  `relative aspect-square w-16 overflow-hidden rounded border-2 bg-gray-100 transition-all ${
                     selectedImage === index
                       ? `border-primary ring-primary ring-2 ${styleProps?.selectedButtonClassName}`
                       : `border-border hover:border-primary ${styleProps?.unselectedButtonClassName}`
@@ -181,6 +182,7 @@ export function ProductGalleryVertical({
                   selectedImage === index ? { borderColor: primaryColor } : {}
                 }
                 aria-label={`View image ${index + 1}`}
+                aria-pressed={selectedImage === index}
               >
                 <Image
                   src={image.url}
@@ -202,7 +204,7 @@ export function ProductGalleryVertical({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: shouldReduce ? 0 : 0.2 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
             onClick={closeLightbox}
           >
@@ -210,10 +212,10 @@ export function ProductGalleryVertical({
               role="dialog"
               aria-modal="true"
               aria-label={`${productName} — enlarged image`}
-              initial={{ scale: 0.92, opacity: 0 }}
+              initial={{ scale: shouldReduce ? 1 : 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              exit={{ scale: shouldReduce ? 1 : 0.92, opacity: 0 }}
+              transition={{ duration: shouldReduce ? 0 : 0.2 }}
               className="relative max-h-[90vh] max-w-[90vw]"
               onClick={(e) => e.stopPropagation()}
             >

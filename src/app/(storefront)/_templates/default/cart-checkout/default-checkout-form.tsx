@@ -63,7 +63,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
     discountAmount: number;
   } | null>(null);
 
-  const primaryColor = business.siteContent?.primaryColor ?? "#3b82f6";
+  const primaryColor = business.siteContent?.primaryColor ?? "#2563eb";
 
   const subtotal = total;
   const discountAmount = appliedDiscount?.discountAmount ?? 0;
@@ -188,11 +188,15 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
               <CardTitle>Contact Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <p className="text-sm text-[#6b6b6b]">
+                Fields marked with <span aria-hidden="true">*</span> are required.
+              </p>
               <div>
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">Email <span aria-hidden="true">*</span></Label>
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
@@ -200,10 +204,11 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 />
               </div>
               <div>
-                <Label htmlFor="name">Full Name *</Label>
+                <Label htmlFor="name">Full Name <span aria-hidden="true">*</span></Label>
                 <Input
                   id="name"
                   type="text"
+                  autoComplete="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
@@ -211,7 +216,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 />
               </div>
               <div>
-                <Label htmlFor="phone">Phone *</Label>
+                <Label htmlFor="phone">Phone <span aria-hidden="true">*</span></Label>
                 <PhoneInput
                   id="phone"
                   autoComplete="tel"
@@ -282,7 +287,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   or edit your name, phone, and address before paying.
                 </p>
                 <div>
-                  <Label htmlFor="address-line1">Address line 1 *</Label>
+                  <Label htmlFor="address-line1">Address line 1 <span aria-hidden="true">*</span></Label>
                   <Input
                     id="address-line1"
                     type="text"
@@ -306,7 +311,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <Label htmlFor="city">City *</Label>
+                    <Label htmlFor="city">City <span aria-hidden="true">*</span></Label>
                     <Input
                       id="city"
                       type="text"
@@ -317,7 +322,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="state">State / Province *</Label>
+                    <Label htmlFor="state">State / Province <span aria-hidden="true">*</span></Label>
                     <Input
                       id="state"
                       type="text"
@@ -331,7 +336,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <Label htmlFor="postal">ZIP / Postal code *</Label>
+                    <Label htmlFor="postal">ZIP / Postal code <span aria-hidden="true">*</span></Label>
                     <Input
                       id="postal"
                       type="text"
@@ -342,7 +347,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="country">Country *</Label>
+                    <Label htmlFor="country">Country <span aria-hidden="true">*</span></Label>
                     <Select
                       value={country}
                       onValueChange={(v) => setCountry(v as "US" | "CA")}

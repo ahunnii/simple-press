@@ -64,7 +64,7 @@ export function ElegantVariantSelector({
         >
           Select option
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+        <div role="group" aria-label="Select option" style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
           {product.variants.map((variant) => {
             const isSelected = selectedVariant?.id === variant.id;
             const outOfStock = variant.inventoryQty === 0;
@@ -72,9 +72,10 @@ export function ElegantVariantSelector({
               <button
                 key={variant.id}
                 type="button"
-                disabled={outOfStock}
+                aria-disabled={outOfStock || undefined}
                 aria-pressed={isSelected}
                 onClick={() => {
+                  if (outOfStock) return;
                   setSelectedVariant(variant);
                   setSelectedVariantId(variant.id);
                 }}
@@ -137,6 +138,8 @@ export function ElegantVariantSelector({
               <Minus aria-hidden={true} style={{ width: 13, height: 13 }} />
             </button>
             <span
+              aria-live="polite"
+              aria-atomic="true"
               style={{
                 minWidth: 24,
                 textAlign: "center",

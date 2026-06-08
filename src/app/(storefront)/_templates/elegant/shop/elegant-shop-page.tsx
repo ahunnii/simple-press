@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpDown } from "lucide-react";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { ElegantProductCard } from "../shared/elegant-product-card";
 
@@ -16,6 +17,7 @@ export function ElegantShopPage({ business }: DefaultProductsPageTemplateProps) 
   const [gridVisible, setGridVisible] = useState(false);
   const [sort, setSort] = useState<SortKey>("featured");
   const gridRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const t = setTimeout(() => setShown(true), 60);
@@ -44,11 +46,14 @@ export function ElegantShopPage({ business }: DefaultProductsPageTemplateProps) 
     return 0;
   });
 
-  const revealStyle = (delay: number): React.CSSProperties => ({
-    opacity: shown ? 1 : 0,
-    transform: shown ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const revealStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   return (
     <div>
@@ -88,7 +93,7 @@ export function ElegantShopPage({ business }: DefaultProductsPageTemplateProps) 
           >
             {/* Two separate mask-reveal lines, matching the design exactly */}
             <span style={{ display: "block", overflow: "hidden" }}>
-              <span style={{
+              <span style={reducedMotion ? { display: "block" } : {
                 display: "block",
                 transform: shown ? "translateY(0)" : "translateY(110%)",
                 transition: `transform 1.1s ${easeOut} 0.08s`,
@@ -97,7 +102,7 @@ export function ElegantShopPage({ business }: DefaultProductsPageTemplateProps) 
               </span>
             </span>
             <span style={{ display: "block", overflow: "hidden" }}>
-              <em style={{
+              <em style={reducedMotion ? { display: "block", fontStyle: "italic" } : {
                 display: "block",
                 fontStyle: "italic",
                 transform: shown ? "translateY(0)" : "translateY(110%)",

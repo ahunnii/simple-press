@@ -11,6 +11,7 @@ import {
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { DEFAULT_ELEGANT_ABOUT_FEATURES } from "..";
 
@@ -61,6 +62,7 @@ export function ElegantFeatureSection({
   const { ref, visible } = useReveal();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoPaused, setVideoPaused] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -94,11 +96,14 @@ export function ElegantFeatureSection({
     DEFAULT_ELEGANT_ABOUT_FEATURES,
   );
 
-  const revealStyle = (delay: number): React.CSSProperties => ({
-    opacity: visible ? 1 : 0,
-    transform: visible ? "translateY(0)" : "translateY(24px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  const revealStyle = (delay: number): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(24px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
 
   return (
     <section
@@ -180,7 +185,7 @@ export function ElegantFeatureSection({
                 src={aboutImage!}
                 fill
                 className="object-cover"
-                alt="About"
+                alt=""
                 sizes="(max-width: 768px) 100vw, 50vw"
                 style={{ transition: `transform 1.2s ${ease}` }}
               />
@@ -269,6 +274,7 @@ export function ElegantFeatureSection({
                       }}
                     >
                       <feature.icon
+                        aria-hidden={true}
                         style={{
                           width: 20,
                           height: 20,

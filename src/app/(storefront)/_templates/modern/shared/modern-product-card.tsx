@@ -1,9 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Eye, Plus } from "lucide-react";
+import { Check, Eye, Plus } from "lucide-react";
 
 import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
@@ -17,7 +17,7 @@ type Props = {
 };
 export function ModernProductCard({ product }: Props) {
   const { addItem } = useCart();
-  const router = useRouter();
+  const [isAdded, setIsAdded] = useState(false);
 
   const productStatus = checkProductStatus({
     price: product.price,
@@ -56,6 +56,8 @@ export function ModernProductCard({ product }: Props) {
       sku: null,
       maxInventory: productStatus.maxInventory,
     });
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
   };
 
   return (
@@ -66,7 +68,7 @@ export function ModernProductCard({ product }: Props) {
             src={productImage}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
           {productStatus?.badgeLabel && (
@@ -78,7 +80,7 @@ export function ModernProductCard({ product }: Props) {
       </Link>
       <div className="mt-4 flex items-start justify-between">
         <div>
-          <Link href={`/shop/${product.id}`}>
+          <Link href={`/shop/${product.slug}`}>
             <h3 className="text-foreground group-hover:text-muted-foreground text-sm font-medium transition-colors">
               {product.name}
             </h3>
@@ -99,24 +101,32 @@ export function ModernProductCard({ product }: Props) {
         </div>
 
         {productStatus.hasVariants ? (
-          <button
-            type="button"
-            onClick={() => router.push(`/shop/${product.slug}`)}
+          <Link
+            href={`/shop/${product.slug}`}
             aria-label={`View ${product.name}`}
-            className="border-border text-foreground hover:bg-primary hover:text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full border transition-colors"
+            className="border-border text-foreground hover:bg-primary hover:text-primary-foreground flex h-9 w-9 items-center justify-center rounded-full border transition-colors"
           >
-            <Eye className="h-4 w-4" />
-          </button>
+            <Eye className="h-4 w-4" aria-hidden="true" />
+          </Link>
         ) : (
-          <button
-            type="button"
-            className="border-border text-foreground hover:bg-primary hover:text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full border transition-colors"
-            onClick={handleAddToCart}
-            disabled={productStatus.disableCart}
-            aria-label="Add to cart"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+          <>
+            <button
+              type="button"
+              className="border-border text-foreground hover:bg-primary hover:text-primary-foreground flex h-9 w-9 items-center justify-center rounded-full border transition-colors"
+              onClick={handleAddToCart}
+              aria-disabled={productStatus.disableCart ? "true" : undefined}
+              aria-label={`Add ${product.name} to cart`}
+            >
+              {isAdded ? (
+                <Check className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Plus className="h-4 w-4" aria-hidden="true" />
+              )}
+            </button>
+            <span className="sr-only" aria-live="polite" aria-atomic="true">
+              {isAdded ? `${product.name} added to cart` : ""}
+            </span>
+          </>
         )}
       </div>
     </div>
