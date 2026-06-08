@@ -15,17 +15,11 @@ import {
 } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { authClient } from "~/server/better-auth/client";
 import { useCart } from "~/providers/cart-context";
 
 import { ElegantCartDrawer } from "../cart-checkout/elegant-cart-drawer";
-
-const DEFAULT_NAV_LINKS = [
-  { href: "/shop", label: "Shop" },
-  { href: "/collections", label: "Collections" },
-  { href: "/blog", label: "Journal" },
-  { href: "/about", label: "About" },
-] as const;
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
@@ -37,6 +31,10 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
   const pathname = usePathname();
+
+  const { isEnabled } = useFeatureFlags({
+    flags: (business?.featureFlags as Record<string, boolean>) ?? {},
+  });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -62,6 +60,15 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [menuOpen]);
+
+  const DEFAULT_NAV_LINKS = [
+    { href: "/shop", label: "Shop" },
+    ...(isEnabled("collections")
+      ? [{ href: "/collections", label: "Collections" }]
+      : []),
+    { href: "/blog", label: "Journal" },
+    { href: "/about", label: "About" },
+  ];
 
   const links =
     (business?.siteContent?.navigationItems as

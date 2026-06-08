@@ -152,7 +152,9 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
             <nav aria-label="Shop links" className="flex flex-col gap-2.5">
               {[
                 { href: "/shop", label: "All products" },
-                { href: "/collections", label: "Collections" },
+                ...(isEnabled("collections")
+                  ? [{ href: "/collections", label: "Collections" }]
+                  : []),
                 { href: "/shop?sort=featured", label: "Featured" },
                 { href: "/shop?sort=new", label: "New arrivals" },
               ].map(({ href, label }) => (

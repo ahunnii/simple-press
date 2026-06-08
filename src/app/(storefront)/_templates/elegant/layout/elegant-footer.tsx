@@ -2,14 +2,8 @@ import Link from "next/link";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api } from "~/trpc/server";
-
-const DEFAULT_NAV_LINKS = [
-  { href: "/shop", label: "All Products" },
-  { href: "/collections", label: "Collections" },
-  { href: "/about", label: "Our Story" },
-  { href: "/blog", label: "Journal" },
-];
 
 const BRAND_LINKS = [
   { href: "/testimonials", label: "Reviews" },
@@ -20,6 +14,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
   const phone = business?.phoneNumber;
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
+  const { isEnabled } = await getBusinessFlags();
 
   const navigationItems = business?.siteContent?.navigationItems as
     | { label: string; href: string }[]
@@ -28,6 +23,15 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
   const socialLinks = business?.siteContent?.socialLinks as
     | { instagram?: string; facebook?: string; twitter?: string }
     | undefined;
+
+  const DEFAULT_NAV_LINKS = [
+    { href: "/shop", label: "All Products" },
+    ...(isEnabled("collections")
+      ? [{ href: "/collections", label: "Collections" }]
+      : []),
+    { href: "/about", label: "Our Story" },
+    { href: "/blog", label: "Journal" },
+  ];
 
   const navLinks = navigationItems ?? DEFAULT_NAV_LINKS;
 

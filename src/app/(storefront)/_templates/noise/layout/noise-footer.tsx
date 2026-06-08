@@ -211,7 +211,9 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
               title="Shop"
               links={[
                 { href: "/shop", label: "Shop All" },
-                { href: "/collections", label: "Collections" },
+                ...(isEnabled("collections")
+                  ? [{ href: "/collections", label: "Collections" }]
+                  : []),
                 { href: "/shop?sort_by=new", label: "New arrivals" },
               ]}
             />
