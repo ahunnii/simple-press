@@ -15,7 +15,7 @@ export default async function NewBlogPostPage() {
           { label: "New Blog Post" },
         ]}
       />
-      <BlogPostEditor galleriesEnabled={flags.isEnabled("galleries")} />
+      <BlogPostEditor galleriesEnabled={flags.isEnabled("galleries")} embedsEnabled={flags.isEnabled("embeds")} />
     </>
   );
 }

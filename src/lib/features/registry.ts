@@ -122,6 +122,14 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     hidesNav: ["galleries"],
   },
+  embeds: {
+    key: "embeds",
+    label: "Embeds",
+    description: "Embed external content (booking widgets, videos, social posts) into pages and rich text",
+    category: "content",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+  },
   blog: {
     key: "blog",
     label: "Blog",

@@ -44,8 +44,15 @@ import {
   groupFieldsByGroup,
   groupFieldsByPage,
   PAGE_METADATA,
+  parseTemplateIframeValue,
   parseTemplateListRows,
 } from "~/lib/template-fields";
+import {
+  DEFAULT_EMBED_HEIGHT,
+  isVideoEmbed,
+  parseEmbedInput,
+} from "~/lib/embed";
+import { EmbedFrame } from "~/components/embed-frame";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
@@ -119,9 +126,10 @@ type Props = {
   siteContent: {
     customFields: any;
   };
+  embedsEnabled?: boolean;
 };
 
-export function TemplateFieldsEditor({ business, siteContent }: Props) {
+export function TemplateFieldsEditor({ business, siteContent, embedsEnabled }: Props) {
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -873,6 +881,7 @@ export function TemplateFieldsEditor({ business, siteContent }: Props) {
                           onFieldChange={handleFieldChange}
                           isUngrouped={isUngrouped}
                           businessId={business.id}
+                          embedsEnabled={embedsEnabled}
                         />
                       );
                     })}
@@ -964,6 +973,7 @@ function FieldGroup({
   onFieldChange,
   isUngrouped,
   businessId: _businessId,
+  embedsEnabled,
 }: {
   groupId: string;
   page: string;
@@ -974,6 +984,7 @@ function FieldGroup({
   onFieldChange: (key: string, value: unknown) => void;
   isUngrouped: boolean;
   businessId: string;
+  embedsEnabled?: boolean;
 }) {
   const columns = groupMeta?.columns ?? 1;
 
@@ -1017,6 +1028,7 @@ function FieldGroup({
                 value={customFields[field.key]}
                 isModified={modifiedFields.has(field.key)}
                 onChange={(value) => onFieldChange(field.key, value)}
+                embedsEnabled={embedsEnabled}
               />
             </div>
           ))}
@@ -1267,11 +1279,13 @@ function FieldInput({
   value,
   isModified,
   onChange,
+  embedsEnabled,
 }: {
   field: TemplateField;
   value: unknown;
   isModified: boolean;
   onChange: (value: unknown) => void;
+  embedsEnabled?: boolean;
 }) {
   const stringValue = typeof value === "string" ? value : "";
   const richTextValue = isRichTextValue(value) ? value : EMPTY_TIPTAP_DOC;
@@ -1316,6 +1330,18 @@ function FieldInput({
           value={stringValue}
           onChange={(nextValue) => onChange(nextValue)}
         />
+      ) : field.type === "iframe" ? (
+        embedsEnabled ? (
+          <IframeFieldEditor
+            value={stringValue}
+            onChange={(nextValue) => onChange(nextValue)}
+          />
+        ) : (
+          <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+            Embeds are disabled for this business. Enable the Embeds feature in{" "}
+            <strong>Settings → Features</strong>.
+          </div>
+        )
       ) : field.type === "richtext" ? (
         <MinimalTiptapEditor
           value={richTextValue}
@@ -1326,6 +1352,7 @@ function FieldInput({
           editorContentClassName="min-h-[220px] p-4"
           editorClassName="focus:outline-hidden"
           editable
+          embedsEnabled={embedsEnabled}
         />
       ) : field.type === "textarea" ? (
         <Textarea
@@ -1359,10 +1386,156 @@ function FieldInput({
         />
       )}
 
-      {/* Don't show description for media types (already in component) */}
-      {field.type !== "image" && field.type !== "video" && (
-        <p className="text-xs text-gray-500">{field.description}</p>
+      {/* Don't show description for media types or iframe (already in component) */}
+      {field.type !== "image" &&
+        field.type !== "video" &&
+        field.type !== "iframe" && (
+          <p className="text-xs text-gray-500">{field.description}</p>
+        )}
+    </div>
+  );
+}
+
+// Iframe Field Editor Component
+function IframeFieldEditor({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+}) {
+  // Parse the stored JSON value to initialize state
+  const parsed = parseTemplateIframeValue(value);
+
+  const [pasteText, setPasteText] = useState<string>(parsed?.src ?? value);
+  const [heightState, setHeightState] = useState<number>(
+    parsed?.height ?? DEFAULT_EMBED_HEIGHT,
+  );
+  const [titleState, setTitleState] = useState<string>(parsed?.title ?? "");
+  const [parseError, setParseError] = useState<string | null>(null);
+
+  // Derive the currently-valid parsed embed from the paste text
+  const currentParsed = parseEmbedInput(pasteText);
+  const currentSrc = currentParsed?.src ?? null;
+  const isVideo = currentSrc ? isVideoEmbed(currentSrc) : false;
+
+  const emitChange = useCallback(
+    (src: string, height: number, title: string) => {
+      if (!src || !title) return;
+      onChange(JSON.stringify({ src, height, title }));
+    },
+    [onChange],
+  );
+
+  const handlePasteTextChange = (text: string) => {
+    setPasteText(text);
+    if (!text.trim()) {
+      setParseError(null);
+      onChange("");
+      return;
+    }
+    const result = parseEmbedInput(text);
+    if (!result) {
+      setParseError("Enter a valid https:// URL or embed code");
+      onChange("");
+    } else {
+      setParseError(null);
+      emitChange(result.src, result.height ?? heightState, titleState);
+    }
+  };
+
+  const handleHeightChange = (h: number) => {
+    setHeightState(h);
+    if (currentSrc && titleState) {
+      emitChange(currentSrc, h, titleState);
+    }
+  };
+
+  const handleTitleChange = (t: string) => {
+    setTitleState(t);
+    if (currentSrc && t) {
+      emitChange(currentSrc, heightState, t);
+    } else if (!t) {
+      onChange("");
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* URL / embed code input */}
+      <div className="space-y-1.5">
+        <Label className="text-sm">URL or embed code</Label>
+        <Textarea
+          value={pasteText}
+          onChange={(e) => handlePasteTextChange(e.target.value)}
+          placeholder="https://... or <iframe ...>"
+          rows={3}
+          disabled={disabled}
+          className={cn(
+            parseError ? "border-red-400 focus-visible:ring-red-400" : "",
+          )}
+        />
+        {parseError && <p className="text-xs text-red-600">{parseError}</p>}
+      </div>
+
+      {/* Height — hidden for video embeds (they use aspect-video) */}
+      {!isVideo && (
+        <div className="space-y-1.5">
+          <Label className="text-sm">Height (px)</Label>
+          <Input
+            type="number"
+            min={100}
+            max={2000}
+            value={heightState}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              if (Number.isFinite(n) && n > 0) handleHeightChange(n);
+            }}
+            disabled={disabled}
+          />
+        </div>
       )}
+      {isVideo && (
+        <p className="text-xs text-gray-500">
+          Video embeds display at 16:9 aspect ratio.
+        </p>
+      )}
+
+      {/* Title — for accessibility */}
+      <div className="space-y-1.5">
+        <Label className="text-sm">Title</Label>
+        <Input
+          type="text"
+          value={titleState}
+          onChange={(e) => handleTitleChange(e.target.value)}
+          placeholder="Booking widget, Video title, etc."
+          disabled={disabled}
+        />
+        <p className="text-xs text-gray-500">
+          Describes the embed for screen readers.
+        </p>
+      </div>
+
+      {/* Live preview */}
+      {currentSrc && titleState && (
+        <div className="overflow-hidden rounded-md border border-gray-200">
+          <EmbedFrame
+            src={currentSrc}
+            height={isVideo ? undefined : heightState}
+            title={titleState}
+          />
+        </div>
+      )}
+
+      <p className="text-xs text-gray-500">
+        Paste a URL (YouTube, Vimeo, booking widget, etc.) or an{" "}
+        <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-[11px]">
+          &lt;iframe&gt;
+        </code>{" "}
+        embed code.
+      </p>
     </div>
   );
 }

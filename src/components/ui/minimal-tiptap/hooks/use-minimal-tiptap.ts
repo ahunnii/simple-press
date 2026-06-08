@@ -13,6 +13,7 @@ import { cn } from "~/lib/utils";
 import {
   CodeBlockLowlight,
   Color,
+  Embed,
   FileHandler,
   Gallery,
   HorizontalRule,
@@ -35,6 +36,7 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   uploader?: (file: File) => Promise<string>;
   businessId?: string;
   galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
 }
 
 async function fakeuploader(file: File): Promise<string> {
@@ -54,11 +56,13 @@ const createExtensions = ({
   uploader,
   businessId,
   galleriesEnabled,
+  embedsEnabled,
 }: {
   placeholder: string;
   uploader?: (file: File) => Promise<string>;
   businessId?: string;
   galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
 }) => [
   StarterKit.configure({
     blockquote: { HTMLAttributes: { class: "block-node" } },
@@ -196,6 +200,7 @@ const createExtensions = ({
   CodeBlockLowlight,
   Placeholder.configure({ placeholder: () => placeholder }),
   Gallery.configure({ businessId, galleriesEnabled: galleriesEnabled !== false }),
+  Embed.configure({ embedsEnabled: embedsEnabled !== false }),
   TableKit.configure({}),
 ];
 
@@ -210,6 +215,7 @@ export const useMinimalTiptapEditor = ({
   uploader,
   businessId,
   galleriesEnabled,
+  embedsEnabled,
   ...props
 }: UseMinimalTiptapEditorProps) => {
   // const lastExternalValueRef = React.useRef<Content | undefined>(value);
@@ -254,8 +260,9 @@ export const useMinimalTiptapEditor = ({
         uploader,
         businessId,
         galleriesEnabled,
+        embedsEnabled,
       }) as unknown as Extension[],
-    [placeholder, uploader, businessId, galleriesEnabled],
+    [placeholder, uploader, businessId, galleriesEnabled, embedsEnabled],
   );
 
   const editorProps = React.useMemo(

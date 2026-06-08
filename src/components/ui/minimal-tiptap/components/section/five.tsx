@@ -8,11 +8,12 @@ import {
   PlusIcon,
   QuoteIcon,
 } from "@radix-ui/react-icons";
-import { Images, Table } from "lucide-react";
+import { Frame, Images, Table } from "lucide-react";
 
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "~/components/ui/toggle";
 
+import { EmbedInsertDialog } from "../embed/embed-insert-dialog";
 import { GalleryInsertDialog } from "../gallery/gallery-insert-dialog";
 import { ImageEditDialog } from "../image/image-edit-dialog";
 import { LinkEditPopover } from "../link/link-edit-popover";
@@ -23,6 +24,7 @@ type InsertElementAction =
   | "blockquote"
   | "horizontalRule"
   | "gallery"
+  | "embed"
   | "table";
 interface InsertElement extends FormatAction {
   value: InsertElementAction;
@@ -69,6 +71,15 @@ const formatActions: InsertElement[] = [
     shortcuts: ["mod", "alt", "G"],
   },
   {
+    value: "embed",
+    label: "Embed",
+    icon: <Frame className="size-5" />,
+    action: (editor) => editor.chain().focus().insertEmbed().run(),
+    isActive: () => false,
+    canExecute: (editor) => editor.can().chain().focus().insertEmbed().run(),
+    shortcuts: ["mod", "alt", "E"],
+  },
+  {
     value: "table",
     label: "Table",
     icon: <Table className="size-5" />,
@@ -85,6 +96,7 @@ interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
   activeActions?: InsertElementAction[];
   mainActionCount?: number;
   galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
 }
 
 export const SectionFive: React.FC<SectionFiveProps> = ({
@@ -94,10 +106,11 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
   size,
   variant,
   galleriesEnabled = true,
+  embedsEnabled = true,
 }) => {
-  const filteredActions = galleriesEnabled
-    ? activeActions
-    : activeActions.filter((a) => a !== "gallery");
+  const filteredActions = activeActions
+    .filter((a) => galleriesEnabled || a !== "gallery")
+    .filter((a) => embedsEnabled || a !== "embed");
 
   return (
     <>
@@ -105,6 +118,13 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
       <ImageEditDialog editor={editor} size={size} variant={variant} />
       {galleriesEnabled && (
         <GalleryInsertDialog
+          editor={editor}
+          size={size ?? "default"}
+          variant={variant ?? "default"}
+        />
+      )}
+      {embedsEnabled && (
+        <EmbedInsertDialog
           editor={editor}
           size={size ?? "default"}
           variant={variant ?? "default"}

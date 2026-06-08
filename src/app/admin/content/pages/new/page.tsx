@@ -15,7 +15,7 @@ export default async function NewPagePage() {
           { label: "New Page" },
         ]}
       />
-      <PageEditor galleriesEnabled={flags.isEnabled("galleries")} />
+      <PageEditor galleriesEnabled={flags.isEnabled("galleries")} embedsEnabled={flags.isEnabled("embeds")} />
     </>
   );
 }

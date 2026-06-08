@@ -30,9 +30,11 @@ export interface MinimalTiptapProps extends Omit<
 const Toolbar = ({
   editor,
   galleriesEnabled,
+  embedsEnabled,
 }: {
   editor: Editor;
   galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
 }) => (
   <div className="border-border flex h-12 shrink-0 overflow-x-auto border-b p-2">
     <div className="flex w-max items-center gap-px">
@@ -69,9 +71,10 @@ const Toolbar = ({
 
       <SectionFive
         editor={editor}
-        activeActions={["codeBlock", "blockquote", "horizontalRule", "gallery", "table"]}
+        activeActions={["codeBlock", "blockquote", "horizontalRule", "gallery", "embed", "table"]}
         mainActionCount={0}
         galleriesEnabled={galleriesEnabled}
+        embedsEnabled={embedsEnabled}
       />
     </div>
   </div>
@@ -83,12 +86,14 @@ export const MinimalTiptapEditor = ({
   className,
   editorContentClassName,
   galleriesEnabled,
+  embedsEnabled,
   ...props
 }: MinimalTiptapProps) => {
   const editor = useMinimalTiptapEditor({
     value,
     onUpdate: onChange,
     galleriesEnabled,
+    embedsEnabled,
     ...props,
   });
 
@@ -103,6 +108,7 @@ export const MinimalTiptapEditor = ({
         className={className}
         editorContentClassName={editorContentClassName}
         galleriesEnabled={galleriesEnabled}
+        embedsEnabled={embedsEnabled}
       />
     </EditorContext.Provider>
   );
@@ -117,6 +123,7 @@ export const MainMinimalTiptapEditor = ({
   className,
   editorContentClassName,
   galleriesEnabled,
+  embedsEnabled,
 }: MinimalTiptapProps & { editor: Editor }) => {
   // Use provided editor directly. Do not subscribe to full editor state here,
   // or every transaction (e.g. from gallery) re-renders the whole toolbar and
@@ -136,7 +143,7 @@ export const MainMinimalTiptapEditor = ({
         className,
       )}
     >
-      <Toolbar editor={providedEditor} galleriesEnabled={galleriesEnabled} />
+      <Toolbar editor={providedEditor} galleriesEnabled={galleriesEnabled} embedsEnabled={embedsEnabled} />
       <EditorContent
         editor={providedEditor}
         className={cn("minimal-tiptap-editor", editorContentClassName)}

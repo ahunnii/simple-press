@@ -84,11 +84,13 @@ type BlogPostEditorProps = {
     ogImage: string | null;
   };
   galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
 };
 
 export function BlogPostEditor({
   page,
   galleriesEnabled,
+  embedsEnabled,
 }: BlogPostEditorProps) {
   const router = useRouter();
   const utils = api.useUtils();
@@ -432,6 +434,7 @@ export function BlogPostEditor({
                       output="json"
                       editorContentClassName="min-h-[400px] p-4"
                       galleriesEnabled={galleriesEnabled}
+                      embedsEnabled={embedsEnabled}
                       required
                     />
                   </CardContent>

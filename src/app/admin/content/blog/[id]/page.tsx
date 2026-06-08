@@ -30,7 +30,7 @@ export default async function EditPagePage({ params }: Props) {
         ]}
       />
 
-      <BlogPostEditor page={page} galleriesEnabled={flags.isEnabled("galleries")} />
+      <BlogPostEditor page={page} galleriesEnabled={flags.isEnabled("galleries")} embedsEnabled={flags.isEnabled("embeds")} />
     </>
   );
 }

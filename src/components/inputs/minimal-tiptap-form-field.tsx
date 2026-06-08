@@ -29,6 +29,7 @@ type Props<CurrentForm extends FieldValues> = {
   output?: "html" | "json" | "text";
   businessId?: string;
   galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
   required?: boolean;
 };
 
@@ -44,6 +45,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
   output = "json",
   businessId,
   galleriesEnabled,
+  embedsEnabled,
   required,
 }: Props<CurrentForm>) => {
   return (
@@ -70,6 +72,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
                 editorClassName="focus:outline-hidden"
                 businessId={businessId}
                 galleriesEnabled={galleriesEnabled}
+                embedsEnabled={embedsEnabled}
               />
             </FormControl>
             {description && <FormDescription>{description}</FormDescription>}

@@ -3,6 +3,11 @@ import type { LucideIcon } from "lucide-react";
 import { Leaf } from "lucide-react";
 import { z } from "zod";
 
+import {
+  DEFAULT_EMBED_HEIGHT,
+  sanitizeEmbedSrc,
+} from "~/lib/embed";
+
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import {
@@ -83,6 +88,7 @@ export type TemplateFieldScalarType =
   | "color"
   | "number"
   | "gallery"
+  | "iframe"
   | "image"
   | "video"
   | "boolean"
@@ -300,6 +306,54 @@ export function parseTemplateImageListRows(
   }
 
   return out.length > 0 ? out : (defaultList ?? null);
+}
+
+/** Validated value for a template field of type `"iframe"`. */
+export type TemplateIframeValue = { src: string; height: number; title: string };
+
+/**
+ * Parses a raw `customFields` value for an iframe field.
+ *
+ * Expects a non-empty JSON string encoding `{ src, height?, title? }`.
+ * `src` is run through `sanitizeEmbedSrc` — returns `null` when the URL is
+ * invalid or not HTTPS. `height` defaults to `DEFAULT_EMBED_HEIGHT` when
+ * absent or non-positive. `title` defaults to `""`.
+ */
+export function parseTemplateIframeValue(
+  raw: unknown,
+): TemplateIframeValue | null {
+  if (typeof raw !== "string" || !raw) return null;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+
+  if (
+    parsed == null ||
+    typeof parsed !== "object" ||
+    Array.isArray(parsed)
+  ) {
+    return null;
+  }
+
+  const obj = parsed as Record<string, unknown>;
+
+  if (typeof obj.src !== "string") return null;
+  const safeSrc = sanitizeEmbedSrc(obj.src);
+  if (!safeSrc) return null;
+
+  const rawHeight = Number(obj.height);
+  const height =
+    Number.isFinite(rawHeight) && rawHeight > 0
+      ? rawHeight
+      : DEFAULT_EMBED_HEIGHT;
+
+  const title = typeof obj.title === "string" ? obj.title : "";
+
+  return { src: safeSrc, height, title };
 }
 
 export type TemplateFieldGroup = {

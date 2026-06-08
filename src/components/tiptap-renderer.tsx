@@ -11,8 +11,10 @@ import StarterKit from "@tiptap/starter-kit";
 import { Images } from "lucide-react";
 
 import { api } from "~/trpc/react";
+import { Embed } from "~/components/ui/minimal-tiptap/extensions/embed";
 import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
 import { TableKit } from "~/components/ui/minimal-tiptap/extensions/table";
+import { EmbedFrame } from "~/components/embed-frame";
 import { GalleryRenderer } from "~/components/gallery-renderer";
 
 /** TipTap document JSON — matches first parameter of generateHTML */
@@ -40,6 +42,7 @@ const extensions = [
     types: ["heading", "paragraph"],
   }),
   Gallery,
+  Embed,
   TableKit,
 ];
 
@@ -162,6 +165,14 @@ function isGalleryNode(
   );
 }
 
+function isEmbedNode(
+  node: ContentNode,
+): node is ContentNode & {
+  attrs: { src?: string; height?: number | string; title?: string };
+} {
+  return node.type === "embed" && node.attrs != null && "src" in node.attrs;
+}
+
 export function TiptapRenderer({ content, className }: TiptapRendererProps) {
   const elements = useMemo(() => {
     if (!isTiptapDoc(content)) {
@@ -175,6 +186,16 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
           <GalleryBlock
             key={`gallery-${node.attrs.galleryId}-${index}`}
             galleryId={String(node.attrs.galleryId)}
+          />
+        );
+      }
+      if (isEmbedNode(node) && node.attrs.src) {
+        return (
+          <EmbedFrame
+            key={`embed-${index}`}
+            src={String(node.attrs.src)}
+            height={node.attrs.height ? Number(node.attrs.height) : undefined}
+            title={typeof node.attrs.title === "string" ? node.attrs.title : ""}
           />
         );
       }

@@ -1,5 +1,6 @@
 export * from "./code-block-lowlight";
 export * from "./color";
+export * from "./embed";
 export * from "./file-handler";
 export * from "./gallery";
 export * from "./horizontal-rule";

@@ -76,9 +76,10 @@ type PageEditorProps = {
     metaDescription: string | null;
   };
   galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
 };
 
-export function PageEditor({ page, galleriesEnabled }: PageEditorProps) {
+export function PageEditor({ page, galleriesEnabled, embedsEnabled }: PageEditorProps) {
   const router = useRouter();
   const utils = api.useUtils();
   const formRef = useRef<HTMLFormElement>(null);
@@ -354,6 +355,7 @@ export function PageEditor({ page, galleriesEnabled }: PageEditorProps) {
                       output="json"
                       editorContentClassName="min-h-[400px] p-4"
                       galleriesEnabled={galleriesEnabled}
+                      embedsEnabled={embedsEnabled}
                       required
                     />
                   </CardContent>
