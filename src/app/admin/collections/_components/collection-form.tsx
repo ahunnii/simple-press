@@ -6,7 +6,25 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Search, Trash2, TriangleAlert, Upload, X } from "lucide-react";
+import type { DragEndEvent } from "@dnd-kit/core";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { ArrowLeft, GripVertical, PlusCircle, Save, Search, Trash2, TriangleAlert, Upload, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -41,7 +59,6 @@ import { Form, FormField } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Switch } from "~/components/ui/switch";
-import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
@@ -51,6 +68,67 @@ type Props = {
   collection?: RouterOutputs["collections"]["getById"];
   allProducts: RouterOutputs["product"]["secureGetAll"];
 };
+
+type ProductSummary = {
+  id: string;
+  name: string;
+  price: number;
+  images: { url: string }[];
+};
+
+function SortableProductRow({
+  product,
+  onRemove,
+}: {
+  product: ProductSummary;
+  onRemove: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: product.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-3 rounded border bg-white p-3"
+    >
+      <button
+        type="button"
+        aria-label="Drag to reorder"
+        className="cursor-move text-gray-400 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-4 w-4" />
+      </button>
+      <div className="relative h-10 w-10 shrink-0 rounded bg-gray-100">
+        <Image
+          src={product.images[0]?.url ?? "/placeholder.svg"}
+          alt={product.name}
+          fill
+          className="rounded object-cover"
+        />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="truncate font-medium text-sm">{product.name}</p>
+        <p className="text-xs text-gray-500">${(product.price / 100).toFixed(2)}</p>
+      </div>
+      <button
+        type="button"
+        aria-label={`Remove ${product.name}`}
+        className="shrink-0 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        onClick={onRemove}
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
 
 function OgImageUploader({
   file,
@@ -142,15 +220,36 @@ function OgImageUploader({
   );
 }
 
+const NEW_COLLECTION_DEFAULTS = {
+  published: true,
+  name: "",
+  description: "",
+  imageUrl: undefined,
+  metaTitle: "",
+  metaDescription: "",
+  metaKeywords: "",
+  ogImage: undefined,
+  imageFile: undefined,
+  productIds: [] as string[],
+} as const;
+
 export function CollectionForm({ collection, allProducts }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const imageFileInputRef = useRef<HTMLInputElement | null>(null);
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
+  const createAnotherRef = useRef<boolean>(false);
   const utils = api.useUtils();
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [productSearch, setProductSearch] = useState("");
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   // OG image state — managed outside RHF (same pattern as product form)
   const [ogImageFile, setOgImageFile] = useState<File | null>(null);
@@ -201,10 +300,27 @@ export function CollectionForm({ collection, allProducts }: Props) {
           productIds: form.getValues("productIds"),
         });
         toast.dismiss(loadingToastId);
-        toast.success("Collection created successfully");
         void utils.collections.invalidate();
-        router.push(`/admin/collections/${data.id}`);
+
+        if (createAnotherRef.current) {
+          createAnotherRef.current = false;
+          // Reset all form state for a fresh create
+          form.reset(NEW_COLLECTION_DEFAULTS);
+          setProductSearch("");
+          setOgImageFile(null);
+          setOgImageRemoved(false);
+          // Clear the image file inputs so the same file can be re-selected
+          if (imageFileInputRef.current) imageFileInputRef.current.value = "";
+          if (ogImageFileInputRef.current)
+            ogImageFileInputRef.current.value = "";
+          toast.success("Collection created — add another");
+          router.push("/admin/collections/new");
+        } else {
+          toast.success("Collection created successfully");
+          router.push(`/admin/collections/${data.id}`);
+        }
       } catch (err) {
+        createAnotherRef.current = false;
         toast.dismiss(loadingToastId);
         const message =
           err instanceof Error ? err.message : "Failed to save products";
@@ -212,6 +328,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
       }
     },
     onError: (err) => {
+      createAnotherRef.current = false;
       toast.dismiss();
       toast.error(err.message ?? "Failed to create collection");
     },
@@ -439,7 +556,30 @@ export function CollectionForm({ collection, allProducts }: Props) {
                 Reset
               </Button>
 
-              <Button type="submit" size="sm" disabled={isSubmitting}>
+              {!collection?.id && (
+                <Button
+                  type="submit"
+                  variant="outline"
+                  size="sm"
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    createAnotherRef.current = true;
+                  }}
+                  className="hidden sm:inline-flex"
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Save &amp; create another
+                </Button>
+              )}
+
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isSubmitting}
+                onClick={() => {
+                  createAnotherRef.current = false;
+                }}
+              >
                 {isSubmitting ? (
                   <>
                     <span className="saving-indicator" />
@@ -556,21 +696,50 @@ export function CollectionForm({ collection, allProducts }: Props) {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <InputFormField
-                      form={form}
-                      name="metaTitle"
-                      label="Meta Title"
-                      placeholder="Summer Collection"
-                      description={`${form.watch("metaTitle")?.length ?? 0}/60 characters (optimal: 50-60)`}
-                    />
-                    <TextareaFormField
-                      form={form}
-                      name="metaDescription"
-                      label="Meta Description"
-                      placeholder="Summer Collection: Bright and Vibrant Styles"
-                      rows={3}
-                      description={`${form.watch("metaDescription")?.length ?? 0}/160 characters (optimal: 150-160)`}
-                    />
+                    {(() => {
+                      const metaTitleLen = form.watch("metaTitle")?.length ?? 0;
+                      const metaTitleOver = metaTitleLen > 60;
+                      return (
+                        <InputFormField
+                          form={form}
+                          name="metaTitle"
+                          label="Meta Title"
+                          placeholder="Summer Collection"
+                          description={
+                            <span
+                              className={
+                                metaTitleOver ? "text-destructive" : undefined
+                              }
+                            >
+                              {metaTitleLen}/60 characters (optimal: 50–60)
+                            </span>
+                          }
+                        />
+                      );
+                    })()}
+                    {(() => {
+                      const metaDescLen =
+                        form.watch("metaDescription")?.length ?? 0;
+                      const metaDescOver = metaDescLen > 160;
+                      return (
+                        <TextareaFormField
+                          form={form}
+                          name="metaDescription"
+                          label="Meta Description"
+                          placeholder="Summer Collection: Bright and Vibrant Styles"
+                          rows={3}
+                          description={
+                            <span
+                              className={
+                                metaDescOver ? "text-destructive" : undefined
+                              }
+                            >
+                              {metaDescLen}/160 characters (optimal: 150–160)
+                            </span>
+                          }
+                        />
+                      );
+                    })()}
                     <InputFormField
                       form={form}
                       name="metaKeywords"
@@ -623,12 +792,26 @@ export function CollectionForm({ collection, allProducts }: Props) {
                       name="productIds"
                       render={({ field }) => {
                         const ids = field.value;
+
+                        // Preserve existing order when toggling: append new,
+                        // filter out removed.
                         const toggleProduct = (productId: string) => {
-                          const next = new Set(ids);
-                          if (next.has(productId)) next.delete(productId);
-                          else next.add(productId);
-                          field.onChange([...next]);
+                          if (ids.includes(productId)) {
+                            field.onChange(ids.filter((id) => id !== productId));
+                          } else {
+                            field.onChange([...ids, productId]);
+                          }
                         };
+
+                        const handleDragEnd = (event: DragEndEvent) => {
+                          const { active, over } = event;
+                          if (over && active.id !== over.id) {
+                            const oldIndex = ids.indexOf(active.id as string);
+                            const newIndex = ids.indexOf(over.id as string);
+                            field.onChange(arrayMove(ids, oldIndex, newIndex));
+                          }
+                        };
+
                         const filteredProducts = productSearch.trim()
                           ? (allProducts ?? []).filter((p) =>
                               p.name
@@ -649,32 +832,39 @@ export function CollectionForm({ collection, allProducts }: Props) {
 
                         return (
                           <>
+                            {/* Sortable ordered list of selected products */}
                             {ids.length > 0 && (
-                              <div className="mb-3 flex flex-wrap gap-1.5">
-                                {selectedProducts.map((product) => (
-                                  <Badge
-                                    key={product.id}
-                                    variant="secondary"
-                                    className="gap-1 pr-1"
+                              <div className="mb-4">
+                                <p className="mb-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                  Selected — drag to reorder
+                                </p>
+                                <DndContext
+                                  sensors={sensors}
+                                  collisionDetection={closestCenter}
+                                  modifiers={[restrictToVerticalAxis]}
+                                  onDragEnd={handleDragEnd}
+                                >
+                                  <SortableContext
+                                    items={ids}
+                                    strategy={verticalListSortingStrategy}
                                   >
-                                    <span className="max-w-[160px] truncate">
-                                      {product.name}
-                                    </span>
-                                    <button
-                                      type="button"
-                                      aria-label={`Remove ${product.name}`}
-                                      className="ml-0.5 rounded-full hover:bg-black/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                      onClick={() =>
-                                        toggleProduct(product.id)
-                                      }
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </Badge>
-                                ))}
+                                    <div className="space-y-1.5">
+                                      {selectedProducts.map((product) => (
+                                        <SortableProductRow
+                                          key={product.id}
+                                          product={product}
+                                          onRemove={() =>
+                                            toggleProduct(product.id)
+                                          }
+                                        />
+                                      ))}
+                                    </div>
+                                  </SortableContext>
+                                </DndContext>
                               </div>
                             )}
 
+                            {/* Search + checkbox list for adding/removing */}
                             <div className="relative mb-3">
                               <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
                               <Input
@@ -688,7 +878,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
                               />
                             </div>
 
-                            <ScrollArea className="h-96 min-h-0 overflow-hidden">
+                            <ScrollArea className="h-72 min-h-0 overflow-hidden">
                               <div className="space-y-2">
                                 {filteredProducts.length === 0 ? (
                                   <p className="py-6 text-center text-sm text-gray-400">

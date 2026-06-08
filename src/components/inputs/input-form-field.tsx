@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes, ReactNode } from "react";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
 import { cn } from "~/lib/utils";
@@ -16,7 +16,7 @@ type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;
   name: Path<CurrentForm>;
   label?: string;
-  description?: string;
+  description?: ReactNode;
   className?: string;
   disabled?: boolean;
   placeholder?: string;

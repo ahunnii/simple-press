@@ -3,10 +3,10 @@ import { z } from "zod";
 
 import { generateCollectionSlug } from "~/lib/slug";
 import {
-  collectionCollectionOrderSchema,
+  collectionBulkDeleteSchema,
+  collectionBulkPublishSchema,
   collectionCreateSchema,
   collectionModifyProductSchema,
-  collectionProductOrderSchema,
   collectionSetProductsSchema,
   collectionUpdateSchema,
 } from "~/lib/validators/collections";
@@ -377,82 +377,24 @@ export const collectionsRouter = createTRPCRouter({
       const inputIdSet = new Set(productIds);
 
       const toRemove = [...currentIds].filter((id) => !inputIdSet.has(id));
-      const toAdd = productIds.filter((id) => !currentIds.has(id));
 
-      if (toRemove.length > 0 || toAdd.length > 0) {
-        await ctx.db.$transaction(async (tx) => {
-          if (toRemove.length > 0) {
-            await tx.collectionProduct.deleteMany({
-              where: { collectionId, productId: { in: toRemove } },
-            });
-          }
-          if (toAdd.length > 0) {
-            await tx.collectionProduct.createMany({
-              data: toAdd.map((productId) => ({
-                collectionId,
-                productId,
-                sortOrder: productIds.indexOf(productId),
-              })),
-            });
-          }
-        });
-      }
-
-      return { success: true };
-    }),
-
-  updateProductOrder: ownerAdminProcedure
-    .use(featureGate("collections"))
-    .input(collectionProductOrderSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-
-      const collection = await ctx.db.collection.findUnique({
-        where: { id: input.collectionId, businessId },
-        select: { id: true, businessId: true },
+      await ctx.db.$transaction(async (tx) => {
+        if (toRemove.length > 0) {
+          await tx.collectionProduct.deleteMany({
+            where: { collectionId, productId: { in: toRemove } },
+          });
+        }
+        // Upsert every product in the desired order — creates new rows and
+        // updates sortOrder for products already in the collection.
+        for (let i = 0; i < productIds.length; i++) {
+          const productId = productIds[i]!;
+          await tx.collectionProduct.upsert({
+            where: { collectionId_productId: { collectionId, productId } },
+            create: { collectionId, productId, sortOrder: i },
+            update: { sortOrder: i },
+          });
+        }
       });
-
-      if (!collection) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Collection not found",
-        });
-      }
-
-      // Update sort orders in transaction
-      await ctx.db.$transaction(
-        input.productIds.map((productId, index) =>
-          ctx.db.collectionProduct.update({
-            where: {
-              collectionId_productId: {
-                collectionId: input.collectionId,
-                productId,
-              },
-            },
-            data: {
-              sortOrder: index,
-            },
-          }),
-        ),
-      );
-
-      return { success: true };
-    }),
-
-  updateCollectionOrder: ownerAdminProcedure
-    .use(featureGate("collections"))
-    .input(collectionCollectionOrderSchema)
-    .mutation(async ({ ctx, input: collectionIds }) => {
-      const { businessId } = ctx;
-
-      await ctx.db.$transaction(
-        collectionIds.map((collectionId, index) =>
-          ctx.db.collection.update({
-            where: { id: collectionId, businessId },
-            data: { sortOrder: index },
-          }),
-        ),
-      );
 
       return { success: true };
     }),
@@ -533,6 +475,29 @@ export const collectionsRouter = createTRPCRouter({
       });
 
       return newCollection;
+    }),
+
+  bulkSetPublished: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(collectionBulkPublishSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const result = await ctx.db.collection.updateMany({
+        where: { id: { in: input.ids }, businessId },
+        data: { published: input.published },
+      });
+      return { count: result.count };
+    }),
+
+  bulkDelete: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(collectionBulkDeleteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const result = await ctx.db.collection.deleteMany({
+        where: { id: { in: input.ids }, businessId },
+      });
+      return { count: result.count };
     }),
 
   getProductsByCollectionId: publicProcedure
