@@ -27,7 +27,7 @@ export function SledgeGetToKnow({
           <div className="sl-media-frame sl-media-frame-dark">
             <Image
               src={image}
-              alt={heading ?? "Get to Know"}
+              alt=""
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -39,12 +39,12 @@ export function SledgeGetToKnow({
 
         {/* Right: text */}
         <div>
-          <h2 className="sl-heading-xl font-heading font-bold">
+          <h2 className="sl-heading-xl font-heading">
             {heading ?? "Get to Know Judy"}
           </h2>
 
           {/* Red-bar body text */}
-          <div className="sl-quote-bar mb-10">
+          <div className="mb-10">
             <p className="sl-quote-body font-sans italic">{body}</p>
           </div>
 

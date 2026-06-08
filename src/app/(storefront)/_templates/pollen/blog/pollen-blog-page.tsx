@@ -30,7 +30,7 @@ function PostCard({ post }: { post: Props["pages"][number] }) {
       <div className="relative aspect-video w-full overflow-hidden">
         <Image
           src={post.image ?? "/placeholder.svg"}
-          alt={post.title}
+          alt=""
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, 50vw"
@@ -105,9 +105,9 @@ export function PollenBlogPage({ pages, customFields, business }: Props) {
                 </p>
               ) : null}
               <div className="rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] py-16 text-center">
-                <p className="text-[#4b5563]">
+                <h2 className="text-[#4b5563]">
                   No blog posts yet. Check back soon!
-                </p>
+                </h2>
                 <Link
                   href="/"
                   className="mt-4 inline-block font-medium text-[#3d5a28] hover:underline"
@@ -155,7 +155,7 @@ export function PollenBlogPage({ pages, customFields, business }: Props) {
                 />
               </div>
               {query.trim() ? (
-                <p className="mt-2 text-center text-sm text-[#6b7280]">
+                <p className="mt-2 text-center text-sm text-[#6b7280]" role="status">
                   {filtered.length === 0
                     ? "No posts match your search."
                     : `${filtered.length} post${filtered.length !== 1 ? "s" : ""} found`}
@@ -190,7 +190,7 @@ export function PollenBlogPage({ pages, customFields, business }: Props) {
                       <div className="relative aspect-4/3 min-h-[220px] lg:aspect-auto lg:min-h-[280px]">
                         <Image
                           src={featured.image ?? "/placeholder.svg"}
-                          alt={featured.title}
+                          alt=""
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
                           priority
@@ -198,7 +198,7 @@ export function PollenBlogPage({ pages, customFields, business }: Props) {
                         />
                       </div>
                       <div className="flex flex-col justify-center p-8 lg:p-10">
-                        <p className="mb-2 text-xs font-medium tracking-[0.2em] text-[#A8D081] uppercase">
+                        <p className="mb-2 text-xs font-medium tracking-[0.2em] text-[#5e7747] uppercase">
                           {formatDate(featured.createdAt)} · Latest
                         </p>
                         <h2 className="text-2xl font-bold tracking-wide text-[#374151] transition-colors group-hover:text-[#3d5a28] md:text-3xl">
@@ -211,7 +211,7 @@ export function PollenBlogPage({ pages, customFields, business }: Props) {
                         ) : null}
                         <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-[#3d5a28]">
                           Read article
-                          <span className="h-px w-8 bg-[#3d5a28] transition-all group-hover:w-12" />
+                          <span className="h-px w-8 bg-[#3d5a28] transition-all group-hover:w-12" aria-hidden="true" />
                         </span>
                       </div>
                     </div>

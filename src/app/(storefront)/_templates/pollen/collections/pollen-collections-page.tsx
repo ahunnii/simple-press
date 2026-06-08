@@ -43,9 +43,10 @@ export function PollenCollectionsPage({
 
         {list.length === 0 ? (
           <div className="py-16 text-center">
-            <p className="text-lg text-gray-500">
+            {/* N-3: promote to h2 so it heads a page state */}
+            <h2 className="text-lg text-gray-500">
               No collections available at this time.
-            </p>
+            </h2>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -59,9 +60,10 @@ export function PollenCollectionsPage({
                 >
                   <div className="overflow-hidden rounded-md border border-[#2a351f]/10 bg-white shadow-sm transition-shadow hover:shadow-md">
                     <div className="relative aspect-4/3 w-full overflow-hidden bg-[#f5f2ee]">
+                      {/* M-6: alt="" — collection name is visible text in the link */}
                       <Image
                         src={collection.imageUrl ?? "/placeholder.svg"}
-                        alt={collection.name}
+                        alt=""
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -82,7 +84,11 @@ export function PollenCollectionsPage({
                         </span>
                         <span className="flex items-center gap-1 text-sm font-medium text-[#215935]">
                           Shop now
-                          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          {/* N-1: aria-hidden on decorative ArrowRight icon */}
+                          <ArrowRight
+                            className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                            aria-hidden="true"
+                          />
                         </span>
                       </div>
                     </div>

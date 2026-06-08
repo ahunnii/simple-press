@@ -26,11 +26,16 @@ export function DarkTrendProductActions({
   } = useProduct(product);
 
   const [isAdded, setIsAdded] = useState(false);
+  const [liveMessage, setLiveMessage] = useState("");
 
   const addToCart = () => {
     handleAddToCart();
     setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
+    setLiveMessage(`Added ${quantity} × ${product.name} to cart`);
+    setTimeout(() => {
+      setIsAdded(false);
+      setLiveMessage("");
+    }, 2000);
   };
 
   return (
@@ -52,50 +57,78 @@ export function DarkTrendProductActions({
       ) : !inStock ? (
         <button
           type="button"
-          disabled={true}
-          className="bg-primary hover:bg-primary/90 inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all disabled:opacity-50"
+          aria-disabled="true"
+          onClick={(e) => e.preventDefault()}
+          className="bg-primary hover:bg-primary/90 inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase opacity-50 transition-all"
         >
           Out of Stock
         </button>
       ) : (
         <>
+          {/* Visually-hidden live region for add-to-cart announcements */}
+          <div
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+          >
+            {liveMessage}
+          </div>
+
           {canAddMore && (
             <>
               {/* Quantity Selector */}
               <div className="mb-8">
-                <label className="mb-3 block text-sm font-medium text-white">
-                  Quantity
-                </label>
-                <div className="bg-card inline-flex items-center gap-4 rounded-md px-4 py-2">
-                  <button
-                    type="button"
-                    onClick={handleDecrement}
-                    disabled={quantity <= 1}
-                    className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </button>
-                  <span className="w-8 text-center font-medium text-white">
-                    {quantity}
+                <div
+                  role="group"
+                  aria-label="Quantity"
+                  className="inline-flex flex-col gap-2"
+                >
+                  <span className="block text-sm font-medium text-white">
+                    Quantity
                   </span>
-                  <button
-                    type="button"
-                    onClick={handleIncrement}
-                    disabled={quantity >= remainingStock}
-                    className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-
-                  {isInventoryTracked && (
-                    <span className="text-sm text-white/60">
-                      {remainingStock > 1
-                        ? `${remainingStock} available`
-                        : "Last one!"}
+                  <div className="bg-card inline-flex items-center gap-4 rounded-md px-4 py-2">
+                    <button
+                      type="button"
+                      onClick={handleDecrement}
+                      disabled={quantity <= 1}
+                      className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                    <span
+                      aria-live="polite"
+                      aria-atomic="true"
+                      className="w-8 text-center font-medium text-white"
+                    >
+                      {quantity}
                     </span>
-                  )}
+                    <button
+                      type="button"
+                      onClick={handleIncrement}
+                      disabled={quantity >= remainingStock}
+                      className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
+                      aria-label="Increase quantity"
+                      aria-describedby={
+                        isInventoryTracked
+                          ? "dt-actions-stock-msg"
+                          : undefined
+                      }
+                    >
+                      <Plus className="h-4 w-4" aria-hidden="true" />
+                    </button>
+
+                    {isInventoryTracked && (
+                      <span
+                        id="dt-actions-stock-msg"
+                        className="text-sm text-white/60"
+                      >
+                        {remainingStock > 1
+                          ? `${remainingStock} available`
+                          : "Last one!"}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </>
@@ -112,7 +145,7 @@ export function DarkTrendProductActions({
             >
               {isAdded ? (
                 <>
-                  <Check className="h-4 w-4" />
+                  <Check className="h-4 w-4" aria-hidden="true" />
                   Added to Cart
                 </>
               ) : (

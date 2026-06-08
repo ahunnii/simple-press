@@ -40,11 +40,11 @@ export function SledgeBlogSearch({ value, onChange, resultCount }: Props) {
         onChange={(e) => onChange(e.target.value)}
         aria-label="Search blog posts"
       />
-      {showResults ? (
-        <span className="sl-eyebrow flex-shrink-0 font-sans text-xs tracking-[0.12em] uppercase">
-          {resultCount} result{resultCount !== 1 ? "s" : ""}
-        </span>
-      ) : null}
+      {/* S-9: always render with role="status"; populate text only when there are results
+           so SR announces count updates rather than missing them on conditional mount */}
+      <span role="status" className="sl-eyebrow flex-shrink-0 font-sans text-xs tracking-[0.12em] uppercase">
+        {showResults ? `${resultCount} result${resultCount !== 1 ? "s" : ""}` : ""}
+      </span>
     </div>
   );
 }

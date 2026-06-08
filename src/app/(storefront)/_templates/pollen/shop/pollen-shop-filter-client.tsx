@@ -37,6 +37,7 @@ export function PollenShopFilterClient({ products }: Props) {
     totalPages,
     handlePage,
     paginated,
+    filtered,
     hasActiveFilters,
     clearFilters,
   } = useShopFilters(products, { pageSize: 12 });
@@ -46,12 +47,18 @@ export function PollenShopFilterClient({ products }: Props) {
       {/* Controls */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
-          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#4c566a]" />
+          {/* N-1: aria-hidden on decorative Search icon */}
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#4c566a]"
+            aria-hidden="true"
+          />
+          {/* S-6: label the search input */}
           <Input
             placeholder="Search products…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
+            aria-label="Search products"
           />
         </div>
 
@@ -60,7 +67,8 @@ export function PollenShopFilterClient({ products }: Props) {
             value={sortParam}
             onValueChange={(v) => handleSort(v as SortOption)}
           >
-            <SelectTrigger className="w-48">
+            {/* S-6: label the sort select trigger */}
+            <SelectTrigger className="w-48" aria-label="Sort products">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -81,22 +89,34 @@ export function PollenShopFilterClient({ products }: Props) {
               onClick={clearFilters}
               className="gap-1.5 text-[#4c566a]"
             >
-              <X className="h-3.5 w-3.5" />
+              {/* N-1: aria-hidden on decorative X icon */}
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
               Clear
             </Button>
           )}
         </div>
       </div>
 
+      {/* S-7: visible result count with role="status" */}
+      <p
+        role="status"
+        className="mt-4 text-sm text-[#4c566a]"
+      >
+        {filtered.length === products.length
+          ? `${products.length} ${products.length === 1 ? "product" : "products"}`
+          : `${filtered.length} of ${products.length} products`}
+      </p>
+
       {/* Product grid */}
-      <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {paginated.map((product, index) => (
           <PollenProductCard key={product.id} index={index} product={product} />
         ))}
       </div>
 
+      {/* S-7: empty state with role="status" */}
       {paginated.length === 0 && (
-        <p className="py-12 text-center text-sm text-[#4c566a]">
+        <p role="status" className="py-12 text-center text-sm text-[#4c566a]">
           No products match your search.{" "}
           <button
             onClick={clearFilters}
@@ -107,9 +127,9 @@ export function PollenShopFilterClient({ products }: Props) {
         </p>
       )}
 
-      {/* Pagination */}
+      {/* M-9: wrap pagination in <nav aria-label="Pagination"> */}
       {totalPages > 1 && (
-        <div className="mt-10 flex items-center justify-center gap-3">
+        <nav aria-label="Pagination" className="mt-10 flex items-center justify-center gap-3">
           <Button
             variant="outline"
             size="sm"
@@ -118,8 +138,17 @@ export function PollenShopFilterClient({ products }: Props) {
           >
             Previous
           </Button>
-          <span className="text-sm text-[#4c566a]">
-            {currentPage} / {totalPages}
+          {/* M-9: aria-live + sr-only label on page indicator */}
+          <span
+            className="text-sm text-[#4c566a]"
+            aria-live="polite"
+            aria-label={`Page ${currentPage} of ${totalPages}`}
+          >
+            <span className="sr-only">Page </span>
+            {currentPage}
+            <span aria-hidden="true"> / </span>
+            <span className="sr-only"> of </span>
+            {totalPages}
           </span>
           <Button
             variant="outline"
@@ -129,7 +158,7 @@ export function PollenShopFilterClient({ products }: Props) {
           >
             Next
           </Button>
-        </div>
+        </nav>
       )}
     </>
   );

@@ -54,15 +54,19 @@ export async function SledgeContactPage({
         className="sl-hero-banner-sm relative w-full"
         {...sectionGroupAttr("contact", "hero")}
       >
+        {/* M-9: decorative banner image */}
         <Image
           src={heroImage}
-          alt="Contact"
+          alt=""
           fill
           className="object-cover"
           priority
           sizes="100vw"
         />
       </section>
+
+      {/* M-2: sr-only page h1 so AT has a document landmark heading */}
+      <h1 className="sr-only">Contact</h1>
 
       {/* ── Info + form (form card overlaps hero only) ── */}
       <section

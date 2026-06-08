@@ -24,7 +24,7 @@ import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { useCart } from "~/providers/cart-context";
 
 const inputClass =
-  "w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-[#215935] focus:ring-2 focus:ring-[#215935]/20 focus:outline-none px-3 py-2 text-sm";
+  "w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-[#215935] focus:ring-2 focus:ring-[#215935]/20 focus:outline-none px-3 py-2 text-sm";
 const labelClass = "block text-sm font-medium text-gray-900 mb-1";
 const sectionHeadingClass =
   "mb-4 text-sm font-medium tracking-wider text-[#2a351f] uppercase";
@@ -218,9 +218,10 @@ export function PollenCheckoutForm({ business }: Props) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-10 lg:flex-row">
       {/* Left column — form fields */}
       <div className="flex-1 space-y-10">
+        <p className="text-sm text-gray-600">Fields marked * are required.</p>
         {/* Contact Information */}
         <section>
-          <p className={sectionHeadingClass}>Contact Information</p>
+          <h2 className={sectionHeadingClass}>Contact Information</h2>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className={labelClass}>
@@ -269,7 +270,7 @@ export function PollenCheckoutForm({ business }: Props) {
 
         {/* Discount Code */}
         <section>
-          <p className={sectionHeadingClass}>Discount Code</p>
+          <h2 className={sectionHeadingClass}>Discount Code</h2>
           <div className="flex gap-2">
             <input
               type="text"
@@ -279,6 +280,9 @@ export function PollenCheckoutForm({ business }: Props) {
               }
               placeholder="SAVE20"
               autoComplete="off"
+              aria-label="Discount code"
+              aria-invalid={!!discountFieldError}
+              aria-describedby={discountFieldError ? "discount-error" : undefined}
               className={`${inputClass} flex-1`}
             />
             <button
@@ -290,17 +294,19 @@ export function PollenCheckoutForm({ business }: Props) {
               className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
               {validateDiscountMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
                 "Apply"
               )}
             </button>
           </div>
           {discountFieldError && (
-            <p className="mt-2 text-sm text-red-600">{discountFieldError}</p>
+            <p id="discount-error" role="alert" className="mt-2 text-sm text-red-600">
+              {discountFieldError}
+            </p>
           )}
           {discountCodeLabel && discountAmount > 0 && (
-            <p className="mt-2 text-sm text-green-700">
+            <p role="status" className="mt-2 text-sm text-green-700">
               Code{" "}
               <span className="font-mono font-semibold">
                 {discountCodeLabel}
@@ -313,14 +319,15 @@ export function PollenCheckoutForm({ business }: Props) {
         {/* Delivery Method */}
         {shippingConfig.offersInStorePickup && (
           <section>
-            <p className={sectionHeadingClass}>Delivery</p>
+            <h2 className={sectionHeadingClass}>Delivery</h2>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setDeliveryMethod("ship")}
+                aria-pressed={deliveryMethod === "ship"}
                 className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                   deliveryMethod === "ship"
-                    ? "bg-[#5e8b4a] text-white"
+                    ? "bg-[#215935] text-white"
                     : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
@@ -329,9 +336,10 @@ export function PollenCheckoutForm({ business }: Props) {
               <button
                 type="button"
                 onClick={() => setDeliveryMethod("pickup")}
+                aria-pressed={deliveryMethod === "pickup"}
                 className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                   deliveryMethod === "pickup"
-                    ? "bg-[#5e8b4a] text-white"
+                    ? "bg-[#215935] text-white"
                     : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
@@ -349,7 +357,7 @@ export function PollenCheckoutForm({ business }: Props) {
         {/* Shipping Address */}
         {deliveryMethod === "ship" && (
           <section>
-            <p className={sectionHeadingClass}>Shipping Address</p>
+            <h2 className={sectionHeadingClass}>Shipping Address</h2>
             <p className="mb-4 text-sm text-gray-600">
               This is sent to Stripe Checkout prefilled so you can confirm or
               edit your name, phone, and address before paying.
@@ -549,7 +557,7 @@ export function PollenCheckoutForm({ business }: Props) {
           >
             {isProcessing ? (
               <span className="flex items-center justify-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 Processing...
               </span>
             ) : (

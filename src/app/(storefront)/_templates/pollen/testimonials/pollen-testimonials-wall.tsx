@@ -39,6 +39,7 @@ export function PollenTestimonialsWall({ testimonials }: Props) {
               stroke="currentColor"
               strokeWidth={2}
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path d="M12 18.25c-1.38 0-2.5-1.12-2.5-2.5h5c0 1.38-1.12 2.5-2.5 2.5z" />
               <path
@@ -48,10 +49,10 @@ export function PollenTestimonialsWall({ testimonials }: Props) {
               />
             </svg>
           </div>
-          <p className="mb-2 text-center text-lg font-medium text-gray-600">
+          <h2 className="mb-2 text-center text-lg font-medium text-gray-600">
             No testimonials yet.
-          </p>
-          <p className="max-w-md text-center text-sm text-gray-400">
+          </h2>
+          <p className="max-w-md text-center text-sm text-gray-600">
             When reviews are posted, you’ll see them here!
           </p>
         </div>

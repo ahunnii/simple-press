@@ -82,7 +82,11 @@ export function SledgeCartContents({ business }: Props) {
                   {Math.round(progress * 100)}%
                 </span>
               </div>
-              <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-[var(--sl-cream)]">
+              {/* N-4: progress bar is decorative — adjacent text conveys progress */}
+              <div
+                aria-hidden="true"
+                className="relative h-1.5 w-full overflow-hidden rounded-full bg-[var(--sl-cream)]"
+              >
                 <div
                   className="absolute inset-y-0 left-0 rounded-full bg-[var(--sl-coral)] transition-all"
                   style={{
@@ -98,7 +102,11 @@ export function SledgeCartContents({ business }: Props) {
       <section className={cn(SLEDGE_PAGE_CONTAINER, SLEDGE_PAGE_CONTENT_PADDING)}>
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
           <div className="min-w-0">
-            <div className="sl-cart-item-grid mb-0 hidden items-center gap-4 border-b border-[var(--sl-border)] pb-3 sm:grid">
+            {/* M-4: visual column headers are decorative — sr-only labels in cells carry semantics */}
+            <div
+              aria-hidden="true"
+              className="sl-cart-item-grid mb-0 hidden items-center gap-4 border-b border-[var(--sl-border)] pb-3 sm:grid"
+            >
               <span />
               <span className="sl-eyebrow font-sans text-xs tracking-[0.18em] uppercase">
                 Item

@@ -118,7 +118,7 @@ export async function PollenServicesPage({ business }: Props) {
                   })}
                 >
                   {f["pollen.services.contact-button-text"]}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </div>
             </FadeIn>
@@ -157,7 +157,7 @@ export async function PollenServicesPage({ business }: Props) {
             >
               <Image
                 src={f["pollen.services.faq-image"]!}
-                alt="Potted plant with green leaves"
+                alt=""
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -195,7 +195,7 @@ export async function PollenServicesPage({ business }: Props) {
                     size: "lg",
                     variant: "outline",
                     className:
-                      "border-[#374151] text-[#374151] hover:bg-[#374151]",
+                      "border-[#374151] text-[#374151] hover:bg-[#374151] hover:text-white",
                   })}
                 >
                   {f["pollen.services.faq-contact-button-text"]}
@@ -238,10 +238,11 @@ export async function PollenServicesPage({ business }: Props) {
                     rel="noopener noreferrer"
                     className="flex h-full items-center gap-3 rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
                   >
-                    <ExternalLink className="h-5 w-5 shrink-0 text-[#5e8b4a]" />
+                    <ExternalLink className="h-5 w-5 shrink-0 text-[#5e8b4a]" aria-hidden="true" />
                     <span className="font-medium text-[#374151]">
                       {resource.name}
                     </span>
+                    <span className="sr-only">(opens in new tab)</span>
                   </Link>
                 </StaggerItem>
               ))}

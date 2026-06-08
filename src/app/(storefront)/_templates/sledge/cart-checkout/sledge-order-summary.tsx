@@ -48,8 +48,12 @@ export function SledgeOrderSummary({
                 className="object-cover"
                 sizes="44px"
               />
+              {/* N-1: quantity badge duplicates the visible "Qty: n" text below */}
               {item.quantity > 1 && (
-                <span className="absolute right-0.5 bottom-0.5 rounded-sm bg-[var(--sl-coral)] px-1 font-sans text-[8px] text-white">
+                <span
+                  aria-hidden="true"
+                  className="absolute right-0.5 bottom-0.5 rounded-sm bg-[var(--sl-coral)] px-1 font-sans text-[8px] text-white"
+                >
                   ×{item.quantity}
                 </span>
               )}
@@ -86,12 +90,13 @@ export function SledgeOrderSummary({
           </span>
         </div>
 
+        {/* C-3: green-600 → green-700 for sufficient contrast */}
         {discountAmount > 0 ? (
           <div className="flex items-baseline justify-between gap-4">
-            <span className="font-sans text-xs tracking-[0.14em] uppercase text-green-600">
+            <span className="font-sans text-xs tracking-[0.14em] uppercase text-green-700">
               Discount
             </span>
-            <span className="font-sans text-sm tracking-[0.04em] text-green-600">
+            <span className="font-sans text-sm tracking-[0.04em] text-green-700">
               −{formatPrice(discountAmount)}
             </span>
           </div>

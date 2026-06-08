@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 type SpotlightProps = {
   gradientFirst?: string;
@@ -25,6 +25,8 @@ export const Spotlight = ({
   duration = 7,
   xOffset = 100,
 }: SpotlightProps = {}) => {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <motion.div
       initial={{
@@ -34,14 +36,14 @@ export const Spotlight = ({
         opacity: 1,
       }}
       transition={{
-        duration: 1.5,
+        duration: shouldReduceMotion ? 0 : 1.5,
       }}
       className="pointer-events-none absolute inset-0 h-full w-full"
     >
       <motion.div
-        animate={{
-          x: [0, xOffset, 0],
-        }}
+        animate={
+          shouldReduceMotion ? undefined : { x: [0, xOffset, 0] }
+        }
         transition={{
           duration,
           repeat: Infinity,
@@ -82,9 +84,9 @@ export const Spotlight = ({
       </motion.div>
 
       <motion.div
-        animate={{
-          x: [0, -xOffset, 0],
-        }}
+        animate={
+          shouldReduceMotion ? undefined : { x: [0, -xOffset, 0] }
+        }
         transition={{
           duration,
           repeat: Infinity,

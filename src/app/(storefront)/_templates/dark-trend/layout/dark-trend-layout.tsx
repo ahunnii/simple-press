@@ -8,10 +8,14 @@ export function DarkTrendLayout({
   children,
 }: DefaultLayoutTemplateProps) {
   return (
-    <main className="dark-trend bg-background text-foreground min-h-screen font-sans antialiased">
+    <div className="dark-trend bg-background text-foreground min-h-screen font-sans antialiased">
+      {/* Skip link — visible on keyboard focus, hidden otherwise (WCAG 2.4.1) */}
+      <a href="#main-content" className="dt-skip-link">
+        Skip to main content
+      </a>
       <DarkTrendHeader business={business} />
-      {children}
+      <main id="main-content">{children}</main>
       <DarkTrendFooter business={business} />
-    </main>
+    </div>
   );
 }

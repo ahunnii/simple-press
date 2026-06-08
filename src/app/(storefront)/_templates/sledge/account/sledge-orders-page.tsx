@@ -42,12 +42,14 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
         {orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-6 py-20 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-sm bg-[var(--sl-cream)] text-[var(--sl-coral)]">
-              <Package className="size-6" />
+              {/* N-1: decorative icon */}
+              <Package className="size-6" aria-hidden="true" />
             </div>
             <div>
-              <p className="sl-page-title-md font-heading text-[var(--sl-coral)] uppercase">
+              {/* N-5: only heading in empty state → h2; C-3: large heading → AA accent token */}
+              <h2 className="sl-page-title-md font-heading text-[var(--sl-coral-aa)] uppercase">
                 No orders yet
-              </p>
+              </h2>
               <p className="sl-eyebrow mt-2 font-sans text-sm">
                 When you place an order, it will appear here.
               </p>
@@ -58,7 +60,11 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
           </div>
         ) : (
           <div className="flex flex-col">
-            <div className="mb-0 hidden grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 border-b border-[var(--sl-border)] pb-3 md:grid">
+            {/* M-4: visual column headers are decorative — sr-only labels in cells carry semantics */}
+            <div
+              aria-hidden="true"
+              className="mb-0 hidden grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 border-b border-[var(--sl-border)] pb-3 md:grid"
+            >
               {["Order", "Items", "Date", "Status", "Total"].map((h) => (
                 <span
                   key={h}
@@ -75,8 +81,9 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
                 className="border-b border-[var(--sl-border)] py-5"
               >
                 <div className="hidden grid-cols-[auto_1fr_auto_auto_auto] items-center gap-x-4 gap-y-2 md:grid">
+                  {/* M-4: sr-only label for order number cell */}
                   <span className="font-sans text-xs tracking-[0.12em] whitespace-nowrap text-[var(--sl-ink)] uppercase">
-                    #{order.orderNumber}
+                    <span className="sr-only">Order </span>#{order.orderNumber}
                   </span>
 
                   <div className="flex min-w-0 flex-wrap gap-1.5">
@@ -100,19 +107,25 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
                     )}
                   </div>
 
+                  {/* M-4: sr-only label for date cell */}
                   <span className="sl-eyebrow font-sans text-xs tracking-[0.1em] whitespace-nowrap">
+                    <span className="sr-only">Date: </span>
                     {formatDate(order.createdAt)}
                   </span>
 
                   <StatusBadge status={order.status} />
 
                   <div className="flex flex-col items-end gap-1.5">
+                    {/* M-4: sr-only label for total cell */}
                     <span className="font-sans text-lg tracking-[0.02em] text-[var(--sl-ink)]">
+                      <span className="sr-only">Total: </span>
                       {formatPrice(order.total)}
                     </span>
+                    {/* N-2: descriptive aria-label; C-3: coral → coral-aa */}
                     <Link
                       href={`/account/orders/${order.id}`}
-                      className="font-sans text-xs tracking-[0.14em] text-[var(--sl-coral)] uppercase transition-opacity hover:opacity-60"
+                      aria-label={`Details for order #${order.orderNumber}`}
+                      className="font-sans text-xs tracking-[0.14em] text-[var(--sl-coral-aa)] uppercase transition-opacity hover:opacity-60"
                     >
                       Details →
                     </Link>
@@ -151,9 +164,11 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
                       <span className="font-sans text-base tracking-[0.02em] text-[var(--sl-ink)]">
                         {formatPrice(order.total)}
                       </span>
+                      {/* N-2: descriptive aria-label; C-3: coral → coral-aa */}
                       <Link
                         href={`/account/orders/${order.id}`}
-                        className="font-sans text-xs tracking-[0.14em] text-[var(--sl-coral)] uppercase"
+                        aria-label={`Details for order #${order.orderNumber}`}
+                        className="font-sans text-xs tracking-[0.14em] text-[var(--sl-coral-aa)] uppercase"
                       >
                         Details →
                       </Link>

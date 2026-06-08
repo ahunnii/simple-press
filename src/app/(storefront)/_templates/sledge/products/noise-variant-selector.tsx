@@ -20,8 +20,21 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
 
+  const isAddDisabled =
+    !selectedVariant ||
+    (product.trackInventory &&
+      (selectedVariant?.inventoryQty ?? 0) === 0 &&
+      !product.allowBackorders);
+
   const handleAddToCart = () => {
     if (!selectedVariant) return;
+    // S-8: guard out-of-stock condition
+    if (
+      product.trackInventory &&
+      selectedVariant.inventoryQty === 0 &&
+      !product.allowBackorders
+    )
+      return;
     addItem(
       {
         productId: product.id,
@@ -44,11 +57,26 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
 
   return (
     <div className="space-y-5">
+      {/* S-2: sr-only live region for add-to-cart announcement */}
+      <span className="sr-only" role="status">
+        {isAdded && selectedVariant
+          ? `Added ${quantity} ${selectedVariant.name} to cart`
+          : ""}
+      </span>
+
       <div>
-        <p className="sl-eyebrow mb-3 font-sans text-xs tracking-[0.18em] uppercase">
+        <p
+          id="sledge-variant-label"
+          className="sl-eyebrow mb-3 font-sans text-xs tracking-[0.18em] uppercase"
+        >
           Select Variant
         </p>
-        <div className="flex flex-wrap gap-2">
+        {/* S-8 / variant group: wrap in group with aria-labelledby */}
+        <div
+          role="group"
+          aria-labelledby="sledge-variant-label"
+          className="flex flex-wrap gap-2"
+        >
           {product.variants.map((variant) => {
             const outOfStock =
               product.trackInventory &&
@@ -65,13 +93,16 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
                 key={variant.id}
                 type="button"
                 aria-pressed={isSelected}
+                // S-8: use aria-disabled instead of disabled so it stays focusable
+                aria-disabled={outOfStock ? "true" : undefined}
                 onClick={() => {
+                  if (outOfStock) return;
                   setSelectedVariant(variant);
                   setSelectedVariantId(variant.id);
                 }}
-                disabled={outOfStock}
                 className={cn(
-                  "rounded-sm border px-4 py-2 font-sans text-xs tracking-[0.08em] uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+                  "rounded-sm border px-4 py-2 font-sans text-xs tracking-[0.08em] uppercase transition-colors",
+                  outOfStock && "cursor-not-allowed opacity-60",
                   isSelected
                     ? "border-[var(--sl-ink)] bg-[var(--sl-ink)] text-white"
                     : "border-[var(--sl-border-input)] bg-white text-[var(--sl-ink)] hover:border-[var(--sl-ink)]",
@@ -94,7 +125,8 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
         {selectedVariant && (
-          <div className="flex items-center rounded-sm border border-[var(--sl-ink)]">
+          // S-3: wrap stepper in group with label
+          <div role="group" aria-label="Quantity" className="flex items-center rounded-sm border border-[var(--sl-ink)]">
             <button
               type="button"
               className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70"
@@ -104,7 +136,8 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
             >
               <Minus className="size-3.5" />
             </button>
-            <span className="min-w-[40px] text-center font-sans text-sm font-medium">
+            {/* S-3: announce quantity updates */}
+            <span aria-live="polite" className="min-w-[40px] text-center font-sans text-sm font-medium">
               {quantity}
             </span>
             <button
@@ -124,18 +157,15 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
           </div>
         )}
 
+        {/* S-8: aria-disabled instead of disabled for add button */}
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={
-            !selectedVariant ||
-            (product.trackInventory &&
-              (selectedVariant?.inventoryQty ?? 0) === 0 &&
-              !product.allowBackorders)
-          }
+          aria-disabled={isAddDisabled ? "true" : undefined}
           className={cn(
-            "sl-btn flex-1 disabled:cursor-not-allowed disabled:opacity-40",
-            isAdded && "bg-[var(--sl-green)]",
+            "sl-btn flex-1",
+            isAddDisabled && "cursor-not-allowed opacity-60",
+            isAdded && "bg-[var(--sl-green)] text-[var(--sl-ink)]",
           )}
         >
           {isAdded ? (

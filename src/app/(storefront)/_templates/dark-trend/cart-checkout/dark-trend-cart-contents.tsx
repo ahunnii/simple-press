@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,6 +30,16 @@ export function DarkTrendCartContents({ business: _business }: Props) {
     total,
   } = useCart();
 
+  // S-6: live region for cart mutation announcements
+  const [announcement, setAnnouncement] = useState("");
+  const announcementTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const announce = useCallback((msg: string) => {
+    setAnnouncement(msg);
+    if (announcementTimeout.current) clearTimeout(announcementTimeout.current);
+    announcementTimeout.current = setTimeout(() => setAnnouncement(""), 3000);
+  }, []);
+
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -43,14 +54,15 @@ export function DarkTrendCartContents({ business: _business }: Props) {
   if (items.length === 0) {
     return (
       <div className="py-16 text-center">
-        <ShoppingBag className="mx-auto mb-4 h-16 w-16 text-white/40" />
+        {/* N-1: decorative icon */}
+        <ShoppingBag aria-hidden="true" className="mx-auto mb-4 h-16 w-16 text-white/40" />
         <h2 className="mb-2 text-2xl font-semibold text-white">
           Your cart is empty
         </h2>
         <p className="mb-8 text-white/70">Add some products to get started!</p>
         <Button
           asChild
-          className="bg-violet-500 text-white hover:bg-violet-600"
+          className="bg-violet-600 text-white hover:bg-violet-700"
         >
           <Link href="/shop">Shop Products</Link>
         </Button>
@@ -60,6 +72,15 @@ export function DarkTrendCartContents({ business: _business }: Props) {
 
   return (
     <div className="grid gap-8 lg:grid-cols-3">
+      {/* S-6: visually-hidden live region */}
+      <p
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcement}
+      </p>
+
       {/* Cart Items */}
       <div className="space-y-6 lg:col-span-2">
         {/* Table Header - Desktop Only */}
@@ -116,14 +137,19 @@ export function DarkTrendCartContents({ business: _business }: Props) {
                   {formatPrice(item.price)}
                 </p>
 
-                {/* Remove button - mobile */}
+                {/* Remove button - mobile (M-9 touch target: h-10 w-10 via size) */}
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeItem(item.productId, item.variantId)}
+                  onClick={() => {
+                    removeItem(item.productId, item.variantId);
+                    announce(`Removed ${item.productName} from cart`);
+                  }}
+                  aria-label={`Remove ${item.productName} from cart`}
                   className="mt-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 lg:hidden"
                 >
-                  <Trash2 className="mr-1 h-4 w-4" />
+                  {/* N-1: decorative icon */}
+                  <Trash2 aria-hidden="true" className="mr-1 h-4 w-4" />
                   Remove
                 </Button>
               </div>
@@ -135,47 +161,69 @@ export function DarkTrendCartContents({ business: _business }: Props) {
                 Quantity:
               </span>
               <div className="inline-flex items-center gap-2 rounded-md bg-zinc-900/50 px-2 py-1">
+                {/* C-3 + M-9: labelled, 40px touch target */}
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => decrementItem(item.productId, item.variantId)}
-                  className="h-8 w-8 rounded-sm bg-zinc-800 p-0 text-white/60 hover:bg-zinc-700 hover:text-white"
+                  onClick={() => {
+                    decrementItem(item.productId, item.variantId);
+                    const newQty = Math.max(1, item.quantity - 1);
+                    announce(`Quantity updated to ${newQty}`);
+                  }}
+                  aria-label={`Decrease quantity of ${item.productName}`}
+                  className="h-10 w-10 rounded-sm bg-zinc-800 p-0 text-white/60 hover:bg-zinc-700 hover:text-white"
                 >
-                  <Minus className="h-4 w-4" />
+                  {/* N-1: decorative icon */}
+                  <Minus aria-hidden="true" className="h-4 w-4" />
                 </Button>
 
+                {/* C-3: labelled quantity input */}
                 <Input
                   type="number"
                   min="1"
                   max={item.maxInventory ?? 999}
                   value={item.quantity}
+                  aria-label={`Quantity for ${item.productName}`}
                   onChange={(e) => {
                     const qty = parseInt(e.target.value);
                     if (!isNaN(qty)) {
                       updateQuantity(item.productId, item.variantId, qty);
+                      announce(`Quantity updated to ${qty}`);
                     }
                   }}
                   className="h-8 w-14 border-none bg-transparent text-center text-white"
                 />
 
+                {/* C-3 + M-9: labelled, 40px touch target */}
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => incrementItem(item.productId, item.variantId)}
-                  className="h-8 w-8 rounded-sm bg-zinc-800 p-0 text-white/60 hover:bg-zinc-700 hover:text-white"
+                  onClick={() => {
+                    incrementItem(item.productId, item.variantId);
+                    const newQty = item.quantity + 1;
+                    announce(`Quantity updated to ${newQty}`);
+                  }}
+                  aria-label={`Increase quantity of ${item.productName}`}
+                  className="h-10 w-10 rounded-sm bg-zinc-800 p-0 text-white/60 hover:bg-zinc-700 hover:text-white"
                 >
-                  <Plus className="h-4 w-4" />
+                  {/* N-1: decorative icon */}
+                  <Plus aria-hidden="true" className="h-4 w-4" />
                 </Button>
               </div>
 
-              {/* Remove button - desktop */}
+              {/* Remove button - desktop (C-3) */}
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => removeItem(item.productId, item.variantId)}
+                onClick={() => {
+                  removeItem(item.productId, item.variantId);
+                  announce(`Removed ${item.productName} from cart`);
+                }}
+                aria-label={`Remove ${item.productName} from cart`}
                 className="ml-2 hidden text-red-400 hover:bg-red-500/10 hover:text-red-300 lg:inline-flex"
               >
-                <Trash2 className="h-4 w-4" />
+                {/* N-1: decorative icon */}
+                <Trash2 aria-hidden="true" className="h-4 w-4" />
               </Button>
             </div>
 
@@ -188,25 +236,6 @@ export function DarkTrendCartContents({ business: _business }: Props) {
             </div>
           </div>
         ))}
-
-        {/* Cart Actions */}
-        {/* <div className="flex flex-col gap-4 pt-4 sm:flex-row sm:justify-between">
-          <div className="flex gap-4">
-            <Input
-              placeholder="Coupon code"
-              className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-            />
-            <Button className="bg-violet-500 font-medium text-white hover:bg-violet-600">
-              Apply coupon
-            </Button>
-          </div>
-          <Button
-            onClick={() => clearCart()}
-            className="border border-white/60 bg-transparent font-medium text-white hover:bg-white/10"
-          >
-            Clear Cart
-          </Button>
-        </div> */}
       </div>
 
       {/* Cart Totals */}
@@ -222,17 +251,6 @@ export function DarkTrendCartContents({ business: _business }: Props) {
               </span>
             </div>
 
-            {/* <div className="border-b border-white/10 pb-4"> */}
-
-            {/* <p className="text-sm text-white/60">Free shipping</p>
-              <p className="text-sm text-white/60">
-                <span className="font-medium">Shipping to</span> MI.
-              </p>
-              <button className="mt-2 text-sm text-white/60 underline hover:text-white">
-                Change address
-              </button> */}
-            {/* </div> */}
-
             <div className="flex justify-between text-white/80">
               <span>Shipping</span>
               <span className="font-semibold text-white">
@@ -240,20 +258,16 @@ export function DarkTrendCartContents({ business: _business }: Props) {
               </span>
             </div>
 
-            {/* <div className="flex justify-between text-white/80">
-              <span>Tax</span>
-              <span className="font-semibold text-white">$0.00</span>
-            </div> */}
-
             <div className="flex justify-between border-t border-white/20 pt-4 text-lg font-bold text-white">
               <span>Total</span>
               <span>{formatPrice(total)}</span>
             </div>
           </div>
 
+          {/* S-11: violet-600 */}
           <Button
             onClick={handleCheckout}
-            className="w-full bg-violet-500 py-6 text-base font-semibold text-white hover:bg-violet-600"
+            className="w-full bg-violet-600 py-6 text-base font-semibold text-white hover:bg-violet-700"
             size="lg"
           >
             Proceed to checkout

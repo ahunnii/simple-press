@@ -28,7 +28,7 @@ export function PollenAccountLayout({ children, heading }: Props) {
     <PageTransition>
       <section className="bg-[#f0f7ec] pt-44 pb-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="mb-2 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
+          <p className="mb-2 text-sm font-semibold tracking-wider text-[#5e7747] uppercase">
             Account
           </p>
           <h1 className="text-3xl font-bold text-[#374151]">{heading}</h1>
@@ -47,14 +47,15 @@ export function PollenAccountLayout({ children, heading }: Props) {
               <Link
                 key={href}
                 href={href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
                   active
-                    ? "bg-[#5e8b4a] text-white"
+                    ? "bg-[#215935] text-white"
                     : "bg-gray-100 text-[#374151] hover:bg-gray-200",
                 )}
               >
-                <Icon className="h-4 w-4" aria-hidden />
+                <Icon className="h-4 w-4" aria-hidden="true" />
                 {label}
               </Link>
             );
@@ -72,14 +73,15 @@ export function PollenAccountLayout({ children, heading }: Props) {
                   <li key={href}>
                     <Link
                       href={href}
+                      aria-current={active ? "page" : undefined}
                       className={cn(
                         "flex items-center gap-3 rounded-lg border-l-2 py-2.5 pr-4 pl-3 text-sm font-medium transition-colors",
                         active
-                          ? "border-[#5e8b4a] bg-[#5e8b4a]/10 text-[#5e8b4a]"
+                          ? "border-[#5e8b4a] bg-[#5e8b4a]/10 text-[#215935]"
                           : "border-transparent text-[#4b5563] hover:bg-gray-100 hover:text-[#374151]",
                       )}
                     >
-                      <Icon className="h-4 w-4 shrink-0" aria-hidden />
+                      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                       {label}
                     </Link>
                   </li>

@@ -78,7 +78,11 @@ export function SledgeCartSummary({ shippingConfig }: Props) {
               {Math.round(progress * 100)}%
             </span>
           </div>
-          <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-[var(--sl-cream)]">
+          {/* N-4: progress bar is decorative — adjacent text conveys progress */}
+          <div
+            aria-hidden="true"
+            className="relative h-1.5 w-full overflow-hidden rounded-full bg-[var(--sl-cream)]"
+          >
             <div
               className="absolute inset-y-0 left-0 rounded-full bg-[var(--sl-coral)] transition-all"
               style={{
@@ -114,7 +118,11 @@ export function SledgeCartSummary({ shippingConfig }: Props) {
       <div className="grid grid-cols-1 gap-3 px-6 pb-6">
         {REASSURANCE.map((note) => (
           <div key={note.icon} className="flex items-start gap-2.5">
-            <span className="flex size-[22px] flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]">
+            {/* N-1: decorative glyph */}
+            <span
+              aria-hidden="true"
+              className="flex size-[22px] flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]"
+            >
               {note.icon}
             </span>
             <p className="font-sans text-xs leading-relaxed tracking-[0.08em] text-[var(--sl-ink-soft)] uppercase">

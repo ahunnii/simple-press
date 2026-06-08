@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
@@ -33,6 +33,8 @@ export function SledgeOrderConfirmation({ business }: Props) {
     payment_status: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  // M-11: ref for focusing the confirmation heading when order loads
+  const h1Ref = useRef<HTMLHeadingElement>(null);
 
   const sessionId = searchParams.get("session_id");
 
@@ -63,10 +65,21 @@ export function SledgeOrderConfirmation({ business }: Props) {
     void fetchOrderDetails();
   }, [sessionId, clearCart]);
 
+  // M-11: move focus to the confirmation h1 once order details are ready
+  useEffect(() => {
+    if (!loading && sessionId && h1Ref.current) {
+      h1Ref.current.focus();
+    }
+  }, [loading, sessionId]);
+
   if (loading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center bg-white">
-        <p className="sl-eyebrow font-sans text-sm tracking-[0.12em] uppercase">
+        {/* M-11: live region so AT announces loading state */}
+        <p
+          role="status"
+          className="sl-eyebrow font-sans text-sm tracking-[0.12em] uppercase"
+        >
           Confirming your order…
         </p>
       </div>
@@ -76,9 +89,10 @@ export function SledgeOrderConfirmation({ business }: Props) {
   if (!sessionId) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-6 bg-white px-7 text-center">
-        <p className="sl-tab-heading uppercase text-[var(--sl-coral)] tracking-[0.04em] leading-none">
+        {/* N-5: only heading in this state → h1; C-3: large heading → AA accent token */}
+        <h1 className="sl-tab-heading uppercase text-[var(--sl-coral-aa)] tracking-[0.04em] leading-none">
           No order found
-        </p>
+        </h1>
         <Link href="/shop" className="sl-btn text-xs">
           Browse Shop →
         </Link>
@@ -97,7 +111,12 @@ export function SledgeOrderConfirmation({ business }: Props) {
           <p className="sl-eyebrow mb-3 font-sans text-xs tracking-[0.18em] uppercase">
             Thank you · {business.name}
           </p>
-          <h1 className="sl-page-title-checkout font-heading uppercase text-[var(--sl-orange)]">
+          {/* M-11: tabIndex={-1} + ref so we can focus on load */}
+          <h1
+            ref={h1Ref}
+            tabIndex={-1}
+            className="sl-page-title-checkout font-heading uppercase text-[var(--sl-orange)] outline-none"
+          >
             Order Placed!
           </h1>
           <p className="sl-eyebrow mx-auto mt-5 max-w-lg font-sans text-sm leading-relaxed md:text-base">
@@ -122,7 +141,8 @@ export function SledgeOrderConfirmation({ business }: Props) {
         <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-2">
           {orderDetails?.customer_email && (
             <div className="sl-card-panel sl-card-shadow rounded-sm p-6">
-              <h2 className="mb-3 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral)] uppercase">
+              {/* M-3: coral on white at 10px → coral-aa */}
+              <h2 className="mb-3 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral-aa)] uppercase">
                 Confirmation sent to
               </h2>
               <p className="font-sans text-sm text-[var(--sl-ink)]">
@@ -132,13 +152,18 @@ export function SledgeOrderConfirmation({ business }: Props) {
           )}
 
           <div className="sl-card-panel sl-card-shadow rounded-sm p-6 md:col-span-2">
-            <h2 className="mb-5 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral)] uppercase">
+            {/* M-3: coral on white at 10px → coral-aa */}
+            <h2 className="mb-5 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral-aa)] uppercase">
               What happens next
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               {NEXT_STEPS.map((step) => (
                 <div key={step.icon} className="flex items-start gap-3">
-                  <span className="flex size-6 flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]">
+                  {/* N-1: decorative glyph */}
+                  <span
+                    aria-hidden="true"
+                    className="flex size-6 flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]"
+                  >
                     {step.icon}
                   </span>
                   <p className="font-sans text-sm leading-relaxed text-[var(--sl-ink-soft)]">

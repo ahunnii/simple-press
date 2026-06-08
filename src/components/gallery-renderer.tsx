@@ -84,6 +84,15 @@ function OverlayCaption({
   );
 }
 
+/** Returns the accessible label for an image button. */
+function imageButtonLabel(
+  image: { altText?: string | null; caption?: string | null },
+  index: number,
+): string {
+  const name = image.altText ?? image.caption ?? `image ${index + 1}`;
+  return `View ${name} larger`;
+}
+
 export function GalleryRenderer({
   gallery,
   showTitle = false,
@@ -153,6 +162,9 @@ export function GalleryRenderer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [lightboxIndex]);
 
+  const currentImage =
+    lightboxIndex !== null ? gallery.images[lightboxIndex] : null;
+
   return (
     <div className="gallery-container">
       {/* Title & Description */}
@@ -170,49 +182,47 @@ export function GalleryRenderer({
       {renderGallery()}
 
       {/* Lightbox */}
-      {gallery.enableLightbox && lightboxIndex !== null && (
+      {gallery.enableLightbox && lightboxIndex !== null && currentImage && (
         <Dialog open={true} onOpenChange={closeLightbox}>
           <DialogContent className="max-w-7xl p-0">
             <DialogTitle className="sr-only">
-              {gallery.images[lightboxIndex]!.altText ??
-                gallery.images[lightboxIndex]!.caption ??
-                gallery.name ??
-                "Image lightbox"}
+              {`Image ${lightboxIndex + 1} of ${gallery.images.length}${currentImage.altText ?? currentImage.caption ?? gallery.name ? `: ${currentImage.altText ?? currentImage.caption ?? gallery.name}` : ""}`}
             </DialogTitle>
             <div className="relative">
               <img
-                src={gallery.images[lightboxIndex]!.url}
-                alt={gallery.images[lightboxIndex]!.altText ?? ""}
+                src={currentImage.url}
+                alt={currentImage.altText ?? ""}
                 className="h-auto max-h-[90vh] w-full object-contain"
               />
 
-              {gallery.showCaptions &&
-                gallery.images[lightboxIndex]!.caption && (
-                  <div className="absolute right-0 bottom-0 left-0 bg-black/70 p-4 text-white">
-                    {gallery.images[lightboxIndex]!.caption}
-                  </div>
-                )}
+              {gallery.showCaptions && currentImage.caption && (
+                <div className="absolute right-0 bottom-0 left-0 bg-black/70 p-4 text-white">
+                  {currentImage.caption}
+                </div>
+              )}
 
               {/* Navigation */}
               <button
                 onClick={prevImage}
+                aria-label="Previous image"
                 className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
               >
                 ←
               </button>
               <button
                 onClick={nextImage}
+                aria-label="Next image"
                 className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
               >
                 →
               </button>
 
               <button
-                title="Close lightbox"
+                aria-label="Close lightbox"
                 onClick={closeLightbox}
                 className="absolute top-4 right-4 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
               >
-                <X className="h-6 w-6" />
+                <X className="h-6 w-6" aria-hidden="true" />
               </button>
             </div>
           </DialogContent>
@@ -232,6 +242,7 @@ function GridLayout({ gallery, onImageClick }: LayoutProps) {
   const captionStyle = gallery.captionStyle ?? "overlay";
   const isBelow = captionStyle === "below";
   const ratio = aspectClass(gallery.aspectRatio);
+  const interactive = gallery.enableLightbox;
 
   return (
     <div
@@ -256,23 +267,39 @@ function GridLayout({ gallery, onImageClick }: LayoutProps) {
         // the below-caption text isn't clipped.
         <div
           key={image.id}
-          className={cn(isBelow ? "flex cursor-pointer flex-col" : "", "group")}
-          onClick={isBelow ? () => onImageClick(index) : undefined}
+          className={cn(isBelow ? "flex flex-col" : "", "group")}
         >
           {/* Image wrapper — always rounded + overflow-hidden */}
-          <div
-            className={`relative cursor-pointer overflow-hidden rounded-lg transition-transform duration-200 group-hover:scale-105 ${ratio}`}
-            onClick={!isBelow ? () => onImageClick(index) : undefined}
-          >
-            <img
-              src={image.url}
-              alt={image.altText ?? ""}
-              className="h-full w-full rounded-lg object-cover"
-            />
-            {gallery.showCaptions && !isBelow && (
-              <OverlayCaption caption={image.caption} style={captionStyle} />
-            )}
-          </div>
+          {interactive ? (
+            <button
+              type="button"
+              aria-label={imageButtonLabel(image, index)}
+              className={`relative w-full cursor-pointer overflow-hidden rounded-lg transition-transform duration-200 group-hover:scale-105 ${ratio}`}
+              onClick={() => onImageClick(index)}
+            >
+              <img
+                src={image.url}
+                alt={image.altText ?? ""}
+                className="h-full w-full rounded-lg object-cover"
+              />
+              {gallery.showCaptions && !isBelow && (
+                <OverlayCaption caption={image.caption} style={captionStyle} />
+              )}
+            </button>
+          ) : (
+            <div
+              className={`relative overflow-hidden rounded-lg ${ratio}`}
+            >
+              <img
+                src={image.url}
+                alt={image.altText ?? ""}
+                className="h-full w-full rounded-lg object-cover"
+              />
+              {gallery.showCaptions && !isBelow && (
+                <OverlayCaption caption={image.caption} style={captionStyle} />
+              )}
+            </div>
+          )}
           {/* Below-image caption */}
           {gallery.showCaptions && isBelow && image.caption && (
             <p className="mt-1 text-sm text-gray-700">{image.caption}</p>
@@ -287,6 +314,7 @@ function GridLayout({ gallery, onImageClick }: LayoutProps) {
 function MasonryLayout({ gallery, onImageClick }: LayoutProps) {
   const captionStyle = gallery.captionStyle ?? "overlay";
   const isBelow = captionStyle === "below";
+  const interactive = gallery.enableLightbox;
 
   return (
     <div
@@ -298,22 +326,39 @@ function MasonryLayout({ gallery, onImageClick }: LayoutProps) {
       {gallery.images.map((image, index: number) => (
         <div
           key={image.id}
-          className="group cursor-pointer break-inside-avoid"
+          className="group break-inside-avoid"
           style={{ marginBottom: `${gallery.gap}px` }}
-          onClick={() => onImageClick(index)}
         >
           {/* Inner wrapper clips the hover-scale; radius on the img itself
               fixes the composited-layer rounded-corner bug in Chrome/Safari */}
-          <div className="relative overflow-hidden rounded-lg">
-            <img
-              src={image.url}
-              alt={image.altText ?? ""}
-              className="h-auto w-full rounded-[inherit] transition-transform group-hover:scale-110"
-            />
-            {gallery.showCaptions && !isBelow && (
-              <OverlayCaption caption={image.caption} style={captionStyle} />
-            )}
-          </div>
+          {interactive ? (
+            <button
+              type="button"
+              aria-label={imageButtonLabel(image, index)}
+              className="relative w-full cursor-pointer overflow-hidden rounded-lg"
+              onClick={() => onImageClick(index)}
+            >
+              <img
+                src={image.url}
+                alt={image.altText ?? ""}
+                className="h-auto w-full rounded-[inherit] transition-transform group-hover:scale-110"
+              />
+              {gallery.showCaptions && !isBelow && (
+                <OverlayCaption caption={image.caption} style={captionStyle} />
+              )}
+            </button>
+          ) : (
+            <div className="relative overflow-hidden rounded-lg">
+              <img
+                src={image.url}
+                alt={image.altText ?? ""}
+                className="h-auto w-full rounded-[inherit] transition-transform group-hover:scale-110"
+              />
+              {gallery.showCaptions && !isBelow && (
+                <OverlayCaption caption={image.caption} style={captionStyle} />
+              )}
+            </div>
+          )}
           {gallery.showCaptions && isBelow && image.caption && (
             <p className="mt-1 text-sm text-gray-700">{image.caption}</p>
           )}
@@ -344,18 +389,28 @@ function CarouselLayout({
 
   return (
     <div className="relative">
-      <div
-        className={`aspect-video overflow-hidden rounded-lg ${
-          gallery.enableLightbox ? "cursor-pointer" : ""
-        }`}
-        onClick={() => gallery.enableLightbox && onImageClick(currentIndex)}
-      >
-        <img
-          src={currentImage.url}
-          alt={currentImage.altText ?? ""}
-          className="h-full w-full object-cover transition-transform duration-300"
-        />
-      </div>
+      {gallery.enableLightbox ? (
+        <button
+          type="button"
+          aria-label={imageButtonLabel(currentImage, currentIndex)}
+          className="aspect-video w-full cursor-pointer overflow-hidden rounded-lg"
+          onClick={() => onImageClick(currentIndex)}
+        >
+          <img
+            src={currentImage.url}
+            alt={currentImage.altText ?? ""}
+            className="h-full w-full object-cover transition-transform duration-300"
+          />
+        </button>
+      ) : (
+        <div className="aspect-video overflow-hidden rounded-lg">
+          <img
+            src={currentImage.url}
+            alt={currentImage.altText ?? ""}
+            className="h-full w-full object-cover transition-transform duration-300"
+          />
+        </div>
+      )}
 
       {/* Carousel caption always renders below the image */}
       {gallery.showCaptions && currentImage.caption && (
@@ -368,12 +423,14 @@ function CarouselLayout({
         <>
           <button
             onClick={prev}
+            aria-label="Previous image"
             className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
           >
             ←
           </button>
           <button
             onClick={next}
+            aria-label="Next image"
             className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
           >
             →
@@ -383,7 +440,8 @@ function CarouselLayout({
             {gallery.images.map((_, index: number) => (
               <button
                 key={index}
-                title={`Go to image ${index + 1}`}
+                aria-label={`Go to image ${index + 1}`}
+                aria-pressed={index === currentIndex}
                 onClick={() => setCurrentIndex(index)}
                 className={`h-2 w-2 rounded-full transition-colors ${
                   index === currentIndex ? "bg-gray-900" : "bg-gray-300"
@@ -402,6 +460,7 @@ function CollageLayout({ gallery, onImageClick }: LayoutProps) {
   const gap = gallery.gap;
   const captionStyle = gallery.captionStyle ?? "overlay";
   const isBelow = captionStyle === "below";
+  const interactive = gallery.enableLightbox;
 
   return (
     <div
@@ -414,33 +473,54 @@ function CollageLayout({ gallery, onImageClick }: LayoutProps) {
       {gallery.images.map((image, index: number) => (
         <div
           key={image.id}
-          className={isBelow ? "flex cursor-pointer flex-col" : ""}
+          className={isBelow ? "flex flex-col" : ""}
           style={
             index === 0
               ? { gridColumn: "span 2", gridRow: "span 2" }
               : undefined
           }
-          onClick={isBelow ? () => onImageClick(index) : undefined}
         >
           {/* radius on the img itself fixes the composited-layer rounded-corner bug */}
-          <div
-            className="group relative cursor-pointer overflow-hidden rounded-lg"
-            style={
-              index === 0
-                ? { aspectRatio: "1", height: "100%" }
-                : { aspectRatio: "1/1" }
-            }
-            onClick={!isBelow ? () => onImageClick(index) : undefined}
-          >
-            <img
-              src={image.url}
-              alt={image.altText ?? ""}
-              className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
-            />
-            {gallery.showCaptions && !isBelow && (
-              <OverlayCaption caption={image.caption} style={captionStyle} />
-            )}
-          </div>
+          {interactive ? (
+            <button
+              type="button"
+              aria-label={imageButtonLabel(image, index)}
+              className="group relative w-full cursor-pointer overflow-hidden rounded-lg"
+              style={
+                index === 0
+                  ? { aspectRatio: "1", height: "100%" }
+                  : { aspectRatio: "1/1" }
+              }
+              onClick={() => onImageClick(index)}
+            >
+              <img
+                src={image.url}
+                alt={image.altText ?? ""}
+                className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
+              />
+              {gallery.showCaptions && !isBelow && (
+                <OverlayCaption caption={image.caption} style={captionStyle} />
+              )}
+            </button>
+          ) : (
+            <div
+              className="group relative overflow-hidden rounded-lg"
+              style={
+                index === 0
+                  ? { aspectRatio: "1", height: "100%" }
+                  : { aspectRatio: "1/1" }
+              }
+            >
+              <img
+                src={image.url}
+                alt={image.altText ?? ""}
+                className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
+              />
+              {gallery.showCaptions && !isBelow && (
+                <OverlayCaption caption={image.caption} style={captionStyle} />
+              )}
+            </div>
+          )}
           {gallery.showCaptions && isBelow && image.caption && (
             <p className="mt-1 text-sm text-gray-700">{image.caption}</p>
           )}
@@ -456,39 +536,61 @@ function JustifiedLayout({ gallery, onImageClick }: LayoutProps) {
   const gap = gallery.gap;
   const captionStyle = gallery.captionStyle ?? "overlay";
   const isBelow = captionStyle === "below";
+  const interactive = gallery.enableLightbox;
 
   return (
     <div className="flex flex-wrap" style={{ gap: `${gap}px` }}>
       {gallery.images.map((image, index: number) => (
         <div
           key={image.id}
-          className={isBelow ? "flex cursor-pointer flex-col" : ""}
+          className={isBelow ? "flex flex-col" : ""}
           style={
             isBelow
               ? { flexGrow: 1, minWidth: "150px" }
               : { height: `${rowHeight}px`, flexGrow: 1, minWidth: "150px" }
           }
-          onClick={isBelow ? () => onImageClick(index) : undefined}
         >
           {/* radius on the img itself fixes the composited-layer rounded-corner bug */}
-          <div
-            className="group relative cursor-pointer overflow-hidden rounded-lg"
-            style={
-              isBelow
-                ? { height: `${rowHeight}px` }
-                : { height: "100%", width: "100%" }
-            }
-            onClick={!isBelow ? () => onImageClick(index) : undefined}
-          >
-            <img
-              src={image.url}
-              alt={image.altText ?? ""}
-              className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
-            />
-            {gallery.showCaptions && !isBelow && (
-              <OverlayCaption caption={image.caption} style={captionStyle} />
-            )}
-          </div>
+          {interactive ? (
+            <button
+              type="button"
+              aria-label={imageButtonLabel(image, index)}
+              className="group relative w-full cursor-pointer overflow-hidden rounded-lg"
+              style={
+                isBelow
+                  ? { height: `${rowHeight}px` }
+                  : { height: "100%", width: "100%" }
+              }
+              onClick={() => onImageClick(index)}
+            >
+              <img
+                src={image.url}
+                alt={image.altText ?? ""}
+                className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
+              />
+              {gallery.showCaptions && !isBelow && (
+                <OverlayCaption caption={image.caption} style={captionStyle} />
+              )}
+            </button>
+          ) : (
+            <div
+              className="group relative overflow-hidden rounded-lg"
+              style={
+                isBelow
+                  ? { height: `${rowHeight}px` }
+                  : { height: "100%", width: "100%" }
+              }
+            >
+              <img
+                src={image.url}
+                alt={image.altText ?? ""}
+                className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
+              />
+              {gallery.showCaptions && !isBelow && (
+                <OverlayCaption caption={image.caption} style={captionStyle} />
+              )}
+            </div>
+          )}
           {gallery.showCaptions && isBelow && image.caption && (
             <p className="mt-1 text-sm text-gray-700">{image.caption}</p>
           )}

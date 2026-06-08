@@ -30,7 +30,7 @@ export function PollenOrdersPage({ orders }: OrdersPageTemplateProps) {
         <FadeIn direction="up">
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-[#5e8b4a]/10">
-              <Package className="size-8 text-[#5e8b4a]" />
+              <Package className="size-8 text-[#5e8b4a]" aria-hidden="true" />
             </div>
             <h2 className="mb-2 text-xl font-bold text-[#374151]">
               No orders yet
@@ -40,7 +40,7 @@ export function PollenOrdersPage({ orders }: OrdersPageTemplateProps) {
             </p>
             <Link
               href="/shop"
-              className="rounded-full bg-[#5e8b4a] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              className="rounded-full bg-[#215935] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
             >
               Start Shopping
             </Link>
@@ -95,9 +95,9 @@ export function PollenOrdersPage({ orders }: OrdersPageTemplateProps) {
                   </div>
                   <Link
                     href={`/account/orders/${order.id}`}
-                    className="mt-4 inline-block text-sm font-semibold text-[#5e8b4a] hover:underline"
+                    className="mt-4 inline-block text-sm font-semibold text-[#215935] hover:underline"
                   >
-                    View Details →
+                    View Details<span className="sr-only"> for order #{order.orderNumber}</span> →
                   </Link>
                 </div>
               </div>

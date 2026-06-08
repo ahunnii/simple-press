@@ -59,8 +59,13 @@ export function SledgeProductActions({
 
   return (
     <div className="flex flex-col gap-3">
+      {/* S-2: sr-only live region to announce add-to-cart */}
+      <span className="sr-only" role="status">
+        {isAdded ? `${product.name} added to cart` : ""}
+      </span>
+
       {showStockCount && (
-        <p className="sl-eyebrow font-sans text-xs tracking-[0.14em] text-[var(--sl-coral)] uppercase">
+        <p className="sl-eyebrow font-sans text-xs tracking-[0.14em] text-[var(--sl-coral-aa)] uppercase">
           {stockQty} in stock
         </p>
       )}
@@ -75,7 +80,8 @@ export function SledgeProductActions({
 
       {inStock && canAddMore && (
         <div className="flex items-stretch gap-3">
-          <div className="flex items-center rounded-sm border border-[var(--sl-ink)]">
+          {/* S-3: group wrapper with accessible label */}
+          <div role="group" aria-label="Quantity" className="flex items-center rounded-sm border border-[var(--sl-ink)]">
             <button
               type="button"
               className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70"
@@ -85,7 +91,8 @@ export function SledgeProductActions({
             >
               <Minus className="size-3.5" />
             </button>
-            <span className="min-w-[40px] text-center font-sans text-sm font-medium">
+            {/* S-3: announce quantity changes */}
+            <span aria-live="polite" className="min-w-[40px] text-center font-sans text-sm font-medium">
               {quantity}
             </span>
             <button
@@ -101,7 +108,10 @@ export function SledgeProductActions({
           <button
             type="button"
             onClick={addToCart}
-            className={cn("sl-btn flex-1", isAdded && "bg-[var(--sl-green)]")}
+            className={cn(
+              "sl-btn flex-1",
+              isAdded && "bg-[var(--sl-green)] text-[var(--sl-ink)]",
+            )}
           >
             {isAdded ? (
               <>
@@ -116,15 +126,17 @@ export function SledgeProductActions({
       )}
 
       {inStock && !canAddMore && (
-        <p className="sl-eyebrow font-sans text-xs tracking-[0.12em] text-[var(--sl-coral)] uppercase">
+        <p className="sl-eyebrow font-sans text-xs tracking-[0.12em] text-[var(--sl-coral-aa)] uppercase">
           Maximum available quantity in cart
         </p>
       )}
 
+      {/* S-8: use aria-disabled instead of disabled so it stays focusable */}
       {!inStock && (
         <button
           type="button"
-          disabled
+          aria-disabled="true"
+          onClick={() => {/* no-op: item is sold out */}}
           className="w-full cursor-not-allowed rounded-sm border border-[var(--sl-border-input)] py-3 font-sans text-xs tracking-[0.16em] text-[var(--sl-ink-soft)] uppercase"
         >
           Sold Out

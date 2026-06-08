@@ -125,10 +125,14 @@ export function DarkTrendOrderDetailPage({
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-purple-400 hover:underline"
                       >
-                        Track shipment <ExternalLink className="h-3 w-3" />
+                        Track shipment
+                        {/* N-1 + M-8: icon decorative; sr-only new-tab warning */}
+                        <ExternalLink aria-hidden="true" className="h-3 w-3" />
+                        <span className="sr-only">(opens in new tab)</span>
                       </a>
                     )}
-                    <p className="mt-1 text-xs text-white/40">
+                    {/* S-11: text-white/40 → text-white/60 */}
+                    <p className="mt-1 text-xs text-white/60">
                       Added {formatDate(shipment.createdAt)}
                     </p>
                   </div>

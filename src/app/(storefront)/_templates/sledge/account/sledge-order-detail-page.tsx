@@ -65,9 +65,10 @@ export function SledgeOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
           <span className="sl-eyebrow font-sans text-xs tracking-[0.12em] uppercase">
             {formatDate(order.createdAt)}
           </span>
+          {/* C-3: coral → coral-aa */}
           <Link
             href="/account/orders"
-            className="ml-auto font-sans text-xs tracking-[0.14em] text-[var(--sl-coral)] uppercase transition-opacity hover:opacity-60"
+            className="ml-auto font-sans text-xs tracking-[0.14em] text-[var(--sl-coral-aa)] uppercase transition-opacity hover:opacity-60"
           >
             ← All Orders
           </Link>
@@ -76,7 +77,11 @@ export function SledgeOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
           <div className="flex flex-col gap-6">
             <div className="sl-card-panel sl-card-shadow overflow-hidden rounded-sm bg-white">
-              <div className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-[var(--sl-border)] bg-[var(--sl-cream)] px-5 py-3">
+              {/* M-4: visual column headers are decorative — sr-only labels in cells carry semantics */}
+              <div
+                aria-hidden="true"
+                className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-[var(--sl-border)] bg-[var(--sl-cream)] px-5 py-3"
+              >
                 {["Item", "Qty", "Total"].map((h) => (
                   <span
                     key={h}
@@ -103,10 +108,13 @@ export function SledgeOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                         </p>
                       )}
                     </div>
+                    {/* M-4: sr-only labels for qty and total cells */}
                     <span className="sl-eyebrow font-sans text-xs">
+                      <span className="sr-only">Quantity: </span>
                       ×{item.quantity}
                     </span>
                     <span className="font-sans text-sm text-[var(--sl-ink)]">
+                      <span className="sr-only">Line total: </span>
                       {formatPrice(item.price * item.quantity)}
                     </span>
                   </div>
@@ -115,12 +123,13 @@ export function SledgeOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
 
               <div className="px-5 pt-2 pb-4">
                 <Row label="Subtotal" value={formatPrice(order.subtotal)} />
+                {/* C-3: green-600 → green-700 */}
                 {order.discount > 0 && (
                   <div className="flex items-baseline justify-between border-b border-[var(--sl-border-subtle)] py-2.5">
-                    <span className="font-sans text-xs tracking-[0.14em] text-green-600 uppercase">
+                    <span className="font-sans text-xs tracking-[0.14em] text-green-700 uppercase">
                       Discount
                     </span>
-                    <span className="font-sans text-sm text-green-600">
+                    <span className="font-sans text-sm text-green-700">
                       −{formatPrice(order.discount)}
                     </span>
                   </div>
@@ -142,9 +151,10 @@ export function SledgeOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
           <div className="flex flex-col gap-4">
             {addr && (
               <div className="sl-card-panel rounded-sm bg-[var(--sl-cream)] p-5">
-                <h5 className="mb-4 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral)] uppercase">
+                {/* M-3: h5 → h2; C-3: coral → coral-aa */}
+                <h2 className="mb-4 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral-aa)] uppercase">
                   Shipping Address
-                </h5>
+                </h2>
                 <address className="flex flex-col gap-1 not-italic">
                   <p className="font-sans text-sm text-[var(--sl-ink)]">
                     {addr.firstName} {addr.lastName}
@@ -168,9 +178,10 @@ export function SledgeOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
 
             {order.shipments && order.shipments.length > 0 && (
               <div className="sl-card-panel rounded-sm bg-white p-5">
-                <h5 className="mb-4 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral)] uppercase">
+                {/* M-3: h5 → h2; C-3: coral → coral-aa */}
+                <h2 className="mb-4 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral-aa)] uppercase">
                   Shipments
-                </h5>
+                </h2>
                 <div className="flex flex-col gap-4">
                   {order.shipments.map((shipment) => (
                     <div key={shipment.id} className="flex flex-col gap-1">
@@ -184,6 +195,7 @@ export function SledgeOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                           {shipment.trackingNumber}
                         </p>
                       )}
+                      {/* M-10: inform AT this link opens in a new tab */}
                       {shipment.trackingUrl && (
                         <Link
                           href={shipment.trackingUrl}
@@ -192,6 +204,7 @@ export function SledgeOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                           className="sl-btn mt-1 w-fit text-[10px]"
                         >
                           Track Shipment →
+                          <span className="sr-only"> (opens in new tab)</span>
                         </Link>
                       )}
                     </div>

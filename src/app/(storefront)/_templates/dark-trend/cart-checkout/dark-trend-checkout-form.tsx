@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CreditCard, Loader2 } from "lucide-react";
@@ -37,6 +37,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
   const shippingConfig = shippingConfigFromBusiness(business);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // M-11: ref to focus error alert when set
+  const errorAlertRef = useRef<HTMLDivElement>(null);
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -143,6 +145,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
           setError(data.error ?? "Failed to create checkout session");
         }
         setIsProcessing(false);
+        // M-11: focus error alert
+        setTimeout(() => errorAlertRef.current?.focus(), 50);
         return;
       }
 
@@ -150,6 +154,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
       if (!sessionUrl) {
         setError("Failed to create checkout session");
         setIsProcessing(false);
+        setTimeout(() => errorAlertRef.current?.focus(), 50);
         return;
       }
 
@@ -157,6 +162,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
     } catch (err: unknown) {
       setError((err as Error).message ?? "Failed to create checkout session");
       setIsProcessing(false);
+      setTimeout(() => errorAlertRef.current?.focus(), 50);
     }
   };
 
@@ -166,7 +172,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
         <p className="mb-4 text-white/70">Your cart is empty</p>
         <Button
           asChild
-          className="bg-violet-500 text-white hover:bg-violet-600"
+          className="bg-violet-600 text-white hover:bg-violet-700"
         >
           <Link href="/shop">Continue Shopping</Link>
         </Button>
@@ -179,6 +185,9 @@ export function DarkTrendCheckoutForm({ business }: Props) {
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Customer Information */}
         <div className="space-y-6 lg:col-span-2">
+          {/* M-11: required field note */}
+          <p className="text-sm text-white/70">* indicates a required field</p>
+
           {/* Contact Info */}
           <Card className="border-white/20 bg-zinc-900/30">
             <CardHeader>
@@ -237,13 +246,15 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                 <CardTitle className="text-white">Delivery</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* S-8: aria-pressed on delivery toggle buttons */}
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
                     onClick={() => setDeliveryMethod("ship")}
+                    aria-pressed={deliveryMethod === "ship"}
                     className={
                       deliveryMethod === "ship"
-                        ? "bg-violet-500 text-white hover:bg-violet-600"
+                        ? "bg-violet-600 text-white hover:bg-violet-700"
                         : "border border-white/20 bg-transparent text-white hover:bg-white/10"
                     }
                   >
@@ -252,9 +263,10 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   <Button
                     type="button"
                     onClick={() => setDeliveryMethod("pickup")}
+                    aria-pressed={deliveryMethod === "pickup"}
                     className={
                       deliveryMethod === "pickup"
-                        ? "bg-violet-500 text-white hover:bg-violet-600"
+                        ? "bg-violet-600 text-white hover:bg-violet-700"
                         : "border border-white/20 bg-transparent text-white hover:bg-white/10"
                     }
                   >
@@ -470,31 +482,35 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                 </p>
               </div>
 
+              {/* M-11: error alert with focus wrapper */}
               {error && (
-                <Alert
-                  variant="destructive"
-                  className="border-red-500/50 bg-red-500/10"
-                >
-                  <AlertDescription className="text-red-400">
-                    {error}
-                  </AlertDescription>
-                </Alert>
+                <div ref={errorAlertRef} tabIndex={-1}>
+                  <Alert
+                    variant="destructive"
+                    className="border-red-500/50 bg-red-500/10"
+                  >
+                    <AlertDescription className="text-red-400">
+                      {error}
+                    </AlertDescription>
+                  </Alert>
+                </div>
               )}
 
+              {/* S-11 + N-1: violet-600, aria-hidden icons */}
               <Button
                 type="submit"
                 disabled={isProcessing}
-                className="w-full bg-violet-500 py-6 text-base font-semibold text-white hover:bg-violet-600"
+                className="w-full bg-violet-600 py-6 text-base font-semibold text-white hover:bg-violet-700"
                 size="lg"
               >
                 {isProcessing ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <Loader2 aria-hidden="true" className="mr-2 h-5 w-5 animate-spin" />
                     Processing...
                   </>
                 ) : (
                   <>
-                    <CreditCard className="mr-2 h-5 w-5" />
+                    <CreditCard aria-hidden="true" className="mr-2 h-5 w-5" />
                     Continue to Payment
                   </>
                 )}

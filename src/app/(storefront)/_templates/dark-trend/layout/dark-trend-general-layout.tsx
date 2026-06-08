@@ -58,7 +58,8 @@ export function DarkTrendGeneralLayout({
                 </>
               ) : null}
               <BreadcrumbItem>
-                <BreadcrumbPage className="max-w-[min(100%,28rem)] truncate font-semibold text-purple-500">
+                {/* S-11: purple-500 (#A855F7) ≈4.4:1 on dark bg; purple-400 (#C084FC) ≈6.5:1 */}
+                <BreadcrumbPage className="max-w-[min(100%,28rem)] truncate font-semibold text-purple-400">
                   {title}
                 </BreadcrumbPage>
               </BreadcrumbItem>
@@ -74,7 +75,8 @@ export function DarkTrendGeneralLayout({
           </h1>
 
           {productsCount && (
-            <p className="text-center text-gray-600">
+            // S-11: gray-600 (#4B5563) ≈2.2:1 on dark bg — swap to white/60 (≈5.7:1)
+            <p className="text-center text-white/60">
               {productsCount} product
               {productsCount !== 1 ? "s" : ""}
             </p>

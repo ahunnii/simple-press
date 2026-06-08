@@ -240,7 +240,10 @@
   --card-foreground: oklch(0.987 0.002 197.1);
   --popover: oklch(0.27 0.008 224);
   --popover-foreground: oklch(0.987 0.002 197.1);
-  --primary: oklch(0.600553 0.242472 293.8885);
+  /* Darkened from oklch(0.600553 0.242472 293.8885) (violet-500, ≈4.2:1 with
+     white) to Tailwind v4 violet-600 (≈5.7:1 with white) so primary CTA
+     buttons meet WCAG 1.4.3 Contrast Minimum (AA). Hover moves to violet-700. */
+  --primary: oklch(0.541 0.281 293.009);
   --primary-foreground: oklch(0.977 0.01 294);
   --secondary: oklch(0.3 0.006 224);
   --secondary-foreground: oklch(0.985 0 0);
@@ -251,20 +254,77 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.600553 0.242472 293.8885);
+  --ring: oklch(0.541 0.281 293.009);
   --chart-1: oklch(0.75 0.15 294);
-  --chart-2: oklch(0.600553 0.242472 293.8885);
+  --chart-2: oklch(0.541 0.281 293.009);
   --chart-3: oklch(0.52 0.2 294);
   --chart-4: oklch(0.45 0.17 294);
   --chart-5: oklch(0.38 0.14 294);
   --sidebar: oklch(0.27 0.008 224);
   --sidebar-foreground: oklch(0.987 0.002 197.1);
-  --sidebar-primary: oklch(0.600553 0.242472 293.8885);
+  --sidebar-primary: oklch(0.541 0.281 293.009);
   --sidebar-primary-foreground: oklch(0.977 0.01 294);
   --sidebar-accent: oklch(0.3 0.006 224);
   --sidebar-accent-foreground: oklch(0.987 0.002 197.1);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.600553 0.242472 293.8885);
+  --sidebar-ring: oklch(0.541 0.281 293.009);
+}
+
+/* ─── Dark-Trend — accessibility enhancements ────────────────────────────────
+   Skip link, focus-visible outlines (WCAG 2.4.1 / 2.4.7 / 2.4.11), and a
+   prefers-reduced-motion block (WCAG 2.3.3) mirroring the default-template
+   convention above.                                                          */
+
+/* Skip link: sr-only until focused, then visually present (WCAG 2.4.1) */
+.dt-skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+.dt-skip-link:focus {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 9999;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  background: #ffffff;
+  color: #111111;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Focus-visible: white outline on the dark template background (WCAG 2.4.7) */
+.dark-trend *:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Respect prefers-reduced-motion for all CSS transitions/animations
+   (JS-driven Framer Motion is handled per-component via useReducedMotion).
+   WCAG 2.1 SC 2.3.3 (AAA) / best practice at AA.                           */
+@media (prefers-reduced-motion: reduce) {
+  .dark-trend *,
+  .dark-trend *::before,
+  .dark-trend *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .default-template {
@@ -917,6 +977,32 @@
   .visual-noise *,
   .visual-noise *::before,
   .visual-noise *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Pollen template — accessibility enhancements ──────────────────────────
+   Pollen uses Tailwind utilities exclusively (no CSS vars for theme tokens).
+   This section adds a scoped focus-visible indicator that reads clearly on
+   BOTH the light body (white) AND the dark hero/footer surfaces
+   (#2a351f / #1A1E1A):
+     - #215935 deep green outline (8.25:1 on white ✓)
+     - white box-shadow halo (provides contrast on dark surfaces ✓)
+   Also adds a scoped prefers-reduced-motion block per repo convention.     */
+
+.pollen *:focus-visible {
+  outline: 2px solid #215935;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pollen *,
+  .pollen *::before,
+  .pollen *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -1776,6 +1862,12 @@
     --sl-green: #8ed36c;
     --sl-coral: #e87b4c;
     --sl-coral-deep: #d4632f;
+    /* AA accent token — fully-saturated vermilion (same hue family as the
+       brand coral, zero gray so it stays vivid rather than muddy).
+       5.18:1 on white, 4.53:1 on cream, 5.18:1 with white text.
+       Does NOT pass on the green sections (2.88:1) — those use --sl-ink. */
+    --sl-coral-aa: #c2410c;
+    --sl-coral-aa-hover: #9a3309;
     --sl-red: #a32c2c;
     --sl-dark: #161616;
     --sl-ink: #2b2b2b;
@@ -1871,7 +1963,7 @@
 
   .sledge .sl-page-title-checkout {
     font-size: clamp(2.5rem, 6vw, 4rem);
-    color: var(--sl-coral);
+    color: var(--sl-coral-aa);
     letter-spacing: 0.04em;
     line-height: 1;
   }
@@ -1919,16 +2011,23 @@
 
   .sledge .sl-heading-xl {
     font-size: clamp(3rem, 7vw, 6rem);
-    color: var(--sl-coral);
+    color: var(--sl-coral-aa);
     line-height: 1.05;
     margin-bottom: 2rem;
   }
 
   .sledge .sl-heading-lg {
     font-size: clamp(2.5rem, 6vw, 5rem);
-    color: var(--sl-coral);
+    color: var(--sl-coral-aa);
     line-height: 1.05;
     margin-bottom: 1.5rem;
+  }
+
+  /* The accent token doesn't reach 3:1 on the green sections (2.88:1) —
+     headings there use ink (7.88:1). */
+  .sledge .sl-section-green .sl-heading-xl,
+  .sledge .sl-section-green .sl-heading-lg {
+    color: var(--sl-ink);
   }
 
   .sledge .sl-media-frame {
@@ -2077,9 +2176,17 @@
     width: 44px;
     height: 44px;
     border-radius: 0.4rem;
-    background: var(--sl-coral);
+    background: var(--sl-coral-aa);
     color: #ffffff;
     flex-shrink: 0;
+  }
+
+  /* In the dark footer the heading keeps the brand coral, so the social
+     buttons match it there: brand coral bg + ink icon (4.97:1 ✓) instead
+     of the vermilion token, avoiding two near-miss reds side by side. */
+  .sledge .sl-footer .sl-social-btn {
+    background: var(--sl-coral);
+    color: var(--sl-ink);
   }
 
   .sledge .sl-footer-heading {
@@ -2094,9 +2201,11 @@
     letter-spacing: 0.04em;
   }
 
+  /* Brand coral bg kept here (sits on the dark header) + ink count:
+     #2b2b2b on #e87b4c = 4.97:1 ✓ (white was 2.85:1) */
   .sledge .sl-cart-badge {
     background: var(--sl-coral);
-    color: #fff;
+    color: var(--sl-ink);
     min-width: 20px;
   }
 
@@ -2111,7 +2220,8 @@
 
   /* ─── Sledge: account nav ───────────────────────────────────────────────── */
   .sledge .sl-account-tab-active {
-    background: var(--sl-coral);
+    background: var(--sl-coral-aa);
+    color: #ffffff;
   }
 
   .sledge .sl-account-tab-inactive {
@@ -2122,8 +2232,8 @@
 
   .sledge .sl-account-nav-active {
     background: var(--sl-cream);
-    color: var(--sl-coral);
-    border-left: 3px solid var(--sl-coral);
+    color: var(--sl-coral-aa);
+    border-left: 3px solid var(--sl-coral-aa);
   }
 
   .sledge .sl-account-nav-inactive {
@@ -2133,14 +2243,14 @@
 
   /* ─── Sledge: order status badges ───────────────────────────────────────── */
   .sledge .sl-status-completed {
-    border-color: #16a34a;
-    color: #16a34a;
+    border-color: #15803d;
+    color: #15803d;
     background: #f0fdf4;
   }
 
   .sledge .sl-status-cancelled {
-    border-color: #dc2626;
-    color: #dc2626;
+    border-color: #b91c1c;
+    color: #b91c1c;
     background: #fef2f2;
   }
 
@@ -2191,7 +2301,6 @@
 
   .sledge .sl-blog-search input::placeholder {
     color: var(--sl-ink-soft);
-    opacity: 0.6;
   }
 
   .sledge .sl-product-accordion summary {
@@ -2372,17 +2481,18 @@
   }
 
   .sledge .sl-testimonial-dot {
-    width: 8px;
-    height: 8px;
+    width: 24px;
+    height: 24px;
     border-radius: 9999px;
     border: none;
     cursor: pointer;
     transition: background 0.3s;
-    padding: 0;
+    padding: 8px;
+    background-clip: content-box !important;
   }
 
   .sledge .sl-testimonial-dot-active {
-    background: var(--sl-coral);
+    background: var(--sl-coral-aa);
   }
 
   .sledge .sl-testimonial-dot-inactive {
@@ -2399,243 +2509,6 @@
     display: block;
     width: 100%;
     height: 80px;
-  }
-
-  /* ─── Sledge: intro overlay (legacy noise animation) ───────────────────── */
-  .sledge .sl-intro-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    overflow: hidden;
-    pointer-events: auto;
-  }
-
-  .sledge .sl-intro-curtain {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 50%;
-    overflow: hidden;
-    background: #0e0d0b;
-    transition: transform 1s cubic-bezier(0.7, 0, 0.2, 1);
-    will-change: transform;
-  }
-
-  .sledge .sl-intro-curtain-left {
-    left: 0;
-    transform: translateX(0);
-  }
-
-  .sledge .sl-intro-curtain-right {
-    right: 0;
-    transform: translateX(0);
-  }
-
-  .sledge .sl-intro-curtain-left[data-open="true"] {
-    transform: translateX(-100%);
-  }
-
-  .sledge .sl-intro-curtain-right[data-open="true"] {
-    transform: translateX(100%);
-  }
-
-  .sledge .sl-intro-seam {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 1px;
-    background: rgba(255, 255, 255, 0.08);
-    transition: opacity 0.3s;
-    z-index: 5;
-    pointer-events: none;
-  }
-
-  .sledge .sl-intro-seam[data-open="true"] {
-    opacity: 0;
-  }
-
-  .sledge .sl-intro-skip {
-    position: absolute;
-    bottom: 28px;
-    right: 32px;
-    z-index: 10;
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 11px;
-    letter-spacing: 0.28em;
-    font-weight: 500;
-    padding: 8px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: transparent;
-    cursor: pointer;
-    transition: opacity 0.3s;
-    font-family: var(--font-mono, monospace);
-    text-transform: uppercase;
-  }
-
-  .sledge .sl-intro-skip[data-open="true"] {
-    opacity: 0;
-  }
-
-  .sledge .sl-intro-scene-left {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100vw;
-  }
-
-  .sledge .sl-intro-scene-right {
-    position: absolute;
-    top: 0;
-    left: -100%;
-    height: 100%;
-    width: 100vw;
-  }
-
-  .sledge .sl-intro-grid {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 6px;
-    padding: 6px;
-  }
-
-  .sledge .sl-intro-tile {
-    position: relative;
-    overflow: hidden;
-    opacity: 0;
-    animation: noiseIntroTileIn 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
-  }
-
-  .sledge .sl-intro-tile-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .sledge .sl-intro-tile-sheen {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.12),
-      transparent 60%
-    );
-    pointer-events: none;
-  }
-
-  .sledge .sl-intro-tile-sheen-muted {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.08),
-      transparent 60%
-    );
-  }
-
-  .sledge .sl-intro-tile-label {
-    position: absolute;
-    left: 10px;
-    bottom: 8px;
-    font-size: 9px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.85);
-    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.7);
-    font-weight: 500;
-    font-family: var(--font-mono, monospace);
-  }
-
-  .sledge .sl-intro-veil {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-      circle at center,
-      rgba(14, 13, 11, 0.55),
-      rgba(14, 13, 11, 0.92) 70%
-    );
-    opacity: 0;
-    transition: opacity 0.8s ease;
-    pointer-events: none;
-  }
-
-  .sledge .sl-intro-veil[data-visible="true"] {
-    opacity: 1;
-  }
-
-  .sledge .sl-intro-wordmark-wrap {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: #fff;
-    opacity: 0;
-    transition:
-      opacity 0.9s ease,
-      letter-spacing 1.2s ease;
-    letter-spacing: 0.4em;
-    pointer-events: none;
-    width: 100%;
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  .sledge .sl-intro-wordmark-wrap[data-visible="true"] {
-    opacity: 1;
-    letter-spacing: 0.22em;
-  }
-
-  .sledge .sl-intro-wordmark {
-    font-family: var(--font-serif, Georgia, serif);
-    font-size: clamp(40px, 7vw, 96px);
-    font-weight: 300;
-    line-height: 1;
-    font-style: italic;
-  }
-
-  .sledge .sl-intro-rule {
-    width: 0;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.4);
-    margin: 22px auto 0;
-    transition: width 1s ease 0.15s;
-  }
-
-  .sledge .sl-intro-rule[data-visible="true"] {
-    width: 80px;
-  }
-
-  .sledge .sl-intro-location {
-    font-size: 11px;
-    letter-spacing: 0.5em;
-    opacity: 0.7;
-    margin-top: 18px;
-    font-weight: 500;
-    font-family: var(--font-mono, monospace);
-  }
-
-  @keyframes noiseIntroTileIn {
-    from {
-      opacity: 0;
-      transform: scale(0.6) translateY(28px);
-      filter: blur(8px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-      filter: blur(0);
-    }
-  }
-
-  .sledge .sl-hero-grain {
-    background-image: var(--noise-grain);
-    background-repeat: repeat;
-    background-size: 200px 200px;
   }
 
   /* ─── Sledge: announcement bar ─────────────────────────────────────────── */
@@ -2665,23 +2538,6 @@
       font-size: 11px;
       letter-spacing: 0.1em;
     }
-  }
-
-  .sledge .vn-topbar {
-    background: var(--sl-dark);
-    color: #ffffff;
-    border-bottom: none;
-    font-family: var(--font-sans, sans-serif);
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 16px;
-    min-height: 38px;
-    overflow: hidden;
-    white-space: nowrap;
   }
 
   /* ─── Sledge: nav links ─────────────────────────────────────────────────── */
@@ -2739,7 +2595,7 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    background: var(--sl-coral);
+    background: var(--sl-coral-aa);
     color: #ffffff;
     font-family: var(--font-sans, sans-serif);
     font-size: 14px;
@@ -2756,13 +2612,25 @@
   }
 
   .sledge .sl-btn:hover {
-    background: var(--sl-coral-deep);
+    background: var(--sl-coral-aa-hover);
   }
 
   /* ─── Sledge: focus ring ────────────────────────────────────────────────── */
   .sledge *:focus-visible {
-    outline: 2px solid var(--sl-coral);
+    outline: 2px solid var(--sl-coral-aa);
     outline-offset: 2px;
+  }
+
+  .sledge .sl-header *:focus-visible,
+  .sledge .sl-footer *:focus-visible,
+  .sledge .sl-mobile-menu *:focus-visible,
+  .sledge .sl-announcement-bar *:focus-visible {
+    outline-color: #ffffff;
+  }
+
+  /* Coral can't reach 3:1 on the green sections — use ink there */
+  .sledge .sl-section-green *:focus-visible {
+    outline-color: var(--sl-ink);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -2892,12 +2760,13 @@
     font-weight: 700;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--sl-coral);
+    color: var(--sl-coral-aa);
     opacity: 0;
     transition: opacity 0.2s ease;
   }
 
-  .sledge .group:hover .sledge-collection-cta {
+  .sledge .group:hover .sledge-collection-cta,
+  .sledge .group:focus-within .sledge-collection-cta {
     opacity: 1;
   }
 
@@ -2941,7 +2810,7 @@
   }
 
   .sledge .sledge-badge-default {
-    background: var(--sl-coral);
+    background: var(--sl-coral-aa);
     color: white;
   }
 
@@ -2999,7 +2868,8 @@
     transition: opacity 0.25s ease-out;
   }
 
-  .sledge .group:hover .sledge-cta-reveal {
+  .sledge .group:hover .sledge-cta-reveal,
+  .sledge .group:focus-within .sledge-cta-reveal {
     opacity: 1;
   }
 
@@ -3012,21 +2882,21 @@
   }
 
   .sledge .sl-account-content .bg-primary {
-    background-color: var(--sl-coral) !important;
+    background-color: var(--sl-coral-aa) !important;
   }
 
   .sledge .sl-account-content .text-primary {
-    color: var(--sl-coral) !important;
+    color: var(--sl-coral-aa) !important;
   }
 
   .sledge .sl-account-content button.bg-primary,
   .sledge .sl-account-content [data-slot="button"].bg-primary {
-    background-color: var(--sl-coral) !important;
+    background-color: var(--sl-coral-aa) !important;
     border-radius: var(--radius, 0.5rem);
   }
 
   .sledge .sl-account-content button.bg-primary:hover {
-    background-color: var(--sl-coral-deep) !important;
+    background-color: var(--sl-coral-aa-hover) !important;
   }
 
   .sledge .sl-account-content h2,
@@ -3034,7 +2904,7 @@
     font-family: var(--font-heading, sans-serif);
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--sl-orange);
+    color: var(--sl-coral-aa);
   }
 }
 

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 import { formatPrice } from "~/lib/prices";
 import { api } from "~/trpc/react";
@@ -15,21 +15,26 @@ const cardTransition = {
 export function DarkTrendFeaturedProductsGrid() {
   const { data: products } = api.product.getFeatured.useQuery();
   const displayProducts = products?.slice(0, 3) ?? [];
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {displayProducts.map((product, index) => (
         <motion.div
           key={product.id}
-          initial={{ opacity: 0, y: 24 }}
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-40px" }}
-          transition={{ ...cardTransition, delay: index * 0.1 }}
+          transition={{
+            ...cardTransition,
+            duration: shouldReduceMotion ? 0 : cardTransition.duration,
+            delay: shouldReduceMotion ? 0 : index * 0.1,
+          }}
         >
           <Link href={`/shop/${product.slug}`} className="group block">
             <motion.div
               className="relative aspect-square overflow-hidden rounded-sm bg-zinc-800"
-              whileHover={{ scale: 1.02 }}
+              whileHover={shouldReduceMotion ? undefined : { scale: 1.02 }}
               transition={{ duration: 0.25 }}
             >
               <Image

@@ -45,42 +45,61 @@ export function PollenVariantSelector({ product, setSelectedVariantId }: Props) 
 
   return (
     <div className="space-y-4">
+      {/* S-2: live region for add-to-cart announcement */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {isAdded ? `${product.name} added to cart` : ""}
+      </span>
+
       <div className="mb-6">
         <Label className="mb-3 block text-sm font-semibold uppercase tracking-wide text-[#2a351f]">
           Select Variant
         </Label>
         <div className="flex flex-wrap gap-2">
-          {product.variants.map((variant) => (
-            <button
-              key={variant.id}
-              type="button"
-              onClick={() => {
-                setSelectedVariant(variant);
-                setSelectedVariantId(variant.id);
-              }}
-              disabled={variant.inventoryQty === 0}
-              className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-                selectedVariant?.id === variant.id
-                  ? "border-[#215935] bg-[#215935] text-white"
-                  : "border-[#2a351f]/20 text-[#2a351f] hover:border-[#215935] hover:text-[#215935]"
-              } ${variant.inventoryQty === 0 ? "cursor-not-allowed opacity-50" : ""}`}
-            >
-              {variant.name}
-              {variant.inventoryQty === 0 && " (Out of Stock)"}
-            </button>
-          ))}
+          {product.variants.map((variant) => {
+            const outOfStock = variant.inventoryQty === 0;
+            return (
+              <button
+                key={variant.id}
+                type="button"
+                /* S-4: aria-pressed for selection state */
+                aria-pressed={selectedVariant?.id === variant.id}
+                /* S-4: aria-disabled instead of native disabled so button stays focusable */
+                aria-disabled={outOfStock}
+                onClick={() => {
+                  /* S-4: guard — no-op when out of stock */
+                  if (outOfStock) return;
+                  setSelectedVariant(variant);
+                  setSelectedVariantId(variant.id);
+                }}
+                className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+                  selectedVariant?.id === variant.id
+                    ? "border-[#215935] bg-[#215935] text-white"
+                    : "border-[#2a351f]/20 text-[#2a351f] hover:border-[#215935] hover:text-[#215935]"
+                } ${outOfStock ? "cursor-not-allowed opacity-50" : ""}`}
+              >
+                {variant.name}
+                {outOfStock && " (Out of Stock)"}
+              </button>
+            );
+          })}
         </div>
       </div>
 
+      {/* S-4: aria-live on the availability line */}
       {selectedVariant && (
-        <p className="text-sm text-[#4c566a]">
+        <p className="text-sm text-[#4c566a]" aria-live="polite">
           {selectedVariant.inventoryQty} available
         </p>
       )}
 
+      {/* S-3: wrap stepper in role="group" with aria-label */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         {selectedVariant && (
-          <div className="flex items-center gap-1 rounded-md border border-[#2a351f]/20">
+          <div
+            role="group"
+            aria-label={`Quantity for ${product.name}`}
+            className="flex items-center gap-1 rounded-md border border-[#2a351f]/20"
+          >
             <Button
               variant="ghost"
               size="icon"
@@ -89,9 +108,13 @@ export function PollenVariantSelector({ product, setSelectedVariantId }: Props) 
               disabled={quantity <= 1}
               aria-label="Decrease quantity"
             >
-              <Minus className="size-4" />
+              <Minus className="size-4" aria-hidden="true" />
             </Button>
-            <span className="w-10 text-center text-base font-semibold text-[#2a351f]">
+            {/* S-3: aria-live on the quantity value span */}
+            <span
+              className="w-10 text-center text-base font-semibold text-[#2a351f]"
+              aria-live="polite"
+            >
               {quantity}
             </span>
             <Button
@@ -103,7 +126,7 @@ export function PollenVariantSelector({ product, setSelectedVariantId }: Props) 
               }
               aria-label="Increase quantity"
             >
-              <Plus className="size-4" />
+              <Plus className="size-4" aria-hidden="true" />
             </Button>
           </div>
         )}
@@ -116,7 +139,7 @@ export function PollenVariantSelector({ product, setSelectedVariantId }: Props) 
         >
           {isAdded ? (
             <>
-              <Check className="mr-2 h-4 w-4" />
+              <Check className="mr-2 h-4 w-4" aria-hidden="true" />
               Added to Cart
             </>
           ) : (

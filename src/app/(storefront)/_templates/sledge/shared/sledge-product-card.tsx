@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -14,8 +15,10 @@ type Props = {
   index: number;
 };
 
-export function NoiseProductCard({ product, index }: Props) {
+export function NoiseProductCard({ product, index: _index }: Props) {
   const { addItem } = useCart();
+  // S-2: announce add-to-cart feedback to screen readers
+  const [announce, setAnnounce] = useState("");
 
   const productStatus = checkProductStatus({
     price: product.price,
@@ -58,10 +61,14 @@ export function NoiseProductCard({ product, index }: Props) {
       sku: null,
       maxInventory: productStatus.maxInventory,
     });
+    // S-2: set announce message for screen readers
+    setAnnounce(`${product.name} added to cart`);
   };
 
   return (
     <div className="group relative">
+      {/* S-2: sr-only live region for add-to-cart feedback */}
+      <span className="sr-only" role="status">{announce}</span>
       {/* Image — rounded card, zoom on hover */}
       <Link
         href={`/shop/${product.slug}`}
@@ -138,6 +145,7 @@ export function NoiseProductCard({ product, index }: Props) {
           ) : (
             <Link
               href={`/shop/${product.slug}`}
+              aria-label={`View ${product.name}`}
               className="font-mono text-[11px] font-bold tracking-[0.2em] uppercase transition-opacity hover:opacity-60"
             >
               View item →

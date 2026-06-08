@@ -86,7 +86,7 @@ export function PollenOrderDetailPage({
                 {order.discount > 0 && (
                   <div className="flex justify-between">
                     <span className="text-[#4b5563]">Discount</span>
-                    <span className="text-green-600">
+                    <span className="text-green-700">
                       -{formatPrice(order.discount)}
                     </span>
                   </div>
@@ -129,12 +129,14 @@ export function PollenOrderDetailPage({
                           href={shipment.trackingUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 font-semibold text-[#5e8b4a] hover:underline"
+                          className="inline-flex items-center gap-1 font-semibold text-[#215935] hover:underline"
                         >
-                          Track shipment <ExternalLink className="h-3 w-3" />
+                          Track shipment
+                          <span className="sr-only">(opens in new tab)</span>
+                          <ExternalLink className="h-3 w-3" aria-hidden="true" />
                         </a>
                       )}
-                      <p className="mt-1 text-xs text-[#9ca3af]">
+                      <p className="mt-1 text-xs text-[#6b7280]">
                         Added {formatDate(shipment.createdAt)}
                       </p>
                     </div>
@@ -195,7 +197,7 @@ export function PollenOrderDetailPage({
 
           <Link
             href="/account/orders"
-            className="block text-sm font-semibold text-[#5e8b4a] hover:underline"
+            className="block text-sm font-semibold text-[#215935] hover:underline"
           >
             ← Back to orders
           </Link>

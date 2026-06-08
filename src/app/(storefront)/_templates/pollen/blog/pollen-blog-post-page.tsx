@@ -55,7 +55,7 @@ export function PollenBlogPostPage({ page, relatedPosts, business }: Props) {
 
             <TiptapRenderer
               content={page.content as TiptapJSON}
-              className="prose prose-lg prose-headings:text-[#374151] prose-p:text-[#4b5563] prose-a:text-[#1f1f1f] prose-a:no-underline hover:prose-a:text-green-600 prose-strong:text-[#374151] prose-code:text-green-400 prose-pre:border prose-pre:border-black/20 prose-pre:bg-zinc-900/50 max-w-none"
+              className="prose prose-lg prose-headings:text-[#374151] prose-p:text-[#4b5563] prose-a:text-[#215935] prose-a:underline hover:prose-a:text-[#1a4729] prose-strong:text-[#374151] prose-code:text-green-700 prose-pre:border prose-pre:border-black/20 prose-pre:bg-zinc-900/50 max-w-none"
             />
 
             {others.length > 0 ? (
@@ -73,7 +73,7 @@ export function PollenBlogPostPage({ page, relatedPosts, business }: Props) {
                       <div className="relative aspect-video w-full overflow-hidden">
                         <Image
                           src={post.image ?? "/placeholder.svg"}
-                          alt={post.title}
+                          alt=""
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
                           sizes="(max-width: 640px) 100vw, 432px"

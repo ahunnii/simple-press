@@ -83,7 +83,7 @@ export function PollenContactPage({
               <div className="relative h-full w-full">
                 <Image
                   src={f["pollen.contact.form-image"]!}
-                  alt="Contact Us"
+                  alt=""
                   fill
                   className="object-cover object-bottom"
                   sizes="100vw"

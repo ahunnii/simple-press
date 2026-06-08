@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
@@ -77,16 +77,42 @@ export function SledgeProductPage({
     displayTrustBadges,
   } = useProduct(product);
 
+  const prefersReducedMotion = useReducedMotion();
+
   const [activeImg, setActiveImg] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"description" | "additional">(
     "description",
   );
 
+  // Lightbox focus management
+  const lightboxCloseRef = useRef<HTMLButtonElement>(null);
+  const enlargeTriggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (lightboxOpen) {
+      // Move focus into dialog on open
+      lightboxCloseRef.current?.focus();
+    }
+  }, [lightboxOpen]);
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    // Restore focus to the trigger on close
+    requestAnimationFrame(() => {
+      enlargeTriggerRef.current?.focus();
+    });
+  };
+
   useEffect(() => {
     if (!lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "Escape") closeLightbox();
+      // Trap Tab — the dialog has exactly one focusable element (the close button)
+      if (e.key === "Tab") {
+        e.preventDefault();
+        lightboxCloseRef.current?.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -193,7 +219,7 @@ export function SledgeProductPage({
                 />
               ) : (
                 <div className="sledge-card-placeholder absolute inset-0 flex items-center justify-center">
-                  <span className="sledge-card-placeholder-num select-none">
+                  <span aria-hidden="true" className="sledge-card-placeholder-num select-none">
                     ★
                   </span>
                 </div>
@@ -201,6 +227,7 @@ export function SledgeProductPage({
 
               {activeImage ? (
                 <button
+                  ref={enlargeTriggerRef}
                   type="button"
                   onClick={() => setLightboxOpen(true)}
                   aria-label="Enlarge image"
@@ -291,7 +318,7 @@ export function SledgeProductPage({
                     key={badge.label}
                     className="inline-flex items-center gap-1.5 rounded-sm border border-[var(--sl-border)] bg-[var(--sl-cream)] px-2.5 py-1 font-sans text-[10px] tracking-[0.12em] text-[var(--sl-ink)] uppercase"
                   >
-                    <badge.Icon className="size-3 text-[var(--sl-coral)]" />
+                    <badge.Icon aria-hidden="true" className="size-3 text-[var(--sl-coral)]" />
                     {badge.label}
                   </span>
                 ))}
@@ -340,83 +367,135 @@ export function SledgeProductPage({
         </div>
       </section>
 
-      {/* Description tabs */}
+      {/* Description tabs — APG tabs pattern */}
       <SledgePageSection className="border-t border-[var(--sl-border)] pt-10 md:pt-12">
-        <div className="-mb-px flex">
-          {(["description", "additional"] as const)
-            .filter((tab) => tab === "description" || hasAdditionalTab)
-            .map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setActiveTab(tab)}
-                className={cn(
-                  "relative px-5 py-2.5 font-sans text-xs tracking-[0.14em] uppercase transition-colors",
-                  activeTab === tab
-                    ? "z-1 border border-[var(--sl-border)] border-b-white bg-white text-[var(--sl-ink)]"
-                    : "z-0 border border-[var(--sl-border)] bg-[var(--sl-cream)] text-[var(--sl-ink-soft)] hover:text-[var(--sl-ink)]",
-                )}
+        {(() => {
+          const tabs = (["description", "additional"] as const).filter(
+            (tab) => tab === "description" || hasAdditionalTab,
+          );
+          const tabLabels: Record<typeof tabs[number], string> = {
+            description: "Description",
+            additional: "Additional Information",
+          };
+
+          const handleTabKeyDown = (
+            e: React.KeyboardEvent,
+            currentIndex: number,
+          ) => {
+            if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key))
+              return;
+            e.preventDefault();
+            let next = currentIndex;
+            if (e.key === "ArrowRight") next = (currentIndex + 1) % tabs.length;
+            else if (e.key === "ArrowLeft")
+              next = (currentIndex - 1 + tabs.length) % tabs.length;
+            else if (e.key === "Home") next = 0;
+            else if (e.key === "End") next = tabs.length - 1;
+            const nextTab = tabs[next];
+            if (nextTab) {
+              setActiveTab(nextTab);
+              document
+                .getElementById(`sledge-tab-${nextTab}`)
+                ?.focus();
+            }
+          };
+
+          return (
+            <>
+              <div
+                role="tablist"
+                aria-label="Product information"
+                className="-mb-px flex"
               >
-                {tab === "description"
-                  ? "Description"
-                  : "Additional Information"}
-              </button>
-            ))}
-        </div>
+                {tabs.map((tab, i) => (
+                  <button
+                    key={tab}
+                    id={`sledge-tab-${tab}`}
+                    role="tab"
+                    type="button"
+                    aria-selected={activeTab === tab}
+                    aria-controls={`sledge-panel-${tab}`}
+                    tabIndex={activeTab === tab ? 0 : -1}
+                    onClick={() => setActiveTab(tab)}
+                    onKeyDown={(e) => handleTabKeyDown(e, i)}
+                    className={cn(
+                      "relative px-5 py-2.5 font-sans text-xs tracking-[0.14em] uppercase transition-colors",
+                      activeTab === tab
+                        ? "z-1 border border-[var(--sl-border)] border-b-white bg-white text-[var(--sl-ink)]"
+                        : "z-0 border border-[var(--sl-border)] bg-[var(--sl-cream)] text-[var(--sl-ink-soft)] hover:text-[var(--sl-ink)]",
+                    )}
+                  >
+                    {tabLabels[tab]}
+                  </button>
+                ))}
+              </div>
 
-        <div className="sl-tab-panel bg-white p-6 md:p-8">
-          {activeTab === "description" && (
-            <div>
-              <h2 className="sl-tab-heading font-heading mb-4 font-semibold text-[var(--sl-orange)] uppercase">
-                Description
-              </h2>
-              {product.description ? (
-                <p className="sl-eyebrow max-w-prose font-sans text-[15px] leading-[1.85]">
-                  {product.description}
-                </p>
-              ) : (
-                <p className="sl-eyebrow font-sans text-sm">
-                  No description available.
-                </p>
-              )}
-            </div>
-          )}
+              <div className="sl-tab-panel bg-white p-6 md:p-8">
+                <div
+                  id="sledge-panel-description"
+                  role="tabpanel"
+                  aria-labelledby="sledge-tab-description"
+                  tabIndex={0}
+                  hidden={activeTab !== "description"}
+                >
+                  <h2 className="sl-tab-heading font-heading mb-4 font-semibold text-[var(--sl-orange)] uppercase">
+                    Description
+                  </h2>
+                  {product.description ? (
+                    <p className="sl-eyebrow max-w-prose font-sans text-[15px] leading-[1.85]">
+                      {product.description}
+                    </p>
+                  ) : (
+                    <p className="sl-eyebrow font-sans text-sm">
+                      No description available.
+                    </p>
+                  )}
+                </div>
 
-          {activeTab === "additional" && hasAdditionalTab && (
-            <div>
-              {!isAdditionalEmpty ? (
-                <ProductAccordion title="Details" defaultOpen>
-                  <TiptapRenderer
-                    content={
-                      additionalFields?.additionalInformation as TiptapJSON
-                    }
-                    className={SLEDGE_PROSE}
-                  />
-                </ProductAccordion>
-              ) : null}
+                {hasAdditionalTab && (
+                  <div
+                    id="sledge-panel-additional"
+                    role="tabpanel"
+                    aria-labelledby="sledge-tab-additional"
+                    tabIndex={0}
+                    hidden={activeTab !== "additional"}
+                  >
+                    {!isAdditionalEmpty ? (
+                      <ProductAccordion title="Details" defaultOpen>
+                        <TiptapRenderer
+                          content={
+                            additionalFields?.additionalInformation as TiptapJSON
+                          }
+                          className={SLEDGE_PROSE}
+                        />
+                      </ProductAccordion>
+                    ) : null}
 
-              {f["sledge.global.product-shipping-description"] ? (
-                <ProductAccordion title="Shipping & Returns">
-                  <p>{f["sledge.global.product-shipping-description"]}</p>
-                </ProductAccordion>
-              ) : null}
+                    {f["sledge.global.product-shipping-description"] ? (
+                      <ProductAccordion title="Shipping & Returns">
+                        <p>{f["sledge.global.product-shipping-description"]}</p>
+                      </ProductAccordion>
+                    ) : null}
 
-              {f["sledge.global.product-question-description"] ? (
-                <ProductAccordion title="Ask a Question">
-                  <p>
-                    {f["sledge.global.product-question-description"]}{" "}
-                    <Link
-                      href="/contact"
-                      className="text-[var(--sl-coral)] underline underline-offset-4 transition-opacity hover:opacity-70"
-                    >
-                      You can reach out to us here.
-                    </Link>
-                  </p>
-                </ProductAccordion>
-              ) : null}
-            </div>
-          )}
-        </div>
+                    {f["sledge.global.product-question-description"] ? (
+                      <ProductAccordion title="Ask a Question">
+                        <p>
+                          {f["sledge.global.product-question-description"]}{" "}
+                          <Link
+                            href="/contact"
+                            className="text-[var(--sl-coral-aa)] underline underline-offset-4 transition-opacity hover:opacity-70"
+                          >
+                            You can reach out to us here.
+                          </Link>
+                        </p>
+                      </ProductAccordion>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
       </SledgePageSection>
 
       <SledgeProductRail
@@ -429,18 +508,21 @@ export function SledgeProductPage({
       <AnimatePresence>
         {lightboxOpen ? (
           <motion.div
-            initial={{ opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Product image"
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-            onClick={() => setLightboxOpen(false)}
+            onClick={closeLightbox}
           >
             <motion.div
-              initial={{ scale: 0.92, opacity: 0 }}
+              initial={prefersReducedMotion ? { scale: 1, opacity: 1 } : { scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              exit={prefersReducedMotion ? { scale: 1, opacity: 1 } : { scale: 0.92, opacity: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
               className="relative max-h-[90vh] max-w-[90vw]"
               onClick={(e) => e.stopPropagation()}
             >
@@ -452,9 +534,10 @@ export function SledgeProductPage({
                 className="max-h-[90vh] max-w-[90vw] object-contain"
               />
               <button
+                ref={lightboxCloseRef}
                 type="button"
-                onClick={() => setLightboxOpen(false)}
-                aria-label="Close"
+                onClick={closeLightbox}
+                aria-label="Close image viewer"
                 className="absolute top-3 right-3 rounded-full border border-[var(--sl-border)] bg-white/90 p-1.5 transition-colors hover:bg-white"
               >
                 <X className="size-5 text-[var(--sl-ink)]" />

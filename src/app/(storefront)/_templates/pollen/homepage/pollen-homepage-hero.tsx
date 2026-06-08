@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 import { buttonVariants } from "~/components/ui/button";
 
@@ -12,11 +12,25 @@ const fadeUp = {
   animate: { opacity: 1, y: 0 },
 };
 
+const fadeUpStill = {
+  initial: { opacity: 1, y: 0 },
+  animate: { opacity: 1, y: 0 },
+};
+
 const stagger = {
   animate: {
     transition: {
       staggerChildren: 0.08,
       delayChildren: 0.1,
+    },
+  },
+};
+
+const staggerStill = {
+  animate: {
+    transition: {
+      staggerChildren: 0,
+      delayChildren: 0,
     },
   },
 };
@@ -41,6 +55,13 @@ export function PollenHero({
   imageUrl,
   sectionAttrs,
 }: Props) {
+  const prefersReducedMotion = useReducedMotion();
+  const itemVariant = prefersReducedMotion ? fadeUpStill : fadeUp;
+  const containerVariant = prefersReducedMotion ? staggerStill : stagger;
+  const itemTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const };
+
   return (
     <section
       className="relative flex h-svh min-h-[70vh] items-center justify-center overflow-hidden py-20 sm:py-28 md:min-h-[80vh] md:py-40"
@@ -49,7 +70,7 @@ export function PollenHero({
       {/* Background image */}
       <Image
         src={imageUrl ?? ""}
-        alt={title ?? ""}
+        alt=""
         fill
         className="object-cover"
         sizes="100vw"
@@ -61,48 +82,52 @@ export function PollenHero({
       <div className="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
         <motion.div
           className="flex flex-col items-center gap-5 sm:gap-6"
-          variants={stagger}
+          variants={containerVariant}
           initial="initial"
           animate="animate"
         >
           <motion.p
-            variants={fadeUp}
-            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            variants={itemVariant}
+            transition={itemTransition}
             className="text-xs font-medium tracking-[0.2em] text-white uppercase sm:text-sm md:text-base"
           >
             {title}
           </motion.p>
 
           <motion.h1
-            variants={fadeUp}
-            transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+            variants={itemVariant}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }
+            }
             className="text-3xl leading-tight font-bold text-balance text-white sm:text-5xl md:text-6xl lg:text-7xl"
           >
-            {subtitle}
+            {subtitle?.trim() ? subtitle : title}
           </motion.h1>
 
           <motion.p
-            variants={fadeUp}
-            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            variants={itemVariant}
+            transition={itemTransition}
             className="max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg md:text-xl"
           >
             {descriptionText}
           </motion.p>
 
           <motion.div
-            variants={fadeUp}
-            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            variants={itemVariant}
+            transition={itemTransition}
           >
             <Link
               href={buttonLink ?? "#!"}
               className={buttonVariants({
                 size: "lg",
                 className:
-                  "gap-2 bg-[#5e8b4a]! px-6 py-4 text-base font-medium text-white hover:bg-[#5e8b4a]/90! sm:px-8 sm:py-6 sm:text-lg!",
+                  "gap-2 bg-[#215935]! px-6 py-4 text-base font-medium text-white hover:bg-[#1a4729]! sm:px-8 sm:py-6 sm:text-lg!",
               })}
             >
               {buttonText}
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </motion.div>
         </motion.div>

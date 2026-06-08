@@ -29,7 +29,8 @@ export function DarkTrendOrdersPage({ orders }: OrdersPageTemplateProps) {
       {orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="mb-4 flex size-16 items-center justify-center rounded-sm bg-purple-500/20">
-            <Package className="size-8 text-purple-400" />
+            {/* N-1: decorative icon */}
+            <Package aria-hidden="true" className="size-8 text-purple-400" />
           </div>
           <h2 className="mb-2 text-xl font-semibold text-white">
             No orders yet
@@ -37,9 +38,10 @@ export function DarkTrendOrdersPage({ orders }: OrdersPageTemplateProps) {
           <p className="mb-6 text-sm text-white/70">
             When you place an order, it will appear here.
           </p>
+          {/* S-11: violet-600 */}
           <Button
             asChild
-            className="bg-violet-500 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-600"
+            className="bg-violet-600 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-700"
           >
             <Link href="/shop">Start Shopping</Link>
           </Button>
@@ -93,8 +95,10 @@ export function DarkTrendOrdersPage({ orders }: OrdersPageTemplateProps) {
                     </span>
                   )}
                 </div>
+                {/* M-7: disambiguated aria-label per order */}
                 <Link
                   href={`/account/orders/${order.id}`}
+                  aria-label={`View details for order #${order.orderNumber}`}
                   className="mt-4 inline-block text-sm font-medium text-purple-400 hover:underline"
                 >
                   View Details →

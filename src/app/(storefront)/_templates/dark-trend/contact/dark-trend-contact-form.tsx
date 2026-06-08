@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { CheckCircle, Loader2 } from "lucide-react";
 
 import { useContactForm } from "~/hooks/use-contact-form";
@@ -32,22 +33,33 @@ export function DarkTrendContactForm() {
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
 
+  // M-5: focus the success alert on mount
+  const successAlertRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (isSuccess) {
+      successAlertRef.current?.focus();
+    }
+  }, [isSuccess]);
+
   if (isSuccess) {
     return (
-      <Alert className="border-purple-500/50 bg-purple-500/10">
-        <CheckCircle className="h-5 w-5 text-purple-400" />
-        <AlertDescription className="text-purple-300">
-          <strong>Message sent successfully!</strong>
-          <br />
-          We&apos;ve received your message and will get back to you soon.
-        </AlertDescription>
-        <Button
-          onClick={resetSuccess}
-          className="mt-4 border border-purple-400/60 bg-purple-950/60 font-medium text-purple-100 transition-colors hover:border-purple-300 hover:bg-purple-900/70"
-        >
-          Send Another Message
-        </Button>
-      </Alert>
+      <div ref={successAlertRef} tabIndex={-1}>
+        <Alert className="border-purple-500/50 bg-purple-500/10">
+          {/* N-1: decorative icon */}
+          <CheckCircle aria-hidden="true" className="h-5 w-5 text-purple-400" />
+          <AlertDescription className="text-purple-300">
+            <strong>Message sent successfully!</strong>
+            <br />
+            We&apos;ve received your message and will get back to you soon.
+          </AlertDescription>
+          <Button
+            onClick={resetSuccess}
+            className="mt-4 border border-purple-400/60 bg-purple-950/60 font-medium text-purple-100 transition-colors hover:border-purple-300 hover:bg-purple-900/70"
+          >
+            Send Another Message
+          </Button>
+        </Alert>
+      </div>
     );
   }
 
@@ -134,14 +146,15 @@ export function DarkTrendContactForm() {
           required
         />
 
+        {/* S-11: violet-600; N-1: aria-hidden on Loader2 */}
         <Button
           type="submit"
           disabled={isSubmitting || !captchaToken}
-          className="bg-violet-500 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-600"
+          className="bg-violet-600 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-700"
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              <Loader2 aria-hidden="true" className="mr-2 h-5 w-5 animate-spin" />
               Sending...
             </>
           ) : (

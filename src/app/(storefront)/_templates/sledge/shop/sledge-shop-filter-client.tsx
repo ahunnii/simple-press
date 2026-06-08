@@ -111,6 +111,7 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
           <button
             type="button"
             onClick={() => commitPriceMax(maxPrice)}
+            aria-label="Clear price filter"
             className="sl-eyebrow mt-2 font-sans text-xs tracking-[0.12em] uppercase underline transition-opacity hover:opacity-70"
           >
             Clear
@@ -196,6 +197,10 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
 
   return (
     <section className="mx-auto w-full max-w-7xl px-7 pt-2 pb-16 md:pb-20">
+      {/* S-9: sr-only live region announcing filtered count — one region only (not on the duplicated visible spans) */}
+      <span className="sr-only" role="status">
+        {`${filtered.length} ${filtered.length === 1 ? "piece" : "pieces"} shown`}
+      </span>
       <div className="sl-shop-toolbar mb-6 md:hidden">
         <span className="sl-eyebrow font-sans text-xs tracking-[0.14em] uppercase">
           {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
@@ -212,12 +217,12 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
         >
           {mobileFiltersOpen ? (
             <>
-              <X className="h-3.5 w-3.5" />
+              <X aria-hidden="true" className="h-3.5 w-3.5" />
               Close filters
             </>
           ) : (
             <>
-              <SlidersHorizontal className="h-3.5 w-3.5" />
+              <SlidersHorizontal aria-hidden="true" className="h-3.5 w-3.5" />
               Filters
             </>
           )}
@@ -236,7 +241,8 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
       <div className="md:hidden">{productGrid}</div>
 
       <div className="hidden grid-cols-[220px_1fr] gap-12 md:grid lg:grid-cols-[240px_1fr] lg:gap-14">
-        <aside className="pt-1">
+        {/* M-7: label the aside landmark */}
+        <aside aria-label="Product filters" className="pt-1">
           <p className="sl-eyebrow mb-6 font-sans text-xs tracking-[0.18em] uppercase">
             Filter by
           </p>

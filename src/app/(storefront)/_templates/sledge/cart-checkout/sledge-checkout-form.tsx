@@ -28,11 +28,12 @@ const LBL =
 const INP =
   "rounded-sm border-[var(--sl-border-input)] font-sans text-sm focus-visible:border-[var(--sl-coral)] focus-visible:ring-0 focus-visible:ring-offset-0";
 
+// M-5: use <legend> inside fieldset so AT announces field group name
 function SectionHead({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="sl-rail-heading mb-5 border-b border-[var(--sl-border)] pb-3 font-heading text-[var(--sl-orange)] uppercase">
+    <legend className="sl-rail-heading mb-5 w-full border-b border-[var(--sl-border)] pb-3 font-heading text-[var(--sl-orange)] uppercase">
       {children}
-    </h3>
+    </legend>
   );
 }
 
@@ -79,6 +80,10 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
       className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12"
     >
       <div className="flex min-w-0 flex-col gap-10">
+        {/* M-5: required fields notice */}
+        <p className="sl-eyebrow font-sans text-xs tracking-[0.12em] uppercase">
+          Fields marked * are required
+        </p>
         <fieldset className="flex flex-col gap-5">
           <SectionHead>Contact Information</SectionHead>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -133,6 +138,7 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
               <Label htmlFor="discount-code" className={LBL}>
                 Code
               </Label>
+              {/* S-6: link input to its error message */}
               <Input
                 id="discount-code"
                 type="text"
@@ -143,6 +149,8 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 }}
                 placeholder="SUMMER-2026"
                 autoComplete="off"
+                aria-invalid={!!discountFieldError}
+                aria-describedby={discountFieldError ? "discount-error" : undefined}
                 className={cn(INP, "tracking-[0.1em] uppercase")}
               />
             </div>
@@ -164,13 +172,18 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
               )}
             </button>
           </div>
+          {/* S-6: error with id + role="alert"; success with role="status" + green-700 */}
           {discountFieldError ? (
-            <p className="font-sans text-xs tracking-[0.12em] text-destructive uppercase">
+            <p
+              id="discount-error"
+              role="alert"
+              className="font-sans text-xs tracking-[0.12em] text-destructive uppercase"
+            >
               {discountFieldError}
             </p>
           ) : null}
           {discountCodeLabel && discountAmount > 0 ? (
-            <p className="font-sans text-xs tracking-[0.12em] text-green-600 uppercase">
+            <p role="status" className="font-sans text-xs tracking-[0.12em] text-green-700 uppercase">
               Code <span className="font-semibold">{discountCodeLabel}</span>{" "}
               applied.
             </p>
@@ -181,11 +194,13 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
           <fieldset className="flex flex-col gap-4">
             <SectionHead>Delivery</SectionHead>
             <div className="flex flex-wrap gap-2">
+              {/* S-7: aria-pressed communicates toggle state to AT */}
               {(["ship", "pickup"] as const).map((method) => (
                 <button
                   key={method}
                   type="button"
                   onClick={() => setDeliveryMethod(method)}
+                  aria-pressed={deliveryMethod === method}
                   className={cn(
                     "cursor-pointer px-4 py-2 font-sans text-xs tracking-[0.16em] uppercase transition-all",
                     deliveryMethod === method
@@ -350,7 +365,11 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
               { ic: "↺", text: "All sales final — order what you love" },
             ].map((note) => (
               <div key={note.ic} className="flex items-start gap-2.5">
-                <span className="flex size-[22px] flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]">
+                {/* N-1: decorative glyph */}
+                <span
+                  aria-hidden="true"
+                  className="flex size-[22px] flex-shrink-0 items-center justify-center rounded-sm bg-[var(--sl-cream)] font-sans text-xs text-[var(--sl-coral)]"
+                >
                   {note.ic}
                 </span>
                 <p className="font-sans text-xs leading-relaxed tracking-[0.08em] text-[var(--sl-ink-soft)] uppercase">

@@ -69,20 +69,25 @@ export function SledgeMosaicHero({
 
           <div className="sl-m-logo">
             {logoUrl ? (
-              <div className="sl-logo-frame">
-                <Image
-                  src={logoUrl}
-                  alt={businessName ?? ""}
-                  fill
-                  sizes="360px"
-                  className="object-contain"
-                  priority
-                />
-              </div>
+              <>
+                {/* M-1: sr-only h1 when logo image is shown (image alt names the brand) */}
+                <h1 className="sr-only">{businessName ?? "Judy Sledge"}</h1>
+                <div className="sl-logo-frame">
+                  <Image
+                    src={logoUrl}
+                    alt={businessName ?? ""}
+                    fill
+                    sizes="360px"
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              </>
             ) : (
-              <span className="sl-hero-wordmark font-heading">
+              /* M-1: visible wordmark is the h1 */
+              <h1 className="sl-hero-wordmark font-heading">
                 {businessName ?? "Judy Sledge"}
-              </span>
+              </h1>
             )}
           </div>
 

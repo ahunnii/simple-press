@@ -37,9 +37,10 @@ export function PollenShopPage({ business }: DefaultProductsPageTemplateProps) {
 
         {business.products?.length === 0 ? (
           <div className="py-16 text-center">
-            <p className="text-lg text-gray-500">
+            {/* N-3: promote to h2 so it heads a page state */}
+            <h2 className="text-lg text-gray-500">
               No products available at this time.
-            </p>
+            </h2>
           </div>
         ) : (
           <Suspense>

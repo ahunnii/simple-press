@@ -20,9 +20,10 @@ export function SledgeContactInfoRow({
         aria-hidden
       />
       <div>
-        <h3 className="mb-2 text-[clamp(1.25rem,2.5vw,1.5625rem)] leading-[1.2] font-bold tracking-[0.04em] text-[var(--sl-coral)] uppercase">
+        {/* M-2: h2 under the sr-only page h1; C-3: bold ≥20px = large text → AA accent token */}
+        <h2 className="mb-2 text-[clamp(1.25rem,2.5vw,1.5625rem)] leading-[1.2] font-bold tracking-[0.04em] text-[var(--sl-coral-aa)] uppercase">
           {title}
-        </h3>
+        </h2>
         <div className="text-[1.09375rem] leading-relaxed text-[var(--sl-ink)]">
           {lines.map((line, i) => {
             const href = links?.[i];

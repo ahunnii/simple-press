@@ -48,7 +48,7 @@ export function PollenHomepageGallery({
               <div className="group relative aspect-4/3 overflow-hidden rounded-xl">
                 <Image
                   src={item.image}
-                  alt={item.label}
+                  alt=""
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -67,11 +67,11 @@ export function PollenHomepageGallery({
             href={buttonLink ?? "#!"}
             className={buttonVariants({
               size: "lg",
-              className: "gap-2 bg-[#5e8b4a]! hover:bg-[#5e8b4a]/90!",
+              className: "gap-2 bg-[#215935]! hover:bg-[#1a4729]!",
             })}
           >
             {buttonText}
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
       </div>

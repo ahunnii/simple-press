@@ -96,7 +96,7 @@ export function SledgeCollectionCard({
           </p>
         )}
 
-        <span className="sledge-collection-cta">View collection →</span>
+        <span aria-hidden="true" className="sledge-collection-cta">View collection →</span>
       </div>
     </div>
   );

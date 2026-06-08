@@ -45,13 +45,13 @@ export function PollenGeneralLayout({
         >
           <Image
             src={!!imageUrl ? imageUrl : f["pollen.global.header-background"]!}
-            alt={title ?? ""}
+            alt=""
             fill
             className="object-cover object-right"
             sizes="100vw"
             priority
           />
-          <div className="absolute inset-0 bg-[#2a351f]/50" />
+          <div className="absolute inset-0 bg-[#2a351f]/65" />
           <div className="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
             <p className="mb-4 text-sm font-medium tracking-wider text-[#A8D081] uppercase">
               {subtitle}

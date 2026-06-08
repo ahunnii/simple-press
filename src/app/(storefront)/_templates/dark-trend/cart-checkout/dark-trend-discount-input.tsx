@@ -74,13 +74,18 @@ export function DarkTrendDiscountInput({
     setError(null);
   };
 
+  // S-9: role="status" on the applied-discount panel so it's announced
   if (appliedDiscount) {
     return (
-      <div className="rounded-md border border-green-500/50 bg-green-500/10 p-4">
+      <div
+        role="status"
+        className="rounded-md border border-green-500/50 bg-green-500/10 p-4"
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/20">
-              <Check className="h-4 w-4 text-green-400" />
+              {/* N-1 + S-9: decorative icon */}
+              <Check aria-hidden="true" className="h-4 w-4 text-green-400" />
             </div>
             <div>
               <p className="text-sm font-medium text-green-400">
@@ -91,13 +96,16 @@ export function DarkTrendDiscountInput({
               </p>
             </div>
           </div>
+          {/* S-9: named remove button */}
           <Button
             variant="ghost"
             size="sm"
             onClick={handleRemove}
+            aria-label={`Remove discount ${appliedDiscount.code}`}
             className="text-green-400 hover:bg-green-500/10 hover:text-green-300"
           >
-            <X className="h-4 w-4" />
+            {/* N-1 + S-9: decorative icon */}
+            <X aria-hidden="true" className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -108,10 +116,13 @@ export function DarkTrendDiscountInput({
     <div className="space-y-3">
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Tag className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-white/40" />
+          {/* N-1 + S-9: decorative icon */}
+          <Tag aria-hidden="true" className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-white/40" />
+          {/* S-9: aria-label on input */}
           <Input
             type="text"
             placeholder="Discount code"
+            aria-label="Discount code"
             value={code}
             onChange={(e) => {
               setCode(e.target.value.toUpperCase());
@@ -125,13 +136,18 @@ export function DarkTrendDiscountInput({
             className="border-white/20 bg-zinc-900/50 pl-10 text-white placeholder:text-white/40"
           />
         </div>
+        {/* N-7: show "Applying…" text while validating */}
         <Button
           onClick={handleApply}
           disabled={isValidating || !code.trim()}
+          aria-label="Apply discount code"
           className="border border-white/60 bg-transparent font-medium text-white hover:bg-white/10"
         >
           {isValidating ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <>
+              <Loader2 aria-hidden="true" className="mr-1 h-4 w-4 animate-spin" />
+              Applying…
+            </>
           ) : (
             "Apply"
           )}

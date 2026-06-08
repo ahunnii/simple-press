@@ -61,7 +61,7 @@ export async function DarkTrendHomepage() {
         <div className="relative h-[85vh] min-h-[560px]">
           <Image
             src={f["dark-trend.homepage.hero-image"] ?? "/placeholder.svg"}
-            alt={homepage?.name ?? "Business Name"}
+            alt=""
             fill
             className="object-cover"
             priority
@@ -89,7 +89,7 @@ export async function DarkTrendHomepage() {
         <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex items-end justify-between">
             <div className="relative">
-              <span className="text-sm font-semibold text-purple-500">01.</span>
+              <span className="text-sm font-semibold text-purple-400">01.</span>
               <span
                 className="absolute top-2 -left-2 overflow-hidden text-6xl leading-none font-bold whitespace-nowrap text-white/5 uppercase md:text-8xl"
                 aria-hidden
@@ -111,7 +111,7 @@ export async function DarkTrendHomepage() {
             <div className="relative aspect-4/3 overflow-hidden rounded-sm bg-zinc-800">
               <Image
                 src={f["dark-trend.first-section-image"] ?? "/placeholder.svg"}
-                alt="Custom embroidery"
+                alt=""
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -161,7 +161,7 @@ export async function DarkTrendHomepage() {
         <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <div className="relative">
-              <span className="text-sm font-semibold text-purple-500">02.</span>
+              <span className="text-sm font-semibold text-purple-400">02.</span>
               {/* <span
                 className="absolute -top-4 -left-2 text-5xl leading-none font-bold text-white/10 uppercase md:text-7xl"
                 aria-hidden
@@ -202,9 +202,9 @@ export async function DarkTrendHomepage() {
 
                     <Button
                       asChild
-                      className="mt-2 inline-flex items-center rounded-md bg-violet-500 px-6 py-2.5 text-center text-sm font-bold text-white transition-opacity hover:bg-violet-600"
+                      className="mt-2 inline-flex items-center rounded-md bg-violet-600 px-6 py-2.5 text-center text-sm font-bold text-white transition-opacity hover:bg-violet-700"
                     >
-                      <Link href={`/shop/${firstProduct.slug}`}>Shop Now</Link>
+                      <Link href={`/shop/${firstProduct.slug}`} aria-label={`Shop ${firstProduct.name}`}>Shop Now</Link>
                     </Button>
                   </div>
                 </>
@@ -213,7 +213,7 @@ export async function DarkTrendHomepage() {
                   <p className="text-white/60">No featured product yet.</p>
                   <Link
                     href="/shop"
-                    className="inline-flex rounded-md bg-violet-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-violet-600"
+                    className="inline-flex rounded-md bg-violet-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-violet-700"
                   >
                     Shop Now
                   </Link>
@@ -229,7 +229,7 @@ export async function DarkTrendHomepage() {
         <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex items-end justify-between">
             <div className="relative">
-              <span className="text-sm font-semibold text-purple-500">03.</span>
+              <span className="text-sm font-semibold text-purple-400">03.</span>
               <span
                 className="absolute top-2 -left-2 overflow-hidden text-6xl leading-none font-bold whitespace-nowrap text-white/5 uppercase md:text-8xl"
                 aria-hidden
@@ -258,7 +258,7 @@ export async function DarkTrendHomepage() {
           <div className="mt-12 grid grid-cols-1 items-stretch gap-12 lg:grid-cols-3">
             <div className="col-span-2 flex flex-col justify-center space-y-4">
               <div className="relative">
-                <span className="text-sm font-semibold text-purple-500">
+                <span className="text-sm font-semibold text-purple-400">
                   04.
                 </span>
 
@@ -282,7 +282,7 @@ export async function DarkTrendHomepage() {
             <div className="relative aspect-4/5 overflow-hidden rounded-sm">
               <Image
                 src={f["dark-trend.cta-image"] ?? "/placeholder.svg"}
-                alt="CTA Image"
+                alt=""
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"

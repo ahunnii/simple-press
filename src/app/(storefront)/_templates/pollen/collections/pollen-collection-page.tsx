@@ -23,9 +23,10 @@ export function PollenCollectionPage({
       {/* Hero */}
       {collection.imageUrl ? (
         <div className="relative h-[45vh] min-h-[320px] overflow-hidden">
+          {/* M-6: alt="" — collection name is the visible h1 below */}
           <Image
             src={collection.imageUrl}
-            alt={collection.name}
+            alt=""
             fill
             className="object-cover"
             priority
@@ -38,7 +39,8 @@ export function PollenCollectionPage({
                 href="/collections"
                 className="mb-4 inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-white"
               >
-                <ArrowLeft className="h-4 w-4" />
+                {/* N-1: aria-hidden on decorative ArrowLeft icon */}
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 All Collections
               </Link>
               <h1 className="text-4xl font-bold text-white md:text-5xl">
@@ -64,7 +66,8 @@ export function PollenCollectionPage({
                 href="/collections"
                 className="mb-4 inline-flex items-center gap-2 text-sm text-[#4c566a] transition-colors hover:text-[#215935]"
               >
-                <ArrowLeft className="h-4 w-4" />
+                {/* N-1: aria-hidden on decorative ArrowLeft icon */}
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 All Collections
               </Link>
               <p className="mb-2 mt-4 text-sm font-medium tracking-wider text-[#5e7747] uppercase">
@@ -95,7 +98,8 @@ export function PollenCollectionPage({
               href="/collections"
               className="mb-8 inline-flex items-center gap-2 text-sm text-[#4c566a] transition-colors hover:text-[#215935]"
             >
-              <ArrowLeft className="h-4 w-4" />
+              {/* N-1: aria-hidden on decorative ArrowLeft icon */}
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               All Collections
             </Link>
           </FadeIn>
@@ -127,9 +131,10 @@ export function PollenCollectionPage({
                   className="group flex flex-col overflow-hidden rounded-md border border-[#2a351f]/20 bg-white transition-shadow hover:shadow-md"
                 >
                   <div className="relative aspect-square overflow-hidden bg-[#f5f2ee]">
+                    {/* M-6: alt="" — product name is visible text in the link */}
                     <Image
                       src={product.images[0]?.url ?? "/placeholder.svg"}
-                      alt={product.name}
+                      alt=""
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -174,9 +179,10 @@ export function PollenCollectionPage({
                     className="group block overflow-hidden rounded-md border border-[#2a351f]/10 bg-white shadow-sm transition-shadow hover:shadow-md"
                   >
                     <div className="relative aspect-video overflow-hidden bg-[#f5f2ee]">
+                      {/* M-6: alt="" — collection name is visible text in the link */}
                       <Image
                         src={col.imageUrl ?? "/placeholder.svg"}
-                        alt={col.name}
+                        alt=""
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -191,7 +197,11 @@ export function PollenCollectionPage({
                           {count} {count === 1 ? "product" : "products"}
                         </p>
                       </div>
-                      <ArrowRight className="h-4 w-4 text-[#215935] transition-transform group-hover:translate-x-1" />
+                      {/* N-1: aria-hidden on decorative ArrowRight icon */}
+                      <ArrowRight
+                        className="h-4 w-4 text-[#215935] transition-transform group-hover:translate-x-1"
+                        aria-hidden="true"
+                      />
                     </div>
                   </Link>
                 );

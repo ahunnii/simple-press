@@ -54,7 +54,7 @@ export function SledgeTestimonials({
       <div className="sl-container grid grid-cols-1 items-center gap-12 md:grid-cols-2">
         {/* Left: text side */}
         <div>
-          <h2 className="sl-heading-xl font-heading font-bold">
+          <h2 className="sl-heading-xl font-heading">
             {heading ?? "Testimonials"}
           </h2>
 
@@ -74,7 +74,7 @@ export function SledgeTestimonials({
                 )}
               >
                 {/* Red accent bar + italic quote */}
-                <div className="sl-quote-bar">
+                <div className="">
                   <p className="sl-quote-body font-sans italic">
                     &ldquo;{t.text}&rdquo;
                   </p>
@@ -138,7 +138,7 @@ export function SledgeTestimonials({
           <div className="sl-media-frame sl-media-frame-green">
             <Image
               src={image}
-              alt="Featured product"
+              alt=""
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"

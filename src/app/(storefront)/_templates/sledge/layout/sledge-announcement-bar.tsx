@@ -23,35 +23,34 @@ export function SledgeAnnouncementBar({
   const href = rawHref && rawHref.length > 0 ? rawHref : "/shop";
   const isExternal = /^https?:\/\//i.test(href);
 
+  // Side obs #2: replaced inline style={{ color }} with Tailwind classes.
+  // coral on the dark announcement bar passes contrast (6.35:1) — no need
+  // to switch to coral-aa here.
   const linkClassName =
-    "ml-3 inline-flex shrink-0 items-center font-sans text-xs tracking-[0.16em] uppercase underline underline-offset-[3px] transition-opacity hover:opacity-70";
+    "ml-3 inline-flex shrink-0 items-center font-sans text-xs tracking-[0.16em] text-[var(--sl-coral)] uppercase underline underline-offset-[3px] transition-opacity hover:opacity-70";
 
   return (
     <div className="sl-announcement-bar" role="region" aria-label="Promotion">
       <p className="text-center font-sans text-xs leading-relaxed tracking-[0.12em] uppercase">
-        <span style={{ color: "rgba(255,255,255,0.92)" }}>
-          {data.bannerText}
-        </span>
-        <span style={{ color: "rgba(255,255,255,0.55)" }}> · Code: </span>
-        <span className="font-semibold" style={{ color: "var(--sl-coral)" }}>
-          {data.code}
-        </span>
+        {/* Side obs #2: was style={{ color: "rgba(255,255,255,0.92)" }} */}
+        <span className="text-white/[0.92]">{data.bannerText}</span>
+        {/* Side obs #2: was style={{ color: "rgba(255,255,255,0.55)" }} */}
+        <span className="text-white/55"> · Code: </span>
+        {/* Side obs #2: was style={{ color: "var(--sl-coral)" }} */}
+        <span className="font-semibold text-[var(--sl-coral)]">{data.code}</span>
         {isExternal ? (
           <a
             href={href}
             className={linkClassName}
-            style={{ color: "var(--sl-coral)" }}
             target="_blank"
             rel="noopener noreferrer"
           >
             Shop →
+            {/* M-10: warn screen-reader users that the link opens in a new tab */}
+            <span className="sr-only"> (opens in new tab)</span>
           </a>
         ) : (
-          <Link
-            href={href}
-            className={linkClassName}
-            style={{ color: "var(--sl-coral)" }}
-          >
+          <Link href={href} className={linkClassName}>
             Shop →
           </Link>
         )}

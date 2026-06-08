@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,7 +23,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
@@ -47,28 +47,113 @@ const MOBILE_ACCOUNT_LINKS = [
   { href: "/account/preferences", label: "Preferences", icon: Bell },
 ] as const;
 
-const mobileNavItemVariants = {
-  closed: { opacity: 0, y: 16 },
-  open: { opacity: 1, y: 0 },
-};
-
-const mobileNavListVariants = {
-  closed: {},
-  open: {
-    transition: { staggerChildren: 0.05, delayChildren: 0.08 },
-  },
-};
+/** Returns all keyboard-focusable elements inside `container`. */
+function getFocusables(container: HTMLElement): HTMLElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  ).filter((el) => !el.closest("[inert]"));
+}
 
 export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const pathname = usePathname();
+  const shouldReduceMotion = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const [expandedMobile, setExpandedMobile] = useState<Set<number>>(new Set());
+
+  // Refs for focus management
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const overlayCloseRef = useRef<HTMLButtonElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const accountMenuId = useId();
+  const overlayId = useId();
 
+  // --- Reduced-motion variants ---
+  const motionDuration = shouldReduceMotion ? 0 : 0.25;
+  const motionSlideDuration = shouldReduceMotion ? 0 : 0.3;
+  const mobileNavListVariants = {
+    closed: {},
+    open: shouldReduceMotion
+      ? {}
+      : { transition: { staggerChildren: 0.05, delayChildren: 0.08 } },
+  };
+  const mobileNavItemVariants = shouldReduceMotion
+    ? { closed: { opacity: 1, y: 0 }, open: { opacity: 1, y: 0 } }
+    : { closed: { opacity: 0, y: 16 }, open: { opacity: 1, y: 0 } };
+
+  // --- Focus management: move focus into overlay on open ---
+  const wasMobileOpenRef = useRef(false);
+  useEffect(() => {
+    if (mobileOpen) {
+      wasMobileOpenRef.current = true;
+      // Small timeout so AnimatePresence has mounted the overlay
+      const t = setTimeout(() => {
+        overlayCloseRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(t);
+    } else if (wasMobileOpenRef.current) {
+      // Only restore focus when the menu was actually open (not on mount)
+      wasMobileOpenRef.current = false;
+      hamburgerRef.current?.focus();
+    }
+  }, [mobileOpen]);
+
+  // --- Inert background elements while mobile overlay is open ---
+  useEffect(() => {
+    const selectors = [
+      "main#main-content",
+      "footer",
+      ".sl-announcement-bar",
+      "header.sl-header",
+    ];
+    if (mobileOpen) {
+      const els = selectors.flatMap((s) =>
+        Array.from(document.querySelectorAll<HTMLElement>(s)),
+      );
+      els.forEach((el) => {
+        el.inert = true;
+      });
+      return () => {
+        els.forEach((el) => {
+          el.inert = false;
+        });
+      };
+    }
+  }, [mobileOpen]);
+
+  // --- Tab trap inside the mobile overlay ---
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const overlay = overlayRef.current;
+      if (!overlay) return;
+      const focusables = getFocusables(overlay);
+      if (!focusables.length) return;
+      const first = focusables[0]!;
+      const last = focusables[focusables.length - 1]!;
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
+  // --- Escape key: close dropdowns / account menu / mobile menu ---
   useEffect(() => {
     if (openDropdown === null) return;
     const onKey = (e: KeyboardEvent) => {
@@ -158,10 +243,10 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     });
   };
 
-  const closeMobileMenu = () => {
+  const closeMobileMenu = useCallback(() => {
     setAccountMenuOpen(false);
     setMobileOpen(false);
-  };
+  }, []);
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
@@ -264,7 +349,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
                 className="overflow-hidden"
               >
                 <div className="pb-3 pl-2">
@@ -286,6 +371,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                       )}
                     >
                       {child.label}
+                      {child.external ? (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      ) : null}
                     </Link>
                   ))}
                 </div>
@@ -313,6 +401,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
           )}
         >
           {link.label}
+          {link.external ? (
+            <span className="sr-only"> (opens in new tab)</span>
+          ) : null}
         </Link>
       </motion.div>
     );
@@ -324,12 +415,16 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
         <div className="relative mx-auto flex h-[88px] w-full max-w-7xl items-center justify-between px-4 sm:h-[120px] sm:px-6">
           {/* Left: menu (mobile) / logo (desktop) */}
           <div className="z-10 flex min-w-[4.5rem] items-center justify-start sm:min-w-[5rem] md:min-w-0 md:flex-1">
+            {/* S-4: hamburger ref; aria-controls + aria-haspopup="dialog" */}
             <Button
+              ref={hamburgerRef}
               variant="ghost"
               size="icon"
               className="h-9 w-9 rounded-none border border-white/20 text-white/80 md:hidden"
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
+              aria-controls={overlayId}
+              aria-haspopup="dialog"
               onClick={() => setMobileOpen((open) => !open)}
             >
               {mobileOpen ? (
@@ -363,18 +458,27 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
               className="hidden flex-nowrap items-center gap-[43.75px] px-7 md:flex lg:gap-10"
               aria-label="Primary navigation"
             >
-              {navItems.map((link, i) =>
-                link.children?.length ? (
+              {navItems.map((link, i) => {
+                const dropdownId = `sl-dropdown-${i}`;
+                return link.children?.length ? (
+                  /* M-6: onBlur closes dropdown when focus leaves wrapper */
                   <div
                     key={link.href + link.label}
                     className="relative"
                     onMouseEnter={() => setOpenDropdown(i)}
                     onMouseLeave={() => setOpenDropdown(null)}
+                    onBlur={(e) => {
+                      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                        setOpenDropdown(null);
+                      }
+                    }}
                   >
+                    {/* M-6: aria-controls pointing at the dropdown panel */}
                     <button
                       type="button"
                       aria-haspopup="true"
                       aria-expanded={openDropdown === i}
+                      aria-controls={dropdownId}
                       onClick={() =>
                         setOpenDropdown(openDropdown === i ? null : i)
                       }
@@ -396,7 +500,10 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     </button>
 
                     {openDropdown === i && (
-                      <div className="absolute top-full left-0 z-10 pt-2">
+                      <div
+                        id={dropdownId}
+                        className="absolute top-full left-0 z-10 pt-2"
+                      >
                         <div className="sl-dropdown-panel min-w-[200px] overflow-hidden rounded-none py-1 shadow-lg">
                           {link.children.map((child) => (
                             <Link
@@ -418,6 +525,13 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                               )}
                             >
                               {child.label}
+                              {/* M-10: warn when opening in new tab */}
+                              {child.external ? (
+                                <span className="sr-only">
+                                  {" "}
+                                  (opens in new tab)
+                                </span>
+                              ) : null}
                             </Link>
                           ))}
                         </div>
@@ -439,25 +553,36 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     )}
                   >
                     {link.label}
+                    {/* M-10: warn when opening in new tab */}
+                    {link.external ? (
+                      <span className="sr-only"> (opens in new tab)</span>
+                    ) : null}
                   </Link>
-                ),
-              )}
+                );
+              })}
             </nav>
 
             <div className="hidden md:block">
               {session?.user ? userMenu : authLink}
             </div>
 
+            {/* M-8: dynamic aria-label includes item count; badge is aria-hidden */}
             <Link
               href="/cart"
-              aria-label="View cart"
+              aria-label={
+                itemCount > 0
+                  ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                  : "View cart"
+              }
               className="relative flex items-center text-white/80 transition-opacity hover:opacity-70"
             >
               <ShoppingBag className="h-[25px] w-[25px]" strokeWidth={1.4} />
               {itemCount > 0 && (
                 <motion.span
-                  initial={{ scale: 0 }}
+                  /* S-4: skip initial pop animation under reduced motion */
+                  initial={shouldReduceMotion ? false : { scale: 0 }}
                   animate={{ scale: 1 }}
+                  aria-hidden="true"
                   className="sl-cart-badge absolute -top-2.5 -right-2.5 flex h-5 w-5 items-center justify-center rounded-full text-[11.25px] font-semibold"
                 >
                   {itemCount}
@@ -472,6 +597,8 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
       <AnimatePresence>
         {mobileOpen ? (
           <motion.div
+            ref={overlayRef}
+            id={overlayId}
             key="mobile-menu"
             role="dialog"
             aria-modal="true"
@@ -480,14 +607,17 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: motionDuration }}
           >
             <motion.div
               className="flex min-h-0 flex-1 flex-col"
-              initial={{ y: 24 }}
+              initial={{ y: shouldReduceMotion ? 0 : 24 }}
               animate={{ y: 0 }}
-              exit={{ y: 16 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              exit={{ y: shouldReduceMotion ? 0 : 16 }}
+              transition={{
+                duration: motionSlideDuration,
+                ease: [0.16, 1, 0.3, 1],
+              }}
             >
               {/* Top: logo + close */}
               <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-4 sm:px-6">
@@ -499,7 +629,9 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                 >
                   {brand}
                 </Link>
+                {/* C-2: close button gets focus on open via overlayCloseRef */}
                 <button
+                  ref={overlayCloseRef}
                   type="button"
                   onClick={closeMobileMenu}
                   aria-label="Close menu"
@@ -524,19 +656,20 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
               <div className="relative shrink-0 border-t border-white/10 px-5 py-4 sm:px-6">
                 <AnimatePresence>
                   {accountMenuOpen && session?.user ? (
-                    <motion.div
+                    /* S-5: plain nav + ul instead of role="menu" */
+                    <motion.nav
                       ref={accountMenuRef}
                       id={accountMenuId}
-                      role="menu"
                       aria-label="Account menu"
-                      initial={{ opacity: 0, y: 12 }}
+                      initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 12 }}
-                      transition={{ duration: 0.2 }}
+                      exit={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
+                      transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
                       className="absolute right-5 bottom-full left-5 mb-2 overflow-hidden rounded-sm border border-white/15 bg-[#1f1f1f] shadow-lg sm:right-6 sm:left-6"
                     >
                       <div className="border-b border-white/10 px-4 py-3">
-                        <p className="font-sans text-[10px] tracking-[0.18em] text-white/45 uppercase">
+                        {/* M-12: raised from text-white/45 to text-white/60 */}
+                        <p className="font-sans text-[10px] tracking-[0.18em] text-white/60 uppercase">
                           Signed in as
                         </p>
                         <p className="mt-1 truncate font-sans text-sm text-white/85">
@@ -544,29 +677,32 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                         </p>
                       </div>
                       <ul className="py-1">
-                        {MOBILE_ACCOUNT_LINKS.map(({ href, label, icon: Icon }) => (
-                          <li key={href} role="none">
-                            <Link
-                              href={href}
-                              role="menuitem"
-                              onClick={closeMobileMenu}
-                              className={cn(
-                                "flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] uppercase transition-colors hover:bg-white/5",
-                                isLinkActive(href)
-                                  ? "text-[var(--sl-coral)]"
-                                  : "text-white/80",
-                              )}
-                            >
-                              <Icon className="h-4 w-4 shrink-0" aria-hidden />
-                              {label}
-                            </Link>
-                          </li>
-                        ))}
+                        {MOBILE_ACCOUNT_LINKS.map(
+                          ({ href, label, icon: Icon }) => (
+                            <li key={href}>
+                              <Link
+                                href={href}
+                                onClick={closeMobileMenu}
+                                className={cn(
+                                  "flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] uppercase transition-colors hover:bg-white/5",
+                                  isLinkActive(href)
+                                    ? "text-[var(--sl-coral)]"
+                                    : "text-white/80",
+                                )}
+                              >
+                                <Icon
+                                  className="h-4 w-4 shrink-0"
+                                  aria-hidden
+                                />
+                                {label}
+                              </Link>
+                            </li>
+                          ),
+                        )}
                         {showAdminLink ? (
-                          <li role="none">
+                          <li>
                             <Link
                               href="/admin"
-                              role="menuitem"
                               onClick={closeMobileMenu}
                               className="flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/80 uppercase transition-colors hover:bg-white/5"
                             >
@@ -578,32 +714,43 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                             </Link>
                           </li>
                         ) : null}
-                        <li role="none" className="border-t border-white/10">
+                        <li className="border-t border-white/10">
                           <Link
                             href="/auth/sign-out"
-                            role="menuitem"
                             onClick={closeMobileMenu}
                             className="flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/80 uppercase transition-colors hover:bg-white/5"
                           >
-                            <IconLogout className="h-4 w-4 shrink-0" aria-hidden />
+                            <IconLogout
+                              className="h-4 w-4 shrink-0"
+                              aria-hidden
+                            />
                             Sign out
                           </Link>
                         </li>
                       </ul>
-                    </motion.div>
+                    </motion.nav>
                   ) : null}
                 </AnimatePresence>
 
                 <div className="grid grid-cols-2 gap-3">
+                  {/* M-8: mobile cart link — badge is aria-hidden */}
                   <Link
                     href="/cart"
                     onClick={closeMobileMenu}
+                    aria-label={
+                      itemCount > 0
+                        ? `Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                        : "Cart"
+                    }
                     className="relative flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
                   >
                     <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-                    Cart
+                    <span aria-hidden="true">Cart</span>
                     {itemCount > 0 ? (
-                      <span className="sl-cart-badge ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold">
+                      <span
+                        aria-hidden="true"
+                        className="sl-cart-badge ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
+                      >
                         {itemCount}
                       </span>
                     ) : null}
@@ -613,9 +760,10 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     <button
                       type="button"
                       id={`${accountMenuId}-trigger`}
-                      aria-haspopup="menu"
+                      /* S-5: changed aria-haspopup from "menu" to "true" */
+                      aria-haspopup="true"
                       aria-expanded={accountMenuOpen}
-                      aria-controls={accountMenuOpen ? accountMenuId : undefined}
+                      aria-controls={accountMenuId}
                       onClick={() => setAccountMenuOpen((open) => !open)}
                       className={cn(
                         "flex items-center justify-center gap-2 rounded-sm border px-4 py-3 font-sans text-xs tracking-[0.14em] uppercase transition-opacity hover:opacity-80",

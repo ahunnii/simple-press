@@ -54,7 +54,7 @@ export async function PollenAboutPage({
             >
               <Image
                 src={f["pollen.about.image"]!}
-                alt="Lush green plants in a greenhouse or conservatory"
+                alt=""
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -81,7 +81,7 @@ export async function PollenAboutPage({
             </FadeIn>
             <FadeIn direction="left" delay={0.1} className="flex-1">
               {f["pollen.about.owner-subheader"] && (
-                <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
+                <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e7747] uppercase">
                   {f["pollen.about.owner-subheader"]}
                 </p>
               )}
@@ -94,7 +94,7 @@ export async function PollenAboutPage({
                 </h3>
               )}
               {f["pollen.about.owner-role"] && (
-                <p className="mb-6 text-sm font-medium tracking-wider text-[#5e8b4a] uppercase">
+                <p className="mb-6 text-sm font-medium tracking-wider text-[#5e7747] uppercase">
                   {f["pollen.about.owner-role"]}
                 </p>
               )}
@@ -121,7 +121,7 @@ export async function PollenAboutPage({
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <FadeIn direction="up">
               <div className="mb-12 text-center">
-                <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e8b4a] uppercase">
+                <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e7747] uppercase">
                   Kind Words
                 </p>
                 <h2 className="text-3xl font-bold text-[#374151] md:text-4xl">
@@ -164,7 +164,7 @@ export async function PollenAboutPage({
             <div className="mt-10 text-center">
               <Link
                 href="/testimonials"
-                className="inline-flex items-center font-semibold text-[#5e8b4a] hover:underline"
+                className="inline-flex items-center font-semibold text-[#215935] hover:underline"
               >
                 View all testimonials
               </Link>

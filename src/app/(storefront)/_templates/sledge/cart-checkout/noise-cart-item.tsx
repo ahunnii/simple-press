@@ -14,9 +14,10 @@ type Props = {
 
 export function NoiseCartItem({ item }: Props) {
   const { updateQuantity, removeItem } = useCart();
-  const { productId, variantId, productName, variantName, price, quantity, imageUrl, sku } = item;
+  const { productId, productSlug, variantId, productName, variantName, price, quantity, imageUrl, sku } = item;
 
   const lineTotal = price * quantity;
+  const productHref = `/shop/${productSlug ?? productId}`;
 
   return (
     <div className="border-b border-[var(--sl-border)] bg-white py-5">
@@ -33,7 +34,7 @@ export function NoiseCartItem({ item }: Props) {
 
         <div className="flex min-w-0 flex-col gap-1.5">
           <Link
-            href={`/shop/${productId}`}
+            href={productHref}
             className="font-sans text-base leading-tight tracking-[0.04em] text-[var(--sl-ink)] uppercase transition-opacity hover:opacity-70 md:text-lg"
           >
             {productName}
@@ -49,20 +50,28 @@ export function NoiseCartItem({ item }: Props) {
               </>
             )}
           </div>
+          {/* C-3: coral on white → coral-aa */}
           <button
             onClick={() => removeItem(productId, variantId)}
-            className="mt-1 w-fit font-sans text-xs tracking-[0.12em] text-[var(--sl-coral)] uppercase transition-opacity hover:opacity-60"
+            className="mt-1 w-fit font-sans text-xs tracking-[0.12em] text-[var(--sl-coral-aa)] uppercase transition-opacity hover:opacity-60"
             aria-label={`Remove ${productName}`}
           >
             Remove
           </button>
         </div>
 
+        {/* M-4: sr-only labels for price and total cells */}
         <div className="self-center font-sans text-sm tracking-[0.04em] whitespace-nowrap text-[var(--sl-ink)]">
+          <span className="sr-only">Price: </span>
           {formatPrice(price)}
         </div>
 
-        <div className="flex items-center self-center overflow-hidden rounded-sm border border-[var(--sl-border-input)]">
+        {/* S-3: quantity stepper group */}
+        <div
+          role="group"
+          aria-label={`Quantity for ${productName}`}
+          className="flex items-center self-center overflow-hidden rounded-sm border border-[var(--sl-border-input)]"
+        >
           <button
             className="sl-qty-btn flex items-center justify-center font-sans transition-colors hover:bg-[var(--sl-cream)]"
             onClick={() => updateQuantity(productId, variantId, quantity - 1)}
@@ -71,7 +80,10 @@ export function NoiseCartItem({ item }: Props) {
           >
             <Minus className="size-3" />
           </button>
-          <span className="sl-qty-input text-center font-sans text-sm">
+          <span
+            className="sl-qty-input text-center font-sans text-sm"
+            aria-live="polite"
+          >
             {quantity}
           </span>
           <button
@@ -84,6 +96,7 @@ export function NoiseCartItem({ item }: Props) {
         </div>
 
         <div className="self-center font-sans text-sm tracking-[0.04em] whitespace-nowrap text-[var(--sl-ink)]">
+          <span className="sr-only">Line total: </span>
           {formatPrice(lineTotal)}
         </div>
 
@@ -111,7 +124,7 @@ export function NoiseCartItem({ item }: Props) {
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 flex-col gap-1">
               <Link
-                href={`/shop/${productId}`}
+                href={productHref}
                 className="font-sans text-base leading-tight tracking-[0.04em] text-[var(--sl-ink)] uppercase transition-opacity hover:opacity-70"
               >
                 {productName}
@@ -132,7 +145,12 @@ export function NoiseCartItem({ item }: Props) {
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center overflow-hidden rounded-sm border border-[var(--sl-border-input)]">
+            {/* S-3: mobile quantity stepper group */}
+            <div
+              role="group"
+              aria-label={`Quantity for ${productName}`}
+              className="flex items-center overflow-hidden rounded-sm border border-[var(--sl-border-input)]"
+            >
               <button
                 className="sl-qty-btn-sm flex items-center justify-center font-sans transition-colors hover:bg-[var(--sl-cream)]"
                 onClick={() => updateQuantity(productId, variantId, quantity - 1)}
@@ -141,7 +159,10 @@ export function NoiseCartItem({ item }: Props) {
               >
                 <Minus className="size-3" />
               </button>
-              <span className="sl-qty-input-sm text-center font-sans text-sm">
+              <span
+                className="sl-qty-input-sm text-center font-sans text-sm"
+                aria-live="polite"
+              >
                 {quantity}
               </span>
               <button

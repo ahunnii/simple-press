@@ -12,7 +12,8 @@ export function DarkTrendShopPage({
       <Separator className="my-10" />
       {business.products?.length === 0 ? (
         <div className="py-16 text-center">
-          <p className="text-lg text-gray-500">
+          {/* S-11: text-gray-500 → text-white/60 for contrast */}
+          <p className="text-lg text-white/60">
             No products available at this time.
           </p>
         </div>

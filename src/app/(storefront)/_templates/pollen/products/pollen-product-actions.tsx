@@ -38,6 +38,11 @@ export function PollenProductActions({
 
   return (
     <>
+      {/* S-2: live region for add-to-cart announcement */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {isAdded ? `${product.name} added to cart` : ""}
+      </span>
+
       {Object.keys(variantOptions).length > 0 ? (
         <PollenVariantSelector
           product={product}
@@ -48,12 +53,19 @@ export function PollenProductActions({
           <p className="font-semibold text-amber-700 dark:text-amber-300">
             Coming Soon
           </p>
-          <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+          {/* M-7: amber-600 → amber-700 */}
+          <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
       ) : !inStock ? (
-        <Button size="lg" disabled className="flex">
+        /* S-5: keep focusable — remove disabled, add aria-disabled + no-op onClick */
+        <Button
+          size="lg"
+          aria-disabled="true"
+          onClick={(e) => e.preventDefault()}
+          className="flex opacity-60"
+        >
           Out of Stock
         </Button>
       ) : (
@@ -61,7 +73,12 @@ export function PollenProductActions({
           {canAddMore && (
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <Label>Quantity</Label>
-              <div className="flex items-center gap-1 rounded-md border border-[#2a351f]/20">
+              {/* S-3: wrap stepper in role="group" with aria-label */}
+              <div
+                role="group"
+                aria-label={`Quantity for ${product.name}`}
+                className="flex items-center gap-1 rounded-md border border-[#2a351f]/20"
+              >
                 <Button
                   variant="ghost"
                   size="icon"
@@ -70,9 +87,13 @@ export function PollenProductActions({
                   disabled={quantity <= 1}
                   aria-label="Decrease quantity"
                 >
-                  <Minus className="size-4" />
+                  <Minus className="size-4" aria-hidden="true" />
                 </Button>
-                <span className="w-10 text-center text-base font-semibold text-[#2a351f]">
+                {/* S-3: aria-live on the quantity value span */}
+                <span
+                  className="w-10 text-center text-base font-semibold text-[#2a351f]"
+                  aria-live="polite"
+                >
                   {quantity}
                 </span>
                 <Button
@@ -82,7 +103,7 @@ export function PollenProductActions({
                   onClick={() => handleIncrement()}
                   aria-label="Increase quantity"
                 >
-                  <Plus className="size-4" />
+                  <Plus className="size-4" aria-hidden="true" />
                 </Button>
               </div>
               <Button
@@ -92,12 +113,12 @@ export function PollenProductActions({
               >
                 {isAdded ? (
                   <>
-                    <Check className="h-4 w-4" />
+                    <Check className="h-4 w-4" aria-hidden="true" />
                     Added to Cart
                   </>
                 ) : (
                   <>
-                    <ShoppingBag className="size-5" />
+                    <ShoppingBag className="size-5" aria-hidden="true" />
                     Add to Cart — {formatPrice(displayPrice)}
                   </>
                 )}
@@ -105,8 +126,9 @@ export function PollenProductActions({
             </div>
           )}
 
+          {/* M-7: amber-600 → amber-700 */}
           {!canAddMore && inStock && (
-            <p className="mt-3 text-center text-sm text-amber-600">
+            <p className="mt-3 text-center text-sm text-amber-700">
               You have the maximum available quantity in your cart
             </p>
           )}

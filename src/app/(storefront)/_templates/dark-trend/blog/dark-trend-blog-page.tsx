@@ -86,24 +86,27 @@ export function DarkTrendBlogPage({ pages, customFields }: Props) {
       sectionAttrs={sectionGroupAttr("blog", "listing")}
     >
       <div className="mb-12">
-        <div className="mx-auto flex max-w-md items-center gap-3 border-b border-white/20 pb-2">
-          <Search className="h-4 w-4 shrink-0 text-white/50" />
+        {/* S-10: removed ring-0 suppression; wrapper gets focus-within border change */}
+        <div className="mx-auto flex max-w-md items-center gap-3 border-b border-white/20 pb-2 focus-within:border-white">
+          {/* N-1: decorative icon */}
+          <Search aria-hidden="true" className="h-4 w-4 shrink-0 text-white/50" />
           <Input
             type="search"
             placeholder="Search posts..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             aria-label="Search blog posts"
-            className="border-none bg-transparent px-0 text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="border-none bg-transparent px-0 text-white placeholder:text-white/40"
           />
         </div>
-        {query.trim() ? (
-          <p className="mt-3 text-center text-sm text-white/60">
-            {filtered.length === 0
+        {/* M-6: role="status" so count updates are announced */}
+        <p role="status" className="mt-3 text-center text-sm text-white/60">
+          {query.trim()
+            ? filtered.length === 0
               ? "No posts match your search."
-              : `${filtered.length} post${filtered.length !== 1 ? "s" : ""} found`}
-          </p>
-        ) : null}
+              : `${filtered.length} post${filtered.length !== 1 ? "s" : ""} found`
+            : ""}
+        </p>
       </div>
 
       {featured && !query.trim() ? (

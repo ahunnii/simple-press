@@ -2,21 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ShoppingBag } from "lucide-react";
 
 import type { Product } from "~/types";
 import { computeSavingsLabel, formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
-import { Button } from "~/components/ui/button";
 
 type Props = {
   product: Product;
   index: number;
 };
 export function DarkTrendProductCard({ product }: Props) {
-  const router = useRouter();
-
   const productStatus = checkProductStatus({
     price: product.price,
     compareAtPrice: product.compareAtPrice,
@@ -52,7 +48,7 @@ export function DarkTrendProductCard({ product }: Props) {
             />
           ) : (
             <div className="text-muted-foreground flex h-full w-full items-center justify-center">
-              <ShoppingBag className="h-12 w-12" />
+              <ShoppingBag className="h-12 w-12" aria-hidden="true" />
             </div>
           )}
 
@@ -73,17 +69,15 @@ export function DarkTrendProductCard({ product }: Props) {
             </div>
           )}
 
-          {/* Quick Add Button */}
-          {/* {productStatus.isAvalable && ( */}
-          <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-            <Button
-              onClick={() => router.push(`/shop/${product.slug}`)}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 font-heading w-full tracking-wider"
-            >
+          {/* Decorative hover overlay — the whole card is a link; this span is aria-hidden */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+          >
+            <span className="bg-primary text-primary-foreground font-heading flex w-full items-center justify-center rounded-md px-4 py-2 text-sm tracking-wider">
               VIEW PRODUCT
-            </Button>
+            </span>
           </div>
-          {/* )} */}
         </div>
 
         {/* Product Info */}

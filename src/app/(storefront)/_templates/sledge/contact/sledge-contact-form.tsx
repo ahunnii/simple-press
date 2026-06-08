@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 
 import { useContactForm } from "~/hooks/use-contact-form";
@@ -32,15 +33,29 @@ export function SledgeContactForm({ formTitle }: Props) {
     resetSuccess,
   } = useContactForm({ messageMaxLength: 400 });
 
+  // S-12: focus the success heading when isSuccess becomes true
+  const successRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (isSuccess && successRef.current) {
+      successRef.current.focus();
+    }
+  }, [isSuccess]);
+
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
 
   if (isSuccess) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-        <p className="sl-page-title-md font-heading text-(--sl-coral) uppercase">
+        {/* S-12: h2 (form title is h2 context); focus on success; C-3: large heading → AA accent token */}
+        <h2
+          ref={successRef}
+          tabIndex={-1}
+          className="sl-page-title-md font-heading text-[var(--sl-coral-aa)] uppercase outline-none"
+        >
           Message sent!
-        </p>
+        </h2>
         <p className="sl-eyebrow text-sm leading-[1.7]">
           Thank you for reaching out. We&apos;ll get back to you soon.
         </p>
@@ -57,7 +72,8 @@ export function SledgeContactForm({ formTitle }: Props) {
 
   return (
     <div>
-      <h2 className="sl-rail-heading font-heading mb-8 font-semibold text-(--sl-orange) uppercase">
+      {/* C-3: form heading is large (sl-rail-heading ≥24px) → AA accent token */}
+      <h2 className="sl-rail-heading font-heading mb-8 font-semibold text-[var(--sl-coral-aa)] uppercase">
         {formTitle}
       </h2>
 

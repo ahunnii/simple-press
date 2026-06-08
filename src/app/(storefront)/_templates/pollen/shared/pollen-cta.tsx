@@ -38,7 +38,7 @@ export function PollenCallToAction({
         sizes="100vw"
         priority={false}
       />
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 bg-black/50" />
 
       <div className="relative z-10 flex min-h-[30vh] items-center justify-center px-4 sm:px-6 lg:px-8">
         <FadeIn direction="up">
@@ -62,7 +62,7 @@ export function PollenCallToAction({
                   size: "lg",
                   variant: "default",
                 }),
-                `rounded-full bg-[#5e8b4a] px-8 py-6 text-base font-medium text-white shadow-lg hover:bg-[#5e8b4a]/90!`,
+                `rounded-full bg-[#215935] px-8 py-6 text-base font-medium text-white shadow-lg hover:bg-[#1a4729]!`,
               )}
             >
               {buttonText}

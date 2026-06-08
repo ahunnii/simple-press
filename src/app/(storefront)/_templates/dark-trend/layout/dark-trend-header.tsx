@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -43,6 +43,20 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
   const { data: session, isPending } = authClient.useSession();
   const { itemCount, total } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  // Close on Escape and return focus to hamburger (WCAG 2.4.3)
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setMobileMenuOpen(false);
+        hamburgerRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [mobileMenuOpen]);
 
   const links =
     (business?.siteContent?.navigationItems as {
@@ -119,6 +133,7 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
                 <li key={href + label}>
                   <Link
                     href={href}
+                    aria-current={isActive ? "page" : undefined}
                     className={`relative py-1 text-sm font-semibold transition-colors ${
                       isActive ? "text-white" : "text-white/60 hover:text-white"
                     }`}
@@ -142,13 +157,12 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
           <Link
             href="/cart"
             className="flex items-center gap-2 text-white/90 transition-colors hover:text-white"
-            aria-label={`Cart with ${itemCount} items`}
+            aria-label={`Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}, total ${formatPrice(total)}`}
           >
-            <span className="text-sm font-medium">{formatPrice(total)}</span>
-            <ShoppingBag className="h-5 w-5" />
-            {itemCount > 0 && (
-              <span className="sr-only">({itemCount} items)</span>
-            )}
+            <span className="text-sm font-medium" aria-hidden="true">
+              {formatPrice(total)}
+            </span>
+            <ShoppingBag aria-hidden="true" className="h-5 w-5" />
           </Link>
           {isPending ? (
             <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
@@ -158,29 +172,36 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
             authActions
           )}
 
+          {/* Hamburger — ≥44px hit area via p-3 -m-3 (WCAG 2.5.5) */}
           <button
+            ref={hamburgerRef}
             type="button"
-            className="text-white/80 md:hidden"
+            className="-m-3 p-3 text-white/80 md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav"
           >
             {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
+              <X aria-hidden="true" className="h-5 w-5" />
             ) : (
-              <Menu className="h-5 w-5" />
+              <Menu aria-hidden="true" className="h-5 w-5" />
             )}
           </button>
         </div>
       </nav>
 
-      {/* Mobile menu */}
+      {/* Mobile menu — inert when closed so hidden links are removed from tab
+          order and SR reading order (WCAG 2.4.3 / 4.1.2) */}
       <div
+        id="mobile-nav"
         className={`overflow-hidden border-t border-white/10 transition-all duration-300 md:hidden ${
           mobileMenuOpen ? "max-h-[320px]" : "max-h-0 border-t-0"
         }`}
+        inert={!mobileMenuOpen || undefined}
       >
         <ul className="flex flex-col gap-1 px-6 py-4">
-          {NAV_LINKS.map(({ href, label }) => {
+          {links.map(({ href, label }) => {
             const isActive =
               href === "/"
                 ? pathname === "/"
@@ -189,6 +210,7 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
               <li key={href + label}>
                 <Link
                   href={href}
+                  aria-current={isActive ? "page" : undefined}
                   className={`block py-2 text-sm ${
                     isActive ? "text-white" : "text-white/70 hover:text-white"
                   }`}

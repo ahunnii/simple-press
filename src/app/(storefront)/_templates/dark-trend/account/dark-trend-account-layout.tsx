@@ -27,7 +27,8 @@ export function DarkTrendAccountLayout({ children, heading }: Props) {
     <>
       <section className="border-b border-white/10 bg-[#1A1A1A] py-14">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <p className="text-xs font-semibold tracking-[0.2em] text-white/40 uppercase">
+          {/* S-11: text-white/40 → text-white/60 for the "Account" eyebrow */}
+          <p className="text-xs font-semibold tracking-[0.2em] text-white/60 uppercase">
             Account
           </p>
           <h1 className="mt-2 text-4xl font-bold text-white">{heading}</h1>
@@ -47,10 +48,11 @@ export function DarkTrendAccountLayout({ children, heading }: Props) {
               <Link
                 key={href}
                 href={href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex shrink-0 items-center gap-2 rounded-sm px-4 py-2 text-sm font-medium transition-colors",
                   active
-                    ? "bg-violet-500 text-white"
+                    ? "bg-violet-600 text-white"
                     : "bg-white/10 text-white/70 hover:bg-white/15 hover:text-white",
                 )}
               >
@@ -72,11 +74,12 @@ export function DarkTrendAccountLayout({ children, heading }: Props) {
                   <li key={href}>
                     <Link
                       href={href}
+                      aria-current={active ? "page" : undefined}
                       className={cn(
                         "flex items-center gap-3 border-l-2 py-2.5 pl-3 pr-4 text-sm font-medium transition-colors",
                         active
                           ? "border-purple-500 text-purple-400"
-                          : "border-transparent text-white/40 hover:border-white/20 hover:text-white/70",
+                          : "border-transparent text-white/60 hover:border-white/20 hover:text-white/70",
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0" aria-hidden />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, Package } from "lucide-react";
@@ -28,6 +28,9 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
     payment_status: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // M-4: ref to focus the h1 once content is loaded
+  const headingRef = useRef<HTMLHeadingElement>(null);
 
   const sessionId = searchParams.get("session_id");
 
@@ -66,10 +69,18 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
     void fetchOrderDetails();
   }, [sessionId, clearCart]);
 
+  // M-4: focus the heading once loading is complete and sessionId is present
+  useEffect(() => {
+    if (!loading && sessionId) {
+      headingRef.current?.focus();
+    }
+  }, [loading, sessionId]);
+
   if (loading) {
     return (
       <div className="mx-auto max-w-2xl text-center">
-        <p className="text-white/70">Loading order details...</p>
+        {/* M-4: loading state announced via role="status" */}
+        <p role="status" className="text-white/70">Loading order details...</p>
       </div>
     );
   }
@@ -80,7 +91,7 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
         <p className="mb-4 text-white/70">No order found</p>
         <Button
           asChild
-          className="bg-violet-500 text-white hover:bg-violet-600"
+          className="bg-violet-600 text-white hover:bg-violet-700"
         >
           <Link href="/shop">Continue Shopping</Link>
         </Button>
@@ -93,9 +104,15 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
       {/* Success Header */}
       <div className="mb-12 text-center">
         <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20">
-          <CheckCircle className="h-12 w-12 text-green-400" />
+          {/* N-1: decorative icon */}
+          <CheckCircle aria-hidden="true" className="h-12 w-12 text-green-400" />
         </div>
-        <h1 className="mb-4 text-4xl font-bold text-white lg:text-5xl">
+        {/* M-4: tabIndex={-1} + ref so focus lands here after redirect */}
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="mb-4 text-4xl font-bold text-white lg:text-5xl"
+        >
           Order Confirmed!
         </h1>
         <p className="text-lg text-white/70">
@@ -106,22 +123,23 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
       {/* Order Details Card */}
       <div className="mb-8 rounded-sm bg-zinc-900/30 p-8">
         <div className="mb-6 flex items-start gap-4">
-          <Package className="h-6 w-6 shrink-0 text-purple-500" />
+          {/* N-1: decorative icon */}
+          <Package aria-hidden="true" className="h-6 w-6 shrink-0 text-purple-400" />
           <div className="flex-1">
             <h2 className="mb-3 text-xl font-semibold text-white">
               What happens next?
             </h2>
             <ul className="space-y-2 text-white/70">
               <li className="flex items-start gap-2">
-                <span className="text-purple-500">•</span>
+                <span className="text-purple-400">•</span>
                 <span>You&apos;ll receive an email confirmation shortly</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-purple-500">•</span>
+                <span className="text-purple-400">•</span>
                 <span>We&apos;ll notify you when your order ships</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-purple-500">•</span>
+                <span className="text-purple-400">•</span>
                 <span>Track your order status via email</span>
               </li>
             </ul>
@@ -148,9 +166,10 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
         >
           <Link href="/shop">Continue Shopping</Link>
         </Button>
+        {/* S-11: violet-600 */}
         <Button
           asChild
-          className="flex-1 bg-violet-500 font-medium text-white hover:bg-violet-600"
+          className="flex-1 bg-violet-600 font-medium text-white hover:bg-violet-700"
         >
           <Link href="/">Back to Home</Link>
         </Button>

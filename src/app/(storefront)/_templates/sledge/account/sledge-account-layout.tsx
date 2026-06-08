@@ -43,10 +43,11 @@ export function SledgeAccountLayout({ children, heading }: Props) {
               <Link
                 key={href}
                 href={href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex flex-shrink-0 items-center gap-1.5 rounded-sm px-3 py-2 font-sans text-[10px] tracking-[0.16em] uppercase transition-all",
                   active
-                    ? "sl-account-tab-active text-white"
+                    ? "sl-account-tab-active"
                     : "sl-account-tab-inactive",
                 )}
               >
@@ -67,8 +68,10 @@ export function SledgeAccountLayout({ children, heading }: Props) {
                   pathname === href || pathname.startsWith(`${href}/`);
                 return (
                   <li key={href}>
+                    {/* M-14: aria-current="page" on desktop sidebar nav active link */}
                     <Link
                       href={href}
+                      aria-current={active ? "page" : undefined}
                       className={cn(
                         "flex items-center gap-3 rounded-sm py-2.5 pr-4 pl-3 font-sans text-xs tracking-[0.16em] uppercase transition-colors",
                         active

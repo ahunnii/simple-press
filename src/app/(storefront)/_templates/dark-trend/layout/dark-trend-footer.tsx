@@ -35,15 +35,18 @@ export async function DarkTrendFooter({
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
             {business?.siteContent?.logoUrl ? (
-              <div className="relative aspect-video h-20 w-auto rounded-sm">
-                <Image
-                  src={business.siteContent.logoUrl}
-                  alt={business.name}
-                  sizes="(max-width: 768px) 100vw, 55px"
-                  fill
-                  className="object-cover"
-                />
-              </div>
+              // N-3: wrap logo image in a link (text fallback already is one)
+              <Link href="/" aria-label={`${business.name} home`}>
+                <div className="relative aspect-video h-20 w-auto rounded-sm">
+                  <Image
+                    src={business.siteContent.logoUrl}
+                    alt=""
+                    sizes="(max-width: 768px) 100vw, 55px"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </Link>
             ) : (
               <Link
                 href="/"
@@ -61,9 +64,10 @@ export async function DarkTrendFooter({
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold tracking-widest text-white uppercase">
+            {/* M-10: no h2 ancestor in footer — use <p> styled identically */}
+            <p className="text-xs font-semibold tracking-widest text-white uppercase">
               Navigate
-            </h3>
+            </p>
             <ul className="mt-4 flex flex-col gap-3">
               {(navigationItems ?? [
                 { href: "/shop", label: "Shop" },
@@ -85,9 +89,9 @@ export async function DarkTrendFooter({
           <div className="space-y-4">
             {(email ?? phone ?? address) && (
               <>
-                <h3 className="text-xs font-semibold tracking-widest text-white uppercase">
+                <p className="text-xs font-semibold tracking-widest text-white uppercase">
                   Reach Out
-                </h3>
+                </p>
                 <ul className="mt-4 flex flex-col gap-3 text-sm text-white/70">
                   {!!address && <li>{address}</li>}
                   {!!phone && (
@@ -114,9 +118,9 @@ export async function DarkTrendFooter({
               </>
             )}
 
-            <h3 className="text-xs font-semibold tracking-widest text-white uppercase">
+            <p className="text-xs font-semibold tracking-widest text-white uppercase">
               Follow Us On
-            </h3>
+            </p>
             <ul className="mt-4 flex flex-row gap-4">
               {socialLinks?.instagram && (
                 <li>
@@ -124,10 +128,12 @@ export async function DarkTrendFooter({
                     href={socialLinks.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Instagram"
+                    aria-label="Instagram (opens in new tab)"
                     className="text-white/70 transition-colors hover:text-white"
                   >
                     <svg
+                      aria-hidden="true"
+                      focusable="false"
                       width="22"
                       height="22"
                       fill="none"
@@ -164,10 +170,12 @@ export async function DarkTrendFooter({
                     href={socialLinks.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Facebook"
+                    aria-label="Facebook (opens in new tab)"
                     className="text-white/70 transition-colors hover:text-white"
                   >
                     <svg
+                      aria-hidden="true"
+                      focusable="false"
                       width="22"
                       height="22"
                       fill="none"
@@ -201,10 +209,12 @@ export async function DarkTrendFooter({
                     href={socialLinks.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Twitter"
+                    aria-label="Twitter (opens in new tab)"
                     className="text-white/70 transition-colors hover:text-white"
                   >
                     <svg
+                      aria-hidden="true"
+                      focusable="false"
                       width="22"
                       height="22"
                       fill="none"
@@ -243,7 +253,12 @@ export async function DarkTrendFooter({
         <div className="flex items-center gap-4">
           {policies?.map((policy, idx) => (
             <Fragment key={policy.id || idx}>
-              {!!idx && <span className="text-white/60"> | </span>}
+              {!!idx && (
+                <span aria-hidden="true" className="text-white/60">
+                  {" "}
+                  |{" "}
+                </span>
+              )}
               <p className="inline text-sm text-white/60">
                 <Link
                   href={policy.slug}

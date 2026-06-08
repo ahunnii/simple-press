@@ -52,7 +52,7 @@ export function DarkTrendProductPage({
           href="/shop"
           className="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center gap-2 text-sm transition-colors"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           Back to Shop
         </Link>
 
@@ -67,7 +67,7 @@ export function DarkTrendProductPage({
           <div className="flex flex-col">
             {/* Header */}
             <div className="mb-8">
-              <span className="text-primary mb-2 block text-sm font-semibold tracking-[0.2em] uppercase">
+              <span className="mb-2 block text-sm font-semibold tracking-[0.2em] uppercase text-purple-400">
                 {additionalFields?.productTagline?.trim() !== ""
                   ? additionalFields?.productTagline
                   : "Product"}
@@ -112,7 +112,7 @@ export function DarkTrendProductPage({
                     key={`${badge.label}-${i}`}
                     className="flex items-center gap-2 text-sm text-white/60"
                   >
-                    <badge.Icon className="text-primary h-4 w-4" />
+                    <badge.Icon className="h-4 w-4 text-purple-400" aria-hidden="true" />
                     <span>{badge.label}</span>
                   </div>
                 ))}

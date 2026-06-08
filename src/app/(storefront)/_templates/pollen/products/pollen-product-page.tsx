@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Minus, Plus, ShoppingBag } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
@@ -22,7 +22,6 @@ import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product
 
 import { PollenProductCard } from "../shared/pollen-product-card";
 import { PollenProductActions } from "./pollen-product-actions";
-import { PollenVariantSelector } from "./pollen-variant-selector";
 
 export function PollenProductPage({
   product,
@@ -30,16 +29,8 @@ export function PollenProductPage({
 }: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
-    inStock,
-    variantOptions,
     displayPrice,
     displayCompareAtPrice,
-    handleAddToCart,
-    canAddMore,
-    handleDecrement,
-    handleIncrement,
-    quantity,
-    setSelectedVariantId,
     additionalFields,
     isOnSale,
   } = useProduct(product);
@@ -48,17 +39,9 @@ export function PollenProductPage({
     productId: product.id,
   });
 
-  const [isAdded, setIsAdded] = useState(false);
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [product.slug]);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   const displayTrustBadges =
     additionalFields?.productFeatures &&
@@ -70,6 +53,7 @@ export function PollenProductPage({
     <PageTransition>
       <section className="mx-auto mt-28 max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <FadeIn direction="none" duration={0.3}>
+          {/* N-1: aria-hidden on decorative ArrowLeft icon */}
           <Button
             variant="ghost"
             size="sm"
@@ -77,7 +61,7 @@ export function PollenProductPage({
             className="mb-6 gap-1 text-[#4c566a] hover:text-[#215935]"
           >
             <Link href="/shop">
-              <ArrowLeft className="size-4" />
+              <ArrowLeft className="size-4" aria-hidden="true" />
               Back to Shop
             </Link>
           </Button>

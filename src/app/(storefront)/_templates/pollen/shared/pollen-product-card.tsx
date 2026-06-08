@@ -7,7 +7,8 @@ import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
+import { buttonVariants } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
 type Props = {
   product: Product;
@@ -42,9 +43,10 @@ export function PollenProductCard({ product }: Props) {
       className="group flex flex-col overflow-hidden rounded-md border border-[#2a351f]/20 bg-white transition-shadow hover:shadow-md"
     >
       <div className="relative aspect-square overflow-hidden bg-[#f5f2ee]">
+        {/* M-6: alt="" — name is already visible text in the link */}
         <Image
           src={productImage}
-          alt={product.name ?? "Product Image"}
+          alt=""
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -76,12 +78,16 @@ export function PollenProductCard({ product }: Props) {
               </span>
             )}
           </span>
-          <Button
-            size="sm"
-            className="bg-[#215935] text-white hover:bg-[#1a4729]"
+          {/* S-10: replace <Button> with styled <span> to avoid <button> inside <a> */}
+          <span
+            aria-hidden="true"
+            className={cn(
+              buttonVariants({ size: "sm" }),
+              "bg-[#215935] text-white hover:bg-[#1a4729]",
+            )}
           >
             View Product
-          </Button>
+          </span>
         </div>
       </div>
     </Link>
