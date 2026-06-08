@@ -302,6 +302,8 @@ exports.Prisma.CollectionScalarFieldEnum = {
   sortOrder: 'sortOrder',
   metaTitle: 'metaTitle',
   metaDescription: 'metaDescription',
+  metaKeywords: 'metaKeywords',
+  ogImage: 'ogImage',
   businessId: 'businessId'
 };
 

@@ -7,6 +7,7 @@ import {
   collectionCreateSchema,
   collectionModifyProductSchema,
   collectionProductOrderSchema,
+  collectionSetProductsSchema,
   collectionUpdateSchema,
 } from "~/lib/validators/collections";
 import {
@@ -131,7 +132,8 @@ export const collectionsRouter = createTRPCRouter({
       const { businessId } = ctx;
 
       // Generate slug
-      let slug = generateCollectionSlug(input.name);
+      const baseSlug = generateCollectionSlug(input.name) || "collection";
+      let slug = baseSlug;
 
       // Ensure unique slug
       let counter = 1;
@@ -146,7 +148,7 @@ export const collectionsRouter = createTRPCRouter({
         });
 
         if (!existing) break;
-        slug = `${generateCollectionSlug(input.name)}-${counter}`;
+        slug = `${baseSlug}-${counter}`;
         counter++;
       }
 
@@ -167,6 +169,8 @@ export const collectionsRouter = createTRPCRouter({
           published: input.published,
           metaTitle: input.metaTitle,
           metaDescription: input.metaDescription,
+          metaKeywords: input.metaKeywords,
+          ogImage: input.ogImage,
           sortOrder: (maxSort?.sortOrder ?? 0) + 1,
         },
       });
@@ -187,6 +191,7 @@ export const collectionsRouter = createTRPCRouter({
         where: { id, businessId },
         select: {
           businessId: true,
+          name: true,
           slug: true,
         },
       });
@@ -200,8 +205,9 @@ export const collectionsRouter = createTRPCRouter({
 
       // If name changed, update slug
       let slug = collection.slug;
-      if (updates.name && updates.name !== collection.slug) {
-        slug = generateCollectionSlug(updates.name);
+      if (updates.name && updates.name !== collection.name) {
+        const baseSlug = generateCollectionSlug(updates.name) || "collection";
+        slug = baseSlug;
 
         // Ensure unique
         let counter = 1;
@@ -216,7 +222,7 @@ export const collectionsRouter = createTRPCRouter({
           });
 
           if (!existing || existing.id === id) break;
-          slug = `${generateCollectionSlug(updates.name)}-${counter}`;
+          slug = `${baseSlug}-${counter}`;
           counter++;
         }
       }
@@ -343,6 +349,58 @@ export const collectionsRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  setProducts: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(collectionSetProductsSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const { collectionId, productIds } = input;
+
+      const collection = await ctx.db.collection.findUnique({
+        where: { id: collectionId, businessId },
+        select: { id: true },
+      });
+
+      if (!collection) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Collection not found",
+        });
+      }
+
+      const existing = await ctx.db.collectionProduct.findMany({
+        where: { collectionId },
+        select: { productId: true },
+      });
+
+      const currentIds = new Set(existing.map((cp) => cp.productId));
+      const inputIdSet = new Set(productIds);
+
+      const toRemove = [...currentIds].filter((id) => !inputIdSet.has(id));
+      const toAdd = productIds.filter((id) => !currentIds.has(id));
+
+      if (toRemove.length > 0 || toAdd.length > 0) {
+        await ctx.db.$transaction(async (tx) => {
+          if (toRemove.length > 0) {
+            await tx.collectionProduct.deleteMany({
+              where: { collectionId, productId: { in: toRemove } },
+            });
+          }
+          if (toAdd.length > 0) {
+            await tx.collectionProduct.createMany({
+              data: toAdd.map((productId) => ({
+                collectionId,
+                productId,
+                sortOrder: productIds.indexOf(productId),
+              })),
+            });
+          }
+        });
+      }
+
+      return { success: true };
+    }),
+
   updateProductOrder: ownerAdminProcedure
     .use(featureGate("collections"))
     .input(collectionProductOrderSchema)
@@ -397,6 +455,84 @@ export const collectionsRouter = createTRPCRouter({
       );
 
       return { success: true };
+    }),
+
+  duplicate: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(z.string())
+    .mutation(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
+
+      // Load source collection with its products
+      const source = await ctx.db.collection.findUnique({
+        where: { id, businessId },
+        include: {
+          collectionProducts: {
+            select: { productId: true, sortOrder: true },
+          },
+        },
+      });
+
+      if (!source) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Collection not found",
+        });
+      }
+
+      // Generate a unique slug for the copy (same pattern as create)
+      const baseSlug =
+        generateCollectionSlug(`${source.name} copy`) || "collection";
+      let slug = baseSlug;
+      let counter = 1;
+      while (true) {
+        const existing = await ctx.db.collection.findUnique({
+          where: { businessId_slug: { businessId, slug } },
+        });
+        if (!existing) break;
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+
+      // Compute sort order: max existing + 1
+      const maxSort = await ctx.db.collection.findFirst({
+        where: { businessId },
+        orderBy: { sortOrder: "desc" },
+        select: { sortOrder: true },
+      });
+
+      // Create the copy + product rows in a single transaction
+      const newCollection = await ctx.db.$transaction(async (tx) => {
+        const created = await tx.collection.create({
+          data: {
+            businessId,
+            name: `Copy of ${source.name}`,
+            slug,
+            description: source.description,
+            imageUrl: source.imageUrl,
+            metaTitle: source.metaTitle,
+            metaDescription: source.metaDescription,
+            metaKeywords: source.metaKeywords,
+            ogImage: source.ogImage,
+            published: false,
+            sortOrder: (maxSort?.sortOrder ?? 0) + 1,
+          },
+        });
+
+        if (source.collectionProducts.length > 0) {
+          await tx.collectionProduct.createMany({
+            data: source.collectionProducts.map((cp) => ({
+              collectionId: created.id,
+              productId: cp.productId,
+              sortOrder: cp.sortOrder,
+            })),
+          });
+        }
+
+        return created;
+      });
+
+      return newCollection;
     }),
 
   getProductsByCollectionId: publicProcedure

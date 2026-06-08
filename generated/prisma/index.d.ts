@@ -15922,6 +15922,8 @@ export namespace Prisma {
     sortOrder: number | null
     metaTitle: string | null
     metaDescription: string | null
+    metaKeywords: string | null
+    ogImage: string | null
     businessId: string | null
   }
 
@@ -15937,6 +15939,8 @@ export namespace Prisma {
     sortOrder: number | null
     metaTitle: string | null
     metaDescription: string | null
+    metaKeywords: string | null
+    ogImage: string | null
     businessId: string | null
   }
 
@@ -15952,6 +15956,8 @@ export namespace Prisma {
     sortOrder: number
     metaTitle: number
     metaDescription: number
+    metaKeywords: number
+    ogImage: number
     businessId: number
     _all: number
   }
@@ -15977,6 +15983,8 @@ export namespace Prisma {
     sortOrder?: true
     metaTitle?: true
     metaDescription?: true
+    metaKeywords?: true
+    ogImage?: true
     businessId?: true
   }
 
@@ -15992,6 +16000,8 @@ export namespace Prisma {
     sortOrder?: true
     metaTitle?: true
     metaDescription?: true
+    metaKeywords?: true
+    ogImage?: true
     businessId?: true
   }
 
@@ -16007,6 +16017,8 @@ export namespace Prisma {
     sortOrder?: true
     metaTitle?: true
     metaDescription?: true
+    metaKeywords?: true
+    ogImage?: true
     businessId?: true
     _all?: true
   }
@@ -16109,6 +16121,8 @@ export namespace Prisma {
     sortOrder: number
     metaTitle: string | null
     metaDescription: string | null
+    metaKeywords: string | null
+    ogImage: string | null
     businessId: string
     _count: CollectionCountAggregateOutputType | null
     _avg: CollectionAvgAggregateOutputType | null
@@ -16143,6 +16157,8 @@ export namespace Prisma {
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
+    metaKeywords?: boolean
+    ogImage?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     collectionProducts?: boolean | Collection$collectionProductsArgs<ExtArgs>
@@ -16161,6 +16177,8 @@ export namespace Prisma {
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
+    metaKeywords?: boolean
+    ogImage?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["collection"]>
@@ -16177,6 +16195,8 @@ export namespace Prisma {
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
+    metaKeywords?: boolean
+    ogImage?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["collection"]>
@@ -16193,10 +16213,12 @@ export namespace Prisma {
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
+    metaKeywords?: boolean
+    ogImage?: boolean
     businessId?: boolean
   }
 
-  export type CollectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "description" | "imageUrl" | "published" | "sortOrder" | "metaTitle" | "metaDescription" | "businessId", ExtArgs["result"]["collection"]>
+  export type CollectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "description" | "imageUrl" | "published" | "sortOrder" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "businessId", ExtArgs["result"]["collection"]>
   export type CollectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     collectionProducts?: boolean | Collection$collectionProductsArgs<ExtArgs>
@@ -16227,6 +16249,8 @@ export namespace Prisma {
       sortOrder: number
       metaTitle: string | null
       metaDescription: string | null
+      metaKeywords: string | null
+      ogImage: string | null
       businessId: string
     }, ExtArgs["result"]["collection"]>
     composites: {}
@@ -16664,6 +16688,8 @@ export namespace Prisma {
     readonly sortOrder: FieldRef<"Collection", 'Int'>
     readonly metaTitle: FieldRef<"Collection", 'String'>
     readonly metaDescription: FieldRef<"Collection", 'String'>
+    readonly metaKeywords: FieldRef<"Collection", 'String'>
+    readonly ogImage: FieldRef<"Collection", 'String'>
     readonly businessId: FieldRef<"Collection", 'String'>
   }
     
@@ -41901,6 +41927,8 @@ export namespace Prisma {
     sortOrder: 'sortOrder',
     metaTitle: 'metaTitle',
     metaDescription: 'metaDescription',
+    metaKeywords: 'metaKeywords',
+    ogImage: 'ogImage',
     businessId: 'businessId'
   };
 
@@ -43542,6 +43570,8 @@ export namespace Prisma {
     sortOrder?: IntFilter<"Collection"> | number
     metaTitle?: StringNullableFilter<"Collection"> | string | null
     metaDescription?: StringNullableFilter<"Collection"> | string | null
+    metaKeywords?: StringNullableFilter<"Collection"> | string | null
+    ogImage?: StringNullableFilter<"Collection"> | string | null
     businessId?: StringFilter<"Collection"> | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     collectionProducts?: CollectionProductListRelationFilter
@@ -43559,6 +43589,8 @@ export namespace Prisma {
     sortOrder?: SortOrder
     metaTitle?: SortOrderInput | SortOrder
     metaDescription?: SortOrderInput | SortOrder
+    metaKeywords?: SortOrderInput | SortOrder
+    ogImage?: SortOrderInput | SortOrder
     businessId?: SortOrder
     business?: BusinessOrderByWithRelationInput
     collectionProducts?: CollectionProductOrderByRelationAggregateInput
@@ -43580,6 +43612,8 @@ export namespace Prisma {
     sortOrder?: IntFilter<"Collection"> | number
     metaTitle?: StringNullableFilter<"Collection"> | string | null
     metaDescription?: StringNullableFilter<"Collection"> | string | null
+    metaKeywords?: StringNullableFilter<"Collection"> | string | null
+    ogImage?: StringNullableFilter<"Collection"> | string | null
     businessId?: StringFilter<"Collection"> | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     collectionProducts?: CollectionProductListRelationFilter
@@ -43597,6 +43631,8 @@ export namespace Prisma {
     sortOrder?: SortOrder
     metaTitle?: SortOrderInput | SortOrder
     metaDescription?: SortOrderInput | SortOrder
+    metaKeywords?: SortOrderInput | SortOrder
+    ogImage?: SortOrderInput | SortOrder
     businessId?: SortOrder
     _count?: CollectionCountOrderByAggregateInput
     _avg?: CollectionAvgOrderByAggregateInput
@@ -43620,6 +43656,8 @@ export namespace Prisma {
     sortOrder?: IntWithAggregatesFilter<"Collection"> | number
     metaTitle?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     metaDescription?: StringNullableWithAggregatesFilter<"Collection"> | string | null
+    metaKeywords?: StringNullableWithAggregatesFilter<"Collection"> | string | null
+    ogImage?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     businessId?: StringWithAggregatesFilter<"Collection"> | string
   }
 
@@ -46914,6 +46952,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     business: BusinessCreateNestedOneWithoutCollectionsInput
     collectionProducts?: CollectionProductCreateNestedManyWithoutCollectionInput
   }
@@ -46930,6 +46970,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutCollectionInput
   }
@@ -46946,6 +46988,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutCollectionsNestedInput
     collectionProducts?: CollectionProductUpdateManyWithoutCollectionNestedInput
   }
@@ -46962,6 +47006,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutCollectionNestedInput
   }
@@ -46978,6 +47024,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
   }
 
@@ -46993,6 +47041,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CollectionUncheckedUpdateManyInput = {
@@ -47007,6 +47057,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -50395,6 +50447,8 @@ export namespace Prisma {
     sortOrder?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
+    metaKeywords?: SortOrder
+    ogImage?: SortOrder
     businessId?: SortOrder
   }
 
@@ -50414,6 +50468,8 @@ export namespace Prisma {
     sortOrder?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
+    metaKeywords?: SortOrder
+    ogImage?: SortOrder
     businessId?: SortOrder
   }
 
@@ -50429,6 +50485,8 @@ export namespace Prisma {
     sortOrder?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
+    metaKeywords?: SortOrder
+    ogImage?: SortOrder
     businessId?: SortOrder
   }
 
@@ -55653,6 +55711,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     collectionProducts?: CollectionProductCreateNestedManyWithoutCollectionInput
   }
 
@@ -55668,6 +55728,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutCollectionInput
   }
 
@@ -56392,6 +56454,8 @@ export namespace Prisma {
     sortOrder?: IntFilter<"Collection"> | number
     metaTitle?: StringNullableFilter<"Collection"> | string | null
     metaDescription?: StringNullableFilter<"Collection"> | string | null
+    metaKeywords?: StringNullableFilter<"Collection"> | string | null
+    ogImage?: StringNullableFilter<"Collection"> | string | null
     businessId?: StringFilter<"Collection"> | string
   }
 
@@ -58234,6 +58298,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     business: BusinessCreateNestedOneWithoutCollectionsInput
   }
 
@@ -58249,6 +58315,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
     businessId: string
   }
 
@@ -58367,6 +58435,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutCollectionsNestedInput
   }
 
@@ -58382,6 +58452,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -64814,6 +64886,8 @@ export namespace Prisma {
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
   }
 
   export type OrderCreateManyBusinessInput = {
@@ -65147,6 +65221,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     collectionProducts?: CollectionProductUpdateManyWithoutCollectionNestedInput
   }
 
@@ -65162,6 +65238,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutCollectionNestedInput
   }
 
@@ -65177,6 +65255,8 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type OrderUpdateWithoutBusinessInput = {

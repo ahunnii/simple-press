@@ -1,18 +1,19 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Search, Trash2, X } from "lucide-react";
+import { ArrowLeft, Save, Search, Trash2, TriangleAlert, Upload, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { CollectionFormData } from "~/lib/validators/collections";
 import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
+import { generateCollectionSlug } from "~/lib/slug";
 import { collectionFormSchema } from "~/lib/validators/collections";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
@@ -51,14 +52,109 @@ type Props = {
   allProducts: RouterOutputs["product"]["secureGetAll"];
 };
 
+function OgImageUploader({
+  file,
+  existingUrl,
+  fileInputRef,
+  onFileChange,
+  onRemove,
+  disabled,
+}: {
+  file: File | null;
+  existingUrl?: string;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  onFileChange: (f: File) => void;
+  onRemove: () => void;
+  disabled?: boolean;
+}) {
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!file) {
+      setObjectUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setObjectUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  const previewUrl = objectUrl ?? existingUrl ?? null;
+
+  return (
+    <div className="space-y-2">
+      <input
+        ref={(el) => {
+          (
+            fileInputRef as React.MutableRefObject<HTMLInputElement | null>
+          ).current = el;
+        }}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        disabled={disabled}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onFileChange(f);
+          e.target.value = "";
+        }}
+      />
+      {previewUrl && (
+        <div className="bg-muted flex items-center gap-3 rounded-lg border p-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={previewUrl}
+            alt="OG image preview"
+            className="h-16 w-16 shrink-0 rounded-md object-cover"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-muted-foreground text-xs">
+              {file
+                ? "New image selected. Upload on submit."
+                : "Existing image."}
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            disabled={disabled}
+            aria-label="Remove image"
+            className="text-muted-foreground hover:text-destructive shrink-0"
+            onClick={onRemove}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={disabled}
+        onClick={() => fileInputRef.current?.click()}
+        className="w-full"
+      >
+        <Upload className="mr-2 h-4 w-4" />
+        {previewUrl ? "Replace image" : "Choose image"}
+      </Button>
+    </div>
+  );
+}
+
 export function CollectionForm({ collection, allProducts }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const imageFileInputRef = useRef<HTMLInputElement | null>(null);
+  const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
   const utils = api.useUtils();
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [productSearch, setProductSearch] = useState("");
+
+  // OG image state — managed outside RHF (same pattern as product form)
+  const [ogImageFile, setOgImageFile] = useState<File | null>(null);
+  const [ogImageRemoved, setOgImageRemoved] = useState(false);
 
   const form = useForm<CollectionFormData>({
     resolver: zodResolver(collectionFormSchema),
@@ -70,6 +166,8 @@ export function CollectionForm({ collection, allProducts }: Props) {
       imageUrl: collection?.imageUrl ?? undefined,
       metaTitle: collection?.metaTitle ?? "",
       metaDescription: collection?.metaDescription ?? "",
+      metaKeywords: collection?.metaKeywords ?? "",
+      ogImage: collection?.ogImage ?? undefined,
       imageFile: undefined,
       productIds:
         collection?.collectionProducts.map((cp) => cp.product.id) ?? [],
@@ -84,23 +182,34 @@ export function CollectionForm({ collection, allProducts }: Props) {
     },
   });
 
+  const ogImageUploader = useUploadFile({
+    api: "/api/upload",
+    route: "image",
+    onError: (error) => {
+      toast.error(error.message ?? "OG image upload failed.");
+    },
+  });
+
   const createMutation = api.collections.create.useMutation({
     onSuccess: async (data) => {
       toast.dismiss();
-      toast.loading("Collection created successfully, updating products...");
+      const loadingToastId = toast.loading("Saving collection products...");
 
-      const productIds = form.getValues("productIds");
-      for (const productId of productIds) {
-        await utils.client.collections.addProduct.mutate({
+      try {
+        await utils.client.collections.setProducts.mutate({
           collectionId: data.id,
-          productId,
+          productIds: form.getValues("productIds"),
         });
+        toast.dismiss(loadingToastId);
+        toast.success("Collection created successfully");
+        void utils.collections.invalidate();
+        router.push(`/admin/collections/${data.id}`);
+      } catch (err) {
+        toast.dismiss(loadingToastId);
+        const message =
+          err instanceof Error ? err.message : "Failed to save products";
+        toast.error(message);
       }
-      toast.dismiss();
-      toast.success("Products updated successfully");
-
-      void utils.collections.invalidate();
-      router.push(`/admin/collections/${data.id}`);
     },
     onError: (err) => {
       toast.dismiss();
@@ -114,48 +223,38 @@ export function CollectionForm({ collection, allProducts }: Props) {
   const updateMutation = api.collections.update.useMutation({
     onSuccess: async (data) => {
       toast.dismiss();
-      toast.success("Collection updated successfully, updating products...");
+      const loadingToastId = toast.loading("Saving collection products...");
 
-      if (collection) {
-        const currentProductIds = new Set(
-          collection.collectionProducts.map((cp) => cp.product.id),
-        );
-        const selectedIds = new Set(form.getValues("productIds"));
+      try {
+        await utils.client.collections.setProducts.mutate({
+          collectionId: data.id,
+          productIds: form.getValues("productIds"),
+        });
+        toast.dismiss(loadingToastId);
+        toast.success("Collection updated successfully");
 
-        for (const productId of selectedIds) {
-          if (!currentProductIds.has(productId)) {
-            await utils.client.collections.addProduct.mutate({
-              collectionId: data.id,
-              productId,
-            });
-          }
-        }
-
-        for (const productId of currentProductIds) {
-          if (!selectedIds.has(productId)) {
-            await utils.client.collections.removeProduct.mutate({
-              collectionId: data.id,
-              productId,
-            });
-          }
-        }
+        void utils.collections.invalidate();
+        const values = form.getValues();
+        form.reset({
+          ...values,
+          name: data.name,
+          description: data.description ?? undefined,
+          imageUrl: data.imageUrl ?? undefined,
+          published: data.published,
+          metaTitle: data.metaTitle ?? undefined,
+          metaDescription: data.metaDescription ?? undefined,
+          metaKeywords: data.metaKeywords ?? undefined,
+          ogImage: data.ogImage ?? undefined,
+        });
+        setOgImageFile(null);
+        setOgImageRemoved(false);
+        router.refresh();
+      } catch (err) {
+        toast.dismiss(loadingToastId);
+        const message =
+          err instanceof Error ? err.message : "Failed to save products";
+        toast.error(message);
       }
-
-      toast.dismiss();
-      toast.success("Products updated successfully");
-
-      void utils.collections.invalidate();
-      const values = form.getValues();
-      form.reset({
-        ...values,
-        name: data.name,
-        description: data.description ?? undefined,
-        imageUrl: data.imageUrl ?? undefined,
-        published: data.published,
-        metaTitle: data.metaTitle ?? undefined,
-        metaDescription: data.metaDescription ?? undefined,
-      });
-      router.refresh();
     },
     onError: (err) => {
       toast.dismiss();
@@ -203,6 +302,25 @@ export function CollectionForm({ collection, allProducts }: Props) {
       imageUrl = data.imageUrl ?? undefined;
     }
 
+    // Resolve ogImage: upload new file, keep existing URL, or clear
+    let resolvedOgImage: string | null;
+    if (ogImageFile instanceof File) {
+      try {
+        const response = await ogImageUploader.upload(ogImageFile);
+        const fileLocation =
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          "";
+        resolvedOgImage = fileLocation || null;
+      } catch {
+        toast.error("Failed to upload Open Graph image.");
+        return;
+      }
+    } else if (ogImageRemoved) {
+      resolvedOgImage = null;
+    } else {
+      resolvedOgImage = data.ogImage ?? null;
+    }
+
     if (collection?.id) {
       updateMutation.mutate({
         id: collection.id,
@@ -212,6 +330,8 @@ export function CollectionForm({ collection, allProducts }: Props) {
         published: data.published,
         metaTitle: data.metaTitle ?? undefined,
         metaDescription: data.metaDescription ?? undefined,
+        metaKeywords: data.metaKeywords ?? undefined,
+        ogImage: resolvedOgImage,
       });
     } else {
       createMutation.mutate({
@@ -221,11 +341,16 @@ export function CollectionForm({ collection, allProducts }: Props) {
         published: data.published,
         metaTitle: data.metaTitle ?? undefined,
         metaDescription: data.metaDescription ?? undefined,
+        metaKeywords: data.metaKeywords ?? undefined,
+        ogImage: resolvedOgImage,
       });
     }
   };
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const isSubmitting =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    ogImageUploader.isPending;
   const isDeleting = deleteMutation.isPending;
   const isDirty = form.formState.isDirty;
 
@@ -349,6 +474,58 @@ export function CollectionForm({ collection, allProducts }: Props) {
                       placeholder="Summer Collection"
                       required
                     />
+
+                    {/* URL preview + rename warning */}
+                    {(() => {
+                      const watchedName = form.watch("name") ?? "";
+                      const previewSlug = generateCollectionSlug(watchedName);
+
+                      const showRenameWarning =
+                        !!collection?.id &&
+                        watchedName.trim() !== "" &&
+                        watchedName.trim() !== collection.name &&
+                        previewSlug !== collection.slug;
+
+                      return (
+                        <div className="space-y-2">
+                          {/* Storefront URL line */}
+                          <p className="text-muted-foreground text-xs">
+                            Storefront URL:{" "}
+                            <span className="font-mono">
+                              {collection?.id
+                                ? `/collections/${collection.slug || "…"}`
+                                : `/collections/${previewSlug || "…"}`}
+                            </span>
+                          </p>
+
+                          {/* Rename warning */}
+                          {showRenameWarning && (
+                            <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+                              <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                              <div className="space-y-0.5">
+                                <p className="font-medium">
+                                  Heads up — this will change the collection&apos;s URL.
+                                </p>
+                                <p className="text-amber-700">
+                                  Saving will change the public URL from{" "}
+                                  <span className="font-mono">
+                                    /collections/{collection.slug}
+                                  </span>{" "}
+                                  to{" "}
+                                  <span className="font-mono">
+                                    /collections/{previewSlug}
+                                  </span>
+                                  . Anyone with the old link (including bookmarks
+                                  and search engines) will get a 404. We don&apos;t
+                                  set up a redirect automatically.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
                     <TextareaFormField
                       form={form}
                       name="description"
@@ -394,6 +571,40 @@ export function CollectionForm({ collection, allProducts }: Props) {
                       rows={3}
                       description={`${form.watch("metaDescription")?.length ?? 0}/160 characters (optimal: 150-160)`}
                     />
+                    <InputFormField
+                      form={form}
+                      name="metaKeywords"
+                      label="Meta Keywords"
+                      placeholder="e.g., summer, fashion, new arrivals"
+                      description="Comma-separated keywords"
+                    />
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium leading-none">
+                        Open Graph Image
+                      </p>
+                      <p className="text-muted-foreground text-sm">
+                        Shown when this collection is shared on social media.
+                        Recommended: 1200×630px.
+                      </p>
+                      <OgImageUploader
+                        file={ogImageFile}
+                        existingUrl={
+                          ogImageRemoved
+                            ? undefined
+                            : (collection?.ogImage ?? undefined)
+                        }
+                        fileInputRef={ogImageFileInputRef}
+                        onFileChange={(f) => {
+                          setOgImageFile(f);
+                          setOgImageRemoved(false);
+                        }}
+                        onRemove={() => {
+                          setOgImageFile(null);
+                          setOgImageRemoved(true);
+                        }}
+                        disabled={isSubmitting}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               </div>

@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 
 import { getCanonicalUrl } from "~/lib/canonical";
 import { JsonLd } from "~/components/json-ld";
-import { buildBreadcrumbSchema } from "~/lib/structured-data";
+import {
+  buildBreadcrumbSchema,
+  buildCollectionSchema,
+} from "~/lib/structured-data";
 import { api } from "~/trpc/server";
 
 import { BambooCollectionPage } from "../../_templates/bamboo/collections/bamboo-collection-page";
@@ -46,6 +49,7 @@ export default async function CollectionPage({ params }: Props) {
       sledge: SledgeCollectionPage,
     }[business.templateId] ?? DefaultCollectionPage;
 
+  const collectionSchema = buildCollectionSchema(collection, business);
   const breadcrumbSchema = buildBreadcrumbSchema(business, [
     { name: "Home", path: "/" },
     { name: "Collections", path: "/collections" },
@@ -54,7 +58,7 @@ export default async function CollectionPage({ params }: Props) {
 
   return (
     <>
-      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={[collectionSchema, breadcrumbSchema]} />
       <TemplateComponent
         business={business}
         collection={collection}
@@ -85,28 +89,42 @@ export async function generateMetadata({ params }: Props) {
       collection.description ??
       `Shop ${collection.name} at ${business.name}`;
 
-    // Collection has no ogImage field — fall back to site/business OG image
-    const ogImage =
-      business.siteContent?.ogImage ??
-      business.siteContent?.logoUrl ??
-      "/placeholder.svg";
+    // Build OG/Twitter images: prefer per-collection ogImage (with dimensions),
+    // fall back to site OG image / logo (S1, S4).
+    const ogImages = collection.ogImage
+      ? [
+          {
+            url: collection.ogImage,
+            width: 1200,
+            height: 630,
+            alt: collection.name,
+          },
+        ]
+      : business.siteContent?.ogImage ?? business.siteContent?.logoUrl
+        ? [
+            business.siteContent.ogImage ??
+              business.siteContent.logoUrl ??
+              "/placeholder.svg",
+          ]
+        : undefined;
 
     return {
       title,
       description,
+      keywords: collection.metaKeywords ?? undefined,
       alternates: {
         canonical: getCanonicalUrl(business, `/collections/${slug}`),
       },
       openGraph: {
         title,
         description,
-        images: [ogImage],
+        images: ogImages,
       },
       twitter: {
         card: "summary_large_image" as const,
         title,
         description,
-        images: [ogImage],
+        images: ogImages,
       },
     };
   } catch {

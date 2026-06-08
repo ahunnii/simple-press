@@ -373,11 +373,13 @@ model Collection {
   // SEO
   metaTitle       String?
   metaDescription String?
-  
+  metaKeywords    String?
+  ogImage         String?
+
   // Multi-tenancy
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
+
   collectionProducts CollectionProduct[]
   
   @@unique([businessId, slug])

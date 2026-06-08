@@ -362,6 +362,8 @@ model Collection {
   // SEO
   metaTitle       String?
   metaDescription String?
+  metaKeywords    String?
+  ogImage         String?
 
   // Multi-tenancy
   businessId String

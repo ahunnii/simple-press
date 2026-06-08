@@ -293,6 +293,72 @@ export function buildBreadcrumbSchema(
 }
 
 // ---------------------------------------------------------------------------
+// Builder: CollectionPage / ItemList
+// ---------------------------------------------------------------------------
+
+interface CollectionProductItem {
+  product: {
+    name: string;
+    slug: string;
+    images: ProductImage[];
+  };
+}
+
+interface CollectionForSchema {
+  name: string;
+  slug: string;
+  description?: string | null;
+  collectionProducts: CollectionProductItem[];
+}
+
+/**
+ * Build a schema.org CollectionPage object containing an ItemList of products.
+ *
+ * Includes:
+ * - @type: CollectionPage with url, name, optional description
+ * - mainEntity: ItemList whose itemListElement lists each product as a ListItem
+ *   with position, url, name, and optional image.
+ */
+export function buildCollectionSchema(
+  collection: CollectionForSchema,
+  business: CanonicalBusiness,
+): Record<string, unknown> {
+  const canonicalUrl = getCanonicalUrl(
+    business,
+    `/collections/${collection.slug}`,
+  );
+
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: collection.name,
+    url: canonicalUrl,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: collection.collectionProducts.map((cp, index) => {
+        const item: Record<string, unknown> = {
+          "@type": "ListItem",
+          position: index + 1,
+          name: cp.product.name,
+          url: getCanonicalUrl(business, `/shop/${cp.product.slug}`),
+        };
+        const image = toAbsoluteUrl(cp.product.images[0]?.url);
+        if (image) {
+          item.image = image;
+        }
+        return item;
+      }),
+    },
+  };
+
+  if (collection.description) {
+    schema.description = collection.description;
+  }
+
+  return schema;
+}
+
+// ---------------------------------------------------------------------------
 // Builder: BlogPosting
 // ---------------------------------------------------------------------------
 
