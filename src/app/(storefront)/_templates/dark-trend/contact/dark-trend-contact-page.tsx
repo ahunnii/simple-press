@@ -4,8 +4,8 @@ import { Mail, MapPin } from "lucide-react";
 import type { DefaultContactPageTemplateProps } from "../../types";
 
 import { resolveFields } from "..";
-import { DarkTrendContactForm } from "./dark-trend-contact-form";
 import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
+import { DarkTrendContactForm } from "./dark-trend-contact-form";
 
 export function DarkTrendContactPage({
   business,

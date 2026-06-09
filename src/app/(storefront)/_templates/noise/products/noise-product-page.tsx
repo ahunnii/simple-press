@@ -6,13 +6,12 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
-import { useReducedMotion } from "~/hooks/use-reduced-motion";
-
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import {
   FadeIn,
   PageTransition,
@@ -114,7 +113,9 @@ export function NoiseProductPage({
                 Home
               </Link>
             </li>
-            <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>/</li>
+            <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>
+              /
+            </li>
             <li>
               <Link
                 href="/shop"
@@ -126,7 +127,9 @@ export function NoiseProductPage({
             </li>
             {firstCollection && (
               <>
-                <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>/</li>
+                <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>
+                  /
+                </li>
                 <li>
                   <Link
                     href={`/collections/${firstCollection.slug}`}
@@ -138,7 +141,9 @@ export function NoiseProductPage({
                 </li>
               </>
             )}
-            <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>/</li>
+            <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>
+              /
+            </li>
             <li>
               <span
                 className="max-w-[30ch] truncate"

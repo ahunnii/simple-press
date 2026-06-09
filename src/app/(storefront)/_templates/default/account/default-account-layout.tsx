@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookUser, Bell, Lock, Package, Settings } from "lucide-react";
+import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 
@@ -28,14 +28,17 @@ export function DefaultAccountLayout({ children, heading }: Props) {
       {/* Page header */}
       <section className="border-b border-[#e8e8e8] px-6 pt-16 pb-10 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
-            <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-4 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+          >
+            <Link href="/" className="transition-colors hover:text-[#0a0a0a]">
               Home
             </Link>
             <span aria-hidden="true">/</span>
             <span aria-current="page">Account</span>
           </nav>
-          <h1 className="font-serif text-[clamp(28px,3.5vw,48px)] font-semibold leading-tight tracking-[-0.025em]">
+          <h1 className="font-serif text-[clamp(28px,3.5vw,48px)] leading-tight font-semibold tracking-[-0.025em]">
             {heading}
           </h1>
         </div>
@@ -47,9 +50,10 @@ export function DefaultAccountLayout({ children, heading }: Props) {
         aria-label="Account navigation (mobile)"
       >
         <div className="mx-auto max-w-[1440px]">
-          <ul className="flex gap-0 overflow-x-auto list-none p-0 m-0">
+          <ul className="m-0 flex list-none gap-0 overflow-x-auto p-0">
             {NAV_ITEMS.map(({ href, label }) => {
-              const active = pathname === href || pathname.startsWith(href + "/");
+              const active =
+                pathname === href || pathname.startsWith(href + "/");
               return (
                 <li key={href}>
                   <Link
@@ -75,7 +79,6 @@ export function DefaultAccountLayout({ children, heading }: Props) {
       <section className="px-6 py-12 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-[180px_1fr]">
-
             {/* Sidebar (desktop) */}
             <nav className="hidden md:block" aria-label="Account navigation">
               <ul className="flex flex-col gap-0.5">

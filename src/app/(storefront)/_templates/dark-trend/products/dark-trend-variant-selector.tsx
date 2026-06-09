@@ -54,8 +54,7 @@ export function DarkTrendVariantSelector({
     }, 2000);
   };
 
-  const isCartDisabled =
-    !selectedVariant || selectedVariant.inventoryQty === 0;
+  const isCartDisabled = !selectedVariant || selectedVariant.inventoryQty === 0;
 
   return (
     <div className="space-y-4">

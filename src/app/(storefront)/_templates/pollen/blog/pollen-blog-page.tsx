@@ -155,7 +155,10 @@ export function PollenBlogPage({ pages, customFields, business }: Props) {
                 />
               </div>
               {query.trim() ? (
-                <p className="mt-2 text-center text-sm text-[#6b7280]" role="status">
+                <p
+                  className="mt-2 text-center text-sm text-[#6b7280]"
+                  role="status"
+                >
                   {filtered.length === 0
                     ? "No posts match your search."
                     : `${filtered.length} post${filtered.length !== 1 ? "s" : ""} found`}
@@ -211,7 +214,10 @@ export function PollenBlogPage({ pages, customFields, business }: Props) {
                         ) : null}
                         <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-[#3d5a28]">
                           Read article
-                          <span className="h-px w-8 bg-[#3d5a28] transition-all group-hover:w-12" aria-hidden="true" />
+                          <span
+                            className="h-px w-8 bg-[#3d5a28] transition-all group-hover:w-12"
+                            aria-hidden="true"
+                          />
                         </span>
                       </div>
                     </div>

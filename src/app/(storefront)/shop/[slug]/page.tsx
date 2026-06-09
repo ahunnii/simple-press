@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation";
 
 import { getCanonicalUrl } from "~/lib/canonical";
-import { JsonLd } from "~/components/json-ld";
 import {
   buildBreadcrumbSchema,
   buildProductSchema,
 } from "~/lib/structured-data";
 import { api } from "~/trpc/server";
+import { JsonLd } from "~/components/json-ld";
 
 import { BambooProductPage } from "../../_templates/bamboo/products/bamboo-product-page";
 import { DarkTrendProductPage } from "../../_templates/dark-trend/products/dark-trend-product-page";

@@ -31,7 +31,11 @@ export function FadeIn({
 
   return (
     <motion.div
-      initial={shouldReduce ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, ...directionMap[direction] }}
+      initial={
+        shouldReduce
+          ? { opacity: 1, x: 0, y: 0 }
+          : { opacity: 0, ...directionMap[direction] }
+      }
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{
@@ -94,7 +98,10 @@ export function StaggerItem({
         visible: {
           opacity: 1,
           y: 0,
-          transition: { duration: shouldReduce ? 0 : 0.5, ease: [0.21, 0.47, 0.32, 0.98] },
+          transition: {
+            duration: shouldReduce ? 0 : 0.5,
+            ease: [0.21, 0.47, 0.32, 0.98],
+          },
         },
       }}
       className={className}
@@ -116,7 +123,9 @@ export function ScaleIn({
   const shouldReduce = useReducedMotion();
   return (
     <motion.div
-      initial={shouldReduce ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+      initial={
+        shouldReduce ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }
+      }
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{

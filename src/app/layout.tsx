@@ -6,8 +6,8 @@ import type { Metadata } from "next";
 import Script from "next/script";
 
 import { env } from "~/env";
-import { checkBusiness } from "~/lib/check-business";
 import { getCanonicalBaseUrl } from "~/lib/canonical";
+import { checkBusiness } from "~/lib/check-business";
 import { TRPCReactProvider } from "~/trpc/react";
 import { api } from "~/trpc/server";
 import { TooltipProvider } from "~/components/ui/tooltip";

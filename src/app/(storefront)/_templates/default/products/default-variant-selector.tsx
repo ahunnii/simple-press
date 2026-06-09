@@ -63,15 +63,23 @@ export function DefaultVariantSelector({
       {/* Variant pills */}
       <div className="flex flex-col gap-2.5">
         {/* aria-live="polite" announces the selected variant name to screen readers (N-4) */}
-        <span id="variant-label" aria-live="polite" className="text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+        <span
+          id="variant-label"
+          aria-live="polite"
+          className="text-[11px] font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+        >
           Select option
           {selectedVariant && (
-            <span className="ml-2 font-normal normal-case tracking-normal text-[#0a0a0a]">
+            <span className="ml-2 font-normal tracking-normal text-[#0a0a0a] normal-case">
               — {selectedVariant.name}
             </span>
           )}
         </span>
-        <div role="group" aria-labelledby="variant-label" className="flex flex-wrap gap-2">
+        <div
+          role="group"
+          aria-labelledby="variant-label"
+          className="flex flex-wrap gap-2"
+        >
           {product.variants.map((variant) => {
             const outOfStock =
               product.trackInventory &&
@@ -95,7 +103,7 @@ export function DefaultVariantSelector({
                 aria-disabled={outOfStock || undefined}
                 aria-pressed={isSelected}
                 aria-label={`${variant.name}${outOfStock ? ", sold out" : isBackorder ? ", pre-order" : ""}`}
-                className={`inline-grid h-10 min-w-12 place-items-center rounded-[var(--radius)] border px-3.5 text-sm transition-colors ${outOfStock ? "opacity-40 cursor-not-allowed" : ""} ${
+                className={`inline-grid h-10 min-w-12 place-items-center rounded-[var(--radius)] border px-3.5 text-sm transition-colors ${outOfStock ? "cursor-not-allowed opacity-40" : ""} ${
                   isSelected
                     ? "border-[#0a0a0a] bg-[#0a0a0a] text-white"
                     : "border-[#e8e8e8] hover:border-[#0a0a0a]"
@@ -103,7 +111,10 @@ export function DefaultVariantSelector({
               >
                 {variant.name}
                 {isBackorder && !isSelected && (
-                  <span className="ml-1 text-[10px] text-[#6b6b6b]" aria-hidden="true">
+                  <span
+                    className="ml-1 text-[10px] text-[#6b6b6b]"
+                    aria-hidden="true"
+                  >
                     (pre-order)
                   </span>
                 )}
@@ -128,7 +139,7 @@ export function DefaultVariantSelector({
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 disabled={quantity <= 1}
                 aria-label="Decrease quantity"
-                className="flex h-full flex-1 items-center justify-center text-lg font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30 rounded-l-[var(--radius)]"
+                className="flex h-full flex-1 items-center justify-center rounded-l-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30"
               >
                 <span aria-hidden="true">−</span>
               </button>
@@ -154,7 +165,7 @@ export function DefaultVariantSelector({
                   quantity >= selectedVariant.inventoryQty
                 }
                 aria-label="Increase quantity"
-                className="flex h-full flex-1 items-center justify-center text-lg font-light transition-colors hover:bg-[#f6f6f6] rounded-r-[var(--radius)]"
+                className="flex h-full flex-1 items-center justify-center rounded-r-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6]"
               >
                 <span aria-hidden="true">+</span>
               </button>
@@ -165,7 +176,7 @@ export function DefaultVariantSelector({
               type="button"
               onClick={handleAddToCart}
               aria-disabled={addToCartDisabled || undefined}
-              className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a] active:translate-y-px ${addToCartDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a] active:translate-y-px ${addToCartDisabled ? "cursor-not-allowed opacity-50" : ""}`}
             >
               {isAdded ? (
                 <>

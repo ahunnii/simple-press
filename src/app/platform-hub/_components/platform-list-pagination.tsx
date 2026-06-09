@@ -62,7 +62,9 @@ export function PlatformListPagination({ total, page, pageSize }: Props) {
             <PaginationPrevious
               href={page > 1 ? buildHref(page - 1) : undefined}
               aria-disabled={page <= 1}
-              className={page <= 1 ? "pointer-events-none opacity-50" : undefined}
+              className={
+                page <= 1 ? "pointer-events-none opacity-50" : undefined
+              }
             />
           </PaginationItem>
 
@@ -85,7 +87,9 @@ export function PlatformListPagination({ total, page, pageSize }: Props) {
               href={page < totalPages ? buildHref(page + 1) : undefined}
               aria-disabled={page >= totalPages}
               className={
-                page >= totalPages ? "pointer-events-none opacity-50" : undefined
+                page >= totalPages
+                  ? "pointer-events-none opacity-50"
+                  : undefined
               }
             />
           </PaginationItem>

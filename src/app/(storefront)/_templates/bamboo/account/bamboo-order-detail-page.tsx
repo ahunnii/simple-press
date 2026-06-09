@@ -139,8 +139,13 @@ export function BambooOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                               className="text-primary inline-flex items-center gap-1 hover:underline"
                             >
                               Track shipment{" "}
-                              <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                              <span className="sr-only">(opens in new tab)</span>
+                              <ExternalLink
+                                className="h-3 w-3"
+                                aria-hidden="true"
+                              />
+                              <span className="sr-only">
+                                (opens in new tab)
+                              </span>
                             </a>
                           )}
                           <p className="text-muted-foreground mt-1 text-xs">

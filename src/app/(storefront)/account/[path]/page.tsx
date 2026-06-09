@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { accountViewPaths } from "@daveyplate/better-auth-ui/server";
 
 import { api } from "~/trpc/server";
+
 import { BambooAccountSecurityPage } from "../../_templates/bamboo/account/bamboo-account-security-page";
 import { BambooAccountSettingsPage } from "../../_templates/bamboo/account/bamboo-account-settings-page";
 import { DarkTrendAccountSecurityPage } from "../../_templates/dark-trend/account/dark-trend-account-security-page";

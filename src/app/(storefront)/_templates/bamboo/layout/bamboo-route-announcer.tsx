@@ -29,11 +29,7 @@ export function BambooRouteAnnouncer() {
   }, [pathname]);
 
   return (
-    <div
-      aria-live="polite"
-      aria-atomic="true"
-      className="sr-only"
-    >
+    <div aria-live="polite" aria-atomic="true" className="sr-only">
       {message}
     </div>
   );

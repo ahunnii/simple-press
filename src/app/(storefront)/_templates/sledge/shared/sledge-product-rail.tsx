@@ -32,10 +32,7 @@ export function SledgeProductRail({
   if (shown.length === 0) return null;
 
   return (
-    <section
-      className="bg-white px-7 py-16 md:py-20"
-      {...sectionAttrs}
-    >
+    <section className="bg-white px-7 py-16 md:py-20" {...sectionAttrs}>
       <div className="mx-auto max-w-7xl">
         <FadeIn className="mb-12 flex items-end justify-between gap-6">
           <h2 className="sl-rail-heading font-heading font-bold uppercase">
@@ -55,10 +52,7 @@ export function SledgeProductRail({
         >
           {shown.map((product, index) => (
             <StaggerItem key={product.id as string}>
-              <NoiseProductCard
-                product={product as Product}
-                index={index}
-              />
+              <NoiseProductCard product={product as Product} index={index} />
             </StaggerItem>
           ))}
         </StaggerContainer>

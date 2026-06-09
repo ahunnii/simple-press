@@ -134,7 +134,7 @@ export function BambooCollectionPage({
 
       {/* More collections */}
       {others.length > 0 && (
-        <div className="border-border border-t bg-secondary/20 py-16">
+        <div className="border-border bg-secondary/20 border-t py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h2 className="font-heading text-foreground mb-8 text-2xl font-bold">
               More Collections
@@ -166,7 +166,10 @@ export function BambooCollectionPage({
                           {count} {count === 1 ? "product" : "products"}
                         </p>
                       </div>
-                      <ArrowRight className="text-primary h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                      <ArrowRight
+                        className="text-primary h-4 w-4 transition-transform group-hover:translate-x-1"
+                        aria-hidden="true"
+                      />
                     </div>
                   </Link>
                 );

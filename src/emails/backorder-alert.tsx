@@ -17,7 +17,9 @@ export default function BackorderAlertEmail({
   businessName,
   businessLogoUrl,
 }: BackorderAlertEmailProps) {
-  const displayName = variantName ? `${productName} — ${variantName}` : productName;
+  const displayName = variantName
+    ? `${productName} — ${variantName}`
+    : productName;
 
   return (
     <EmailLayout

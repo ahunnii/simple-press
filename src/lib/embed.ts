@@ -99,9 +99,7 @@ export function isVideoEmbed(src: string): boolean {
       "vimeo.com",
       "player.vimeo.com",
     ];
-    return VIDEO_HOSTS.some(
-      (h) => host === h || host.endsWith(`.${h}`),
-    );
+    return VIDEO_HOSTS.some((h) => host === h || host.endsWith(`.${h}`));
   } catch {
     return false;
   }

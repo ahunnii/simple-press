@@ -149,7 +149,7 @@ export function HappyBambooVariantSelector({
           type="button"
           onClick={handleAddToCart}
           aria-disabled={addToCartDisabled}
-          className={`flex-1 ${addToCartDisabled ? "aria-disabled:cursor-not-allowed aria-disabled:opacity-50 cursor-not-allowed opacity-50" : ""}`}
+          className={`flex-1 ${addToCartDisabled ? "cursor-not-allowed opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50" : ""}`}
         >
           {isAdded ? (
             <>
@@ -161,7 +161,12 @@ export function HappyBambooVariantSelector({
           )}
         </Button>
       </div>
-      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+      <span
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
         {isAdded ? "Added to cart" : ""}
       </span>
     </div>

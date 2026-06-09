@@ -11,8 +11,8 @@ import { toast } from "sonner";
 import type { GalleryCreateData } from "~/lib/validators/gallery";
 import { cn } from "~/lib/utils";
 import { galleryCreateSchema } from "~/lib/validators/gallery";
-import { useDeferredImageUpload } from "~/hooks/use-deferred-image-upload";
 import { api } from "~/trpc/react";
+import { useDeferredImageUpload } from "~/hooks/use-deferred-image-upload";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -141,7 +141,9 @@ export function NewGalleryForm() {
         // uploadAll() threw — it already discarded any partial uploads
         toast.dismiss();
         const message =
-          err instanceof Error ? err.message : "Upload failed. Please try again.";
+          err instanceof Error
+            ? err.message
+            : "Upload failed. Please try again.";
         toast.error(message);
         createAnotherRef.current = false;
         setIsSaving(false);
@@ -164,7 +166,8 @@ export function NewGalleryForm() {
   const aspectRatio = form.watch("aspectRatio");
   const showCaptions = form.watch("showCaptions");
   const isDirty = form.formState.isDirty || upload.pendingFiles.length > 0;
-  const isProcessing = isSaving || upload.isUploading || createMutation.isPending;
+  const isProcessing =
+    isSaving || upload.isUploading || createMutation.isPending;
 
   return (
     <Form {...form}>
@@ -512,9 +515,13 @@ export function NewGalleryForm() {
                         <SelectContent>
                           <SelectItem value="1:1">1:1 — Square</SelectItem>
                           <SelectItem value="4:3">4:3 — Landscape</SelectItem>
-                          <SelectItem value="16:9">16:9 — Widescreen</SelectItem>
+                          <SelectItem value="16:9">
+                            16:9 — Widescreen
+                          </SelectItem>
                           <SelectItem value="3:4">3:4 — Portrait</SelectItem>
-                          <SelectItem value="original">Original — Natural size</SelectItem>
+                          <SelectItem value="original">
+                            Original — Natural size
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -575,7 +582,9 @@ export function NewGalleryForm() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="overlay">Always visible</SelectItem>
+                          <SelectItem value="overlay">
+                            Always visible
+                          </SelectItem>
                           <SelectItem value="hover">Show on hover</SelectItem>
                           <SelectItem value="below">Below image</SelectItem>
                         </SelectContent>
@@ -620,7 +629,12 @@ export function NewGalleryForm() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <LayoutPreview layout={layout} columns={columns} gap={gap} aspectRatio={aspectRatio} />
+              <LayoutPreview
+                layout={layout}
+                columns={columns}
+                gap={gap}
+                aspectRatio={aspectRatio}
+              />
             </CardContent>
           </Card>
         </div>

@@ -7,9 +7,9 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
-import { TrailHeader } from "../../_components/trail-header";
 import { BusinessesTable } from "../_components/businesses-table";
 import { CreateBusinessButton } from "../_components/create-business-button";
+import { TrailHeader } from "../../_components/trail-header";
 
 export default async function BusinessesPage() {
   const { businesses } = await api.platform.listBusinesses();

@@ -18,7 +18,9 @@ type Props = {
   testimonialsAutoApprove: boolean;
 };
 
-export function TestimonialSettings({ testimonialsAutoApprove: initial }: Props) {
+export function TestimonialSettings({
+  testimonialsAutoApprove: initial,
+}: Props) {
   const [autoApprove, setAutoApprove] = useState(initial);
 
   const mutation = api.business.updateTestimonialSettings.useMutation({
@@ -54,7 +56,10 @@ export function TestimonialSettings({ testimonialsAutoApprove: initial }: Props)
         <CardContent>
           <div className="flex items-center justify-between py-2">
             <div className="min-w-0 flex-1 pr-6">
-              <Label htmlFor="testimonials-auto-approve" className="text-sm font-medium">
+              <Label
+                htmlFor="testimonials-auto-approve"
+                className="text-sm font-medium"
+              >
                 Auto-approve testimonials
               </Label>
               <p className="mt-0.5 text-sm text-gray-500">

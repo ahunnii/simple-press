@@ -87,7 +87,7 @@ export function ModernProductPage({
                     type="button"
                     onClick={() => setSelectedImageIndex(index)}
                     aria-pressed={selectedImageIndex === index}
-                    className={`bg-muted relative aspect-square w-16 overflow-hidden rounded-sm transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                    className={`bg-muted focus-visible:ring-ring relative aspect-square w-16 overflow-hidden rounded-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-2 ${
                       selectedImageIndex === index
                         ? "ring-foreground ring-1 ring-offset-1"
                         : "opacity-60 hover:opacity-100"

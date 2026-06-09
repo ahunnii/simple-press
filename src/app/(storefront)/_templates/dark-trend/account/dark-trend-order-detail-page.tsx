@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
+import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
-import type { OrderDetailPageTemplateProps } from "../../types";
 import { DarkTrendAccountLayout } from "./dark-trend-account-layout";
 
 function statusClass(status: string) {
@@ -148,7 +148,7 @@ export function DarkTrendOrderDetailPage({
               <h2 className="mb-4 font-semibold text-white">
                 Shipping Address
               </h2>
-              <address className="not-italic text-sm leading-relaxed text-white/60">
+              <address className="text-sm leading-relaxed text-white/60 not-italic">
                 {addr.firstName && addr.lastName && (
                   <p className="font-medium text-white">
                     {addr.firstName} {addr.lastName}
@@ -179,7 +179,7 @@ export function DarkTrendOrderDetailPage({
               )}
               <div>
                 <dt className="text-white/50">Payment</dt>
-                <dd className="capitalize text-white">{order.paymentStatus}</dd>
+                <dd className="text-white capitalize">{order.paymentStatus}</dd>
               </div>
             </dl>
           </div>

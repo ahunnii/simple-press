@@ -173,7 +173,10 @@ export function HappyBambooProductCard({
                         : `Add ${product.name} to cart`
                   }
                 >
-                  <ShoppingCart className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <ShoppingCart
+                    className="h-4 w-4 shrink-0"
+                    aria-hidden="true"
+                  />
                   {productStatus.comingSoon
                     ? "Coming Soon"
                     : productStatus.isOutOfStock

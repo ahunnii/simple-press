@@ -32,10 +32,10 @@ export function LayoutPreview({ layout, columns, gap, aspectRatio }: Props) {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="h-full w-full bg-gray-200" />
         </div>
-        <div className="absolute top-1/2 left-3 -translate-y-1/2 rounded-full bg-gray-500/60 p-1 text-white text-xs">
+        <div className="absolute top-1/2 left-3 -translate-y-1/2 rounded-full bg-gray-500/60 p-1 text-xs text-white">
           ‹
         </div>
-        <div className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-gray-500/60 p-1 text-white text-xs">
+        <div className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-gray-500/60 p-1 text-xs text-white">
           ›
         </div>
         <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
@@ -100,10 +100,7 @@ export function LayoutPreview({ layout, columns, gap, aspectRatio }: Props) {
 
   if (layout === "justified") {
     return (
-      <div
-        className="flex flex-wrap"
-        style={{ gap: `${gap}px` }}
-      >
+      <div className="flex flex-wrap" style={{ gap: `${gap}px` }}>
         {placeholders.map((i) => (
           <div
             key={i}
@@ -130,7 +127,10 @@ export function LayoutPreview({ layout, columns, gap, aspectRatio }: Props) {
       }}
     >
       {placeholders.map((i) => (
-        <div key={i} className={`rounded bg-gray-200 ${aspectClass(aspectRatio)}`} />
+        <div
+          key={i}
+          className={`rounded bg-gray-200 ${aspectClass(aspectRatio)}`}
+        />
       ))}
     </div>
   );

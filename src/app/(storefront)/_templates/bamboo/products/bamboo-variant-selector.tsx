@@ -55,7 +55,11 @@ export function BambooVariantSelector({
         <Label className="mb-3 block text-sm font-medium" id="variant-label">
           Select Variant
         </Label>
-        <div className="flex flex-wrap gap-3" role="group" aria-labelledby="variant-label">
+        <div
+          className="flex flex-wrap gap-3"
+          role="group"
+          aria-labelledby="variant-label"
+        >
           {product.variants.map((variant) => {
             const isOutOfStock = variant.inventoryQty === 0;
             return (
@@ -132,7 +136,8 @@ export function BambooVariantSelector({
 
         {/* Add to Cart */}
         {(() => {
-          const isUnavailable = !selectedVariant || selectedVariant.inventoryQty === 0;
+          const isUnavailable =
+            !selectedVariant || selectedVariant.inventoryQty === 0;
           return (
             <Button
               type="button"

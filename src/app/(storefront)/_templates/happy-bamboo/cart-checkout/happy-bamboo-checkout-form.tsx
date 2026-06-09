@@ -86,7 +86,10 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmitWithAttempt} className="flex flex-col gap-8 lg:flex-row">
+    <form
+      onSubmit={handleSubmitWithAttempt}
+      className="flex flex-col gap-8 lg:flex-row"
+    >
       <div className="flex-1 space-y-8">
         <fieldset className="flex flex-col gap-4">
           <legend className="text-foreground font-heading pb-4 text-lg font-semibold">
@@ -97,7 +100,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
           </p>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">Email <span aria-hidden="true">*</span></Label>
+              <Label htmlFor="email">
+                Email <span aria-hidden="true">*</span>
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -110,7 +115,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="name">Full Name <span aria-hidden="true">*</span></Label>
+              <Label htmlFor="name">
+                Full Name <span aria-hidden="true">*</span>
+              </Label>
               <Input
                 id="name"
                 type="text"
@@ -119,11 +126,15 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="John Doe"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !name.trim() ? true : undefined
+                }
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="phone">Phone <span aria-hidden="true">*</span></Label>
+              <Label htmlFor="phone">
+                Phone <span aria-hidden="true">*</span>
+              </Label>
               <PhoneInput
                 id="phone"
                 autoComplete="tel"
@@ -132,7 +143,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="+1 555 123 4567"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !phone.trim() ? true : undefined
+                }
               />
             </div>
           </div>
@@ -173,7 +186,10 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
             >
               {isValidatingDiscount ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                  <Loader2
+                    className="mr-2 size-4 animate-spin"
+                    aria-hidden="true"
+                  />
                   Checking…
                 </>
               ) : (
@@ -253,7 +269,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
             </p>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="address-line1">Address line 1 <span aria-hidden="true">*</span></Label>
+                <Label htmlFor="address-line1">
+                  Address line 1 <span aria-hidden="true">*</span>
+                </Label>
                 <Input
                   id="address-line1"
                   type="text"
@@ -263,7 +281,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                   placeholder="Street address, P.O. box"
                   required={deliveryMethod === "ship"}
                   aria-required="true"
-                  aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !addressLine1.trim() ? true : undefined
+                  }
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -279,7 +299,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="city">City <span aria-hidden="true">*</span></Label>
+                  <Label htmlFor="city">
+                    City <span aria-hidden="true">*</span>
+                  </Label>
                   <Input
                     id="city"
                     type="text"
@@ -288,12 +310,16 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                     onChange={(e) => setCity(e.target.value)}
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !city.trim() ? true : undefined
+                    }
                     placeholder="e.g. San Francisco"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="state">State / Province <span aria-hidden="true">*</span></Label>
+                  <Label htmlFor="state">
+                    State / Province <span aria-hidden="true">*</span>
+                  </Label>
                   <Input
                     id="state"
                     type="text"
@@ -303,13 +329,17 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                     placeholder="e.g. CA or ON"
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !state.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !state.trim() ? true : undefined
+                    }
                   />
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="postal">ZIP / Postal code <span aria-hidden="true">*</span></Label>
+                  <Label htmlFor="postal">
+                    ZIP / Postal code <span aria-hidden="true">*</span>
+                  </Label>
                   <Input
                     id="postal"
                     type="text"
@@ -319,17 +349,25 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                     onChange={(e) => setPostalCode(e.target.value)}
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !postalCode.trim() ? true : undefined
+                    }
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="country" id="country-label">Country <span aria-hidden="true">*</span></Label>
+                  <Label htmlFor="country" id="country-label">
+                    Country <span aria-hidden="true">*</span>
+                  </Label>
                   <Select
                     value={country}
                     onValueChange={(v) => setCountry(v as "US" | "CA")}
                     required
                   >
-                    <SelectTrigger id="country" aria-labelledby="country-label" className="w-full">
+                    <SelectTrigger
+                      id="country"
+                      aria-labelledby="country-label"
+                      className="w-full"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -370,7 +408,10 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
           >
             {isProcessing ? (
               <>
-                <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                <Loader2
+                  className="mr-2 size-4 animate-spin"
+                  aria-hidden="true"
+                />
                 Processing...
               </>
             ) : (

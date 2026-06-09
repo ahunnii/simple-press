@@ -1,1 +1,7 @@
-export { Table, TableCell, TableHeader, TableKit, TableRow } from "@tiptap/extension-table";
+export {
+  Table,
+  TableCell,
+  TableHeader,
+  TableKit,
+  TableRow,
+} from "@tiptap/extension-table";

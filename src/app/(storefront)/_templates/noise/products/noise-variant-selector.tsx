@@ -7,8 +7,6 @@ import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
-
-
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
   setSelectedVariantId: (variantId: string | null) => void;

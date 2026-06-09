@@ -1,9 +1,9 @@
 "use client";
 
-import { PageTransition } from "~/components/page-animations";
-
 import type { AccountPreferencesPageProps } from "../../types";
+import { PageTransition } from "~/components/page-animations";
 import { PreferencesContent } from "~/app/(storefront)/_components/account/address-components";
+
 import { HappyBambooAccountLayout } from "./happy-bamboo-account-layout";
 
 export function HappyBambooPreferencesPage({

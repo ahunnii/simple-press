@@ -72,7 +72,7 @@ export function useShopFilters(
   const collections = useMemo(() => {
     const seen = new Map<string, { id: string; name: string; slug: string }>();
     for (const product of products) {
-      for (const cp of (product.collectionProducts ?? [])) {
+      for (const cp of product.collectionProducts ?? []) {
         if (!seen.has(cp.collection.id)) {
           seen.set(cp.collection.id, cp.collection);
         }
@@ -84,10 +84,13 @@ export function useShopFilters(
   // Count in-stock products from the subset that passes all other active filters
   const inStockCount = useMemo(() => {
     let list = [...products];
-    if (priceMax !== null) list = list.filter((p) => (p.price ?? 0) <= priceMax);
+    if (priceMax !== null)
+      list = list.filter((p) => (p.price ?? 0) <= priceMax);
     if (activeCollectionId) {
       list = list.filter((p) =>
-        (p.collectionProducts ?? []).some((cp) => cp.collection.id === activeCollectionId),
+        (p.collectionProducts ?? []).some(
+          (cp) => cp.collection.id === activeCollectionId,
+        ),
       );
     }
     if (search.trim()) {
@@ -138,14 +141,20 @@ export function useShopFilters(
   function clearFilters() {
     setSearch("");
     setActiveCollectionId(null);
-    updateParams({ price_max: null, in_stock: null, sort_by: null, page: null });
+    updateParams({
+      price_max: null,
+      in_stock: null,
+      sort_by: null,
+      page: null,
+    });
   }
 
   const filtered = useMemo(() => {
     let list = [...products];
 
     if (inStockOnly) list = list.filter(isInStock);
-    if (priceMax !== null) list = list.filter((p) => (p.price ?? 0) <= priceMax);
+    if (priceMax !== null)
+      list = list.filter((p) => (p.price ?? 0) <= priceMax);
     if (activeCollectionId) {
       list = list.filter((p) =>
         (p.collectionProducts ?? []).some(

@@ -8,7 +8,7 @@ import { captcha, organization } from "better-auth/plugins";
 import { env } from "~/env";
 import { getBusinessUrl } from "~/lib/business-url";
 import { checkBusiness, checkBusinessForEmail } from "~/lib/check-business";
-import { resend } from "~/lib/email/resend";
+import { sendResendEmail } from "~/lib/email/resend";
 import { EMAIL_FROM } from "~/lib/email/send";
 import { db } from "~/server/db";
 
@@ -74,23 +74,21 @@ export const auth = betterAuth({
 
       const updatedResetUrl = url.replace(env.BETTER_AUTH_BASE_URL, domain);
 
-      resend.emails
-        .send({
-          from: `${business?.name} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
-          to: user.email,
-          subject: "Reset your SimplePress password",
-          react: ResetPasswordEmail({
-            name: user.name,
-            businessName: business?.name ?? "",
-            resetUrl: updatedResetUrl,
-            logoUrl: business?.siteContent?.logoUrl ?? undefined,
-          }),
-        })
-        .catch((err) => {
-          Sentry.captureException(err, {
-            tags: { "auth.email": "password-reset" },
-          });
+      sendResendEmail({
+        from: `${business?.name} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+        to: user.email,
+        subject: "Reset your SimplePress password",
+        react: ResetPasswordEmail({
+          name: user.name,
+          businessName: business?.name ?? "",
+          resetUrl: updatedResetUrl,
+          logoUrl: business?.siteContent?.logoUrl ?? undefined,
+        }),
+      }).catch((err) => {
+        Sentry.captureException(err, {
+          tags: { "auth.email": "password-reset" },
         });
+      });
     },
   },
   emailVerification: {
@@ -110,23 +108,21 @@ export const auth = betterAuth({
       });
 
       const updatedVerifyUrl = url.replace(env.BETTER_AUTH_BASE_URL, domain);
-      resend.emails
-        .send({
-          from: `${business?.name} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
-          to: user.email,
-          subject: "Verify your email",
-          react: VerifyEmail({
-            name: user.name,
-            businessName: business?.name ?? "",
-            verifyUrl: updatedVerifyUrl,
-            logoUrl: business?.siteContent?.logoUrl ?? undefined,
-          }),
-        })
-        .catch((err) => {
-          Sentry.captureException(err, {
-            tags: { "auth.email": "verification" },
-          });
+      sendResendEmail({
+        from: `${business?.name} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+        to: user.email,
+        subject: "Verify your email",
+        react: VerifyEmail({
+          name: user.name,
+          businessName: business?.name ?? "",
+          verifyUrl: updatedVerifyUrl,
+          logoUrl: business?.siteContent?.logoUrl ?? undefined,
+        }),
+      }).catch((err) => {
+        Sentry.captureException(err, {
+          tags: { "auth.email": "verification" },
         });
+      });
     },
     sendOnSignUp: true,
     autoSignInAfterVerification: true,

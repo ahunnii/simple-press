@@ -24,8 +24,12 @@ export function useDiscountCode(): UseDiscountCodeReturn {
   const [discountCodeInput, setDiscountCodeInput] = useState("");
   const [discountCodeId, setDiscountCodeId] = useState<string | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [discountCodeLabel, setDiscountCodeLabel] = useState<string | null>(null);
-  const [discountFieldError, setDiscountFieldError] = useState<string | null>(null);
+  const [discountCodeLabel, setDiscountCodeLabel] = useState<string | null>(
+    null,
+  );
+  const [discountFieldError, setDiscountFieldError] = useState<string | null>(
+    null,
+  );
 
   const validateDiscountMutation = api.discount.validate.useMutation({
     onSuccess: (data) => {

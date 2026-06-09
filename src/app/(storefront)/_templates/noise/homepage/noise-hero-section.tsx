@@ -151,7 +151,10 @@ export function NoiseHeroSection({
         <motion.div
           initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduce ? 0 : 0.9, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{
+            duration: reduce ? 0 : 0.9,
+            ease: [0.25, 0.1, 0.25, 1],
+          }}
           className="flex flex-col items-center gap-6"
           style={{ maxWidth: "860px", width: "100%" }}
         >
@@ -191,7 +194,9 @@ export function NoiseHeroSection({
           type="button"
           onClick={toggleVideo}
           aria-pressed={videoPaused}
-          aria-label={videoPaused ? "Play background video" : "Pause background video"}
+          aria-label={
+            videoPaused ? "Play background video" : "Pause background video"
+          }
           className="vn-focus-on-dark absolute right-5 bottom-14 flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[9px] tracking-[0.22em] uppercase transition-opacity hover:opacity-80"
           style={{
             borderColor: "rgba(255,255,255,0.4)",

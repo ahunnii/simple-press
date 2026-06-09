@@ -111,11 +111,7 @@ export function BambooProductActions({
                   )}
                 </Button>
                 {/* S-1: live region announces add-to-cart confirmation */}
-                <div
-                  aria-live="polite"
-                  aria-atomic="true"
-                  className="sr-only"
-                >
+                <div aria-live="polite" aria-atomic="true" className="sr-only">
                   {isAdded ? `${product.name} added to cart` : ""}
                 </div>
               </div>

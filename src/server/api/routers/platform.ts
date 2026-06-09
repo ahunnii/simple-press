@@ -124,7 +124,10 @@ export const platformRouter = createTRPCRouter({
               { name: { contains: search, mode: "insensitive" as const } },
               { subdomain: { contains: search, mode: "insensitive" as const } },
               {
-                customDomain: { contains: search, mode: "insensitive" as const },
+                customDomain: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
               },
             ],
           }
@@ -412,7 +415,10 @@ export const platformRouter = createTRPCRouter({
           .string()
           .min(3)
           .max(63)
-          .regex(/^[a-z0-9-]+$/, "Subdomain may only contain lowercase letters, numbers, and hyphens"),
+          .regex(
+            /^[a-z0-9-]+$/,
+            "Subdomain may only contain lowercase letters, numbers, and hyphens",
+          ),
         templateId: z.string().default("modern"),
         ownerEmail: z.string().email().optional(),
       }),
@@ -466,7 +472,11 @@ export const platformRouter = createTRPCRouter({
         return newBusiness;
       });
 
-      return { id: business.id, name: business.name, subdomain: business.subdomain };
+      return {
+        id: business.id,
+        name: business.name,
+        subdomain: business.subdomain,
+      };
     }),
 
   getDashboardStats: platformAdminProcedure.query(async ({ ctx }) => {
@@ -588,7 +598,10 @@ export const platformRouter = createTRPCRouter({
 
         if (business.customDomain) {
           await ctx.db.domainQueue.updateMany({
-            where: { businessId: input.businessId, domain: business.customDomain },
+            where: {
+              businessId: input.businessId,
+              domain: business.customDomain,
+            },
             data: { status: "failed" },
           });
         }
@@ -600,7 +613,10 @@ export const platformRouter = createTRPCRouter({
 
         if (input.domainStatus === "ACTIVE" && business.customDomain) {
           await ctx.db.domainQueue.updateMany({
-            where: { businessId: input.businessId, domain: business.customDomain },
+            where: {
+              businessId: input.businessId,
+              domain: business.customDomain,
+            },
             data: { status: "completed" },
           });
         }

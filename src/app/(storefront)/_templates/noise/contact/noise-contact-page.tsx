@@ -76,10 +76,7 @@ export function NoiseContactPage({
               {(email ?? phone) && (
                 <NoiseContactInfoBlock
                   title="Reach Us"
-                  lines={[
-                    ...(email ? [email] : []),
-                    ...(phone ? [phone] : []),
-                  ]}
+                  lines={[...(email ? [email] : []), ...(phone ? [phone] : [])]}
                   links={[
                     ...(email ? [`mailto:${email}`] : []),
                     ...(phone ? [`tel:${phone.replace(/\D/g, "")}`] : []),

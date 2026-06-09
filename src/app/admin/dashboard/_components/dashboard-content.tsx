@@ -20,10 +20,10 @@ import {
   YAxis,
 } from "recharts";
 
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 
 type DashboardContentProps = {
   business: {
@@ -328,16 +328,22 @@ export function DashboardContent({
                     <Link key={pool.id} href="/admin/inventory">
                       <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 transition-colors hover:bg-amber-100">
                         <div className="flex items-center gap-3">
-                          <AlertTriangle className={`h-5 w-5 shrink-0 ${pool.inventoryQty === 0 ? "text-red-600" : "text-amber-600"}`} />
+                          <AlertTriangle
+                            className={`h-5 w-5 shrink-0 ${pool.inventoryQty === 0 ? "text-red-600" : "text-amber-600"}`}
+                          />
                           <div>
                             <p className="text-sm font-medium text-gray-900">
                               {pool.name}
                             </p>
-                            <p className="text-xs text-gray-600">Inventory pool</p>
+                            <p className="text-xs text-gray-600">
+                              Inventory pool
+                            </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`text-sm font-semibold ${pool.inventoryQty === 0 ? "text-red-700" : "text-amber-700"}`}>
+                          <p
+                            className={`text-sm font-semibold ${pool.inventoryQty === 0 ? "text-red-700" : "text-amber-700"}`}
+                          >
                             {pool.inventoryQty} left
                           </p>
                         </div>

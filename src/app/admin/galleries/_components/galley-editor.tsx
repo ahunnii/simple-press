@@ -82,7 +82,9 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
   const utils = api.useUtils();
   const dndId = useId();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [pendingDeleteImageId, setPendingDeleteImageId] = useState<string | null>(null);
+  const [pendingDeleteImageId, setPendingDeleteImageId] = useState<
+    string | null
+  >(null);
   const [editingImage, setEditingImage] = useState<GalleryImage | null>(null);
   const [images, setImages] = useState(gallery.images);
 
@@ -95,8 +97,10 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
       layout: gallery.layout as GalleryUpdateData["layout"],
       columns: gallery.columns,
       gap: gallery.gap,
-      aspectRatio: (gallery.aspectRatio ?? "1:1") as GalleryUpdateData["aspectRatio"],
-      captionStyle: (gallery.captionStyle ?? "overlay") as GalleryUpdateData["captionStyle"],
+      aspectRatio: (gallery.aspectRatio ??
+        "1:1") as GalleryUpdateData["aspectRatio"],
+      captionStyle: (gallery.captionStyle ??
+        "overlay") as GalleryUpdateData["captionStyle"],
       showCaptions: gallery.showCaptions,
       enableLightbox: gallery.enableLightbox,
     },
@@ -163,8 +167,10 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
         layout: data.layout as GalleryUpdateData["layout"],
         columns: data.columns,
         gap: data.gap,
-        aspectRatio: (data.aspectRatio ?? "1:1") as GalleryUpdateData["aspectRatio"],
-        captionStyle: (data.captionStyle ?? "overlay") as GalleryUpdateData["captionStyle"],
+        aspectRatio: (data.aspectRatio ??
+          "1:1") as GalleryUpdateData["aspectRatio"],
+        captionStyle: (data.captionStyle ??
+          "overlay") as GalleryUpdateData["captionStyle"],
         showCaptions: data.showCaptions,
         enableLightbox: data.enableLightbox,
       });
@@ -467,7 +473,11 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Textarea {...field} rows={3} maxLength={DESCRIPTION_MAX} />
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            maxLength={DESCRIPTION_MAX}
+                          />
                         </FormControl>
                         <div className="flex items-center justify-between">
                           <FormMessage />
@@ -585,10 +595,18 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="1:1">1:1 — Square</SelectItem>
-                              <SelectItem value="4:3">4:3 — Landscape</SelectItem>
-                              <SelectItem value="16:9">16:9 — Widescreen</SelectItem>
-                              <SelectItem value="3:4">3:4 — Portrait</SelectItem>
-                              <SelectItem value="original">Original — Natural size</SelectItem>
+                              <SelectItem value="4:3">
+                                4:3 — Landscape
+                              </SelectItem>
+                              <SelectItem value="16:9">
+                                16:9 — Widescreen
+                              </SelectItem>
+                              <SelectItem value="3:4">
+                                3:4 — Portrait
+                              </SelectItem>
+                              <SelectItem value="original">
+                                Original — Natural size
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -633,8 +651,12 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="overlay">Always visible</SelectItem>
-                              <SelectItem value="hover">Show on hover</SelectItem>
+                              <SelectItem value="overlay">
+                                Always visible
+                              </SelectItem>
+                              <SelectItem value="hover">
+                                Show on hover
+                              </SelectItem>
                               <SelectItem value="below">Below image</SelectItem>
                             </SelectContent>
                           </Select>

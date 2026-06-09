@@ -159,7 +159,10 @@ export function HappyBambooAboutPage({
       </section>
 
       {/* Mission Banner */}
-      <section className="py-12 md:py-16" {...sectionGroupAttr("about", "mission")}>
+      <section
+        className="py-12 md:py-16"
+        {...sectionGroupAttr("about", "mission")}
+      >
         <div className="container mx-auto px-4">
           <FadeIn>
             <div className="bg-primary relative overflow-hidden rounded-2xl px-8 py-10 md:px-12 md:py-14">
@@ -235,7 +238,10 @@ export function HappyBambooAboutPage({
       </section>
 
       {/* Why Bamboo Is Better Section */}
-      <section className="py-20 md:py-32" {...sectionGroupAttr("about", "bamboo")}>
+      <section
+        className="py-20 md:py-32"
+        {...sectionGroupAttr("about", "bamboo")}
+      >
         <div className="container mx-auto px-4">
           <div className="grid items-start gap-12 lg:grid-cols-5">
             <div className="lg:col-span-3">

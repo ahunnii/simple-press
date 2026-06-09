@@ -135,7 +135,7 @@ export function CreateBusinessButton() {
                 onChange={(e) => handleSubdomainChange(e.target.value)}
                 required
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Lowercase letters, numbers, and hyphens only. Min 3 characters.
               </p>
             </div>

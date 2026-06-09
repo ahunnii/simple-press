@@ -17,7 +17,9 @@ export default function OutOfStockAlertEmail({
   businessName,
   businessLogoUrl,
 }: OutOfStockAlertEmailProps) {
-  const displayName = variantName ? `${productName} — ${variantName}` : productName;
+  const displayName = variantName
+    ? `${productName} — ${variantName}`
+    : productName;
 
   return (
     <EmailLayout

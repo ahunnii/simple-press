@@ -131,7 +131,10 @@ export function HappyBambooProductPage({
                   key={`${badge.label}-${i}`}
                   className="bg-secondary/60 flex items-center gap-2 rounded-lg px-3 py-2"
                 >
-                  <badge.Icon className="text-primary size-4" aria-hidden="true" />
+                  <badge.Icon
+                    className="text-primary size-4"
+                    aria-hidden="true"
+                  />
                   <span className="text-secondary-foreground text-xs font-medium">
                     {badge.label}
                   </span>

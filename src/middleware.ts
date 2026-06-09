@@ -11,6 +11,16 @@ export async function middleware(req: NextRequest) {
     requestHeaders.set("x-sp-preview", "1");
   }
 
+  // On the preview/staging deployment, keep the whole environment out of search
+  // indexes (it serves a clone of prod data on preview.<platform-domain>).
+  const isPreviewEnv = process.env.IS_PREVIEW_ENV === "true";
+  const finalize = (res: NextResponse) => {
+    if (isPreviewEnv) {
+      res.headers.set("X-Robots-Tag", "noindex, nofollow");
+    }
+    return res;
+  };
+
   // Get platform domain from env
   const platformDomain = process.env.PLATFORM_DOMAIN ?? "localhost";
   const isDevelopment = process.env.NODE_ENV === "development";
@@ -30,7 +40,9 @@ export async function middleware(req: NextRequest) {
   // ========================================
   if (isPlatformDomain) {
     // Platform routes work normally
-    return NextResponse.next({ request: { headers: requestHeaders } });
+    return finalize(
+      NextResponse.next({ request: { headers: requestHeaders } }),
+    );
   }
 
   // ========================================
@@ -45,7 +57,9 @@ export async function middleware(req: NextRequest) {
       pathname.startsWith("/_next") ||
       pathname.startsWith("/favicon")
     ) {
-      return NextResponse.next({ request: { headers: requestHeaders } });
+      return finalize(
+        NextResponse.next({ request: { headers: requestHeaders } }),
+      );
     }
 
     const url = req.nextUrl.clone();
@@ -58,7 +72,9 @@ export async function middleware(req: NextRequest) {
     }
 
     url.pathname = `/platform-hub${targetPath === "/" ? "" : targetPath}`;
-    return NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+    return finalize(
+      NextResponse.rewrite(url, { request: { headers: requestHeaders } }),
+    );
   }
 
   // ========================================
@@ -73,11 +89,13 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon")
   ) {
-    return NextResponse.next({ request: { headers: requestHeaders } });
+    return finalize(
+      NextResponse.next({ request: { headers: requestHeaders } }),
+    );
   }
 
   // For any other paths on tenant domains, just pass through
-  return NextResponse.next({ request: { headers: requestHeaders } });
+  return finalize(NextResponse.next({ request: { headers: requestHeaders } }));
 }
 
 export const config = {

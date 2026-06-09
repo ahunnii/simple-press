@@ -105,7 +105,10 @@ export function DefaultContactPage({
   return (
     <PageTransition>
       {/* ── Page hero ────────────────────────────────────────────────────── */}
-      <section {...sectionGroupAttr("contact", "header")} className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
+      <section
+        {...sectionGroupAttr("contact", "header")}
+        className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8"
+      >
         <div className="mx-auto max-w-[1440px]">
           {f["default.contact.eyebrow"] && (
             <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
@@ -167,7 +170,10 @@ export function DefaultContactPage({
 
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
       {faqs.length > 0 && (
-        <section {...sectionGroupAttr("contact", "faq")} className="bg-[#efece8] px-6 py-20 lg:px-8">
+        <section
+          {...sectionGroupAttr("contact", "faq")}
+          className="bg-[#efece8] px-6 py-20 lg:px-8"
+        >
           <div className="mx-auto max-w-[760px]">
             <div className="mb-12 text-center">
               <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">

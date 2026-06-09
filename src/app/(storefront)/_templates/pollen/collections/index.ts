@@ -26,7 +26,8 @@ const collectionsPageData: TemplateField[] = [
   {
     key: "pollen.collections.listing-intro",
     label: "Collections Page Intro",
-    description: "Short intro shown below the hero on the collections listing page",
+    description:
+      "Short intro shown below the hero on the collections listing page",
     type: "textarea",
     page: "collections",
     group: "collections.main",

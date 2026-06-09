@@ -111,7 +111,7 @@ export function AddMemberButton({ businessId }: Props) {
                   <Label htmlFor="add-owner" className="font-normal">
                     <div>
                       <div className="font-medium">Owner</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-muted-foreground text-sm">
                         Full control of the business
                       </div>
                     </div>
@@ -122,7 +122,7 @@ export function AddMemberButton({ businessId }: Props) {
                   <Label htmlFor="add-manager" className="font-normal">
                     <div>
                       <div className="font-medium">Manager</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-muted-foreground text-sm">
                         Operational access to the business
                       </div>
                     </div>

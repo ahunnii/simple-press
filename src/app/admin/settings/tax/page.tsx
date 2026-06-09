@@ -28,11 +28,11 @@ export default function TaxGuidePage() {
       <div className="admin-container space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Tax Setup Guide</h1>
-          <p className="mt-1 text-muted-foreground">
+          <p className="text-muted-foreground mt-1">
             Understanding your sales tax obligations and how to set them up in
             Stripe.
           </p>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-sm">
             <strong>This page is for informational purposes only.</strong> It is
             not legal or tax advice. Consult a tax professional for guidance
             specific to your business.
@@ -124,16 +124,18 @@ export default function TaxGuidePage() {
             <p>
               When a customer in a new state buys from you, you are{" "}
               <strong>not immediately required to collect sales tax</strong>{" "}
-              unless you&apos;ve already crossed that state&apos;s economic nexus
-              threshold. Stripe Tax will automatically handle this — it only
-              collects tax in states where you have active registrations.
+              unless you&apos;ve already crossed that state&apos;s economic
+              nexus threshold. Stripe Tax will automatically handle this — it
+              only collects tax in states where you have active registrations.
             </p>
-            <p>Here&apos;s what to do as your business grows into new states:</p>
+            <p>
+              Here&apos;s what to do as your business grows into new states:
+            </p>
             <ol className="ml-4 list-decimal space-y-2">
               <li>
                 <strong>Monitor your sales by state.</strong> Use the Stripe Tax
-                Dashboard or a third-party nexus tracker to see where you&apos;re
-                approaching thresholds.
+                Dashboard or a third-party nexus tracker to see where
+                you&apos;re approaching thresholds.
               </li>
               <li>
                 <strong>Register for a sales tax permit</strong> in that state
@@ -142,7 +144,9 @@ export default function TaxGuidePage() {
                 Revenue).
               </li>
               <li>
-                <strong>Add the registration to your Stripe Tax account.</strong>{" "}
+                <strong>
+                  Add the registration to your Stripe Tax account.
+                </strong>{" "}
                 Go to{" "}
                 <a
                   href="https://dashboard.stripe.com/tax/registrations"
@@ -189,8 +193,8 @@ export default function TaxGuidePage() {
                 >
                   Settings → Integrations
                 </Link>{" "}
-                and turn on{" "}
-                <em>Automatic Tax Collection</em> under your Stripe connection.
+                and turn on <em>Automatic Tax Collection</em> under your Stripe
+                connection.
               </li>
               <li>
                 <strong>Add tax registrations in Stripe.</strong> Open the{" "}
@@ -207,8 +211,8 @@ export default function TaxGuidePage() {
               </li>
               <li>
                 <strong>Verify your registrations are active.</strong> Stripe
-                will only collect tax in states with an &quot;Active&quot; status.
-                Pending or incomplete registrations will not trigger tax
+                will only collect tax in states with an &quot;Active&quot;
+                status. Pending or incomplete registrations will not trigger tax
                 collection.
               </li>
               <li>
@@ -238,8 +242,8 @@ export default function TaxGuidePage() {
             <p>
               The INFORM Consumers Act (effective June 2023) requires online
               marketplaces to collect and verify certain information from
-              &quot;high-volume third-party sellers&quot; — defined as sellers who
-              complete <strong>200+ transactions</strong> or generate{" "}
+              &quot;high-volume third-party sellers&quot; — defined as sellers
+              who complete <strong>200+ transactions</strong> or generate{" "}
               <strong>$5,000+ in gross annual revenue</strong> on the platform.
             </p>
             <p>
@@ -252,8 +256,8 @@ export default function TaxGuidePage() {
               </Link>{" "}
               will alert you. The required verification is handled through your
               Stripe account — completing Stripe&apos;s identity and business
-              verification (KYB/KYC) satisfies the INFORM Act&apos;s requirements
-              for identity confirmation.
+              verification (KYB/KYC) satisfies the INFORM Act&apos;s
+              requirements for identity confirmation.
             </p>
             <p className="text-muted-foreground">
               Stripe Connect requires all connected accounts to submit business
@@ -287,7 +291,8 @@ export default function TaxGuidePage() {
                 {
                   label: "TaxJar: Economic Nexus Guide",
                   href: "https://www.taxjar.com/sales-tax/economic-nexus/",
-                  description: "State-by-state nexus thresholds, regularly updated",
+                  description:
+                    "State-by-state nexus thresholds, regularly updated",
                 },
                 {
                   label: "Avalara: State Sales Tax Rates",

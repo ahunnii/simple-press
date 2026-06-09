@@ -117,7 +117,10 @@ export function DarkTrendDiscountInput({
       <div className="flex gap-2">
         <div className="relative flex-1">
           {/* N-1 + S-9: decorative icon */}
-          <Tag aria-hidden="true" className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-white/40" />
+          <Tag
+            aria-hidden="true"
+            className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-white/40"
+          />
           {/* S-9: aria-label on input */}
           <Input
             type="text"
@@ -145,7 +148,10 @@ export function DarkTrendDiscountInput({
         >
           {isValidating ? (
             <>
-              <Loader2 aria-hidden="true" className="mr-1 h-4 w-4 animate-spin" />
+              <Loader2
+                aria-hidden="true"
+                className="mr-1 h-4 w-4 animate-spin"
+              />
               Applying…
             </>
           ) : (

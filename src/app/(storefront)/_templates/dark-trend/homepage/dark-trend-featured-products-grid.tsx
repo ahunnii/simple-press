@@ -22,7 +22,9 @@ export function DarkTrendFeaturedProductsGrid() {
       {displayProducts.map((product, index) => (
         <motion.div
           key={product.id}
-          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+          initial={
+            shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }
+          }
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-40px" }}
           transition={{

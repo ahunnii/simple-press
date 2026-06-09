@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 import { IconTerminal } from "@tabler/icons-react";
 import { Building2, Globe, LayoutDashboard, Users } from "lucide-react";
 
@@ -76,7 +76,9 @@ export default async function PlatformHubLayout({
                       <IconTerminal className="size-8" />
                       simple_press
                     </span>
-                    <span className="text-sm text-gray-500">Platform Admin</span>
+                    <span className="text-sm text-gray-500">
+                      Platform Admin
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

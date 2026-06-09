@@ -50,7 +50,7 @@ export async function ModernTestimonialsPage({
                     key={t.id}
                     className="bg-card text-card-foreground border-border/80 flex flex-col rounded-3xl border p-6 shadow-sm ring-1 ring-black/4 dark:ring-white/10"
                   >
-                    <figure className="flex flex-col flex-1">
+                    <figure className="flex flex-1 flex-col">
                       <blockquote className="text-foreground/80 mb-4 flex-1 font-serif text-xl leading-relaxed font-medium tracking-wide text-pretty">
                         &ldquo;{t.text}&rdquo;
                       </blockquote>

@@ -118,15 +118,21 @@ export function HappyBambooOrderConfirmation({ business }: Props) {
               </h2>
               <ul className="text-muted-foreground space-y-2">
                 <li className="flex items-start gap-2">
-                  <span className="text-primary" aria-hidden="true">•</span>
+                  <span className="text-primary" aria-hidden="true">
+                    •
+                  </span>
                   <span>You&apos;ll receive an email confirmation shortly</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary" aria-hidden="true">•</span>
+                  <span className="text-primary" aria-hidden="true">
+                    •
+                  </span>
                   <span>We&apos;ll notify you when your order ships</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary" aria-hidden="true">•</span>
+                  <span className="text-primary" aria-hidden="true">
+                    •
+                  </span>
                   <span>Track your order status via email</span>
                 </li>
               </ul>

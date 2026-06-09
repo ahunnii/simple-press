@@ -1,10 +1,10 @@
 import type { NextRequest } from "next/server";
-import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
-import { verifySignedOAuthState } from "~/lib/stripe/oauth-state";
 import { stripeClient } from "~/lib/stripe/client";
+import { verifySignedOAuthState } from "~/lib/stripe/oauth-state";
 import { db } from "~/server/db";
 
 export async function GET(request: NextRequest) {

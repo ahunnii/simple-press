@@ -55,7 +55,10 @@ export function PollenCartContents({ business }: Props) {
         <section className="mx-auto flex max-w-7xl flex-col items-center justify-center px-4 py-40 text-center sm:px-6 lg:px-8">
           <FadeIn direction="up">
             <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-[#f5f2ee]">
-              <ShoppingBag className="size-8 text-[#4c566a]" aria-hidden="true" />
+              <ShoppingBag
+                className="size-8 text-[#4c566a]"
+                aria-hidden="true"
+              />
             </div>
             <h1 className="mt-6 text-2xl font-bold text-[#2a351f]">
               Your cart is empty

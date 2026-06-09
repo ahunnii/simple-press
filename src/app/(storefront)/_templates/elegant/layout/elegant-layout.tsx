@@ -40,8 +40,11 @@ export function ElegantLayout({
     >
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:z-[9999] focus:top-4 focus:left-4 focus:px-4 focus:py-2 focus:rounded focus:shadow-lg"
-        style={{ background: "var(--el-paper, #fbf8f2)", color: "var(--el-ink, #1c1a17)" }}
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:rounded focus:px-4 focus:py-2 focus:shadow-lg"
+        style={{
+          background: "var(--el-paper, #fbf8f2)",
+          color: "var(--el-ink, #1c1a17)",
+        }}
       >
         Skip to main content
       </a>

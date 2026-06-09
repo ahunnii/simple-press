@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Pause, Play } from "lucide-react";
+
 import type { RouterOutputs } from "~/trpc/react";
 import {
   getListFieldValue,
@@ -28,7 +29,9 @@ export function ElegantTrustBadges({
     DEFAULT_ELEGANT_TRUST_BADGES,
   );
 
-  const items = trustBadges?.length ? trustBadges : DEFAULT_ELEGANT_TRUST_BADGES;
+  const items = trustBadges?.length
+    ? trustBadges
+    : DEFAULT_ELEGANT_TRUST_BADGES;
 
   return (
     <div
@@ -97,7 +100,13 @@ export function ElegantTrustBadges({
               }}
             >
               {badge.title}
-              <span style={{ fontSize: 14, fontStyle: "normal", color: "var(--el-sage, #4a5240)" }}>
+              <span
+                style={{
+                  fontSize: 14,
+                  fontStyle: "normal",
+                  color: "var(--el-sage, #4a5240)",
+                }}
+              >
                 ✿
               </span>
             </span>
@@ -107,7 +116,9 @@ export function ElegantTrustBadges({
       <button
         type="button"
         onClick={() => setIsPaused((p) => !p)}
-        aria-label={isPaused ? "Resume scrolling banner" : "Pause scrolling banner"}
+        aria-label={
+          isPaused ? "Resume scrolling banner" : "Pause scrolling banner"
+        }
         style={{
           position: "absolute",
           right: 16,
@@ -127,7 +138,11 @@ export function ElegantTrustBadges({
         }}
         className="el-icon-btn"
       >
-        {isPaused ? <Play aria-hidden={true} size={11} /> : <Pause aria-hidden={true} size={11} />}
+        {isPaused ? (
+          <Play aria-hidden={true} size={11} />
+        ) : (
+          <Pause aria-hidden={true} size={11} />
+        )}
       </button>
     </div>
   );

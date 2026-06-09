@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import type { AccountAddressBookPageProps } from "../../_templates/types";
 import { api } from "~/trpc/react";
 import {
   AlertDialog,
@@ -37,8 +38,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-
-import type { AccountAddressBookPageProps } from "../../_templates/types";
 
 export const addressSchema = z.object({
   firstName: z.string().min(1, "Required"),
@@ -134,7 +133,7 @@ export function AddressSheet({
       phone: address?.phone ?? "",
       isDefault: address?.isDefault ?? false,
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address?.id]);
 
   function handleOpenChange(next: boolean) {
@@ -146,7 +145,9 @@ export function AddressSheet({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className="overflow-y-auto sm:max-w-lg">
         <SheetHeader className="px-6 pt-2">
-          <SheetTitle>{isEditing ? "Edit Address" : "Add New Address"}</SheetTitle>
+          <SheetTitle>
+            {isEditing ? "Edit Address" : "Add New Address"}
+          </SheetTitle>
           <SheetDescription>
             {isEditing
               ? "Update your saved address."
@@ -166,7 +167,9 @@ export function AddressSheet({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>First name</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -177,7 +180,9 @@ export function AddressSheet({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Last name</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -190,7 +195,9 @@ export function AddressSheet({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Company (optional)</FormLabel>
-                  <FormControl><Input {...field} /></FormControl>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -202,7 +209,9 @@ export function AddressSheet({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Address</FormLabel>
-                  <FormControl><Input placeholder="Street address" {...field} /></FormControl>
+                  <FormControl>
+                    <Input placeholder="Street address" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -214,7 +223,9 @@ export function AddressSheet({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Apt, suite, etc. (optional)</FormLabel>
-                  <FormControl><Input {...field} /></FormControl>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -226,7 +237,9 @@ export function AddressSheet({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>City</FormLabel>
-                  <FormControl><Input {...field} /></FormControl>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -239,7 +252,9 @@ export function AddressSheet({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>State / Province</FormLabel>
-                    <FormControl><Input placeholder="MI" {...field} /></FormControl>
+                    <FormControl>
+                      <Input placeholder="MI" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -250,7 +265,9 @@ export function AddressSheet({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>ZIP / Postal code</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -263,7 +280,9 @@ export function AddressSheet({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Country</FormLabel>
-                  <FormControl><Input placeholder="US" {...field} /></FormControl>
+                  <FormControl>
+                    <Input placeholder="US" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -275,7 +294,9 @@ export function AddressSheet({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone (optional)</FormLabel>
-                  <FormControl><Input type="tel" {...field} /></FormControl>
+                  <FormControl>
+                    <Input type="tel" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -301,7 +322,11 @@ export function AddressSheet({
 
             <div className="pt-2">
               <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? "Saving…" : isEditing ? "Update Address" : "Save Address"}
+                {isPending
+                  ? "Saving…"
+                  : isEditing
+                    ? "Update Address"
+                    : "Save Address"}
               </Button>
             </div>
           </form>
@@ -350,7 +375,7 @@ export function AddressCard({
           </span>
         )}
         <CardContent className="p-5">
-          <address className="text-sm not-italic leading-relaxed">
+          <address className="text-sm leading-relaxed not-italic">
             <p className="text-foreground font-semibold">
               {address.firstName} {address.lastName}
             </p>
@@ -519,19 +544,20 @@ export function PreferencesContent({
     customer?.acceptsMarketing ?? false,
   );
 
-  const { mutate, isPending } = api.customer.updateMarketingPreference.useMutation({
-    onSuccess: (_, variables) => {
-      setAcceptsMarketing(variables.acceptsMarketing);
-      toast.success(
-        variables.acceptsMarketing
-          ? "You're now subscribed to marketing emails."
-          : "You've unsubscribed from marketing emails.",
-      );
-    },
-    onError: () => {
-      toast.error("Failed to update preference. Please try again.");
-    },
-  });
+  const { mutate, isPending } =
+    api.customer.updateMarketingPreference.useMutation({
+      onSuccess: (_, variables) => {
+        setAcceptsMarketing(variables.acceptsMarketing);
+        toast.success(
+          variables.acceptsMarketing
+            ? "You're now subscribed to marketing emails."
+            : "You've unsubscribed from marketing emails.",
+        );
+      },
+      onError: () => {
+        toast.error("Failed to update preference. Please try again.");
+      },
+    });
 
   return (
     <div className="max-w-xl space-y-4">
@@ -556,11 +582,11 @@ export function PreferencesContent({
                 aria-checked={acceptsMarketing}
                 disabled={isPending}
                 onClick={() => mutate({ acceptsMarketing: !acceptsMarketing })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${acceptsMarketing ? "bg-primary" : "bg-input"}`}
+                className={`focus-visible:ring-ring relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${acceptsMarketing ? "bg-primary" : "bg-input"}`}
                 aria-label="Toggle marketing emails"
               >
                 <span
-                  className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform ${acceptsMarketing ? "translate-x-5" : "translate-x-0"}`}
+                  className={`bg-background pointer-events-none inline-block h-5 w-5 rounded-full shadow-lg ring-0 transition-transform ${acceptsMarketing ? "translate-x-5" : "translate-x-0"}`}
                 />
               </button>
             </div>

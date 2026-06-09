@@ -32,7 +32,7 @@ const INP =
 // M-5: use <legend> inside fieldset so AT announces field group name
 function SectionHead({ children }: { children: React.ReactNode }) {
   return (
-    <legend className="sl-rail-heading mb-5 w-full border-b border-[var(--sl-border)] pb-3 font-heading text-[var(--sl-orange)] uppercase">
+    <legend className="sl-rail-heading font-heading mb-5 w-full border-b border-[var(--sl-border)] pb-3 text-[var(--sl-orange)] uppercase">
       {children}
     </legend>
   );
@@ -124,7 +124,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="First & last"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !name.trim() ? true : undefined
+                }
                 className={INP}
               />
             </div>
@@ -165,7 +167,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="SUMMER-2026"
                 autoComplete="off"
                 aria-invalid={!!discountFieldError}
-                aria-describedby={discountFieldError ? "discount-error" : undefined}
+                aria-describedby={
+                  discountFieldError ? "discount-error" : undefined
+                }
                 className={cn(INP, "tracking-[0.1em] uppercase")}
               />
             </div>
@@ -192,13 +196,16 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
             <p
               id="discount-error"
               role="alert"
-              className="font-sans text-xs tracking-[0.12em] text-destructive uppercase"
+              className="text-destructive font-sans text-xs tracking-[0.12em] uppercase"
             >
               {discountFieldError}
             </p>
           ) : null}
           {discountCodeLabel && discountAmount > 0 ? (
-            <p role="status" className="font-sans text-xs tracking-[0.12em] text-green-700 uppercase">
+            <p
+              role="status"
+              className="font-sans text-xs tracking-[0.12em] text-green-700 uppercase"
+            >
               Code <span className="font-semibold">{discountCodeLabel}</span>{" "}
               applied.
             </p>
@@ -255,7 +262,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="Street address, P.O. box"
                 required={deliveryMethod === "ship"}
                 aria-required="true"
-                aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !addressLine1.trim() ? true : undefined
+                }
                 className={INP}
               />
             </div>
@@ -289,7 +298,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   required={deliveryMethod === "ship"}
                   placeholder="e.g. Detroit"
                   aria-required="true"
-                  aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !city.trim() ? true : undefined
+                  }
                   className={INP}
                 />
               </div>
@@ -306,7 +317,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   placeholder="e.g. MI"
                   required={deliveryMethod === "ship"}
                   aria-required="true"
-                  aria-invalid={submitAttempted && !state.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !state.trim() ? true : undefined
+                  }
                   className={INP}
                 />
               </div>
@@ -326,7 +339,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   onChange={(e) => setPostalCode(e.target.value)}
                   required={deliveryMethod === "ship"}
                   aria-required="true"
-                  aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !postalCode.trim() ? true : undefined
+                  }
                   className={INP}
                 />
               </div>
@@ -339,7 +354,11 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   onValueChange={(v) => setCountry(v as "US" | "CA")}
                   required
                 >
-                  <SelectTrigger id="country" className={cn("w-full", INP)} aria-labelledby="country-label">
+                  <SelectTrigger
+                    id="country"
+                    className={cn("w-full", INP)}
+                    aria-labelledby="country-label"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -378,7 +397,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
             className="sl-btn flex w-full items-center justify-between disabled:opacity-50"
           >
             <span className="flex items-center gap-2">
-              {isProcessing ? <Loader2 className="size-3.5 animate-spin" /> : null}
+              {isProcessing ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : null}
               {isProcessing ? "Processing…" : "Continue to Payment"}
             </span>
             <span>→</span>

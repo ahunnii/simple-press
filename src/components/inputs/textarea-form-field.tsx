@@ -64,7 +64,11 @@ export const TextareaFormField = <CurrentForm extends FieldValues>({
         <FormItem className={cn("col-span-full", className)}>
           <FormLabel className={cn(labelClassName)}>
             {label}
-            {required && <span className="text-red-500" aria-hidden="true">*</span>}
+            {required && (
+              <span className="text-red-500" aria-hidden="true">
+                *
+              </span>
+            )}
           </FormLabel>
           {maxLength && (
             <span className="text-xs text-gray-500">

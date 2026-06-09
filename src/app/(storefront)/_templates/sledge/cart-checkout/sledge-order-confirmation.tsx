@@ -5,14 +5,23 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 
-import { useCart } from "~/providers/cart-context";
 import { formatPrice } from "~/lib/prices";
+import { useCart } from "~/providers/cart-context";
 
 const NEXT_STEPS = [
-  { icon: "✉", text: "You'll receive an email confirmation at the address provided." },
+  {
+    icon: "✉",
+    text: "You'll receive an email confirmation at the address provided.",
+  },
   { icon: "✱", text: "Each piece is handcrafted with care before it ships." },
-  { icon: "↗", text: "We'll notify you with a tracking number when your order ships." },
-  { icon: "✓", text: "All sales are final — thank you for supporting the studio." },
+  {
+    icon: "↗",
+    text: "We'll notify you with a tracking number when your order ships.",
+  },
+  {
+    icon: "✓",
+    text: "All sales are final — thank you for supporting the studio.",
+  },
 ] as const;
 
 type Props = {
@@ -46,7 +55,9 @@ export function SledgeOrderConfirmation({ business }: Props) {
     clearCart();
     const fetchOrderDetails = async () => {
       try {
-        const response = await fetch(`/api/stripe/session?session_id=${sessionId}`);
+        const response = await fetch(
+          `/api/stripe/session?session_id=${sessionId}`,
+        );
         if (response.ok) {
           const data = (await response.json()) as {
             customer_email: string;
@@ -90,7 +101,7 @@ export function SledgeOrderConfirmation({ business }: Props) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-6 bg-white px-7 text-center">
         {/* N-5: only heading in this state → h1; C-3: large heading → AA accent token */}
-        <h1 className="sl-tab-heading uppercase text-[var(--sl-coral-aa)] tracking-[0.04em] leading-none">
+        <h1 className="sl-tab-heading leading-none tracking-[0.04em] text-[var(--sl-coral-aa)] uppercase">
           No order found
         </h1>
         <Link href="/shop" className="sl-btn text-xs">
@@ -115,7 +126,7 @@ export function SledgeOrderConfirmation({ business }: Props) {
           <h1
             ref={h1Ref}
             tabIndex={-1}
-            className="sl-page-title-checkout font-heading uppercase text-[var(--sl-orange)] outline-none"
+            className="sl-page-title-checkout font-heading text-[var(--sl-orange)] uppercase outline-none"
           >
             Order Placed!
           </h1>
@@ -178,7 +189,10 @@ export function SledgeOrderConfirmation({ business }: Props) {
 
       <section className="border-t border-[var(--sl-border)] bg-white px-7 py-10">
         <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:justify-center">
-          <Link href="/shop" className="sl-btn flex-1 justify-center text-xs sm:flex-none">
+          <Link
+            href="/shop"
+            className="sl-btn flex-1 justify-center text-xs sm:flex-none"
+          >
             Continue Shopping
           </Link>
           <Link

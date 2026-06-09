@@ -58,8 +58,8 @@ export function DeleteMembershipDialog({
           <AlertDialogDescription>
             {businessName && `Remove user from ${businessName}?`}
             {userName && `Remove ${userName} from this business?`}
-            {!businessName && !userName && "Remove this membership?"} This action
-            cannot be undone.
+            {!businessName && !userName && "Remove this membership?"} This
+            action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

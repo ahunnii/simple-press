@@ -85,7 +85,11 @@ export async function BambooTestimonialsPage({
                 <StaggerItem key={t.id}>
                   <Card className="border-border/60 bg-card h-full">
                     <CardContent className="flex h-full flex-col p-8">
-                      <div className="flex gap-0.5" role="img" aria-label="5 out of 5 stars">
+                      <div
+                        className="flex gap-0.5"
+                        role="img"
+                        aria-label="5 out of 5 stars"
+                      >
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star
                             key={i}
@@ -94,7 +98,10 @@ export async function BambooTestimonialsPage({
                           />
                         ))}
                       </div>
-                      <Quote className="text-primary/30 mt-4 mb-3 h-8 w-8" aria-hidden="true" />
+                      <Quote
+                        className="text-primary/30 mt-4 mb-3 h-8 w-8"
+                        aria-hidden="true"
+                      />
                       {t.title ? (
                         <p className="text-foreground mb-2 text-sm font-semibold">
                           {t.title}

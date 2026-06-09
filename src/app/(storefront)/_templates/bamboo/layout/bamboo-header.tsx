@@ -130,7 +130,9 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
                 onMouseLeave={() => setOpenDropdown(null)}
                 onBlur={(e) => {
                   // Close when focus leaves the wrapper entirely
-                  if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                  if (
+                    !e.currentTarget.contains(e.relatedTarget as Node | null)
+                  ) {
                     setOpenDropdown(null);
                   }
                 }}

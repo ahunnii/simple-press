@@ -4,7 +4,11 @@ import { useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 
 import type { Product } from "~/types";
-import { SORT_LABELS, isInStock, useShopFilters } from "~/hooks/use-shop-filters";
+import {
+  isInStock,
+  SORT_LABELS,
+  useShopFilters,
+} from "~/hooks/use-shop-filters";
 
 import { DefaultProductCard } from "../shared/default-product-card";
 
@@ -32,11 +36,14 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
   const totalInStock = products.filter(isInStock).length;
 
   const sidebar = (
-    <aside aria-label="Product filters" className="flex flex-col divide-y divide-[#e8e8e8]">
+    <aside
+      aria-label="Product filters"
+      className="flex flex-col divide-y divide-[#e8e8e8]"
+    >
       {/* Collections */}
       {collections.length > 0 && (
-        <div className="pb-6 pt-0">
-          <h2 className="mb-3.5 text-[11px] font-medium tracking-[0.16em] uppercase text-[#6b6b6b]">
+        <div className="pt-0 pb-6">
+          <h2 className="mb-3.5 text-[11px] font-medium tracking-[0.16em] text-[#6b6b6b] uppercase">
             Collection
           </h2>
           <ul className="flex flex-col gap-2">
@@ -87,7 +94,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
 
       {/* Availability */}
       <div className="py-6">
-        <h2 className="mb-3.5 text-[11px] font-medium tracking-[0.16em] uppercase text-[#6b6b6b]">
+        <h2 className="mb-3.5 text-[11px] font-medium tracking-[0.16em] text-[#6b6b6b] uppercase">
           Availability
         </h2>
         <ul className="flex flex-col gap-2">
@@ -114,7 +121,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
           <button
             type="button"
             onClick={clearFilters}
-            className="flex items-center gap-1.5 text-xs text-[#6b6b6b] hover:text-[#0a0a0a] transition-colors"
+            className="flex items-center gap-1.5 text-xs text-[#6b6b6b] transition-colors hover:text-[#0a0a0a]"
           >
             <X className="h-3.5 w-3.5" aria-hidden="true" />
             Clear filters
@@ -134,22 +141,32 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
           aria-expanded={filtersOpen}
           aria-controls="mobile-filters-panel"
           aria-label={hasActiveFilters ? "Filters (active)" : "Filters"}
-          className="flex items-center gap-2 border border-[#e8e8e8] rounded-[var(--radius)] px-4 h-10 text-sm font-medium transition-colors hover:border-[#0a0a0a]"
+          className="flex h-10 items-center gap-2 rounded-[var(--radius)] border border-[#e8e8e8] px-4 text-sm font-medium transition-colors hover:border-[#0a0a0a]"
         >
           <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
           <span aria-hidden="true">Filters</span>
           {hasActiveFilters && (
-            <span className="ml-1 h-1.5 w-1.5 rounded-full bg-[#0a0a0a]" aria-hidden="true" />
+            <span
+              className="ml-1 h-1.5 w-1.5 rounded-full bg-[#0a0a0a]"
+              aria-hidden="true"
+            />
           )}
         </button>
-        <p className="text-sm text-[#6b6b6b]" aria-live="polite" aria-atomic="true">
+        <p
+          className="text-sm text-[#6b6b6b]"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {filtered.length} product{filtered.length !== 1 ? "s" : ""}
         </p>
       </div>
 
       {/* Mobile filters panel */}
       {filtersOpen && (
-        <div id="mobile-filters-panel" className="mb-8 rounded-[var(--radius)] border border-[#e8e8e8] p-5 md:hidden">
+        <div
+          id="mobile-filters-panel"
+          className="mb-8 rounded-[var(--radius)] border border-[#e8e8e8] p-5 md:hidden"
+        >
           {sidebar}
         </div>
       )}
@@ -163,7 +180,11 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
         <div>
           {/* Toolbar */}
           <div className="mb-6 flex items-center justify-between border-b border-[#e8e8e8] pb-4">
-            <span className="text-sm text-[#6b6b6b]" aria-live="polite" aria-atomic="true">
+            <span
+              className="text-sm text-[#6b6b6b]"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               Showing {filtered.length} product
               {filtered.length !== 1 ? "s" : ""}
             </span>
@@ -197,7 +218,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
           {/* Product grid */}
           {paginated.length === 0 ? (
             <div className="py-16 text-center">
-              <p className="text-[#6b6b6b] text-sm">
+              <p className="text-sm text-[#6b6b6b]">
                 No products match your filters.
               </p>
               <button
@@ -222,7 +243,10 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <nav aria-label="Pagination" className="mt-16 flex items-center justify-center gap-2">
+            <nav
+              aria-label="Pagination"
+              className="mt-16 flex items-center justify-center gap-2"
+            >
               <button
                 type="button"
                 onClick={() => handlePage(currentPage - 1)}

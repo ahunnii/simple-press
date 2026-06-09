@@ -247,33 +247,34 @@ export function PreviewOverlay() {
       )}
 
       {/* Pulse ring for sp:focus-group */}
-      {pulsing && (() => {
-        const el = document.querySelector<HTMLElement>(
-          `[data-sp-group="${pulsing}"]`,
-        );
-        if (!el) return null;
-        const rect = el.getBoundingClientRect();
-        return (
-          <div
-            aria-hidden="true"
-            style={{
-              position: "fixed",
-              top: rect.top,
-              left: rect.left,
-              width: rect.width,
-              height: rect.height,
-              pointerEvents: "none",
-              zIndex: 9998,
-              outline: "3px solid hsl(214, 84%, 56%)",
-              outlineOffset: "2px",
-              borderRadius: "2px",
-              animation: prefersReducedRef.current
-                ? "none"
-                : "sp-pulse 1.2s ease-out forwards",
-            }}
-          />
-        );
-      })()}
+      {pulsing &&
+        (() => {
+          const el = document.querySelector<HTMLElement>(
+            `[data-sp-group="${pulsing}"]`,
+          );
+          if (!el) return null;
+          const rect = el.getBoundingClientRect();
+          return (
+            <div
+              aria-hidden="true"
+              style={{
+                position: "fixed",
+                top: rect.top,
+                left: rect.left,
+                width: rect.width,
+                height: rect.height,
+                pointerEvents: "none",
+                zIndex: 9998,
+                outline: "3px solid hsl(214, 84%, 56%)",
+                outlineOffset: "2px",
+                borderRadius: "2px",
+                animation: prefersReducedRef.current
+                  ? "none"
+                  : "sp-pulse 1.2s ease-out forwards",
+              }}
+            />
+          );
+        })()}
 
       {/* Keyboard-accessible companion buttons (screen-reader visible) */}
       <div className="sr-only">

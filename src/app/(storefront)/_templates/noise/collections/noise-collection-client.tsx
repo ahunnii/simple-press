@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 
-import type { Product } from "~/types";
 import type { SortOption } from "~/hooks/use-shop-filters";
+import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { useShopFilters } from "~/hooks/use-shop-filters";
 import {

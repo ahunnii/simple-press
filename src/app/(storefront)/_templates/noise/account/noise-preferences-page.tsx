@@ -1,12 +1,15 @@
 "use client";
 
+import type { AccountPreferencesPageProps } from "../../types";
 import { PageTransition } from "~/components/page-animations";
 import { PreferencesContent } from "~/app/(storefront)/_components/account/address-components";
 
-import type { AccountPreferencesPageProps } from "../../types";
 import { NoiseAccountLayout } from "./noise-account-layout";
 
-export function NoisePreferencesPage({ business, customer }: AccountPreferencesPageProps) {
+export function NoisePreferencesPage({
+  business,
+  customer,
+}: AccountPreferencesPageProps) {
   return (
     <PageTransition>
       <NoiseAccountLayout heading="Preferences">

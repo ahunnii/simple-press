@@ -66,11 +66,7 @@ export function DarkTrendProductActions({
       ) : (
         <>
           {/* Visually-hidden live region for add-to-cart announcements */}
-          <div
-            aria-live="polite"
-            aria-atomic="true"
-            className="sr-only"
-          >
+          <div aria-live="polite" aria-atomic="true" className="sr-only">
             {liveMessage}
           </div>
 
@@ -110,9 +106,7 @@ export function DarkTrendProductActions({
                       className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
                       aria-label="Increase quantity"
                       aria-describedby={
-                        isInventoryTracked
-                          ? "dt-actions-stock-msg"
-                          : undefined
+                        isInventoryTracked ? "dt-actions-stock-msg" : undefined
                       }
                     >
                       <Plus className="h-4 w-4" aria-hidden="true" />

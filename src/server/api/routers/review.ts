@@ -3,10 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
-import {
-  getClientIpFromHeaders,
-  reviewVoteLimiter,
-} from "~/lib/rate-limit";
+import { getClientIpFromHeaders, reviewVoteLimiter } from "~/lib/rate-limit";
 
 import {
   createTRPCRouter,
@@ -199,10 +196,7 @@ export const reviewRouter = createTRPCRouter({
         where: {
           reviewId: input.reviewId,
           review: { product: { businessId: business.id } },
-          OR: [
-            ...(userId ? [{ userId }] : []),
-            { ipAddress: ip },
-          ],
+          OR: [...(userId ? [{ userId }] : []), { ipAddress: ip }],
         },
       });
 

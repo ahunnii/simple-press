@@ -57,8 +57,8 @@ export default function OrderRefundedEmail({
             We&apos;ve processed a partial refund of{" "}
             <strong>{formatPrice(refundAmountCents)}</strong> for order #
             {orderNumber} (order total was {formatPrice(orderTotalCents)}). The
-            refund will appear on your original payment method; timing depends on
-            your bank or card issuer.
+            refund will appear on your original payment method; timing depends
+            on your bank or card issuer.
           </>
         )}
       </Text>

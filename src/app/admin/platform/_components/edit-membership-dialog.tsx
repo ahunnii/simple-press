@@ -70,13 +70,16 @@ export function EditMembershipDialog({
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <RadioGroup value={role} onValueChange={(v) => setRole(v as "OWNER" | "MANAGER")}>
+            <RadioGroup
+              value={role}
+              onValueChange={(v) => setRole(v as "OWNER" | "MANAGER")}
+            >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="OWNER" id="owner" />
                 <Label htmlFor="owner" className="font-normal">
                   <div>
                     <div className="font-medium">Owner</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm">
                       Full control of the business
                     </div>
                   </div>
@@ -87,7 +90,7 @@ export function EditMembershipDialog({
                 <Label htmlFor="manager" className="font-normal">
                   <div>
                     <div className="font-medium">Manager</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm">
                       Operational access to the business
                     </div>
                   </div>

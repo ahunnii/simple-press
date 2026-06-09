@@ -3,8 +3,6 @@ import { notFound } from "next/navigation";
 import { AlertCircle } from "lucide-react";
 
 import { api } from "~/trpc/server";
-
-import { WizardClient } from "./_components/wizard-client";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -14,6 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+
+import { WizardClient } from "./_components/wizard-client";
 
 type Props = {
   searchParams: Promise<{ code?: string; aftoken?: string }>;
@@ -46,8 +46,8 @@ export default async function PlatformSignupPage({ searchParams }: Props) {
               <CardHeader>
                 <CardTitle>Invalid artisan link</CardTitle>
                 <CardDescription>
-                  This signup link could not be verified. It may have expired
-                  or already been used.
+                  This signup link could not be verified. It may have expired or
+                  already been used.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

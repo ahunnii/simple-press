@@ -74,7 +74,10 @@ export function HappyBambooHeroSection({
 
           <FadeIn delay={0.25}>
             <p className="mb-4 flex items-center gap-2 font-serif text-2xl font-semibold tracking-wide text-white/80 md:text-3xl">
-              <Leaf className="text-primary h-5 w-5 shrink-0" aria-hidden="true" />
+              <Leaf
+                className="text-primary h-5 w-5 shrink-0"
+                aria-hidden="true"
+              />
               {heroTagline}
             </p>
           </FadeIn>

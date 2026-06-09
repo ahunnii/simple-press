@@ -22,7 +22,10 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
   if (items.length === 0) {
     return (
       <div className="py-24 text-center">
-        <ShoppingBag className="mx-auto mb-5 h-12 w-12 text-[#6b6b6b]" aria-hidden="true" />
+        <ShoppingBag
+          className="mx-auto mb-5 h-12 w-12 text-[#6b6b6b]"
+          aria-hidden="true"
+        />
         <h2 className="font-serif text-2xl font-medium">Your cart is empty</h2>
         <p className="mt-2 text-sm text-[#6b6b6b]">
           Add some products to get started.
@@ -39,7 +42,6 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
 
   return (
     <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_340px]">
-
       {/* Line items */}
       <div className="flex flex-col divide-y divide-[#e8e8e8]">
         {items.map((item) => (
@@ -59,7 +61,10 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
-                  <ShoppingBag className="h-6 w-6 text-[#6b6b6b]" aria-hidden="true" />
+                  <ShoppingBag
+                    className="h-6 w-6 text-[#6b6b6b]"
+                    aria-hidden="true"
+                  />
                 </div>
               )}
             </div>
@@ -68,7 +73,7 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="font-serif text-[15px] font-medium leading-snug">
+                  <h3 className="font-serif text-[15px] leading-snug font-medium">
                     {item.productName}
                   </h3>
                   {item.variantName && (
@@ -87,7 +92,7 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between gap-4 mt-auto">
+              <div className="mt-auto flex items-center justify-between gap-4">
                 {/* Qty stepper */}
                 <div
                   role="group"
@@ -96,10 +101,12 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
                 >
                   <button
                     type="button"
-                    onClick={() => decrementItem(item.productId, item.variantId)}
+                    onClick={() =>
+                      decrementItem(item.productId, item.variantId)
+                    }
                     disabled={item.quantity <= 1}
                     aria-label={`Decrease quantity of ${item.productName}`}
-                    className="flex h-full flex-1 items-center justify-center text-base font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30 rounded-l-[var(--radius)]"
+                    className="flex h-full flex-1 items-center justify-center rounded-l-[var(--radius)] text-base font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30"
                   >
                     <span aria-hidden="true">−</span>
                   </button>
@@ -112,13 +119,15 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
                   </span>
                   <button
                     type="button"
-                    onClick={() => incrementItem(item.productId, item.variantId)}
+                    onClick={() =>
+                      incrementItem(item.productId, item.variantId)
+                    }
                     disabled={
                       item.maxInventory !== undefined &&
                       item.quantity >= item.maxInventory
                     }
                     aria-label={`Increase quantity of ${item.productName}`}
-                    className="flex h-full flex-1 items-center justify-center text-base font-light transition-colors hover:bg-[#f6f6f6] rounded-r-[var(--radius)]"
+                    className="flex h-full flex-1 items-center justify-center rounded-r-[var(--radius)] text-base font-light transition-colors hover:bg-[#f6f6f6]"
                   >
                     <span aria-hidden="true">+</span>
                   </button>
@@ -136,7 +145,7 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
       {/* Order summary */}
       <div>
         <div className="sticky top-[calc(72px+24px)] rounded-[var(--radius)] border border-[#e8e8e8] p-6">
-          <h2 className="font-serif text-xl font-medium mb-5">Order summary</h2>
+          <h2 className="mb-5 font-serif text-xl font-medium">Order summary</h2>
 
           <div className="flex flex-col gap-3 text-sm">
             <div className="flex justify-between">
@@ -151,21 +160,21 @@ export function DefaultCartContents({ business: _ }: { business: Business }) {
 
           <div className="my-5 border-t border-[#e8e8e8]" />
 
-          <div className="flex justify-between text-base font-medium mb-6">
+          <div className="mb-6 flex justify-between text-base font-medium">
             <span>Estimated total</span>
             <span>{fmt(total)}</span>
           </div>
 
           <Link
             href="/checkout"
-            className="flex w-full h-12 items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+            className="flex h-12 w-full items-center justify-center rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
           >
             Continue to checkout
           </Link>
 
           <Link
             href="/shop"
-            className="mt-4 block text-center text-sm text-[#6b6b6b] hover:text-[#0a0a0a] transition-colors"
+            className="mt-4 block text-center text-sm text-[#6b6b6b] transition-colors hover:text-[#0a0a0a]"
           >
             Continue shopping
           </Link>

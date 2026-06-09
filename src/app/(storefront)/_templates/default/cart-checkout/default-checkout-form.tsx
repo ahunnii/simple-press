@@ -189,53 +189,64 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
           <Card>
             <CardContent className="space-y-4 pt-6">
               <fieldset className="space-y-4 border-0 p-0">
-              <legend className="text-xl font-semibold leading-none tracking-tight pb-2">
-                Contact Information
-              </legend>
-              <p className="text-sm text-[#6b6b6b]">
-                Fields marked with <span aria-hidden="true">*</span> are required.
-              </p>
-              <div>
-                <Label htmlFor="email">Email <span aria-hidden="true">*</span></Label>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  aria-required="true"
-                  aria-invalid={submitAttempted && !email ? true : undefined}
-                />
-              </div>
-              <div>
-                <Label htmlFor="name">Full Name <span aria-hidden="true">*</span></Label>
-                <Input
-                  id="name"
-                  type="text"
-                  autoComplete="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
-                  required
-                  aria-required="true"
-                  aria-invalid={submitAttempted && !name.trim() ? true : undefined}
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">Phone <span aria-hidden="true">*</span></Label>
-                <PhoneInput
-                  id="phone"
-                  autoComplete="tel"
-                  value={phone}
-                  onChange={(val) => setPhone(val)}
-                  placeholder="+1 555 123 4567"
-                  required
-                  aria-required="true"
-                  aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
-                />
-              </div>
+                <legend className="pb-2 text-xl leading-none font-semibold tracking-tight">
+                  Contact Information
+                </legend>
+                <p className="text-sm text-[#6b6b6b]">
+                  Fields marked with <span aria-hidden="true">*</span> are
+                  required.
+                </p>
+                <div>
+                  <Label htmlFor="email">
+                    Email <span aria-hidden="true">*</span>
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !email ? true : undefined}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="name">
+                    Full Name <span aria-hidden="true">*</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    autoComplete="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="John Doe"
+                    required
+                    aria-required="true"
+                    aria-invalid={
+                      submitAttempted && !name.trim() ? true : undefined
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">
+                    Phone <span aria-hidden="true">*</span>
+                  </Label>
+                  <PhoneInput
+                    id="phone"
+                    autoComplete="tel"
+                    value={phone}
+                    onChange={(val) => setPhone(val)}
+                    placeholder="+1 555 123 4567"
+                    required
+                    aria-required="true"
+                    aria-invalid={
+                      submitAttempted && !phone.trim() ? true : undefined
+                    }
+                  />
+                </div>
               </fieldset>
             </CardContent>
           </Card>
@@ -247,7 +258,11 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 <CardTitle>Delivery</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div role="group" aria-label="Delivery method" className="flex flex-wrap gap-2">
+                <div
+                  role="group"
+                  aria-label="Delivery method"
+                  className="flex flex-wrap gap-2"
+                >
                   <Button
                     type="button"
                     variant={deliveryMethod === "ship" ? "default" : "outline"}
@@ -291,7 +306,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
             <Card>
               <CardContent className="space-y-4 pt-6">
                 <fieldset className="space-y-4 border-0 p-0">
-                  <legend className="text-xl font-semibold leading-none tracking-tight pb-2">
+                  <legend className="pb-2 text-xl leading-none font-semibold tracking-tight">
                     Shipping Address
                   </legend>
                   <p className="text-sm text-[#6b6b6b]">
@@ -299,7 +314,9 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                     or edit your name, phone, and address before paying.
                   </p>
                   <div>
-                    <Label htmlFor="address-line1">Address line 1 <span aria-hidden="true">*</span></Label>
+                    <Label htmlFor="address-line1">
+                      Address line 1 <span aria-hidden="true">*</span>
+                    </Label>
                     <Input
                       id="address-line1"
                       type="text"
@@ -309,7 +326,11 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                       placeholder="Street address, P.O. box"
                       required={deliveryMethod === "ship"}
                       aria-required="true"
-                      aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                      aria-invalid={
+                        submitAttempted && !addressLine1.trim()
+                          ? true
+                          : undefined
+                      }
                     />
                   </div>
                   <div>
@@ -325,7 +346,9 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <Label htmlFor="city">City <span aria-hidden="true">*</span></Label>
+                      <Label htmlFor="city">
+                        City <span aria-hidden="true">*</span>
+                      </Label>
                       <Input
                         id="city"
                         type="text"
@@ -334,11 +357,15 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                         onChange={(e) => setCity(e.target.value)}
                         required={deliveryMethod === "ship"}
                         aria-required="true"
-                        aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                        aria-invalid={
+                          submitAttempted && !city.trim() ? true : undefined
+                        }
                       />
                     </div>
                     <div>
-                      <Label htmlFor="state">State / Province <span aria-hidden="true">*</span></Label>
+                      <Label htmlFor="state">
+                        State / Province <span aria-hidden="true">*</span>
+                      </Label>
                       <Input
                         id="state"
                         type="text"
@@ -348,13 +375,17 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                         placeholder="e.g. CA or ON"
                         required={deliveryMethod === "ship"}
                         aria-required="true"
-                        aria-invalid={submitAttempted && !state.trim() ? true : undefined}
+                        aria-invalid={
+                          submitAttempted && !state.trim() ? true : undefined
+                        }
                       />
                     </div>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <Label htmlFor="postal">ZIP / Postal code <span aria-hidden="true">*</span></Label>
+                      <Label htmlFor="postal">
+                        ZIP / Postal code <span aria-hidden="true">*</span>
+                      </Label>
                       <Input
                         id="postal"
                         type="text"
@@ -363,16 +394,26 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                         onChange={(e) => setPostalCode(e.target.value)}
                         required={deliveryMethod === "ship"}
                         aria-required="true"
-                        aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                        aria-invalid={
+                          submitAttempted && !postalCode.trim()
+                            ? true
+                            : undefined
+                        }
                       />
                     </div>
                     <div>
-                      <Label htmlFor="country" id="country-label">Country <span aria-hidden="true">*</span></Label>
+                      <Label htmlFor="country" id="country-label">
+                        Country <span aria-hidden="true">*</span>
+                      </Label>
                       <Select
                         value={country}
                         onValueChange={(v) => setCountry(v as "US" | "CA")}
                       >
-                        <SelectTrigger id="country" aria-labelledby="country-label" className="w-full">
+                        <SelectTrigger
+                          id="country"
+                          aria-labelledby="country-label"
+                          className="w-full"
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -412,7 +453,10 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-[#6b6b6b]" aria-hidden="true">
+                        <div
+                          className="flex h-full w-full items-center justify-center text-xs text-[#6b6b6b]"
+                          aria-hidden="true"
+                        >
                           No img
                         </div>
                       )}
@@ -494,7 +538,10 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
               >
                 {isProcessing ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />
+                    <Loader2
+                      className="mr-2 h-5 w-5 animate-spin"
+                      aria-hidden="true"
+                    />
                     Processing...
                   </>
                 ) : (

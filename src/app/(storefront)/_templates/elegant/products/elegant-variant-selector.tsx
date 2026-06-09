@@ -64,7 +64,11 @@ export function ElegantVariantSelector({
         >
           Select option
         </div>
-        <div role="group" aria-label="Select option" style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+        <div
+          role="group"
+          aria-label="Select option"
+          style={{ display: "flex", flexWrap: "wrap", gap: 10 }}
+        >
           {product.variants.map((variant) => {
             const isSelected = selectedVariant?.id === variant.id;
             const outOfStock = variant.inventoryQty === 0;
@@ -245,7 +249,10 @@ export function ElegantVariantSelector({
             <>
               Add {quantity > 1 ? `${quantity} ` : ""}to bag
               {price > 0 && ` · $${((price * quantity) / 100).toFixed(0)}`}
-              <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
+              <ArrowRight
+                aria-hidden={true}
+                style={{ width: 14, height: 14 }}
+              />
             </>
           )}
         </button>

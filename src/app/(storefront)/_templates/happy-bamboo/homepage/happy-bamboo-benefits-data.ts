@@ -13,7 +13,8 @@ import { z } from "zod";
 
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 
-export const HAPPY_BAMBOO_BENEFITS_LIST_KEY = "happy-bamboo.homepage.benefits-list";
+export const HAPPY_BAMBOO_BENEFITS_LIST_KEY =
+  "happy-bamboo.homepage.benefits-list";
 
 const benefitRowSchema = z
   .object({

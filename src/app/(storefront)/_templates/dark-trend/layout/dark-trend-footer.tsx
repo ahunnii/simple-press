@@ -69,11 +69,13 @@ export async function DarkTrendFooter({
               Navigate
             </p>
             <ul className="mt-4 flex flex-col gap-3">
-              {(navigationItems ?? [
-                { href: "/shop", label: "Shop" },
-                { href: "/contact", label: "Contact" },
-                { href: "/about", label: "About" },
-              ]).map((link) => (
+              {(
+                navigationItems ?? [
+                  { href: "/shop", label: "Shop" },
+                  { href: "/contact", label: "Contact" },
+                  { href: "/about", label: "About" },
+                ]
+              ).map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}

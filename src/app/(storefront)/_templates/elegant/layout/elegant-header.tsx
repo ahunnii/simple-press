@@ -15,8 +15,8 @@ import {
 } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
-import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { authClient } from "~/server/better-auth/client";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useCart } from "~/providers/cart-context";
 
 import { ElegantCartDrawer } from "../cart-checkout/elegant-cart-drawer";
@@ -134,7 +134,10 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
           {/* ── Column 1: nav links (desktop) OR hamburger (mobile) ── */}
           <div style={{ display: "flex", alignItems: "center" }}>
             {/* Desktop nav links */}
-            <div className="el-desktop-nav" style={{ display: "flex", alignItems: "center", gap: 24 }}>
+            <div
+              className="el-desktop-nav"
+              style={{ display: "flex", alignItems: "center", gap: 24 }}
+            >
               {links.map((link) => (
                 <Link
                   key={link.href}
@@ -166,7 +169,9 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                       height: 1,
                       background: "var(--el-ink, #1c1a17)",
                       display: "block",
-                      transform: isActive(link.href) ? "scaleX(1)" : "scaleX(0)",
+                      transform: isActive(link.href)
+                        ? "scaleX(1)"
+                        : "scaleX(0)",
                       transformOrigin: "left",
                       transition: `transform 0.4s ${ease}`,
                     }}
@@ -186,10 +191,11 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
               aria-expanded={menuOpen}
               aria-controls="el-mobile-nav"
             >
-              {menuOpen
-                ? <X aria-hidden={true} style={{ width: 18, height: 18 }} />
-                : <Menu aria-hidden={true} style={{ width: 18, height: 18 }} />
-              }
+              {menuOpen ? (
+                <X aria-hidden={true} style={{ width: 18, height: 18 }} />
+              ) : (
+                <Menu aria-hidden={true} style={{ width: 18, height: 18 }} />
+              )}
             </button>
           </div>
 
@@ -285,11 +291,18 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
             <button
               type="button"
               onClick={() => setIsOpen(true)}
-              aria-label={itemCount > 0 ? `Cart (${itemCount} item${itemCount === 1 ? "" : "s"})` : "Cart"}
+              aria-label={
+                itemCount > 0
+                  ? `Cart (${itemCount} item${itemCount === 1 ? "" : "s"})`
+                  : "Cart"
+              }
               style={{ ...iconBtnStyle, position: "relative" }}
               className="el-icon-btn"
             >
-              <ShoppingBag aria-hidden={true} style={{ width: 17, height: 17 }} />
+              <ShoppingBag
+                aria-hidden={true}
+                style={{ width: 17, height: 17 }}
+              />
               <span
                 aria-hidden={true}
                 style={{
@@ -369,7 +382,6 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
 
       {/* Cart drawer */}
       <ElegantCartDrawer />
-
     </>
   );
 }

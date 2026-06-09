@@ -1,5 +1,5 @@
-import { Prisma } from "generated/prisma";
 import type Stripe from "stripe";
+import { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -17,8 +17,8 @@ import { stripeClient } from "~/lib/stripe/client";
 import {
   addShipmentSchema,
   manualOrderFormSchema,
-  markAsRefundedSchema,
   markAsFulfilledSchema,
+  markAsRefundedSchema,
   orderFiltersSchema,
   refundOrderSchema,
   updateFulfillmentSchema,
@@ -544,7 +544,11 @@ export const orderRouter = createTRPCRouter({
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
         data: {
-          status: isFullRefund ? "refunded" : order.fulfillmentStatus === "fulfilled" ? "completed" : "open",
+          status: isFullRefund
+            ? "refunded"
+            : order.fulfillmentStatus === "fulfilled"
+              ? "completed"
+              : "open",
           ...(isFullRefund && { paymentStatus: "refunded" }),
           refundReason: reasonLabel,
           refundAmountCents: newTotalRefunded,
@@ -615,7 +619,9 @@ export const orderRouter = createTRPCRouter({
                   await restorePoolInventory(tx, {
                     poolId: product.baseInventoryUnitId,
                     items: [{ productId: product.id, quantity: item.quantity }],
-                    unitsConsumedMap: { [product.id]: product.baseUnitsConsumed ?? 1 },
+                    unitsConsumedMap: {
+                      [product.id]: product.baseUnitsConsumed ?? 1,
+                    },
                     orderId: updatedOrder.id,
                     orderNumber: updatedOrder.orderNumber,
                     businessId: product.businessId,
@@ -649,7 +655,10 @@ export const orderRouter = createTRPCRouter({
                 if (newQty > 0) {
                   await tx.product.updateMany({
                     where: { id: item.productId, outOfStockAlertSent: true },
-                    data: { outOfStockAlertSent: false, lowInventoryAlertSent: false },
+                    data: {
+                      outOfStockAlertSent: false,
+                      lowInventoryAlertSent: false,
+                    },
                   });
                 }
               }
@@ -781,7 +790,9 @@ export const orderRouter = createTRPCRouter({
                       id: true,
                       inventoryQty: true,
                       productId: true,
-                      product: { select: { businessId: true, trackInventory: true } },
+                      product: {
+                        select: { businessId: true, trackInventory: true },
+                      },
                     },
                   });
                   if (!variant) continue;
@@ -821,8 +832,12 @@ export const orderRouter = createTRPCRouter({
                   if (product.baseInventoryUnitId) {
                     await restorePoolInventory(tx, {
                       poolId: product.baseInventoryUnitId,
-                      items: [{ productId: product.id, quantity: item.quantity }],
-                      unitsConsumedMap: { [product.id]: product.baseUnitsConsumed ?? 1 },
+                      items: [
+                        { productId: product.id, quantity: item.quantity },
+                      ],
+                      unitsConsumedMap: {
+                        [product.id]: product.baseUnitsConsumed ?? 1,
+                      },
                       orderId: order.id,
                       orderNumber: order.orderNumber,
                       businessId: product.businessId,
@@ -852,7 +867,10 @@ export const orderRouter = createTRPCRouter({
                   if (newQty > 0) {
                     await tx.product.updateMany({
                       where: { id: item.productId, outOfStockAlertSent: true },
-                      data: { outOfStockAlertSent: false, lowInventoryAlertSent: false },
+                      data: {
+                        outOfStockAlertSent: false,
+                        lowInventoryAlertSent: false,
+                      },
                     });
                   }
                 }
@@ -881,7 +899,7 @@ export const orderRouter = createTRPCRouter({
                 siteContent: order.business.siteContent,
                 subdomain: order.business.subdomain,
                 customDomain: order.business.customDomain,
-              domainStatus: order.business.domainStatus,
+                domainStatus: order.business.domainStatus,
               },
             });
             console.log(
@@ -1131,9 +1149,15 @@ export const orderRouter = createTRPCRouter({
       }
 
       let derivedStatus: string | undefined;
-      if (input.fulfillmentStatus === "fulfilled" && order.paymentStatus === "paid") {
+      if (
+        input.fulfillmentStatus === "fulfilled" &&
+        order.paymentStatus === "paid"
+      ) {
         derivedStatus = "completed";
-      } else if (input.fulfillmentStatus !== "fulfilled" && order.status === "completed") {
+      } else if (
+        input.fulfillmentStatus !== "fulfilled" &&
+        order.status === "completed"
+      ) {
         derivedStatus = "open";
       }
 
@@ -1232,7 +1256,9 @@ export const orderRouter = createTRPCRouter({
                     id: true,
                     inventoryQty: true,
                     productId: true,
-                    product: { select: { businessId: true, trackInventory: true } },
+                    product: {
+                      select: { businessId: true, trackInventory: true },
+                    },
                   },
                 });
                 if (!variant) continue;
@@ -1273,7 +1299,9 @@ export const orderRouter = createTRPCRouter({
                   await restorePoolInventory(tx, {
                     poolId: product.baseInventoryUnitId,
                     items: [{ productId: product.id, quantity: item.quantity }],
-                    unitsConsumedMap: { [product.id]: product.baseUnitsConsumed ?? 1 },
+                    unitsConsumedMap: {
+                      [product.id]: product.baseUnitsConsumed ?? 1,
+                    },
                     orderId: order.id,
                     orderNumber: order.orderNumber,
                     businessId: product.businessId,
@@ -1303,14 +1331,20 @@ export const orderRouter = createTRPCRouter({
                 if (newQty > 0) {
                   await tx.product.updateMany({
                     where: { id: item.productId, outOfStockAlertSent: true },
-                    data: { outOfStockAlertSent: false, lowInventoryAlertSent: false },
+                    data: {
+                      outOfStockAlertSent: false,
+                      lowInventoryAlertSent: false,
+                    },
                   });
                 }
               }
             }
           });
         } catch (invError) {
-          console.error("[Orders] Failed to restore inventory on manual refund:", invError);
+          console.error(
+            "[Orders] Failed to restore inventory on manual refund:",
+            invError,
+          );
         }
       }
 
@@ -1391,7 +1425,8 @@ export const orderRouter = createTRPCRouter({
       } else {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Cannot add a shipping address: order has no linked customer",
+          message:
+            "Cannot add a shipping address: order has no linked customer",
         });
       }
     }),

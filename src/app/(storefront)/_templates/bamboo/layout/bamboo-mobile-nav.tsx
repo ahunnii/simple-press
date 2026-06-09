@@ -15,7 +15,12 @@ import {
 } from "~/components/ui/sheet";
 
 type NavChild = { label: string; href: string; external?: boolean };
-type NavLink = { label: string; href: string; external?: boolean; children?: NavChild[] };
+type NavLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+  children?: NavChild[];
+};
 
 const NAV_LINKS: NavLink[] = [
   { href: "/", label: "Home" },
@@ -95,7 +100,9 @@ export function BambooMobileNav({
                         target={child.external ? "_blank" : undefined}
                         rel={child.external ? "noopener noreferrer" : undefined}
                         onClick={() => onOpenChange(false)}
-                        aria-current={pathname === child.href ? "page" : undefined}
+                        aria-current={
+                          pathname === child.href ? "page" : undefined
+                        }
                         className={cn(
                           "rounded-md px-3 py-2 text-sm transition-colors",
                           pathname === child.href

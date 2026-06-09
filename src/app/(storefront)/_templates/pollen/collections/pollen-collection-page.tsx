@@ -70,7 +70,7 @@ export function PollenCollectionPage({
                 <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 All Collections
               </Link>
-              <p className="mb-2 mt-4 text-sm font-medium tracking-wider text-[#5e7747] uppercase">
+              <p className="mt-4 mb-2 text-sm font-medium tracking-wider text-[#5e7747] uppercase">
                 Collection
               </p>
               <h1 className="text-4xl font-bold text-[#2a351f] md:text-5xl">

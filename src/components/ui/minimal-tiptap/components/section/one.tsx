@@ -1,8 +1,8 @@
 import type { Editor } from "@tiptap/react";
-import { useEditorState } from "@tiptap/react";
 import type { VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { CaretDownIcon, LetterCaseCapitalizeIcon } from "@radix-ui/react-icons";
+import { useEditorState } from "@tiptap/react";
 
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "~/components/ui/toggle";

@@ -125,7 +125,8 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
   embeds: {
     key: "embeds",
     label: "Embeds",
-    description: "Embed external content (booking widgets, videos, social posts) into pages and rich text",
+    description:
+      "Embed external content (booking widgets, videos, social posts) into pages and rich text",
     category: "content",
     enabledByDefault: false,
     ownerCanToggle: true,

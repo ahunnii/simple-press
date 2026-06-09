@@ -18,7 +18,9 @@ export function DarkTrendMotionSection({
   return (
     <motion.div
       className={className}
-      initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
+      initial={
+        shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }
+      }
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{

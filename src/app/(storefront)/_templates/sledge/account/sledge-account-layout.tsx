@@ -46,9 +46,7 @@ export function SledgeAccountLayout({ children, heading }: Props) {
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex flex-shrink-0 items-center gap-1.5 rounded-sm px-3 py-2 font-sans text-[10px] tracking-[0.16em] uppercase transition-all",
-                  active
-                    ? "sl-account-tab-active"
-                    : "sl-account-tab-inactive",
+                  active ? "sl-account-tab-active" : "sl-account-tab-inactive",
                 )}
               >
                 <Icon className="h-3 w-3" aria-hidden />

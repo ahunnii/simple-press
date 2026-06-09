@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
+
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 const testimonials = [
@@ -107,7 +108,14 @@ const TestimonialCard = ({
     >
       &ldquo;{testimonial.text}&rdquo;
     </p>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: 8,
+      }}
+    >
       <div>
         <p
           style={{
@@ -188,7 +196,11 @@ export function ElegantTestimonials() {
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Header */}
-        <div ref={headerRef} className="mb-16 text-center" style={{ position: "relative" }}>
+        <div
+          ref={headerRef}
+          className="mb-16 text-center"
+          style={{ position: "relative" }}
+        >
           <span
             style={{
               fontFamily: "var(--font-mono, ui-monospace)",
@@ -198,11 +210,15 @@ export function ElegantTestimonials() {
               color: "var(--el-ink-soft, #6b6659)",
               display: "block",
               marginBottom: 16,
-              ...(reducedMotion ? {} : {
-                opacity: headerVisible ? 1 : 0,
-                transform: headerVisible ? "translateY(0)" : "translateY(24px)",
-                transition: "opacity 0.9s 0.1s, transform 0.9s 0.1s",
-              }),
+              ...(reducedMotion
+                ? {}
+                : {
+                    opacity: headerVisible ? 1 : 0,
+                    transform: headerVisible
+                      ? "translateY(0)"
+                      : "translateY(24px)",
+                    transition: "opacity 0.9s 0.1s, transform 0.9s 0.1s",
+                  }),
             }}
           >
             Kind Words
@@ -215,11 +231,15 @@ export function ElegantTestimonials() {
               lineHeight: 1.05,
               letterSpacing: "-0.01em",
               color: "var(--el-ink, #1c1a17)",
-              ...(reducedMotion ? {} : {
-                opacity: headerVisible ? 1 : 0,
-                transform: headerVisible ? "translateY(0)" : "translateY(24px)",
-                transition: "opacity 0.9s 0.2s, transform 0.9s 0.2s",
-              }),
+              ...(reducedMotion
+                ? {}
+                : {
+                    opacity: headerVisible ? 1 : 0,
+                    transform: headerVisible
+                      ? "translateY(0)"
+                      : "translateY(24px)",
+                    transition: "opacity 0.9s 0.2s, transform 0.9s 0.2s",
+                  }),
             }}
           >
             Loved by our community
@@ -227,7 +247,11 @@ export function ElegantTestimonials() {
           <button
             type="button"
             onClick={() => setIsPaused((p) => !p)}
-            aria-label={isPaused ? "Resume scrolling testimonials" : "Pause scrolling testimonials"}
+            aria-label={
+              isPaused
+                ? "Resume scrolling testimonials"
+                : "Pause scrolling testimonials"
+            }
             style={{
               position: "absolute",
               right: 0,
@@ -246,7 +270,11 @@ export function ElegantTestimonials() {
             }}
             className="el-icon-btn"
           >
-            {isPaused ? <Play aria-hidden={true} size={14} /> : <Pause aria-hidden={true} size={14} />}
+            {isPaused ? (
+              <Play aria-hidden={true} size={14} />
+            ) : (
+              <Pause aria-hidden={true} size={14} />
+            )}
           </button>
         </div>
 
@@ -292,14 +320,32 @@ export function ElegantTestimonials() {
                 {column1.map((testimonial) => (
                   <TestimonialCard
                     key={`col1-${testimonial?.id}-first`}
-                    testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
+                    testimonial={
+                      testimonial ?? {
+                        id: 0,
+                        name: "",
+                        location: "",
+                        rating: 0,
+                        text: "",
+                        product: "",
+                      }
+                    }
                   />
                 ))}
                 <div aria-hidden="true">
                   {column1.map((testimonial) => (
                     <TestimonialCard
                       key={`col1-${testimonial?.id}-dup`}
-                      testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
+                      testimonial={
+                        testimonial ?? {
+                          id: 0,
+                          name: "",
+                          location: "",
+                          rating: 0,
+                          text: "",
+                          product: "",
+                        }
+                      }
                     />
                   ))}
                 </div>
@@ -315,14 +361,32 @@ export function ElegantTestimonials() {
                 {column2.map((testimonial) => (
                   <TestimonialCard
                     key={`col2-${testimonial?.id}-first`}
-                    testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
+                    testimonial={
+                      testimonial ?? {
+                        id: 0,
+                        name: "",
+                        location: "",
+                        rating: 0,
+                        text: "",
+                        product: "",
+                      }
+                    }
                   />
                 ))}
                 <div aria-hidden="true">
                   {column2.map((testimonial) => (
                     <TestimonialCard
                       key={`col2-${testimonial?.id}-dup`}
-                      testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
+                      testimonial={
+                        testimonial ?? {
+                          id: 0,
+                          name: "",
+                          location: "",
+                          rating: 0,
+                          text: "",
+                          product: "",
+                        }
+                      }
                     />
                   ))}
                 </div>
@@ -338,14 +402,32 @@ export function ElegantTestimonials() {
                 {column3.map((testimonial) => (
                   <TestimonialCard
                     key={`col3-${testimonial?.id}-first`}
-                    testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
+                    testimonial={
+                      testimonial ?? {
+                        id: 0,
+                        name: "",
+                        location: "",
+                        rating: 0,
+                        text: "",
+                        product: "",
+                      }
+                    }
                   />
                 ))}
                 <div aria-hidden="true">
                   {column3.map((testimonial) => (
                     <TestimonialCard
                       key={`col3-${testimonial?.id}-dup`}
-                      testimonial={testimonial ?? { id: 0, name: "", location: "", rating: 0, text: "", product: "" }}
+                      testimonial={
+                        testimonial ?? {
+                          id: 0,
+                          name: "",
+                          location: "",
+                          rating: 0,
+                          text: "",
+                          product: "",
+                        }
+                      }
                     />
                   ))}
                 </div>
@@ -354,7 +436,6 @@ export function ElegantTestimonials() {
           </div>
         </div>
       </div>
-
     </section>
   );
 }

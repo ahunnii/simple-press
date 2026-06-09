@@ -151,7 +151,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                   {socialLinks?.instagram && (
                     <a
                       href={socialLinks.instagram}
-                      className="flex items-center justify-center p-3 -m-3 transition-opacity hover:opacity-60"
+                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
                       style={{ color: "var(--vn-steel-mist)" }}
                       aria-label="Instagram"
                     >
@@ -161,7 +161,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                   {socialLinks?.facebook && (
                     <a
                       href={socialLinks.facebook}
-                      className="flex items-center justify-center p-3 -m-3 transition-opacity hover:opacity-60"
+                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
                       style={{ color: "var(--vn-steel-mist)" }}
                       aria-label="Facebook"
                     >
@@ -171,7 +171,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                   {socialLinks?.twitter && (
                     <a
                       href={socialLinks.twitter}
-                      className="flex items-center justify-center p-3 -m-3 transition-opacity hover:opacity-60"
+                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
                       style={{ color: "var(--vn-steel-mist)" }}
                       aria-label="X / Twitter"
                     >
@@ -181,7 +181,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                   {socialLinks?.tiktok && (
                     <a
                       href={socialLinks.tiktok}
-                      className="flex items-center justify-center p-3 -m-3 transition-opacity hover:opacity-60"
+                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
                       style={{ color: "var(--vn-steel-mist)" }}
                       aria-label="TikTok"
                     >

@@ -37,7 +37,10 @@ export function BambooOrdersPage({ orders }: OrdersPageTemplateProps) {
         {orders.length === 0 ? (
           <FadeIn direction="up">
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="bg-primary/10 mb-4 flex size-16 items-center justify-center rounded-full" aria-hidden="true">
+              <div
+                className="bg-primary/10 mb-4 flex size-16 items-center justify-center rounded-full"
+                aria-hidden="true"
+              >
                 <Package className="text-primary size-8" />
               </div>
               <h2 className="font-heading text-foreground mb-2 text-xl font-semibold">

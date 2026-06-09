@@ -312,7 +312,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
       />
     </div>
   ) : (
-    <span className="sl-brand-text text-center font-heading leading-none md:text-left">
+    <span className="sl-brand-text font-heading text-center leading-none md:text-left">
       {businessName}
     </span>
   );
@@ -385,10 +385,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     }
 
     return (
-      <motion.div
-        key={link.href + link.label}
-        variants={mobileNavItemVariants}
-      >
+      <motion.div key={link.href + link.label} variants={mobileNavItemVariants}>
         <Link
           href={link.href}
           target={link.external ? "_blank" : undefined}

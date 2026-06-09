@@ -10,7 +10,6 @@ import {
 import { BubbleMenu } from "@tiptap/react/menus";
 
 import type { ShouldShowProps } from "../../types";
-
 import { Separator } from "~/components/ui/separator";
 
 import { ToolbarButton } from "../toolbar-button";
@@ -20,12 +19,9 @@ interface TableBubbleMenuProps {
 }
 
 export const TableBubbleMenu: React.FC<TableBubbleMenuProps> = ({ editor }) => {
-  const shouldShow = React.useCallback(
-    ({ editor }: ShouldShowProps) => {
-      return editor.isActive("table") && editor.isEditable;
-    },
-    [],
-  );
+  const shouldShow = React.useCallback(({ editor }: ShouldShowProps) => {
+    return editor.isActive("table") && editor.isEditable;
+  }, []);
 
   return (
     <BubbleMenu

@@ -38,8 +38,8 @@ export default function OrderFulfilledEmail({
       </Section>
 
       <Text style={note}>
-        If you have questions about your order, reply to this email and the store
-        will get back to you.
+        If you have questions about your order, reply to this email and the
+        store will get back to you.
       </Text>
     </EmailLayout>
   );

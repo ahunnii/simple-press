@@ -126,7 +126,11 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
         {selectedVariant && (
           // S-3: wrap stepper in group with label
-          <div role="group" aria-label="Quantity" className="flex items-center rounded-sm border border-[var(--sl-ink)]">
+          <div
+            role="group"
+            aria-label="Quantity"
+            className="flex items-center rounded-sm border border-[var(--sl-ink)]"
+          >
             <button
               type="button"
               className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70"
@@ -137,7 +141,10 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
               <Minus className="size-3.5" />
             </button>
             {/* S-3: announce quantity updates */}
-            <span aria-live="polite" className="min-w-[40px] text-center font-sans text-sm font-medium">
+            <span
+              aria-live="polite"
+              className="min-w-[40px] text-center font-sans text-sm font-medium"
+            >
               {quantity}
             </span>
             <button

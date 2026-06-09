@@ -68,7 +68,9 @@ export function NoiseProductCard({ product, index: _index }: Props) {
   return (
     <div className="group relative">
       {/* S-2: sr-only live region for add-to-cart feedback */}
-      <span className="sr-only" role="status">{announce}</span>
+      <span className="sr-only" role="status">
+        {announce}
+      </span>
       {/* Image — rounded card, zoom on hover */}
       <Link
         href={`/shop/${product.slug}`}

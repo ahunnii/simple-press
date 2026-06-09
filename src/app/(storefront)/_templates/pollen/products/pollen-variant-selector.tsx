@@ -13,7 +13,10 @@ type Props = {
   setSelectedVariantId: (variantId: string | null) => void;
 };
 
-export function PollenVariantSelector({ product, setSelectedVariantId }: Props) {
+export function PollenVariantSelector({
+  product,
+  setSelectedVariantId,
+}: Props) {
   const { addItem } = useCart();
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
@@ -51,7 +54,7 @@ export function PollenVariantSelector({ product, setSelectedVariantId }: Props) 
       </span>
 
       <div className="mb-6">
-        <Label className="mb-3 block text-sm font-semibold uppercase tracking-wide text-[#2a351f]">
+        <Label className="mb-3 block text-sm font-semibold tracking-wide text-[#2a351f] uppercase">
           Select Variant
         </Label>
         <div className="flex flex-wrap gap-2">
@@ -122,7 +125,9 @@ export function PollenVariantSelector({ product, setSelectedVariantId }: Props) 
               size="icon"
               className="size-10 text-[#2a351f] hover:bg-[#2a351f]/5"
               onClick={() =>
-                setQuantity(Math.min(selectedVariant.inventoryQty, quantity + 1))
+                setQuantity(
+                  Math.min(selectedVariant.inventoryQty, quantity + 1),
+                )
               }
               aria-label="Increase quantity"
             >

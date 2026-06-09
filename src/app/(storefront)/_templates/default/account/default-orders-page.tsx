@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Package } from "lucide-react";
 
+import type { OrdersPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
-import type { OrdersPageTemplateProps } from "../../types";
 import { DefaultAccountLayout } from "./default-account-layout";
 
 function StatusBadge({ status }: { status: string }) {
@@ -30,7 +30,10 @@ export function DefaultOrdersPage({ orders }: OrdersPageTemplateProps) {
     <DefaultAccountLayout heading="Orders">
       {orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Package className="mb-4 h-10 w-10 text-[#6b6b6b]" aria-hidden="true" />
+          <Package
+            className="mb-4 h-10 w-10 text-[#6b6b6b]"
+            aria-hidden="true"
+          />
           <h2 className="font-serif text-xl font-medium">No orders yet</h2>
           <p className="mt-2 text-sm text-[#6b6b6b]">
             When you place an order, it will appear here.
@@ -55,8 +58,7 @@ export function DefaultOrdersPage({ orders }: OrdersPageTemplateProps) {
                     <StatusBadge status={order.status} />
                   </div>
                   <p className="text-[13px] text-[#6b6b6b]">
-                    {formatDate(order.createdAt)} &middot;{" "}
-                    {order.items.length}{" "}
+                    {formatDate(order.createdAt)} &middot; {order.items.length}{" "}
                     {order.items.length === 1 ? "item" : "items"}
                   </p>
                 </div>
@@ -86,7 +88,7 @@ export function DefaultOrdersPage({ orders }: OrdersPageTemplateProps) {
 
               <Link
                 href={`/account/orders/${order.id}`}
-                className="mt-4 inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3"
+                className="mt-4 inline-flex items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
               >
                 View details <span aria-hidden="true">→</span>
               </Link>

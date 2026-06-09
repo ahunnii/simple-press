@@ -14,7 +14,17 @@ type Props = {
 
 export function NoiseCartItem({ item }: Props) {
   const { updateQuantity, removeItem } = useCart();
-  const { productId, productSlug, variantId, productName, variantName, price, quantity, imageUrl, sku } = item;
+  const {
+    productId,
+    productSlug,
+    variantId,
+    productName,
+    variantName,
+    price,
+    quantity,
+    imageUrl,
+    sku,
+  } = item;
 
   const lineTotal = price * quantity;
   const productHref = `/shop/${productSlug ?? productId}`;
@@ -153,7 +163,9 @@ export function NoiseCartItem({ item }: Props) {
             >
               <button
                 className="sl-qty-btn-sm flex items-center justify-center font-sans transition-colors hover:bg-[var(--sl-cream)]"
-                onClick={() => updateQuantity(productId, variantId, quantity - 1)}
+                onClick={() =>
+                  updateQuantity(productId, variantId, quantity - 1)
+                }
                 disabled={quantity <= 1}
                 aria-label="Decrease quantity"
               >
@@ -167,7 +179,9 @@ export function NoiseCartItem({ item }: Props) {
               </span>
               <button
                 className="sl-qty-btn-sm flex items-center justify-center font-sans transition-colors hover:bg-[var(--sl-cream)]"
-                onClick={() => updateQuantity(productId, variantId, quantity + 1)}
+                onClick={() =>
+                  updateQuantity(productId, variantId, quantity + 1)
+                }
                 aria-label="Increase quantity"
               >
                 <Plus className="size-3" />

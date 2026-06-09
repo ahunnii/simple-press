@@ -255,7 +255,9 @@ export function PollenCheckoutForm({ business }: Props) {
                 className={inputClass}
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !name.trim() ? true : undefined
+                }
               />
             </div>
             <div>
@@ -271,7 +273,9 @@ export function PollenCheckoutForm({ business }: Props) {
                 className={inputClass}
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !phone.trim() ? true : undefined
+                }
               />
             </div>
           </div>
@@ -291,7 +295,9 @@ export function PollenCheckoutForm({ business }: Props) {
               autoComplete="off"
               aria-label="Discount code"
               aria-invalid={!!discountFieldError}
-              aria-describedby={discountFieldError ? "discount-error" : undefined}
+              aria-describedby={
+                discountFieldError ? "discount-error" : undefined
+              }
               className={`${inputClass} flex-1`}
             />
             <button
@@ -310,7 +316,11 @@ export function PollenCheckoutForm({ business }: Props) {
             </button>
           </div>
           {discountFieldError && (
-            <p id="discount-error" role="alert" className="mt-2 text-sm text-red-600">
+            <p
+              id="discount-error"
+              role="alert"
+              className="mt-2 text-sm text-red-600"
+            >
               {discountFieldError}
             </p>
           )}
@@ -386,7 +396,9 @@ export function PollenCheckoutForm({ business }: Props) {
                   className={inputClass}
                   required={deliveryMethod === "ship"}
                   aria-required="true"
-                  aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !addressLine1.trim() ? true : undefined
+                  }
                 />
               </div>
               <div>
@@ -417,7 +429,9 @@ export function PollenCheckoutForm({ business }: Props) {
                     className={inputClass}
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !city.trim() ? true : undefined
+                    }
                   />
                 </div>
                 <div>
@@ -434,7 +448,9 @@ export function PollenCheckoutForm({ business }: Props) {
                     className={inputClass}
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !state.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !state.trim() ? true : undefined
+                    }
                   />
                 </div>
               </div>
@@ -452,11 +468,17 @@ export function PollenCheckoutForm({ business }: Props) {
                     className={inputClass}
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !postalCode.trim() ? true : undefined
+                    }
                   />
                 </div>
                 <div>
-                  <label id="country-label" htmlFor="country" className={labelClass}>
+                  <label
+                    id="country-label"
+                    htmlFor="country"
+                    className={labelClass}
+                  >
                     Country *
                   </label>
                   <Select

@@ -226,7 +226,9 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                   required
                   aria-required="true"
-                  aria-invalid={submitAttempted && !name.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !name.trim() ? true : undefined
+                  }
                 />
               </div>
               <div>
@@ -242,7 +244,9 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                   required
                   aria-required="true"
-                  aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !phone.trim() ? true : undefined
+                  }
                 />
               </div>
             </CardContent>
@@ -316,7 +320,9 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                     className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !addressLine1.trim() ? true : undefined
+                    }
                   />
                 </div>
                 <div>
@@ -347,7 +353,9 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                       required={deliveryMethod === "ship"}
                       aria-required="true"
-                      aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                      aria-invalid={
+                        submitAttempted && !city.trim() ? true : undefined
+                      }
                     />
                   </div>
                   <div>
@@ -364,7 +372,9 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                       required={deliveryMethod === "ship"}
                       aria-required="true"
-                      aria-invalid={submitAttempted && !state.trim() ? true : undefined}
+                      aria-invalid={
+                        submitAttempted && !state.trim() ? true : undefined
+                      }
                     />
                   </div>
                 </div>
@@ -382,11 +392,17 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                       required={deliveryMethod === "ship"}
                       aria-required="true"
-                      aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                      aria-invalid={
+                        submitAttempted && !postalCode.trim() ? true : undefined
+                      }
                     />
                   </div>
                   <div>
-                    <Label id="country-label" htmlFor="country" className="text-white">
+                    <Label
+                      id="country-label"
+                      htmlFor="country"
+                      className="text-white"
+                    >
                       Country *
                     </Label>
                     <Select
@@ -526,7 +542,10 @@ export function DarkTrendCheckoutForm({ business }: Props) {
               >
                 {isProcessing ? (
                   <>
-                    <Loader2 aria-hidden="true" className="mr-2 h-5 w-5 animate-spin" />
+                    <Loader2
+                      aria-hidden="true"
+                      className="mr-2 h-5 w-5 animate-spin"
+                    />
                     Processing...
                   </>
                 ) : (

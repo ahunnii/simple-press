@@ -1,8 +1,8 @@
 "use client";
 
+import type { AccountAddressBookPageProps } from "../../types";
 import { AddressBookContent } from "~/app/(storefront)/_components/account/address-components";
 
-import type { AccountAddressBookPageProps } from "../../types";
 import { ModernAccountLayout } from "./modern-account-layout";
 
 export function ModernAddressBookPage({

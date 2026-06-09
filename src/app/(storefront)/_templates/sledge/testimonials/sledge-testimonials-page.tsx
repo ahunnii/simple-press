@@ -61,7 +61,9 @@ export async function SledgeTestimonialsPage({
         sectionAttrs={sectionGroupAttr("testimonials", "header")}
       />
 
-      <SledgePageSection sectionAttrs={sectionGroupAttr("testimonials", "list")}>
+      <SledgePageSection
+        sectionAttrs={sectionGroupAttr("testimonials", "list")}
+      >
         {testimonials.length === 0 ? (
           <SledgeEmptyState
             bare

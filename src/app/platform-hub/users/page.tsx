@@ -8,9 +8,9 @@ import {
 } from "~/components/ui/card";
 import { UsersTable } from "~/app/admin/platform/_components/users-table";
 
-import { PlatformTrailHeader } from "../_components/platform-trail-header";
 import { PlatformListFilters } from "../_components/platform-list-filters";
 import { PlatformListPagination } from "../_components/platform-list-pagination";
+import { PlatformTrailHeader } from "../_components/platform-trail-header";
 
 const PAGE_SIZE = 25;
 

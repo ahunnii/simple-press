@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { fmtBlogDate, SledgeBlogImagePlaceholder } from "./sledge-blog-utils";
 import type { SledgeBlogPostSummary } from "./sledge-blog-post-card";
+
+import { fmtBlogDate, SledgeBlogImagePlaceholder } from "./sledge-blog-utils";
 
 type Props = {
   post: SledgeBlogPostSummary;
@@ -32,7 +33,10 @@ export function SledgeBlogFeaturedCard({ post }: Props) {
       <div className="flex flex-col justify-between gap-8 bg-white p-8 lg:p-10">
         <div className="flex flex-col gap-4">
           {/* N-2: aria-hidden — decorative within the big link; post title is the accessible name */}
-          <span aria-hidden="true" className="self-start rounded-sm bg-[var(--sl-cream)] px-2.5 py-1 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral-aa)] uppercase">
+          <span
+            aria-hidden="true"
+            className="self-start rounded-sm bg-[var(--sl-cream)] px-2.5 py-1 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral-aa)] uppercase"
+          >
             Latest
           </span>
           <h2 className="font-serif text-2xl leading-tight tracking-tight text-[var(--sl-ink)] transition-opacity group-hover:opacity-70 md:text-3xl lg:text-4xl">

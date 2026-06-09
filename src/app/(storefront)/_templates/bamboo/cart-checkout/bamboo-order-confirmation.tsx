@@ -98,7 +98,10 @@ export function BambooOrderConfirmation({ business }: Props) {
     <div className="mx-auto max-w-3xl">
       {/* Success Header */}
       <div className="mb-12 text-center">
-        <div className="bg-primary/10 mb-6 inline-flex size-16 items-center justify-center rounded-full" aria-hidden="true">
+        <div
+          className="bg-primary/10 mb-6 inline-flex size-16 items-center justify-center rounded-full"
+          aria-hidden="true"
+        >
           <CheckCircle2 className="text-primary size-8" />
         </div>
         <h1
@@ -117,7 +120,10 @@ export function BambooOrderConfirmation({ business }: Props) {
       <Card className="border-primary/20 bg-primary/5 mb-8">
         <CardContent className="p-8">
           <div className="flex items-start gap-4">
-            <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-full" aria-hidden="true">
+            <div
+              className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-full"
+              aria-hidden="true"
+            >
               <Package className="text-primary size-5" />
             </div>
             <div className="flex-1">

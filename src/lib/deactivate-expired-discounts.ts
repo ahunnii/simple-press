@@ -28,9 +28,7 @@ export async function deactivateExpiredDiscountCodes(
   });
 
   const exhaustedIds = candidates
-    .filter(
-      (c) => c.usageLimit != null && c.usageCount >= c.usageLimit,
-    )
+    .filter((c) => c.usageLimit != null && c.usageCount >= c.usageLimit)
     .map((c) => c.id);
 
   let expiredByUsage = { count: 0 };

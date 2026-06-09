@@ -18,7 +18,10 @@ type BlogPostImageProps = {
 export function SledgeBlogImagePlaceholder({ label }: BlogPostImageProps) {
   return (
     // N-1/N-6: aria-hidden so the decorative letter/star isn't read aloud
-    <div aria-hidden="true" className="sledge-card-placeholder absolute inset-0 flex items-center justify-center bg-[var(--sl-green)]">
+    <div
+      aria-hidden="true"
+      className="sledge-card-placeholder absolute inset-0 flex items-center justify-center bg-[var(--sl-green)]"
+    >
       <span className="sledge-card-placeholder-num select-none">{label}</span>
     </div>
   );

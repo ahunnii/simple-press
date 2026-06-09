@@ -110,7 +110,10 @@ export function DiscountDiscountInput({
 
   if (appliedDiscount) {
     return (
-      <div role="status" className="rounded-lg border border-green-200 bg-green-50 p-4">
+      <div
+        role="status"
+        className="rounded-lg border border-green-200 bg-green-50 p-4"
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
@@ -146,7 +149,10 @@ export function DiscountDiscountInput({
       </label>
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Tag className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+          <Tag
+            className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+            aria-hidden="true"
+          />
           <Input
             id="discount-code"
             type="text"
@@ -168,7 +174,9 @@ export function DiscountDiscountInput({
           onClick={handleApply}
           disabled={isValidating || !code.trim()}
           variant="outline"
-          aria-label={isValidating ? "Applying discount code" : "Apply discount code"}
+          aria-label={
+            isValidating ? "Applying discount code" : "Apply discount code"
+          }
         >
           {isValidating ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

@@ -128,7 +128,9 @@ export function PoolDialog({ open, onOpenChange, pool }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Base Unit" : "New Base Unit"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Edit Base Unit" : "New Base Unit"}
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>

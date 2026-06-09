@@ -124,33 +124,30 @@ export const testimonialRouter = createTRPCRouter({
 
   // ─── CUSTOMER SUBMITTED ───────────────────────────────────────────────────
 
-  canSubmit: protectedProcedure
-    .query(async ({ ctx }) => {
-      const business = await checkBusiness();
-      if (!business) return { canSubmit: false, reason: "Business not found" };
+  canSubmit: protectedProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+    if (!business) return { canSubmit: false, reason: "Business not found" };
 
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { email: true },
-      });
+    const user = await ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      select: { email: true },
+    });
 
-      if (!user) return { canSubmit: false, reason: "User not found" };
+    if (!user) return { canSubmit: false, reason: "User not found" };
 
-      const existing = await ctx.db.testimonial.findFirst({
-        where: {
-          businessId: business.id,
-          customerEmail: user.email,
-          source: "customer",
-        },
-      });
+    const existing = await ctx.db.testimonial.findFirst({
+      where: {
+        businessId: business.id,
+        customerEmail: user.email,
+        source: "customer",
+      },
+    });
 
-      return {
-        canSubmit: !existing,
-        reason: existing
-          ? "You have already submitted a testimonial"
-          : undefined,
-      };
-    }),
+    return {
+      canSubmit: !existing,
+      reason: existing ? "You have already submitted a testimonial" : undefined,
+    };
+  }),
 
   submit: protectedProcedure
     .use(featureGate("testimonials"))
@@ -174,7 +171,10 @@ export const testimonialRouter = createTRPCRouter({
 
       const business = await checkBusiness();
       if (!business)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
 
       const isValid = await verifyHCaptcha(input.captchaToken);
       if (!isValid) {
@@ -508,7 +508,9 @@ export const testimonialRouter = createTRPCRouter({
 
   bulkApprove: ownerAdminProcedure
     .use(featureGate("testimonials"))
-    .input(z.object({ ids: z.array(z.string()).min(1), isApproved: z.boolean() }))
+    .input(
+      z.object({ ids: z.array(z.string()).min(1), isApproved: z.boolean() }),
+    )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
       return ctx.db.testimonial.updateMany({

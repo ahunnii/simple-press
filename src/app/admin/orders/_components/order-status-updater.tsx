@@ -137,7 +137,10 @@ export function OrderStatusUpdater({ order }: Props) {
                   checked={restockItems}
                   onCheckedChange={(v) => setRestockItems(!!v)}
                 />
-                <Label htmlFor="cancel-restock" className="cursor-pointer font-normal">
+                <Label
+                  htmlFor="cancel-restock"
+                  className="cursor-pointer font-normal"
+                >
                   Return items to inventory
                 </Label>
               </div>
@@ -148,7 +151,10 @@ export function OrderStatusUpdater({ order }: Props) {
                 checked={sendEmail}
                 onCheckedChange={(v) => setSendEmail(!!v)}
               />
-              <Label htmlFor="cancel-send-email" className="cursor-pointer font-normal">
+              <Label
+                htmlFor="cancel-send-email"
+                className="cursor-pointer font-normal"
+              >
                 Notify customer by email
               </Label>
             </div>

@@ -32,7 +32,9 @@ export function DarkTrendCartContents({ business: _business }: Props) {
 
   // S-6: live region for cart mutation announcements
   const [announcement, setAnnouncement] = useState("");
-  const announcementTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const announcementTimeout = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const announce = useCallback((msg: string) => {
     setAnnouncement(msg);
@@ -55,7 +57,10 @@ export function DarkTrendCartContents({ business: _business }: Props) {
     return (
       <div className="py-16 text-center">
         {/* N-1: decorative icon */}
-        <ShoppingBag aria-hidden="true" className="mx-auto mb-4 h-16 w-16 text-white/40" />
+        <ShoppingBag
+          aria-hidden="true"
+          className="mx-auto mb-4 h-16 w-16 text-white/40"
+        />
         <h2 className="mb-2 text-2xl font-semibold text-white">
           Your cart is empty
         </h2>
@@ -73,11 +78,7 @@ export function DarkTrendCartContents({ business: _business }: Props) {
   return (
     <div className="grid gap-8 lg:grid-cols-3">
       {/* S-6: visually-hidden live region */}
-      <p
-        aria-live="polite"
-        aria-atomic="true"
-        className="sr-only"
-      >
+      <p aria-live="polite" aria-atomic="true" className="sr-only">
         {announcement}
       </p>
 

@@ -6,9 +6,9 @@ import Link from "next/link";
 import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { buttonVariants } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
 
 type Props = {
   product: Product;

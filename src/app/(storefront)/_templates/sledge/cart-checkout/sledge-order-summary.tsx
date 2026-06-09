@@ -3,9 +3,9 @@
 import Image from "next/image";
 
 import type { ShippingConfig } from "~/lib/shipping-utils";
-import { cn } from "~/lib/utils";
 import { formatPrice } from "~/lib/prices";
 import { calculateShipping } from "~/lib/shipping-utils";
+import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
 
 type OrderSummaryProps = {
@@ -22,7 +22,9 @@ export function SledgeOrderSummary({
   const { items, subtotal } = useCart();
 
   const shipping =
-    deliveryMethod === "pickup" ? 0 : calculateShipping(subtotal, shippingConfig);
+    deliveryMethod === "pickup"
+      ? 0
+      : calculateShipping(subtotal, shippingConfig);
   const afterDiscount = subtotal - discountAmount;
   const estimatedTotal = afterDiscount + shipping;
 
@@ -93,7 +95,7 @@ export function SledgeOrderSummary({
         {/* C-3: green-600 → green-700 for sufficient contrast */}
         {discountAmount > 0 ? (
           <div className="flex items-baseline justify-between gap-4">
-            <span className="font-sans text-xs tracking-[0.14em] uppercase text-green-700">
+            <span className="font-sans text-xs tracking-[0.14em] text-green-700 uppercase">
               Discount
             </span>
             <span className="font-sans text-sm tracking-[0.04em] text-green-700">

@@ -2,9 +2,9 @@ import Link from "next/link";
 import { Package } from "lucide-react";
 
 import type { OrdersPageTemplateProps } from "../../types";
-import { cn } from "~/lib/utils";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { cn } from "~/lib/utils";
 import { PageTransition } from "~/components/page-animations";
 
 import { SledgeAccountLayout } from "./sledge-account-layout";
@@ -94,7 +94,7 @@ export function SledgeOrdersPage({ orders }: OrdersPageTemplateProps) {
                       >
                         {item.productName}
                         {item.quantity > 1 && (
-                          <span className="sl-eyebrow ml-1 text-[10px] not-uppercase">
+                          <span className="sl-eyebrow not-uppercase ml-1 text-[10px]">
                             ×{item.quantity}
                           </span>
                         )}

@@ -1,10 +1,11 @@
 // app/api/webhooks/stripe/route.ts
 import type { NextRequest } from "next/server";
 import type Stripe from "stripe";
-import { Prisma } from "generated/prisma";
 import { NextResponse } from "next/server";
+import { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 
+import type { PoolDeductionResult } from "~/lib/inventory";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import { getBusinessUrl } from "~/lib/business-url";
 import {
@@ -16,7 +17,7 @@ import {
   sendPoolLowInventoryAlert,
   sendPoolOutOfStockAlert,
 } from "~/lib/email/templates";
-import { deductPoolInventory, type PoolDeductionResult } from "~/lib/inventory";
+import { deductPoolInventory } from "~/lib/inventory";
 import { stripeClient } from "~/lib/stripe/client";
 import { db } from "~/server/db";
 
@@ -420,7 +421,8 @@ export async function POST(req: NextRequest) {
                         const productId = metadata.productId?.trim() ?? null;
                         const productVariantId =
                           metadata.productVariantId?.trim() ?? null;
-                        const variantName = metadata.variantName?.trim() ?? null;
+                        const variantName =
+                          metadata.variantName?.trim() ?? null;
                         const sku = metadata.sku?.trim() ?? null;
 
                         return {
@@ -601,7 +603,8 @@ export async function POST(req: NextRequest) {
                     newQty,
                     previousQty,
                     allowBackorders: variant.product.allowBackorders,
-                    lowInventoryThreshold: variant.product.lowInventoryThreshold,
+                    lowInventoryThreshold:
+                      variant.product.lowInventoryThreshold,
                   });
                 } else {
                   const result = await tx.productVariant.updateMany({
@@ -654,7 +657,8 @@ export async function POST(req: NextRequest) {
                     newQty,
                     previousQty,
                     allowBackorders: variant.product.allowBackorders,
-                    lowInventoryThreshold: variant.product.lowInventoryThreshold,
+                    lowInventoryThreshold:
+                      variant.product.lowInventoryThreshold,
                   });
                 }
               }
@@ -835,14 +839,27 @@ export async function POST(req: NextRequest) {
                 // Atomic flag set — count > 0 means we won the race and should send the email
                 const flagged = await db.product.updateMany({
                   where: { id: productId, outOfStockAlertSent: false },
-                  data: { outOfStockAlertSent: true, lowInventoryAlertSent: true },
+                  data: {
+                    outOfStockAlertSent: true,
+                    lowInventoryAlertSent: true,
+                  },
                 });
                 if (flagged.count > 0) {
                   alertedProductIds.add(productId);
                   if (allowBackorders) {
-                    await sendBackorderAlert({ productName, variantName, adminProductUrl, business });
+                    await sendBackorderAlert({
+                      productName,
+                      variantName,
+                      adminProductUrl,
+                      business,
+                    });
                   } else {
-                    await sendOutOfStockAlert({ productName, variantName, adminProductUrl, business });
+                    await sendOutOfStockAlert({
+                      productName,
+                      variantName,
+                      adminProductUrl,
+                      business,
+                    });
                   }
                 }
               } else if (
@@ -867,9 +884,14 @@ export async function POST(req: NextRequest) {
                 }
               }
             }
-            console.log(`[Webhook] Inventory notifications processed for order ${order.id}`);
+            console.log(
+              `[Webhook] Inventory notifications processed for order ${order.id}`,
+            );
           } catch (notifyError) {
-            console.error("[Webhook] Failed to send inventory notification:", notifyError);
+            console.error(
+              "[Webhook] Failed to send inventory notification:",
+              notifyError,
+            );
             Sentry.withScope((scope) => {
               scope.setTag("webhook.step", "inventory-notification");
               scope.setTag("businessId", businessId);
@@ -880,61 +902,66 @@ export async function POST(req: NextRequest) {
 
         // Send pool inventory alert notifications
         if (poolNotificationCandidates.length > 0) {
-            try {
-              const businessUrl = getBusinessUrl(business);
-              const alertedPoolIds = new Set<string>();
-              for (const candidate of poolNotificationCandidates) {
-                if (candidate.wasOversell) continue;
-                if (alertedPoolIds.has(candidate.poolId)) continue;
+          try {
+            const businessUrl = getBusinessUrl(business);
+            const alertedPoolIds = new Set<string>();
+            for (const candidate of poolNotificationCandidates) {
+              if (candidate.wasOversell) continue;
+              if (alertedPoolIds.has(candidate.poolId)) continue;
 
-                const adminInventoryUrl = `${businessUrl}/admin/inventory`;
+              const adminInventoryUrl = `${businessUrl}/admin/inventory`;
 
-                if (candidate.newQty <= 0) {
-                  const flagged = await db.baseInventoryUnit.updateMany({
-                    where: { id: candidate.poolId, outOfStockAlertSent: false },
-                    data: {
-                      outOfStockAlertSent: true,
-                      lowInventoryAlertSent: true,
-                    },
+              if (candidate.newQty <= 0) {
+                const flagged = await db.baseInventoryUnit.updateMany({
+                  where: { id: candidate.poolId, outOfStockAlertSent: false },
+                  data: {
+                    outOfStockAlertSent: true,
+                    lowInventoryAlertSent: true,
+                  },
+                });
+                if (flagged.count > 0) {
+                  alertedPoolIds.add(candidate.poolId);
+                  await sendPoolOutOfStockAlert({
+                    poolName: candidate.poolName,
+                    adminUrl: adminInventoryUrl,
+                    business,
                   });
-                  if (flagged.count > 0) {
-                    alertedPoolIds.add(candidate.poolId);
-                    await sendPoolOutOfStockAlert({
-                      poolName: candidate.poolName,
-                      adminUrl: adminInventoryUrl,
-                      business,
-                    });
-                  }
-                } else if (
-                  candidate.lowInventoryThreshold !== null &&
-                  candidate.newQty <= candidate.lowInventoryThreshold &&
-                  candidate.previousQty > candidate.lowInventoryThreshold
-                ) {
-                  const flagged = await db.baseInventoryUnit.updateMany({
-                    where: { id: candidate.poolId, lowInventoryAlertSent: false },
-                    data: { lowInventoryAlertSent: true },
+                }
+              } else if (
+                candidate.lowInventoryThreshold !== null &&
+                candidate.newQty <= candidate.lowInventoryThreshold &&
+                candidate.previousQty > candidate.lowInventoryThreshold
+              ) {
+                const flagged = await db.baseInventoryUnit.updateMany({
+                  where: { id: candidate.poolId, lowInventoryAlertSent: false },
+                  data: { lowInventoryAlertSent: true },
+                });
+                if (flagged.count > 0) {
+                  alertedPoolIds.add(candidate.poolId);
+                  await sendPoolLowInventoryAlert({
+                    poolName: candidate.poolName,
+                    currentQty: candidate.newQty,
+                    threshold: candidate.lowInventoryThreshold,
+                    adminUrl: adminInventoryUrl,
+                    business,
                   });
-                  if (flagged.count > 0) {
-                    alertedPoolIds.add(candidate.poolId);
-                    await sendPoolLowInventoryAlert({
-                      poolName: candidate.poolName,
-                      currentQty: candidate.newQty,
-                      threshold: candidate.lowInventoryThreshold,
-                      adminUrl: adminInventoryUrl,
-                      business,
-                    });
-                  }
                 }
               }
-              console.log(`[Webhook] Pool notifications processed for order ${order.id}`);
-            } catch (poolNotifyError) {
-              console.error("[Webhook] Failed to send pool inventory notification:", poolNotifyError);
-              Sentry.withScope((scope) => {
-                scope.setTag("webhook.step", "pool-inventory-notification");
-                scope.setTag("businessId", businessId);
-                Sentry.captureException(poolNotifyError);
-              });
             }
+            console.log(
+              `[Webhook] Pool notifications processed for order ${order.id}`,
+            );
+          } catch (poolNotifyError) {
+            console.error(
+              "[Webhook] Failed to send pool inventory notification:",
+              poolNotifyError,
+            );
+            Sentry.withScope((scope) => {
+              scope.setTag("webhook.step", "pool-inventory-notification");
+              scope.setTag("businessId", businessId);
+              Sentry.captureException(poolNotifyError);
+            });
+          }
         }
 
         // Send order confirmation email (skip if customer email is unknown)
@@ -942,69 +969,70 @@ export async function POST(req: NextRequest) {
           console.warn(
             `[Webhook] Skipping order confirmation email for order #${order.orderNumber} — no customer email`,
           );
-        } else try {
-          // Fetch shipping address for email if available
-          let shippingAddressForEmail = undefined;
-          if (shippingAddressId) {
-            const addr = await db.shippingAddress.findUnique({
-              where: { id: shippingAddressId },
-            });
-            if (addr) {
-              shippingAddressForEmail = {
-                name: `${addr.firstName} ${addr.lastName}`.trim(),
-                line1: addr.address1,
-                line2: addr.address2 ?? null,
-                city: addr.city,
-                state: addr.province ?? "",
-                postalCode: addr.zip,
-                country: addr.country,
-              };
+        } else
+          try {
+            // Fetch shipping address for email if available
+            let shippingAddressForEmail = undefined;
+            if (shippingAddressId) {
+              const addr = await db.shippingAddress.findUnique({
+                where: { id: shippingAddressId },
+              });
+              if (addr) {
+                shippingAddressForEmail = {
+                  name: `${addr.firstName} ${addr.lastName}`.trim(),
+                  line1: addr.address1,
+                  line2: addr.address2 ?? null,
+                  city: addr.city,
+                  state: addr.province ?? "",
+                  postalCode: addr.zip,
+                  country: addr.country,
+                };
+              }
             }
+
+            await sendOrderConfirmation({
+              to: order.customerEmail,
+              orderNumber: order.orderNumber,
+              customerName: order.customerName ?? "Guest",
+              items: order.items.map((item) => ({
+                productName: item.productName,
+                variantName: item.variantName,
+                quantity: item.quantity,
+                price: item.price,
+                total: item.total,
+              })),
+              subtotal: order.subtotal,
+              shipping: order.shipping,
+              tax: order.tax,
+              discount: order.discount,
+              total: order.total,
+              shippingAddress: shippingAddressForEmail,
+              business: {
+                name: business.name,
+                ownerEmail: business.ownerEmail,
+                siteContent: business.siteContent,
+                subdomain: business.subdomain,
+                customDomain: business.customDomain,
+                domainStatus: business.domainStatus,
+              },
+              idempotencyKey: `order-confirmation-${session.id}`,
+            });
+
+            console.log(
+              `[Webhook] Order confirmation email sent for order ${order.id}`,
+            );
+          } catch (emailError) {
+            console.error(
+              "[Webhook] Failed to send order confirmation email:",
+              emailError,
+            );
+            Sentry.withScope((scope) => {
+              scope.setTag("webhook.step", "order-confirmation-email");
+              scope.setTag("businessId", businessId);
+              Sentry.captureException(emailError);
+            });
+            // Don't fail the webhook if email fails
           }
-
-          await sendOrderConfirmation({
-            to: order.customerEmail,
-            orderNumber: order.orderNumber,
-            customerName: order.customerName ?? "Guest",
-            items: order.items.map((item) => ({
-              productName: item.productName,
-              variantName: item.variantName,
-              quantity: item.quantity,
-              price: item.price,
-              total: item.total,
-            })),
-            subtotal: order.subtotal,
-            shipping: order.shipping,
-            tax: order.tax,
-            discount: order.discount,
-            total: order.total,
-            shippingAddress: shippingAddressForEmail,
-            business: {
-              name: business.name,
-              ownerEmail: business.ownerEmail,
-              siteContent: business.siteContent,
-              subdomain: business.subdomain,
-              customDomain: business.customDomain,
-              domainStatus: business.domainStatus,
-            },
-            idempotencyKey: `order-confirmation-${session.id}`,
-          });
-
-          console.log(
-            `[Webhook] Order confirmation email sent for order ${order.id}`,
-          );
-        } catch (emailError) {
-          console.error(
-            "[Webhook] Failed to send order confirmation email:",
-            emailError,
-          );
-          Sentry.withScope((scope) => {
-            scope.setTag("webhook.step", "order-confirmation-email");
-            scope.setTag("businessId", businessId);
-            Sentry.captureException(emailError);
-          });
-          // Don't fail the webhook if email fails
-        }
 
         try {
           await sendNewOrderNotification({

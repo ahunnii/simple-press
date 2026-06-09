@@ -3,11 +3,11 @@ import Link from "next/link";
 import { ArrowRight, MapPin, Package } from "lucide-react";
 
 import type { Product } from "~/types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
@@ -166,7 +166,10 @@ export async function BambooHomepage() {
             {homepage?.products?.length === 0 && (
               <StaggerItem key="no-products">
                 <div className="flex flex-col items-center justify-center">
-                  <Package className="text-muted-foreground/50 mb-4 h-12 w-12" aria-hidden="true" />
+                  <Package
+                    className="text-muted-foreground/50 mb-4 h-12 w-12"
+                    aria-hidden="true"
+                  />
                   <p className="text-muted-foreground text-lg">
                     No products found
                   </p>

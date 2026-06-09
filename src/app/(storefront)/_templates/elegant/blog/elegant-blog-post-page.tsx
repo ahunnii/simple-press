@@ -8,8 +8,8 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { formatDate } from "~/lib/utils";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -21,7 +21,12 @@ function useScrollReveal() {
     const el = ref.current;
     if (!el) return;
     const io = new IntersectionObserver(
-      ([entry]) => { if (entry?.isIntersecting) { setVisible(true); io.disconnect(); } },
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
       { threshold: 0.08 },
     );
     io.observe(el);
@@ -30,7 +35,10 @@ function useScrollReveal() {
   return { ref, visible };
 }
 
-export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageTemplateProps) {
+export function ElegantBlogPostPage({
+  page,
+  relatedPosts,
+}: DefaultBlogPostPageTemplateProps) {
   const [shown, setShown] = useState(false);
   const keepReading = useScrollReveal();
   const reducedMotion = useReducedMotion();
@@ -91,27 +99,31 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
 
           {/* Date */}
           <div style={fadeStyle(0.08)}>
-            <span style={{
-              fontFamily: "var(--font-mono, ui-monospace)",
-              fontSize: 10,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "var(--el-ink-soft, #6b6659)",
-            }}>
+            <span
+              style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 10,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+              }}
+            >
               {formatDate(page.createdAt)}
             </span>
           </div>
 
           {/* Title */}
-          <h1 style={{
-            fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-            fontWeight: 400,
-            fontSize: "clamp(40px, 6vw, 84px)",
-            lineHeight: 1.0,
-            letterSpacing: "-0.01em",
-            marginTop: 14,
-            color: "var(--el-ink, #1c1a17)",
-          }}>
+          <h1
+            style={{
+              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+              fontWeight: 400,
+              fontSize: "clamp(40px, 6vw, 84px)",
+              lineHeight: 1.0,
+              letterSpacing: "-0.01em",
+              marginTop: 14,
+              color: "var(--el-ink, #1c1a17)",
+            }}
+          >
             <span style={{ display: "block", overflow: "hidden" }}>
               <span style={maskStyle(0.12)}>{page.title}</span>
             </span>
@@ -120,32 +132,38 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
           {/* Excerpt */}
           {page.excerpt && (
             <div style={fadeStyle(0.35)}>
-              <p style={{
-                marginTop: 24,
-                fontSize: 20,
-                color: "var(--el-ink-soft, #6b6659)",
-                lineHeight: 1.55,
-                fontFamily: "var(--font-sans, sans-serif)",
-              }}>
+              <p
+                style={{
+                  marginTop: 24,
+                  fontSize: 20,
+                  color: "var(--el-ink-soft, #6b6659)",
+                  lineHeight: 1.55,
+                  fontFamily: "var(--font-sans, sans-serif)",
+                }}
+              >
                 {page.excerpt}
               </p>
             </div>
           )}
 
           {/* Byline divider */}
-          <div style={{
-            ...fadeStyle(0.45),
-            marginTop: 32,
-            paddingTop: 24,
-            borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
-          }}>
-            <span style={{
-              fontFamily: "var(--font-mono, ui-monospace)",
-              fontSize: 10,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--el-ink-soft, #6b6659)",
-            }}>
+          <div
+            style={{
+              ...fadeStyle(0.45),
+              marginTop: 32,
+              paddingTop: 24,
+              borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 10,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+              }}
+            >
               {formatDate(page.createdAt)}
             </span>
           </div>
@@ -156,15 +174,17 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
       {page.image && (
         <section style={{ padding: "0 40px" }}>
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
-            <div style={{
-              ...fadeStyle(0.4),
-              position: "relative",
-              width: "100%",
-              aspectRatio: "16/8",
-              borderRadius: 8,
-              overflow: "hidden",
-              background: "var(--el-cream-2, #ebe6dc)",
-            }}>
+            <div
+              style={{
+                ...fadeStyle(0.4),
+                position: "relative",
+                width: "100%",
+                aspectRatio: "16/8",
+                borderRadius: 8,
+                overflow: "hidden",
+                background: "var(--el-cream-2, #ebe6dc)",
+              }}
+            >
               <Image
                 src={page.image}
                 alt={page.title}
@@ -187,23 +207,27 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
           />
 
           {/* Footer: filed under + back */}
-          <div style={{
-            marginTop: 64,
-            paddingTop: 24,
-            borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 16,
-          }}>
-            <span style={{
-              fontFamily: "var(--font-mono, ui-monospace)",
-              fontSize: 10,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--el-ink-soft, #6b6659)",
-            }}>
+          <div
+            style={{
+              marginTop: 64,
+              paddingTop: 24,
+              borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 16,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 10,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+              }}
+            >
               {formatDate(page.createdAt)}
             </span>
             <Link
@@ -237,45 +261,60 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
       {others.length > 0 && (
         <section
           ref={keepReading.ref}
-          style={{ padding: "80px 40px", background: "var(--el-paper, #fbf8f2)" }}
+          style={{
+            padding: "80px 40px",
+            background: "var(--el-paper, #fbf8f2)",
+          }}
         >
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
-            <div style={{
-              ...(reducedMotion ? {} : {
-                opacity: keepReading.visible ? 1 : 0,
-                transform: keepReading.visible ? "translateY(0)" : "translateY(24px)",
-                transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
-              }),
-              marginBottom: 40,
-            }}>
-              <span style={{
-                fontFamily: "var(--font-mono, ui-monospace)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--el-ink-soft, #6b6659)",
-                display: "block",
-                marginBottom: 14,
-              }}>
+            <div
+              style={{
+                ...(reducedMotion
+                  ? {}
+                  : {
+                      opacity: keepReading.visible ? 1 : 0,
+                      transform: keepReading.visible
+                        ? "translateY(0)"
+                        : "translateY(24px)",
+                      transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+                    }),
+                marginBottom: 40,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                  display: "block",
+                  marginBottom: 14,
+                }}
+              >
                 Keep reading
               </span>
-              <h2 style={{
-                fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-                fontWeight: 400,
-                fontSize: "clamp(32px, 4vw, 48px)",
-                lineHeight: 1.05,
-                letterSpacing: "-0.01em",
-                color: "var(--el-ink, #1c1a17)",
-              }}>
+              <h2
+                style={{
+                  fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                  fontWeight: 400,
+                  fontSize: "clamp(32px, 4vw, 48px)",
+                  lineHeight: 1.05,
+                  letterSpacing: "-0.01em",
+                  color: "var(--el-ink, #1c1a17)",
+                }}
+              >
                 More from the <em style={{ fontStyle: "italic" }}>journal</em>.
               </h2>
             </div>
 
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-              gap: 32,
-            }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+                gap: 32,
+              }}
+            >
               {others.map((post, i) => (
                 <Link
                   key={post.slug}
@@ -283,21 +322,27 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
                   style={{
                     display: "block",
                     textDecoration: "none",
-                    ...(reducedMotion ? {} : {
-                      opacity: keepReading.visible ? 1 : 0,
-                      transform: keepReading.visible ? "translateY(0)" : "translateY(24px)",
-                      transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
-                    }),
+                    ...(reducedMotion
+                      ? {}
+                      : {
+                          opacity: keepReading.visible ? 1 : 0,
+                          transform: keepReading.visible
+                            ? "translateY(0)"
+                            : "translateY(24px)",
+                          transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
+                        }),
                   }}
                   className="el-related-post group"
                 >
-                  <div style={{
-                    position: "relative",
-                    aspectRatio: "4/5",
-                    borderRadius: 8,
-                    overflow: "hidden",
-                    background: "var(--el-cream-2, #ebe6dc)",
-                  }}>
+                  <div
+                    style={{
+                      position: "relative",
+                      aspectRatio: "4/5",
+                      borderRadius: 8,
+                      overflow: "hidden",
+                      background: "var(--el-cream-2, #ebe6dc)",
+                    }}
+                  >
                     <Image
                       src={post.image ?? "/placeholder.svg"}
                       alt={post.title}
@@ -307,25 +352,30 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
                       sizes="(max-width: 640px) 100vw, 33vw"
                     />
                   </div>
-                  <div style={{
-                    fontFamily: "var(--font-mono, ui-monospace)",
-                    fontSize: 10,
-                    letterSpacing: "0.18em",
-                    textTransform: "uppercase",
-                    color: "var(--el-ink-soft, #6b6659)",
-                    marginTop: 16,
-                    marginBottom: 8,
-                  }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--font-mono, ui-monospace)",
+                      fontSize: 10,
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: "var(--el-ink-soft, #6b6659)",
+                      marginTop: 16,
+                      marginBottom: 8,
+                    }}
+                  >
                     {formatDate(post.createdAt)}
                   </div>
-                  <h3 style={{
-                    fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-                    fontWeight: 400,
-                    fontSize: 22,
-                    lineHeight: 1.2,
-                    color: "var(--el-ink, #1c1a17)",
-                    letterSpacing: "-0.005em",
-                  }}>
+                  <h3
+                    style={{
+                      fontFamily:
+                        "var(--font-serif, 'Cormorant Garamond', serif)",
+                      fontWeight: 400,
+                      fontSize: 22,
+                      lineHeight: 1.2,
+                      color: "var(--el-ink, #1c1a17)",
+                      letterSpacing: "-0.005em",
+                    }}
+                  >
                     {post.title}
                   </h3>
                 </Link>
@@ -349,14 +399,15 @@ export function ElegantBlogPostPage({ page, relatedPosts }: DefaultBlogPostPageT
                 }}
               >
                 All posts
-                <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
+                <ArrowRight
+                  aria-hidden={true}
+                  style={{ width: 14, height: 14 }}
+                />
               </Link>
             </div>
           </div>
-
         </section>
       )}
-
     </div>
   );
 }

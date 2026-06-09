@@ -23,12 +23,9 @@ import {
   Upload,
   X,
 } from "lucide-react";
-
 import { toast } from "sonner";
 
 import type { PreviewPaneHandle } from "~/components/preview/preview-pane";
-import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
-
 import type {
   TemplateField,
   TemplateFieldGroup,
@@ -36,9 +33,15 @@ import type {
   TemplateListRow,
 } from "~/lib/template-fields";
 import {
+  DEFAULT_EMBED_HEIGHT,
+  isVideoEmbed,
+  parseEmbedInput,
+} from "~/lib/embed";
+import {
   getLucideTemplateIcon,
   TEMPLATE_LUCIDE_ICON_NAMES,
 } from "~/lib/lucide-template-icons";
+import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
 import {
   getGroupMetadata,
   groupFieldsByGroup,
@@ -47,12 +50,6 @@ import {
   parseTemplateIframeValue,
   parseTemplateListRows,
 } from "~/lib/template-fields";
-import {
-  DEFAULT_EMBED_HEIGHT,
-  isVideoEmbed,
-  parseEmbedInput,
-} from "~/lib/embed";
-import { EmbedFrame } from "~/components/embed-frame";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
@@ -86,9 +83,10 @@ import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
+import { EmbedFrame } from "~/components/embed-frame";
+import { PreviewPane } from "~/components/preview/preview-pane";
 import { ResetFormButton } from "~/components/shared/reset-form-button";
 import { SaveFormButton } from "~/components/shared/save-form-button";
-import { PreviewPane } from "~/components/preview/preview-pane";
 
 const EMPTY_TIPTAP_DOC: Content = { type: "doc", content: [] };
 
@@ -129,7 +127,11 @@ type Props = {
   embedsEnabled?: boolean;
 };
 
-export function TemplateFieldsEditor({ business, siteContent, embedsEnabled }: Props) {
+export function TemplateFieldsEditor({
+  business,
+  siteContent,
+  embedsEnabled,
+}: Props) {
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -665,7 +667,10 @@ export function TemplateFieldsEditor({ business, siteContent, embedsEnabled }: P
           size="sm"
           aria-pressed={view === "form"}
           onClick={() => setView("form")}
-          className={cn("gap-1.5", view === "form" && "bg-secondary text-secondary-foreground")}
+          className={cn(
+            "gap-1.5",
+            view === "form" && "bg-secondary text-secondary-foreground",
+          )}
         >
           <Pencil className="h-3.5 w-3.5" />
           Form
@@ -675,7 +680,10 @@ export function TemplateFieldsEditor({ business, siteContent, embedsEnabled }: P
           size="sm"
           aria-pressed={view === "preview"}
           onClick={() => void switchToPreview()}
-          className={cn("gap-1.5", view === "preview" && "bg-secondary text-secondary-foreground")}
+          className={cn(
+            "gap-1.5",
+            view === "preview" && "bg-secondary text-secondary-foreground",
+          )}
         >
           <Eye className="h-3.5 w-3.5" />
           Preview
@@ -692,220 +700,231 @@ export function TemplateFieldsEditor({ business, siteContent, embedsEnabled }: P
           )}
         >
           <div className="mx-auto max-w-4xl">
-        {/* Main Content */}
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-              <div className="w-full">
-                <CardTitle className="flex items-center gap-2">
-                  Template Content{" "}
-                  <Badge variant="outline" className="capitalize">
-                    {business.templateId} Template
-                  </Badge>
-                </CardTitle>
-                <CardDescription>
-                  Edit content organized by page and grouped by section
-                </CardDescription>
-              </div>
+            {/* Main Content */}
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+                  <div className="w-full">
+                    <CardTitle className="flex items-center gap-2">
+                      Template Content{" "}
+                      <Badge variant="outline" className="capitalize">
+                        {business.templateId} Template
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription>
+                      Edit content organized by page and grouped by section
+                    </CardDescription>
+                  </div>
 
-              {/* Search */}
-              <div className="flex w-full items-center gap-2 md:w-auto">
-                <div className="relative w-full md:w-64">
-                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    placeholder="Search fields..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
+                  {/* Search */}
+                  <div className="flex w-full items-center gap-2 md:w-auto">
+                    <div className="relative w-full md:w-64">
+                      <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <Input
+                        placeholder="Search fields..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    {searchQuery && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSearchQuery("")}
+                      >
+                        Clear <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                {searchQuery && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSearchQuery("")}
-                  >
-                    Clear <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardHeader>
+              </CardHeader>
 
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <div className="mb-6 sm:hidden">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="h-auto min-h-9 w-full justify-between gap-2 px-3 py-2 font-normal"
-                    >
-                      <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
-                        <span className="shrink-0">
-                          {activeTabStats.meta?.icon || "📄"}
-                        </span>
-                        <span className="truncate">
-                          {activeTabStats.meta?.title || activeTab}
-                        </span>
-                        {activeTabStats.totalFields > 0 && (
-                          <Badge
-                            variant={
-                              activeTabStats.modifiedCount > 0
-                                ? "default"
-                                : "secondary"
-                            }
-                            className="ml-auto h-5 w-5 shrink-0 rounded-full p-0 text-xs"
-                          >
-                            {activeTabStats.totalFields}
-                          </Badge>
-                        )}
-                      </span>
-                      <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="max-h-[min(60vh,22rem)] w-(--radix-dropdown-menu-trigger-width) overflow-y-auto"
-                    align="start"
-                  >
-                    <DropdownMenuRadioGroup
-                      value={activeTab}
-                      onValueChange={setActiveTab}
-                    >
-                      {allPages.map((page) => {
-                        const { meta, totalFields, modifiedCount } =
-                          getPageTabStats(page);
-                        return (
-                          <DropdownMenuRadioItem
-                            key={page}
-                            value={page}
-                            className="min-w-0 pr-2"
-                          >
-                            <span className="mr-1 shrink-0">
-                              {meta?.icon || "📄"}
+              <CardContent>
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <div className="mb-6 sm:hidden">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-auto min-h-9 w-full justify-between gap-2 px-3 py-2 font-normal"
+                        >
+                          <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
+                            <span className="shrink-0">
+                              {activeTabStats.meta?.icon || "📄"}
                             </span>
-                            <span className="min-w-0 flex-1 truncate">
-                              {meta?.title || page}
+                            <span className="truncate">
+                              {activeTabStats.meta?.title || activeTab}
                             </span>
-                            {totalFields > 0 && (
+                            {activeTabStats.totalFields > 0 && (
                               <Badge
                                 variant={
-                                  modifiedCount > 0 ? "default" : "secondary"
+                                  activeTabStats.modifiedCount > 0
+                                    ? "default"
+                                    : "secondary"
                                 }
                                 className="ml-auto h-5 w-5 shrink-0 rounded-full p-0 text-xs"
                               >
-                                {totalFields}
+                                {activeTabStats.totalFields}
                               </Badge>
                             )}
-                          </DropdownMenuRadioItem>
-                        );
-                      })}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <TabsList className="mb-6 hidden max-w-full flex-wrap sm:inline-flex">
-                {allPages.map((page) => {
-                  const { meta, totalFields, modifiedCount } =
-                    getPageTabStats(page);
-                  return (
-                    <TabsTrigger
-                      key={page}
-                      value={page}
-                      className="relative w-fit"
-                    >
-                      <span className="mr-1">{meta?.icon || "📄"}</span>
-                      <span>{meta?.title || page}</span>
-                      {totalFields > 0 && (
-                        <Badge
-                          variant={modifiedCount > 0 ? "default" : "secondary"}
-                          className="ml-1 h-5 w-5 rounded-full p-0 text-xs"
+                          </span>
+                          <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        className="max-h-[min(60vh,22rem)] w-(--radix-dropdown-menu-trigger-width) overflow-y-auto"
+                        align="start"
+                      >
+                        <DropdownMenuRadioGroup
+                          value={activeTab}
+                          onValueChange={setActiveTab}
                         >
-                          {totalFields}
-                        </Badge>
-                      )}
-                    </TabsTrigger>
-                  );
-                })}
-              </TabsList>
+                          {allPages.map((page) => {
+                            const { meta, totalFields, modifiedCount } =
+                              getPageTabStats(page);
+                            return (
+                              <DropdownMenuRadioItem
+                                key={page}
+                                value={page}
+                                className="min-w-0 pr-2"
+                              >
+                                <span className="mr-1 shrink-0">
+                                  {meta?.icon || "📄"}
+                                </span>
+                                <span className="min-w-0 flex-1 truncate">
+                                  {meta?.title || page}
+                                </span>
+                                {totalFields > 0 && (
+                                  <Badge
+                                    variant={
+                                      modifiedCount > 0
+                                        ? "default"
+                                        : "secondary"
+                                    }
+                                    className="ml-auto h-5 w-5 shrink-0 rounded-full p-0 text-xs"
+                                  >
+                                    {totalFields}
+                                  </Badge>
+                                )}
+                              </DropdownMenuRadioItem>
+                            );
+                          })}
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
 
-              {allPages.map((page) => {
-                const meta = PAGE_METADATA[page as keyof typeof PAGE_METADATA];
-                const { templateFields, customPairs: pagePairs } =
-                  getFieldsForPage(page);
-                const filteredFields = filterFields(templateFields);
-
-                // Group fields by their group property
-                const fieldGroups = groupFieldsByGroup(filteredFields);
-
-                return (
-                  <TabsContent key={page} value={page} className="space-y-6">
-                    {/* Page Description */}
-                    {meta && (
-                      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">{meta.icon}</span>
-                          <div>
-                            <h3 className="font-medium text-blue-900">
-                              {meta.title}
-                            </h3>
-                            <p className="text-sm text-blue-700">
-                              {meta.description}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Grouped Template Fields */}
-                    {Object.entries(fieldGroups).map(([groupId, fields]) => {
-                      if (fields.length === 0) return null;
-
-                      const groupMeta = getGroupMetadata(
-                        business.templateId,
-                        groupId,
-                      );
-                      const isUngrouped = groupId === "ungrouped";
-
+                  <TabsList className="mb-6 hidden max-w-full flex-wrap sm:inline-flex">
+                    {allPages.map((page) => {
+                      const { meta, totalFields, modifiedCount } =
+                        getPageTabStats(page);
                       return (
-                        <FieldGroup
-                          key={groupId}
-                          groupId={groupId}
-                          page={page}
-                          groupMeta={groupMeta}
-                          fields={fields}
-                          customFields={customFields}
-                          modifiedFields={modifiedFields}
-                          onFieldChange={handleFieldChange}
-                          isUngrouped={isUngrouped}
-                          businessId={business.id}
-                          embedsEnabled={embedsEnabled}
-                        />
+                        <TabsTrigger
+                          key={page}
+                          value={page}
+                          className="relative w-fit"
+                        >
+                          <span className="mr-1">{meta?.icon || "📄"}</span>
+                          <span>{meta?.title || page}</span>
+                          {totalFields > 0 && (
+                            <Badge
+                              variant={
+                                modifiedCount > 0 ? "default" : "secondary"
+                              }
+                              className="ml-1 h-5 w-5 rounded-full p-0 text-xs"
+                            >
+                              {totalFields}
+                            </Badge>
+                          )}
+                        </TabsTrigger>
                       );
                     })}
+                  </TabsList>
 
-                    {filteredFields.length === 0 &&
-                      templateFields.length > 0 && (
-                        <div className="rounded-lg border border-dashed border-gray-300 p-12 text-center">
-                          <p className="text-gray-500">
-                            No fields match your search
-                          </p>
-                          <Button
-                            variant="link"
-                            onClick={() => setSearchQuery("")}
-                            className="mt-2"
-                          >
-                            Clear search
-                          </Button>
-                        </div>
-                      )}
+                  {allPages.map((page) => {
+                    const meta =
+                      PAGE_METADATA[page as keyof typeof PAGE_METADATA];
+                    const { templateFields, customPairs: pagePairs } =
+                      getFieldsForPage(page);
+                    const filteredFields = filterFields(templateFields);
 
-                    {templateFields.length > 0 && <Separator />}
+                    // Group fields by their group property
+                    const fieldGroups = groupFieldsByGroup(filteredFields);
 
-                    {/* Custom Fields for this page - unchanged */}
-                    {/* <CustomFieldsSection
+                    return (
+                      <TabsContent
+                        key={page}
+                        value={page}
+                        className="space-y-6"
+                      >
+                        {/* Page Description */}
+                        {meta && (
+                          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl">{meta.icon}</span>
+                              <div>
+                                <h3 className="font-medium text-blue-900">
+                                  {meta.title}
+                                </h3>
+                                <p className="text-sm text-blue-700">
+                                  {meta.description}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Grouped Template Fields */}
+                        {Object.entries(fieldGroups).map(
+                          ([groupId, fields]) => {
+                            if (fields.length === 0) return null;
+
+                            const groupMeta = getGroupMetadata(
+                              business.templateId,
+                              groupId,
+                            );
+                            const isUngrouped = groupId === "ungrouped";
+
+                            return (
+                              <FieldGroup
+                                key={groupId}
+                                groupId={groupId}
+                                page={page}
+                                groupMeta={groupMeta}
+                                fields={fields}
+                                customFields={customFields}
+                                modifiedFields={modifiedFields}
+                                onFieldChange={handleFieldChange}
+                                isUngrouped={isUngrouped}
+                                businessId={business.id}
+                                embedsEnabled={embedsEnabled}
+                              />
+                            );
+                          },
+                        )}
+
+                        {filteredFields.length === 0 &&
+                          templateFields.length > 0 && (
+                            <div className="rounded-lg border border-dashed border-gray-300 p-12 text-center">
+                              <p className="text-gray-500">
+                                No fields match your search
+                              </p>
+                              <Button
+                                variant="link"
+                                onClick={() => setSearchQuery("")}
+                                className="mt-2"
+                              >
+                                Clear search
+                              </Button>
+                            </div>
+                          )}
+
+                        {templateFields.length > 0 && <Separator />}
+
+                        {/* Custom Fields for this page - unchanged */}
+                        {/* <CustomFieldsSection
                       page={page}
                       customPairs={pagePairs}
                       allCustomPairs={customPairs}
@@ -914,35 +933,38 @@ export function TemplateFieldsEditor({ business, siteContent, embedsEnabled }: P
                       onDelete={deleteCustomPair}
                     /> */}
 
-                    {/* Empty state */}
-                    {templateFields.length === 0 && pagePairs.length === 0 && (
-                      <div className="rounded-lg border border-dashed border-gray-300 p-12 text-center">
-                        <p className="mb-3 text-gray-500">
-                          No template fields defined for this page yet
-                        </p>
-                        <Button
-                          onClick={() => addCustomPair(page)}
-                          size="sm"
-                          variant="outline"
-                        >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Add Custom Field
-                        </Button>
-                      </div>
-                    )}
-                  </TabsContent>
-                );
-              })}
-            </Tabs>
-          </CardContent>
-        </Card>
-          </div>{/* /max-w-4xl */}
-        </div>{/* /fields pane */}
+                        {/* Empty state */}
+                        {templateFields.length === 0 &&
+                          pagePairs.length === 0 && (
+                            <div className="rounded-lg border border-dashed border-gray-300 p-12 text-center">
+                              <p className="mb-3 text-gray-500">
+                                No template fields defined for this page yet
+                              </p>
+                              <Button
+                                onClick={() => addCustomPair(page)}
+                                size="sm"
+                                variant="outline"
+                              >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Custom Field
+                              </Button>
+                            </div>
+                          )}
+                      </TabsContent>
+                    );
+                  })}
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
+          {/* /max-w-4xl */}
+        </div>
+        {/* /fields pane */}
 
         {/* ── Preview pane — mounted always, hidden when not active ── */}
         <div
           className={cn(
-            "h-full bg-muted/20",
+            "bg-muted/20 h-full",
             view === "form" ? "hidden" : "block",
           )}
         >
@@ -957,7 +979,8 @@ export function TemplateFieldsEditor({ business, siteContent, embedsEnabled }: P
             />
           </div>
         </div>
-      </div>{/* /full-width column */}
+      </div>
+      {/* /full-width column */}
     </div>
   );
 }

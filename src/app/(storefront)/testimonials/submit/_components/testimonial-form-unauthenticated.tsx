@@ -272,9 +272,7 @@ export function TestimonialFormUnauthenticated({
                   aria-required="true"
                   aria-invalid={textError ? "true" : undefined}
                   aria-describedby={
-                    textError
-                      ? "text-error text-char-count"
-                      : "text-char-count"
+                    textError ? "text-error text-char-count" : "text-char-count"
                   }
                 />
                 {textError && (

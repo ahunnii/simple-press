@@ -1,6 +1,9 @@
 const PREFIX = "__SP_TRPC__" as const;
 
-export function formatTrpcErrorForBoundary(code: string, message: string): string {
+export function formatTrpcErrorForBoundary(
+  code: string,
+  message: string,
+): string {
   return `${PREFIX}${JSON.stringify({ code, message })}`;
 }
 

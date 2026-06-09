@@ -49,20 +49,22 @@ export function DefaultProductRail({
         <FadeIn className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col gap-2">
             {eyebrow && (
-              <p className="text-[#6b6b6b] text-xs font-medium tracking-[0.14em] uppercase">
+              <p className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
                 {eyebrow}
               </p>
             )}
-            <h2 className="font-serif text-foreground text-3xl font-semibold tracking-tight md:text-4xl">
+            <h2 className="text-foreground font-serif text-3xl font-semibold tracking-tight md:text-4xl">
               {title}
             </h2>
             {description && (
-              <p className="text-muted-foreground max-w-md text-sm">{description}</p>
+              <p className="text-muted-foreground max-w-md text-sm">
+                {description}
+              </p>
             )}
           </div>
           <Link
             href={ctaHref}
-            className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
+            className="inline-flex shrink-0 items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
           >
             {ctaText} <span aria-hidden="true">→</span>
           </Link>

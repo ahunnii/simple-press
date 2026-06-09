@@ -90,11 +90,19 @@ export const inventoryRouter = createTRPCRouter({
         // Reset alert flags atomically within the same transaction
         const parent = await tx.product.findUnique({
           where: { id: variant.productId },
-          select: { lowInventoryThreshold: true, lowInventoryAlertSent: true, outOfStockAlertSent: true },
+          select: {
+            lowInventoryThreshold: true,
+            lowInventoryAlertSent: true,
+            outOfStockAlertSent: true,
+          },
         });
         if (parent) {
-          const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
-          if (parent.outOfStockAlertSent && newQty > 0) resetData.outOfStockAlertSent = false;
+          const resetData: {
+            outOfStockAlertSent?: boolean;
+            lowInventoryAlertSent?: boolean;
+          } = {};
+          if (parent.outOfStockAlertSent && newQty > 0)
+            resetData.outOfStockAlertSent = false;
           if (
             parent.lowInventoryAlertSent &&
             parent.lowInventoryThreshold !== null &&
@@ -103,7 +111,10 @@ export const inventoryRouter = createTRPCRouter({
             resetData.lowInventoryAlertSent = false;
           }
           if (Object.keys(resetData).length > 0) {
-            await tx.product.update({ where: { id: variant.productId }, data: resetData });
+            await tx.product.update({
+              where: { id: variant.productId },
+              data: resetData,
+            });
           }
         }
 
@@ -141,7 +152,8 @@ export const inventoryRouter = createTRPCRouter({
       if (!product) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Product not found or has variants — use variant inventory update instead",
+          message:
+            "Product not found or has variants — use variant inventory update instead",
         });
       }
 
@@ -167,8 +179,12 @@ export const inventoryRouter = createTRPCRouter({
         });
 
         // Reset alert flags atomically
-        const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
-        if (product.outOfStockAlertSent && newQty > 0) resetData.outOfStockAlertSent = false;
+        const resetData: {
+          outOfStockAlertSent?: boolean;
+          lowInventoryAlertSent?: boolean;
+        } = {};
+        if (product.outOfStockAlertSent && newQty > 0)
+          resetData.outOfStockAlertSent = false;
         if (
           product.lowInventoryAlertSent &&
           product.lowInventoryThreshold !== null &&
@@ -177,7 +193,10 @@ export const inventoryRouter = createTRPCRouter({
           resetData.lowInventoryAlertSent = false;
         }
         if (Object.keys(resetData).length > 0) {
-          await tx.product.update({ where: { id: product.id }, data: resetData });
+          await tx.product.update({
+            where: { id: product.id },
+            data: resetData,
+          });
         }
       });
 
@@ -316,7 +335,13 @@ export const inventoryRouter = createTRPCRouter({
             variants: { none: {} },
             inventoryQty: { lte: input.threshold, gte: 0 },
           },
-          select: { id: true, name: true, sku: true, inventoryQty: true, published: true },
+          select: {
+            id: true,
+            name: true,
+            sku: true,
+            inventoryQty: true,
+            published: true,
+          },
           orderBy: { inventoryQty: "asc" },
         }),
       ]);
@@ -431,16 +456,31 @@ export const inventoryRouter = createTRPCRouter({
               // Reset alert flags atomically
               const parent = await tx.product.findUnique({
                 where: { id: variant.productId },
-                select: { lowInventoryThreshold: true, lowInventoryAlertSent: true, outOfStockAlertSent: true },
+                select: {
+                  lowInventoryThreshold: true,
+                  lowInventoryAlertSent: true,
+                  outOfStockAlertSent: true,
+                },
               });
               if (parent) {
-                const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
-                if (parent.outOfStockAlertSent && update.quantity > 0) resetData.outOfStockAlertSent = false;
-                if (parent.lowInventoryAlertSent && parent.lowInventoryThreshold !== null && update.quantity > parent.lowInventoryThreshold) {
+                const resetData: {
+                  outOfStockAlertSent?: boolean;
+                  lowInventoryAlertSent?: boolean;
+                } = {};
+                if (parent.outOfStockAlertSent && update.quantity > 0)
+                  resetData.outOfStockAlertSent = false;
+                if (
+                  parent.lowInventoryAlertSent &&
+                  parent.lowInventoryThreshold !== null &&
+                  update.quantity > parent.lowInventoryThreshold
+                ) {
                   resetData.lowInventoryAlertSent = false;
                 }
                 if (Object.keys(resetData).length > 0) {
-                  await tx.product.update({ where: { id: variant.productId }, data: resetData });
+                  await tx.product.update({
+                    where: { id: variant.productId },
+                    data: resetData,
+                  });
                 }
               }
             });
@@ -483,13 +523,24 @@ export const inventoryRouter = createTRPCRouter({
                 userId: ctx.session.user.id,
               },
             });
-            const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
-            if (baseProduct.outOfStockAlertSent && update.quantity > 0) resetData.outOfStockAlertSent = false;
-            if (baseProduct.lowInventoryAlertSent && baseProduct.lowInventoryThreshold !== null && update.quantity > baseProduct.lowInventoryThreshold) {
+            const resetData: {
+              outOfStockAlertSent?: boolean;
+              lowInventoryAlertSent?: boolean;
+            } = {};
+            if (baseProduct.outOfStockAlertSent && update.quantity > 0)
+              resetData.outOfStockAlertSent = false;
+            if (
+              baseProduct.lowInventoryAlertSent &&
+              baseProduct.lowInventoryThreshold !== null &&
+              update.quantity > baseProduct.lowInventoryThreshold
+            ) {
               resetData.lowInventoryAlertSent = false;
             }
             if (Object.keys(resetData).length > 0) {
-              await tx.product.update({ where: { id: baseProduct.id }, data: resetData });
+              await tx.product.update({
+                where: { id: baseProduct.id },
+                data: resetData,
+              });
             }
           });
 

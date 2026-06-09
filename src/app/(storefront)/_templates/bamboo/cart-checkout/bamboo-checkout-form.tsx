@@ -9,7 +9,6 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
 import { calculateShipping } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
-import { useCart } from "~/providers/cart-context";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -22,6 +21,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { useCart } from "~/providers/cart-context";
 
 type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -30,17 +30,28 @@ type CheckoutFormProps = {
 export function CheckoutForm({ business }: CheckoutFormProps) {
   const { subtotal } = useCart();
   const {
-    email, setEmail,
-    name, setName,
-    phone, setPhone,
-    addressLine1, setAddressLine1,
-    addressLine2, setAddressLine2,
-    city, setCity,
-    state, setState,
-    postalCode, setPostalCode,
-    country, setCountry,
-    deliveryMethod, setDeliveryMethod,
-    discountCodeInput, setDiscountCodeInput,
+    email,
+    setEmail,
+    name,
+    setName,
+    phone,
+    setPhone,
+    addressLine1,
+    setAddressLine1,
+    addressLine2,
+    setAddressLine2,
+    city,
+    setCity,
+    state,
+    setState,
+    postalCode,
+    setPostalCode,
+    country,
+    setCountry,
+    deliveryMethod,
+    setDeliveryMethod,
+    discountCodeInput,
+    setDiscountCodeInput,
     discountAmount,
     discountCodeLabel,
     discountFieldError,
@@ -83,7 +94,10 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
   }
 
   return (
-    <form onSubmit={wrappedHandleSubmit} className="flex flex-col gap-8 lg:flex-row">
+    <form
+      onSubmit={wrappedHandleSubmit}
+      className="flex flex-col gap-8 lg:flex-row"
+    >
       <div className="flex-1 space-y-8">
         {/* M-7: required field explanation */}
         <p className="text-muted-foreground text-sm">
@@ -119,7 +133,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="John Doe"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !name.trim() ? true : undefined
+                }
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -132,7 +148,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="+1 555 123 4567"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !phone.trim() ? true : undefined
+                }
               />
             </div>
           </div>
@@ -155,20 +173,23 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="SAVE20"
                 autoComplete="off"
                 aria-invalid={!!discountFieldError}
-                aria-describedby={discountFieldError ? "discount-error" : undefined}
+                aria-describedby={
+                  discountFieldError ? "discount-error" : undefined
+                }
               />
             </div>
             <Button
               type="button"
               variant="outline"
               onClick={handleApplyDiscount}
-              disabled={
-                isValidatingDiscount || items.length === 0
-              }
+              disabled={isValidatingDiscount || items.length === 0}
             >
               {isValidatingDiscount ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                  <Loader2
+                    className="mr-2 size-4 animate-spin"
+                    aria-hidden="true"
+                  />
                   Checking…
                 </>
               ) : (
@@ -177,7 +198,13 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
             </Button>
           </div>
           {discountFieldError && (
-            <p id="discount-error" className="text-destructive text-sm" role="alert">{discountFieldError}</p>
+            <p
+              id="discount-error"
+              className="text-destructive text-sm"
+              role="alert"
+            >
+              {discountFieldError}
+            </p>
           )}
           {discountCodeLabel && discountAmount > 0 && (
             <p className="text-sm text-green-700" role="status">
@@ -252,7 +279,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                   placeholder="Street address, P.O. box"
                   required={deliveryMethod === "ship"}
                   aria-required="true"
-                  aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !addressLine1.trim() ? true : undefined
+                  }
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -277,7 +306,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                     onChange={(e) => setCity(e.target.value)}
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !city.trim() ? true : undefined
+                    }
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -291,7 +322,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                     placeholder="e.g. CA or ON"
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !state.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !state.trim() ? true : undefined
+                    }
                   />
                 </div>
               </div>
@@ -306,17 +339,25 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                     onChange={(e) => setPostalCode(e.target.value)}
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !postalCode.trim() ? true : undefined
+                    }
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label id="country-label" htmlFor="country">Country *</Label>
+                  <Label id="country-label" htmlFor="country">
+                    Country *
+                  </Label>
                   <Select
                     value={country}
                     onValueChange={(v) => setCountry(v as "US" | "CA")}
                     required
                   >
-                    <SelectTrigger id="country" className="w-full" aria-labelledby="country-label">
+                    <SelectTrigger
+                      id="country"
+                      className="w-full"
+                      aria-labelledby="country-label"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -423,11 +464,16 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               aria-busy={isProcessing}
               className="w-full"
               size="lg"
-              style={primaryColor ? { backgroundColor: primaryColor } : undefined}
+              style={
+                primaryColor ? { backgroundColor: primaryColor } : undefined
+              }
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                  <Loader2
+                    className="mr-2 size-4 animate-spin"
+                    aria-hidden="true"
+                  />
                   Processing...
                 </>
               ) : (

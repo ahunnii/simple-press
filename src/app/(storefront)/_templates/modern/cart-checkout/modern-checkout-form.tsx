@@ -198,7 +198,10 @@ export function ModernCheckoutForm({ business }: Props) {
   if (items.length === 0) {
     return (
       <div className="py-20 text-center">
-        <ShoppingBag aria-hidden="true" className="text-muted-foreground/40 mx-auto h-12 w-12" />
+        <ShoppingBag
+          aria-hidden="true"
+          className="text-muted-foreground/40 mx-auto h-12 w-12"
+        />
         <h2 className="text-foreground mt-4 font-serif text-2xl">
           Nothing to check out
         </h2>
@@ -239,7 +242,9 @@ export function ModernCheckoutForm({ business }: Props) {
                   type="text"
                   required
                   aria-required="true"
-                  aria-invalid={submitAttempted && !firstName.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !firstName.trim() ? true : undefined
+                  }
                   autoComplete="given-name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
@@ -256,7 +261,9 @@ export function ModernCheckoutForm({ business }: Props) {
                   type="text"
                   required
                   aria-required="true"
-                  aria-invalid={submitAttempted && !lastName.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !lastName.trim() ? true : undefined
+                  }
                   autoComplete="family-name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
@@ -294,7 +301,9 @@ export function ModernCheckoutForm({ business }: Props) {
                   className={inputClass}
                   required
                   aria-required="true"
-                  aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !phone.trim() ? true : undefined
+                  }
                 />
               </div>
             </div>
@@ -340,13 +349,20 @@ export function ModernCheckoutForm({ business }: Props) {
                 className="border-border bg-card text-foreground hover:bg-muted mt-1 inline-flex items-center gap-2 border px-6 py-3 text-sm font-medium tracking-wide transition-opacity disabled:opacity-50"
               >
                 {validateDiscountMutation.isPending && (
-                  <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                  <Loader2
+                    aria-hidden="true"
+                    className="h-4 w-4 animate-spin"
+                  />
                 )}
                 Apply
               </button>
             </div>
             {discountFieldError && (
-              <p id="discount-error" role="alert" className="mt-2 text-sm text-red-600">
+              <p
+                id="discount-error"
+                role="alert"
+                className="mt-2 text-sm text-red-600"
+              >
                 {discountFieldError}
               </p>
             )}
@@ -431,7 +447,9 @@ export function ModernCheckoutForm({ business }: Props) {
                     autoComplete="shipping address-line1"
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !addressLine1.trim() ? true : undefined
+                    }
                     value={addressLine1}
                     onChange={(e) => setAddressLine1(e.target.value)}
                     className={inputClass}
@@ -462,7 +480,9 @@ export function ModernCheckoutForm({ business }: Props) {
                     autoComplete="shipping address-level2"
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !city.trim() ? true : undefined
+                    }
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     className={inputClass}
@@ -479,7 +499,9 @@ export function ModernCheckoutForm({ business }: Props) {
                     autoComplete="shipping address-level1"
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !state.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !state.trim() ? true : undefined
+                    }
                     value={state}
                     onChange={(e) => setState(e.target.value)}
                     className={inputClass}
@@ -496,7 +518,9 @@ export function ModernCheckoutForm({ business }: Props) {
                     autoComplete="shipping postal-code"
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !postalCode.trim() ? true : undefined
+                    }
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
                     className={inputClass}

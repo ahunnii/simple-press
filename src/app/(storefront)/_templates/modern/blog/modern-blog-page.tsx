@@ -68,7 +68,10 @@ export function ModernBlogPage({ pages, customFields }: Props) {
             {/* S-1: focus indicator on the wrapper div; input itself ring-free */}
             <div className="border-border bg-background focus-within:ring-ring flex items-center gap-2 rounded-xl border px-3 py-2 shadow-sm focus-within:ring-2">
               {/* M-2: decorative Search icon hidden from AT */}
-              <Search className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden="true" />
+              <Search
+                className="text-muted-foreground h-4 w-4 shrink-0"
+                aria-hidden="true"
+              />
               <Input
                 type="search"
                 placeholder="Search posts..."
@@ -80,7 +83,10 @@ export function ModernBlogPage({ pages, customFields }: Props) {
             </div>
             {/* S-8: role="status" announces result count as user types */}
             {query.trim() ? (
-              <p role="status" className="text-muted-foreground mt-2 text-center text-sm">
+              <p
+                role="status"
+                className="text-muted-foreground mt-2 text-center text-sm"
+              >
                 {filtered.length === 0
                   ? "No posts match your search."
                   : `${filtered.length} post${filtered.length !== 1 ? "s" : ""} found`}

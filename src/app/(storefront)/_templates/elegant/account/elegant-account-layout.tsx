@@ -71,7 +71,7 @@ export function ElegantAccountLayout({ children, heading }: Props) {
           borderBottom: "1px solid var(--el-line, rgba(28,26,23,0.12))",
           marginBottom: 0,
         }}
-        className="md:hidden el-account-mobile-nav"
+        className="el-account-mobile-nav md:hidden"
       >
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
@@ -89,7 +89,9 @@ export function ElegantAccountLayout({ children, heading }: Props) {
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
                 fontFamily: "var(--font-mono, ui-monospace)",
-                color: active ? "var(--el-ink, #1c1a17)" : "var(--el-ink-soft, #6b6659)",
+                color: active
+                  ? "var(--el-ink, #1c1a17)"
+                  : "var(--el-ink-soft, #6b6659)",
                 textDecoration: "none",
                 borderBottom: active
                   ? "1px solid var(--el-ink, #1c1a17)"
@@ -100,10 +102,7 @@ export function ElegantAccountLayout({ children, heading }: Props) {
               }}
               className="el-account-tab-link"
             >
-              <Icon
-                style={{ width: 13, height: 13 }}
-                aria-hidden={true}
-              />
+              <Icon style={{ width: 13, height: 13 }} aria-hidden={true} />
               {label}
             </Link>
           );
@@ -172,7 +171,6 @@ export function ElegantAccountLayout({ children, heading }: Props) {
           <div style={{ minWidth: 0 }}>{children}</div>
         </div>
       </section>
-
     </div>
   );
 }

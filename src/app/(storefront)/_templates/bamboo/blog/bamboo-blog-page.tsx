@@ -156,7 +156,10 @@ export function BambooBlogPage({ pages, customFields }: Props) {
         <div className="mx-auto max-w-lg">
           <InputGroup>
             <InputGroupAddon>
-              <Search className="text-muted-foreground h-4 w-4" aria-hidden="true" />
+              <Search
+                className="text-muted-foreground h-4 w-4"
+                aria-hidden="true"
+              />
             </InputGroupAddon>
             <InputGroupInput
               type="search"
@@ -222,7 +225,10 @@ export function BambooBlogPage({ pages, customFields }: Props) {
                     </div>
                     <div className="text-primary flex items-center gap-2 font-semibold">
                       Read article
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                      <ArrowRight
+                        className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                        aria-hidden="true"
+                      />
                     </div>
                   </div>
                 </div>
@@ -274,7 +280,10 @@ export function BambooBlogPage({ pages, customFields }: Props) {
                         </p>
                         <div className="text-muted-foreground flex items-center gap-4 text-xs">
                           <span className="flex items-center gap-1.5">
-                            <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+                            <CalendarDays
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
                             {formatDate(post.createdAt)}
                           </span>
                         </div>
@@ -287,7 +296,10 @@ export function BambooBlogPage({ pages, customFields }: Props) {
           ) : (
             <FadeIn>
               <div className="text-muted-foreground flex flex-col items-center py-16 text-center">
-                <Search className="mb-4 h-10 w-10 opacity-30" aria-hidden="true" />
+                <Search
+                  className="mb-4 h-10 w-10 opacity-30"
+                  aria-hidden="true"
+                />
                 <p className="text-lg font-medium">
                   No articles matched &ldquo;{query}&rdquo;
                 </p>

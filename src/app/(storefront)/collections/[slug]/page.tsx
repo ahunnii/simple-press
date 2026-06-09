@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation";
 
 import { getCanonicalUrl } from "~/lib/canonical";
-import { JsonLd } from "~/components/json-ld";
 import {
   buildBreadcrumbSchema,
   buildCollectionSchema,
 } from "~/lib/structured-data";
 import { api } from "~/trpc/server";
+import { JsonLd } from "~/components/json-ld";
 
 import { BambooCollectionPage } from "../../_templates/bamboo/collections/bamboo-collection-page";
 import { DarkTrendCollectionPage } from "../../_templates/dark-trend/collections/dark-trend-collection-page";
@@ -100,7 +100,7 @@ export async function generateMetadata({ params }: Props) {
             alt: collection.name,
           },
         ]
-      : business.siteContent?.ogImage ?? business.siteContent?.logoUrl
+      : (business.siteContent?.ogImage ?? business.siteContent?.logoUrl)
         ? [
             business.siteContent.ogImage ??
               business.siteContent.logoUrl ??

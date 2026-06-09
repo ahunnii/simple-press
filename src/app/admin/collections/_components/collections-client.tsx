@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 import {
   Copy,
   ExternalLink,
-  EyeOff,
   Eye,
+  EyeOff,
   MoreVertical,
   Pencil,
   Plus,
@@ -32,15 +32,6 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -63,6 +54,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 
 type Collection = RouterOutputs["collections"]["getAll"][number];
 
@@ -205,8 +205,7 @@ export function CollectionsClient({ collections }: Props) {
   const filteredIds = filtered.map((c) => c.id);
   const selectedInFiltered = filteredIds.filter((id) => selectedIds.has(id));
   const allFilteredSelected =
-    filteredIds.length > 0 &&
-    selectedInFiltered.length === filteredIds.length;
+    filteredIds.length > 0 && selectedInFiltered.length === filteredIds.length;
   const someFilteredSelected =
     selectedInFiltered.length > 0 && !allFilteredSelected;
 
@@ -411,9 +410,7 @@ export function CollectionsClient({ collections }: Props) {
                 {/* Collections Table */}
                 <Card>
                   <Table>
-                    <TableCaption className="sr-only">
-                      Collections
-                    </TableCaption>
+                    <TableCaption className="sr-only">Collections</TableCaption>
                     <TableHeader>
                       <TableRow>
                         {/* Select-all */}
@@ -433,9 +430,15 @@ export function CollectionsClient({ collections }: Props) {
                           />
                         </TableHead>
                         <TableHead scope="col">Collection</TableHead>
-                        <TableHead scope="col" className="hidden md:table-cell">Products</TableHead>
-                        <TableHead scope="col" className="hidden md:table-cell">Status</TableHead>
-                        <TableHead scope="col" className="hidden md:table-cell">Storefront</TableHead>
+                        <TableHead scope="col" className="hidden md:table-cell">
+                          Products
+                        </TableHead>
+                        <TableHead scope="col" className="hidden md:table-cell">
+                          Status
+                        </TableHead>
+                        <TableHead scope="col" className="hidden md:table-cell">
+                          Storefront
+                        </TableHead>
                         <TableHead scope="col">
                           <span className="sr-only">Actions</span>
                         </TableHead>
@@ -449,16 +452,12 @@ export function CollectionsClient({ collections }: Props) {
                             key={collection.id}
                             data-state={isSelected ? "selected" : undefined}
                             onClick={() =>
-                              router.push(
-                                `/admin/collections/${collection.id}`,
-                              )
+                              router.push(`/admin/collections/${collection.id}`)
                             }
                             className="cursor-pointer"
                           >
                             {/* Select */}
-                            <TableCell
-                              onClick={(e) => e.stopPropagation()}
-                            >
+                            <TableCell onClick={(e) => e.stopPropagation()}>
                               <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() =>
@@ -546,15 +545,10 @@ export function CollectionsClient({ collections }: Props) {
                             </TableCell>
 
                             {/* Actions */}
-                            <TableCell
-                              onClick={(e) => e.stopPropagation()}
-                            >
+                            <TableCell onClick={(e) => e.stopPropagation()}>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                  >
+                                  <Button variant="ghost" size="sm">
                                     <MoreVertical className="h-4 w-4" />
                                     <span className="sr-only">
                                       Actions for {collection.name}
@@ -581,9 +575,7 @@ export function CollectionsClient({ collections }: Props) {
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     className="text-red-600 focus:text-red-600"
-                                    onClick={() =>
-                                      setDeleteId(collection.id)
-                                    }
+                                    onClick={() => setDeleteId(collection.id)}
                                   >
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     Delete
@@ -605,9 +597,7 @@ export function CollectionsClient({ collections }: Props) {
                       <PaginationContent>
                         <PaginationItem>
                           <PaginationPrevious
-                            onClick={() =>
-                              setPage((p) => Math.max(1, p - 1))
-                            }
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
                             aria-disabled={safePage <= 1}
                             className={
                               safePage <= 1

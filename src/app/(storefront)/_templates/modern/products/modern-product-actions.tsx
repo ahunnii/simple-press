@@ -125,11 +125,7 @@ export function ModernProductActions({ product }: Props) {
                   )}
                 </button>
               </div>
-              <span
-                className="sr-only"
-                aria-live="polite"
-                aria-atomic="true"
-              >
+              <span className="sr-only" aria-live="polite" aria-atomic="true">
                 {isAdded ? `${product.name} added to cart` : ""}
               </span>
               {product.trackInventory &&

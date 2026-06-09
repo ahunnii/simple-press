@@ -192,8 +192,7 @@ export function ElegantProductActions({
                 borderRadius: 999,
                 border: "none",
                 background: "transparent",
-                cursor:
-                  quantity >= remainingStock ? "not-allowed" : "pointer",
+                cursor: quantity >= remainingStock ? "not-allowed" : "pointer",
                 color:
                   quantity >= remainingStock
                     ? "var(--el-ink-mute, #9a9485)"
@@ -263,7 +262,10 @@ export function ElegantProductActions({
           ) : (
             <>
               Add to bag · {formatPrice(displayPrice * quantity)}
-              <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
+              <ArrowRight
+                aria-hidden={true}
+                style={{ width: 14, height: 14 }}
+              />
             </>
           )}
         </button>
@@ -303,7 +305,6 @@ export function ElegantProductActions({
           Maximum quantity in cart
         </p>
       )}
-
     </>
   );
 }

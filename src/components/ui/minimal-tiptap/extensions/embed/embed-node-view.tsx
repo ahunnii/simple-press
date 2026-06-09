@@ -11,11 +11,11 @@ import {
   isVideoEmbed,
   parseEmbedInput,
 } from "~/lib/embed";
-import { EmbedFrame } from "~/components/embed-frame";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { EmbedFrame } from "~/components/embed-frame";
 
 export function EmbedNodeView({
   node,
@@ -109,9 +109,7 @@ export function EmbedNodeView({
 
             <div className="min-w-0 flex-1 space-y-4">
               <div>
-                <h3 className="mb-1 font-medium text-gray-900">
-                  Insert Embed
-                </h3>
+                <h3 className="mb-1 font-medium text-gray-900">Insert Embed</h3>
                 <p className="text-sm text-gray-600">
                   Paste a URL or embed code (e.g. a booking widget, map, or
                   video)
@@ -133,15 +131,13 @@ export function EmbedNodeView({
                   rows={3}
                   className="font-mono text-sm"
                 />
-                {urlError && (
-                  <p className="text-sm text-red-600">{urlError}</p>
-                )}
+                {urlError && <p className="text-sm text-red-600">{urlError}</p>}
               </div>
 
               <div className="space-y-1">
                 <Label htmlFor="embed-title" className="text-sm font-medium">
                   Title{" "}
-                  <span className="text-gray-500 font-normal">
+                  <span className="font-normal text-gray-500">
                     (accessibility label, e.g. &ldquo;Booking calendar&rdquo;)
                   </span>
                 </Label>
@@ -161,10 +157,7 @@ export function EmbedNodeView({
 
               {!isVideo && (
                 <div className="space-y-1">
-                  <Label
-                    htmlFor="embed-height"
-                    className="text-sm font-medium"
-                  >
+                  <Label htmlFor="embed-height" className="text-sm font-medium">
                     Height (px)
                   </Label>
                   <Input
@@ -189,13 +182,15 @@ export function EmbedNodeView({
               {/* Live preview */}
               {parsed && titleInput.trim() && (
                 <div className="mt-2">
-                  <p className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="mb-1 text-xs font-medium tracking-wide text-gray-500 uppercase">
                     Preview
                   </p>
                   <div className="overflow-hidden rounded-lg border border-gray-200">
                     <EmbedFrame
                       src={parsed.src}
-                      height={isVideo ? undefined : (parsed.height ?? heightInput)}
+                      height={
+                        isVideo ? undefined : (parsed.height ?? heightInput)
+                      }
                       title={titleInput.trim()}
                     />
                   </div>
@@ -246,9 +241,7 @@ export function EmbedNodeView({
                 ? node.attrs.height
                 : undefined
             }
-            title={
-              typeof node.attrs.title === "string" ? node.attrs.title : ""
-            }
+            title={typeof node.attrs.title === "string" ? node.attrs.title : ""}
           />
         </div>
       </div>

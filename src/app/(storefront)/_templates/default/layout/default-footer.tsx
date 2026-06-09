@@ -197,11 +197,11 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
               ))}
             </nav>
             {(business.phoneNumber ?? business.businessAddress) && (
-              <address className="not-italic mt-1 flex flex-col gap-1 text-sm text-[#6b6b6b]">
+              <address className="mt-1 flex flex-col gap-1 text-sm text-[#6b6b6b] not-italic">
                 {business.phoneNumber && (
                   <a
                     href={`tel:${business.phoneNumber}`}
-                    className="hover:underline hover:text-[#0a0a0a]"
+                    className="hover:text-[#0a0a0a] hover:underline"
                   >
                     {business.phoneNumber}
                   </a>

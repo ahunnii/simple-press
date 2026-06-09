@@ -63,7 +63,6 @@ export function ProductGalleryHorizontal({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-
   }, [enableLightbox, lightboxOpen]);
 
   return (
@@ -179,7 +178,9 @@ export function ProductGalleryHorizontal({
             initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={shouldReduceMotion ? undefined : { opacity: 0 }}
-            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
+            transition={
+              shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }
+            }
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
             onClick={closeLightbox}
           >
@@ -187,14 +188,16 @@ export function ProductGalleryHorizontal({
               role="dialog"
               aria-modal="true"
               aria-label={`${productName} — enlarged image`}
-              initial={
-                shouldReduceMotion ? false : { scale: 0.92, opacity: 0 }
+              initial={shouldReduceMotion ? false : { scale: 0.92, opacity: 0 }}
+              animate={
+                shouldReduceMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }
               }
-              animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
               exit={
                 shouldReduceMotion ? undefined : { scale: 0.92, opacity: 0 }
               }
-              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
+              transition={
+                shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }
+              }
               className="relative max-h-[90vh] max-w-[90vw]"
               onClick={(e) => e.stopPropagation()}
             >

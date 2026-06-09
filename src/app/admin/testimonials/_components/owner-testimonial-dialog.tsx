@@ -202,9 +202,7 @@ export function OwnerTestimonialDialog({
             {/* Title & Date */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="customerTitle">
-                  Customer Title (Optional)
-                </Label>
+                <Label htmlFor="customerTitle">Customer Title (Optional)</Label>
                 <Input
                   id="customerTitle"
                   value={customerTitle}

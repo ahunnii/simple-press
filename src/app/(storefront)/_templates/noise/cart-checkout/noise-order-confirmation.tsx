@@ -4,14 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { useCart } from "~/providers/cart-context";
 import { formatPrice } from "~/lib/prices";
+import { useCart } from "~/providers/cart-context";
 
 const NEXT_STEPS = [
-  { icon: "✉", text: "You'll receive an email confirmation at the address provided." },
+  {
+    icon: "✉",
+    text: "You'll receive an email confirmation at the address provided.",
+  },
   { icon: "✦", text: "Each piece is carefully prepared before it ships." },
-  { icon: "↗", text: "We'll notify you with a tracking number when your order ships." },
-  { icon: "✓", text: "Your order will be packed and shipped within five working days." },
+  {
+    icon: "↗",
+    text: "We'll notify you with a tracking number when your order ships.",
+  },
+  {
+    icon: "✓",
+    text: "Your order will be packed and shipped within five working days.",
+  },
 ] as const;
 
 type Props = {
@@ -44,7 +53,9 @@ export function NoiseOrderConfirmation({ business }: Props) {
     clearCart();
     const fetchOrderDetails = async () => {
       try {
-        const response = await fetch(`/api/stripe/session?session_id=${sessionId}`);
+        const response = await fetch(
+          `/api/stripe/session?session_id=${sessionId}`,
+        );
         if (response.ok) {
           const data = (await response.json()) as {
             customer_email: string;
@@ -95,7 +106,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
         style={{ background: "var(--vn-paper)" }}
       >
         <p
-          className="font-serif italic text-2xl"
+          className="font-serif text-2xl italic"
           style={{ color: "var(--vn-steel-mist)" }}
         >
           No order found.
@@ -111,11 +122,14 @@ export function NoiseOrderConfirmation({ business }: Props) {
     <>
       {/* Success hero — ink background */}
       <section
-        className="border-b-2 border-foreground grid md:grid-cols-2"
+        className="border-foreground grid border-b-2 md:grid-cols-2"
         style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
       >
         {/* Left — headline */}
-        <div className="flex flex-col justify-between gap-8 px-7 py-14 border-b border-foreground md:border-b-0 md:border-r" style={{ borderColor: "#2a2c30" }}>
+        <div
+          className="border-foreground flex flex-col justify-between gap-8 border-b px-7 py-14 md:border-r md:border-b-0"
+          style={{ borderColor: "#2a2c30" }}
+        >
           <div className="flex flex-col gap-4">
             <p
               className="font-mono text-[9.5px] tracking-[0.22em] uppercase"
@@ -126,7 +140,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
             <h1
               ref={confirmationH1Ref}
               tabIndex={-1}
-              className="font-serif italic leading-[0.95] tracking-tight"
+              className="font-serif leading-[0.95] tracking-tight italic"
               style={{
                 fontSize: "clamp(3rem, 6vw, 5.5rem)",
                 letterSpacing: "-0.025em",
@@ -135,18 +149,18 @@ export function NoiseOrderConfirmation({ business }: Props) {
               Order placed.
             </h1>
             <p
-              className="font-sans text-[15px] leading-relaxed max-w-[40ch]"
+              className="max-w-[40ch] font-sans text-[15px] leading-relaxed"
               style={{ color: "rgba(255,255,255,0.6)" }}
             >
-              Your order is queued for preparation. We&apos;ll
-              have everything packed and shipped within five working days.
+              Your order is queued for preparation. We&apos;ll have everything
+              packed and shipped within five working days.
             </p>
           </div>
 
           {/* Order amount */}
           {orderDetails?.amount_total && (
             <div
-              className="border-t pt-6 flex items-baseline justify-between"
+              className="flex items-baseline justify-between border-t pt-6"
               style={{ borderColor: "#2a2c30" }}
             >
               <span
@@ -156,7 +170,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
                 Order total
               </span>
               <span
-                className="font-serif italic leading-none"
+                className="font-serif leading-none italic"
                 style={{ fontSize: "32px", letterSpacing: "-0.02em" }}
               >
                 {formatPrice(orderDetails.amount_total)}
@@ -170,7 +184,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
           {orderDetails?.customer_email && (
             <div>
               <h2
-                className="font-mono text-[9px] tracking-[0.22em] uppercase mb-3"
+                className="mb-3 font-mono text-[9px] tracking-[0.22em] uppercase"
                 style={{ color: "var(--vn-steel-mist)" }}
               >
                 Confirmation sent to
@@ -186,17 +200,17 @@ export function NoiseOrderConfirmation({ business }: Props) {
 
           <div>
             <h2
-              className="font-mono text-[9px] tracking-[0.22em] uppercase mb-5"
+              className="mb-5 font-mono text-[9px] tracking-[0.22em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
               What happens next
             </h2>
             <div className="flex flex-col gap-3.5">
               {NEXT_STEPS.map((step) => (
-                <div key={step.icon} className="flex gap-3 items-start">
+                <div key={step.icon} className="flex items-start gap-3">
                   <span
                     aria-hidden="true"
-                    className="flex-shrink-0 flex items-center justify-center border font-serif italic"
+                    className="flex flex-shrink-0 items-center justify-center border font-serif italic"
                     style={{
                       width: "24px",
                       height: "24px",
@@ -208,7 +222,7 @@ export function NoiseOrderConfirmation({ business }: Props) {
                     {step.icon}
                   </span>
                   <p
-                    className="font-mono text-[10px] tracking-[0.14em] uppercase leading-relaxed"
+                    className="font-mono text-[10px] leading-relaxed tracking-[0.14em] uppercase"
                     style={{ color: "rgba(255,255,255,0.55)" }}
                   >
                     {step.text}
@@ -222,26 +236,26 @@ export function NoiseOrderConfirmation({ business }: Props) {
 
       {/* CTA row */}
       <div
-        className="flex flex-col gap-3 sm:flex-row px-7 py-8 border-b border-foreground/15"
+        className="border-foreground/15 flex flex-col gap-3 border-b px-7 py-8 sm:flex-row"
         style={{ background: "var(--vn-bone)" }}
       >
         <Link
           href="/shop"
-          className="vn-stamp text-[10.5px] transition-all hover:bg-foreground hover:text-background flex-1 justify-center"
+          className="vn-stamp hover:bg-foreground hover:text-background flex-1 justify-center text-[10.5px] transition-all"
           style={{ padding: "12px 20px" }}
         >
           Continue Shopping
         </Link>
         <Link
           href="/account/orders"
-          className="vn-stamp vn-stamp-solid text-[10.5px] transition-all hover:opacity-80 flex-1 justify-center"
+          className="vn-stamp vn-stamp-solid flex-1 justify-center text-[10.5px] transition-all hover:opacity-80"
           style={{ padding: "12px 20px" }}
         >
           View My Orders →
         </Link>
         <Link
           href="/"
-          className="vn-stamp text-[10.5px] transition-all hover:bg-foreground hover:text-background flex-1 justify-center"
+          className="vn-stamp hover:bg-foreground hover:text-background flex-1 justify-center text-[10.5px] transition-all"
           style={{ padding: "12px 20px" }}
         >
           Back to Home

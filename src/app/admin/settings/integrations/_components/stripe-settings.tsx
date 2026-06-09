@@ -197,7 +197,7 @@ export function StripeSettings({
                   <Label htmlFor="auto-tax-toggle">
                     Automatic Tax Collection
                   </Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Automatically calculate and collect sales tax at checkout
                     via Stripe Tax. Requires active tax registrations on your
                     Stripe account.{" "}

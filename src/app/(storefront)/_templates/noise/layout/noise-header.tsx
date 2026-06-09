@@ -25,12 +25,11 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
-import { useReducedMotion } from "~/hooks/use-reduced-motion";
-
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
@@ -79,9 +78,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const mobileNavListVariants = {
     closed: {},
     open: {
-      transition: reduce
-        ? {}
-        : { staggerChildren: 0.05, delayChildren: 0.08 },
+      transition: reduce ? {} : { staggerChildren: 0.05, delayChildren: 0.08 },
     },
   };
 
@@ -445,9 +442,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
         }}
       >
         {link.label}
-        {link.external && (
-          <span className="sr-only">(opens in new tab)</span>
-        )}
+        {link.external && <span className="sr-only">(opens in new tab)</span>}
       </Link>
     );
   };
@@ -548,9 +543,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
           )}
         >
           {link.label}
-          {link.external && (
-            <span className="sr-only">(opens in new tab)</span>
-          )}
+          {link.external && <span className="sr-only">(opens in new tab)</span>}
         </Link>
       </motion.li>
     );
@@ -617,8 +610,12 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
 
             <button
               onClick={() => setIsOpen(true)}
-              aria-label={itemCount > 0 ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}` : "Open cart"}
-              className="relative flex items-center p-3 -m-3 transition-opacity hover:opacity-60"
+              aria-label={
+                itemCount > 0
+                  ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                  : "Open cart"
+              }
+              className="relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60"
               style={{ color: "var(--vn-ink-soft)" }}
             >
               <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.4} />
@@ -664,7 +661,10 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
               initial={{ y: reduce ? 0 : 24 }}
               animate={{ y: 0 }}
               exit={{ y: reduce ? 0 : 16 }}
-              transition={{ duration: reduce ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
+              transition={{
+                duration: reduce ? 0 : 0.3,
+                ease: [0.16, 1, 0.3, 1],
+              }}
             >
               <div
                 className="flex shrink-0 items-center justify-between border-b px-5 py-4 sm:px-6"
@@ -810,7 +810,11 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                   <button
                     type="button"
                     onClick={openCart}
-                    aria-label={itemCount > 0 ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}` : "Open cart"}
+                    aria-label={
+                      itemCount > 0
+                        ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                        : "Open cart"
+                    }
                     className="vn-mobile-action-btn relative rounded-none transition-opacity hover:opacity-80"
                     style={{
                       border: "1px solid var(--vn-rule)",

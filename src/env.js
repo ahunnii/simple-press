@@ -37,6 +37,16 @@ export const env = createEnv({
     SIMPLEPRESS_HASH_SECRET: z.string(),
     ARTISANAL_FUTURES_API_URL: z.string().url(),
     REDIS_URL: z.string().url().optional(),
+
+    // Preview/staging deployment flag. When "true", outbound email is
+    // neutralized and a noindex header is emitted (see middleware + resend.ts).
+    IS_PREVIEW_ENV: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((s) => s === "true"),
+    // Optional: when set on a preview env, all outbound email is rerouted to
+    // this single inbox instead of being dropped.
+    EMAIL_REDIRECT_TO: z.string().email().optional(),
   },
 
   /**
@@ -108,6 +118,8 @@ export const env = createEnv({
     SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,
     ARTISANAL_FUTURES_API_URL: process.env.ARTISANAL_FUTURES_API_URL,
     REDIS_URL: process.env.REDIS_URL,
+    IS_PREVIEW_ENV: process.env.IS_PREVIEW_ENV,
+    EMAIL_REDIRECT_TO: process.env.EMAIL_REDIRECT_TO,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

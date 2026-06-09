@@ -65,7 +65,6 @@ export function ProductGalleryVertical({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-   
   }, [enableLightbox, lightboxOpen]);
 
   return (

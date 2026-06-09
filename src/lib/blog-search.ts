@@ -50,7 +50,10 @@ export function buildBlogSearchBlob(page: BlogSearchablePage): string {
   return parts.join("\n").toLowerCase();
 }
 
-export function blobIncludesQuery(blob: string, queryTrimmedLower: string): boolean {
+export function blobIncludesQuery(
+  blob: string,
+  queryTrimmedLower: string,
+): boolean {
   if (queryTrimmedLower.length === 0) return true;
   return blob.includes(queryTrimmedLower);
 }

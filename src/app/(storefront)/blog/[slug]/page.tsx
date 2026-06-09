@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getCanonicalUrl } from "~/lib/canonical";
-import { JsonLd } from "~/components/json-ld";
 import {
   buildBlogPostingSchema,
   buildBreadcrumbSchema,
 } from "~/lib/structured-data";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
+import { JsonLd } from "~/components/json-ld";
 
 import { BambooBlogPostPage } from "../../_templates/bamboo/blog/bamboo-blog-post-page";
 import { DarkTrendBlogPostPage } from "../../_templates/dark-trend/blog/dark-trend-blog-post-page";
@@ -89,9 +89,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
   const [page, business] = await Promise.all([
-    api.content
-      .getBlogPostBySlug({ slug })
-      .catch(rethrowTrpcForErrorBoundary),
+    api.content.getBlogPostBySlug({ slug }).catch(rethrowTrpcForErrorBoundary),
     api.business.simplifiedGet(),
   ]);
 

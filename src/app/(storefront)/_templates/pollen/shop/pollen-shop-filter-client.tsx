@@ -98,10 +98,7 @@ export function PollenShopFilterClient({ products }: Props) {
       </div>
 
       {/* S-7: visible result count with role="status" */}
-      <p
-        role="status"
-        className="mt-4 text-sm text-[#4c566a]"
-      >
+      <p role="status" className="mt-4 text-sm text-[#4c566a]">
         {filtered.length === products.length
           ? `${products.length} ${products.length === 1 ? "product" : "products"}`
           : `${filtered.length} of ${products.length} products`}
@@ -129,7 +126,10 @@ export function PollenShopFilterClient({ products }: Props) {
 
       {/* M-9: wrap pagination in <nav aria-label="Pagination"> */}
       {totalPages > 1 && (
-        <nav aria-label="Pagination" className="mt-10 flex items-center justify-center gap-3">
+        <nav
+          aria-label="Pagination"
+          className="mt-10 flex items-center justify-center gap-3"
+        >
           <Button
             variant="outline"
             size="sm"

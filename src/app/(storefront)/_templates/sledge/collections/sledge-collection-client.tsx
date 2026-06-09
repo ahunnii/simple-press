@@ -7,8 +7,8 @@ import { SlidersHorizontal, X } from "lucide-react";
 import type { SortOption } from "~/hooks/use-shop-filters";
 import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
-import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 import { cn } from "~/lib/utils";
+import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 import {
   FadeIn,
   StaggerContainer,

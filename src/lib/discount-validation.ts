@@ -50,10 +50,7 @@ export function validateAndComputeDiscount(
     };
   }
 
-  if (
-    discount.minPurchase != null &&
-    cartTotalCents < discount.minPurchase
-  ) {
+  if (discount.minPurchase != null && cartTotalCents < discount.minPurchase) {
     const minAmount = (discount.minPurchase / 100).toFixed(2);
     return {
       ok: false,

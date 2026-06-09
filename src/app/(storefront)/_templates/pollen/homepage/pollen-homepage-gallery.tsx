@@ -29,7 +29,11 @@ export function PollenHomepageGallery({
   sectionAttrs,
 }: Props) {
   return (
-    <section id="gallery" className="bg-background py-20 md:py-32" {...sectionAttrs}>
+    <section
+      id="gallery"
+      className="bg-background py-20 md:py-32"
+      {...sectionAttrs}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <FadeIn direction="up">
           <div className="mx-auto mb-12 max-w-3xl text-center">

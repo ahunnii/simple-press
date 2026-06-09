@@ -17,16 +17,16 @@ export function UsersTable({ users }: Props) {
         <table className="w-full">
           <thead className="border-b">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 User
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 Platform Role
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 Memberships
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 Created
               </th>
             </tr>
@@ -34,7 +34,7 @@ export function UsersTable({ users }: Props) {
           <tbody className="divide-y divide-gray-200 bg-white">
             {users.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
-                <td className="whitespace-nowrap px-6 py-4">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <Link href={`/admin/platform/users/${user.id}`}>
                     <div>
                       <div className="font-medium text-gray-900">
@@ -44,7 +44,7 @@ export function UsersTable({ users }: Props) {
                     </div>
                   </Link>
                 </td>
-                <td className="whitespace-nowrap px-6 py-4">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <Badge
                     variant={
                       user.platformRole === "PLATFORM_ADMIN"
@@ -55,12 +55,12 @@ export function UsersTable({ users }: Props) {
                     {user.platformRole}
                   </Badge>
                 </td>
-                <td className="whitespace-nowrap px-6 py-4">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <span className="text-sm text-gray-900">
                     {user._count.memberships}
                   </span>
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
                   {new Date(user.createdAt).toLocaleDateString()}
                 </td>
               </tr>

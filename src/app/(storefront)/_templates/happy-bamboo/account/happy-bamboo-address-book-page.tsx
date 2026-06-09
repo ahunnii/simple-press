@@ -1,9 +1,9 @@
 "use client";
 
-import { PageTransition } from "~/components/page-animations";
-
 import type { AccountAddressBookPageProps } from "../../types";
+import { PageTransition } from "~/components/page-animations";
 import { AddressBookContent } from "~/app/(storefront)/_components/account/address-components";
+
 import { HappyBambooAccountLayout } from "./happy-bamboo-account-layout";
 
 export function HappyBambooAddressBookPage({

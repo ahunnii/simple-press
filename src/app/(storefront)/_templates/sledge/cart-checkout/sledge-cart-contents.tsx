@@ -99,7 +99,9 @@ export function SledgeCartContents({ business }: Props) {
         }
       />
 
-      <section className={cn(SLEDGE_PAGE_CONTAINER, SLEDGE_PAGE_CONTENT_PADDING)}>
+      <section
+        className={cn(SLEDGE_PAGE_CONTAINER, SLEDGE_PAGE_CONTENT_PADDING)}
+      >
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
           <div className="min-w-0">
             {/* M-4: visual column headers are decorative — sr-only labels in cells carry semantics */}

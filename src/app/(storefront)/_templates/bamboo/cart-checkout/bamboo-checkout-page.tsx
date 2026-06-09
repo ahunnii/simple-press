@@ -13,7 +13,7 @@ export async function BambooCheckoutPage({
   if (!business.isStripeConnected) {
     return (
       <PageTransition>
-        <div className="flex min-h-[50vh] flex-1 items-center justify-center bg-foreground p-4">
+        <div className="bg-foreground flex min-h-[50vh] flex-1 items-center justify-center p-4">
           <div className="max-w-md text-center">
             <h1 className="text-background mb-4 text-2xl font-bold">
               Checkout Unavailable
