@@ -422,7 +422,7 @@ model Customer {
   email     String
   firstName String?
   lastName  String?
-  phone     String?
+  phone     String? /// @encrypted
 
   // Marketing
   acceptsMarketing Boolean @default(false)
@@ -457,14 +457,14 @@ model ShippingAddress {
 
   firstName String
   lastName  String
-  company   String?
-  address1  String
-  address2  String?
-  city      String
-  province  String? // State/Province
+  company   String? /// @encrypted
+  address1  String /// @encrypted
+  address2  String? /// @encrypted
+  city      String /// @encrypted
+  province  String? /// @encrypted State/Province
   country   String
-  zip       String
-  phone     String?
+  zip       String /// @encrypted
+  phone     String? /// @encrypted
 
   isDefault Boolean @default(false)
 
@@ -505,7 +505,7 @@ model Order {
   customerName      String? // For simpler storage (combines first+last)
   customerFirstName String?
   customerLastName  String?
-  customerPhone     String?
+  customerPhone     String? /// @encrypted
 
   // Payment
   paymentMethod String @default("card") // card | cash | check | manual

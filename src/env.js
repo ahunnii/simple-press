@@ -38,6 +38,10 @@ export const env = createEnv({
     ARTISANAL_FUTURES_API_URL: z.string().url(),
     REDIS_URL: z.string().url().optional(),
 
+    // PII field-level encryption key for prisma-field-encryption.
+    // Format: k1.aesgcm256.<44-char base64> (AES-GCM-256).
+    PRISMA_FIELD_ENCRYPTION_KEY: z.string().min(50),
+
     // Preview/staging deployment flag. When "true", outbound email is
     // neutralized and a noindex header is emitted (see middleware + resend.ts).
     IS_PREVIEW_ENV: z
@@ -118,6 +122,7 @@ export const env = createEnv({
     SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,
     ARTISANAL_FUTURES_API_URL: process.env.ARTISANAL_FUTURES_API_URL,
     REDIS_URL: process.env.REDIS_URL,
+    PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
     IS_PREVIEW_ENV: process.env.IS_PREVIEW_ENV,
     EMAIL_REDIRECT_TO: process.env.EMAIL_REDIRECT_TO,
   },

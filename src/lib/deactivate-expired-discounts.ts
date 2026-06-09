@@ -1,10 +1,10 @@
-import type { PrismaClient } from "generated/prisma";
+import type { DbClient } from "~/server/db";
 
 /**
  * Sets active=false for codes that are past expiry or have exhausted usage limits.
  */
 export async function deactivateExpiredDiscountCodes(
-  db: PrismaClient,
+  db: DbClient,
   businessId: string,
 ) {
   const now = new Date();

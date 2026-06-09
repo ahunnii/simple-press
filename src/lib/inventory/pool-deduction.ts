@@ -1,9 +1,6 @@
-import type { PrismaClient } from "generated/prisma";
+import type { TxClient } from "~/server/db";
 
-type Tx = Omit<
-  PrismaClient,
-  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
->;
+type Tx = TxClient;
 
 export type PoolDeductionItem = {
   productId: string;

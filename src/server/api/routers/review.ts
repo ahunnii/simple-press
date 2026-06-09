@@ -1,4 +1,5 @@
-import type { Prisma, PrismaClient } from "generated/prisma";
+import type { Prisma } from "generated/prisma";
+import type { DbClient } from "~/server/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -16,7 +17,7 @@ import {
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 async function assertBusinessOwner(
-  db: PrismaClient,
+  db: DbClient,
   userId: string,
   businessId: string,
 ) {
@@ -35,7 +36,7 @@ async function assertBusinessOwner(
 }
 
 async function getReviewAndAssertOwner(
-  db: PrismaClient,
+  db: DbClient,
   userId: string,
   reviewId: string,
 ) {
@@ -50,7 +51,7 @@ async function getReviewAndAssertOwner(
   return review;
 }
 
-async function updateProductStats(db: PrismaClient, productId: string) {
+async function updateProductStats(db: DbClient, productId: string) {
   const reviews = await db.productReview.findMany({
     where: { productId, isApproved: true, isHidden: false },
     select: { rating: true },
@@ -66,7 +67,7 @@ async function updateProductStats(db: PrismaClient, productId: string) {
   });
 }
 
-async function updateVoteCounts(db: PrismaClient, reviewId: string) {
+async function updateVoteCounts(db: DbClient, reviewId: string) {
   const votes = await db.reviewVote.findMany({
     where: { reviewId },
     select: { isHelpful: true },
