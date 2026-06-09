@@ -255,6 +255,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   barcode: 'barcode',
   trackInventory: 'trackInventory',
   inventoryQty: 'inventoryQty',
+  reservedQty: 'reservedQty',
   allowBackorders: 'allowBackorders',
   lowInventoryThreshold: 'lowInventoryThreshold',
   lowInventoryAlertSent: 'lowInventoryAlertSent',
@@ -286,6 +287,7 @@ exports.Prisma.ProductVariantScalarFieldEnum = {
   price: 'price',
   compareAtPrice: 'compareAtPrice',
   inventoryQty: 'inventoryQty',
+  reservedQty: 'reservedQty',
   options: 'options',
   imageUrl: 'imageUrl',
   productId: 'productId'
@@ -467,11 +469,23 @@ exports.Prisma.BaseInventoryUnitScalarFieldEnum = {
   name: 'name',
   description: 'description',
   inventoryQty: 'inventoryQty',
+  reservedQty: 'reservedQty',
   lowInventoryThreshold: 'lowInventoryThreshold',
   lowInventoryAlertSent: 'lowInventoryAlertSent',
   outOfStockAlertSent: 'outOfStockAlertSent',
   allowBackorders: 'allowBackorders',
   businessId: 'businessId'
+};
+
+exports.Prisma.InventoryReservationScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  stripeSessionId: 'stripeSessionId',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  items: 'items'
 };
 
 exports.Prisma.PageScalarFieldEnum = {
@@ -686,6 +700,7 @@ exports.Prisma.ModelName = {
   DiscountCode: 'DiscountCode',
   InventoryHistory: 'InventoryHistory',
   BaseInventoryUnit: 'BaseInventoryUnit',
+  InventoryReservation: 'InventoryReservation',
   Page: 'Page',
   ProductImport: 'ProductImport',
   Gallery: 'Gallery',

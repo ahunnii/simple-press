@@ -18,6 +18,10 @@ import {
   sendPoolOutOfStockAlert,
 } from "~/lib/email/templates";
 import { deductPoolInventory } from "~/lib/inventory";
+import {
+  releaseReservation,
+  type ReservationEntry,
+} from "~/lib/inventory/reservation";
 import { stripeClient } from "~/lib/stripe/client";
 import { normalizeEmail } from "~/lib/utils";
 import { db } from "~/server/db";
@@ -800,6 +804,42 @@ export async function POST(req: NextRequest) {
               });
               if (result) poolNotificationCandidates.push(result);
             }
+
+            // Release the inventory reservation now that physical inventory has
+            // been deducted. Look up by stripeSessionId first, fall back to
+            // metadata.reservationId. Guard so a missing/already-consumed
+            // reservation never breaks order creation.
+            try {
+              const reservationId = session.metadata?.reservationId;
+              const reservation = await tx.inventoryReservation.findFirst({
+                where: {
+                  OR: [
+                    { stripeSessionId: session.id },
+                    ...(reservationId ? [{ id: reservationId }] : []),
+                  ],
+                  status: "active",
+                },
+              });
+              if (reservation) {
+                const entries = reservation.items as ReservationEntry[];
+                await releaseReservation(tx, { items: entries });
+                await tx.inventoryReservation.update({
+                  where: { id: reservation.id },
+                  data: { status: "consumed" },
+                });
+              }
+            } catch (reservationErr) {
+              console.error(
+                "[Webhook] Failed to release reservation on checkout.session.completed:",
+                reservationErr,
+              );
+              Sentry.withScope((scope) => {
+                scope.setTag("webhook.step", "reservation-release-completed");
+                scope.setTag("businessId", businessId);
+                Sentry.captureException(reservationErr);
+              });
+              // Non-fatal — inventory deduction and order creation still succeed
+            }
           });
 
           console.log(`[Webhook] Inventory deducted for order ${order.id}`);
@@ -1112,6 +1152,46 @@ export async function POST(req: NextRequest) {
           { status: 500 },
         );
       }
+    }
+
+    // Handle checkout.session.expired — release the inventory reservation so
+    // held stock is returned to available. Idempotent: no-op if already released.
+    if (event.type === "checkout.session.expired") {
+      const expiredSession = event.data.object;
+      try {
+        const reservationId = expiredSession.metadata?.reservationId;
+        const reservation = await db.inventoryReservation.findFirst({
+          where: {
+            OR: [
+              { stripeSessionId: expiredSession.id },
+              ...(reservationId ? [{ id: reservationId }] : []),
+            ],
+            status: "active",
+          },
+        });
+        if (reservation) {
+          await db.$transaction(async (tx) => {
+            const entries = reservation.items as ReservationEntry[];
+            await releaseReservation(tx, { items: entries });
+            await tx.inventoryReservation.update({
+              where: { id: reservation.id },
+              data: { status: "released" },
+            });
+          });
+          console.log(
+            `[Webhook] Released reservation ${reservation.id} on session expiry ${expiredSession.id}`,
+          );
+        }
+      } catch (expiredErr) {
+        console.error(
+          "[Webhook] Failed to release reservation on checkout.session.expired:",
+          expiredErr,
+        );
+        Sentry.captureException(expiredErr, {
+          tags: { "webhook.step": "reservation-release-expired" },
+        });
+      }
+      return NextResponse.json({ received: true });
     }
 
     // Handle account.updated (Connect account status changes)

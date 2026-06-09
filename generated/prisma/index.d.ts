@@ -119,6 +119,11 @@ export type InventoryHistory = $Result.DefaultSelection<Prisma.$InventoryHistory
  */
 export type BaseInventoryUnit = $Result.DefaultSelection<Prisma.$BaseInventoryUnitPayload>
 /**
+ * Model InventoryReservation
+ * 
+ */
+export type InventoryReservation = $Result.DefaultSelection<Prisma.$InventoryReservationPayload>
+/**
  * Model Page
  * 
  */
@@ -533,6 +538,16 @@ export class PrismaClient<
     * ```
     */
   get baseInventoryUnit(): Prisma.BaseInventoryUnitDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.inventoryReservation`: Exposes CRUD operations for the **InventoryReservation** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more InventoryReservations
+    * const inventoryReservations = await prisma.inventoryReservation.findMany()
+    * ```
+    */
+  get inventoryReservation(): Prisma.InventoryReservationDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.page`: Exposes CRUD operations for the **Page** model.
@@ -1085,6 +1100,7 @@ export namespace Prisma {
     DiscountCode: 'DiscountCode',
     InventoryHistory: 'InventoryHistory',
     BaseInventoryUnit: 'BaseInventoryUnit',
+    InventoryReservation: 'InventoryReservation',
     Page: 'Page',
     ProductImport: 'ProductImport',
     Gallery: 'Gallery',
@@ -1112,7 +1128,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "product" | "productVariant" | "collection" | "collectionProduct" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "product" | "productVariant" | "collection" | "collectionProduct" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2670,6 +2686,80 @@ export namespace Prisma {
           }
         }
       }
+      InventoryReservation: {
+        payload: Prisma.$InventoryReservationPayload<ExtArgs>
+        fields: Prisma.InventoryReservationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InventoryReservationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryReservationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InventoryReservationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+          }
+          findFirst: {
+            args: Prisma.InventoryReservationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryReservationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InventoryReservationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+          }
+          findMany: {
+            args: Prisma.InventoryReservationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryReservationPayload>[]
+          }
+          create: {
+            args: Prisma.InventoryReservationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+          }
+          createMany: {
+            args: Prisma.InventoryReservationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InventoryReservationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryReservationPayload>[]
+          }
+          delete: {
+            args: Prisma.InventoryReservationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+          }
+          update: {
+            args: Prisma.InventoryReservationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+          }
+          deleteMany: {
+            args: Prisma.InventoryReservationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InventoryReservationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InventoryReservationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryReservationPayload>[]
+          }
+          upsert: {
+            args: Prisma.InventoryReservationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+          }
+          aggregate: {
+            args: Prisma.InventoryReservationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInventoryReservation>
+          }
+          groupBy: {
+            args: Prisma.InventoryReservationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InventoryReservationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InventoryReservationCountArgs<ExtArgs>
+            result: $Utils.Optional<InventoryReservationCountAggregateOutputType> | number
+          }
+        }
+      }
       Page: {
         payload: Prisma.$PagePayload<ExtArgs>
         fields: Prisma.PageFieldRefs
@@ -3453,6 +3543,7 @@ export namespace Prisma {
     discountCode?: DiscountCodeOmit
     inventoryHistory?: InventoryHistoryOmit
     baseInventoryUnit?: BaseInventoryUnitOmit
+    inventoryReservation?: InventoryReservationOmit
     page?: PageOmit
     productImport?: ProductImportOmit
     gallery?: GalleryOmit
@@ -3626,6 +3717,7 @@ export namespace Prisma {
     discountCodes: number
     inventoryHistory: number
     baseInventoryUnits: number
+    inventoryReservations: number
     pages: number
     productImports: number
     galleries: number
@@ -3644,6 +3736,7 @@ export namespace Prisma {
     discountCodes?: boolean | BusinessCountOutputTypeCountDiscountCodesArgs
     inventoryHistory?: boolean | BusinessCountOutputTypeCountInventoryHistoryArgs
     baseInventoryUnits?: boolean | BusinessCountOutputTypeCountBaseInventoryUnitsArgs
+    inventoryReservations?: boolean | BusinessCountOutputTypeCountInventoryReservationsArgs
     pages?: boolean | BusinessCountOutputTypeCountPagesArgs
     productImports?: boolean | BusinessCountOutputTypeCountProductImportsArgs
     galleries?: boolean | BusinessCountOutputTypeCountGalleriesArgs
@@ -3718,6 +3811,13 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountBaseInventoryUnitsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BaseInventoryUnitWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountInventoryReservationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryReservationWhereInput
   }
 
   /**
@@ -10219,6 +10319,7 @@ export namespace Prisma {
     discountCodes?: boolean | Business$discountCodesArgs<ExtArgs>
     inventoryHistory?: boolean | Business$inventoryHistoryArgs<ExtArgs>
     baseInventoryUnits?: boolean | Business$baseInventoryUnitsArgs<ExtArgs>
+    inventoryReservations?: boolean | Business$inventoryReservationsArgs<ExtArgs>
     pages?: boolean | Business$pagesArgs<ExtArgs>
     productImports?: boolean | Business$productImportsArgs<ExtArgs>
     galleries?: boolean | Business$galleriesArgs<ExtArgs>
@@ -10327,6 +10428,7 @@ export namespace Prisma {
     discountCodes?: boolean | Business$discountCodesArgs<ExtArgs>
     inventoryHistory?: boolean | Business$inventoryHistoryArgs<ExtArgs>
     baseInventoryUnits?: boolean | Business$baseInventoryUnitsArgs<ExtArgs>
+    inventoryReservations?: boolean | Business$inventoryReservationsArgs<ExtArgs>
     pages?: boolean | Business$pagesArgs<ExtArgs>
     productImports?: boolean | Business$productImportsArgs<ExtArgs>
     galleries?: boolean | Business$galleriesArgs<ExtArgs>
@@ -10351,6 +10453,7 @@ export namespace Prisma {
       discountCodes: Prisma.$DiscountCodePayload<ExtArgs>[]
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
       baseInventoryUnits: Prisma.$BaseInventoryUnitPayload<ExtArgs>[]
+      inventoryReservations: Prisma.$InventoryReservationPayload<ExtArgs>[]
       pages: Prisma.$PagePayload<ExtArgs>[]
       productImports: Prisma.$ProductImportPayload<ExtArgs>[]
       galleries: Prisma.$GalleryPayload<ExtArgs>[]
@@ -10789,6 +10892,7 @@ export namespace Prisma {
     discountCodes<T extends Business$discountCodesArgs<ExtArgs> = {}>(args?: Subset<T, Business$discountCodesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DiscountCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     inventoryHistory<T extends Business$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Business$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     baseInventoryUnits<T extends Business$baseInventoryUnitsArgs<ExtArgs> = {}>(args?: Subset<T, Business$baseInventoryUnitsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BaseInventoryUnitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    inventoryReservations<T extends Business$inventoryReservationsArgs<ExtArgs> = {}>(args?: Subset<T, Business$inventoryReservationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     pages<T extends Business$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Business$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     productImports<T extends Business$productImportsArgs<ExtArgs> = {}>(args?: Subset<T, Business$productImportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     galleries<T extends Business$galleriesArgs<ExtArgs> = {}>(args?: Subset<T, Business$galleriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GalleryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -11447,6 +11551,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: BaseInventoryUnitScalarFieldEnum | BaseInventoryUnitScalarFieldEnum[]
+  }
+
+  /**
+   * Business.inventoryReservations
+   */
+  export type Business$inventoryReservationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationInclude<ExtArgs> | null
+    where?: InventoryReservationWhereInput
+    orderBy?: InventoryReservationOrderByWithRelationInput | InventoryReservationOrderByWithRelationInput[]
+    cursor?: InventoryReservationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryReservationScalarFieldEnum | InventoryReservationScalarFieldEnum[]
   }
 
   /**
@@ -12990,6 +13118,7 @@ export namespace Prisma {
     compareAtPrice: number | null
     cost: number | null
     inventoryQty: number | null
+    reservedQty: number | null
     lowInventoryThreshold: number | null
     baseUnitsConsumed: number | null
     weight: number | null
@@ -13003,6 +13132,7 @@ export namespace Prisma {
     compareAtPrice: number | null
     cost: number | null
     inventoryQty: number | null
+    reservedQty: number | null
     lowInventoryThreshold: number | null
     baseUnitsConsumed: number | null
     weight: number | null
@@ -13026,6 +13156,7 @@ export namespace Prisma {
     barcode: string | null
     trackInventory: boolean | null
     inventoryQty: number | null
+    reservedQty: number | null
     allowBackorders: boolean | null
     lowInventoryThreshold: number | null
     lowInventoryAlertSent: boolean | null
@@ -13061,6 +13192,7 @@ export namespace Prisma {
     barcode: string | null
     trackInventory: boolean | null
     inventoryQty: number | null
+    reservedQty: number | null
     allowBackorders: boolean | null
     lowInventoryThreshold: number | null
     lowInventoryAlertSent: boolean | null
@@ -13096,6 +13228,7 @@ export namespace Prisma {
     barcode: number
     trackInventory: number
     inventoryQty: number
+    reservedQty: number
     allowBackorders: number
     lowInventoryThreshold: number
     lowInventoryAlertSent: number
@@ -13124,6 +13257,7 @@ export namespace Prisma {
     compareAtPrice?: true
     cost?: true
     inventoryQty?: true
+    reservedQty?: true
     lowInventoryThreshold?: true
     baseUnitsConsumed?: true
     weight?: true
@@ -13137,6 +13271,7 @@ export namespace Prisma {
     compareAtPrice?: true
     cost?: true
     inventoryQty?: true
+    reservedQty?: true
     lowInventoryThreshold?: true
     baseUnitsConsumed?: true
     weight?: true
@@ -13160,6 +13295,7 @@ export namespace Prisma {
     barcode?: true
     trackInventory?: true
     inventoryQty?: true
+    reservedQty?: true
     allowBackorders?: true
     lowInventoryThreshold?: true
     lowInventoryAlertSent?: true
@@ -13195,6 +13331,7 @@ export namespace Prisma {
     barcode?: true
     trackInventory?: true
     inventoryQty?: true
+    reservedQty?: true
     allowBackorders?: true
     lowInventoryThreshold?: true
     lowInventoryAlertSent?: true
@@ -13230,6 +13367,7 @@ export namespace Prisma {
     barcode?: true
     trackInventory?: true
     inventoryQty?: true
+    reservedQty?: true
     allowBackorders?: true
     lowInventoryThreshold?: true
     lowInventoryAlertSent?: true
@@ -13353,6 +13491,7 @@ export namespace Prisma {
     barcode: string | null
     trackInventory: boolean
     inventoryQty: number
+    reservedQty: number
     allowBackorders: boolean
     lowInventoryThreshold: number | null
     lowInventoryAlertSent: boolean
@@ -13408,6 +13547,7 @@ export namespace Prisma {
     barcode?: boolean
     trackInventory?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     allowBackorders?: boolean
     lowInventoryThreshold?: boolean
     lowInventoryAlertSent?: boolean
@@ -13453,6 +13593,7 @@ export namespace Prisma {
     barcode?: boolean
     trackInventory?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     allowBackorders?: boolean
     lowInventoryThreshold?: boolean
     lowInventoryAlertSent?: boolean
@@ -13491,6 +13632,7 @@ export namespace Prisma {
     barcode?: boolean
     trackInventory?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     allowBackorders?: boolean
     lowInventoryThreshold?: boolean
     lowInventoryAlertSent?: boolean
@@ -13529,6 +13671,7 @@ export namespace Prisma {
     barcode?: boolean
     trackInventory?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     allowBackorders?: boolean
     lowInventoryThreshold?: boolean
     lowInventoryAlertSent?: boolean
@@ -13550,7 +13693,7 @@ export namespace Prisma {
     additionalFields?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "excerpt" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "allowBackorders" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "baseInventoryUnitId" | "baseUnitsConsumed" | "weight" | "weightUnit" | "published" | "featured" | "sortOrder" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "excerpt" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "reservedQty" | "allowBackorders" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "baseInventoryUnitId" | "baseUnitsConsumed" | "weight" | "weightUnit" | "published" | "featured" | "sortOrder" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     baseInventoryUnit?: boolean | Product$baseInventoryUnitArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -13598,6 +13741,7 @@ export namespace Prisma {
       barcode: string | null
       trackInventory: boolean
       inventoryQty: number
+      reservedQty: number
       allowBackorders: boolean
       lowInventoryThreshold: number | null
       lowInventoryAlertSent: boolean
@@ -14062,6 +14206,7 @@ export namespace Prisma {
     readonly barcode: FieldRef<"Product", 'String'>
     readonly trackInventory: FieldRef<"Product", 'Boolean'>
     readonly inventoryQty: FieldRef<"Product", 'Int'>
+    readonly reservedQty: FieldRef<"Product", 'Int'>
     readonly allowBackorders: FieldRef<"Product", 'Boolean'>
     readonly lowInventoryThreshold: FieldRef<"Product", 'Int'>
     readonly lowInventoryAlertSent: FieldRef<"Product", 'Boolean'>
@@ -14674,12 +14819,14 @@ export namespace Prisma {
     price: number | null
     compareAtPrice: number | null
     inventoryQty: number | null
+    reservedQty: number | null
   }
 
   export type ProductVariantSumAggregateOutputType = {
     price: number | null
     compareAtPrice: number | null
     inventoryQty: number | null
+    reservedQty: number | null
   }
 
   export type ProductVariantMinAggregateOutputType = {
@@ -14692,6 +14839,7 @@ export namespace Prisma {
     price: number | null
     compareAtPrice: number | null
     inventoryQty: number | null
+    reservedQty: number | null
     imageUrl: string | null
     productId: string | null
   }
@@ -14706,6 +14854,7 @@ export namespace Prisma {
     price: number | null
     compareAtPrice: number | null
     inventoryQty: number | null
+    reservedQty: number | null
     imageUrl: string | null
     productId: string | null
   }
@@ -14720,6 +14869,7 @@ export namespace Prisma {
     price: number
     compareAtPrice: number
     inventoryQty: number
+    reservedQty: number
     options: number
     imageUrl: number
     productId: number
@@ -14731,12 +14881,14 @@ export namespace Prisma {
     price?: true
     compareAtPrice?: true
     inventoryQty?: true
+    reservedQty?: true
   }
 
   export type ProductVariantSumAggregateInputType = {
     price?: true
     compareAtPrice?: true
     inventoryQty?: true
+    reservedQty?: true
   }
 
   export type ProductVariantMinAggregateInputType = {
@@ -14749,6 +14901,7 @@ export namespace Prisma {
     price?: true
     compareAtPrice?: true
     inventoryQty?: true
+    reservedQty?: true
     imageUrl?: true
     productId?: true
   }
@@ -14763,6 +14916,7 @@ export namespace Prisma {
     price?: true
     compareAtPrice?: true
     inventoryQty?: true
+    reservedQty?: true
     imageUrl?: true
     productId?: true
   }
@@ -14777,6 +14931,7 @@ export namespace Prisma {
     price?: true
     compareAtPrice?: true
     inventoryQty?: true
+    reservedQty?: true
     options?: true
     imageUrl?: true
     productId?: true
@@ -14879,6 +15034,7 @@ export namespace Prisma {
     price: number | null
     compareAtPrice: number | null
     inventoryQty: number
+    reservedQty: number
     options: JsonValue
     imageUrl: string | null
     productId: string
@@ -14913,6 +15069,7 @@ export namespace Prisma {
     price?: boolean
     compareAtPrice?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     options?: boolean
     imageUrl?: boolean
     productId?: boolean
@@ -14932,6 +15089,7 @@ export namespace Prisma {
     price?: boolean
     compareAtPrice?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     options?: boolean
     imageUrl?: boolean
     productId?: boolean
@@ -14948,6 +15106,7 @@ export namespace Prisma {
     price?: boolean
     compareAtPrice?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     options?: boolean
     imageUrl?: boolean
     productId?: boolean
@@ -14964,12 +15123,13 @@ export namespace Prisma {
     price?: boolean
     compareAtPrice?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     options?: boolean
     imageUrl?: boolean
     productId?: boolean
   }
 
-  export type ProductVariantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "sku" | "barcode" | "price" | "compareAtPrice" | "inventoryQty" | "options" | "imageUrl" | "productId", ExtArgs["result"]["productVariant"]>
+  export type ProductVariantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "sku" | "barcode" | "price" | "compareAtPrice" | "inventoryQty" | "reservedQty" | "options" | "imageUrl" | "productId", ExtArgs["result"]["productVariant"]>
   export type ProductVariantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     product?: boolean | ProductDefaultArgs<ExtArgs>
     inventoryHistory?: boolean | ProductVariant$inventoryHistoryArgs<ExtArgs>
@@ -15000,6 +15160,7 @@ export namespace Prisma {
       price: number | null
       compareAtPrice: number | null
       inventoryQty: number
+      reservedQty: number
       options: Prisma.JsonValue
       imageUrl: string | null
       productId: string
@@ -15438,6 +15599,7 @@ export namespace Prisma {
     readonly price: FieldRef<"ProductVariant", 'Float'>
     readonly compareAtPrice: FieldRef<"ProductVariant", 'Float'>
     readonly inventoryQty: FieldRef<"ProductVariant", 'Int'>
+    readonly reservedQty: FieldRef<"ProductVariant", 'Int'>
     readonly options: FieldRef<"ProductVariant", 'Json'>
     readonly imageUrl: FieldRef<"ProductVariant", 'String'>
     readonly productId: FieldRef<"ProductVariant", 'String'>
@@ -29643,11 +29805,13 @@ export namespace Prisma {
 
   export type BaseInventoryUnitAvgAggregateOutputType = {
     inventoryQty: number | null
+    reservedQty: number | null
     lowInventoryThreshold: number | null
   }
 
   export type BaseInventoryUnitSumAggregateOutputType = {
     inventoryQty: number | null
+    reservedQty: number | null
     lowInventoryThreshold: number | null
   }
 
@@ -29658,6 +29822,7 @@ export namespace Prisma {
     name: string | null
     description: string | null
     inventoryQty: number | null
+    reservedQty: number | null
     lowInventoryThreshold: number | null
     lowInventoryAlertSent: boolean | null
     outOfStockAlertSent: boolean | null
@@ -29672,6 +29837,7 @@ export namespace Prisma {
     name: string | null
     description: string | null
     inventoryQty: number | null
+    reservedQty: number | null
     lowInventoryThreshold: number | null
     lowInventoryAlertSent: boolean | null
     outOfStockAlertSent: boolean | null
@@ -29686,6 +29852,7 @@ export namespace Prisma {
     name: number
     description: number
     inventoryQty: number
+    reservedQty: number
     lowInventoryThreshold: number
     lowInventoryAlertSent: number
     outOfStockAlertSent: number
@@ -29697,11 +29864,13 @@ export namespace Prisma {
 
   export type BaseInventoryUnitAvgAggregateInputType = {
     inventoryQty?: true
+    reservedQty?: true
     lowInventoryThreshold?: true
   }
 
   export type BaseInventoryUnitSumAggregateInputType = {
     inventoryQty?: true
+    reservedQty?: true
     lowInventoryThreshold?: true
   }
 
@@ -29712,6 +29881,7 @@ export namespace Prisma {
     name?: true
     description?: true
     inventoryQty?: true
+    reservedQty?: true
     lowInventoryThreshold?: true
     lowInventoryAlertSent?: true
     outOfStockAlertSent?: true
@@ -29726,6 +29896,7 @@ export namespace Prisma {
     name?: true
     description?: true
     inventoryQty?: true
+    reservedQty?: true
     lowInventoryThreshold?: true
     lowInventoryAlertSent?: true
     outOfStockAlertSent?: true
@@ -29740,6 +29911,7 @@ export namespace Prisma {
     name?: true
     description?: true
     inventoryQty?: true
+    reservedQty?: true
     lowInventoryThreshold?: true
     lowInventoryAlertSent?: true
     outOfStockAlertSent?: true
@@ -29841,6 +30013,7 @@ export namespace Prisma {
     name: string
     description: string | null
     inventoryQty: number
+    reservedQty: number
     lowInventoryThreshold: number | null
     lowInventoryAlertSent: boolean
     outOfStockAlertSent: boolean
@@ -29874,6 +30047,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     lowInventoryThreshold?: boolean
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -29892,6 +30066,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     lowInventoryThreshold?: boolean
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -29907,6 +30082,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     lowInventoryThreshold?: boolean
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -29922,6 +30098,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     inventoryQty?: boolean
+    reservedQty?: boolean
     lowInventoryThreshold?: boolean
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -29929,7 +30106,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type BaseInventoryUnitOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "description" | "inventoryQty" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "allowBackorders" | "businessId", ExtArgs["result"]["baseInventoryUnit"]>
+  export type BaseInventoryUnitOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "description" | "inventoryQty" | "reservedQty" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "allowBackorders" | "businessId", ExtArgs["result"]["baseInventoryUnit"]>
   export type BaseInventoryUnitInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     products?: boolean | BaseInventoryUnit$productsArgs<ExtArgs>
@@ -29957,6 +30134,7 @@ export namespace Prisma {
       name: string
       description: string | null
       inventoryQty: number
+      reservedQty: number
       lowInventoryThreshold: number | null
       lowInventoryAlertSent: boolean
       outOfStockAlertSent: boolean
@@ -30394,6 +30572,7 @@ export namespace Prisma {
     readonly name: FieldRef<"BaseInventoryUnit", 'String'>
     readonly description: FieldRef<"BaseInventoryUnit", 'String'>
     readonly inventoryQty: FieldRef<"BaseInventoryUnit", 'Int'>
+    readonly reservedQty: FieldRef<"BaseInventoryUnit", 'Int'>
     readonly lowInventoryThreshold: FieldRef<"BaseInventoryUnit", 'Int'>
     readonly lowInventoryAlertSent: FieldRef<"BaseInventoryUnit", 'Boolean'>
     readonly outOfStockAlertSent: FieldRef<"BaseInventoryUnit", 'Boolean'>
@@ -30858,6 +31037,1099 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: BaseInventoryUnitInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model InventoryReservation
+   */
+
+  export type AggregateInventoryReservation = {
+    _count: InventoryReservationCountAggregateOutputType | null
+    _min: InventoryReservationMinAggregateOutputType | null
+    _max: InventoryReservationMaxAggregateOutputType | null
+  }
+
+  export type InventoryReservationMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    stripeSessionId: string | null
+    status: string | null
+    expiresAt: Date | null
+  }
+
+  export type InventoryReservationMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    stripeSessionId: string | null
+    status: string | null
+    expiresAt: Date | null
+  }
+
+  export type InventoryReservationCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    businessId: number
+    stripeSessionId: number
+    status: number
+    expiresAt: number
+    items: number
+    _all: number
+  }
+
+
+  export type InventoryReservationMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    stripeSessionId?: true
+    status?: true
+    expiresAt?: true
+  }
+
+  export type InventoryReservationMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    stripeSessionId?: true
+    status?: true
+    expiresAt?: true
+  }
+
+  export type InventoryReservationCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    stripeSessionId?: true
+    status?: true
+    expiresAt?: true
+    items?: true
+    _all?: true
+  }
+
+  export type InventoryReservationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryReservation to aggregate.
+     */
+    where?: InventoryReservationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryReservations to fetch.
+     */
+    orderBy?: InventoryReservationOrderByWithRelationInput | InventoryReservationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InventoryReservationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryReservations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryReservations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned InventoryReservations
+    **/
+    _count?: true | InventoryReservationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InventoryReservationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InventoryReservationMaxAggregateInputType
+  }
+
+  export type GetInventoryReservationAggregateType<T extends InventoryReservationAggregateArgs> = {
+        [P in keyof T & keyof AggregateInventoryReservation]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInventoryReservation[P]>
+      : GetScalarType<T[P], AggregateInventoryReservation[P]>
+  }
+
+
+
+
+  export type InventoryReservationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryReservationWhereInput
+    orderBy?: InventoryReservationOrderByWithAggregationInput | InventoryReservationOrderByWithAggregationInput[]
+    by: InventoryReservationScalarFieldEnum[] | InventoryReservationScalarFieldEnum
+    having?: InventoryReservationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InventoryReservationCountAggregateInputType | true
+    _min?: InventoryReservationMinAggregateInputType
+    _max?: InventoryReservationMaxAggregateInputType
+  }
+
+  export type InventoryReservationGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    businessId: string
+    stripeSessionId: string | null
+    status: string
+    expiresAt: Date
+    items: JsonValue
+    _count: InventoryReservationCountAggregateOutputType | null
+    _min: InventoryReservationMinAggregateOutputType | null
+    _max: InventoryReservationMaxAggregateOutputType | null
+  }
+
+  type GetInventoryReservationGroupByPayload<T extends InventoryReservationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InventoryReservationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InventoryReservationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InventoryReservationGroupByOutputType[P]>
+            : GetScalarType<T[P], InventoryReservationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InventoryReservationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    stripeSessionId?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    items?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryReservation"]>
+
+  export type InventoryReservationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    stripeSessionId?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    items?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryReservation"]>
+
+  export type InventoryReservationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    stripeSessionId?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    items?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryReservation"]>
+
+  export type InventoryReservationSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    stripeSessionId?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    items?: boolean
+  }
+
+  export type InventoryReservationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "stripeSessionId" | "status" | "expiresAt" | "items", ExtArgs["result"]["inventoryReservation"]>
+  export type InventoryReservationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type InventoryReservationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type InventoryReservationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $InventoryReservationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "InventoryReservation"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      businessId: string
+      stripeSessionId: string | null
+      status: string
+      expiresAt: Date
+      items: Prisma.JsonValue
+    }, ExtArgs["result"]["inventoryReservation"]>
+    composites: {}
+  }
+
+  type InventoryReservationGetPayload<S extends boolean | null | undefined | InventoryReservationDefaultArgs> = $Result.GetResult<Prisma.$InventoryReservationPayload, S>
+
+  type InventoryReservationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InventoryReservationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InventoryReservationCountAggregateInputType | true
+    }
+
+  export interface InventoryReservationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['InventoryReservation'], meta: { name: 'InventoryReservation' } }
+    /**
+     * Find zero or one InventoryReservation that matches the filter.
+     * @param {InventoryReservationFindUniqueArgs} args - Arguments to find a InventoryReservation
+     * @example
+     * // Get one InventoryReservation
+     * const inventoryReservation = await prisma.inventoryReservation.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InventoryReservationFindUniqueArgs>(args: SelectSubset<T, InventoryReservationFindUniqueArgs<ExtArgs>>): Prisma__InventoryReservationClient<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one InventoryReservation that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InventoryReservationFindUniqueOrThrowArgs} args - Arguments to find a InventoryReservation
+     * @example
+     * // Get one InventoryReservation
+     * const inventoryReservation = await prisma.inventoryReservation.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InventoryReservationFindUniqueOrThrowArgs>(args: SelectSubset<T, InventoryReservationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InventoryReservationClient<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InventoryReservation that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryReservationFindFirstArgs} args - Arguments to find a InventoryReservation
+     * @example
+     * // Get one InventoryReservation
+     * const inventoryReservation = await prisma.inventoryReservation.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InventoryReservationFindFirstArgs>(args?: SelectSubset<T, InventoryReservationFindFirstArgs<ExtArgs>>): Prisma__InventoryReservationClient<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InventoryReservation that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryReservationFindFirstOrThrowArgs} args - Arguments to find a InventoryReservation
+     * @example
+     * // Get one InventoryReservation
+     * const inventoryReservation = await prisma.inventoryReservation.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InventoryReservationFindFirstOrThrowArgs>(args?: SelectSubset<T, InventoryReservationFindFirstOrThrowArgs<ExtArgs>>): Prisma__InventoryReservationClient<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more InventoryReservations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryReservationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all InventoryReservations
+     * const inventoryReservations = await prisma.inventoryReservation.findMany()
+     * 
+     * // Get first 10 InventoryReservations
+     * const inventoryReservations = await prisma.inventoryReservation.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const inventoryReservationWithIdOnly = await prisma.inventoryReservation.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InventoryReservationFindManyArgs>(args?: SelectSubset<T, InventoryReservationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a InventoryReservation.
+     * @param {InventoryReservationCreateArgs} args - Arguments to create a InventoryReservation.
+     * @example
+     * // Create one InventoryReservation
+     * const InventoryReservation = await prisma.inventoryReservation.create({
+     *   data: {
+     *     // ... data to create a InventoryReservation
+     *   }
+     * })
+     * 
+     */
+    create<T extends InventoryReservationCreateArgs>(args: SelectSubset<T, InventoryReservationCreateArgs<ExtArgs>>): Prisma__InventoryReservationClient<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many InventoryReservations.
+     * @param {InventoryReservationCreateManyArgs} args - Arguments to create many InventoryReservations.
+     * @example
+     * // Create many InventoryReservations
+     * const inventoryReservation = await prisma.inventoryReservation.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InventoryReservationCreateManyArgs>(args?: SelectSubset<T, InventoryReservationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many InventoryReservations and returns the data saved in the database.
+     * @param {InventoryReservationCreateManyAndReturnArgs} args - Arguments to create many InventoryReservations.
+     * @example
+     * // Create many InventoryReservations
+     * const inventoryReservation = await prisma.inventoryReservation.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many InventoryReservations and only return the `id`
+     * const inventoryReservationWithIdOnly = await prisma.inventoryReservation.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InventoryReservationCreateManyAndReturnArgs>(args?: SelectSubset<T, InventoryReservationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a InventoryReservation.
+     * @param {InventoryReservationDeleteArgs} args - Arguments to delete one InventoryReservation.
+     * @example
+     * // Delete one InventoryReservation
+     * const InventoryReservation = await prisma.inventoryReservation.delete({
+     *   where: {
+     *     // ... filter to delete one InventoryReservation
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InventoryReservationDeleteArgs>(args: SelectSubset<T, InventoryReservationDeleteArgs<ExtArgs>>): Prisma__InventoryReservationClient<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one InventoryReservation.
+     * @param {InventoryReservationUpdateArgs} args - Arguments to update one InventoryReservation.
+     * @example
+     * // Update one InventoryReservation
+     * const inventoryReservation = await prisma.inventoryReservation.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InventoryReservationUpdateArgs>(args: SelectSubset<T, InventoryReservationUpdateArgs<ExtArgs>>): Prisma__InventoryReservationClient<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more InventoryReservations.
+     * @param {InventoryReservationDeleteManyArgs} args - Arguments to filter InventoryReservations to delete.
+     * @example
+     * // Delete a few InventoryReservations
+     * const { count } = await prisma.inventoryReservation.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InventoryReservationDeleteManyArgs>(args?: SelectSubset<T, InventoryReservationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InventoryReservations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryReservationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many InventoryReservations
+     * const inventoryReservation = await prisma.inventoryReservation.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InventoryReservationUpdateManyArgs>(args: SelectSubset<T, InventoryReservationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InventoryReservations and returns the data updated in the database.
+     * @param {InventoryReservationUpdateManyAndReturnArgs} args - Arguments to update many InventoryReservations.
+     * @example
+     * // Update many InventoryReservations
+     * const inventoryReservation = await prisma.inventoryReservation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more InventoryReservations and only return the `id`
+     * const inventoryReservationWithIdOnly = await prisma.inventoryReservation.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends InventoryReservationUpdateManyAndReturnArgs>(args: SelectSubset<T, InventoryReservationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one InventoryReservation.
+     * @param {InventoryReservationUpsertArgs} args - Arguments to update or create a InventoryReservation.
+     * @example
+     * // Update or create a InventoryReservation
+     * const inventoryReservation = await prisma.inventoryReservation.upsert({
+     *   create: {
+     *     // ... data to create a InventoryReservation
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the InventoryReservation we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InventoryReservationUpsertArgs>(args: SelectSubset<T, InventoryReservationUpsertArgs<ExtArgs>>): Prisma__InventoryReservationClient<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of InventoryReservations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryReservationCountArgs} args - Arguments to filter InventoryReservations to count.
+     * @example
+     * // Count the number of InventoryReservations
+     * const count = await prisma.inventoryReservation.count({
+     *   where: {
+     *     // ... the filter for the InventoryReservations we want to count
+     *   }
+     * })
+    **/
+    count<T extends InventoryReservationCountArgs>(
+      args?: Subset<T, InventoryReservationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InventoryReservationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a InventoryReservation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryReservationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InventoryReservationAggregateArgs>(args: Subset<T, InventoryReservationAggregateArgs>): Prisma.PrismaPromise<GetInventoryReservationAggregateType<T>>
+
+    /**
+     * Group by InventoryReservation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryReservationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InventoryReservationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InventoryReservationGroupByArgs['orderBy'] }
+        : { orderBy?: InventoryReservationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InventoryReservationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInventoryReservationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the InventoryReservation model
+   */
+  readonly fields: InventoryReservationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for InventoryReservation.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InventoryReservationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the InventoryReservation model
+   */
+  interface InventoryReservationFieldRefs {
+    readonly id: FieldRef<"InventoryReservation", 'String'>
+    readonly createdAt: FieldRef<"InventoryReservation", 'DateTime'>
+    readonly updatedAt: FieldRef<"InventoryReservation", 'DateTime'>
+    readonly businessId: FieldRef<"InventoryReservation", 'String'>
+    readonly stripeSessionId: FieldRef<"InventoryReservation", 'String'>
+    readonly status: FieldRef<"InventoryReservation", 'String'>
+    readonly expiresAt: FieldRef<"InventoryReservation", 'DateTime'>
+    readonly items: FieldRef<"InventoryReservation", 'Json'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * InventoryReservation findUnique
+   */
+  export type InventoryReservationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryReservation to fetch.
+     */
+    where: InventoryReservationWhereUniqueInput
+  }
+
+  /**
+   * InventoryReservation findUniqueOrThrow
+   */
+  export type InventoryReservationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryReservation to fetch.
+     */
+    where: InventoryReservationWhereUniqueInput
+  }
+
+  /**
+   * InventoryReservation findFirst
+   */
+  export type InventoryReservationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryReservation to fetch.
+     */
+    where?: InventoryReservationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryReservations to fetch.
+     */
+    orderBy?: InventoryReservationOrderByWithRelationInput | InventoryReservationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryReservations.
+     */
+    cursor?: InventoryReservationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryReservations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryReservations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryReservations.
+     */
+    distinct?: InventoryReservationScalarFieldEnum | InventoryReservationScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryReservation findFirstOrThrow
+   */
+  export type InventoryReservationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryReservation to fetch.
+     */
+    where?: InventoryReservationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryReservations to fetch.
+     */
+    orderBy?: InventoryReservationOrderByWithRelationInput | InventoryReservationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryReservations.
+     */
+    cursor?: InventoryReservationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryReservations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryReservations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryReservations.
+     */
+    distinct?: InventoryReservationScalarFieldEnum | InventoryReservationScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryReservation findMany
+   */
+  export type InventoryReservationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryReservations to fetch.
+     */
+    where?: InventoryReservationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryReservations to fetch.
+     */
+    orderBy?: InventoryReservationOrderByWithRelationInput | InventoryReservationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing InventoryReservations.
+     */
+    cursor?: InventoryReservationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryReservations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryReservations.
+     */
+    skip?: number
+    distinct?: InventoryReservationScalarFieldEnum | InventoryReservationScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryReservation create
+   */
+  export type InventoryReservationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a InventoryReservation.
+     */
+    data: XOR<InventoryReservationCreateInput, InventoryReservationUncheckedCreateInput>
+  }
+
+  /**
+   * InventoryReservation createMany
+   */
+  export type InventoryReservationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many InventoryReservations.
+     */
+    data: InventoryReservationCreateManyInput | InventoryReservationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * InventoryReservation createManyAndReturn
+   */
+  export type InventoryReservationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * The data used to create many InventoryReservations.
+     */
+    data: InventoryReservationCreateManyInput | InventoryReservationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InventoryReservation update
+   */
+  export type InventoryReservationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a InventoryReservation.
+     */
+    data: XOR<InventoryReservationUpdateInput, InventoryReservationUncheckedUpdateInput>
+    /**
+     * Choose, which InventoryReservation to update.
+     */
+    where: InventoryReservationWhereUniqueInput
+  }
+
+  /**
+   * InventoryReservation updateMany
+   */
+  export type InventoryReservationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update InventoryReservations.
+     */
+    data: XOR<InventoryReservationUpdateManyMutationInput, InventoryReservationUncheckedUpdateManyInput>
+    /**
+     * Filter which InventoryReservations to update
+     */
+    where?: InventoryReservationWhereInput
+    /**
+     * Limit how many InventoryReservations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * InventoryReservation updateManyAndReturn
+   */
+  export type InventoryReservationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * The data used to update InventoryReservations.
+     */
+    data: XOR<InventoryReservationUpdateManyMutationInput, InventoryReservationUncheckedUpdateManyInput>
+    /**
+     * Filter which InventoryReservations to update
+     */
+    where?: InventoryReservationWhereInput
+    /**
+     * Limit how many InventoryReservations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InventoryReservation upsert
+   */
+  export type InventoryReservationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the InventoryReservation to update in case it exists.
+     */
+    where: InventoryReservationWhereUniqueInput
+    /**
+     * In case the InventoryReservation found by the `where` argument doesn't exist, create a new InventoryReservation with this data.
+     */
+    create: XOR<InventoryReservationCreateInput, InventoryReservationUncheckedCreateInput>
+    /**
+     * In case the InventoryReservation was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InventoryReservationUpdateInput, InventoryReservationUncheckedUpdateInput>
+  }
+
+  /**
+   * InventoryReservation delete
+   */
+  export type InventoryReservationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationInclude<ExtArgs> | null
+    /**
+     * Filter which InventoryReservation to delete.
+     */
+    where: InventoryReservationWhereUniqueInput
+  }
+
+  /**
+   * InventoryReservation deleteMany
+   */
+  export type InventoryReservationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryReservations to delete
+     */
+    where?: InventoryReservationWhereInput
+    /**
+     * Limit how many InventoryReservations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * InventoryReservation without action
+   */
+  export type InventoryReservationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryReservation
+     */
+    select?: InventoryReservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryReservation
+     */
+    omit?: InventoryReservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryReservationInclude<ExtArgs> | null
   }
 
 
@@ -41927,6 +43199,7 @@ export namespace Prisma {
     barcode: 'barcode',
     trackInventory: 'trackInventory',
     inventoryQty: 'inventoryQty',
+    reservedQty: 'reservedQty',
     allowBackorders: 'allowBackorders',
     lowInventoryThreshold: 'lowInventoryThreshold',
     lowInventoryAlertSent: 'lowInventoryAlertSent',
@@ -41961,6 +43234,7 @@ export namespace Prisma {
     price: 'price',
     compareAtPrice: 'compareAtPrice',
     inventoryQty: 'inventoryQty',
+    reservedQty: 'reservedQty',
     options: 'options',
     imageUrl: 'imageUrl',
     productId: 'productId'
@@ -42178,6 +43452,7 @@ export namespace Prisma {
     name: 'name',
     description: 'description',
     inventoryQty: 'inventoryQty',
+    reservedQty: 'reservedQty',
     lowInventoryThreshold: 'lowInventoryThreshold',
     lowInventoryAlertSent: 'lowInventoryAlertSent',
     outOfStockAlertSent: 'outOfStockAlertSent',
@@ -42186,6 +43461,20 @@ export namespace Prisma {
   };
 
   export type BaseInventoryUnitScalarFieldEnum = (typeof BaseInventoryUnitScalarFieldEnum)[keyof typeof BaseInventoryUnitScalarFieldEnum]
+
+
+  export const InventoryReservationScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    businessId: 'businessId',
+    stripeSessionId: 'stripeSessionId',
+    status: 'status',
+    expiresAt: 'expiresAt',
+    items: 'items'
+  };
+
+  export type InventoryReservationScalarFieldEnum = (typeof InventoryReservationScalarFieldEnum)[keyof typeof InventoryReservationScalarFieldEnum]
 
 
   export const PageScalarFieldEnum: {
@@ -42960,6 +44249,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
     baseInventoryUnits?: BaseInventoryUnitListRelationFilter
+    inventoryReservations?: InventoryReservationListRelationFilter
     pages?: PageListRelationFilter
     productImports?: ProductImportListRelationFilter
     galleries?: GalleryListRelationFilter
@@ -43005,6 +44295,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeOrderByRelationAggregateInput
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
     baseInventoryUnits?: BaseInventoryUnitOrderByRelationAggregateInput
+    inventoryReservations?: InventoryReservationOrderByRelationAggregateInput
     pages?: PageOrderByRelationAggregateInput
     productImports?: ProductImportOrderByRelationAggregateInput
     galleries?: GalleryOrderByRelationAggregateInput
@@ -43053,6 +44344,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
     baseInventoryUnits?: BaseInventoryUnitListRelationFilter
+    inventoryReservations?: InventoryReservationListRelationFilter
     pages?: PageListRelationFilter
     productImports?: ProductImportListRelationFilter
     galleries?: GalleryListRelationFilter
@@ -43316,6 +44608,7 @@ export namespace Prisma {
     barcode?: StringNullableFilter<"Product"> | string | null
     trackInventory?: BoolFilter<"Product"> | boolean
     inventoryQty?: IntFilter<"Product"> | number
+    reservedQty?: IntFilter<"Product"> | number
     allowBackorders?: BoolFilter<"Product"> | boolean
     lowInventoryThreshold?: IntNullableFilter<"Product"> | number | null
     lowInventoryAlertSent?: BoolFilter<"Product"> | boolean
@@ -43360,6 +44653,7 @@ export namespace Prisma {
     barcode?: SortOrderInput | SortOrder
     trackInventory?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     allowBackorders?: SortOrder
     lowInventoryThreshold?: SortOrderInput | SortOrder
     lowInventoryAlertSent?: SortOrder
@@ -43408,6 +44702,7 @@ export namespace Prisma {
     barcode?: StringNullableFilter<"Product"> | string | null
     trackInventory?: BoolFilter<"Product"> | boolean
     inventoryQty?: IntFilter<"Product"> | number
+    reservedQty?: IntFilter<"Product"> | number
     allowBackorders?: BoolFilter<"Product"> | boolean
     lowInventoryThreshold?: IntNullableFilter<"Product"> | number | null
     lowInventoryAlertSent?: BoolFilter<"Product"> | boolean
@@ -43452,6 +44747,7 @@ export namespace Prisma {
     barcode?: SortOrderInput | SortOrder
     trackInventory?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     allowBackorders?: SortOrder
     lowInventoryThreshold?: SortOrderInput | SortOrder
     lowInventoryAlertSent?: SortOrder
@@ -43496,6 +44792,7 @@ export namespace Prisma {
     barcode?: StringNullableWithAggregatesFilter<"Product"> | string | null
     trackInventory?: BoolWithAggregatesFilter<"Product"> | boolean
     inventoryQty?: IntWithAggregatesFilter<"Product"> | number
+    reservedQty?: IntWithAggregatesFilter<"Product"> | number
     allowBackorders?: BoolWithAggregatesFilter<"Product"> | boolean
     lowInventoryThreshold?: IntNullableWithAggregatesFilter<"Product"> | number | null
     lowInventoryAlertSent?: BoolWithAggregatesFilter<"Product"> | boolean
@@ -43530,6 +44827,7 @@ export namespace Prisma {
     price?: FloatNullableFilter<"ProductVariant"> | number | null
     compareAtPrice?: FloatNullableFilter<"ProductVariant"> | number | null
     inventoryQty?: IntFilter<"ProductVariant"> | number
+    reservedQty?: IntFilter<"ProductVariant"> | number
     options?: JsonFilter<"ProductVariant">
     imageUrl?: StringNullableFilter<"ProductVariant"> | string | null
     productId?: StringFilter<"ProductVariant"> | string
@@ -43548,6 +44846,7 @@ export namespace Prisma {
     price?: SortOrderInput | SortOrder
     compareAtPrice?: SortOrderInput | SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     options?: SortOrder
     imageUrl?: SortOrderInput | SortOrder
     productId?: SortOrder
@@ -43569,6 +44868,7 @@ export namespace Prisma {
     price?: FloatNullableFilter<"ProductVariant"> | number | null
     compareAtPrice?: FloatNullableFilter<"ProductVariant"> | number | null
     inventoryQty?: IntFilter<"ProductVariant"> | number
+    reservedQty?: IntFilter<"ProductVariant"> | number
     options?: JsonFilter<"ProductVariant">
     imageUrl?: StringNullableFilter<"ProductVariant"> | string | null
     productId?: StringFilter<"ProductVariant"> | string
@@ -43587,6 +44887,7 @@ export namespace Prisma {
     price?: SortOrderInput | SortOrder
     compareAtPrice?: SortOrderInput | SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     options?: SortOrder
     imageUrl?: SortOrderInput | SortOrder
     productId?: SortOrder
@@ -43610,6 +44911,7 @@ export namespace Prisma {
     price?: FloatNullableWithAggregatesFilter<"ProductVariant"> | number | null
     compareAtPrice?: FloatNullableWithAggregatesFilter<"ProductVariant"> | number | null
     inventoryQty?: IntWithAggregatesFilter<"ProductVariant"> | number
+    reservedQty?: IntWithAggregatesFilter<"ProductVariant"> | number
     options?: JsonWithAggregatesFilter<"ProductVariant">
     imageUrl?: StringNullableWithAggregatesFilter<"ProductVariant"> | string | null
     productId?: StringWithAggregatesFilter<"ProductVariant"> | string
@@ -44730,6 +46032,7 @@ export namespace Prisma {
     name?: StringFilter<"BaseInventoryUnit"> | string
     description?: StringNullableFilter<"BaseInventoryUnit"> | string | null
     inventoryQty?: IntFilter<"BaseInventoryUnit"> | number
+    reservedQty?: IntFilter<"BaseInventoryUnit"> | number
     lowInventoryThreshold?: IntNullableFilter<"BaseInventoryUnit"> | number | null
     lowInventoryAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
     outOfStockAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
@@ -44747,6 +46050,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrderInput | SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrderInput | SortOrder
     lowInventoryAlertSent?: SortOrder
     outOfStockAlertSent?: SortOrder
@@ -44767,6 +46071,7 @@ export namespace Prisma {
     name?: StringFilter<"BaseInventoryUnit"> | string
     description?: StringNullableFilter<"BaseInventoryUnit"> | string | null
     inventoryQty?: IntFilter<"BaseInventoryUnit"> | number
+    reservedQty?: IntFilter<"BaseInventoryUnit"> | number
     lowInventoryThreshold?: IntNullableFilter<"BaseInventoryUnit"> | number | null
     lowInventoryAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
     outOfStockAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
@@ -44784,6 +46089,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrderInput | SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrderInput | SortOrder
     lowInventoryAlertSent?: SortOrder
     outOfStockAlertSent?: SortOrder
@@ -44806,11 +46112,82 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"BaseInventoryUnit"> | string
     description?: StringNullableWithAggregatesFilter<"BaseInventoryUnit"> | string | null
     inventoryQty?: IntWithAggregatesFilter<"BaseInventoryUnit"> | number
+    reservedQty?: IntWithAggregatesFilter<"BaseInventoryUnit"> | number
     lowInventoryThreshold?: IntNullableWithAggregatesFilter<"BaseInventoryUnit"> | number | null
     lowInventoryAlertSent?: BoolWithAggregatesFilter<"BaseInventoryUnit"> | boolean
     outOfStockAlertSent?: BoolWithAggregatesFilter<"BaseInventoryUnit"> | boolean
     allowBackorders?: BoolWithAggregatesFilter<"BaseInventoryUnit"> | boolean
     businessId?: StringWithAggregatesFilter<"BaseInventoryUnit"> | string
+  }
+
+  export type InventoryReservationWhereInput = {
+    AND?: InventoryReservationWhereInput | InventoryReservationWhereInput[]
+    OR?: InventoryReservationWhereInput[]
+    NOT?: InventoryReservationWhereInput | InventoryReservationWhereInput[]
+    id?: StringFilter<"InventoryReservation"> | string
+    createdAt?: DateTimeFilter<"InventoryReservation"> | Date | string
+    updatedAt?: DateTimeFilter<"InventoryReservation"> | Date | string
+    businessId?: StringFilter<"InventoryReservation"> | string
+    stripeSessionId?: StringNullableFilter<"InventoryReservation"> | string | null
+    status?: StringFilter<"InventoryReservation"> | string
+    expiresAt?: DateTimeFilter<"InventoryReservation"> | Date | string
+    items?: JsonFilter<"InventoryReservation">
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type InventoryReservationOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    stripeSessionId?: SortOrderInput | SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    items?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type InventoryReservationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    stripeSessionId?: string
+    AND?: InventoryReservationWhereInput | InventoryReservationWhereInput[]
+    OR?: InventoryReservationWhereInput[]
+    NOT?: InventoryReservationWhereInput | InventoryReservationWhereInput[]
+    createdAt?: DateTimeFilter<"InventoryReservation"> | Date | string
+    updatedAt?: DateTimeFilter<"InventoryReservation"> | Date | string
+    businessId?: StringFilter<"InventoryReservation"> | string
+    status?: StringFilter<"InventoryReservation"> | string
+    expiresAt?: DateTimeFilter<"InventoryReservation"> | Date | string
+    items?: JsonFilter<"InventoryReservation">
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id" | "stripeSessionId">
+
+  export type InventoryReservationOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    stripeSessionId?: SortOrderInput | SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    items?: SortOrder
+    _count?: InventoryReservationCountOrderByAggregateInput
+    _max?: InventoryReservationMaxOrderByAggregateInput
+    _min?: InventoryReservationMinOrderByAggregateInput
+  }
+
+  export type InventoryReservationScalarWhereWithAggregatesInput = {
+    AND?: InventoryReservationScalarWhereWithAggregatesInput | InventoryReservationScalarWhereWithAggregatesInput[]
+    OR?: InventoryReservationScalarWhereWithAggregatesInput[]
+    NOT?: InventoryReservationScalarWhereWithAggregatesInput | InventoryReservationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"InventoryReservation"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"InventoryReservation"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"InventoryReservation"> | Date | string
+    businessId?: StringWithAggregatesFilter<"InventoryReservation"> | string
+    stripeSessionId?: StringNullableWithAggregatesFilter<"InventoryReservation"> | string | null
+    status?: StringWithAggregatesFilter<"InventoryReservation"> | string
+    expiresAt?: DateTimeWithAggregatesFilter<"InventoryReservation"> | Date | string
+    items?: JsonWithAggregatesFilter<"InventoryReservation">
   }
 
   export type PageWhereInput = {
@@ -46179,6 +47556,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -46224,6 +47602,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -46269,6 +47648,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -46314,6 +47694,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -46641,6 +48022,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -46683,6 +48065,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -46725,6 +48108,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -46767,6 +48151,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -46809,6 +48194,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -46845,6 +48231,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -46879,6 +48266,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -46910,6 +48298,7 @@ export namespace Prisma {
     price?: number | null
     compareAtPrice?: number | null
     inventoryQty?: number
+    reservedQty?: number
     options: JsonNullValueInput | InputJsonValue
     imageUrl?: string | null
     product: ProductCreateNestedOneWithoutVariantsInput
@@ -46927,6 +48316,7 @@ export namespace Prisma {
     price?: number | null
     compareAtPrice?: number | null
     inventoryQty?: number
+    reservedQty?: number
     options: JsonNullValueInput | InputJsonValue
     imageUrl?: string | null
     productId: string
@@ -46944,6 +48334,7 @@ export namespace Prisma {
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
@@ -46961,6 +48352,7 @@ export namespace Prisma {
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: StringFieldUpdateOperationsInput | string
@@ -46978,6 +48370,7 @@ export namespace Prisma {
     price?: number | null
     compareAtPrice?: number | null
     inventoryQty?: number
+    reservedQty?: number
     options: JsonNullValueInput | InputJsonValue
     imageUrl?: string | null
     productId: string
@@ -46993,6 +48386,7 @@ export namespace Prisma {
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -47007,6 +48401,7 @@ export namespace Prisma {
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: StringFieldUpdateOperationsInput | string
@@ -48227,6 +49622,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     inventoryQty?: number
+    reservedQty?: number
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -48243,6 +49639,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     inventoryQty?: number
+    reservedQty?: number
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -48259,6 +49656,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -48275,6 +49673,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -48291,6 +49690,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     inventoryQty?: number
+    reservedQty?: number
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -48305,6 +49705,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -48318,11 +49719,88 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type InventoryReservationCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeSessionId?: string | null
+    status?: string
+    expiresAt: Date | string
+    items: JsonNullValueInput | InputJsonValue
+    business: BusinessCreateNestedOneWithoutInventoryReservationsInput
+  }
+
+  export type InventoryReservationUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    stripeSessionId?: string | null
+    status?: string
+    expiresAt: Date | string
+    items: JsonNullValueInput | InputJsonValue
+  }
+
+  export type InventoryReservationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+    business?: BusinessUpdateOneRequiredWithoutInventoryReservationsNestedInput
+  }
+
+  export type InventoryReservationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type InventoryReservationCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    stripeSessionId?: string | null
+    status?: string
+    expiresAt: Date | string
+    items: JsonNullValueInput | InputJsonValue
+  }
+
+  export type InventoryReservationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type InventoryReservationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
   }
 
   export type PageCreateInput = {
@@ -49836,6 +51314,12 @@ export namespace Prisma {
     none?: BaseInventoryUnitWhereInput
   }
 
+  export type InventoryReservationListRelationFilter = {
+    every?: InventoryReservationWhereInput
+    some?: InventoryReservationWhereInput
+    none?: InventoryReservationWhereInput
+  }
+
   export type PageListRelationFilter = {
     every?: PageWhereInput
     some?: PageWhereInput
@@ -49887,6 +51371,10 @@ export namespace Prisma {
   }
 
   export type BaseInventoryUnitOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InventoryReservationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -50287,6 +51775,7 @@ export namespace Prisma {
     barcode?: SortOrder
     trackInventory?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     allowBackorders?: SortOrder
     lowInventoryThreshold?: SortOrder
     lowInventoryAlertSent?: SortOrder
@@ -50313,6 +51802,7 @@ export namespace Prisma {
     compareAtPrice?: SortOrder
     cost?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrder
     baseUnitsConsumed?: SortOrder
     weight?: SortOrder
@@ -50336,6 +51826,7 @@ export namespace Prisma {
     barcode?: SortOrder
     trackInventory?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     allowBackorders?: SortOrder
     lowInventoryThreshold?: SortOrder
     lowInventoryAlertSent?: SortOrder
@@ -50371,6 +51862,7 @@ export namespace Prisma {
     barcode?: SortOrder
     trackInventory?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     allowBackorders?: SortOrder
     lowInventoryThreshold?: SortOrder
     lowInventoryAlertSent?: SortOrder
@@ -50396,6 +51888,7 @@ export namespace Prisma {
     compareAtPrice?: SortOrder
     cost?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrder
     baseUnitsConsumed?: SortOrder
     weight?: SortOrder
@@ -50467,6 +51960,7 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     options?: SortOrder
     imageUrl?: SortOrder
     productId?: SortOrder
@@ -50476,6 +51970,7 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
   }
 
   export type ProductVariantMaxOrderByAggregateInput = {
@@ -50488,6 +51983,7 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     imageUrl?: SortOrder
     productId?: SortOrder
   }
@@ -50502,6 +51998,7 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     imageUrl?: SortOrder
     productId?: SortOrder
   }
@@ -50510,6 +52007,7 @@ export namespace Prisma {
     price?: SortOrder
     compareAtPrice?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
   }
 
   export type CollectionBusinessIdSlugCompoundUniqueInput = {
@@ -51232,6 +52730,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrder
     lowInventoryAlertSent?: SortOrder
     outOfStockAlertSent?: SortOrder
@@ -51241,6 +52740,7 @@ export namespace Prisma {
 
   export type BaseInventoryUnitAvgOrderByAggregateInput = {
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrder
   }
 
@@ -51251,6 +52751,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrder
     lowInventoryAlertSent?: SortOrder
     outOfStockAlertSent?: SortOrder
@@ -51265,6 +52766,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrder
     lowInventoryAlertSent?: SortOrder
     outOfStockAlertSent?: SortOrder
@@ -51274,7 +52776,39 @@ export namespace Prisma {
 
   export type BaseInventoryUnitSumOrderByAggregateInput = {
     inventoryQty?: SortOrder
+    reservedQty?: SortOrder
     lowInventoryThreshold?: SortOrder
+  }
+
+  export type InventoryReservationCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    stripeSessionId?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    items?: SortOrder
+  }
+
+  export type InventoryReservationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    stripeSessionId?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+  }
+
+  export type InventoryReservationMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    stripeSessionId?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
   }
 
   export type PageBusinessIdSlugCompoundUniqueInput = {
@@ -52220,6 +53754,13 @@ export namespace Prisma {
     connect?: BaseInventoryUnitWhereUniqueInput | BaseInventoryUnitWhereUniqueInput[]
   }
 
+  export type InventoryReservationCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InventoryReservationCreateWithoutBusinessInput, InventoryReservationUncheckedCreateWithoutBusinessInput> | InventoryReservationCreateWithoutBusinessInput[] | InventoryReservationUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryReservationCreateOrConnectWithoutBusinessInput | InventoryReservationCreateOrConnectWithoutBusinessInput[]
+    createMany?: InventoryReservationCreateManyBusinessInputEnvelope
+    connect?: InventoryReservationWhereUniqueInput | InventoryReservationWhereUniqueInput[]
+  }
+
   export type PageCreateNestedManyWithoutBusinessInput = {
     create?: XOR<PageCreateWithoutBusinessInput, PageUncheckedCreateWithoutBusinessInput> | PageCreateWithoutBusinessInput[] | PageUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: PageCreateOrConnectWithoutBusinessInput | PageCreateOrConnectWithoutBusinessInput[]
@@ -52329,6 +53870,13 @@ export namespace Prisma {
     connectOrCreate?: BaseInventoryUnitCreateOrConnectWithoutBusinessInput | BaseInventoryUnitCreateOrConnectWithoutBusinessInput[]
     createMany?: BaseInventoryUnitCreateManyBusinessInputEnvelope
     connect?: BaseInventoryUnitWhereUniqueInput | BaseInventoryUnitWhereUniqueInput[]
+  }
+
+  export type InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InventoryReservationCreateWithoutBusinessInput, InventoryReservationUncheckedCreateWithoutBusinessInput> | InventoryReservationCreateWithoutBusinessInput[] | InventoryReservationUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryReservationCreateOrConnectWithoutBusinessInput | InventoryReservationCreateOrConnectWithoutBusinessInput[]
+    createMany?: InventoryReservationCreateManyBusinessInputEnvelope
+    connect?: InventoryReservationWhereUniqueInput | InventoryReservationWhereUniqueInput[]
   }
 
   export type PageUncheckedCreateNestedManyWithoutBusinessInput = {
@@ -52512,6 +54060,20 @@ export namespace Prisma {
     update?: BaseInventoryUnitUpdateWithWhereUniqueWithoutBusinessInput | BaseInventoryUnitUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: BaseInventoryUnitUpdateManyWithWhereWithoutBusinessInput | BaseInventoryUnitUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: BaseInventoryUnitScalarWhereInput | BaseInventoryUnitScalarWhereInput[]
+  }
+
+  export type InventoryReservationUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InventoryReservationCreateWithoutBusinessInput, InventoryReservationUncheckedCreateWithoutBusinessInput> | InventoryReservationCreateWithoutBusinessInput[] | InventoryReservationUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryReservationCreateOrConnectWithoutBusinessInput | InventoryReservationCreateOrConnectWithoutBusinessInput[]
+    upsert?: InventoryReservationUpsertWithWhereUniqueWithoutBusinessInput | InventoryReservationUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InventoryReservationCreateManyBusinessInputEnvelope
+    set?: InventoryReservationWhereUniqueInput | InventoryReservationWhereUniqueInput[]
+    disconnect?: InventoryReservationWhereUniqueInput | InventoryReservationWhereUniqueInput[]
+    delete?: InventoryReservationWhereUniqueInput | InventoryReservationWhereUniqueInput[]
+    connect?: InventoryReservationWhereUniqueInput | InventoryReservationWhereUniqueInput[]
+    update?: InventoryReservationUpdateWithWhereUniqueWithoutBusinessInput | InventoryReservationUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InventoryReservationUpdateManyWithWhereWithoutBusinessInput | InventoryReservationUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InventoryReservationScalarWhereInput | InventoryReservationScalarWhereInput[]
   }
 
   export type PageUpdateManyWithoutBusinessNestedInput = {
@@ -52732,6 +54294,20 @@ export namespace Prisma {
     update?: BaseInventoryUnitUpdateWithWhereUniqueWithoutBusinessInput | BaseInventoryUnitUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: BaseInventoryUnitUpdateManyWithWhereWithoutBusinessInput | BaseInventoryUnitUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: BaseInventoryUnitScalarWhereInput | BaseInventoryUnitScalarWhereInput[]
+  }
+
+  export type InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InventoryReservationCreateWithoutBusinessInput, InventoryReservationUncheckedCreateWithoutBusinessInput> | InventoryReservationCreateWithoutBusinessInput[] | InventoryReservationUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryReservationCreateOrConnectWithoutBusinessInput | InventoryReservationCreateOrConnectWithoutBusinessInput[]
+    upsert?: InventoryReservationUpsertWithWhereUniqueWithoutBusinessInput | InventoryReservationUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InventoryReservationCreateManyBusinessInputEnvelope
+    set?: InventoryReservationWhereUniqueInput | InventoryReservationWhereUniqueInput[]
+    disconnect?: InventoryReservationWhereUniqueInput | InventoryReservationWhereUniqueInput[]
+    delete?: InventoryReservationWhereUniqueInput | InventoryReservationWhereUniqueInput[]
+    connect?: InventoryReservationWhereUniqueInput | InventoryReservationWhereUniqueInput[]
+    update?: InventoryReservationUpdateWithWhereUniqueWithoutBusinessInput | InventoryReservationUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InventoryReservationUpdateManyWithWhereWithoutBusinessInput | InventoryReservationUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InventoryReservationScalarWhereInput | InventoryReservationScalarWhereInput[]
   }
 
   export type PageUncheckedUpdateManyWithoutBusinessNestedInput = {
@@ -54200,6 +55776,20 @@ export namespace Prisma {
     deleteMany?: InventoryHistoryScalarWhereInput | InventoryHistoryScalarWhereInput[]
   }
 
+  export type BusinessCreateNestedOneWithoutInventoryReservationsInput = {
+    create?: XOR<BusinessCreateWithoutInventoryReservationsInput, BusinessUncheckedCreateWithoutInventoryReservationsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutInventoryReservationsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type BusinessUpdateOneRequiredWithoutInventoryReservationsNestedInput = {
+    create?: XOR<BusinessCreateWithoutInventoryReservationsInput, BusinessUncheckedCreateWithoutInventoryReservationsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutInventoryReservationsInput
+    upsert?: BusinessUpsertWithoutInventoryReservationsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutInventoryReservationsInput, BusinessUpdateWithoutInventoryReservationsInput>, BusinessUncheckedUpdateWithoutInventoryReservationsInput>
+  }
+
   export type BusinessCreateNestedOneWithoutPagesInput = {
     create?: XOR<BusinessCreateWithoutPagesInput, BusinessUncheckedCreateWithoutPagesInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutPagesInput
@@ -55337,6 +56927,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -55381,6 +56972,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -55484,6 +57076,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -55528,6 +57121,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -55711,6 +57305,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -55752,6 +57347,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -56152,6 +57748,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     inventoryQty?: number
+    reservedQty?: number
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -56167,6 +57764,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     inventoryQty?: number
+    reservedQty?: number
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -56182,6 +57780,36 @@ export namespace Prisma {
 
   export type BaseInventoryUnitCreateManyBusinessInputEnvelope = {
     data: BaseInventoryUnitCreateManyBusinessInput | BaseInventoryUnitCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InventoryReservationCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeSessionId?: string | null
+    status?: string
+    expiresAt: Date | string
+    items: JsonNullValueInput | InputJsonValue
+  }
+
+  export type InventoryReservationUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeSessionId?: string | null
+    status?: string
+    expiresAt: Date | string
+    items: JsonNullValueInput | InputJsonValue
+  }
+
+  export type InventoryReservationCreateOrConnectWithoutBusinessInput = {
+    where: InventoryReservationWhereUniqueInput
+    create: XOR<InventoryReservationCreateWithoutBusinessInput, InventoryReservationUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type InventoryReservationCreateManyBusinessInputEnvelope = {
+    data: InventoryReservationCreateManyBusinessInput | InventoryReservationCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
@@ -56493,6 +58121,7 @@ export namespace Prisma {
     barcode?: StringNullableFilter<"Product"> | string | null
     trackInventory?: BoolFilter<"Product"> | boolean
     inventoryQty?: IntFilter<"Product"> | number
+    reservedQty?: IntFilter<"Product"> | number
     allowBackorders?: BoolFilter<"Product"> | boolean
     lowInventoryThreshold?: IntNullableFilter<"Product"> | number | null
     lowInventoryAlertSent?: BoolFilter<"Product"> | boolean
@@ -56799,11 +58428,42 @@ export namespace Prisma {
     name?: StringFilter<"BaseInventoryUnit"> | string
     description?: StringNullableFilter<"BaseInventoryUnit"> | string | null
     inventoryQty?: IntFilter<"BaseInventoryUnit"> | number
+    reservedQty?: IntFilter<"BaseInventoryUnit"> | number
     lowInventoryThreshold?: IntNullableFilter<"BaseInventoryUnit"> | number | null
     lowInventoryAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
     outOfStockAlertSent?: BoolFilter<"BaseInventoryUnit"> | boolean
     allowBackorders?: BoolFilter<"BaseInventoryUnit"> | boolean
     businessId?: StringFilter<"BaseInventoryUnit"> | string
+  }
+
+  export type InventoryReservationUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: InventoryReservationWhereUniqueInput
+    update: XOR<InventoryReservationUpdateWithoutBusinessInput, InventoryReservationUncheckedUpdateWithoutBusinessInput>
+    create: XOR<InventoryReservationCreateWithoutBusinessInput, InventoryReservationUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type InventoryReservationUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: InventoryReservationWhereUniqueInput
+    data: XOR<InventoryReservationUpdateWithoutBusinessInput, InventoryReservationUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type InventoryReservationUpdateManyWithWhereWithoutBusinessInput = {
+    where: InventoryReservationScalarWhereInput
+    data: XOR<InventoryReservationUpdateManyMutationInput, InventoryReservationUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type InventoryReservationScalarWhereInput = {
+    AND?: InventoryReservationScalarWhereInput | InventoryReservationScalarWhereInput[]
+    OR?: InventoryReservationScalarWhereInput[]
+    NOT?: InventoryReservationScalarWhereInput | InventoryReservationScalarWhereInput[]
+    id?: StringFilter<"InventoryReservation"> | string
+    createdAt?: DateTimeFilter<"InventoryReservation"> | Date | string
+    updatedAt?: DateTimeFilter<"InventoryReservation"> | Date | string
+    businessId?: StringFilter<"InventoryReservation"> | string
+    stripeSessionId?: StringNullableFilter<"InventoryReservation"> | string | null
+    status?: StringFilter<"InventoryReservation"> | string
+    expiresAt?: DateTimeFilter<"InventoryReservation"> | Date | string
+    items?: JsonFilter<"InventoryReservation">
   }
 
   export type PageUpsertWithWhereUniqueWithoutBusinessInput = {
@@ -57054,6 +58714,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -57098,6 +58759,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -57158,6 +58820,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -57202,6 +58865,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -57218,6 +58882,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     inventoryQty?: number
+    reservedQty?: number
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -57233,6 +58898,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     inventoryQty?: number
+    reservedQty?: number
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -57281,6 +58947,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -57325,6 +58992,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -57381,6 +59049,7 @@ export namespace Prisma {
     price?: number | null
     compareAtPrice?: number | null
     inventoryQty?: number
+    reservedQty?: number
     options: JsonNullValueInput | InputJsonValue
     imageUrl?: string | null
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutVariantInput
@@ -57397,6 +59066,7 @@ export namespace Prisma {
     price?: number | null
     compareAtPrice?: number | null
     inventoryQty?: number
+    reservedQty?: number
     options: JsonNullValueInput | InputJsonValue
     imageUrl?: string | null
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput
@@ -57585,6 +59255,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -57600,6 +59271,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -57654,6 +59326,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -57698,6 +59371,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -57752,6 +59426,7 @@ export namespace Prisma {
     price?: FloatNullableFilter<"ProductVariant"> | number | null
     compareAtPrice?: FloatNullableFilter<"ProductVariant"> | number | null
     inventoryQty?: IntFilter<"ProductVariant"> | number
+    reservedQty?: IntFilter<"ProductVariant"> | number
     options?: JsonFilter<"ProductVariant">
     imageUrl?: StringNullableFilter<"ProductVariant"> | string | null
     productId?: StringFilter<"ProductVariant"> | string
@@ -57889,6 +59564,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -57930,6 +59606,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -58061,6 +59738,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -58102,6 +59780,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -58195,6 +59874,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -58239,6 +59919,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -58321,6 +60002,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -58365,6 +60047,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -58444,6 +60127,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -58485,6 +60169,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -58587,6 +60272,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -58628,6 +60314,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -58669,6 +60356,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -58710,6 +60398,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -58776,6 +60465,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -58820,6 +60510,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -58860,6 +60551,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -58901,6 +60593,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -58973,6 +60666,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -59017,6 +60711,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -59098,6 +60793,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -59142,6 +60838,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -59507,6 +61204,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -59551,6 +61249,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -59882,6 +61581,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -59926,6 +61626,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -60275,6 +61976,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -60319,6 +62021,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -60719,6 +62422,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -60760,6 +62464,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -60801,6 +62506,7 @@ export namespace Prisma {
     price?: number | null
     compareAtPrice?: number | null
     inventoryQty?: number
+    reservedQty?: number
     options: JsonNullValueInput | InputJsonValue
     imageUrl?: string | null
     product: ProductCreateNestedOneWithoutVariantsInput
@@ -60817,6 +62523,7 @@ export namespace Prisma {
     price?: number | null
     compareAtPrice?: number | null
     inventoryQty?: number
+    reservedQty?: number
     options: JsonNullValueInput | InputJsonValue
     imageUrl?: string | null
     productId: string
@@ -60927,6 +62634,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -60968,6 +62676,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -61015,6 +62724,7 @@ export namespace Prisma {
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
@@ -61031,6 +62741,7 @@ export namespace Prisma {
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: StringFieldUpdateOperationsInput | string
@@ -61151,6 +62862,7 @@ export namespace Prisma {
     images?: ImageCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -61195,6 +62907,7 @@ export namespace Prisma {
     images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -61333,6 +63046,7 @@ export namespace Prisma {
     images?: ImageUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -61377,6 +63091,7 @@ export namespace Prisma {
     images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -61412,6 +63127,7 @@ export namespace Prisma {
     price?: number | null
     compareAtPrice?: number | null
     inventoryQty?: number
+    reservedQty?: number
     options: JsonNullValueInput | InputJsonValue
     imageUrl?: string | null
     product: ProductCreateNestedOneWithoutVariantsInput
@@ -61428,6 +63144,7 @@ export namespace Prisma {
     price?: number | null
     compareAtPrice?: number | null
     inventoryQty?: number
+    reservedQty?: number
     options: JsonNullValueInput | InputJsonValue
     imageUrl?: string | null
     productId: string
@@ -61454,6 +63171,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -61495,6 +63213,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -61533,6 +63252,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     inventoryQty?: number
+    reservedQty?: number
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -61548,6 +63268,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     inventoryQty?: number
+    reservedQty?: number
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
@@ -61596,6 +63317,7 @@ export namespace Prisma {
     images?: ImageCreateNestedManyWithoutBusinessInput
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -61640,6 +63362,7 @@ export namespace Prisma {
     images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -61785,6 +63508,7 @@ export namespace Prisma {
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
@@ -61801,6 +63525,7 @@ export namespace Prisma {
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: StringFieldUpdateOperationsInput | string
@@ -61833,6 +63558,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -61874,6 +63600,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -61918,6 +63645,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -61933,6 +63661,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -61987,6 +63716,7 @@ export namespace Prisma {
     images?: ImageUpdateManyWithoutBusinessNestedInput
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -62031,6 +63761,7 @@ export namespace Prisma {
     images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -62197,6 +63928,7 @@ export namespace Prisma {
     images?: ImageCreateNestedManyWithoutBusinessInput
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -62241,6 +63973,7 @@ export namespace Prisma {
     images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -62270,6 +64003,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -62311,6 +64045,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -62433,6 +64168,7 @@ export namespace Prisma {
     images?: ImageUpdateManyWithoutBusinessNestedInput
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -62477,6 +64213,7 @@ export namespace Prisma {
     images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -62518,6 +64255,202 @@ export namespace Prisma {
     data: XOR<InventoryHistoryUpdateManyMutationInput, InventoryHistoryUncheckedUpdateManyWithoutBaseInventoryUnitInput>
   }
 
+  export type BusinessCreateWithoutInventoryReservationsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    taxId?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutInventoryReservationsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    taxId?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutInventoryReservationsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutInventoryReservationsInput, BusinessUncheckedCreateWithoutInventoryReservationsInput>
+  }
+
+  export type BusinessUpsertWithoutInventoryReservationsInput = {
+    update: XOR<BusinessUpdateWithoutInventoryReservationsInput, BusinessUncheckedUpdateWithoutInventoryReservationsInput>
+    create: XOR<BusinessCreateWithoutInventoryReservationsInput, BusinessUncheckedCreateWithoutInventoryReservationsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutInventoryReservationsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutInventoryReservationsInput, BusinessUncheckedUpdateWithoutInventoryReservationsInput>
+  }
+
+  export type BusinessUpdateWithoutInventoryReservationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutInventoryReservationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
   export type BusinessCreateWithoutPagesInput = {
     id?: string
     createdAt?: Date | string
@@ -62554,6 +64487,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -62598,6 +64532,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -62658,6 +64593,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -62702,6 +64638,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -62746,6 +64683,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -62790,6 +64728,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -62850,6 +64789,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -62894,6 +64834,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -62938,6 +64879,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -62982,6 +64924,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -63074,6 +65017,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -63118,6 +65062,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -63277,6 +65222,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -63321,6 +65267,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -63424,6 +65371,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -63468,6 +65416,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -63561,6 +65510,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -63605,6 +65555,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -63708,6 +65659,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -63752,6 +65704,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -63824,6 +65777,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -63865,6 +65819,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -64064,6 +66019,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -64105,6 +66061,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -64435,6 +66392,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
@@ -64479,6 +66437,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
@@ -64576,6 +66535,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
@@ -64620,6 +66580,7 @@ export namespace Prisma {
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -65008,6 +66969,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -65140,10 +67102,21 @@ export namespace Prisma {
     name: string
     description?: string | null
     inventoryQty?: number
+    reservedQty?: number
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
     outOfStockAlertSent?: boolean
     allowBackorders?: boolean
+  }
+
+  export type InventoryReservationCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeSessionId?: string | null
+    status?: string
+    expiresAt: Date | string
+    items: JsonNullValueInput | InputJsonValue
   }
 
   export type PageCreateManyBusinessInput = {
@@ -65262,6 +67235,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -65303,6 +67277,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -65344,6 +67319,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -65708,6 +67684,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -65723,6 +67700,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -65738,10 +67716,41 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
     outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type InventoryReservationUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type InventoryReservationUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+  }
+
+  export type InventoryReservationUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
   }
 
   export type PageUpdateWithoutBusinessInput = {
@@ -66070,6 +68079,7 @@ export namespace Prisma {
     price?: number | null
     compareAtPrice?: number | null
     inventoryQty?: number
+    reservedQty?: number
     options: JsonNullValueInput | InputJsonValue
     imageUrl?: string | null
   }
@@ -66173,6 +68183,7 @@ export namespace Prisma {
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryHistory?: InventoryHistoryUpdateManyWithoutVariantNestedInput
@@ -66189,6 +68200,7 @@ export namespace Prisma {
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput
@@ -66205,6 +68217,7 @@ export namespace Prisma {
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -67432,6 +69445,7 @@ export namespace Prisma {
     barcode?: string | null
     trackInventory?: boolean
     inventoryQty?: number
+    reservedQty?: number
     allowBackorders?: boolean
     lowInventoryThreshold?: number | null
     lowInventoryAlertSent?: boolean
@@ -67482,6 +69496,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -67523,6 +69538,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
@@ -67564,6 +69580,7 @@ export namespace Prisma {
     barcode?: NullableStringFieldUpdateOperationsInput | string | null
     trackInventory?: BoolFieldUpdateOperationsInput | boolean
     inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
     allowBackorders?: BoolFieldUpdateOperationsInput | boolean
     lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean

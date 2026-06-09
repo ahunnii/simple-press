@@ -189,7 +189,8 @@ model Business {
   images      Image[]
   discountCodes DiscountCode[]
   inventoryHistory InventoryHistory[]
-  baseInventoryUnits BaseInventoryUnit[]
+  baseInventoryUnits    BaseInventoryUnit[]
+  inventoryReservations InventoryReservation[]
   pages         Page[]
   productImports ProductImport[]
   galleries     Gallery[]
@@ -278,6 +279,7 @@ model Product {
   barcode                String?
   trackInventory         Boolean @default(false)
   inventoryQty           Int     @default(0)
+  reservedQty            Int     @default(0)
   allowBackorders        Boolean @default(false)
   lowInventoryThreshold  Int?
   lowInventoryAlertSent  Boolean @default(false)
@@ -344,7 +346,8 @@ model ProductVariant {
   
   // Inventory
   inventoryQty Int @default(0)
-  
+  reservedQty  Int @default(0)
+
   // Options (stored as JSON for flexibility)
   options Json // { size: "Small", color: "Red" }
   
@@ -721,6 +724,7 @@ model BaseInventoryUnit {
   description String? @db.Text
 
   inventoryQty          Int     @default(0)
+  reservedQty           Int     @default(0)
   lowInventoryThreshold Int?
   lowInventoryAlertSent Boolean @default(false)
   outOfStockAlertSent   Boolean @default(false)
@@ -733,6 +737,34 @@ model BaseInventoryUnit {
   inventoryHistory InventoryHistory[]
 
   @@index([businessId])
+}
+
+// ============================================
+// INVENTORY RESERVATIONS
+// ============================================
+
+model InventoryReservation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  stripeSessionId String? @unique
+
+  // active | consumed | released
+  status String @default("active")
+
+  expiresAt DateTime
+
+  // Array of { variantId?, productId?, baseInventoryUnitId?, qty }
+  items Json
+
+  @@index([businessId])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([stripeSessionId])
 }
 
 model Page {
