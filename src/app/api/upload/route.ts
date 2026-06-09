@@ -278,11 +278,8 @@ const router: Router = {
 
         return {
           generateObjectInfo: ({ file }) => {
-            const ext = file.name.includes(".")
-              ? file.name.slice(file.name.lastIndexOf("."))
-              : "";
-            const uniqueName = `${crypto.randomBytes(8).toString("hex")}${ext}`;
-            const key = `${businessId}/testimonials/${uniqueName}`;
+            const ext = safeImageExt(file.name);
+            const key = `${businessId}/testimonials/${crypto.randomBytes(8).toString("hex")}${ext}`;
             const pathName = `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${key}`;
             return {
               key,

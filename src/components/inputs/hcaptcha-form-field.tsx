@@ -18,10 +18,29 @@ type HCaptchaFieldProps = {
   size?: "normal" | "compact" | "invisible";
   label?: string;
   required?: boolean;
+  /** Stable id for the captcha container — used to associate the label and aria-describedby */
+  fieldId?: string;
+  /** Id of an error element to reference via aria-describedby on the widget container */
+  errorId?: string;
+  /** Inline error message; rendered in a role="alert" element when provided */
+  error?: string;
 };
 
 export const HCaptchaField = forwardRef<HCaptchaHandle, HCaptchaFieldProps>(
-  ({ onVerify, onError, onExpire, size = "normal", label, required }, ref) => {
+  (
+    {
+      onVerify,
+      onError,
+      onExpire,
+      size = "normal",
+      label,
+      required,
+      fieldId,
+      errorId,
+      error,
+    },
+    ref,
+  ) => {
     const captchaRef = useRef<HCaptcha>(null);
     const siteKey = env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
 
@@ -39,12 +58,21 @@ export const HCaptchaField = forwardRef<HCaptchaHandle, HCaptchaFieldProps>(
       return null;
     }
 
+    const labelId = fieldId ? `${fieldId}-label` : undefined;
+    const resolvedErrorId = error ? (errorId ?? (fieldId ? `${fieldId}-error` : undefined)) : undefined;
+
     return (
-      <div className="space-y-2">
+      <div
+        className="space-y-2"
+        id={fieldId}
+        role="group"
+        aria-labelledby={labelId}
+        aria-describedby={resolvedErrorId}
+      >
         {label && (
-          <Label>
+          <Label id={labelId}>
             {label}
-            {required && <span className="ml-1 text-red-500">*</span>}
+            {required && <span className="ml-1 text-red-500" aria-hidden="true">*</span>}
           </Label>
         )}
         <HCaptcha
@@ -55,6 +83,11 @@ export const HCaptchaField = forwardRef<HCaptchaHandle, HCaptchaFieldProps>(
           onExpire={onExpire}
           size={size}
         />
+        {error && resolvedErrorId && (
+          <p id={resolvedErrorId} role="alert" className="text-sm text-red-600">
+            {error}
+          </p>
+        )}
       </div>
     );
   },

@@ -599,6 +599,17 @@ export const businessRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  updateTestimonialSettings: ownerAdminProcedure
+    .input(z.object({ testimonialsAutoApprove: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      await ctx.db.business.update({
+        where: { id: businessId },
+        data: { testimonialsAutoApprove: input.testimonialsAutoApprove },
+      });
+      return { success: true };
+    }),
+
   getWith: ownerAdminProcedure
     .input(
       z.object({

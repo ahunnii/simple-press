@@ -160,6 +160,9 @@ model Business {
   stripeAccountId      String? @unique
   stripeAutoTaxEnabled Boolean @default(false)
 
+  // Testimonials
+  testimonialsAutoApprove Boolean @default(false) // when true, customer submissions are auto-approved
+
   // Analytics
   umamiWebsiteId String? // Each business gets their own website ID
   umamiEnabled   Boolean @default(false)
@@ -868,8 +871,11 @@ model Testimonial {
   text        String   @db.Text
   photoUrls   String[] // Max 5; enforced in API
 
-  // Status — owner-created are public by default; customer-submitted auto-publish
-  isPublic    Boolean  @default(false)
+  // Status — two-boolean moderation model (mirrors ProductReview)
+  isApproved  Boolean  @default(false)  // owner has approved for display
+  isHidden    Boolean  @default(false)  // owner has hidden after approval
+  // Visibility: isApproved && !isHidden
+  // Status: PENDING = !isApproved && !isHidden; PUBLISHED = isApproved && !isHidden; HIDDEN = isHidden
 
   // Attribution (used by both types)
   customerName    String
@@ -887,7 +893,7 @@ model Testimonial {
   customerId  String?
   customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
-  @@index([businessId, isPublic])
+  @@index([businessId, isApproved, isHidden])
   @@index([businessId, source])
   @@index([customerId])
 }

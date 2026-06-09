@@ -14,10 +14,33 @@ import {
 
 import {
   createTRPCRouter,
+  featureGate,
   ownerAdminProcedure,
   protectedProcedure,
   publicProcedure,
 } from "../trpc";
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function buildInviteUrl(
+  business: {
+    subdomain: string;
+    customDomain: string | null;
+    domainStatus: import("generated/prisma").BusinessDomainStatus | null;
+  },
+  code: string,
+): string {
+  if (
+    business.customDomain &&
+    business.domainStatus === BusinessDomainStatus.ACTIVE
+  ) {
+    return `https://${business.customDomain}/testimonials/submit?code=${code}`;
+  }
+  if (process.env.NODE_ENV === "development") {
+    return `http://${business.subdomain}.localhost:3000/testimonials/submit?code=${code}`;
+  }
+  return `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/testimonials/submit?code=${code}`;
+}
 
 export const testimonialRouter = createTRPCRouter({
   // ─── PUBLIC ──────────────────────────────────────────────────────────────────
@@ -40,7 +63,7 @@ export const testimonialRouter = createTRPCRouter({
       return ctx.db.testimonial.findMany({
         where: {
           businessId: businessId.id,
-          ...(input.publicOnly && { isPublic: true }),
+          ...(input.publicOnly && { isApproved: true, isHidden: false }),
         },
         orderBy: { testimonialDate: "desc" },
       });
@@ -62,7 +85,7 @@ export const testimonialRouter = createTRPCRouter({
       }
 
       const all = await ctx.db.testimonial.findMany({
-        where: { businessId: businessId.id, isPublic: true },
+        where: { businessId: businessId.id, isApproved: true, isHidden: false },
         orderBy: { testimonialDate: "desc" },
         take: 20,
       });
@@ -130,26 +153,35 @@ export const testimonialRouter = createTRPCRouter({
     }),
 
   submit: protectedProcedure
+    .use(featureGate("testimonials"))
     .input(
       z.object({
         text: z.string().min(10).max(1000),
         photoUrls: z.array(z.string().url()).max(5).default([]),
-        captchaToken: z.string().optional(),
+        captchaToken: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const ip = `${getClientIpFromHeaders(ctx.headers)}:${ctx.headers.get("host") ?? ""}`;
+      try {
+        await testimonialSubmitLimiter.consume(ip);
+      } catch {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many submissions. Please try again later.",
+        });
+      }
+
       const business = await checkBusiness();
       if (!business)
         throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
 
-      if (input.captchaToken) {
-        const isValid = await verifyHCaptcha(input.captchaToken);
-        if (!isValid) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Captcha verification failed",
-          });
-        }
+      const isValid = await verifyHCaptcha(input.captchaToken);
+      if (!isValid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Captcha verification failed",
+        });
       }
 
       const user = await ctx.db.user.findUnique({
@@ -191,6 +223,13 @@ export const testimonialRouter = createTRPCRouter({
         update: {},
       });
 
+      // Fetch the business setting to determine auto-approve behaviour
+      const businessSettings = await ctx.db.business.findUnique({
+        where: { id: business.id },
+        select: { testimonialsAutoApprove: true },
+      });
+      const autoApprove = businessSettings?.testimonialsAutoApprove ?? false;
+
       return ctx.db.testimonial.create({
         data: {
           source: "customer",
@@ -200,13 +239,15 @@ export const testimonialRouter = createTRPCRouter({
           customerName: user.name ?? "Anonymous",
           text: input.text,
           photoUrls: input.photoUrls,
-          isPublic: true, // Auto-publish on submit
+          isApproved: autoApprove,
+          isHidden: false,
           testimonialDate: new Date(),
         },
       });
     }),
 
   submitWithCode: publicProcedure
+    .use(featureGate("testimonials"))
     .input(
       z.object({
         code: z.string(),
@@ -293,6 +334,13 @@ export const testimonialRouter = createTRPCRouter({
         update: {},
       });
 
+      // Fetch the business setting to determine auto-approve behaviour
+      const businessSettings = await ctx.db.business.findUnique({
+        where: { id: invite.businessId },
+        select: { testimonialsAutoApprove: true },
+      });
+      const autoApprove = businessSettings?.testimonialsAutoApprove ?? false;
+
       const testimonial = await ctx.db.testimonial.create({
         data: {
           source: "customer",
@@ -302,7 +350,8 @@ export const testimonialRouter = createTRPCRouter({
           customerName: input.name ?? "Anonymous",
           text: input.text,
           photoUrls: input.photoUrls,
-          isPublic: true, // Auto-publish on submit
+          isApproved: autoApprove,
+          isHidden: false,
           testimonialDate: new Date(),
         },
       });
@@ -319,13 +368,17 @@ export const testimonialRouter = createTRPCRouter({
 
   // Create a testimonial manually
   ownerCreate: ownerAdminProcedure
+    .use(featureGate("testimonials"))
     .input(
       z.object({
-        customerName: z.string().min(1),
+        customerName: z.string().min(1).max(200),
         customerEmail: z.string().email().optional().nullable(),
-        text: z.string().min(1),
+        customerTitle: z.string().max(200).optional().nullable(),
+        customerCompany: z.string().max(200).optional().nullable(),
+        title: z.string().max(300).optional().nullable(),
+        text: z.string().min(1).max(5000),
         photoUrls: z.array(z.string().url()).max(5).default([]),
-        isPublic: z.boolean().default(true),
+        isApproved: z.boolean().default(true),
         testimonialDate: z.string().optional(),
       }),
     )
@@ -337,10 +390,14 @@ export const testimonialRouter = createTRPCRouter({
           source: "owner",
           businessId,
           customerName: input.customerName,
-          text: input.text,
           customerEmail: input.customerEmail,
+          customerTitle: input.customerTitle,
+          customerCompany: input.customerCompany,
+          title: input.title,
+          text: input.text,
           photoUrls: input.photoUrls,
-          isPublic: input.isPublic,
+          isApproved: input.isApproved,
+          isHidden: false,
           testimonialDate: input.testimonialDate
             ? new Date(input.testimonialDate)
             : new Date(),
@@ -350,14 +407,19 @@ export const testimonialRouter = createTRPCRouter({
 
   // Update a testimonial (owner-created only)
   ownerUpdate: ownerAdminProcedure
+    .use(featureGate("testimonials"))
     .input(
       z.object({
         id: z.string(),
-        customerName: z.string().min(1).optional(),
+        customerName: z.string().min(1).max(200).optional(),
         customerEmail: z.string().email().optional().nullable(),
-        text: z.string().min(1).optional(),
+        customerTitle: z.string().max(200).optional().nullable(),
+        customerCompany: z.string().max(200).optional().nullable(),
+        title: z.string().max(300).optional().nullable(),
+        text: z.string().min(1).max(5000).optional(),
         photoUrls: z.array(z.string().url()).max(5).optional(),
-        isPublic: z.boolean().optional(),
+        isApproved: z.boolean().optional(),
+        isHidden: z.boolean().optional(),
         testimonialDate: z.string().optional(),
       }),
     )
@@ -397,6 +459,7 @@ export const testimonialRouter = createTRPCRouter({
   // ─── ADMIN (BOTH TYPES) ───────────────────────────────────────────────────
 
   updatePhotoUrls: ownerAdminProcedure
+    .use(featureGate("testimonials"))
     .input(
       z.object({
         id: z.string(),
@@ -411,24 +474,72 @@ export const testimonialRouter = createTRPCRouter({
       });
     }),
 
-  togglePublic: ownerAdminProcedure
-    .input(z.object({ id: z.string(), isPublic: z.boolean() }))
+  approve: ownerAdminProcedure
+    .use(featureGate("testimonials"))
+    .input(z.object({ id: z.string(), isApproved: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
       return ctx.db.testimonial.update({
         where: { id: input.id, businessId },
-        data: { isPublic: input.isPublic },
+        data: { isApproved: input.isApproved },
+      });
+    }),
+
+  toggleHidden: ownerAdminProcedure
+    .use(featureGate("testimonials"))
+    .input(z.object({ id: z.string(), isHidden: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      return ctx.db.testimonial.update({
+        where: { id: input.id, businessId },
+        data: { isHidden: input.isHidden },
       });
     }),
 
   delete: ownerAdminProcedure
+    .use(featureGate("testimonials"))
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
       return ctx.db.testimonial.delete({ where: { id: input.id, businessId } });
     }),
 
+  // ─── BULK MUTATIONS ───────────────────────────────────────────────────────
+
+  bulkApprove: ownerAdminProcedure
+    .use(featureGate("testimonials"))
+    .input(z.object({ ids: z.array(z.string()).min(1), isApproved: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      return ctx.db.testimonial.updateMany({
+        where: { id: { in: input.ids }, businessId },
+        data: { isApproved: input.isApproved },
+      });
+    }),
+
+  bulkSetHidden: ownerAdminProcedure
+    .use(featureGate("testimonials"))
+    .input(z.object({ ids: z.array(z.string()).min(1), isHidden: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      return ctx.db.testimonial.updateMany({
+        where: { id: { in: input.ids }, businessId },
+        data: { isHidden: input.isHidden },
+      });
+    }),
+
+  bulkDelete: ownerAdminProcedure
+    .use(featureGate("testimonials"))
+    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      return ctx.db.testimonial.deleteMany({
+        where: { id: { in: input.ids }, businessId },
+      });
+    }),
+
   sendInvite: ownerAdminProcedure
+    .use(featureGate("testimonials"))
     .input(
       z.object({
         email: z.string().email(),
@@ -438,6 +549,22 @@ export const testimonialRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
+
+      // Duplicate-invite guard: reject if an active (unused, not-yet-expired) invite already exists
+      const existingActive = await ctx.db.testimonialInvite.findFirst({
+        where: {
+          businessId,
+          email: input.email,
+          used: false,
+          expiresAt: { gt: new Date() },
+        },
+      });
+      if (existingActive) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "An active invitation already exists for this email",
+        });
+      }
 
       const business = await ctx.db.business.findUnique({
         where: { id: businessId },
@@ -474,17 +601,7 @@ export const testimonialRouter = createTRPCRouter({
         },
       });
 
-      let inviteUrl = `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/testimonials/submit?code=${code}`;
-      if (
-        business.customDomain &&
-        business.domainStatus === BusinessDomainStatus.ACTIVE
-      ) {
-        inviteUrl = `https://${business.customDomain}/testimonials/submit?code=${code}`;
-      }
-
-      if (process.env.NODE_ENV === "development") {
-        inviteUrl = `http://${business.subdomain}.localhost:3000/testimonials/submit?code=${code}`;
-      }
+      const inviteUrl = buildInviteUrl(business, code);
 
       await sendTestimonialInviteEmail({
         to: input.email,
@@ -495,6 +612,89 @@ export const testimonialRouter = createTRPCRouter({
       });
 
       return invite;
+    }),
+
+  resendInvite: ownerAdminProcedure
+    .use(featureGate("testimonials"))
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const invite = await ctx.db.testimonialInvite.findUnique({
+        where: { id: input.id, businessId },
+      });
+
+      if (!invite)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
+      if (invite.used)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This invite has already been used",
+        });
+
+      // Refresh expiry to now+30d on resend
+      const newExpiresAt = new Date();
+      newExpiresAt.setDate(newExpiresAt.getDate() + 30);
+
+      const business = await ctx.db.business.findUnique({
+        where: { id: businessId },
+        select: {
+          name: true,
+          ownerEmail: true,
+          subdomain: true,
+          customDomain: true,
+          domainStatus: true,
+          siteContent: { select: { logoUrl: true } },
+        },
+      });
+
+      if (!business)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+
+      const updatedInvite = await ctx.db.testimonialInvite.update({
+        where: { id: input.id, businessId },
+        data: { expiresAt: newExpiresAt },
+      });
+
+      const inviteUrl = buildInviteUrl(business, invite.code);
+
+      await sendTestimonialInviteEmail({
+        to: invite.email,
+        businessName: business.name,
+        inviteUrl,
+        logoUrl: business.siteContent?.logoUrl ?? undefined,
+        ownerEmail: business.ownerEmail,
+      });
+
+      return updatedInvite;
+    }),
+
+  cancelInvite: ownerAdminProcedure
+    .use(featureGate("testimonials"))
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const invite = await ctx.db.testimonialInvite.findUnique({
+        where: { id: input.id, businessId },
+      });
+
+      if (!invite)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
+      if (invite.used)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot cancel a used invite",
+        });
+
+      // Expire immediately by setting expiresAt to now
+      return ctx.db.testimonialInvite.update({
+        where: { id: input.id, businessId },
+        data: { expiresAt: new Date() },
+      });
     }),
 
   listInvites: ownerAdminProcedure.query(async ({ ctx }) => {

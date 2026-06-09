@@ -9883,6 +9883,7 @@ export namespace Prisma {
     taxId: string | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean | null
+    testimonialsAutoApprove: boolean | null
     umamiWebsiteId: string | null
     umamiEnabled: boolean | null
     status: string | null
@@ -9910,6 +9911,7 @@ export namespace Prisma {
     taxId: string | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean | null
+    testimonialsAutoApprove: boolean | null
     umamiWebsiteId: string | null
     umamiEnabled: boolean | null
     status: string | null
@@ -9937,6 +9939,7 @@ export namespace Prisma {
     taxId: number
     stripeAccountId: number
     stripeAutoTaxEnabled: number
+    testimonialsAutoApprove: number
     umamiWebsiteId: number
     umamiEnabled: number
     status: number
@@ -9977,6 +9980,7 @@ export namespace Prisma {
     taxId?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
+    testimonialsAutoApprove?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -10004,6 +10008,7 @@ export namespace Prisma {
     taxId?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
+    testimonialsAutoApprove?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -10031,6 +10036,7 @@ export namespace Prisma {
     taxId?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
+    testimonialsAutoApprove?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -10146,6 +10152,7 @@ export namespace Prisma {
     taxId: string | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean
+    testimonialsAutoApprove: boolean
     umamiWebsiteId: string | null
     umamiEnabled: boolean
     status: string
@@ -10193,6 +10200,7 @@ export namespace Prisma {
     taxId?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -10238,6 +10246,7 @@ export namespace Prisma {
     taxId?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -10266,6 +10275,7 @@ export namespace Prisma {
     taxId?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -10294,6 +10304,7 @@ export namespace Prisma {
     taxId?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -10305,7 +10316,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "taxId" | "stripeAccountId" | "stripeAutoTaxEnabled" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "taxId" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -10365,6 +10376,7 @@ export namespace Prisma {
       taxId: string | null
       stripeAccountId: string | null
       stripeAutoTaxEnabled: boolean
+      testimonialsAutoApprove: boolean
       umamiWebsiteId: string | null
       umamiEnabled: boolean
       status: string
@@ -10829,6 +10841,7 @@ export namespace Prisma {
     readonly taxId: FieldRef<"Business", 'String'>
     readonly stripeAccountId: FieldRef<"Business", 'String'>
     readonly stripeAutoTaxEnabled: FieldRef<"Business", 'Boolean'>
+    readonly testimonialsAutoApprove: FieldRef<"Business", 'Boolean'>
     readonly umamiWebsiteId: FieldRef<"Business", 'String'>
     readonly umamiEnabled: FieldRef<"Business", 'Boolean'>
     readonly status: FieldRef<"Business", 'String'>
@@ -35686,7 +35699,8 @@ export namespace Prisma {
     source: string | null
     title: string | null
     text: string | null
-    isPublic: boolean | null
+    isApproved: boolean | null
+    isHidden: boolean | null
     customerName: string | null
     customerEmail: string | null
     customerTitle: string | null
@@ -35703,7 +35717,8 @@ export namespace Prisma {
     source: string | null
     title: string | null
     text: string | null
-    isPublic: boolean | null
+    isApproved: boolean | null
+    isHidden: boolean | null
     customerName: string | null
     customerEmail: string | null
     customerTitle: string | null
@@ -35721,7 +35736,8 @@ export namespace Prisma {
     title: number
     text: number
     photoUrls: number
-    isPublic: number
+    isApproved: number
+    isHidden: number
     customerName: number
     customerEmail: number
     customerTitle: number
@@ -35740,7 +35756,8 @@ export namespace Prisma {
     source?: true
     title?: true
     text?: true
-    isPublic?: true
+    isApproved?: true
+    isHidden?: true
     customerName?: true
     customerEmail?: true
     customerTitle?: true
@@ -35757,7 +35774,8 @@ export namespace Prisma {
     source?: true
     title?: true
     text?: true
-    isPublic?: true
+    isApproved?: true
+    isHidden?: true
     customerName?: true
     customerEmail?: true
     customerTitle?: true
@@ -35775,7 +35793,8 @@ export namespace Prisma {
     title?: true
     text?: true
     photoUrls?: true
-    isPublic?: true
+    isApproved?: true
+    isHidden?: true
     customerName?: true
     customerEmail?: true
     customerTitle?: true
@@ -35866,7 +35885,8 @@ export namespace Prisma {
     title: string | null
     text: string
     photoUrls: string[]
-    isPublic: boolean
+    isApproved: boolean
+    isHidden: boolean
     customerName: string
     customerEmail: string | null
     customerTitle: string | null
@@ -35901,7 +35921,8 @@ export namespace Prisma {
     title?: boolean
     text?: boolean
     photoUrls?: boolean
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName?: boolean
     customerEmail?: boolean
     customerTitle?: boolean
@@ -35921,7 +35942,8 @@ export namespace Prisma {
     title?: boolean
     text?: boolean
     photoUrls?: boolean
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName?: boolean
     customerEmail?: boolean
     customerTitle?: boolean
@@ -35941,7 +35963,8 @@ export namespace Prisma {
     title?: boolean
     text?: boolean
     photoUrls?: boolean
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName?: boolean
     customerEmail?: boolean
     customerTitle?: boolean
@@ -35961,7 +35984,8 @@ export namespace Prisma {
     title?: boolean
     text?: boolean
     photoUrls?: boolean
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName?: boolean
     customerEmail?: boolean
     customerTitle?: boolean
@@ -35971,7 +35995,7 @@ export namespace Prisma {
     customerId?: boolean
   }
 
-  export type TestimonialOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "source" | "title" | "text" | "photoUrls" | "isPublic" | "customerName" | "customerEmail" | "customerTitle" | "customerCompany" | "testimonialDate" | "businessId" | "customerId", ExtArgs["result"]["testimonial"]>
+  export type TestimonialOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "source" | "title" | "text" | "photoUrls" | "isApproved" | "isHidden" | "customerName" | "customerEmail" | "customerTitle" | "customerCompany" | "testimonialDate" | "businessId" | "customerId", ExtArgs["result"]["testimonial"]>
   export type TestimonialInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Testimonial$customerArgs<ExtArgs>
@@ -35999,7 +36023,8 @@ export namespace Prisma {
       title: string | null
       text: string
       photoUrls: string[]
-      isPublic: boolean
+      isApproved: boolean
+      isHidden: boolean
       customerName: string
       customerEmail: string | null
       customerTitle: string | null
@@ -36439,7 +36464,8 @@ export namespace Prisma {
     readonly title: FieldRef<"Testimonial", 'String'>
     readonly text: FieldRef<"Testimonial", 'String'>
     readonly photoUrls: FieldRef<"Testimonial", 'String[]'>
-    readonly isPublic: FieldRef<"Testimonial", 'Boolean'>
+    readonly isApproved: FieldRef<"Testimonial", 'Boolean'>
+    readonly isHidden: FieldRef<"Testimonial", 'Boolean'>
     readonly customerName: FieldRef<"Testimonial", 'String'>
     readonly customerEmail: FieldRef<"Testimonial", 'String'>
     readonly customerTitle: FieldRef<"Testimonial", 'String'>
@@ -41810,6 +41836,7 @@ export namespace Prisma {
     taxId: 'taxId',
     stripeAccountId: 'stripeAccountId',
     stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
+    testimonialsAutoApprove: 'testimonialsAutoApprove',
     umamiWebsiteId: 'umamiWebsiteId',
     umamiEnabled: 'umamiEnabled',
     status: 'status',
@@ -42220,7 +42247,8 @@ export namespace Prisma {
     title: 'title',
     text: 'text',
     photoUrls: 'photoUrls',
-    isPublic: 'isPublic',
+    isApproved: 'isApproved',
+    isHidden: 'isHidden',
     customerName: 'customerName',
     customerEmail: 'customerEmail',
     customerTitle: 'customerTitle',
@@ -42886,6 +42914,7 @@ export namespace Prisma {
     taxId?: StringNullableFilter<"Business"> | string | null
     stripeAccountId?: StringNullableFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
+    testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
     umamiWebsiteId?: StringNullableFilter<"Business"> | string | null
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
@@ -42930,6 +42959,7 @@ export namespace Prisma {
     taxId?: SortOrderInput | SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     stripeAutoTaxEnabled?: SortOrder
+    testimonialsAutoApprove?: SortOrder
     umamiWebsiteId?: SortOrderInput | SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -42977,6 +43007,7 @@ export namespace Prisma {
     businessAddress?: StringNullableFilter<"Business"> | string | null
     taxId?: StringNullableFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
+    testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
     umamiWebsiteId?: StringNullableFilter<"Business"> | string | null
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
@@ -43021,6 +43052,7 @@ export namespace Prisma {
     taxId?: SortOrderInput | SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     stripeAutoTaxEnabled?: SortOrder
+    testimonialsAutoApprove?: SortOrder
     umamiWebsiteId?: SortOrderInput | SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -43057,6 +43089,7 @@ export namespace Prisma {
     taxId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     stripeAccountId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
+    testimonialsAutoApprove?: BoolWithAggregatesFilter<"Business"> | boolean
     umamiWebsiteId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     umamiEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     status?: StringWithAggregatesFilter<"Business"> | string
@@ -45167,7 +45200,8 @@ export namespace Prisma {
     title?: StringNullableFilter<"Testimonial"> | string | null
     text?: StringFilter<"Testimonial"> | string
     photoUrls?: StringNullableListFilter<"Testimonial">
-    isPublic?: BoolFilter<"Testimonial"> | boolean
+    isApproved?: BoolFilter<"Testimonial"> | boolean
+    isHidden?: BoolFilter<"Testimonial"> | boolean
     customerName?: StringFilter<"Testimonial"> | string
     customerEmail?: StringNullableFilter<"Testimonial"> | string | null
     customerTitle?: StringNullableFilter<"Testimonial"> | string | null
@@ -45187,7 +45221,8 @@ export namespace Prisma {
     title?: SortOrderInput | SortOrder
     text?: SortOrder
     photoUrls?: SortOrder
-    isPublic?: SortOrder
+    isApproved?: SortOrder
+    isHidden?: SortOrder
     customerName?: SortOrder
     customerEmail?: SortOrderInput | SortOrder
     customerTitle?: SortOrderInput | SortOrder
@@ -45210,7 +45245,8 @@ export namespace Prisma {
     title?: StringNullableFilter<"Testimonial"> | string | null
     text?: StringFilter<"Testimonial"> | string
     photoUrls?: StringNullableListFilter<"Testimonial">
-    isPublic?: BoolFilter<"Testimonial"> | boolean
+    isApproved?: BoolFilter<"Testimonial"> | boolean
+    isHidden?: BoolFilter<"Testimonial"> | boolean
     customerName?: StringFilter<"Testimonial"> | string
     customerEmail?: StringNullableFilter<"Testimonial"> | string | null
     customerTitle?: StringNullableFilter<"Testimonial"> | string | null
@@ -45230,7 +45266,8 @@ export namespace Prisma {
     title?: SortOrderInput | SortOrder
     text?: SortOrder
     photoUrls?: SortOrder
-    isPublic?: SortOrder
+    isApproved?: SortOrder
+    isHidden?: SortOrder
     customerName?: SortOrder
     customerEmail?: SortOrderInput | SortOrder
     customerTitle?: SortOrderInput | SortOrder
@@ -45254,7 +45291,8 @@ export namespace Prisma {
     title?: StringNullableWithAggregatesFilter<"Testimonial"> | string | null
     text?: StringWithAggregatesFilter<"Testimonial"> | string
     photoUrls?: StringNullableListFilter<"Testimonial">
-    isPublic?: BoolWithAggregatesFilter<"Testimonial"> | boolean
+    isApproved?: BoolWithAggregatesFilter<"Testimonial"> | boolean
+    isHidden?: BoolWithAggregatesFilter<"Testimonial"> | boolean
     customerName?: StringWithAggregatesFilter<"Testimonial"> | string
     customerEmail?: StringNullableWithAggregatesFilter<"Testimonial"> | string | null
     customerTitle?: StringNullableWithAggregatesFilter<"Testimonial"> | string | null
@@ -46095,6 +46133,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -46139,6 +46178,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -46183,6 +46223,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -46227,6 +46268,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -46271,6 +46313,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -46299,6 +46342,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -46327,6 +46371,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -48723,7 +48768,8 @@ export namespace Prisma {
     title?: string | null
     text: string
     photoUrls?: TestimonialCreatephotoUrlsInput | string[]
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName: string
     customerEmail?: string | null
     customerTitle?: string | null
@@ -48741,7 +48787,8 @@ export namespace Prisma {
     title?: string | null
     text: string
     photoUrls?: TestimonialCreatephotoUrlsInput | string[]
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName: string
     customerEmail?: string | null
     customerTitle?: string | null
@@ -48759,7 +48806,8 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
     photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48777,7 +48825,8 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
     photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48795,7 +48844,8 @@ export namespace Prisma {
     title?: string | null
     text: string
     photoUrls?: TestimonialCreatephotoUrlsInput | string[]
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName: string
     customerEmail?: string | null
     customerTitle?: string | null
@@ -48813,7 +48863,8 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
     photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48829,7 +48880,8 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
     photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -49848,6 +49900,7 @@ export namespace Prisma {
     taxId?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
+    testimonialsAutoApprove?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -49881,6 +49934,7 @@ export namespace Prisma {
     taxId?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
+    testimonialsAutoApprove?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -49908,6 +49962,7 @@ export namespace Prisma {
     taxId?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
+    testimonialsAutoApprove?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -51470,7 +51525,8 @@ export namespace Prisma {
     title?: SortOrder
     text?: SortOrder
     photoUrls?: SortOrder
-    isPublic?: SortOrder
+    isApproved?: SortOrder
+    isHidden?: SortOrder
     customerName?: SortOrder
     customerEmail?: SortOrder
     customerTitle?: SortOrder
@@ -51487,7 +51543,8 @@ export namespace Prisma {
     source?: SortOrder
     title?: SortOrder
     text?: SortOrder
-    isPublic?: SortOrder
+    isApproved?: SortOrder
+    isHidden?: SortOrder
     customerName?: SortOrder
     customerEmail?: SortOrder
     customerTitle?: SortOrder
@@ -51504,7 +51561,8 @@ export namespace Prisma {
     source?: SortOrder
     title?: SortOrder
     text?: SortOrder
-    isPublic?: SortOrder
+    isApproved?: SortOrder
+    isHidden?: SortOrder
     customerName?: SortOrder
     customerEmail?: SortOrder
     customerTitle?: SortOrder
@@ -55233,6 +55291,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -55276,6 +55335,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -55378,6 +55438,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -55421,6 +55482,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -56238,7 +56300,8 @@ export namespace Prisma {
     title?: string | null
     text: string
     photoUrls?: TestimonialCreatephotoUrlsInput | string[]
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName: string
     customerEmail?: string | null
     customerTitle?: string | null
@@ -56255,7 +56318,8 @@ export namespace Prisma {
     title?: string | null
     text: string
     photoUrls?: TestimonialCreatephotoUrlsInput | string[]
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName: string
     customerEmail?: string | null
     customerTitle?: string | null
@@ -56853,7 +56917,8 @@ export namespace Prisma {
     title?: StringNullableFilter<"Testimonial"> | string | null
     text?: StringFilter<"Testimonial"> | string
     photoUrls?: StringNullableListFilter<"Testimonial">
-    isPublic?: BoolFilter<"Testimonial"> | boolean
+    isApproved?: BoolFilter<"Testimonial"> | boolean
+    isHidden?: BoolFilter<"Testimonial"> | boolean
     customerName?: StringFilter<"Testimonial"> | string
     customerEmail?: StringNullableFilter<"Testimonial"> | string | null
     customerTitle?: StringNullableFilter<"Testimonial"> | string | null
@@ -56944,6 +57009,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -56987,6 +57053,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -57046,6 +57113,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -57089,6 +57157,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -57167,6 +57236,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -57210,6 +57280,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -57538,6 +57609,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -57581,6 +57653,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -58077,6 +58150,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -58120,6 +58194,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -58201,6 +58276,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -58244,6 +58320,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -58654,6 +58731,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -58697,6 +58775,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -58849,6 +58928,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -58892,6 +58972,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -58972,6 +59053,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -59015,6 +59097,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -59178,7 +59261,8 @@ export namespace Prisma {
     title?: string | null
     text: string
     photoUrls?: TestimonialCreatephotoUrlsInput | string[]
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName: string
     customerEmail?: string | null
     customerTitle?: string | null
@@ -59195,7 +59279,8 @@ export namespace Prisma {
     title?: string | null
     text: string
     photoUrls?: TestimonialCreatephotoUrlsInput | string[]
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName: string
     customerEmail?: string | null
     customerTitle?: string | null
@@ -59377,6 +59462,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -59420,6 +59506,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -59750,6 +59837,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -59793,6 +59881,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -60141,6 +60230,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -60184,6 +60274,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -61015,6 +61106,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -61058,6 +61150,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -61195,6 +61288,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -61238,6 +61332,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -61456,6 +61551,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -61499,6 +61595,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -61845,6 +61942,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -61888,6 +61986,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -62053,6 +62152,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -62096,6 +62196,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -62287,6 +62388,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -62330,6 +62432,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -62405,6 +62508,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -62448,6 +62552,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -62507,6 +62612,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -62550,6 +62656,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -62593,6 +62700,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -62636,6 +62744,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -62695,6 +62804,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -62738,6 +62848,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -62781,6 +62892,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -62824,6 +62936,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -62915,6 +63028,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -62958,6 +63072,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -63116,6 +63231,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -63159,6 +63275,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -63261,6 +63378,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -63304,6 +63422,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -63396,6 +63515,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -63439,6 +63559,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -63541,6 +63662,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -63584,6 +63706,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -64266,6 +64389,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -64309,6 +64433,7 @@ export namespace Prisma {
     taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -64405,6 +64530,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -64448,6 +64574,7 @@ export namespace Prisma {
     taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -65051,7 +65178,8 @@ export namespace Prisma {
     title?: string | null
     text: string
     photoUrls?: TestimonialCreatephotoUrlsInput | string[]
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName: string
     customerEmail?: string | null
     customerTitle?: string | null
@@ -65752,7 +65880,8 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
     photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65769,7 +65898,8 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
     photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65786,7 +65916,8 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
     photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66408,7 +66539,8 @@ export namespace Prisma {
     title?: string | null
     text: string
     photoUrls?: TestimonialCreatephotoUrlsInput | string[]
-    isPublic?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
     customerName: string
     customerEmail?: string | null
     customerTitle?: string | null
@@ -66611,7 +66743,8 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
     photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66628,7 +66761,8 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
     photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66645,7 +66779,8 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     text?: StringFieldUpdateOperationsInput | string
     photoUrls?: TestimonialUpdatephotoUrlsInput | string[]
-    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     customerTitle?: NullableStringFieldUpdateOperationsInput | string | null

@@ -3,6 +3,7 @@
 import type { Testimonial } from "generated/prisma";
 import { useEffect, useState } from "react";
 import { useUploadFiles } from "@better-upload/client";
+import { format } from "date-fns";
 import { Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
@@ -40,9 +41,15 @@ export function OwnerTestimonialDialog({
   // Form state
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerTitle, setCustomerTitle] = useState("");
+  const [customerCompany, setCustomerCompany] = useState("");
+  const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
-  const [isPublic, setIsPublic] = useState(true);
+  const [isApproved, setIsApproved] = useState(true);
+  const [testimonialDate, setTestimonialDate] = useState(
+    format(new Date(), "yyyy-MM-dd"),
+  );
 
   const maxPhotos = 5;
   const uploadFiles = useUploadFiles({
@@ -66,17 +73,30 @@ export function OwnerTestimonialDialog({
     if (testimonial) {
       setCustomerName(testimonial.customerName ?? "");
       setCustomerEmail(testimonial.customerEmail ?? "");
+      setCustomerTitle(testimonial.customerTitle ?? "");
+      setCustomerCompany(testimonial.customerCompany ?? "");
+      setTitle(testimonial.title ?? "");
       setText(testimonial.text ?? "");
       setPhotoUrls(
         testimonial.photoUrls?.length ? [...testimonial.photoUrls] : [],
       );
-      setIsPublic(testimonial.isPublic ?? true);
+      setIsApproved(testimonial.isApproved ?? true);
+      setTestimonialDate(
+        format(
+          new Date(testimonial.testimonialDate ?? testimonial.createdAt),
+          "yyyy-MM-dd",
+        ),
+      );
     } else {
       setCustomerName("");
       setCustomerEmail("");
+      setCustomerTitle("");
+      setCustomerCompany("");
+      setTitle("");
       setText("");
       setPhotoUrls([]);
-      setIsPublic(true);
+      setIsApproved(true);
+      setTestimonialDate(format(new Date(), "yyyy-MM-dd"));
     }
   }, [testimonial, isOpen]);
 
@@ -119,9 +139,13 @@ export function OwnerTestimonialDialog({
     const payload = {
       customerName: customerName.trim(),
       customerEmail: customerEmail.trim() || undefined,
+      customerTitle: customerTitle.trim() || undefined,
+      customerCompany: customerCompany.trim() || undefined,
+      title: title.trim() || undefined,
       text: text.trim(),
       photoUrls: urls,
-      isPublic,
+      isApproved,
+      testimonialDate,
     };
 
     if (isEditing) {
@@ -172,6 +196,61 @@ export function OwnerTestimonialDialog({
                   placeholder="jane@example.com"
                   className="mt-2"
                 />
+              </div>
+            </div>
+
+            {/* Title & Date */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="customerTitle">
+                  Customer Title (Optional)
+                </Label>
+                <Input
+                  id="customerTitle"
+                  value={customerTitle}
+                  onChange={(e) => setCustomerTitle(e.target.value)}
+                  placeholder="CEO at Acme"
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="customerCompany">
+                  Customer Company (Optional)
+                </Label>
+                <Input
+                  id="customerCompany"
+                  value={customerCompany}
+                  onChange={(e) => setCustomerCompany(e.target.value)}
+                  placeholder="Acme Corp"
+                  className="mt-2"
+                />
+              </div>
+            </div>
+
+            {/* Testimonial headline & date */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="title">Headline / Title (Optional)</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Best product I've ever used!"
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="testimonialDate">Testimonial Date</Label>
+                <Input
+                  id="testimonialDate"
+                  type="date"
+                  value={testimonialDate}
+                  onChange={(e) => setTestimonialDate(e.target.value)}
+                  className="mt-2"
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  Backdate if importing
+                </p>
               </div>
             </div>
 
@@ -277,18 +356,19 @@ export function OwnerTestimonialDialog({
               </div>
             </div>
 
-            {/* Visibility */}
+            {/* Approval */}
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div>
-                <Label htmlFor="isPublic">Publish Immediately</Label>
+                <Label htmlFor="isApproved">Approve Immediately</Label>
                 <p className="mt-0.5 text-sm text-gray-500">
-                  Owner-added testimonials can be published right away
+                  Publish this testimonial right away (owner-added testimonials
+                  can be approved on creation)
                 </p>
               </div>
               <Switch
-                id="isPublic"
-                checked={isPublic}
-                onCheckedChange={setIsPublic}
+                id="isApproved"
+                checked={isApproved}
+                onCheckedChange={setIsApproved}
               />
             </div>
           </div>

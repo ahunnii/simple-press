@@ -36,9 +36,15 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
   const [text, setText] = useState("");
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [approved, setApproved] = useState(false);
 
   const captchaRef = useRef<HCaptchaHandle>(null);
   const [captchaToken, setCaptchaToken] = useState("");
+
+  // Inline error state per field
+  const [textError, setTextError] = useState("");
+  const [captchaError, setCaptchaError] = useState("");
+  const [photoError, setPhotoError] = useState("");
 
   const uploadFiles = useUploadFiles({
     api: "/api/upload",
@@ -49,6 +55,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
         .filter(Boolean);
       if (newUrls.length > 0) {
         setPhotoUrls((prev) => [...prev, ...newUrls].slice(0, MAX_PHOTOS));
+        setPhotoError("");
       }
     },
     onError: (error) => {
@@ -60,8 +67,9 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
   const { data: canSubmitData } = api.testimonial.canSubmit.useQuery();
 
   const submitMutation = api.testimonial.submit.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Thank you for your testimonial!");
+      setApproved(data.isApproved);
       setSubmitted(true);
     },
     onError: (error) => {
@@ -73,25 +81,42 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captchaToken) {
-      toast.error("Please complete the captcha");
-      return;
-    }
+
+    // Clear previous errors
+    setTextError("");
+    setCaptchaError("");
+    setPhotoError("");
+
+    let hasError = false;
 
     if (!text.trim()) {
-      toast.error("Please write your testimonial");
-      return;
-    }
-
-    if (text.length < 10) {
-      toast.error("Please write at least 10 characters");
-      return;
+      const msg = "Please write your testimonial";
+      setTextError(msg);
+      toast.error(msg);
+      hasError = true;
+    } else if (text.length < 10) {
+      const msg = "Please write at least 10 characters";
+      setTextError(msg);
+      toast.error(msg);
+      hasError = true;
     }
 
     if (photoUrls.length > MAX_PHOTOS) {
-      toast.error(`Maximum ${MAX_PHOTOS} photos allowed`);
-      return;
+      const msg = `Maximum ${MAX_PHOTOS} photos allowed`;
+      setPhotoError(msg);
+      toast.error(msg);
+      hasError = true;
     }
+
+    if (!captchaToken) {
+      const msg = "Please complete the captcha";
+      setCaptchaError(msg);
+      toast.error(msg);
+      hasError = true;
+    }
+
+    if (hasError) return;
+
     submitMutation.mutate({
       text: text.trim(),
       photoUrls,
@@ -133,7 +158,9 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
             </div>
             <h2 className="mb-2 text-xl font-semibold">Thank You!</h2>
             <p className="mb-6 text-gray-600">
-              Your testimonial has been submitted and is now live on the site.
+              {approved
+                ? "Your testimonial has been submitted and is now live on the site."
+                : "Your testimonial has been submitted and will appear once it's approved."}
             </p>
             <Button onClick={() => router.push("/")}>Back to Home</Button>
           </CardContent>
@@ -152,7 +179,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <Card>
             <CardHeader>
               <CardTitle>Your Testimonial</CardTitle>
@@ -165,27 +192,51 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
               {/* Text Testimonial */}
               <div>
                 <Label htmlFor="text">
-                  Your Testimonial <span className="text-red-500">*</span>
+                  Your Testimonial{" "}
+                  <span className="text-red-500" aria-hidden="true">
+                    *
+                  </span>
                 </Label>
                 <Textarea
                   id="text"
                   value={text}
-                  onChange={(e) => setText(e.target.value)}
+                  onChange={(e) => {
+                    setText(e.target.value);
+                    if (textError) setTextError("");
+                  }}
                   placeholder="Tell us about your experience..."
                   rows={6}
                   maxLength={1000}
                   className="mt-2"
                   required
+                  aria-required="true"
+                  aria-invalid={textError ? "true" : undefined}
+                  aria-describedby={
+                    textError
+                      ? "text-error text-char-count"
+                      : "text-char-count"
+                  }
                 />
-                <p className="mt-1 text-sm text-gray-500">
+                {textError && (
+                  <p
+                    id="text-error"
+                    role="alert"
+                    className="mt-1 text-sm text-red-600"
+                  >
+                    {textError}
+                  </p>
+                )}
+                <p id="text-char-count" className="mt-1 text-sm text-gray-500">
                   {text.length}/1000 characters (minimum 10)
                 </p>
               </div>
 
               {/* Photos (Optional, max 5) — upload */}
               <div>
-                <Label>Photos (Optional, max {MAX_PHOTOS})</Label>
-                <p className="mt-1 text-sm text-gray-500">
+                <Label htmlFor="testimonial-photo-upload">
+                  Photos (Optional, max {MAX_PHOTOS})
+                </Label>
+                <p id="photo-hint" className="mt-1 text-sm text-gray-500">
                   Upload images to include with your testimonial
                 </p>
                 <div className="mt-2 space-y-3">
@@ -198,7 +249,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                         >
                           <img
                             src={url}
-                            alt=""
+                            alt={`Preview of testimonial photo ${i + 1}`}
                             className="h-full w-full object-cover"
                           />
                           <Button
@@ -206,15 +257,25 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                             variant="destructive"
                             size="icon"
                             className="absolute top-1 right-1 h-6 w-6"
+                            aria-label={`Remove photo ${i + 1}`}
                             onClick={() =>
                               setPhotoUrls(photoUrls.filter((_, j) => j !== i))
                             }
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-3 w-3" aria-hidden="true" />
                           </Button>
                         </div>
                       ))}
                     </div>
+                  )}
+                  {photoError && (
+                    <p
+                      id="photo-error"
+                      role="alert"
+                      className="text-sm text-red-600"
+                    >
+                      {photoError}
+                    </p>
                   )}
                   {photoUrls.length < MAX_PHOTOS && (
                     <div>
@@ -225,8 +286,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                         multiple
                         className="hidden"
                         disabled={uploadFiles.isPending}
-                        title="Upload photos"
-                        aria-label="Upload photos for your testimonial"
+                        aria-describedby="photo-hint"
                         onChange={async (e) => {
                           const files = e.target.files;
                           if (!files?.length) return;
@@ -252,12 +312,18 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                       >
                         {uploadFiles.isPending ? (
                           <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            <Loader2
+                              className="mr-2 h-4 w-4 animate-spin"
+                              aria-hidden="true"
+                            />
                             Uploading...
                           </>
                         ) : (
                           <>
-                            <Upload className="mr-2 h-4 w-4" />
+                            <Upload
+                              className="mr-2 h-4 w-4"
+                              aria-hidden="true"
+                            />
                             Upload photos
                           </>
                         )}
@@ -266,14 +332,22 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                   )}
                 </div>
               </div>
+
               <HCaptchaField
                 ref={captchaRef}
-                onVerify={setCaptchaToken}
+                onVerify={(token) => {
+                  setCaptchaToken(token);
+                  if (captchaError) setCaptchaError("");
+                }}
                 onExpire={() => setCaptchaToken("")}
                 onError={() => setCaptchaToken("")}
                 label="Verification"
                 required
+                fieldId="testimonial-captcha"
+                error={captchaError}
+                errorId="testimonial-captcha-error"
               />
+
               {/* Submit */}
               <div className="border-t pt-4">
                 <Button
@@ -283,7 +357,10 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                 >
                   {submitMutation.isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2
+                        className="mr-2 h-4 w-4 animate-spin"
+                        aria-hidden="true"
+                      />
                       Submitting...
                     </>
                   ) : (
@@ -291,7 +368,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                   )}
                 </Button>
                 <p className="mt-2 text-center text-xs text-gray-500">
-                  Your testimonial will appear on the site right away
+                  Your testimonial will be reviewed before it appears on the site
                 </p>
               </div>
             </CardContent>
