@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
@@ -52,6 +53,14 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
     items,
   } = useCheckoutForm(business);
 
+  // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  const wrappedHandleSubmit = async (e: React.FormEvent) => {
+    setSubmitAttempted(true);
+    await handleSubmit(e);
+  };
+
   // primaryColor is used only for the delivery method toggle indicator and
   // the submit button; falls back to the CSS --primary token when absent.
   const primaryColor = business.siteContent?.primaryColor ?? undefined;
@@ -74,7 +83,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-8 lg:flex-row">
+    <form onSubmit={wrappedHandleSubmit} className="flex flex-col gap-8 lg:flex-row">
       <div className="flex-1 space-y-8">
         {/* M-7: required field explanation */}
         <p className="text-muted-foreground text-sm">
@@ -95,6 +104,8 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
+                aria-required="true"
+                aria-invalid={submitAttempted && !email ? true : undefined}
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -107,6 +118,8 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
                 required
+                aria-required="true"
+                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -118,6 +131,8 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 onChange={(val) => setPhone(val)}
                 placeholder="+1 555 123 4567"
                 required
+                aria-required="true"
+                aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
               />
             </div>
           </div>
@@ -236,6 +251,8 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                   onChange={(e) => setAddressLine1(e.target.value)}
                   placeholder="Street address, P.O. box"
                   required={deliveryMethod === "ship"}
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -259,6 +276,8 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     required={deliveryMethod === "ship"}
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !city.trim() ? true : undefined}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -271,6 +290,8 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                     onChange={(e) => setState(e.target.value)}
                     placeholder="e.g. CA or ON"
                     required={deliveryMethod === "ship"}
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !state.trim() ? true : undefined}
                   />
                 </div>
               </div>
@@ -284,16 +305,18 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
                     required={deliveryMethod === "ship"}
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="country">Country *</Label>
+                  <Label id="country-label" htmlFor="country">Country *</Label>
                   <Select
                     value={country}
                     onValueChange={(v) => setCountry(v as "US" | "CA")}
                     required
                   >
-                    <SelectTrigger id="country" className="w-full">
+                    <SelectTrigger id="country" className="w-full" aria-labelledby="country-label">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -386,15 +409,18 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               </p>
             </div>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+            <div role="alert" aria-live="assertive" aria-atomic="true">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
 
             <Button
               type="submit"
               disabled={isProcessing}
+              aria-busy={isProcessing}
               className="w-full"
               size="lg"
               style={primaryColor ? { backgroundColor: primaryColor } : undefined}

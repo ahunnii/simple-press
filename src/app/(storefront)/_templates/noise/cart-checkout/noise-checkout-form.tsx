@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
@@ -71,6 +72,14 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
     items,
   } = useCheckoutForm(business);
 
+  // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  const wrappedHandleSubmit = async (e: React.FormEvent) => {
+    setSubmitAttempted(true);
+    await handleSubmit(e);
+  };
+
   if (items.length === 0) {
     return (
       <div className="py-20 text-center flex flex-col items-center gap-6">
@@ -92,7 +101,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={wrappedHandleSubmit}
       className="vn-contact-form flex flex-col gap-0 lg:flex-row lg:gap-12"
     >
       {/* Left — fields */}
@@ -119,6 +128,8 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@frequency.com"
                 required
+                aria-required="true"
+                aria-invalid={submitAttempted && !email ? true : undefined}
                 className={INP}
               />
             </div>
@@ -133,6 +144,8 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="First & last"
                 required
+                aria-required="true"
+                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
                 className={INP}
               />
             </div>
@@ -148,6 +161,8 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
               onChange={(val) => setPhone(val)}
               placeholder="+1 313 555 0000"
               required
+              aria-required="true"
+              aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
             />
           </div>
         </fieldset>
@@ -264,6 +279,8 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                 onChange={(e) => setAddressLine1(e.target.value)}
                 placeholder="Street address, P.O. box"
                 required={deliveryMethod === "ship"}
+                aria-required="true"
+                aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
                 className={INP}
               />
             </div>
@@ -296,6 +313,8 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   onChange={(e) => setCity(e.target.value)}
                   required={deliveryMethod === "ship"}
                   placeholder="e.g. Detroit"
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !city.trim() ? true : undefined}
                   className={INP}
                 />
               </div>
@@ -311,6 +330,8 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   onChange={(e) => setState(e.target.value)}
                   placeholder="e.g. MI"
                   required={deliveryMethod === "ship"}
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !state.trim() ? true : undefined}
                   className={INP}
                 />
               </div>
@@ -329,11 +350,13 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
                   required={deliveryMethod === "ship"}
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
                   className={INP}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="country" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                <Label id="country-label" htmlFor="country" className={LBL} style={{ color: "var(--vn-steel)" }}>
                   Country *
                 </Label>
                 <Select
@@ -341,7 +364,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   onValueChange={(v) => setCountry(v as "US" | "CA")}
                   required
                 >
-                  <SelectTrigger id="country" className={cn("w-full", INP)}>
+                  <SelectTrigger id="country" className={cn("w-full", INP)} aria-labelledby="country-label">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -364,18 +387,21 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
             discountAmount={discountAmount}
           />
 
-          {error && (
-            <Alert variant="destructive" className="rounded-none">
-              <AlertDescription className="font-mono text-[10px] tracking-[0.14em] uppercase">
-                {error}
-              </AlertDescription>
-            </Alert>
-          )}
+          <div role="alert" aria-live="assertive" aria-atomic="true">
+            {error && (
+              <Alert variant="destructive" className="rounded-none">
+                <AlertDescription className="font-mono text-[10px] tracking-[0.14em] uppercase">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
 
           {/* Submit */}
           <button
             type="submit"
             disabled={isProcessing}
+            aria-busy={isProcessing}
             className="flex items-center justify-between w-full px-5 py-4 font-mono text-[11px] tracking-[0.24em] uppercase transition-all disabled:opacity-50"
             style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
           >

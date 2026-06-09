@@ -261,6 +261,37 @@ export const inventoryRouter = createTRPCRouter({
   //     return { success: true };
   //   }),
 
+  // Get recent oversell alerts — InventoryHistory rows with reason: "oversell"
+  getOversellAlerts: ownerAdminProcedure
+    .input(
+      z.object({
+        days: z.number().int().min(1).max(365).default(30),
+        take: z.number().int().min(1).max(50).default(20),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const since = new Date();
+      since.setDate(since.getDate() - input.days);
+
+      const rows = await ctx.db.inventoryHistory.findMany({
+        where: {
+          businessId,
+          reason: "oversell",
+          createdAt: { gte: since },
+        },
+        include: {
+          product: { select: { id: true, name: true } },
+          variant: { select: { name: true } },
+          order: { select: { id: true, orderNumber: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: input.take,
+      });
+
+      return rows;
+    }),
+
   // Get low stock alerts (variants + base products)
   getLowStockAlerts: ownerAdminProcedure
     .input(z.object({ threshold: z.number().int().default(10) }))

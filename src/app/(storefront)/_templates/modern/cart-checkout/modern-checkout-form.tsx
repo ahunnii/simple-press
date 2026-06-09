@@ -25,6 +25,8 @@ export function ModernCheckoutForm({ business }: Props) {
   const shippingConfig = shippingConfigFromBusiness(business);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -97,6 +99,7 @@ export function ModernCheckoutForm({ business }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSubmitAttempted(true);
     setIsProcessing(true);
 
     try {
@@ -219,10 +222,10 @@ export function ModernCheckoutForm({ business }: Props) {
       <div className="lg:col-span-2">
         <form onSubmit={handleSubmit} id="checkout-form">
           {/* Contact */}
-          <div>
-            <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+          <fieldset>
+            <legend className="text-foreground text-xs font-semibold tracking-widest uppercase">
               Contact Information
-            </h2>
+            </legend>
             <p className="text-muted-foreground mt-2 text-xs">
               Fields marked with * are required.
             </p>
@@ -235,6 +238,8 @@ export function ModernCheckoutForm({ business }: Props) {
                   id="firstName"
                   type="text"
                   required
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !firstName.trim() ? true : undefined}
                   autoComplete="given-name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
@@ -250,6 +255,8 @@ export function ModernCheckoutForm({ business }: Props) {
                   id="lastName"
                   type="text"
                   required
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !lastName.trim() ? true : undefined}
                   autoComplete="family-name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
@@ -265,6 +272,8 @@ export function ModernCheckoutForm({ business }: Props) {
                   id="email"
                   type="email"
                   required
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !email ? true : undefined}
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -284,10 +293,12 @@ export function ModernCheckoutForm({ business }: Props) {
                   placeholder="+1 555 123 4567"
                   className={inputClass}
                   required
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
                 />
               </div>
             </div>
-          </div>
+          </fieldset>
 
           {/* Discount Code */}
           <div className="border-border mt-10 border-t pt-10">
@@ -352,10 +363,10 @@ export function ModernCheckoutForm({ business }: Props) {
 
           {/* Delivery Method */}
           {shippingConfig.offersInStorePickup && (
-            <div className="border-border mt-10 border-t pt-10">
-              <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+            <fieldset className="border-border mt-10 border-t pt-10">
+              <legend className="text-foreground text-xs font-semibold tracking-widest uppercase">
                 Delivery
-              </h2>
+              </legend>
               <div
                 role="group"
                 aria-label="Delivery method"
@@ -396,15 +407,15 @@ export function ModernCheckoutForm({ business }: Props) {
                   ? "No shipping charge. You'll pick up your order at the store."
                   : "Shipping cost is based on your store's shipping settings."}
               </p>
-            </div>
+            </fieldset>
           )}
 
           {/* Shipping Address */}
           {deliveryMethod === "ship" && (
-            <div className="border-border mt-10 border-t pt-10">
-              <h2 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+            <fieldset className="border-border mt-10 border-t pt-10">
+              <legend className="text-foreground text-xs font-semibold tracking-widest uppercase">
                 Shipping Address
-              </h2>
+              </legend>
               <p className="text-muted-foreground mt-2 text-sm">
                 This is sent to Stripe Checkout prefilled so you can confirm or
                 edit before paying.
@@ -419,6 +430,8 @@ export function ModernCheckoutForm({ business }: Props) {
                     type="text"
                     autoComplete="shipping address-line1"
                     required={deliveryMethod === "ship"}
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
                     value={addressLine1}
                     onChange={(e) => setAddressLine1(e.target.value)}
                     className={inputClass}
@@ -448,6 +461,8 @@ export function ModernCheckoutForm({ business }: Props) {
                     type="text"
                     autoComplete="shipping address-level2"
                     required={deliveryMethod === "ship"}
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !city.trim() ? true : undefined}
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     className={inputClass}
@@ -463,6 +478,8 @@ export function ModernCheckoutForm({ business }: Props) {
                     type="text"
                     autoComplete="shipping address-level1"
                     required={deliveryMethod === "ship"}
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !state.trim() ? true : undefined}
                     value={state}
                     onChange={(e) => setState(e.target.value)}
                     className={inputClass}
@@ -478,6 +495,8 @@ export function ModernCheckoutForm({ business }: Props) {
                     type="text"
                     autoComplete="shipping postal-code"
                     required={deliveryMethod === "ship"}
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
                     className={inputClass}
@@ -492,6 +511,7 @@ export function ModernCheckoutForm({ business }: Props) {
                     id="country"
                     value={country}
                     onChange={(e) => setCountry(e.target.value as "US" | "CA")}
+                    aria-required="true"
                     className={inputClass}
                   >
                     <option value="US">United States</option>
@@ -499,7 +519,7 @@ export function ModernCheckoutForm({ business }: Props) {
                   </select>
                 </div>
               </div>
-            </div>
+            </fieldset>
           )}
         </form>
       </div>
@@ -587,16 +607,19 @@ export function ModernCheckoutForm({ business }: Props) {
             </p>
           </div>
 
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          <div role="alert" aria-live="assertive" aria-atomic="true">
+            {error && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </div>
 
           <button
             type="submit"
             form="checkout-form"
             disabled={isProcessing}
+            aria-busy={isProcessing}
             className="bg-primary text-primary-foreground mt-8 flex w-full items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {isProcessing ? (

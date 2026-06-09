@@ -41,6 +41,7 @@ export default async function AdminDashboardPage() {
     lowStockProducts,
     lowStockPools,
     revenueByDay,
+    recentOversells,
     topProducts,
   ] = await Promise.all([
     // Total revenue (all time, paid orders that are not fully refunded)
@@ -156,6 +157,22 @@ export default async function AdminDashboardPage() {
       },
     }),
 
+    // Recent oversells (last 30 days)
+    db.inventoryHistory.findMany({
+      where: {
+        businessId: business.id,
+        reason: "oversell",
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      include: {
+        product: { select: { id: true, name: true } },
+        variant: { select: { name: true } },
+        order: { select: { id: true, orderNumber: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+
     // Top products by revenue (last 30 days)
     db.orderItem.groupBy({
       by: ["productId"],
@@ -251,6 +268,7 @@ export default async function AdminDashboardPage() {
         }
         lowStockProducts={lowStockProducts}
         lowStockPools={lowStockPools}
+        recentOversells={recentOversells}
         revenueByDay={revenueByDay}
         topProducts={topProductsWithDetails}
       />

@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { AlertTriangle, ArrowLeft } from "lucide-react";
 
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -104,6 +105,10 @@ export default async function OrderDetailPage({ params }: Props) {
             >
               Fulfillment: {order.fulfillmentStatus}
             </Badge>
+
+            {order.hasOversell && (
+              <Badge variant="destructive">Oversold</Badge>
+            )}
           </div>
         </div>
 
@@ -207,6 +212,35 @@ export default async function OrderDetailPage({ params }: Props) {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Oversell Warning */}
+            {order.hasOversell && order.oversellItems.length > 0 && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Oversold items in this order</AlertTitle>
+                <AlertDescription>
+                  <p className="mb-2 text-sm">
+                    The following items were sold beyond available stock.
+                    Consider contacting the customer or restocking.
+                  </p>
+                  <ul className="list-inside list-disc space-y-1 text-sm">
+                    {order.oversellItems.map((item, i) => (
+                      <li key={i}>
+                        <span className="font-medium">
+                          {item.productName ?? "Unknown product"}
+                        </span>
+                        {item.variantName && (
+                          <span> — {item.variantName}</span>
+                        )}
+                        <span className="ml-1 text-xs opacity-80">
+                          ({item.previousQty} in stock at time of purchase)
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Fulfillment Form — show when payment is confirmed and order not yet fulfilled.
                 Keyed on paymentStatus rather than order.status so the form reappears

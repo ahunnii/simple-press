@@ -37,6 +37,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
   const shippingConfig = shippingConfigFromBusiness(business);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   // M-11: ref to focus error alert when set
   const errorAlertRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +74,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSubmitAttempted(true);
     setIsProcessing(true);
 
     try {
@@ -206,6 +209,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   placeholder="you@example.com"
                   className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                   required
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !email ? true : undefined}
                 />
               </div>
               <div>
@@ -220,6 +225,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   placeholder="John Doe"
                   className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                   required
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !name.trim() ? true : undefined}
                 />
               </div>
               <div>
@@ -234,6 +241,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   placeholder="+1 555 123 4567"
                   className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                   required
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
                 />
               </div>
             </CardContent>
@@ -306,6 +315,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                     placeholder="Street address, P.O. box"
                     className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                     required={deliveryMethod === "ship"}
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
                   />
                 </div>
                 <div>
@@ -335,6 +346,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       onChange={(e) => setCity(e.target.value)}
                       className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                       required={deliveryMethod === "ship"}
+                      aria-required="true"
+                      aria-invalid={submitAttempted && !city.trim() ? true : undefined}
                     />
                   </div>
                   <div>
@@ -350,6 +363,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       placeholder="e.g. CA or ON"
                       className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                       required={deliveryMethod === "ship"}
+                      aria-required="true"
+                      aria-invalid={submitAttempted && !state.trim() ? true : undefined}
                     />
                   </div>
                 </div>
@@ -366,10 +381,12 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       onChange={(e) => setPostalCode(e.target.value)}
                       className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                       required={deliveryMethod === "ship"}
+                      aria-required="true"
+                      aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="country" className="text-white">
+                    <Label id="country-label" htmlFor="country" className="text-white">
                       Country *
                     </Label>
                     <Select
@@ -379,6 +396,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       <SelectTrigger
                         id="country"
                         className="w-full border-white/20 bg-zinc-900/50 text-white"
+                        aria-labelledby="country-label"
                       >
                         <SelectValue />
                       </SelectTrigger>
@@ -482,24 +500,27 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                 </p>
               </div>
 
-              {/* M-11: error alert with focus wrapper */}
-              {error && (
-                <div ref={errorAlertRef} tabIndex={-1}>
-                  <Alert
-                    variant="destructive"
-                    className="border-red-500/50 bg-red-500/10"
-                  >
-                    <AlertDescription className="text-red-400">
-                      {error}
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              )}
+              {/* M-11: error alert with persistent live region and focus wrapper */}
+              <div role="alert" aria-live="assertive" aria-atomic="true">
+                {error && (
+                  <div ref={errorAlertRef} tabIndex={-1}>
+                    <Alert
+                      variant="destructive"
+                      className="border-red-500/50 bg-red-500/10"
+                    >
+                      <AlertDescription className="text-red-400">
+                        {error}
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+              </div>
 
               {/* S-11 + N-1: violet-600, aria-hidden icons */}
               <Button
                 type="submit"
                 disabled={isProcessing}
+                aria-busy={isProcessing}
                 className="w-full bg-violet-600 py-6 text-base font-semibold text-white hover:bg-violet-700"
                 size="lg"
               >

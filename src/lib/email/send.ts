@@ -12,6 +12,7 @@ type SendEmailOptions = {
   from?: string;
   fromName?: string;
   tags?: Array<{ name: string; value: string }>;
+  idempotencyKey?: string;
 };
 
 // Email addresses
@@ -29,20 +30,25 @@ export async function sendEmail({
   from = EMAIL_FROM.NOREPLY,
   fromName,
   tags = [],
+  idempotencyKey,
 }: SendEmailOptions) {
   try {
     const fromAddress = fromName
       ? `${fromName} via ${"SimplePress"} <${from}>`
       : from;
 
-    const { data, error } = await resend.emails.send({
+    const payload = {
       from: fromAddress,
       to: Array.isArray(to) ? to : [to],
       subject,
       react,
       replyTo,
       tags,
-    });
+    };
+
+    const { data, error } = idempotencyKey
+      ? await resend.emails.send(payload, { idempotencyKey })
+      : await resend.emails.send(payload);
 
     if (error) {
       console.error("[Email] Send error:", error);

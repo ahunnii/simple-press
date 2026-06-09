@@ -38,6 +38,8 @@ export function PollenCheckoutForm({ business }: Props) {
   const shippingConfig = shippingConfigFromBusiness(business);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -110,6 +112,7 @@ export function PollenCheckoutForm({ business }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSubmitAttempted(true);
     setIsProcessing(true);
 
     try {
@@ -235,6 +238,8 @@ export function PollenCheckoutForm({ business }: Props) {
                 placeholder="you@example.com"
                 className={inputClass}
                 required
+                aria-required="true"
+                aria-invalid={submitAttempted && !email ? true : undefined}
               />
             </div>
             <div>
@@ -249,6 +254,8 @@ export function PollenCheckoutForm({ business }: Props) {
                 placeholder="Jane Doe"
                 className={inputClass}
                 required
+                aria-required="true"
+                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
               />
             </div>
             <div>
@@ -263,6 +270,8 @@ export function PollenCheckoutForm({ business }: Props) {
                 placeholder="+1 555 123 4567"
                 className={inputClass}
                 required
+                aria-required="true"
+                aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
               />
             </div>
           </div>
@@ -376,6 +385,8 @@ export function PollenCheckoutForm({ business }: Props) {
                   placeholder="Street address, P.O. box"
                   className={inputClass}
                   required={deliveryMethod === "ship"}
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
                 />
               </div>
               <div>
@@ -405,6 +416,8 @@ export function PollenCheckoutForm({ business }: Props) {
                     onChange={(e) => setCity(e.target.value)}
                     className={inputClass}
                     required={deliveryMethod === "ship"}
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !city.trim() ? true : undefined}
                   />
                 </div>
                 <div>
@@ -420,6 +433,8 @@ export function PollenCheckoutForm({ business }: Props) {
                     placeholder="e.g. CA or ON"
                     className={inputClass}
                     required={deliveryMethod === "ship"}
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !state.trim() ? true : undefined}
                   />
                 </div>
               </div>
@@ -436,10 +451,12 @@ export function PollenCheckoutForm({ business }: Props) {
                     onChange={(e) => setPostalCode(e.target.value)}
                     className={inputClass}
                     required={deliveryMethod === "ship"}
+                    aria-required="true"
+                    aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
                   />
                 </div>
                 <div>
-                  <label htmlFor="country" className={labelClass}>
+                  <label id="country-label" htmlFor="country" className={labelClass}>
                     Country *
                   </label>
                   <Select
@@ -449,6 +466,7 @@ export function PollenCheckoutForm({ business }: Props) {
                     <SelectTrigger
                       id="country"
                       className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#215935] focus:ring-2 focus:ring-[#215935]/20 focus:outline-none"
+                      aria-labelledby="country-label"
                     >
                       <SelectValue />
                     </SelectTrigger>
@@ -544,15 +562,18 @@ export function PollenCheckoutForm({ business }: Props) {
             </p>
           </div>
 
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          <div role="alert" aria-live="assertive" aria-atomic="true">
+            {error && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </div>
 
           <button
             type="submit"
             disabled={isProcessing}
+            aria-busy={isProcessing}
             className="mt-5 w-full rounded-md bg-[#215935] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#1a4729] disabled:opacity-50"
           >
             {isProcessing ? (
