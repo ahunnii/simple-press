@@ -22,13 +22,13 @@ Click **Create Blog Post** (top right of the list). The editor has two tabs: **C
 
 ### Content Tab
 
-| Field | What it's for |
-|---|---|
-| **Title** | The post's headline — shown on the listing and post pages |
-| **Slug** | The URL for this post: `yourstore.com/blog/[slug]`. Auto-generated from the title when creating a new post; you can edit it manually. Must be unique across all posts. |
-| **Excerpt** | A short summary of the post — shown in listing cards and used as the fallback meta description if no SEO description is set |
-| **Featured Image** | The primary image for this post — shown in the listing card and at the top of the post page |
-| **Content** | The full post body, written in the rich text editor (TipTap). Supports headings, bold/italic, links, lists, block quotes, and images. |
+| Field              | What it's for                                                                                                                                                                                      |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Title**          | The post's headline — shown on the listing and post pages                                                                                                                                          |
+| **Slug**           | The URL for this post: `yourstore.com/blog/[slug]`. Auto-generated from the title when creating a new post; you can edit it manually. Must be unique across all posts and pages for your business. |
+| **Excerpt**        | A short summary of the post — shown in listing cards and used as the fallback meta description if no SEO description is set                                                                        |
+| **Featured Image** | The primary image for this post — shown in the listing card and at the top of the post page                                                                                                        |
+| **Content**        | The full post body, written in the rich text editor (TipTap). Supports headings, bold/italic, links, lists, block quotes, and images.                                                              |
 
 **[Photo: Blog post editor — Content tab showing title, slug, excerpt, image upload, and TipTap editor open]**
 
@@ -38,9 +38,9 @@ If you have the **Galleries** feature enabled, you can insert a gallery directly
 
 ### SEO Tab
 
-| Field | Notes |
-|---|---|
-| **Meta Title** | Shown in browser tabs and search results. Aim for under 60 characters. Falls back to the post title if left blank. |
+| Field                | Notes                                                                                                                  |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Meta Title**       | Shown in browser tabs and search results. Aim for under 60 characters. Falls back to the post title if left blank.     |
 | **Meta Description** | Shown as the preview snippet in search results. Aim for under 160 characters. Falls back to the excerpt if left blank. |
 
 **[Photo: Blog post editor — SEO tab showing meta title and meta description fields with character counts]**
@@ -96,6 +96,7 @@ The exact visual design adapts to your active storefront template.
 ## What You Can and Cannot Do
 
 **You can:**
+
 - Create, edit, publish, unpublish, and delete posts at any time
 - Manually edit the slug on any post (including existing ones)
 - Set SEO metadata per post independently of the global site SEO
@@ -103,8 +104,9 @@ The exact visual design adapts to your active storefront template.
 - Search and filter posts in the admin list
 
 **You cannot:**
+
 - Schedule a post to publish at a future date — the Published toggle takes effect immediately when you save
-- Use the same slug on two posts
+- Use the same slug on two posts or pages for your business
 - Reorder posts manually — posts always display newest first on the storefront
 
 ---
@@ -112,3 +114,5 @@ The exact visual design adapts to your active storefront template.
 ## Feature Flag
 
 Blog is **off by default**. To turn it on: go to **Settings > Features** and enable **Blog**. Disabling it removes the blog from your admin nav and hides all blog pages from the storefront (posts are not deleted).
+
+---

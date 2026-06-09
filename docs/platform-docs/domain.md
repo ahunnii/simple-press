@@ -133,3 +133,5 @@ Your store switches back to its subdomain immediately. There is no gap in availa
 
 **Can I reuse a domain I previously removed?**
 Yes. After removing a domain and adding it back, it goes through the same Pending DNS → Active flow again.
+
+---

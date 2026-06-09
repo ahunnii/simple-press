@@ -99,3 +99,5 @@ Umami collects page views, referrer sources, browser/device data, and session du
 - Use a different analytics provider through this integration (Umami is the only supported option)
 
 <!-- Note that the Umami section is conditionally rendered based on NEXT_PUBLIC_ENABLE_UMAMI — owners might wonder why they don't see it at all. -->
+
+---

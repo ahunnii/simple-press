@@ -35,13 +35,13 @@ If you have a quote from a customer (email, DM, in-person) that you want to add 
 
 **Fields:**
 
-| Field          | Required | Notes                                              |
-| -------------- | -------- | -------------------------------------------------- |
-| Customer Name  | Yes      | Displayed publicly on the storefront               |
-| Email          | No       | For your reference only; not shown to customers    |
-| Testimonial    | Yes      | The quote text                                     |
-| Photos         | No       | Upload up to 5 images (optional)                   |
-| Publish Immediately | —   | Toggle on or off; defaults to published            |
+| Field               | Required | Notes                                           |
+| ------------------- | -------- | ----------------------------------------------- |
+| Customer Name       | Yes      | Displayed publicly on the storefront            |
+| Email               | No       | For your reference only; not shown to customers |
+| Testimonial         | Yes      | The quote text                                  |
+| Photos              | No       | Upload up to 5 images (optional)                |
+| Publish Immediately | —        | Toggle on or off; defaults to published         |
 
 Owner-added testimonials go live immediately when published. You can edit or hide them at any time.
 
@@ -59,11 +59,11 @@ Click **Send Invite** in the top right.
 
 **Fields:**
 
-| Field        | Notes                                                                                   |
-| ------------ | --------------------------------------------------------------------------------------- |
-| Select Customer | Optional. Pick from your existing customers to pre-fill the email field.            |
-| Email        | Required. The invite is sent here. If this email isn't in your customer list, one is created automatically. |
-| Max Photos   | Set how many photos this customer can add (0–5). Defaults to 3.                        |
+| Field           | Notes                                                                                                       |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| Select Customer | Optional. Pick from your existing customers to pre-fill the email field.                                    |
+| Email           | Required. The invite is sent here. If this email isn't in your customer list, one is created automatically. |
+| Max Photos      | Set how many photos this customer can add (0–5). Defaults to 3.                                             |
 
 Invite links expire after **30 days** and can only be used **once**. Once submitted, the code is marked as used and cannot be reused.
 
@@ -101,12 +101,12 @@ If you want customers to be able to submit without a personal invite, they can v
 
 Each testimonial has a dropdown menu (three-dot icon) with the following actions:
 
-| Action        | Owner Added | Customer Submitted |
-| ------------- | ----------- | ------------------ |
-| Edit          | Yes         | No                 |
-| Manage Images | Only if photos exist | Only if photos exist |
-| Publish / Hide | Yes        | Yes                |
-| Delete        | Yes         | Yes                |
+| Action         | Owner Added          | Customer Submitted   |
+| -------------- | -------------------- | -------------------- |
+| Edit           | Yes                  | No                   |
+| Manage Images  | Only if photos exist | Only if photos exist |
+| Publish / Hide | Yes                  | Yes                  |
+| Delete         | Yes                  | Yes                  |
 
 ### Hiding vs. Deleting
 
@@ -125,11 +125,11 @@ If a testimonial has photos, you'll see a **Manage Images** option in the dropdo
 
 The **Invites** tab shows all invites you've sent, each with a status:
 
-| Status    | Meaning                                             |
-| --------- | --------------------------------------------------- |
+| Status    | Meaning                                               |
+| --------- | ----------------------------------------------------- |
 | Pending   | Sent and not yet used; still within the 30-day window |
-| Completed | The customer submitted a testimonial using this link |
-| Expired   | 30 days passed without the customer submitting      |
+| Completed | The customer submitted a testimonial using this link  |
+| Expired   | 30 days passed without the customer submitting        |
 
 Each invite card shows the email address, send date, expiry date, max photos allowed, and (if completed) the date it was used.
 
@@ -158,3 +158,5 @@ Testimonials are sorted by date on the `/testimonials` page, newest first.
 - Approve or moderate testimonials before they go live — both owner-added and customer-submitted testimonials publish immediately (you can hide them after the fact)
 - Bulk-hide or bulk-delete testimonials (visibility and deletion are per-testimonial)
 - Set a photo allowance higher than 5 on any invite
+
+---

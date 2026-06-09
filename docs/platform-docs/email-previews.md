@@ -71,3 +71,5 @@ Click any template button to load a live preview in the right panel. The preview
 ---
 
 **Photo:** Close-up of the rendered Order Confirmation email showing the logo, order number, line items, and totals.
+
+---

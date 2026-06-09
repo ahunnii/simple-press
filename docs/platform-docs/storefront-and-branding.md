@@ -27,6 +27,7 @@ Your template controls the overall design and layout of your storefront — the 
 To change your template, select one from the dropdown. The change takes effect immediately for your customers after you save.
 
 **Available templates** vary by account. Most stores have access to:
+
 - **Modern** — Clean, minimal layout
 - **Elegant** — Refined, editorial feel
 - **Default** — Simple fallback layout
@@ -36,6 +37,7 @@ Some templates (Bamboo, Happy Bamboo, Pollen, Dark Trend, Noise, and others) are
 > **Note:** Switching templates does not delete your content — all values you've entered for your previous template's fields are preserved in the database. However, they won't appear in the editor until you switch back to that template. See [Template Fields](#template-fields) below for more on this.
 
 **Cannot:**
+
 - Create or customize a template's layout/code — templates are managed by the platform
 - Access commercial templates not assigned to your account
 
@@ -75,11 +77,11 @@ If no favicon is set, the default SimplePress favicon is used.
 
 Three color values control your storefront's color palette — how they're applied depends on your template, but in general:
 
-| Color | Typical Use |
-|---|---|
-| **Primary** | Main brand color — buttons, accents, headings |
-| **Secondary** | Background tones, secondary UI elements |
-| **Accent** | Highlights, badges, calls to action |
+| Color         | Typical Use                                   |
+| ------------- | --------------------------------------------- |
+| **Primary**   | Main brand color — buttons, accents, headings |
+| **Secondary** | Background tones, secondary UI elements       |
+| **Accent**    | Highlights, badges, calls to action           |
 
 Click any color swatch to open the color picker and choose your value.
 
@@ -92,6 +94,7 @@ Click any color swatch to open the color picker and choose your value.
 Add links to your social media profiles and they'll appear in your storefront footer. All fields are optional — only the ones you fill in will be displayed.
 
 **Supported platforms:**
+
 - Instagram
 - Facebook
 - Twitter / X
@@ -127,6 +130,7 @@ The Navigation editor lets you build the menu links that appear in your storefro
 ### Adding and Editing Menu Items
 
 Each menu item has:
+
 - **Label** — The text shown in the nav (max 100 characters)
 - **URL** — Where the link goes (max 500 characters). Use relative paths for internal pages (e.g., `/products`, `/about`) or full URLs for external links.
 - **Open in new tab** — Toggle this on for links that point to external websites
@@ -146,6 +150,7 @@ The sidebar provides quick-add buttons for common destinations — Products, Col
 If you haven't added any nav items, your storefront defaults to showing: **Home** (`/`) and **Products** (`/products`).
 
 **Cannot:**
+
 - Create dropdown menus or nested navigation
 - Add icons to nav items
 - Style individual items differently
@@ -206,19 +211,19 @@ Fields are organized by **page** (e.g., Homepage, About, Contact, Shop, Blog, Gl
 
 Depending on your template, you may see any of the following:
 
-| Field Type | What It Is |
-|---|---|
-| **Text** | A single line of plain text |
-| **Textarea** | Multiple lines of plain text |
-| **Rich Text** | Formatted content — headings, bold, lists, links |
-| **Image** | A single uploaded image |
-| **Gallery** | A gallery you've created (see the Galleries section) |
-| **Color** | A color picker value |
-| **Boolean** | An on/off toggle |
-| **List** | Repeating rows (e.g., feature cards, each with an icon and text) |
-| **Video** | An uploaded video file (max 20MB; MP4, WebM, MOV, AVI) |
-| **URL** | A web link |
-| **Number** | A numeric value |
+| Field Type    | What It Is                                                       |
+| ------------- | ---------------------------------------------------------------- |
+| **Text**      | A single line of plain text                                      |
+| **Textarea**  | Multiple lines of plain text                                     |
+| **Rich Text** | Formatted content — headings, bold, lists, links                 |
+| **Image**     | A single uploaded image                                          |
+| **Gallery**   | A gallery you've created (see the Galleries section)             |
+| **Color**     | A color picker value                                             |
+| **Boolean**   | An on/off toggle                                                 |
+| **List**      | Repeating rows (e.g., feature cards, each with an icon and text) |
+| **Video**     | An uploaded video file (max 20MB; MP4, WebM, MOV, AVI)           |
+| **URL**       | A web link                                                       |
+| **Number**    | A numeric value                                                  |
 
 ### Default Values
 
@@ -233,6 +238,7 @@ Use the **Save** button in the toolbar. The **Unsaved Changes** badge appears wh
 > **Photo:** A list-type field showing repeating card rows with per-row inputs (e.g., icon + text).
 
 **Cannot:**
+
 - Add new field types outside what your template defines
 - See or edit fields for a template you're not currently using
 
@@ -242,3 +248,5 @@ Use the **Save** button in the toolbar. The **Unsaved Changes** badge appears wh
 
 - **Subdomain** — Your subdomain (e.g., `yourstore.simplepress.co`) is set during onboarding and cannot be changed afterward. If you want a custom domain, see [Domain Settings](./domain.md).
 - **Template code** — Visual layout and structure are controlled by the platform, not editable by owners.
+
+---

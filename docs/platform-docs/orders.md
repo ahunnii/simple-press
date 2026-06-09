@@ -322,3 +322,5 @@ The customer's shipping address is shown in its own panel on the order detail pa
 - Bulk-fulfill or bulk-cancel orders
 - Set a future fulfillment or cancellation date
 - Generate shipping labels directly in SimplePress (use PirateShip or your carrier of choice)
+
+---

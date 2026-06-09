@@ -14,12 +14,12 @@ Go to **Reviews** in the admin sidebar once the feature is enabled.
 
 The page is organized into four tabs:
 
-| Tab | What it shows |
-| --- | ------------- |
-| **Pending** | Customer-submitted reviews waiting for your approval (badge shows count) |
-| **Published** | Approved reviews visible on your storefront |
-| **Hidden** | Reviews you've hidden — kept in the system but not displayed publicly |
-| **All** | Every review regardless of status |
+| Tab           | What it shows                                                            |
+| ------------- | ------------------------------------------------------------------------ |
+| **Pending**   | Customer-submitted reviews waiting for your approval (badge shows count) |
+| **Published** | Approved reviews visible on your storefront                              |
+| **Hidden**    | Reviews you've hidden — kept in the system but not displayed publicly    |
+| **All**       | Every review regardless of status                                        |
 
 Each tab can be filtered further by **source**: All / Customer / Owner Added.
 
@@ -58,18 +58,18 @@ Use the **Add Review** button in the top right to add a review under any custome
 
 **Fields:**
 
-| Field | Required | Notes |
-| ----- | -------- | ----- |
-| Product | Yes | Which product this review is for |
-| Reviewer Name | Yes | Shown publicly on the storefront |
-| Email | No | For your reference only; not shown to customers |
-| Reviewer Title | No | Displayed under the name, e.g. "Verified Buyer" or "Professional Chef" |
-| Review Date | No | Defaults to today; can be backdated |
-| Rating | Yes | 1–5 stars |
-| Review Headline | No | Short title for the review |
-| Review Text | Yes | The full review body |
-| Verified Purchase | No | Toggle on to show the Verified Purchase badge |
-| Publish Immediately | — | Defaults to on; turn off to save as pending |
+| Field               | Required | Notes                                                                  |
+| ------------------- | -------- | ---------------------------------------------------------------------- |
+| Product             | Yes      | Which product this review is for                                       |
+| Reviewer Name       | Yes      | Shown publicly on the storefront                                       |
+| Email               | No       | For your reference only; not shown to customers                        |
+| Reviewer Title      | No       | Displayed under the name, e.g. "Verified Buyer" or "Professional Chef" |
+| Review Date         | No       | Defaults to today; can be backdated                                    |
+| Rating              | Yes      | 1–5 stars                                                              |
+| Review Headline     | No       | Short title for the review                                             |
+| Review Text         | Yes      | The full review body                                                   |
+| Verified Purchase   | No       | Toggle on to show the Verified Purchase badge                          |
+| Publish Immediately | —        | Defaults to on; turn off to save as pending                            |
 
 Owner-added reviews default to published. You can edit or delete them at any time.
 
@@ -79,12 +79,12 @@ Owner-added reviews default to published. You can edit or delete them at any tim
 
 Each review has a dropdown menu with the following actions, depending on its source and status:
 
-| Action | Customer Review | Owner-Added Review |
-| ------ | --------------- | ------------------ |
-| Approve / Unapprove | Yes | Yes |
-| Hide / Unhide | Yes | Yes |
-| Edit | No | Yes |
-| Delete | Yes | Yes |
+| Action              | Customer Review | Owner-Added Review |
+| ------------------- | --------------- | ------------------ |
+| Approve / Unapprove | Yes             | Yes                |
+| Hide / Unhide       | Yes             | Yes                |
+| Edit                | No              | Yes                |
+| Delete              | Yes             | Yes                |
 
 ### Hiding vs. Deleting
 
@@ -109,13 +109,13 @@ Customers can submit a review from any product page by clicking **Write a Review
 
 **Fields customers fill out:**
 
-| Field | Required | Limits |
-| ----- | -------- | ------ |
-| Rating | Yes | 1–5 stars |
-| Review Title | Yes | Max 200 characters |
-| Review Text | Yes | Min 10 characters, max 2,000 characters |
-| Photos | No | Up to 5 images |
-| Video URL | No | Optional link |
+| Field        | Required | Limits                                  |
+| ------------ | -------- | --------------------------------------- |
+| Rating       | Yes      | 1–5 stars                               |
+| Review Title | Yes      | Max 200 characters                      |
+| Review Text  | Yes      | Min 10 characters, max 2,000 characters |
+| Photos       | No       | Up to 5 images                          |
+| Video URL    | No       | Optional link                           |
 
 If the customer has a confirmed order for the product, a **Verified Purchase** badge is automatically added to their review.
 
@@ -156,3 +156,5 @@ These stats are displayed on product cards and product pages across all template
 - Approve or moderate reviews in bulk
 - Allow customers to update or delete their own reviews after submitting
 - Toggle the feature on or off yourself (contact support to enable or disable)
+
+---

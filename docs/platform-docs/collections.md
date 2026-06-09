@@ -86,6 +86,7 @@ Unpublished collections are completely invisible — they return a not-found pag
 ## Can and Can't
 
 **You can:**
+
 - Create as many collections as you need
 - Add a product to more than one collection
 - Save a collection as a draft (unpublished) while you work on it
@@ -94,6 +95,7 @@ Unpublished collections are completely invisible — they return a not-found pag
 - Upload a featured image for each collection
 
 **You cannot:**
+
 - Manually set or edit a collection's URL slug — it is auto-generated from the name
 - Use collections if the Products feature is disabled
 - Apply pricing, discounts, or inventory changes through a collection (collections are display only)
@@ -104,3 +106,5 @@ Unpublished collections are completely invisible — they return a not-found pag
 ## Feature Flag
 
 **Collections** is off by default and owner-toggleable. Go to **Settings > Features** to enable it. It requires the **Products** feature to be on — disabling Products will also disable Collections.
+
+---
