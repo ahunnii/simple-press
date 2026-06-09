@@ -14,6 +14,7 @@ import {
 } from "~/lib/email/templates";
 import { restorePoolInventory } from "~/lib/inventory";
 import { stripeClient } from "~/lib/stripe/client";
+import { normalizeEmail } from "~/lib/utils";
 import {
   addShipmentSchema,
   manualOrderFormSchema,
@@ -977,15 +978,16 @@ export const orderRouter = createTRPCRouter({
       const firstName = nameParts[0] ?? "Guest";
       const lastName = nameParts.slice(1).join(" ") || "";
 
+      const normalizedCustomerEmail = normalizeEmail(input.customerEmail);
       const customer = await ctx.db.customer.upsert({
         where: {
           businessId_email: {
-            email: input.customerEmail,
+            email: normalizedCustomerEmail,
             businessId,
           },
         },
         create: {
-          email: input.customerEmail,
+          email: normalizedCustomerEmail,
           firstName,
           lastName,
           businessId,
@@ -1048,7 +1050,7 @@ export const orderRouter = createTRPCRouter({
                 orderNumber,
                 businessId,
                 customerId: customer.id,
-                customerEmail: input.customerEmail,
+                customerEmail: normalizedCustomerEmail,
                 customerName: input.customerName,
 
                 subtotal: input.subtotal,

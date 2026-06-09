@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
 import { getClientIpFromHeaders, reviewVoteLimiter } from "~/lib/rate-limit";
+import { normalizeEmail } from "~/lib/utils";
 
 import {
   createTRPCRouter,
@@ -310,10 +311,11 @@ export const reviewRouter = createTRPCRouter({
           message: "Product not found",
         });
 
+      const normalizedUserEmail = normalizeEmail(user.email);
       const order = await ctx.db.order.findFirst({
         where: {
           businessId: product.businessId,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           items: { some: { productId: input.productId } },
         },
         select: { id: true },
@@ -323,12 +325,12 @@ export const reviewRouter = createTRPCRouter({
         where: {
           businessId_email: {
             businessId: product.businessId,
-            email: user.email,
+            email: normalizedUserEmail,
           },
         },
         create: {
           businessId: product.businessId,
-          email: user.email,
+          email: normalizedUserEmail,
           firstName: user.name?.split(" ")[0],
           lastName: user.name?.split(" ").slice(1).join(" "),
         },
@@ -340,7 +342,7 @@ export const reviewRouter = createTRPCRouter({
           source: "customer",
           productId: input.productId,
           customerId: customer.id,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           customerName: user.name ?? user.email,
           rating: input.rating,
           title: input.title,

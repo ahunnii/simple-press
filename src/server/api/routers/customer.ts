@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import { normalizeEmail } from "~/lib/utils";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
@@ -95,7 +96,7 @@ export const customerRouter = createTRPCRouter({
     // placed before the userId was set correctly on the Customer record)
     await ctx.db.customer.updateMany({
       where: {
-        email: user.email.toLowerCase(),
+        email: normalizeEmail(user.email),
         businessId: business.id,
         userId: null,
       },
@@ -253,12 +254,16 @@ export const customerRouter = createTRPCRouter({
       }
 
       // Upsert customer if they haven't ordered before
+      const normalizedUserEmail = normalizeEmail(user.email);
       const customer = await ctx.db.customer.upsert({
         where: {
-          businessId_email: { businessId: business.id, email: user.email },
+          businessId_email: {
+            businessId: business.id,
+            email: normalizedUserEmail,
+          },
         },
         create: {
-          email: user.email,
+          email: normalizedUserEmail,
           firstName: user.name?.split(" ")[0] ?? "",
           lastName: user.name?.split(" ").slice(1).join(" ") ?? "",
           userId: user.id,

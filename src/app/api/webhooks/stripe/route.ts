@@ -19,6 +19,7 @@ import {
 } from "~/lib/email/templates";
 import { deductPoolInventory } from "~/lib/inventory";
 import { stripeClient } from "~/lib/stripe/client";
+import { normalizeEmail } from "~/lib/utils";
 import { db } from "~/server/db";
 
 type NotificationCandidate = {
@@ -238,10 +239,11 @@ export async function POST(req: NextRequest) {
 
         // Get or create customer
         let customer = null;
-        const customerEmail =
+        const customerEmail = normalizeEmail(
           session.customer_email ??
-          session.customer_details?.email ??
-          "unknown@example.com";
+            session.customer_details?.email ??
+            "unknown@example.com",
+        );
 
         if (customerEmail === "unknown@example.com") {
           Sentry.withScope((scope) => {

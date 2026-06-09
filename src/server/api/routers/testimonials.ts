@@ -11,6 +11,7 @@ import {
   getClientIpFromHeaders,
   testimonialSubmitLimiter,
 } from "~/lib/rate-limit";
+import { normalizeEmail } from "~/lib/utils";
 
 import {
   createTRPCRouter,
@@ -210,13 +211,17 @@ export const testimonialRouter = createTRPCRouter({
         });
       }
 
+      const normalizedUserEmail = normalizeEmail(user.email);
       const customer = await ctx.db.customer.upsert({
         where: {
-          businessId_email: { businessId: business.id, email: user.email },
+          businessId_email: {
+            businessId: business.id,
+            email: normalizedUserEmail,
+          },
         },
         create: {
           businessId: business.id,
-          email: user.email,
+          email: normalizedUserEmail,
           firstName: user.name?.split(" ")[0],
           lastName: user.name?.split(" ").slice(1).join(" "),
         },
@@ -235,7 +240,7 @@ export const testimonialRouter = createTRPCRouter({
           source: "customer",
           businessId: business.id,
           customerId: customer.id,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           customerName: user.name ?? "Anonymous",
           text: input.text,
           photoUrls: input.photoUrls,
@@ -318,16 +323,17 @@ export const testimonialRouter = createTRPCRouter({
         });
       }
 
+      const normalizedInviteEmail = normalizeEmail(invite.email);
       const customer = await ctx.db.customer.upsert({
         where: {
           businessId_email: {
             businessId: invite.businessId,
-            email: invite.email,
+            email: normalizedInviteEmail,
           },
         },
         create: {
           businessId: invite.businessId,
-          email: invite.email,
+          email: normalizedInviteEmail,
           firstName: input.name.split(" ")[0],
           lastName: input.name.split(" ").slice(1).join(" "),
         },
@@ -346,7 +352,7 @@ export const testimonialRouter = createTRPCRouter({
           source: "customer",
           businessId: invite.businessId,
           customerId: customer.id,
-          customerEmail: invite.email,
+          customerEmail: normalizedInviteEmail,
           customerName: input.name ?? "Anonymous",
           text: input.text,
           photoUrls: input.photoUrls,

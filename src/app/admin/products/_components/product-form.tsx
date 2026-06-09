@@ -624,14 +624,14 @@ export function ProductForm({
   useDirtyForm(isDirty);
 
   // SEO preview values — || is intentional so empty string falls back to the default
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
   const seoPreviewTitle =
     form.watch("metaTitle") || form.watch("name") || "Product Name";
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
   const seoPreviewDesc =
     form.watch("metaDescription") ||
     form.watch("description") ||
     "Your product description will appear here in search results.";
+  /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
 
   return (
     <>
