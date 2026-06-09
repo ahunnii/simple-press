@@ -41,6 +41,8 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
   const shippingConfig = shippingConfigFromBusiness(business);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -76,6 +78,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSubmitAttempted(true);
     setIsProcessing(true);
 
     try {
@@ -184,10 +187,11 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
         <div className="space-y-6 lg:col-span-2">
           {/* Contact Info */}
           <Card>
-            <CardHeader>
-              <CardTitle>Contact Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
+              <fieldset className="space-y-4 border-0 p-0">
+              <legend className="text-xl font-semibold leading-none tracking-tight pb-2">
+                Contact Information
+              </legend>
               <p className="text-sm text-[#6b6b6b]">
                 Fields marked with <span aria-hidden="true">*</span> are required.
               </p>
@@ -201,6 +205,8 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !email ? true : undefined}
                 />
               </div>
               <div>
@@ -213,6 +219,8 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
                   required
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !name.trim() ? true : undefined}
                 />
               </div>
               <div>
@@ -224,8 +232,11 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   onChange={(val) => setPhone(val)}
                   placeholder="+1 555 123 4567"
                   required
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
                 />
               </div>
+              </fieldset>
             </CardContent>
           </Card>
 
@@ -278,90 +289,100 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
           {/* Shipping Address */}
           {deliveryMethod === "ship" && (
             <Card>
-              <CardHeader>
-                <CardTitle>Shipping Address</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-[#6b6b6b]">
-                  This is sent to Stripe Checkout prefilled so you can confirm
-                  or edit your name, phone, and address before paying.
-                </p>
-                <div>
-                  <Label htmlFor="address-line1">Address line 1 <span aria-hidden="true">*</span></Label>
-                  <Input
-                    id="address-line1"
-                    type="text"
-                    autoComplete="shipping address-line1"
-                    value={addressLine1}
-                    onChange={(e) => setAddressLine1(e.target.value)}
-                    placeholder="Street address, P.O. box"
-                    required={deliveryMethod === "ship"}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="address-line2">Address line 2</Label>
-                  <Input
-                    id="address-line2"
-                    type="text"
-                    autoComplete="shipping address-line2"
-                    value={addressLine2}
-                    onChange={(e) => setAddressLine2(e.target.value)}
-                    placeholder="Apartment, suite, etc."
-                  />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
+              <CardContent className="space-y-4 pt-6">
+                <fieldset className="space-y-4 border-0 p-0">
+                  <legend className="text-xl font-semibold leading-none tracking-tight pb-2">
+                    Shipping Address
+                  </legend>
+                  <p className="text-sm text-[#6b6b6b]">
+                    This is sent to Stripe Checkout prefilled so you can confirm
+                    or edit your name, phone, and address before paying.
+                  </p>
                   <div>
-                    <Label htmlFor="city">City <span aria-hidden="true">*</span></Label>
+                    <Label htmlFor="address-line1">Address line 1 <span aria-hidden="true">*</span></Label>
                     <Input
-                      id="city"
+                      id="address-line1"
                       type="text"
-                      autoComplete="shipping address-level2"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
+                      autoComplete="shipping address-line1"
+                      value={addressLine1}
+                      onChange={(e) => setAddressLine1(e.target.value)}
+                      placeholder="Street address, P.O. box"
                       required={deliveryMethod === "ship"}
+                      aria-required="true"
+                      aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="state">State / Province <span aria-hidden="true">*</span></Label>
+                    <Label htmlFor="address-line2">Address line 2</Label>
                     <Input
-                      id="state"
+                      id="address-line2"
                       type="text"
-                      autoComplete="shipping address-level1"
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
-                      placeholder="e.g. CA or ON"
-                      required={deliveryMethod === "ship"}
+                      autoComplete="shipping address-line2"
+                      value={addressLine2}
+                      onChange={(e) => setAddressLine2(e.target.value)}
+                      placeholder="Apartment, suite, etc."
                     />
                   </div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <Label htmlFor="postal">ZIP / Postal code <span aria-hidden="true">*</span></Label>
-                    <Input
-                      id="postal"
-                      type="text"
-                      autoComplete="shipping postal-code"
-                      value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value)}
-                      required={deliveryMethod === "ship"}
-                    />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <Label htmlFor="city">City <span aria-hidden="true">*</span></Label>
+                      <Input
+                        id="city"
+                        type="text"
+                        autoComplete="shipping address-level2"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        required={deliveryMethod === "ship"}
+                        aria-required="true"
+                        aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="state">State / Province <span aria-hidden="true">*</span></Label>
+                      <Input
+                        id="state"
+                        type="text"
+                        autoComplete="shipping address-level1"
+                        value={state}
+                        onChange={(e) => setState(e.target.value)}
+                        placeholder="e.g. CA or ON"
+                        required={deliveryMethod === "ship"}
+                        aria-required="true"
+                        aria-invalid={submitAttempted && !state.trim() ? true : undefined}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="country">Country <span aria-hidden="true">*</span></Label>
-                    <Select
-                      value={country}
-                      onValueChange={(v) => setCountry(v as "US" | "CA")}
-                    >
-                      <SelectTrigger id="country" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="US">United States</SelectItem>
-                        <SelectItem value="CA">Canada</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <Label htmlFor="postal">ZIP / Postal code <span aria-hidden="true">*</span></Label>
+                      <Input
+                        id="postal"
+                        type="text"
+                        autoComplete="shipping postal-code"
+                        value={postalCode}
+                        onChange={(e) => setPostalCode(e.target.value)}
+                        required={deliveryMethod === "ship"}
+                        aria-required="true"
+                        aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="country" id="country-label">Country <span aria-hidden="true">*</span></Label>
+                      <Select
+                        value={country}
+                        onValueChange={(v) => setCountry(v as "US" | "CA")}
+                      >
+                        <SelectTrigger id="country" aria-labelledby="country-label" className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="US">United States</SelectItem>
+                          <SelectItem value="CA">Canada</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                </div>
+                </fieldset>
               </CardContent>
             </Card>
           )}

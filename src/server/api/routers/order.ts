@@ -405,11 +405,21 @@ export const orderRouter = createTRPCRouter({
 
       const orders = await ctx.db.order.findMany({
         where,
-        include: { items: true },
+        include: {
+          items: true,
+          _count: {
+            select: {
+              inventoryHistory: { where: { reason: "oversell" } },
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
       });
 
-      return orders;
+      return orders.map((order) => ({
+        ...order,
+        hasOversell: order._count.inventoryHistory > 0,
+      }));
     }),
 
   getById: ownerAdminProcedure
@@ -425,10 +435,30 @@ export const orderRouter = createTRPCRouter({
           shippingAddress: true,
           customer: true,
           shipments: { orderBy: { shippedAt: "asc" } },
+          inventoryHistory: {
+            where: { reason: "oversell" },
+            include: {
+              product: { select: { id: true, name: true } },
+              variant: { select: { name: true } },
+            },
+            orderBy: { createdAt: "asc" },
+          },
         },
       });
 
-      return order;
+      if (!order) return order;
+
+      return {
+        ...order,
+        hasOversell: order.inventoryHistory.length > 0,
+        oversellItems: order.inventoryHistory.map((h) => ({
+          productId: h.productId,
+          productName: h.product?.name ?? null,
+          variantName: h.variant?.name ?? null,
+          previousQty: h.previousQty,
+          requestedQty: Math.abs(h.changeQty) || 1,
+        })),
+      };
     }),
 
   refund: ownerAdminProcedure

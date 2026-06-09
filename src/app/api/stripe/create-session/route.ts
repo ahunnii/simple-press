@@ -12,6 +12,7 @@ import {
   shippingConfigFromBusiness,
 } from "~/lib/shipping-utils";
 import { stripeClient } from "~/lib/stripe/client";
+import { checkoutSessionSchema } from "~/lib/validators/checkout";
 import { db } from "~/server/db";
 
 // Helper function to create a one-time Stripe coupon for the discount
@@ -36,44 +37,13 @@ async function createStripeCoupon(
 
 export async function POST(req: NextRequest) {
   try {
-    const body = (await req.json()) as {
-      items: {
-        productId: string;
-        variantId: string | null;
-        productName: string;
-        variantName: string | null;
-        price: number;
-        quantity: number;
-        imageUrl: string | null;
-        sku?: string;
-      }[];
-      customerInfo: {
-        email: string;
-        name: string;
-        /** Contact phone; prefills Stripe Checkout when `phone_number_collection` is enabled. */
-        phone?: string | null;
-        shippingAddress?: {
-          line1: string;
-          line2?: string | null;
-          city: string;
-          state: string;
-          postalCode: string;
-          country: string;
-          phone?: string | null;
-        } | null;
-      };
-      discountCodeId?: string | null;
-      deliveryMethod?: "ship" | "pickup";
-    };
-
-    const { items, customerInfo, discountCodeId } = body;
-
-    if (!items || !customerInfo) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
+    const parsed = checkoutSessionSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
+
+    const body = parsed.data;
+    const { items, customerInfo, discountCodeId } = body;
 
     try {
       await checkoutLimiter.consume(getClientIp(req));
@@ -106,28 +76,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate cart: all items must exist, be published, and be in stock
-    const itemList = Array.isArray(items) ? items : [];
-    if (itemList.length === 0) {
-      return NextResponse.json(
-        { error: "Your cart is empty" },
-        { status: 400 },
-      );
-    }
-
-    const MAX_QUANTITY_PER_ITEM = 100;
-    if (
-      itemList.some(
-        (i) =>
-          !Number.isInteger(i.quantity) ||
-          i.quantity < 1 ||
-          i.quantity > MAX_QUANTITY_PER_ITEM,
-      )
-    ) {
-      return NextResponse.json(
-        { error: "Invalid item quantity." },
-        { status: 400 },
-      );
-    }
+    // (schema guarantees items is a non-empty array with valid quantities)
+    const itemList = items;
 
     const variantIds = [
       ...new Set(

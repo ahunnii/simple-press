@@ -255,11 +255,6 @@ export async function POST(req: NextRequest) {
         }
 
         if (customerEmail !== "unknown@example.com") {
-          console.log(
-            "[Webhook] customer_details:",
-            JSON.stringify(fullSession.customer_details, null, 2),
-          );
-
           // Parse customer name from Stripe (use 'name' field, not 'individual_name')
           const customerName = fullSession.customer_details?.name?.trim() ?? "";
           const nameParts = customerName.split(" ").filter((p) => p.length > 0);
@@ -301,7 +296,7 @@ export async function POST(req: NextRequest) {
           });
 
           console.log(
-            `[Webhook] Customer upserted: ${customer.id} (${customer.email})${existingUser ? " - linked to user" : ""}`,
+            `[Webhook] Customer upserted: ${customer.id}${existingUser ? " - linked to user" : ""}`,
           );
         }
 
@@ -478,7 +473,7 @@ export async function POST(req: NextRequest) {
               },
             });
             console.log(
-              `[Webhook] Updated customer metrics for ${customer.email}`,
+              `[Webhook] Updated customer metrics for ${customer.id}`,
             );
           } catch (customerError) {
             console.error(
@@ -992,10 +987,11 @@ export async function POST(req: NextRequest) {
               customDomain: business.customDomain,
               domainStatus: business.domainStatus,
             },
+            idempotencyKey: `order-confirmation-${session.id}`,
           });
 
           console.log(
-            `[Webhook] Order confirmation email sent to ${order.customerEmail}`,
+            `[Webhook] Order confirmation email sent for order ${order.id}`,
           );
         } catch (emailError) {
           console.error(
@@ -1035,9 +1031,10 @@ export async function POST(req: NextRequest) {
               customDomain: business.customDomain,
               domainStatus: business.domainStatus,
             },
+            idempotencyKey: `owner-notification-${session.id}`,
           });
           console.log(
-            `[Webhook] New order notification sent to ${business.ownerEmail}`,
+            `[Webhook] New order notification sent for order ${order.id} (business ${business.id})`,
           );
         } catch (ownerEmailError) {
           console.error(

@@ -294,6 +294,12 @@ type PhoneInputProps = {
   autoFocus?: boolean;
   autoComplete?: string;
   inputRef?: React.RefObject<HTMLInputElement | null>;
+  /** Forwarded to the underlying <input> as aria-required */
+  "aria-required"?: boolean | "true" | "false";
+  /** Forwarded to the underlying <input> as aria-invalid */
+  "aria-invalid"?: boolean | "true" | "false" | "grammar" | "spelling";
+  /** Forwarded to the underlying <input> as aria-describedby */
+  "aria-describedby"?: string;
 };
 
 const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
@@ -313,6 +319,9 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
       autoFocus,
       autoComplete,
       inputRef,
+      "aria-required": ariaRequired,
+      "aria-invalid": ariaInvalid,
+      "aria-describedby": ariaDescribedby,
     },
     ref,
   ) => {
@@ -435,6 +444,9 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           type="tel"
           inputMode="tel"
           autoComplete={autoComplete}
+          aria-required={ariaRequired}
+          aria-invalid={ariaInvalid}
+          aria-describedby={ariaDescribedby}
         />
       </div>
     );

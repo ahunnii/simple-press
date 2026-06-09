@@ -41,6 +41,7 @@ export async function sendOrderConfirmation(params: {
     customDomain?: string | null;
     domainStatus?: string | null;
   };
+  idempotencyKey?: string;
 }) {
   const businessUrl = getBusinessUrl(params.business);
 
@@ -68,6 +69,7 @@ export async function sendOrderConfirmation(params: {
       { name: "category", value: "order_confirmation" },
       { name: "business", value: params.business.subdomain },
     ],
+    idempotencyKey: params.idempotencyKey,
   });
 }
 
@@ -98,6 +100,7 @@ export async function sendNewOrderNotification(params: {
     customDomain?: string | null;
     domainStatus?: string | null;
   };
+  idempotencyKey?: string;
 }) {
   const adminOrderUrl = `${getBusinessUrl(params.business)}/admin/orders/${params.orderId}`;
 
@@ -125,6 +128,7 @@ export async function sendNewOrderNotification(params: {
       { name: "category", value: "new_order_owner" },
       { name: "business", value: params.business.subdomain },
     ],
+    idempotencyKey: params.idempotencyKey,
   });
 }
 

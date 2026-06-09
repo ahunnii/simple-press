@@ -12,6 +12,7 @@ type Props = {
   orders: (Order & {
     items: OrderItem[];
     shippingAddress?: ShippingAddress;
+    hasOversell?: boolean;
   })[];
 };
 
@@ -106,9 +107,14 @@ export function OrdersTable({ orders }: Props) {
                   {formatPrice(order.total)}
                 </td>
                 <td className="px-6 py-4">
-                  <Badge variant={getStatusColor(order.status)}>
-                    {order.status}
-                  </Badge>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Badge variant={getStatusColor(order.status)}>
+                      {order.status}
+                    </Badge>
+                    {order.hasOversell && (
+                      <Badge variant="destructive">Oversold</Badge>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 text-right text-sm font-medium">
                   <Button variant="ghost" size="sm" asChild>

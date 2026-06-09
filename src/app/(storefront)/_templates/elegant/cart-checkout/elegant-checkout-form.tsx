@@ -279,6 +279,7 @@ export function ElegantCheckoutForm({ business }: Props) {
                 onChange={(e) => { setEmail(e.target.value); if (fieldErrors.email) setFieldErrors(f => ({ ...f, email: "" })); }}
                 placeholder="you@example.com" required
                 className="el-co-input"
+                aria-required="true"
                 aria-invalid={fieldErrors.email ? true : undefined}
                 aria-describedby={fieldErrors.email ? "email-error" : undefined}
               />
@@ -289,6 +290,7 @@ export function ElegantCheckoutForm({ business }: Props) {
                 onChange={(e) => { setName(e.target.value); if (fieldErrors.name) setFieldErrors(f => ({ ...f, name: "" })); }}
                 placeholder="Jane Doe" required
                 className="el-co-input"
+                aria-required="true"
                 aria-invalid={fieldErrors.name ? true : undefined}
                 aria-describedby={fieldErrors.name ? "name-error" : undefined}
               />
@@ -299,6 +301,7 @@ export function ElegantCheckoutForm({ business }: Props) {
                 onChange={(val) => { setPhone(val); if (fieldErrors.phone) setFieldErrors(f => ({ ...f, phone: "" })); }}
                 placeholder="+1 555 123 4567" required
                 className="el-co-input"
+                aria-required="true"
                 aria-invalid={fieldErrors.phone ? true : undefined}
                 aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
               />
@@ -402,6 +405,7 @@ export function ElegantCheckoutForm({ business }: Props) {
                   placeholder="Street address, P.O. box"
                   required={deliveryMethod === "ship"}
                   className="el-co-input"
+                  aria-required="true"
                   aria-invalid={fieldErrors["address-line1"] ? true : undefined}
                   aria-describedby={fieldErrors["address-line1"] ? "address-line1-error" : undefined}
                 />
@@ -422,6 +426,7 @@ export function ElegantCheckoutForm({ business }: Props) {
                     onChange={(e) => { setCity(e.target.value); if (fieldErrors.city) setFieldErrors(f => ({ ...f, city: "" })); }}
                     required={deliveryMethod === "ship"}
                     className="el-co-input"
+                    aria-required="true"
                     aria-invalid={fieldErrors.city ? true : undefined}
                     aria-describedby={fieldErrors.city ? "city-error" : undefined}
                   />
@@ -434,6 +439,7 @@ export function ElegantCheckoutForm({ business }: Props) {
                     placeholder="CA or ON"
                     required={deliveryMethod === "ship"}
                     className="el-co-input"
+                    aria-required="true"
                     aria-invalid={fieldErrors.state ? true : undefined}
                     aria-describedby={fieldErrors.state ? "state-error" : undefined}
                   />
@@ -447,13 +453,14 @@ export function ElegantCheckoutForm({ business }: Props) {
                     onChange={(e) => { setPostalCode(e.target.value); if (fieldErrors.postal) setFieldErrors(f => ({ ...f, postal: "" })); }}
                     required={deliveryMethod === "ship"}
                     className="el-co-input"
+                    aria-required="true"
                     aria-invalid={fieldErrors.postal ? true : undefined}
                     aria-describedby={fieldErrors.postal ? "postal-error" : undefined}
                   />
                 </ElegantField>
                 <ElegantField label="Country *" htmlFor="country">
                   <Select value={country} onValueChange={(v) => setCountry(v as "US" | "CA")}>
-                    <SelectTrigger id="country" className="el-co-input w-full border-x-0 border-t-0 rounded-none px-0 shadow-none focus:ring-0">
+                    <SelectTrigger id="country" className="el-co-input w-full border-x-0 border-t-0 rounded-none px-0 shadow-none focus:ring-0" aria-required="true">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -566,15 +573,18 @@ export function ElegantCheckoutForm({ business }: Props) {
             </div>
           </div>
 
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          <div role="alert" aria-live="assertive" aria-atomic="true">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </div>
 
           <button
             type="submit"
             disabled={isProcessing}
+            aria-busy={isProcessing}
             style={{
               display: "flex",
               alignItems: "center",

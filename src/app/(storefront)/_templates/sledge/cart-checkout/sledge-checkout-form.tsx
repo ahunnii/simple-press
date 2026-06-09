@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
@@ -74,9 +75,17 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
     items,
   } = useCheckoutForm(business);
 
+  // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  const wrappedHandleSubmit = async (e: React.FormEvent) => {
+    setSubmitAttempted(true);
+    await handleSubmit(e);
+  };
+
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={wrappedHandleSubmit}
       className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12"
     >
       <div className="flex min-w-0 flex-col gap-10">
@@ -98,6 +107,8 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
+                aria-required="true"
+                aria-invalid={submitAttempted && !email ? true : undefined}
                 className={INP}
               />
             </div>
@@ -112,6 +123,8 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="First & last"
                 required
+                aria-required="true"
+                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
                 className={INP}
               />
             </div>
@@ -127,6 +140,8 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
               onChange={(val) => setPhone(val)}
               placeholder="+1 313 555 0000"
               required
+              aria-required="true"
+              aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
             />
           </div>
         </fieldset>
@@ -239,6 +254,8 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 onChange={(e) => setAddressLine1(e.target.value)}
                 placeholder="Street address, P.O. box"
                 required={deliveryMethod === "ship"}
+                aria-required="true"
+                aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
                 className={INP}
               />
             </div>
@@ -271,6 +288,8 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   onChange={(e) => setCity(e.target.value)}
                   required={deliveryMethod === "ship"}
                   placeholder="e.g. Detroit"
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !city.trim() ? true : undefined}
                   className={INP}
                 />
               </div>
@@ -286,6 +305,8 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   onChange={(e) => setState(e.target.value)}
                   placeholder="e.g. MI"
                   required={deliveryMethod === "ship"}
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !state.trim() ? true : undefined}
                   className={INP}
                 />
               </div>
@@ -304,11 +325,13 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
                   required={deliveryMethod === "ship"}
+                  aria-required="true"
+                  aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
                   className={INP}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="country" className={LBL}>
+                <Label id="country-label" htmlFor="country" className={LBL}>
                   Country *
                 </Label>
                 <Select
@@ -316,7 +339,7 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   onValueChange={(v) => setCountry(v as "US" | "CA")}
                   required
                 >
-                  <SelectTrigger id="country" className={cn("w-full", INP)}>
+                  <SelectTrigger id="country" className={cn("w-full", INP)} aria-labelledby="country-label">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -338,17 +361,20 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
             discountAmount={discountAmount}
           />
 
-          {error ? (
-            <Alert variant="destructive" className="rounded-sm">
-              <AlertDescription className="font-sans text-xs tracking-[0.12em] uppercase">
-                {error}
-              </AlertDescription>
-            </Alert>
-          ) : null}
+          <div role="alert" aria-live="assertive" aria-atomic="true">
+            {error ? (
+              <Alert variant="destructive" className="rounded-sm">
+                <AlertDescription className="font-sans text-xs tracking-[0.12em] uppercase">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            ) : null}
+          </div>
 
           <button
             type="submit"
             disabled={isProcessing}
+            aria-busy={isProcessing}
             className="sl-btn flex w-full items-center justify-between disabled:opacity-50"
           >
             <span className="flex items-center gap-2">
