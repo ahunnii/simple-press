@@ -35,12 +35,14 @@ export function OrdersTable({ orders }: Props) {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "paid":
+      case "open":
         return "default";
-      case "pending":
-        return "secondary";
+      case "completed":
+        return "default";
       case "cancelled":
         return "destructive";
+      case "refunded":
+        return "secondary";
       default:
         return "secondary";
     }

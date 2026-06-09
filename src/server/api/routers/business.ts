@@ -1,9 +1,11 @@
-import { headers } from "next/headers";
+import type { Prisma } from "generated/prisma";
+import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
-import { updateBrandingSchema } from "~/lib/validators/branding";
+import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
+import { stripeClient } from "~/lib/stripe/client";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
@@ -11,34 +13,325 @@ import {
 } from "~/server/api/trpc";
 
 export const businessRouter = createTRPCRouter({
-  get: publicProcedure
+  simplifiedGet: publicProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+
+    if (!business) return null;
+
+    const businessData = await ctx.db.business.findFirst({
+      where: {
+        id: business.id,
+        status: "active",
+      },
+      select: {
+        id: true,
+        stripeAccountId: true,
+        name: true,
+        templateId: true,
+        businessAddress: true,
+        supportEmail: true,
+        phoneNumber: true,
+        customDomain: true,
+        domainStatus: true,
+        subdomain: true,
+        shippingType: true,
+        shippingFlatRate: true,
+        freeShippingThreshold: true,
+        offersInStorePickup: true,
+        siteContent: {
+          select: {
+            logoUrl: true,
+            faviconUrl: true,
+            logoAltText: true,
+            footerText: true,
+            primaryColor: true,
+            navigationItems: true,
+            socialLinks: true,
+            customFields: true,
+            previewCustomFields: true,
+            metaTitle: true,
+            metaDescription: true,
+            metaKeywords: true,
+            ogImage: true,
+          },
+        },
+      },
+    });
+
+    if (!businessData) {
+      return null;
+    }
+
+    // Swap in the preview draft if the current user is an authorized owner/manager.
+    const sc = businessData.siteContent;
+    if (sc?.previewCustomFields != null) {
+      const previewBizId = await getAuthorizedPreviewBusinessId(
+        businessData.id,
+      );
+      if (previewBizId) {
+        sc.customFields = sc.previewCustomFields;
+      }
+    }
+
+    const { stripeAccountId, ...rest } = businessData;
+    const sanitizedSiteContent = rest.siteContent
+      ? (({ previewCustomFields: _drop, ...safe }) => safe)(rest.siteContent)
+      : rest.siteContent;
+    return {
+      ...rest,
+      siteContent: sanitizedSiteContent,
+      isStripeConnected: !!stripeAccountId,
+    };
+  }),
+
+  simplifiedGetWithProducts: publicProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+
+    if (!business) {
+      return null;
+    }
+
+    const businessData = await ctx.db.business.findFirst({
+      where: {
+        id: business.id,
+        status: "active",
+      },
+      select: {
+        id: true,
+        name: true,
+        templateId: true,
+        featureFlags: true,
+        businessAddress: true,
+        stripeAccountId: true,
+        supportEmail: true,
+        phoneNumber: true,
+        subdomain: true,
+        customDomain: true,
+        domainStatus: true,
+        shippingType: true,
+        shippingFlatRate: true,
+        freeShippingThreshold: true,
+        offersInStorePickup: true,
+        products: {
+          where: { published: true },
+          include: {
+            images: true,
+          },
+        },
+        siteContent: {
+          select: {
+            logoUrl: true,
+            logoAltText: true,
+            primaryColor: true,
+            footerText: true,
+            navigationItems: true,
+            socialLinks: true,
+            customFields: true,
+            previewCustomFields: true,
+          },
+        },
+      },
+    });
+
+    if (!businessData) {
+      return null;
+    }
+
+    // Swap in the preview draft if the current user is an authorized owner/manager.
+    const sc = businessData.siteContent;
+    if (sc?.previewCustomFields != null) {
+      const previewBizId = await getAuthorizedPreviewBusinessId(
+        businessData.id,
+      );
+      if (previewBizId) {
+        sc.customFields = sc.previewCustomFields;
+      }
+    }
+    // Never ship the raw draft field to clients.
+    const { stripeAccountId, ...rest } = businessData;
+    const { siteContent, ...restWithoutSiteContent } = rest;
+    const sanitizedSiteContent = siteContent
+      ? (({ previewCustomFields: _drop, ...safe }) => safe)(siteContent)
+      : siteContent;
+    return {
+      ...restWithoutSiteContent,
+      siteContent: sanitizedSiteContent,
+      isStripeConnected: !!stripeAccountId,
+    };
+  }),
+
+  getWithPolicies: ownerAdminProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+    const policies = await ctx.db.business.findFirst({
+      where: { id: business.id },
+      include: { pages: { where: { type: "policy" } } },
+    });
+    return policies;
+  }),
+
+  getHomepage: publicProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+    const homepage = await ctx.db.business.findFirst({
+      where: {
+        id: business.id,
+        status: "active",
+      },
+      select: {
+        name: true,
+        businessAddress: true,
+        templateId: true,
+        siteContent: {
+          select: {
+            primaryColor: true,
+            secondaryColor: true,
+            accentColor: true,
+            logoUrl: true,
+            logoAltText: true,
+            faviconUrl: true,
+            customFields: true,
+            previewCustomFields: true,
+            socialLinks: true,
+          },
+        },
+        products: {
+          where: {
+            published: true,
+            OR: [
+              {
+                additionalFields: {
+                  path: ["comingSoon"],
+                  equals: "false",
+                },
+              },
+              {
+                additionalFields: {
+                  path: ["comingSoon"],
+                  equals: false,
+                },
+              },
+            ],
+          },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            price: true,
+            compareAtPrice: true,
+            description: true,
+            variants: true,
+            images: {
+              take: 1,
+              orderBy: { sortOrder: "asc" },
+            },
+            additionalFields: true,
+            trackInventory: true,
+            inventoryQty: true,
+            allowBackorders: true,
+            baseUnitsConsumed: true,
+            baseInventoryUnit: {
+              select: { inventoryQty: true, allowBackorders: true },
+            },
+          },
+          take: 4,
+        },
+      },
+    });
+
+    if (!homepage) return homepage;
+
+    // Swap in the preview draft if the current user is an authorized owner/manager.
+    const hsc = homepage.siteContent;
+    if (hsc?.previewCustomFields != null) {
+      const previewBizId = await getAuthorizedPreviewBusinessId(business.id);
+      if (previewBizId) {
+        hsc.customFields = hsc.previewCustomFields;
+      }
+    }
+    // Never ship the raw draft field to clients.
+    const { siteContent: homepageSc, ...homepageRest } = homepage;
+    const sanitizedHomepageSc = homepageSc
+      ? (({ previewCustomFields: _drop, ...safe }) => safe)(homepageSc)
+      : homepageSc;
+    return { ...homepageRest, siteContent: sanitizedHomepageSc };
+  }),
+
+  getForEmailPreview: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    const business = await ctx.db.business.findFirst({
+      where: {
+        id: businessId,
+      },
+      select: {
+        id: true,
+        name: true,
+        subdomain: true,
+        customDomain: true,
+        siteContent: {
+          select: {
+            logoUrl: true,
+          },
+        },
+      },
+    });
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
+    const sampleOrder = await ctx.db.order.findFirst({
+      where: { businessId },
+      include: {
+        items: true,
+        shippingAddress: true,
+      },
+    });
+    return { business, sampleOrder };
+  }),
+
+  get: ownerAdminProcedure
     .input(
       z
         .object({
           productNumber: z.number().optional(),
           includeProducts: z.boolean().optional(),
+          includePages: z.boolean().optional(),
         })
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const headersList = await headers();
-      const hostname = headersList.get("host") ?? "";
+      const businessId = await checkBusiness();
 
-      // Extract subdomain or custom domain
-      const domain = hostname.split(":")[0]; // Remove port
+      if (!businessId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
 
       const business = await ctx.db.business.findFirst({
         where: {
-          OR: [
-            { customDomain: domain },
-            { subdomain: domain?.split(".")[0] }, // Extract subdomain
-          ],
+          id: businessId.id,
           status: "active",
         },
         include: {
           siteContent: true,
           images: true,
-
+          ...(input?.includePages ? { pages: true } : {}),
           ...(input?.includeProducts
             ? {
                 products: {
@@ -62,37 +355,292 @@ export const businessRouter = createTRPCRouter({
       return business;
     }),
 
-  secureGetContent: ownerAdminProcedure.query(async ({ ctx }) => {
-    const headersList = await headers();
-    const hostname = headersList.get("host") ?? "";
-
-    // Extract subdomain or custom domain
-    const domain = hostname.split(":")[0]; // Remove port
+  getWithProducts: publicProcedure.query(async ({ ctx }) => {
+    const businessId = await checkBusiness();
+    if (!businessId) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
 
     const business = await ctx.db.business.findFirst({
       where: {
-        OR: [
-          { customDomain: domain },
-          { subdomain: domain?.split(".")[0] }, // Extract subdomain
-        ],
+        id: businessId.id,
         status: "active",
       },
       include: {
         siteContent: true,
-        pages: {
-          orderBy: { sortOrder: "asc" },
+        images: true,
+        products: {
+          where: { published: true },
+          include: {
+            images: {
+              orderBy: { sortOrder: "asc" },
+              take: 1,
+            },
+            variants: true,
+
+            collectionProducts: {
+              include: {
+                collection: {
+                  select: { id: true, name: true, slug: true },
+                },
+              },
+            },
+            baseInventoryUnit: {
+              select: { inventoryQty: true, allowBackorders: true },
+            },
+          },
+          orderBy: { createdAt: "desc" },
         },
       },
     });
+
+    if (business && business.products && Array.isArray(business.products)) {
+      // Move products with additionalFields.comingSoon === true to the bottom
+      business.products = [
+        ...business.products.filter(
+          (p) =>
+            !(
+              p.additionalFields &&
+              (p.additionalFields as Record<string, unknown>).comingSoon ===
+                true
+            ),
+        ),
+        ...business.products.filter(
+          (p) =>
+            p.additionalFields &&
+            (p.additionalFields as Record<string, unknown>).comingSoon === true,
+        ),
+      ];
+    }
+
+    if (!business) {
+      return business;
+    }
+
+    // Swap in the preview draft if the current user is an authorized owner/manager.
+    const sc = business.siteContent;
+    if (sc?.previewCustomFields != null) {
+      const previewBizId = await getAuthorizedPreviewBusinessId(business.id);
+      if (previewBizId) {
+        sc.customFields = sc.previewCustomFields;
+      }
+    }
+    // Never ship the raw draft field to clients.
+    const sanitizedSiteContent = sc
+      ? (({ previewCustomFields: _drop, ...safe }) => safe)(sc)
+      : sc;
+
+    return { ...business, siteContent: sanitizedSiteContent };
+  }),
+
+  getWithIntegrations: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+    const business = await ctx.db.business.findFirst({
+      where: { id: businessId },
+      select: {
+        id: true,
+        stripeAccountId: true,
+        stripeAutoTaxEnabled: true,
+        umamiWebsiteId: true,
+        umamiEnabled: true,
+      },
+    });
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
     return business;
   }),
 
-  updateBranding: ownerAdminProcedure
-    .input(updateBrandingSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { templateId, siteContent } = input;
+  getPaymentsOverview: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
 
-      const business = await checkBusiness();
+    const business = await ctx.db.business.findFirst({
+      where: { id: businessId },
+      select: { stripeAccountId: true },
+    });
+
+    // Annual order stats — current calendar year, exclude refunded/cancelled
+    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+    const orderStats = await ctx.db.order.aggregate({
+      where: {
+        businessId,
+        createdAt: { gte: startOfYear },
+        status: { notIn: ["refunded", "cancelled"] },
+      },
+      _count: { id: true },
+      _sum: { total: true },
+    });
+
+    const annualTransactions = orderStats._count.id;
+    const annualRevenueCents = orderStats._sum.total ?? 0;
+    // INFORM Act: 200+ transactions OR $5,000+ (500000 cents) annual revenue
+    const informActThresholdReached =
+      annualTransactions >= 200 || annualRevenueCents >= 500000;
+
+    let stripeDetailsSubmitted = false;
+    let stripeBalance: {
+      available: { amount: number; currency: string }[];
+      pending: { amount: number; currency: string }[];
+    } | null = null;
+    let recentPayouts:
+      | {
+          id: string;
+          amount: number;
+          currency: string;
+          status: string;
+          arrival_date: number;
+        }[]
+      | null = null;
+
+    const accountId = business?.stripeAccountId;
+    if (accountId) {
+      try {
+        const [balance, payouts, account] = await Promise.all([
+          stripeClient.balance.retrieve({ stripeAccount: accountId }),
+          stripeClient.payouts.list({ limit: 5 }, { stripeAccount: accountId }),
+          stripeClient.accounts.retrieve(accountId),
+        ]);
+
+        stripeDetailsSubmitted = account.details_submitted ?? false;
+        stripeBalance = {
+          available: balance.available.map((b) => ({
+            amount: b.amount,
+            currency: b.currency,
+          })),
+          pending: balance.pending.map((b) => ({
+            amount: b.amount,
+            currency: b.currency,
+          })),
+        };
+        recentPayouts = payouts.data.map((p) => ({
+          id: p.id,
+          amount: p.amount,
+          currency: p.currency,
+          status: p.status,
+          arrival_date: p.arrival_date,
+        }));
+      } catch (err) {
+        Sentry.captureException(err, {
+          tags: {
+            "trpc.procedure": "business.getPaymentsOverview",
+            service: "stripe",
+          },
+        });
+        // Non-fatal — return partial data
+      }
+    }
+
+    return {
+      annualTransactions,
+      annualRevenueCents,
+      informActThresholdReached,
+      stripeDetailsSubmitted,
+      stripeBalance,
+      recentPayouts,
+      isStripeConnected: !!accountId,
+    };
+  }),
+
+  updateStripeSettings: ownerAdminProcedure
+    .input(z.object({ stripeAutoTaxEnabled: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // When enabling, verify Stripe Tax is actually configured on the connected
+      // account before saving. If not active, block and explain what's needed.
+      if (input.stripeAutoTaxEnabled) {
+        const business = await ctx.db.business.findFirst({
+          where: { id: businessId },
+          select: { stripeAccountId: true },
+        });
+
+        if (!business?.stripeAccountId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Connect a Stripe account before enabling automatic tax collection.",
+          });
+        }
+
+        try {
+          const taxSettings = await stripeClient.tax.settings.retrieve({
+            stripeAccount: business.stripeAccountId,
+          });
+
+          if (taxSettings.status !== "active") {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message:
+                "Stripe Tax is not fully configured on your account. Add your business address and at least one active tax registration in the Stripe Tax Dashboard, then try again.",
+            });
+          }
+        } catch (err) {
+          // Re-throw TRPCErrors as-is; wrap Stripe API errors
+          if (err instanceof TRPCError) throw err;
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Could not verify your Stripe Tax setup. Make sure Stripe Tax is configured in your Stripe Dashboard before enabling this.",
+          });
+        }
+      }
+
+      await ctx.db.business.update({
+        where: { id: businessId },
+        data: { stripeAutoTaxEnabled: input.stripeAutoTaxEnabled },
+      });
+
+      return { success: true };
+    }),
+
+  updateTestimonialSettings: ownerAdminProcedure
+    .input(z.object({ testimonialsAutoApprove: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      await ctx.db.business.update({
+        where: { id: businessId },
+        data: { testimonialsAutoApprove: input.testimonialsAutoApprove },
+      });
+      return { success: true };
+    }),
+
+  getWith: ownerAdminProcedure
+    .input(
+      z.object({
+        includePages: z.boolean().optional(),
+        includeSiteContent: z.boolean().optional(),
+        includeBlog: z.boolean().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const include = {
+        ...(input?.includePages
+          ? { pages: { orderBy: { sortOrder: "asc" } } }
+          : {}),
+        ...(input?.includeSiteContent
+          ? {
+              siteContent: true,
+            }
+          : {}),
+        ...(input?.includeBlog
+          ? {
+              pages: { where: { type: "blog" }, orderBy: { sortOrder: "asc" } },
+            }
+          : {}),
+      };
+
+      const business = await ctx.db.business.findFirst({
+        where: { id: businessId },
+        include: include as Prisma.BusinessInclude,
+      });
 
       if (!business) {
         throw new TRPCError({
@@ -101,24 +649,7 @@ export const businessRouter = createTRPCRouter({
         });
       }
 
-      const updatedBusiness = await ctx.db.business.update({
-        where: { id: business.id },
-        data: {
-          templateId,
-          siteContent: {
-            upsert: {
-              create: siteContent,
-              update: siteContent,
-            },
-          },
-        },
-        include: { siteContent: true },
-      });
-
-      return {
-        message: "Branding updated successfully",
-        businessId: updatedBusiness.id,
-      };
+      return business;
     }),
 
   updateGeneral: ownerAdminProcedure
@@ -129,27 +660,35 @@ export const businessRouter = createTRPCRouter({
         supportEmail: z.string().optional(),
         businessAddress: z.string().optional(),
         taxId: z.string().optional(),
+        phoneNumber: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { name, ownerEmail, supportEmail, businessAddress, taxId } = input;
-
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
+      const { businessId } = ctx;
+      const {
+        name,
+        ownerEmail,
+        supportEmail,
+        businessAddress,
+        taxId,
+        phoneNumber,
+      } = input;
 
       const updatedBusiness = await ctx.db.business.update({
-        where: { id: business.id },
-        data: { name, ownerEmail, supportEmail, businessAddress, taxId },
+        where: { id: businessId },
+        data: {
+          name,
+          ownerEmail,
+          supportEmail,
+          businessAddress,
+          taxId,
+          phoneNumber,
+        },
       });
       return {
         message: "General settings updated successfully",
         businessId: updatedBusiness.id,
+        business: updatedBusiness,
       };
     }),
 
@@ -161,22 +700,51 @@ export const businessRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const { umamiWebsiteId, umamiEnabled } = input;
 
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
       const updatedBusiness = await ctx.db.business.update({
-        where: { id: business.id },
+        where: { id: businessId },
         data: { umamiWebsiteId, umamiEnabled },
       });
       return updatedBusiness;
+    }),
+
+  updateShipping: ownerAdminProcedure
+    .input(
+      z.object({
+        shippingType: z.enum(["free", "flat_rate", "flat_rate_with_threshold"]),
+        shippingFlatRate: z.number().int().min(0).nullable().optional(),
+        freeShippingThreshold: z.number().int().min(0).nullable().optional(),
+        offersInStorePickup: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const {
+        shippingType,
+        shippingFlatRate,
+        freeShippingThreshold,
+        offersInStorePickup,
+      } = input;
+
+      const updatedBusiness = await ctx.db.business.update({
+        where: { id: businessId },
+        data: {
+          shippingType,
+          shippingFlatRate:
+            shippingType === "free" ? null : (shippingFlatRate ?? null),
+          freeShippingThreshold:
+            shippingType === "flat_rate_with_threshold"
+              ? (freeShippingThreshold ?? null)
+              : null,
+          offersInStorePickup,
+        },
+      });
+      return {
+        message: "Shipping settings updated successfully",
+        business: updatedBusiness,
+      };
     }),
 
   updateSeo: ownerAdminProcedure
@@ -189,19 +757,11 @@ export const businessRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const { metaTitle, metaDescription, metaKeywords, ogImage } = input;
 
-      const business = await checkBusiness();
-
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
       const updatedBusiness = await ctx.db.business.update({
-        where: { id: business.id },
+        where: { id: businessId },
         data: {
           siteContent: {
             upsert: {
@@ -220,9 +780,7 @@ export const businessRouter = createTRPCRouter({
             },
           },
         },
-        include: {
-          siteContent: true,
-        },
+        include: { siteContent: true },
       });
       return updatedBusiness;
     }),

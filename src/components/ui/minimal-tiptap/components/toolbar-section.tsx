@@ -1,4 +1,5 @@
 import type { Editor } from "@tiptap/react";
+import { useEditorState } from "@tiptap/react";
 import type { VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { CaretDownIcon } from "@radix-ui/react-icons";
@@ -38,6 +39,16 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
   size,
   variant,
 }) => {
+  // Re-render when selection changes so bold/italic/etc buttons show correct state.
+  // Narrow subscription avoids re-rendering on every transaction (e.g. from gallery).
+  useEditorState({
+    editor,
+    selector: (ctx) => ({
+      from: ctx.editor.state.selection.from,
+      to: ctx.editor.state.selection.to,
+    }),
+  });
+
   const { mainActions, dropdownActions } = React.useMemo(() => {
     const sortedActions = actions
       .filter((action) => activeActions.includes(action.value))

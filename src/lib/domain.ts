@@ -21,6 +21,11 @@ export async function getBusinessByDomain(domain: string) {
     // Search by subdomain
     return db.business.findUnique({
       where: { subdomain },
+      include: {
+        siteContent: {
+          select: { logoUrl: true },
+        },
+      },
     });
   } else {
     // Search by custom domain
@@ -30,6 +35,11 @@ export async function getBusinessByDomain(domain: string) {
           { customDomain: domain },
           { customDomain: domain.replace(/:\d+$/, "") }, // Remove port for dev
         ],
+      },
+      include: {
+        siteContent: {
+          select: { logoUrl: true },
+        },
       },
     });
   }

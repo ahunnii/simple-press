@@ -1,38 +1,45 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { api } from "~/trpc/server";
+import { TrailHeader } from "~/app/admin/_components/trail-header";
 
-import { PageEditor } from "../../_components/page-editor";
+import { PageEditor } from "../_components/page-editor";
 
-export default async function EditPagePage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) redirect("/auth/sign-in");
+type Props = {
+  params: Promise<{ id: string }>;
+};
+export default async function EditPagePage({ params }: Props) {
+  const { id } = await params;
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      businessId: true,
-      business: { select: { id: true, name: true } },
-    },
-  });
+  const [page, flags] = await Promise.all([
+    api.content.getPageById({ id }),
+    getBusinessFlags(),
+  ]);
 
-  if (!user?.business) redirect("/admin/welcome");
+  if (!page) notFound();
 
-  const page = await db.page.findUnique({
-    where: { id: params.id },
-  });
+  return (
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Content", href: "/admin/content" },
+          { label: "Pages", href: "/admin/content/pages" },
+          { label: page.title },
+        ]}
+      />
 
-  if (!page || page?.businessId !== user.business.id) {
-    notFound();
-  }
-
-  return <PageEditor business={user.business} page={page as any} />;
+      <PageEditor page={page} galleriesEnabled={flags.isEnabled("galleries")} embedsEnabled={flags.isEnabled("embeds")} />
+    </>
+  );
 }
+
+export const generateMetadata = async ({ params }: Props) => {
+  const { id } = await params;
+  const page = await api.content.getPageById({
+    id,
+  });
+  return {
+    title: `Edit ${page?.title ?? "Page"}`,
+  };
+};

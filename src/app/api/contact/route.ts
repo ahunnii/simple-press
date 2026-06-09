@@ -1,15 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { verifyHCaptcha } from "~/lib/captcha/verify-hcaptcha";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { sendContactFormSubmission } from "~/lib/email/templates";
-import { db } from "~/server/db";
 
 const contactSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
   subject: z.string().optional(),
   message: z.string().min(10, "Message must be at least 10 characters"),
+  phone: z.string().optional(),
+  preferredContactMethod: z
+    .enum(["email", "phone", "no-preference"])
+    .optional(),
+  captchaToken: z.string(),
 });
 
 export async function POST(req: NextRequest) {
@@ -25,7 +31,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, subject, message } = validation.data;
+    const {
+      name,
+      email,
+      subject,
+      message,
+      phone,
+      preferredContactMethod,
+      captchaToken,
+    } = validation.data;
+
+    const isValid = await verifyHCaptcha(captchaToken);
+    if (!isValid) {
+      return NextResponse.json(
+        { error: "Captcha verification failed" },
+        { status: 400 },
+      );
+    }
 
     // Get business from domain
     const domain = getCurrentDomain(req.headers);
@@ -44,9 +66,12 @@ export async function POST(req: NextRequest) {
       email,
       subject,
       message,
+      phone,
+      preferredContactMethod,
       business: {
         name: business.name,
         ownerEmail: business.ownerEmail,
+        siteContent: business.siteContent,
       },
     });
 
@@ -62,8 +87,7 @@ export async function POST(req: NextRequest) {
     console.error("[Contact] Error:", error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Failed to send message",
+        error: "Failed to send message. Please try again.",
       },
       { status: 500 },
     );

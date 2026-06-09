@@ -1,12 +1,49 @@
-import { headers } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
+import { NextResponse } from "next/server";
 
+import { env } from "~/env";
+import { authLimiter, getClientIp } from "~/lib/rate-limit";
 import { isSubdomainReserved, slugify } from "~/lib/utils";
-import { auth } from "~/server/better-auth";
+import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
+
+/**
+ * Notify Artisanal Futures that an artisan token was successfully used.
+ * Non-blocking — a failure here should never prevent store creation.
+ * Called server-side so SIMPLEPRESS_HASH_SECRET is never exposed to the client.
+ */
+async function notifyArtisanalFutures(
+  aftoken: string,
+  subdomain: string,
+  customDomain: string | null,
+): Promise<void> {
+  const storeUrl =
+    customDomain ??
+    `https://${subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  try {
+    const res = await fetch(`${env.ARTISANAL_FUTURES_API_URL}/simplepress`, {
+      method: "POST",
+      body: JSON.stringify({ artisanToken: aftoken, subdomain, customDomain: storeUrl }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.SIMPLEPRESS_HASH_SECRET}`,
+      },
+    });
+    if (!res.ok) {
+      console.warn("[Onboarding] AF token update returned non-OK status", res.status);
+    }
+  } catch (err) {
+    Sentry.captureException(err, { tags: { route: "onboarding", step: "af-token-update" } });
+    console.error("[Onboarding] Failed to notify Artisanal Futures (non-blocking)", err);
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    await authLimiter.consume(ip);
+
     const formData = (await req.json()) as {
       email: string;
       password: string;
@@ -19,6 +56,8 @@ export async function POST(req: NextRequest) {
       heroSubtitle: string;
       aboutText: string;
       primaryColor: string;
+      /** Artisanal Futures token — present only for the artisan onboarding flow. */
+      aftoken?: string | null;
     };
 
     const {
@@ -33,7 +72,17 @@ export async function POST(req: NextRequest) {
       heroSubtitle,
       aboutText,
       primaryColor,
+      aftoken,
     } = formData;
+
+    // Verify the caller is authenticated and owns this email
+    const session = await auth.api.getSession({ headers: req.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (session.user.email !== email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Validation
     if (!email || !password || !name || !businessName || !subdomain) {
@@ -64,12 +113,12 @@ export async function POST(req: NextRequest) {
 
     // Check if email already exists
     const existingUser = await db.user.findFirst({
-      where: { email, businessId: null },
+      where: { email },
     });
 
     if (!existingUser) {
       return NextResponse.json(
-        { error: "An account with this email does not exist" },
+        { error: "Unable to complete store setup. Please try again." },
         { status: 400 },
       );
     }
@@ -121,13 +170,12 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // 3. Create owner user (WITHOUT password - Better Auth will handle it)
-      await tx.user.update({
-        where: { id: existingUser.id },
+      // 3. Create business membership for the owner
+      await tx.businessMembership.create({
         data: {
-          role: "OWNER",
+          userId: existingUser.id,
           businessId: newBusiness.id,
-          emailVerified: false,
+          role: "OWNER",
         },
       });
 
@@ -145,27 +193,18 @@ export async function POST(req: NextRequest) {
       return newBusiness;
     });
 
-    // Create a one-time signup token for secure cross-domain session creation
-    const { randomBytes } = await import("crypto");
-    const token = randomBytes(32).toString("hex");
-
-    await db.signupToken.create({
-      data: {
-        token,
-        userId: existingUser.id,
-        businessId: business.id,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
-        used: false,
-      },
-    });
+    // Notify Artisanal Futures that this token was consumed (non-blocking).
+    if (aftoken) {
+      void notifyArtisanalFutures(aftoken, business.subdomain, business.customDomain);
+    }
 
     // Redirect to signup completion page with token
     const isDev = process.env.NODE_ENV === "development";
     const subdomainUrl = isDev
       ? `http://${subdomain}.localhost:3000`
-      : `https://${subdomain}.myapplication.com`;
+      : `https://${subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
 
-    const redirectUrl = `${subdomainUrl}/auth/signup-complete?token=${token}`;
+    const redirectUrl = `${subdomainUrl}/auth/signup-complete`;
 
     return NextResponse.json({
       success: true,
@@ -173,7 +212,14 @@ export async function POST(req: NextRequest) {
       businessId: business.id,
     });
   } catch (error) {
+    if (error instanceof Error && error.constructor.name === "RateLimiterRes") {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 },
+      );
+    }
     console.error("Onboarding error:", error);
+    Sentry.captureException(error, { tags: { route: "onboarding" } });
     return NextResponse.json(
       { error: "Failed to create your store. Please try again." },
       { status: 500 },

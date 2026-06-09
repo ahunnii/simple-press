@@ -1,83 +1,1784 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 @import "@daveyplate/better-auth-ui/css";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.98 0.005 85);
-  --foreground: oklch(0.25 0.02 150);
+  --radius: 0.65rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.25 0.02 150);
+  --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.25 0.02 150);
-  --primary: oklch(0.45 0.12 155);
-  --primary-foreground: oklch(0.98 0.005 85);
-  --secondary: oklch(0.95 0.01 85);
-  --secondary-foreground: oklch(0.25 0.02 150);
-  --muted: oklch(0.94 0.01 85);
-  --muted-foreground: oklch(0.45 0.02 150);
-  --accent: oklch(0.55 0.1 155);
-  --accent-foreground: oklch(0.98 0.005 85);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0.02 85);
-  --input: oklch(0.92 0.01 85);
-  --ring: oklch(0.45 0.12 155);
-  --chart-1: oklch(0.45 0.12 155);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.25 0.02 150);
-  --sidebar-primary: oklch(0.45 0.12 155);
-  --sidebar-primary-foreground: oklch(0.98 0.005 85);
-  --sidebar-accent: oklch(0.95 0.01 85);
-  --sidebar-accent-foreground: oklch(0.25 0.02 150);
-  --sidebar-border: oklch(0.9 0.02 85);
-  --sidebar-ring: oklch(0.45 0.12 155);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+
+  --vn-bone: #fbfaf7; /* warm cream — main body background           */
+  --vn-paper: #ffffff; /* white — card/surface backgrounds            */
+  --vn-ink: #1a1a1a; /* near-black — primary text / dark sections   */
+  --vn-ink-soft: #444444; /* dark grey — secondary text                  */
+  --vn-steel: #303d4b; /* steel blue-grey — accent dark sections      */
+  --vn-steel-deep: #1f2838; /* deepest steel                               */
+  --vn-steel-mist: #7a7670; /* warm muted — tertiary / placeholder text    */
+  --vn-rule: #e8e4dc; /* warm border / divider                       */
+  --vn-line-soft: #f0ece4; /* very subtle border                          */
+  --vn-accent: #7a3b1d; /* deep terracotta — used sparingly            */
 }
 
 .dark {
-  --background: oklch(0.18 0.02 150);
-  --foreground: oklch(0.95 0.01 85);
-  --card: oklch(0.22 0.02 150);
-  --card-foreground: oklch(0.95 0.01 85);
-  --popover: oklch(0.22 0.02 150);
-  --popover-foreground: oklch(0.95 0.01 85);
-  --primary: oklch(0.55 0.12 155);
-  --primary-foreground: oklch(0.18 0.02 150);
-  --secondary: oklch(0.28 0.02 150);
-  --secondary-foreground: oklch(0.95 0.01 85);
-  --muted: oklch(0.28 0.02 150);
-  --muted-foreground: oklch(0.65 0.02 150);
-  --accent: oklch(0.55 0.12 155);
-  --accent-foreground: oklch(0.18 0.02 150);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.32 0.02 150);
-  --input: oklch(0.28 0.02 150);
-  --ring: oklch(0.55 0.12 155);
-  --chart-1: oklch(0.55 0.12 155);
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.22 0.02 150);
-  --sidebar-foreground: oklch(0.95 0.01 85);
-  --sidebar-primary: oklch(0.55 0.12 155);
-  --sidebar-primary-foreground: oklch(0.18 0.02 150);
-  --sidebar-accent: oklch(0.28 0.02 150);
-  --sidebar-accent-foreground: oklch(0.95 0.01 85);
-  --sidebar-border: oklch(0.32 0.02 150);
-  --sidebar-ring: oklch(0.55 0.12 155);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+.bamboo {
+  --background: oklch(0.98 0.005 90);
+  --foreground: oklch(0.2 0.02 50);
+  --card: oklch(0.99 0.003 90);
+  --card-foreground: oklch(0.2 0.02 50);
+  --popover: oklch(0.99 0.003 90);
+  --popover-foreground: oklch(0.2 0.02 50);
+  --primary: oklch(0.35 0.08 160);
+  --primary-foreground: oklch(0.97 0.01 90);
+  --secondary: oklch(0.92 0.03 85);
+  --secondary-foreground: oklch(0.25 0.02 50);
+  --muted: oklch(0.94 0.02 140);
+  --muted-foreground: oklch(0.45 0.03 50);
+  --accent: oklch(0.78 0.1 85);
+  --accent-foreground: oklch(0.2 0.02 50);
+  --destructive: oklch(0.55 0.15 30);
+  --destructive-foreground: oklch(0.97 0.01 90);
+  --border: oklch(0.9 0.02 90);
+  --input: oklch(0.9 0.02 90);
+  --ring: oklch(0.45 0.08 160);
+  --chart-1: oklch(0.35 0.08 160);
+  --chart-2: oklch(0.78 0.1 85);
+  --chart-3: oklch(0.55 0.06 160);
+  --chart-4: oklch(0.65 0.08 85);
+  --chart-5: oklch(0.45 0.06 140);
+  --radius: 0.5rem;
+  --sidebar: oklch(0.97 0.005 90);
+  --sidebar-foreground: oklch(0.2 0.02 50);
+  --sidebar-primary: oklch(0.35 0.08 160);
+  --sidebar-primary-foreground: oklch(0.97 0.01 90);
+  --sidebar-accent: oklch(0.92 0.03 85);
+  --sidebar-accent-foreground: oklch(0.25 0.02 50);
+  --sidebar-border: oklch(0.9 0.02 90);
+  --sidebar-ring: oklch(0.45 0.08 160);
+  --font-sans: "Inter", "Inter Fallback";
+  --font-heading: "Plus Jakarta Sans", "Inter Fallback";
+}
+
+/* ─── Bamboo template — accessibility enhancements ──────────────────────────
+   Focus-visible outlines for every interactive element (WCAG 2.4.7 / 2.4.11).
+   prefers-reduced-motion support (WCAG 2.3.3 / best practice at AA).         */
+
+.bamboo *:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bamboo *,
+  .bamboo *::before,
+  .bamboo *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Variant selector buttons (N-5) ── */
+.bamboo .bamboo-variant-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bamboo .bamboo-variant-btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.happy-bamboo {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.148 0.004 228.8);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.148 0.004 228.8);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.982 0.018 127);
+  --primary: oklch(0.589 0.136 127);
+  --primary-foreground: oklch(0.982 0.018 155.826);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.963 0.002 197.1);
+  --muted-foreground: oklch(0.56 0.021 213.5);
+  --accent: oklch(0.963 0.002 197.1);
+  --accent-foreground: oklch(0.218 0.008 223.9);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.925 0.005 214.3);
+  --input: oklch(0.925 0.005 214.3);
+  --ring: oklch(0.723 0.014 214.4);
+  --chart-1: oklch(0.872 0.007 219.6);
+  --chart-2: oklch(0.56 0.021 213.5);
+  --chart-3: oklch(0.45 0.017 213.2);
+  --chart-4: oklch(0.378 0.015 216);
+  --chart-5: oklch(0.275 0.011 216.9);
+  --radius: 0.45rem;
+  --sidebar: oklch(0.987 0.002 197.1);
+  --sidebar-foreground: oklch(0.148 0.004 228.8);
+  --sidebar-primary: oklch(0.689 0.176 126);
+  --sidebar-primary-foreground: oklch(0.982 0.018 127);
+  --sidebar-accent: oklch(0.963 0.002 197.1);
+  --sidebar-accent-foreground: oklch(0.218 0.008 223.9);
+  --sidebar-border: oklch(0.925 0.005 214.3);
+  --sidebar-ring: oklch(0.723 0.014 214.4);
+  --font-sans: "Outfit", "Outfit Fallback";
+  --font-heading: "Outfit", "Outfit Fallback";
+  --font-serif: "Spectral", "Spectral Fallback";
+}
+
+.dark.happy-bamboo {
+  --background: oklch(0.148 0.004 228.8);
+  --foreground: oklch(0.987 0.002 197.1);
+  --card: oklch(0.218 0.008 223.9);
+  --card-foreground: oklch(0.987 0.002 197.1);
+  --popover: oklch(0.218 0.008 223.9);
+  --popover-foreground: oklch(0.987 0.002 197.1);
+  --primary: oklch(0.51 0.101 128);
+  --primary-foreground: oklch(0.982 0.018 127);
+  --secondary: oklch(0.274 0.006 286.033);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.275 0.011 216.9);
+  --muted-foreground: oklch(0.723 0.014 214.4);
+  --accent: oklch(0.275 0.011 216.9);
+  --accent-foreground: oklch(0.987 0.002 197.1);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.56 0.021 213.5);
+  --chart-1: oklch(0.872 0.007 219.6);
+  --chart-2: oklch(0.56 0.021 213.5);
+  --chart-3: oklch(0.45 0.017 213.2);
+  --chart-4: oklch(0.378 0.015 216);
+  --chart-5: oklch(0.275 0.011 216.9);
+  --sidebar: oklch(0.218 0.008 223.9);
+  --sidebar-foreground: oklch(0.987 0.002 197.1);
+  --sidebar-primary: oklch(0.785 0.201 126);
+  --sidebar-primary-foreground: oklch(0.982 0.018 127);
+  --sidebar-accent: oklch(0.275 0.011 216.9);
+  --sidebar-accent-foreground: oklch(0.987 0.002 197.1);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.56 0.021 213.5);
+  --font-sans: "Outfit", "Outfit Fallback";
+  --font-heading: "Outfit", "Outfit Fallback";
+}
+
+.dark-trend {
+  --background: oklch(0.2178 0 0);
+  --foreground: oklch(0.987 0.002 197.1);
+  --card: oklch(0.27 0.008 224);
+  --card-foreground: oklch(0.987 0.002 197.1);
+  --popover: oklch(0.27 0.008 224);
+  --popover-foreground: oklch(0.987 0.002 197.1);
+  /* Darkened from oklch(0.600553 0.242472 293.8885) (violet-500, ≈4.2:1 with
+     white) to Tailwind v4 violet-600 (≈5.7:1 with white) so primary CTA
+     buttons meet WCAG 1.4.3 Contrast Minimum (AA). Hover moves to violet-700. */
+  --primary: oklch(0.541 0.281 293.009);
+  --primary-foreground: oklch(0.977 0.01 294);
+  --secondary: oklch(0.3 0.006 224);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.3 0.006 224);
+  --muted-foreground: oklch(0.723 0.014 214.4);
+  --accent: oklch(0.3 0.006 224);
+  --accent-foreground: oklch(0.987 0.002 197.1);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.541 0.281 293.009);
+  --chart-1: oklch(0.75 0.15 294);
+  --chart-2: oklch(0.541 0.281 293.009);
+  --chart-3: oklch(0.52 0.2 294);
+  --chart-4: oklch(0.45 0.17 294);
+  --chart-5: oklch(0.38 0.14 294);
+  --sidebar: oklch(0.27 0.008 224);
+  --sidebar-foreground: oklch(0.987 0.002 197.1);
+  --sidebar-primary: oklch(0.541 0.281 293.009);
+  --sidebar-primary-foreground: oklch(0.977 0.01 294);
+  --sidebar-accent: oklch(0.3 0.006 224);
+  --sidebar-accent-foreground: oklch(0.987 0.002 197.1);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.541 0.281 293.009);
+}
+
+/* ─── Dark-Trend — accessibility enhancements ────────────────────────────────
+   Skip link, focus-visible outlines (WCAG 2.4.1 / 2.4.7 / 2.4.11), and a
+   prefers-reduced-motion block (WCAG 2.3.3) mirroring the default-template
+   convention above.                                                          */
+
+/* Skip link: sr-only until focused, then visually present (WCAG 2.4.1) */
+.dt-skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+.dt-skip-link:focus {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 9999;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  background: #ffffff;
+  color: #111111;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Focus-visible: white outline on the dark template background (WCAG 2.4.7) */
+.dark-trend *:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Respect prefers-reduced-motion for all CSS transitions/animations
+   (JS-driven Framer Motion is handled per-component via useReducedMotion).
+   WCAG 2.1 SC 2.3.3 (AAA) / best practice at AA.                           */
+@media (prefers-reduced-motion: reduce) {
+  .dark-trend *,
+  .dark-trend *::before,
+  .dark-trend *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.default-template {
+  --font-sans: "Poppins", "Poppins Fallback", sans-serif;
+  --font-heading: "Inter", "Inter Fallback", sans-serif;
+  --font-serif: "Inter", "Inter Fallback", sans-serif;
+  --radius: 0.25rem;
+}
+
+/* Parallax hero: extend 10% above/below so translateY never reveals a gap */
+.default-template .dt-parallax-bg {
+  top: -10%;
+  bottom: -10%;
+}
+
+/* ─── Default template — accessibility enhancements ─────────────────────────
+   Focus-visible outlines: two-tone indicator (dark outline + white inner ring)
+   that meets WCAG 2.1 SC 2.4.7 / 2.4.11 (AA) on both light and dark surfaces.
+   The white box-shadow renders a 2px ring flush with the element edge; the
+   2px dark outline sits 2px outside that white ring, so the dark ring is
+   visible on light surfaces and the white ring is visible on dark surfaces
+   (hero, selected pills, lightbox backdrop, bg-[#0a0a0a] CTAs).              */
+
+.default-template *:focus-visible {
+  outline: 2px solid #0a0a0a;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+/* Respect prefers-reduced-motion for all CSS transitions/animations
+   (JS-driven parallax is handled in the component).
+   WCAG 2.1 SC 2.3.3 (AAA) / best practice at AA.                           */
+@media (prefers-reduced-motion: reduce) {
+  .default-template *,
+  .default-template *::before,
+  .default-template *::after,
+  .happy-bamboo *,
+  .happy-bamboo *::before,
+  .happy-bamboo *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Visual Noise Detroit — design tokens ─────────────────────────────────
+   Defined at :root so Sheet/Dialog portals (which render outside the layout
+   wrapper) still inherit the correct values.                               */
+
+.noise,
+.visual-noise {
+  --vn-bone: #fbfaf7;
+  --vn-paper: #ffffff;
+  --vn-ink: #1a1a1a;
+  --vn-ink-soft: #444444;
+  --vn-steel: #303d4b;
+  --vn-steel-deep: #1f2838;
+  /* Darkened from #7a7670 (≈3.6:1) to #6b6760 (≈4.6:1 on white) so muted
+     text used at body sizes meets WCAG 1.4.3 (AA). Still reads as a soft
+     warm grey against the bone/paper backgrounds.                        */
+  --vn-steel-mist: #6b6760;
+  --vn-rule: #e8e4dc;
+  --vn-line-soft: #f0ece4;
+  --vn-accent: #7a3b1d;
+  --radius: 0.15rem;
+  --font-sans: "DM Sans", "DM Sans Fallback";
+  --font-serif: "Cormorant Garamond", "Cormorant Garamond Fallback";
+  --font-mono: "JetBrains Mono", "JetBrains Mono Fallback";
+}
+
+/* ─── Announcement bar ──────────────────────────────────────────────────── */
+.noise .vn-topbar,
+.visual-noise .vn-topbar {
+  background: #111111;
+  color: #ffffff;
+  border-bottom: none;
+  font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  min-height: 38px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.noise .vn-topbar .vn-dot,
+.visual-noise .vn-topbar .vn-dot,
+.visual-editorial .vn-topbar .vn-dot {
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  animation: vn-pulse 2s infinite ease-in-out;
+}
+
+@keyframes vn-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ─── Wordmark ──────────────────────────────────────────────────────────── */
+/* Design: "VISUAL NOISE" large serif + "· DETROIT ·" small caption below  */
+.noise .vn-wordmark,
+.visual-noise .vn-wordmark,
+.visual-editorial .vn-wordmark {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  color: var(--vn-ink);
+}
+
+.noise .vn-wordmark-sub,
+.visual-noise .vn-wordmark-sub {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.5em;
+  color: var(--vn-steel-mist);
+  font-weight: 500;
+}
+
+/* Legacy wordmark parts — kept so old markup still compiles */
+.noise .vn-wordmark-x,
+.visual-noise .vn-wordmark-x,
+.visual-editorial .vn-wordmark-x {
+  display: none;
+}
+
+.noise .vn-wordmark-detroit,
+.visual-noise .vn-wordmark-detroit,
+.visual-editorial .vn-wordmark-detroit {
+  display: none;
+}
+
+/* ─── Stamps ────────────────────────────────────────────────────────────── */
+.noise .vn-stamp,
+.visual-noise .vn-stamp {
+  border: 1px solid var(--vn-ink);
+  padding: 4px 9px 3px;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.noise .vn-stamp-solid,
+.visual-noise .vn-stamp-solid,
+.visual-editorial .vn-stamp-solid {
+  background: var(--vn-ink);
+  color: var(--vn-paper);
+  border-color: var(--vn-ink);
+}
+
+.noise .vn-stamp-steel,
+.visual-noise .vn-stamp-steel,
+.visual-editorial .vn-stamp-steel {
+  background: var(--vn-steel);
+  color: var(--vn-paper);
+  border-color: var(--vn-steel);
+}
+
+/* ─── Marquee ───────────────────────────────────────────────────────────── */
+@keyframes vn-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.noise .vn-marquee-track,
+.visual-noise .vn-marquee-track,
+.visual-editorial .vn-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: vn-marquee 38s linear infinite;
+  will-change: transform;
+}
+
+.noise .vn-marquee-track:hover,
+.visual-noise .vn-marquee-track:hover,
+.visual-editorial .vn-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* ─── Nav links ─────────────────────────────────────────────────────────── */
+.noise .vn-nav-link,
+.visual-noise .vn-nav-link,
+.visual-editorial .vn-nav-link {
+  position: relative;
+  padding: 4px 0;
+}
+
+.noise .vn-nav-link.vn-active::after,
+.noise .vn-nav-link:hover::after,
+.visual-noise .vn-nav-link.vn-active::after,
+.visual-noise .vn-nav-link:hover::after,
+.visual-editorial .vn-nav-link.vn-active::after,
+.visual-editorial .vn-nav-link:hover::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: var(--vn-ink);
+}
+
+.noise .vn-mobile-menu,
+.visual-noise .vn-mobile-menu {
+  background: var(--vn-bone);
+  color: var(--vn-ink);
+}
+
+.noise .vn-mobile-nav-active,
+.visual-noise .vn-mobile-nav-active {
+  color: var(--vn-ink);
+  font-weight: 600;
+}
+
+.noise .vn-mobile-nav-inactive,
+.visual-noise .vn-mobile-nav-inactive {
+  color: var(--vn-ink-soft);
+}
+
+.noise .vn-mobile-nav-inactive:hover,
+.visual-noise .vn-mobile-nav-inactive:hover {
+  color: var(--vn-ink);
+}
+
+.noise .vn-mobile-nav-list,
+.visual-noise .vn-mobile-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.noise .vn-mobile-nav-link,
+.visual-noise .vn-mobile-nav-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.875rem 0.25rem;
+  font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
+  font-size: 0.875rem;
+  line-height: 1.25;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.noise .vn-mobile-nav-link-child,
+.visual-noise .vn-mobile-nav-link-child {
+  min-height: 2.75rem;
+  padding: 0.75rem 0.25rem 0.75rem 1rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+}
+
+.noise .vn-mobile-nav-link:focus-visible,
+.visual-noise .vn-mobile-nav-link:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 2px;
+}
+
+.noise .vn-mobile-action-btn,
+.visual-noise .vn-mobile-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.noise .vn-mobile-action-btn:focus-visible,
+.visual-noise .vn-mobile-action-btn:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 2px;
+}
+
+.noise .vn-mobile-account-panel,
+.visual-noise .vn-mobile-account-panel {
+  background: var(--vn-paper);
+  border: 1px solid var(--vn-rule);
+}
+
+.noise .vn-dropdown-panel,
+.visual-noise .vn-dropdown-panel {
+  background: var(--vn-paper);
+  border: 1px solid var(--vn-rule);
+  box-shadow: 0 4px 16px rgba(26, 26, 26, 0.08);
+}
+
+.noise .vn-nav-dropdown-link,
+.visual-noise .vn-nav-dropdown-link {
+  display: block;
+  padding: 0.75rem 1.25rem;
+  font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--vn-ink-soft);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.noise .vn-nav-dropdown-link:hover,
+.noise .vn-nav-dropdown-link.vn-active,
+.visual-noise .vn-nav-dropdown-link:hover,
+.visual-noise .vn-nav-dropdown-link.vn-active {
+  color: var(--vn-ink);
+  background: var(--vn-line-soft);
+}
+
+.noise .vn-nav-dropdown-link:focus-visible,
+.visual-noise .vn-nav-dropdown-link:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: -2px;
+}
+
+/* ─── Footer links ──────────────────────────────────────────────────────── */
+.noise .vn-footer-link,
+.visual-noise .vn-footer-link,
+.visual-editorial .vn-footer-link {
+  color: var(--vn-steel-mist);
+  transition: color 0.15s ease;
+  text-decoration: none;
+}
+
+.noise .vn-footer-link:hover,
+.visual-noise .vn-footer-link:hover,
+.visual-editorial .vn-footer-link:hover {
+  color: var(--vn-ink);
+}
+
+/* ─── Scrollbar hide ────────────────────────────────────────────────────── */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Contact form ──────────────────────────────────────────────────────── */
+.noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
+.noise .vn-contact-form textarea,
+.visual-noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
+.visual-noise .vn-contact-form textarea,
+.visual-editorial
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
+.visual-editorial .vn-contact-form textarea {
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1.5px solid var(--vn-rule);
+  background: transparent;
+  padding: 10px 0;
+  font-family: var(--font-sans, "DM Sans", sans-serif);
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  color: var(--vn-ink);
+}
+
+.noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not(
+    [type="tel"]
+  )::placeholder,
+.noise .vn-contact-form textarea::placeholder,
+.visual-noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not(
+    [type="tel"]
+  )::placeholder,
+.visual-noise .vn-contact-form textarea::placeholder,
+.visual-editorial
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not(
+    [type="tel"]
+  )::placeholder,
+.visual-editorial .vn-contact-form textarea::placeholder {
+  color: var(--vn-steel-mist);
+  opacity: 0.6;
+}
+
+.noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
+.noise .vn-contact-form textarea:focus,
+.visual-noise
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
+.visual-noise .vn-contact-form textarea:focus,
+.visual-editorial
+  .vn-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
+.visual-editorial .vn-contact-form textarea:focus {
+  border-bottom-color: var(--vn-ink);
+  box-shadow: none;
+}
+
+.noise .vn-contact-form .vn-field-label,
+.visual-noise .vn-contact-form .vn-field-label {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--vn-steel-mist);
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* ─── Blog post drop cap ────────────────────────────────────────────────── */
+.noise .vn-article > p:first-of-type::first-letter,
+.visual-noise .vn-article > p:first-of-type::first-letter,
+.visual-editorial .vn-article > p:first-of-type::first-letter {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-style: italic;
+  font-size: 4.5em;
+  line-height: 0.75;
+  float: left;
+  margin-right: 0.06em;
+  margin-top: 0.1em;
+  color: var(--vn-ink);
+}
+
+/* ─── Product card hover lift ───────────────────────────────────────────── */
+.noise .vn-prod-pic,
+.visual-noise .vn-prod-pic,
+.visual-editorial .vn-prod-pic {
+  transition: box-shadow 0.15s ease;
+}
+
+.noise .vn-prod-link:hover .vn-prod-pic,
+.noise .vn-prod-link:focus-within .vn-prod-pic,
+.visual-noise .vn-prod-link:hover .vn-prod-pic,
+.visual-noise .vn-prod-link:focus-within .vn-prod-pic,
+.visual-editorial .vn-prod-link:hover .vn-prod-pic,
+.visual-editorial .vn-prod-link:focus-within .vn-prod-pic {
+  box-shadow:
+    0 0 0 1px var(--vn-ink),
+    5px 5px 0 0 var(--vn-ink);
+}
+
+/* Stretched card link: the title link covers the whole card as the click
+   target without nesting the add-to-cart <button> inside an <a> (fixes the
+   invalid interactive-in-interactive markup — WCAG 1.3.1 / 4.1.2).         */
+.noise .vn-card-link::after,
+.visual-noise .vn-card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.noise .vn-card-link:focus-visible,
+.visual-noise .vn-card-link:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 3px;
+}
+
+/* ─── Category cards ────────────────────────────────────────────────────── */
+.noise .vn-cat-card,
+.visual-noise .vn-cat-card,
+.visual-editorial .vn-cat-card {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.noise .vn-cat-card:hover,
+.visual-noise .vn-cat-card:hover,
+.visual-editorial .vn-cat-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 0 var(--vn-ink);
+}
+
+.noise .vn-cat-card:hover .vn-cat-meta,
+.visual-noise .vn-cat-card:hover .vn-cat-meta,
+.visual-editorial .vn-cat-card:hover .vn-cat-meta {
+  background: var(--vn-ink);
+  color: var(--vn-paper);
+}
+
+.noise .vn-cat-card:hover .vn-cat-meta .vn-cat-num,
+.noise .vn-cat-card:hover .vn-cat-meta .vn-cat-count,
+.visual-noise .vn-cat-card:hover .vn-cat-meta .vn-cat-num,
+.visual-noise .vn-cat-card:hover .vn-cat-meta .vn-cat-count,
+.visual-editorial .vn-cat-card:hover .vn-cat-meta .vn-cat-num,
+.visual-editorial .vn-cat-card:hover .vn-cat-meta .vn-cat-count {
+  color: var(--vn-steel-mist);
+}
+
+.noise .vn-cat-card:hover .vn-cat-meta .vn-cat-name,
+.visual-noise .vn-cat-card:hover .vn-cat-meta .vn-cat-name,
+.visual-editorial .vn-cat-card:hover .vn-cat-meta .vn-cat-name {
+  color: var(--vn-paper);
+}
+
+/* ─── Visual Noise Detroit — accessibility enhancements ─────────────────────
+   This template ships no theme-mapped --ring token and previously suppressed
+   focus indicators on its hand-rolled controls. The rules below restore a
+   visible focus indicator for every interactive element (WCAG 2.4.7 / 2.4.11)
+   and add prefers-reduced-motion support (WCAG 2.3.3) for the marquee, intro
+   overlay, hover-lift, pulse and card-transform animations.                  */
+
+.noise *:focus-visible,
+.visual-noise *:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 2px;
+}
+
+/* On dark steel / ink sections an ink outline is invisible. Elements placed
+   on those backgrounds opt into a paper-colored ring via .vn-focus-on-dark. */
+.noise .vn-focus-on-dark:focus-visible,
+.visual-noise .vn-focus-on-dark:focus-visible {
+  outline: 2px solid var(--vn-bone);
+  outline-offset: 3px;
+}
+
+/* The contact-form fields suppress the native outline and rely only on a
+   border-bottom color change; add a visible focus ring back for keyboard
+   users (WCAG 2.4.7).                                                        */
+.noise .vn-contact-form input:focus-visible,
+.noise .vn-contact-form textarea:focus-visible,
+.visual-noise .vn-contact-form input:focus-visible,
+.visual-noise .vn-contact-form textarea:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 3px;
+}
+
+/* ─── Product page grid ─────────────────────────────────────────────────── */
+.noise .vn-product-grid,
+.visual-noise .vn-product-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ─── Hero overlay (replaces inline rgba) ───────────────────────────────── */
+.noise .vn-hero-overlay,
+.visual-noise .vn-hero-overlay {
+  background: linear-gradient(
+    180deg,
+    oklch(from var(--vn-ink) l c h / 0.2) 0%,
+    oklch(from var(--vn-ink) l c h / 0.35) 50%,
+    oklch(from var(--vn-ink) l c h / 0.6) 100%
+  );
+}
+
+/* ─── Button hover transition (replaces JS onMouseOver) ─────────────────── */
+/* Hero CTA button */
+.noise .vn-btn-hero,
+.visual-noise .vn-btn-hero {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  padding: 15px 38px;
+  background: var(--vn-paper);
+  color: var(--vn-ink);
+  border: 1px solid var(--vn-paper);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+  display: inline-block;
+}
+.noise .vn-btn-hero:hover,
+.visual-noise .vn-btn-hero:hover {
+  background: var(--vn-bone);
+  border-color: var(--vn-bone);
+}
+
+/* ─── Shared heading scale ───────────────────────────────────────────────── */
+/* h1 hero */
+.noise .vn-h1,
+.visual-noise .vn-h1 {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(3rem, 9vw, 7.5rem);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+/* h1 page */
+.noise .vn-h1-page,
+.visual-noise .vn-h1-page {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(3rem, 7vw, 5rem);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+/* h2 section */
+.noise .vn-h2,
+.visual-noise .vn-h2 {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noise *,
+  .noise *::before,
+  .noise *::after,
+  .visual-noise *,
+  .visual-noise *::before,
+  .visual-noise *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Pollen template — accessibility enhancements ──────────────────────────
+   Pollen uses Tailwind utilities exclusively (no CSS vars for theme tokens).
+   This section adds a scoped focus-visible indicator that reads clearly on
+   BOTH the light body (white) AND the dark hero/footer surfaces
+   (#2a351f / #1A1E1A):
+     - #215935 deep green outline (8.25:1 on white ✓)
+     - white box-shadow halo (provides contrast on dark surfaces ✓)
+   Also adds a scoped prefers-reduced-motion block per repo convention.     */
+
+.pollen *:focus-visible {
+  outline: 2px solid #215935;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pollen *,
+  .pollen *::before,
+  .pollen *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.elegant {
+  /* Tailwind-mapped theme tokens */
+  --background: oklch(0.963 0.018 80); /* cream #f5f1ea */
+  --foreground: oklch(0.14 0.006 70); /* ink #1c1a17 */
+  --card: oklch(0.978 0.01 80); /* paper #fbf8f2 */
+  --card-foreground: oklch(0.14 0.006 70);
+  --primary: oklch(0.14 0.006 70); /* ink - primary buttons */
+  --primary-foreground: oklch(0.978 0.01 80);
+  --secondary: oklch(0.918 0.022 80); /* cream-2 #ebe6dc */
+  --secondary-foreground: oklch(0.14 0.006 70);
+  --muted: oklch(0.918 0.022 80);
+  --muted-foreground: oklch(0.43 0.015 65); /* ink-soft #6b6659 */
+  --accent: oklch(0.34 0.046 145); /* sage #4a5240 */
+  --accent-foreground: oklch(0.978 0.01 80);
+  --border: oklch(0.88 0.014 80);
+  --radius: 0.5rem;
+
+  /* Elegant design tokens */
+  --el-cream: #f5f1ea;
+  --el-cream-2: #ebe6dc;
+  --el-cream-3: #e0d9c8;
+  --el-ink: #1c1a17;
+  --el-ink-2: #2a2722;
+  --el-ink-soft: #5a5348;
+  --el-ink-mute: #9a9485;
+  --el-paper: #fbf8f2;
+  --el-sage: #4a5240;
+  --el-sage-soft: #8a9474;
+  --el-blush: #d9b9a8;
+  --el-line: rgba(28, 26, 23, 0.12);
+  --el-line-2: rgba(28, 26, 23, 0.06);
+  --el-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --el-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark.elegant {
+  --background: oklch(0.963 0.018 80);
+}
+
+@keyframes el-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes el-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes el-mask {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes el-scroll-pulse {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+    transform-origin: top;
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+@keyframes el-scroll-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+@keyframes el-scroll-up {
+  from {
+    transform: translateY(-50%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ─── Elegant Template – Shared Component Styles ───────────────────────────
+   All .el-* interactive and structural rules live here, scoped via the
+   `.elegant` class on the layout root. Components no longer embed <style>
+   blocks — those injected CSS on every render and caused duplication.      */
+
+/* ── Buttons ── */
+.elegant .el-btn-primary:hover {
+  background: var(--el-sage, #4a5240) !important;
+  transform: translateY(-1px);
+}
+.elegant .el-btn-ghost:hover {
+  background: var(--el-ink, #1c1a17) !important;
+  color: var(--el-paper, #fbf8f2) !important;
+}
+.elegant .el-btn-primary:focus-visible,
+.elegant .el-btn-ghost:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+.elegant .el-cta-primary:hover {
+  background: var(--el-sage, #4a5240) !important;
+}
+.elegant .el-cta-ghost:hover {
+  background: var(--el-ink, #1c1a17) !important;
+  color: var(--el-paper, #fbf8f2) !important;
+}
+.elegant .el-cta-primary:focus-visible,
+.elegant .el-cta-ghost:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+.elegant .el-checkout-btn:hover,
+.elegant .el-pay-btn:hover:not(:disabled),
+.elegant .el-drawer-checkout:hover {
+  background: var(--el-sage, #4a5240) !important;
+}
+.elegant .el-drawer-checkout:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+/* ── Icon / quantity buttons ── */
+.elegant .el-icon-btn:hover {
+  background: rgba(28, 26, 23, 0.06) !important;
+}
+.elegant .el-icon-btn:focus-visible,
+.elegant .el-qty-sm:focus-visible,
+.elegant .el-qty-btn:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+}
+.elegant .el-qty-sm:hover {
+  background: var(--el-cream-2, #ebe6dc) !important;
+}
+.elegant .el-qty-btn:hover:not(:disabled) {
+  background: var(--el-cream-2, #ebe6dc) !important;
+}
+
+/* ── Video toggle ── */
+.elegant .el-video-toggle:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+}
+
+/* ── Header nav ── */
+.elegant .el-nav-link:hover .el-nav-underline {
+  transform: scaleX(1) !important;
+}
+.elegant .el-nav-link:hover {
+  color: var(--el-ink, #1c1a17) !important;
+}
+.elegant .el-nav-link:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.elegant .el-hamburger:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+}
+@media (max-width: 767px) {
+  .elegant .el-desktop-nav {
+    display: none !important;
+  }
+  .elegant .el-hamburger {
+    display: inline-flex !important;
+  }
+  .elegant .el-pill {
+    padding: 10px 18px !important;
+  }
+}
+@media (min-width: 768px) {
+  .elegant .el-desktop-nav {
+    display: flex !important;
+  }
+  .elegant .el-hamburger {
+    display: none !important;
+  }
+}
+
+/* ── Newsletter ── */
+.elegant .el-newsletter-input:focus-visible,
+.elegant .el-newsletter-submit:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* ── Shop sort select ── */
+.elegant .el-shop-sort-select:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Product card ── */
+.elegant .el-product-card .el-quick-btns {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.4s var(--el-ease-out),
+    transform 0.4s var(--el-ease-out);
+}
+.elegant .el-product-card:hover .el-quick-btns,
+.elegant .el-product-card:focus-within .el-quick-btns {
+  opacity: 1;
+  transform: translateY(0);
+}
+.elegant .el-product-card:hover .object-cover {
+  transform: scale(1.05);
+}
+.elegant .el-quick-btn:hover {
+  background: var(--el-ink, #1c1a17) !important;
+  color: var(--el-paper, #fbf8f2) !important;
+}
+.elegant .el-quick-btn:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+.elegant .el-card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.elegant .el-card-link:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Product detail page ── */
+.elegant .el-back-link:hover {
+  color: var(--el-ink, #1c1a17) !important;
+}
+.elegant .el-back-link:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.elegant .el-thumb-btn:focus-visible {
+  outline: 2px solid var(--el-ink, #1c1a17);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.elegant button[role="tab"]:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Checkout form inputs ── */
+.elegant .el-co-input {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--el-line, rgba(28, 26, 23, 0.12)) !important;
+  border-radius: 0 !important;
+  padding: 10px 0 !important;
+  font-size: 15px !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.elegant .el-co-input:focus {
+  border-bottom-color: var(--el-ink, #1c1a17) !important;
+}
+.elegant .el-co-input:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240) !important;
+  outline-offset: 2px !important;
+}
+
+/* ── Account nav ── */
+.elegant .el-account-nav-link:hover {
+  color: var(--el-ink, #1c1a17) !important;
+  border-left-color: rgba(28, 26, 23, 0.3) !important;
+}
+.elegant .el-account-nav-link:focus-visible,
+.elegant .el-account-tab-link:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Testimonials masonry scroll ── */
+.elegant .animate-scroll-down {
+  animation: el-scroll-down 30s linear infinite;
+}
+.elegant .animate-scroll-up {
+  animation: el-scroll-up 30s linear infinite;
+}
+.elegant .hover\:animate-scroll-down-slow:hover {
+  animation-duration: 60s;
+}
+.elegant .hover\:animate-scroll-up-slow:hover {
+  animation-duration: 60s;
+}
+
+/* ── Hero scroll-pulse line ── */
+.elegant .el-scroll-pulse-line {
+  animation: el-scroll-pulse 2.2s var(--el-ease, cubic-bezier(0.22, 1, 0.36, 1)) infinite;
+}
+
+/* ── Reduced-motion overrides ── */
+@media (prefers-reduced-motion: reduce) {
+  .elegant .animate-scroll-down,
+  .elegant .animate-scroll-up {
+    animation: none;
+  }
+  .elegant .el-marquee-track {
+    animation: none;
+  }
+  .elegant .el-scroll-pulse-line {
+    animation: none;
+  }
+  .elegant {
+    --el-reveal-dur: 0s;
+  }
+}
+
+/* ── Scroll-reveal helpers (JS toggles .is-visible; CSS handles the motion) ── */
+.elegant .el-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity var(--el-reveal-dur, 0.9s) var(--el-ease-out),
+    transform var(--el-reveal-dur, 0.9s) var(--el-ease-out);
+  transition-delay: var(--reveal-delay, 0s);
+}
+.elegant .el-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+/* Mask reveal (text clip) */
+.elegant .el-mask-wrap {
+  overflow: hidden;
+}
+.elegant .el-mask-inner {
+  transform: translateY(110%);
+  transition: transform var(--el-reveal-dur, 0.9s) var(--el-ease-out);
+  transition-delay: var(--reveal-delay, 0s);
+}
+.elegant .el-reveal.is-visible .el-mask-inner {
+  transform: none;
+}
+
+/* ── Newsletter ── */
+.elegant .el-newsletter-eyebrow {
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  /* rgba(255,255,255,0.75) on #1c1a17 ≈ 9:1 — passes WCAG 1.4.3 */
+  color: rgba(255, 255, 255, 0.75);
+  display: block;
+  margin-bottom: 20px;
+}
+.elegant .el-newsletter-success {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: var(--font-sans, sans-serif);
+}
+
+/* ── Checkout delivery method buttons ── */
+.elegant .el-delivery-btn {
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  border: 1px solid var(--el-line, rgba(28, 26, 23, 0.12));
+  background: transparent;
+  color: var(--el-ink, #1c1a17);
+  cursor: pointer;
+  font-family: var(--font-sans, sans-serif);
+  transition: all 0.3s var(--el-ease);
+}
+.elegant .el-delivery-btn[aria-checked="true"] {
+  border-color: var(--el-ink, #1c1a17);
+  background: var(--el-ink, #1c1a17);
+  color: var(--el-paper, #fbf8f2);
+}
+.elegant .el-delivery-btn:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+/* ── Checkout field-level error ── */
+.elegant .el-field-error {
+  font-family: var(--font-sans, sans-serif);
+  font-size: 12px;
+  color: #c0392b;
+  margin-top: 2px;
+}
+
+/* ── Checkout fieldset legend ── */
+.elegant .el-fieldset-legend {
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--el-ink-soft, #5a5348);
+  display: block;
+  margin-bottom: 20px;
+  padding: 0;
+  float: left;
+  width: 100%;
+}
+
+/* ── Variant selector ── */
+.elegant .el-variant-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: 1px solid var(--el-line, rgba(28, 26, 23, 0.12));
+  border-radius: 999px;
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--el-ink-soft, #5a5348);
+  background: var(--el-paper, #fbf8f2);
+  cursor: pointer;
+  transition: all 0.3s var(--el-ease);
+}
+.elegant .el-variant-btn[aria-pressed="true"] {
+  border-color: var(--el-ink, #1c1a17);
+  color: var(--el-paper, #fbf8f2);
+  background: var(--el-ink, #1c1a17);
+}
+.elegant .el-variant-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.elegant .el-variant-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.elegant .el-variant-btn:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+/* ── Contact form success ── */
+.elegant .el-contact-success {
+  padding: 40px 0;
+  text-align: center;
+}
+.elegant .el-contact-success-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--el-sage, #4a5240);
+  color: var(--el-paper, #fbf8f2);
+  margin: 0 auto 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.elegant .el-contact-success-heading {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--el-ink, #1c1a17);
+  margin-bottom: 8px;
+}
+.elegant .el-contact-success-body {
+  font-size: 15px;
+  color: var(--el-ink-soft, #5a5348);
+  font-family: var(--font-sans, sans-serif);
+  margin-bottom: 20px;
+}
+.elegant .el-contact-success-btn {
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--el-ink-soft, #5a5348);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.elegant .el-contact-success-btn:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Image hover scale (cards across the template) ── */
+.elegant .el-related-post:hover .object-cover,
+.elegant .el-featured-post:hover .object-cover,
+.elegant .el-post-card:hover .object-cover,
+.elegant .el-collection-cell:hover .object-cover,
+.elegant .el-other-col:hover .object-cover {
+  transform: scale(1.04);
+}
+.elegant .el-collection-product-card:hover .object-cover {
+  transform: scale(1.05);
+}
+/* Branded focus indicator for full-card links (matches .el-card-link) —
+   default UA outline applies otherwise, but can hug image content poorly */
+.elegant .el-related-post:focus-visible,
+.elegant .el-featured-post:focus-visible,
+.elegant .el-post-card:focus-visible,
+.elegant .el-collection-cell:focus-visible,
+.elegant .el-other-col:focus-visible,
+.elegant .el-collection-product-card:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+.elegant .el-blog-back:hover {
+  color: var(--el-ink, #1c1a17) !important;
+}
+
+/* ── Layout grids — responsive overrides for inline-style grid tracks ── */
+@media (max-width: 900px) {
+  .elegant .el-hero-grid {
+    grid-template-columns: 1fr !important;
+    min-height: auto !important;
+  }
+  .elegant .el-hero-grid > div:nth-child(2) {
+    height: 60vh !important;
+    min-height: 400px;
+  }
+  .elegant .el-pdp-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  .elegant .el-pdp-grid > div:nth-child(2) {
+    position: static !important;
+  }
+  .elegant .el-feature-grid {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+  }
+}
+@media (max-width: 800px) {
+  .elegant .el-editorial-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  .elegant .el-about-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  .elegant .el-contact-grid {
+    grid-template-columns: 1fr !important;
+    gap: 48px !important;
+  }
+  .elegant .el-collections-mosaic {
+    grid-template-columns: 1fr !important;
+  }
+  .elegant .el-collection-cell {
+    grid-column: span 1 !important;
+  }
+  .elegant .el-editorial-cta {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  .elegant .el-editorial-cta > div:last-child {
+    display: none;
+  }
+  .elegant .el-collection-hero {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+}
+@media (max-width: 768px) {
+  .elegant .el-account-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .elegant .el-account-mobile-nav {
+    display: flex !important;
+  }
+}
+@media (max-width: 760px) {
+  .elegant .el-footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+@media (max-width: 700px) {
+  .elegant .el-cart-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  .elegant .el-cart-grid > div:nth-child(2) {
+    position: static !important;
+  }
+  .elegant .el-order-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+@media (max-width: 480px) {
+  .elegant .el-footer-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Rich-text bodies (generic pages + blog posts) ── */
+.elegant .el-generic-body {
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--el-ink-2, #2a2722);
+  font-family: var(--font-sans, sans-serif);
+}
+.elegant .el-generic-body h1,
+.elegant .el-generic-body h2,
+.elegant .el-generic-body h3,
+.elegant .el-generic-body h4 {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--el-ink, #1c1a17);
+  margin: 40px 0 16px;
+}
+.elegant .el-generic-body h1 {
+  font-size: clamp(28px, 3.5vw, 44px);
+}
+.elegant .el-generic-body h2 {
+  font-size: clamp(24px, 2.8vw, 36px);
+}
+.elegant .el-generic-body h3 {
+  font-size: clamp(20px, 2.2vw, 28px);
+}
+.elegant .el-generic-body p {
+  margin-top: 16px;
+  color: var(--el-ink-2, #2a2722);
+}
+.elegant .el-generic-body a {
+  color: var(--el-ink, #1c1a17);
+  text-underline-offset: 3px;
+}
+.elegant .el-generic-body ul,
+.elegant .el-generic-body ol {
+  padding-left: 24px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--el-ink-2, #2a2722);
+}
+.elegant .el-generic-body li {
+  line-height: 1.65;
+}
+.elegant .el-generic-body blockquote {
+  margin: 36px 0;
+  padding: 24px 0 24px 28px;
+  border-left: 1px solid var(--el-sage, #4a5240);
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-style: italic;
+  font-size: clamp(20px, 2.2vw, 28px);
+  line-height: 1.35;
+  color: var(--el-ink, #1c1a17);
+}
+.elegant .el-generic-body hr {
+  border: none;
+  border-top: 1px solid var(--el-line, rgba(28, 26, 23, 0.12));
+  margin: 40px 0;
+}
+.elegant .el-generic-body strong {
+  font-weight: 600;
+  color: var(--el-ink, #1c1a17);
+}
+.elegant .el-generic-body img {
+  border-radius: 6px;
+  margin: 28px 0;
+  width: 100%;
+}
+.elegant .el-generic-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 28px 0;
+  font-size: 15px;
+}
+.elegant .el-generic-body th {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--el-line, rgba(28, 26, 23, 0.12));
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--el-ink-soft, #5a5348);
+  font-weight: 400;
+}
+.elegant .el-generic-body td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--el-line-2, rgba(28, 26, 23, 0.06));
+  color: var(--el-ink-2, #2a2722);
+}
+.elegant .el-blog-body {
+  font-size: 18px;
+  line-height: 1.8;
+  color: var(--el-ink-2, #2a2722);
+  font-family: var(--font-sans, sans-serif);
+}
+.elegant .el-blog-body h1,
+.elegant .el-blog-body h2,
+.elegant .el-blog-body h3,
+.elegant .el-blog-body h4 {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--el-ink, #1c1a17);
+  margin: 44px 0 18px;
+}
+.elegant .el-blog-body h2 {
+  font-size: clamp(28px, 3.2vw, 40px);
+}
+.elegant .el-blog-body h3 {
+  font-size: clamp(22px, 2.4vw, 30px);
+}
+.elegant .el-blog-body p {
+  margin-top: 18px;
+  color: var(--el-ink-2, #2a2722);
+}
+.elegant .el-blog-body blockquote {
+  margin: 44px 0;
+  padding: 32px 0 32px 32px;
+  border-left: 1px solid var(--el-sage, #4a5240);
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-style: italic;
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.3;
+  color: var(--el-ink, #1c1a17);
+}
+.elegant .el-blog-body a {
+  color: var(--el-ink, #1c1a17);
+  text-underline-offset: 3px;
+}
+.elegant .el-blog-body ul,
+.elegant .el-blog-body ol {
+  padding-left: 24px;
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.elegant .el-blog-body img {
+  border-radius: 6px;
+  margin: 32px 0;
+  width: 100%;
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  /* --font-mono: "Geist Mono", "Geist Mono Fallback"; */
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-heading);
+  --font-mono: var(--font-mono);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -123,6 +1824,1116 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .prose :where(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--font-heading), sans-serif;
+  }
+
+  .bamboo {
+    p {
+      @apply font-sans;
+    }
+  }
+
+  .happy-bamboo {
+    * {
+      @apply font-sans;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply font-heading;
+    }
+  }
+
+  .editorial {
+    * {
+      @apply font-sans;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply font-serif;
+    }
+  }
+
+  .default-template {
+    * {
+      @apply font-sans;
+    }
+
+    p {
+      @apply font-sans;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply font-serif;
+    }
+  }
+
+  /* ─── Judy Sledge — design tokens ──────────────────────────────────────── */
+  .sledge {
+    --sl-cream: #e7f4dd;
+    --sl-green: #8ed36c;
+    --sl-coral: #e87b4c;
+    --sl-coral-deep: #d4632f;
+    /* AA accent token — fully-saturated vermilion (same hue family as the
+       brand coral, zero gray so it stays vivid rather than muddy).
+       5.18:1 on white, 4.53:1 on cream, 5.18:1 with white text.
+       Does NOT pass on the green sections (2.88:1) — those use --sl-ink. */
+    --sl-coral-aa: #c2410c;
+    --sl-coral-aa-hover: #9a3309;
+    --sl-red: #a32c2c;
+    --sl-dark: #161616;
+    --sl-ink: #2b2b2b;
+    --sl-ink-soft: #4a4a4a;
+    --sl-orange: #fc6434;
+    --sl-border: #e8e8e8;
+    --sl-border-subtle: #f0f0f0;
+    --sl-border-input: #d8d8d8;
+    --sl-border-panel: #d1d5db;
+    --sl-gray-cta: #ececec;
+    --sl-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.1);
+
+    /* keep cloned vn-* markup alive */
+    --vn-paper: var(--sl-cream);
+    --vn-bone: var(--sl-cream);
+    --vn-ink: var(--sl-ink);
+    --vn-ink-soft: var(--sl-ink-soft);
+    --vn-accent: var(--sl-coral);
+    --vn-steel: var(--sl-green);
+    --vn-steel-mist: var(--sl-ink-soft);
+    --vn-rule: #cfe4c2;
+    --vn-line-soft: #d9ecce;
+    --font-serif: var(--font-heading);
+    --font-mono: var(--font-sans);
+    --radius: 0.5rem;
+
+    color: var(--sl-ink);
+
+    * {
+      @apply font-sans;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply font-heading;
+    }
+
+    .sl-page-header {
+      font-size: clamp(2.75rem, 6.5vw, 4.75rem);
+
+      color: var(--sl-orange);
+    }
+  }
+
+  /* ─── Sledge: layout & typography utilities ─────────────────────────────── */
+  .sledge .sl-container {
+    max-width: 1100px;
+    margin-inline: auto;
+  }
+
+  .sledge .sl-container-wide {
+    max-width: 1320px;
+    margin-inline: auto;
+  }
+
+  .sledge .sl-container-hero {
+    max-width: 1280px;
+    margin-inline: auto;
+    padding: 2rem 1rem 2.5rem;
+  }
+
+  .sledge .sl-section-green {
+    background: var(--sl-green);
+    padding: 4rem 1.75rem;
+  }
+
+  .sledge .sl-section-cream {
+    background: var(--sl-cream);
+    padding: 4rem 1.75rem;
+  }
+
+  .sledge .sl-eyebrow {
+    color: var(--sl-ink-soft);
+  }
+
+  .sledge .sl-page-title-lg {
+    font-size: clamp(2.5rem, 6.25vw, 4.06rem);
+    color: var(--sl-orange);
+    /* letter-spacing: 0.04em; */
+    line-height: 1.1;
+  }
+
+  .sledge .sl-page-title-md {
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: var(--sl-orange);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .sledge .sl-page-title-checkout {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    color: var(--sl-coral-aa);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .sledge .sl-rail-heading {
+    font-size: clamp(1.95rem, 4.4vw, 3.15rem);
+    color: var(--sl-orange);
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+  }
+
+  .sledge .sl-hero-banner {
+    height: clamp(320px, 45vw, 520px);
+  }
+
+  .sledge .sl-hero-banner-sm {
+    height: clamp(220px, 35vw, 380px);
+  }
+
+  .sledge .sl-cta-pill {
+    background: var(--sl-gray-cta);
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-card-panel {
+    border: 1px solid var(--sl-border);
+    background: #ffffff;
+  }
+
+  .sledge .sl-card-shadow {
+    box-shadow: var(--sl-shadow-card);
+  }
+
+  .sledge .sl-quote-bar {
+    border-left: 4px solid var(--sl-red);
+    padding-left: 1.25rem;
+  }
+
+  .sledge .sl-quote-body {
+    font-size: clamp(17.5px, 2.25vw, 21.25px);
+    color: var(--sl-ink);
+    line-height: 1.85;
+    max-width: 52ch;
+  }
+
+  .sledge .sl-heading-xl {
+    font-size: clamp(3rem, 7vw, 6rem);
+    color: var(--sl-coral-aa);
+    line-height: 1.05;
+    margin-bottom: 2rem;
+  }
+
+  .sledge .sl-heading-lg {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    color: var(--sl-coral-aa);
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+  }
+
+  /* The accent token doesn't reach 3:1 on the green sections (2.88:1) —
+     headings there use ink (7.88:1). */
+  .sledge .sl-section-green .sl-heading-xl,
+  .sledge .sl-section-green .sl-heading-lg {
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-media-frame {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .sledge .sl-media-frame-green {
+    background: var(--sl-green);
+  }
+
+  .sledge .sl-media-frame-cream {
+    background: var(--sl-cream);
+  }
+
+  .sledge .sl-media-frame-dark {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .sledge .sl-media-frame-muted {
+    background: rgba(0, 0, 0, 0.12);
+  }
+
+  .sledge .sl-logo-frame {
+    position: relative;
+    width: min(88%, 360px);
+    aspect-ratio: 5 / 4;
+  }
+
+  .sledge .sl-hero-wordmark {
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    color: var(--sl-coral);
+    line-height: 1;
+    text-align: center;
+  }
+
+  .sledge .sl-hero-tagline {
+    text-align: center;
+    font-size: clamp(20px, 2.3vw, 30px);
+    color: var(--sl-ink);
+    letter-spacing: 0.04em;
+    font-weight: 500;
+    margin: 2.25rem auto 1.75rem;
+  }
+
+  .sledge .sl-hero-cta-wrap {
+    text-align: center;
+    padding-bottom: 0.5rem;
+  }
+
+  .sledge .sl-btn-hero {
+    font-size: 17px;
+    padding: 16px 46px;
+  }
+
+  /* ─── Sledge: about page ────────────────────────────────────────────────── */
+  .sledge .sl-about-grid-desktop {
+    display: grid;
+    grid-template-columns: minmax(160px, 28%) 2px 1fr;
+    row-gap: 4rem;
+  }
+
+  .sledge .sl-about-divider-desktop {
+    grid-column: 2;
+    background: var(--sl-red);
+  }
+
+  .sledge .sl-about-divider-mobile {
+    background: var(--sl-orange);
+    align-self: stretch;
+  }
+
+  .sledge .sl-about-label-mobile {
+    color: var(--sl-ink);
+    /* line-height: 1.4; */
+  }
+
+  .sledge .sl-about-label-desktop {
+    font-size: clamp(20px, 2.1vw, 21px);
+    color: var(--sl-ink);
+    /* line-height: 1.4; */
+  }
+
+  .sledge .sl-about-body-mobile {
+    font-size: clamp(18.7px, 4.97vw, 21.25px);
+    color: var(--sl-ink);
+    line-height: 1.85;
+    white-space: pre-line;
+  }
+
+  .sledge .sl-about-body-desktop {
+    font-size: clamp(19.55px, 2.21vw, 22.1px);
+    color: var(--sl-ink);
+    line-height: 1.85;
+    white-space: pre-line;
+  }
+
+  /* ─── Sledge: header & footer (dark) ────────────────────────────────────── */
+  .sledge .sl-header {
+    background: linear-gradient(
+      90deg,
+      var(--sl-dark) 0%,
+      var(--sl-dark) 70%,
+      #262626 100%
+    );
+  }
+
+  .sledge .sl-footer {
+    background: var(--sl-dark);
+    color: #ffffff;
+    margin-top: 0;
+  }
+
+  .sledge .sl-brand-text {
+    color: #ffffff;
+    font-size: 43.125px;
+  }
+
+  .sledge .sl-brand-logo {
+    position: relative;
+    height: 57.5px;
+    width: 161px;
+  }
+
+  @media (min-width: 640px) {
+    .sledge .sl-brand-logo {
+      height: 69px;
+      width: 207px;
+    }
+  }
+
+  .sledge .sl-nav-active {
+    color: var(--sl-coral);
+  }
+
+  .sledge .sl-nav-inactive {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .sledge .sl-social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 0.4rem;
+    background: var(--sl-coral-aa);
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+
+  /* In the dark footer the heading keeps the brand coral, so the social
+     buttons match it there: brand coral bg + ink icon (4.97:1 ✓) instead
+     of the vermilion token, avoiding two near-miss reds side by side. */
+  .sledge .sl-footer .sl-social-btn {
+    background: var(--sl-coral);
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-footer-heading {
+    font-size: clamp(3rem, 6vw, 5rem);
+    color: var(--sl-coral);
+    line-height: 1;
+  }
+
+  .sledge .sl-footer-meta {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.04em;
+  }
+
+  /* Brand coral bg kept here (sits on the dark header) + ink count:
+     #2b2b2b on #e87b4c = 4.97:1 ✓ (white was 2.85:1) */
+  .sledge .sl-cart-badge {
+    background: var(--sl-coral);
+    color: var(--sl-ink);
+    min-width: 20px;
+  }
+
+  .sledge .sl-mobile-menu {
+    background: var(--sl-dark);
+  }
+
+  .sledge .sl-dropdown-panel {
+    background: var(--sl-dark);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  /* ─── Sledge: account nav ───────────────────────────────────────────────── */
+  .sledge .sl-account-tab-active {
+    background: var(--sl-coral-aa);
+    color: #ffffff;
+  }
+
+  .sledge .sl-account-tab-inactive {
+    border: 1px solid var(--sl-border-input);
+    color: var(--sl-ink);
+    background: #ffffff;
+  }
+
+  .sledge .sl-account-nav-active {
+    background: var(--sl-cream);
+    color: var(--sl-coral-aa);
+    border-left: 3px solid var(--sl-coral-aa);
+  }
+
+  .sledge .sl-account-nav-inactive {
+    color: var(--sl-ink-soft);
+    border-left: 3px solid transparent;
+  }
+
+  /* ─── Sledge: order status badges ───────────────────────────────────────── */
+  .sledge .sl-status-completed {
+    border-color: #15803d;
+    color: #15803d;
+    background: #f0fdf4;
+  }
+
+  .sledge .sl-status-cancelled {
+    border-color: #b91c1c;
+    color: #b91c1c;
+    background: #fef2f2;
+  }
+
+  .sledge .sl-status-refunded {
+    color: var(--sl-ink-soft);
+    border-color: var(--sl-border-input);
+    background: var(--sl-cream);
+  }
+
+  .sledge .sl-status-default {
+    border-color: var(--sl-border-input);
+    color: var(--sl-ink);
+    background: #ffffff;
+  }
+
+  /* ─── Sledge: product page ──────────────────────────────────────────────── */
+  .sledge .sl-product-title {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    color: var(--sl-ink);
+    line-height: 1.05;
+  }
+
+  .sledge .sl-blog-post-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--sl-ink);
+    line-height: 1.08;
+  }
+
+  .sledge .sl-blog-search {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid var(--sl-border-input);
+    border-radius: var(--radius, 0.25rem);
+    background: var(--sl-cream);
+    padding: 0.875rem 1.25rem;
+  }
+
+  .sledge .sl-blog-search input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: var(--sl-ink);
+    outline: none;
+  }
+
+  .sledge .sl-blog-search input::placeholder {
+    color: var(--sl-ink-soft);
+  }
+
+  .sledge .sl-product-accordion summary {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-tab-heading {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+  }
+
+  .sledge .sl-related-heading {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+  }
+
+  .sledge .sl-tab-panel {
+    border: 1px solid var(--sl-border-panel);
+  }
+
+  /* ─── Sledge: cart item ─────────────────────────────────────────────────── */
+  .sledge .sl-cart-item-grid {
+    grid-template-columns: 80px 1fr auto auto auto auto;
+  }
+
+  .sledge .sl-cart-thumb {
+    aspect-ratio: 3 / 4;
+    width: 80px;
+    background: var(--sl-green);
+  }
+
+  .sledge .sl-cart-thumb-sm {
+    width: 72px;
+    aspect-ratio: 3 / 4;
+    background: var(--sl-green);
+  }
+
+  .sledge .sl-qty-btn {
+    width: 32px;
+    height: 32px;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-qty-btn-sm {
+    width: 28px;
+    height: 28px;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-qty-input {
+    width: 28px;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-qty-input-sm {
+    width: 24px;
+    color: var(--sl-ink);
+  }
+
+  /* ─── Sledge: shop filters ──────────────────────────────────────────────── */
+  .sledge .sl-shop-filter-group {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--sl-border);
+  }
+
+  .sledge .sl-shop-filter-title {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-shop-filter-toggle {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: var(--sl-ink-soft);
+  }
+
+  .sledge .sl-shop-range {
+    accent-color: var(--sl-coral);
+  }
+
+  .sledge .sl-shop-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--sl-border);
+  }
+
+  .sledge .sl-shop-sort-select {
+    cursor: pointer;
+    border: 1px solid var(--sl-ink);
+    border-radius: var(--radius, 0.25rem);
+    background: #ffffff;
+    padding: 0.375rem 0.625rem;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: var(--sl-ink);
+    outline: none;
+  }
+
+  .sledge .sl-shop-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--sl-ink);
+    background: #ffffff;
+    padding: 0.375rem 0.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
+    transition: opacity 0.15s ease;
+  }
+
+  .sledge .sl-shop-filter-btn:hover,
+  .sledge .sl-shop-filter-btn-active {
+    opacity: 0.7;
+  }
+
+  /* ─── Sledge: testimonial cards ─────────────────────────────────────────── */
+  .sledge .sl-testimonial-card {
+    border: 1px solid #e5e5e5;
+    border-radius: 1.5rem;
+    background: #ffffff;
+    padding: clamp(2rem, 4vw, 3rem) clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .sledge .sl-testimonial-card-label {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.8125rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
+    margin-bottom: 1.25rem;
+  }
+
+  .sledge .sl-testimonial-card-quote {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: clamp(1.125rem, 2.2vw, 1.625rem);
+    line-height: 1.35;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sl-testimonial-card-attribution {
+    font-family: var(--font-sans);
+    font-size: clamp(0.8125rem, 1.5vw, 0.9375rem);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sl-ink);
+    margin-top: 1.75rem;
+  }
+
+  /* ─── Sledge: testimonial carousel ──────────────────────────────────────── */
+  .sledge .sl-testimonial-stage {
+    min-height: 160px;
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .sledge .sl-testimonial-slide {
+    position: absolute;
+    inset: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .sledge .sl-testimonial-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+    padding: 8px;
+    background-clip: content-box !important;
+  }
+
+  .sledge .sl-testimonial-dot-active {
+    background: var(--sl-coral-aa);
+  }
+
+  .sledge .sl-testimonial-dot-inactive {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .sledge .sl-wave {
+    display: block;
+    line-height: 0;
+    overflow: hidden;
+  }
+
+  .sledge .sl-wave svg {
+    display: block;
+    width: 100%;
+    height: 80px;
+  }
+
+  /* ─── Sledge: announcement bar ─────────────────────────────────────────── */
+  .sledge .sl-announcement-bar {
+    background: var(--sl-dark);
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: var(--font-sans, sans-serif);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    min-height: 40px;
+  }
+
+  .sledge .sl-announcement-bar p {
+    margin: 0;
+    max-width: 72rem;
+  }
+
+  @media (max-width: 640px) {
+    .sledge .sl-announcement-bar {
+      padding: 10px 12px;
+    }
+
+    .sledge .sl-announcement-bar p {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+    }
+  }
+
+  /* ─── Sledge: nav links ─────────────────────────────────────────────────── */
+  .sledge .vn-nav-link {
+    position: relative;
+    padding: 4px 0;
+  }
+
+  .sledge .vn-nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -3px;
+    height: 2px;
+    background: var(--sl-coral);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .sledge .vn-nav-link:hover::after,
+  .sledge .vn-nav-link.vn-active::after {
+    transform: scaleX(1);
+  }
+
+  /* ─── Sledge: nav dropdown links ────────────────────────────────────────── */
+  .sledge .vn-nav-dropdown-link {
+    display: block;
+    padding: 1rem 1.75rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .sledge .vn-nav-dropdown-link:hover,
+  .sledge .vn-nav-dropdown-link.vn-active {
+    color: var(--sl-coral);
+  }
+
+  /* ─── Sledge: footer links ──────────────────────────────────────────────── */
+  .sledge .vn-footer-link {
+    color: rgba(255, 255, 255, 0.65);
+    transition: color 0.15s ease;
+    text-decoration: none;
+  }
+
+  .sledge .vn-footer-link:hover {
+    color: #ffffff;
+  }
+
+  /* ─── Sledge: coral button helper ──────────────────────────────────────── */
+  .sledge .sl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--sl-coral-aa);
+    color: #ffffff;
+    font-family: var(--font-sans, sans-serif);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 15px 27px;
+    border: none;
+    border-radius: var(--radius, 0.25rem);
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+      background 0.15s ease,
+      opacity 0.15s ease;
+  }
+
+  .sledge .sl-btn:hover {
+    background: var(--sl-coral-aa-hover);
+  }
+
+  /* ─── Sledge: focus ring ────────────────────────────────────────────────── */
+  .sledge *:focus-visible {
+    outline: 2px solid var(--sl-coral-aa);
+    outline-offset: 2px;
+  }
+
+  .sledge .sl-header *:focus-visible,
+  .sledge .sl-footer *:focus-visible,
+  .sledge .sl-mobile-menu *:focus-visible,
+  .sledge .sl-announcement-bar *:focus-visible {
+    outline-color: #ffffff;
+  }
+
+  /* Coral can't reach 3:1 on the green sections — use ink there */
+  .sledge .sl-section-green *:focus-visible {
+    outline-color: var(--sl-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sledge *,
+    .sledge *::before,
+    .sledge *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ─── Sledge: hero mosaic collage ──────────────────────────────────────── */
+  .sledge .sl-mosaic {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .sledge .sl-mosaic .sl-m-logo {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 1rem 1rem;
+  }
+
+  .sledge .sl-mosaic .sl-m-tile {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.4rem;
+    aspect-ratio: 3 / 4;
+    background: var(--sl-green);
+  }
+
+  @media (min-width: 768px) {
+    /* Fine-grained row grid (each track is a fraction of a tile) so the
+       center column pair can be staggered DOWN relative to the flanks —
+       the intentional offset from the original collage. */
+    .sledge .sl-mosaic {
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(11, clamp(70px, 7vw, 96px));
+      gap: 10px;
+    }
+    .sledge .sl-mosaic .sl-m-tile {
+      aspect-ratio: auto;
+    }
+    /* Logo: top-center, sitting above the (lower) center pair. */
+    .sledge .sl-mosaic .sl-m-logo {
+      grid-column: 2 / 4;
+      grid-row: 1 / 4;
+      padding: 0 0.5rem;
+    }
+    /* Flanking columns: tall top image + image below, both anchored to the
+       top. They end higher than the center pair. */
+    .sledge .sl-mosaic .sl-m-0 {
+      grid-column: 1;
+      grid-row: 1 / 6;
+    }
+    .sledge .sl-mosaic .sl-m-1 {
+      grid-column: 4;
+      grid-row: 1 / 6;
+    }
+    .sledge .sl-mosaic .sl-m-4 {
+      grid-column: 1;
+      grid-row: 6 / 10;
+    }
+    .sledge .sl-mosaic .sl-m-7 {
+      grid-column: 4;
+      grid-row: 6 / 10;
+    }
+    /* Center pair: pushed down beneath the logo so it hangs below the
+       flanks — the staggered offset. */
+    .sledge .sl-mosaic .sl-m-2 {
+      grid-column: 2;
+      grid-row: 4 / 8;
+    }
+    .sledge .sl-mosaic .sl-m-3 {
+      grid-column: 3;
+      grid-row: 4 / 8;
+    }
+    .sledge .sl-mosaic .sl-m-5 {
+      grid-column: 2;
+      grid-row: 8 / 12;
+    }
+    .sledge .sl-mosaic .sl-m-6 {
+      grid-column: 3;
+      grid-row: 8 / 12;
+    }
+  }
+
+  .sledge .sledge-collection-img {
+    aspect-ratio: 4 / 5;
+    background: var(--sl-green);
+  }
+
+  .sledge .sledge-collection-meta {
+    margin-top: 0.875rem;
+    padding: 0 0.125rem;
+  }
+
+  .sledge .sledge-collection-meta-compact {
+    margin-top: 0.625rem;
+    padding: 0 0.125rem;
+  }
+
+  .sledge .sledge-collection-name {
+    font-size: clamp(1.375rem, 2vw, 1.75rem);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sledge-collection-name-compact {
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    color: var(--sl-ink);
+  }
+
+  .sledge .sledge-collection-cta {
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sl-coral-aa);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .sledge .group:hover .sledge-collection-cta,
+  .sledge .group:focus-within .sledge-collection-cta {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .sledge .sledge-collection-cta {
+      opacity: 1;
+    }
+  }
+
+  /* ─── Sledge: product card ──────────────────────────────────────────────── */
+  .sledge .sledge-card-img {
+    aspect-ratio: 4 / 5;
+    background: var(--sl-green);
+  }
+
+  .sledge .sledge-card-placeholder {
+    background:
+      repeating-linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.06) 0 12px,
+        transparent 12px 24px
+      ),
+      linear-gradient(180deg, var(--sl-dark), var(--sl-ink));
+  }
+
+  .sledge .sledge-card-placeholder-num {
+    font-size: 64px;
+    color: var(--sl-cream);
+    opacity: 0.4;
+  }
+
+  .sledge .sledge-badge-new {
+    background: var(--sl-cream);
+    color: var(--sl-ink);
+    border: 1px solid var(--sl-ink);
+  }
+
+  .sledge .sledge-badge-sold {
+    background: var(--sl-dark);
+    color: var(--sl-cream);
+  }
+
+  .sledge .sledge-badge-default {
+    background: var(--sl-coral-aa);
+    color: white;
+  }
+
+  .sledge .sledge-card-name {
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+
+  .sledge .sledge-card-price {
+    font-size: 16px;
+    letter-spacing: 0.02em;
+  }
+
+  .sledge .sledge-price-compare {
+    text-decoration: line-through;
+    color: var(--sl-ink-soft);
+  }
+
+  .sledge .sledge-card-tagline {
+    color: var(--sl-ink-soft);
+  }
+
+  /*
+   * Meta section: single element, transforms into a white card on hover.
+   * Only horizontal padding (px) animates — vertical padding and height
+   * stay fixed so the card never shifts other grid items.
+   * The CTA is always in the layout (opacity-only reveal), so its height
+   * is baked into the card from the start.
+   */
+  .sledge .sledge-card-meta {
+    margin-top: 16px;
+    padding: 16px 4px 8px;
+    border-radius: 1rem;
+    transition:
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.3s ease,
+      box-shadow 0.3s ease,
+      padding-left 0.35s ease,
+      padding-right 0.35s ease;
+  }
+
+  .sledge .group:hover .sledge-card-meta {
+    background: white;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    padding-left: 20px;
+    padding-right: 20px;
+    transform: translateY(-32px);
+  }
+
+  /* CTA: always occupies layout space, only opacity changes — no height shift */
+  .sledge .sledge-cta-reveal {
+    margin-top: 6px;
+    opacity: 0;
+    transition: opacity 0.25s ease-out;
+  }
+
+  .sledge .group:hover .sledge-cta-reveal,
+  .sledge .group:focus-within .sledge-cta-reveal {
+    opacity: 1;
+  }
+
+  /* ─── Sledge: account pages (auth cards, address book, preferences) ─── */
+  .sledge .sl-account-content .rounded-lg.border,
+  .sledge .sl-account-content [class*="rounded-lg"][class*="border"] {
+    border-color: #e8e8e8 !important;
+    border-radius: var(--radius, 0.5rem);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  .sledge .sl-account-content .bg-primary {
+    background-color: var(--sl-coral-aa) !important;
+  }
+
+  .sledge .sl-account-content .text-primary {
+    color: var(--sl-coral-aa) !important;
+  }
+
+  .sledge .sl-account-content button.bg-primary,
+  .sledge .sl-account-content [data-slot="button"].bg-primary {
+    background-color: var(--sl-coral-aa) !important;
+    border-radius: var(--radius, 0.5rem);
+  }
+
+  .sledge .sl-account-content button.bg-primary:hover {
+    background-color: var(--sl-coral-aa-hover) !important;
+  }
+
+  .sledge .sl-account-content h2,
+  .sledge .sl-account-content h3 {
+    font-family: var(--font-heading, sans-serif);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--sl-coral-aa);
+  }
 }
 
 @layer admin {
@@ -167,12 +2978,106 @@
     @apply bg-green-50 text-green-700 ring-1 ring-green-600/20 ring-inset dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20;
   }
 
+  .admin-status-badge.isPublished.isNew {
+    /* @apply bg-green-50 text-green-700 ring-1 ring-green-600/20 ring-inset dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20; */
+    @apply bg-gray-50 text-gray-600 ring-1 ring-gray-500/20 ring-inset dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20;
+  }
+
   .admin-status-badge.isDraft {
     @apply bg-gray-50 text-gray-600 ring-1 ring-gray-500/20 ring-inset dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20;
+  }
+
+  .admin-status-badge.isDirty {
+    @apply bg-amber-50 text-amber-700 ring-1 ring-amber-600/20 ring-inset dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20;
+  }
+
+  .admin-form-toolbar {
+    @apply bg-background/75 sticky top-0 z-10 flex h-16 justify-between border-b px-4;
+  }
+
+  .admin-form-toolbar .toolbar-info {
+    @apply flex min-w-0 items-center gap-3;
+  }
+
+  .admin-form-toolbar .toolbar-actions {
+    @apply flex shrink-0 items-center gap-2;
+  }
+  .admin-form-toolbar.dirty {
+    @apply shadow-sm shadow-amber-200;
+  }
+
+  .saving-indicator {
+    @apply border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2;
   }
 }
 
 .not-found-pattern {
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   opacity: 0.02;
+}
+
+/* Custom soft shadow utility */
+.boty-shadow {
+  box-shadow:
+    rgba(14, 63, 126, 0.04) 0px 0px 0px 1px,
+    rgba(42, 51, 69, 0.04) 0px 1px 1px -0.5px,
+    rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px,
+    rgba(42, 51, 70, 0.04) 0px 6px 6px -3px,
+    rgba(14, 63, 126, 0.04) 0px 12px 12px -6px,
+    rgba(14, 63, 126, 0.04) 0px 24px 24px -12px;
+}
+
+/* Smooth transitions */
+.boty-transition {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Blur in animation */
+@keyframes blur-in {
+  0% {
+    opacity: 0;
+    filter: blur(12px);
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.animate-blur-in {
+  animation: blur-in 0.8s ease-out;
+}
+
+/* Scale fade in animation */
+@keyframes scale-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-fade-in {
+  animation: scale-fade-in 0.6s ease-out;
+}
+
+/* Slide up animation */
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out;
 }

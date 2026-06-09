@@ -1,33 +1,58 @@
 import { notFound } from "next/navigation";
 
-import { api, HydrateClient } from "~/trpc/server";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
+import { api } from "~/trpc/server";
 
 import { ProductForm } from "../_components/product-form";
-import { SiteHeader } from "../../_components/site-header";
+import { TrailHeader } from "../../_components/trail-header";
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
-export const metadata = {
-  title: "Edit Product",
-};
-
 export default async function EditProductPage({ params }: Props) {
   const { id } = await params;
 
-  const product = await api.product.secureGet(id);
+  const [product, flags, pools] = await Promise.all([
+    api.product.secureGet(id).catch(rethrowTrpcForErrorBoundary),
+    getBusinessFlags(),
+    api.baseInventoryUnit.list(),
+  ]);
 
-  if (!product) {
-    notFound();
-  }
+  if (!product) notFound();
+
+  const allCollections = flags.isEnabled("collections")
+    ? await api.collections.getAll()
+    : [];
 
   return (
-    <HydrateClient>
-      <SiteHeader title="Edit Product" />
-      <div className="admin-container">
-        <ProductForm product={product} />
-      </div>
-    </HydrateClient>
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Products", href: "/admin/products" },
+          { label: product.name },
+        ]}
+      />
+
+      <ProductForm
+        product={product}
+        galleriesEnabled={flags.isEnabled("galleries")}
+        collectionsEnabled={flags.isEnabled("collections")}
+        allCollections={allCollections}
+        pools={pools}
+      />
+    </>
   );
 }
+
+export const generateMetadata = async ({ params }: Props) => {
+  const { id } = await params;
+  const product = await api.product
+    .secureGet(id)
+    .catch(rethrowTrpcForErrorBoundary);
+  if (!product) notFound();
+  return {
+    title: `Edit ${product?.name ?? "Product"}`,
+  };
+};

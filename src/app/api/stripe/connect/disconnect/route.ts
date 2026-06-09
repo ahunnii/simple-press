@@ -1,36 +1,46 @@
-// app/api/stripe/connect/disconnect/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 import { env } from "~/env";
-import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { stripeClient } from "~/lib/stripe/client";
-import { auth } from "~/server/better-auth";
+import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
+
+// app/api/stripe/connect/disconnect/route.ts
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify authentication
     const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user's business
-    // const user = await db.user.findUnique({
-    //   where: { id: session.user.id },
-    //   include: { business: true },
-    // });
+    const body = (await request.json()) as {
+      businessId?: string;
+    };
+    const businessId = body.businessId;
+    if (!businessId) {
+      return NextResponse.json(
+        { error: "Missing businessId" },
+        { status: 400 },
+      );
+    }
 
-    // if (!user?.business?.stripeAccountId) {
-    //   return NextResponse.json(
-    //     { error: "No Stripe account connected" },
-    //     { status: 400 },
-    //   );
-    // }
+    const membership = await db.businessMembership.findFirst({
+      where: {
+        userId: session.user.id,
+        businessId,
+        role: { in: ["OWNER", "MANAGER"] },
+      },
+    });
+    if (!membership && session.user.platformRole !== "PLATFORM_ADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
-    const domain = getCurrentDomain(request.headers);
-    const business = await getBusinessByDomain(domain);
+    const business = await db.business.findUnique({
+      where: { id: businessId },
+      select: { id: true, stripeAccountId: true },
+    });
 
     if (!business?.stripeAccountId) {
       return NextResponse.json(

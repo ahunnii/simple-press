@@ -48,7 +48,7 @@ function useObjectUrl(file: File | null): string | null {
 }
 
 type InnerProps = {
-  field: { value: unknown; onChange: (v: File | null) => void };
+  field: { value: unknown; onChange: (v: File | null | undefined) => void };
   disabled?: boolean;
   existingPreviewUrl?: string;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
@@ -68,9 +68,17 @@ function ImageUploadFormFieldInner({
 }: InnerProps) {
   const value = field.value as File | null | undefined;
   const hasFile = value instanceof File;
+  const [removedExisting, setRemovedExisting] = useState(false);
+
+  useEffect(() => {
+    if (value === undefined) setRemovedExisting(false);
+  }, [value]);
+
   const objectUrl = useObjectUrl(hasFile ? value : null);
+  const showExisting =
+    Boolean(existingPreviewUrl) && !hasFile && !removedExisting;
   const previewUrl =
-    objectUrl ?? (existingPreviewUrl && !hasFile ? existingPreviewUrl : null);
+    objectUrl ?? (showExisting ? (existingPreviewUrl ?? null) : null);
 
   const triggerFileInput = useCallback(() => {
     if (disabled) return;
@@ -95,7 +103,10 @@ function ImageUploadFormFieldInner({
             aria-label={label ?? "Choose image file"}
             onChange={(e) => {
               const file = e.target.files?.[0];
-              if (file) field.onChange(file);
+              if (file) {
+                setRemovedExisting(false);
+                field.onChange(file);
+              }
               e.target.value = "";
             }}
           />
@@ -125,6 +136,7 @@ function ImageUploadFormFieldInner({
                 aria-label="Remove image"
                 className="text-muted-foreground hover:text-destructive shrink-0"
                 onClick={() => {
+                  setRemovedExisting(true);
                   field.onChange(null);
                   if (fileInputRef.current) fileInputRef.current.value = "";
                 }}
@@ -157,7 +169,10 @@ function ImageUploadFormFieldInner({
               e.preventDefault();
               if (disabled) return;
               const file = e.dataTransfer.files?.[0];
-              if (file && isImageFile(file)) field.onChange(file);
+              if (file && isImageFile(file)) {
+                setRemovedExisting(false);
+                field.onChange(file);
+              }
             }}
             onDragOver={(e) => e.preventDefault()}
             className={cn(

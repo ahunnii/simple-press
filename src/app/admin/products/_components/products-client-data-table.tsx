@@ -71,90 +71,114 @@ export function ProductsTable({ products }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {products.map((product) => (
-              <tr key={product.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Link href={`/admin/products/${product.id}`}>
-                    <div className="flex items-center">
-                      {product.images[0] ? (
-                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-gray-100">
-                          <Image
-                            src={product.images[0].url}
-                            alt={product.images[0].altText ?? product.name}
-                            fill
-                            className="object-cover"
-                          />
+            {products.map((product) => {
+              let displayPrice = "N/A";
+              if (
+                product._count.variants > 0 &&
+                product.variants &&
+                product.variants.length > 0
+              ) {
+                const prices = product.variants
+                  .filter((v) => v.price !== null && v.price !== undefined)
+                  .map((v) => v.price) as number[];
+
+                if (prices.length > 0) {
+                  const minPrice = Math.min(...prices);
+                  const allSamePrice = prices.every((p) => p === minPrice);
+
+                  displayPrice = allSamePrice
+                    ? formatPrice(minPrice)
+                    : `${formatPrice(minPrice)}+`;
+                } else if (product.price != null) {
+                  displayPrice = formatPrice(product.price);
+                }
+              } else if (product.price != null) {
+                displayPrice = formatPrice(product.price);
+              }
+              return (
+                <tr key={product.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Link href={`/admin/products/${product.id}`}>
+                      <div className="flex items-center">
+                        {product.images[0] ? (
+                          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-gray-100">
+                            <Image
+                              src={product.images[0].url}
+                              alt={product.images[0].altText ?? product.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-gray-200">
+                            <span className="text-xs text-gray-400">
+                              No img
+                            </span>
+                          </div>
+                        )}
+                        <div className="ml-4">
+                          <div className="font-medium text-gray-900">
+                            {product.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {product.slug}
+                          </div>
                         </div>
-                      ) : (
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-gray-200">
-                          <span className="text-xs text-gray-400">No img</span>
-                        </div>
-                      )}
-                      <div className="ml-4">
-                        <div className="font-medium text-gray-900">
-                          {product.name}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {product.slug}
-                        </div>
-                      </div>
-                    </div>{" "}
-                  </Link>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {product.published ? (
-                    <Badge variant="default">Published</Badge>
-                  ) : (
-                    <Badge variant="secondary">Draft</Badge>
-                  )}
-                </td>
-                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
-                  {formatPrice(product.price)}
-                </td>
-                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                  {product._count.variants > 0
-                    ? `${product._count.variants} variant${product._count.variants !== 1 ? "s" : ""}`
-                    : "No variants"}
-                </td>
-                <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/admin/products/${product.id}`}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href={`/products/${product.slug}`}
-                          target="_blank"
+                      </div>{" "}
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {product.published ? (
+                      <Badge variant="default">Published</Badge>
+                    ) : (
+                      <Badge variant="secondary">Draft</Badge>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                    {displayPrice}
+                  </td>
+                  <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                    {product._count.variants > 0
+                      ? `${product._count.variants} variant${product._count.variants !== 1 ? "s" : ""}`
+                      : "No variants"}
+                  </td>
+                  <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/products/${product.id}`}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/shop/${product.slug}`} target="_blank">
+                            <Eye className="mr-2 h-4 w-4" />
+                            Preview
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => {
+                            setDeleteId(product.id);
+                            setProductName(product.name);
+                            setOpen(true);
+                          }}
                         >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Preview
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => {
-                          setDeleteId(product.id);
-                          setProductName(product.name);
-                          setOpen(true);
-                        }}
-                      >
-                        <Trash className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              </tr>
-            ))}
+                          <Trash className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

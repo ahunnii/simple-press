@@ -1,4 +1,5 @@
 import { type NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 import { env } from "~/env";
@@ -21,14 +22,26 @@ const handler = (req: NextRequest) =>
     req,
     router: appRouter,
     createContext: () => createContext(req),
-    onError:
-      env.NODE_ENV === "development"
-        ? ({ path, error }) => {
-            console.error(
-              `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
-            );
+    onError: ({ path, error, ctx }) => {
+      if (env.NODE_ENV === "development") {
+        console.error(
+          `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
+        );
+      }
+      if (error.code === "INTERNAL_SERVER_ERROR") {
+        Sentry.withScope((scope) => {
+          scope.setTag("trpc.path", path ?? "unknown");
+          scope.setExtra("trpc.code", error.code);
+          if (ctx?.session?.user) {
+            scope.setUser({
+              id: ctx.session.user.id,
+              email: ctx.session.user.email,
+            });
           }
-        : undefined,
+          Sentry.captureException(error.cause ?? error);
+        });
+      }
+    },
   });
 
 export { handler as GET, handler as POST };

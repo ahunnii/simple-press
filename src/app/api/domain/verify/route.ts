@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import type { DomainRouteInput } from "~/lib/validators/domain";
+import { checkBusiness } from "~/lib/check-business";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
 
@@ -9,6 +10,8 @@ export async function POST(req: NextRequest) {
   try {
     // Get session
     const session = await auth.api.getSession({ headers: req.headers });
+
+    const currentBusiness = await checkBusiness();
 
     if (!session?.user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -24,19 +27,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Get user's business
-    const user = await db.user.findUnique({
-      where: { id: session.user.id },
-      select: { businessId: true },
-    });
+    // const user = await db.user.findUnique({
+    //   where: { id: session.user.id },
+    //   select: { businessId: true },
+    // });
 
-    if (!user?.businessId) {
-      return NextResponse.json({ error: "No business found" }, { status: 404 });
-    }
+    // if (!user?.businessId) {
+    //   return NextResponse.json({ error: "No business found" }, { status: 404 });
+    // }
 
     // Verify this domain belongs to this business
     const business = await db.business.findFirst({
       where: {
-        id: user.businessId,
+        id: currentBusiness?.id,
         customDomain: domain,
       },
     });
@@ -69,7 +72,7 @@ export async function POST(req: NextRequest) {
         // DNS is configured correctly!
         // Update business status
         await db.business.update({
-          where: { id: user.businessId },
+          where: { id: currentBusiness?.id },
           data: { domainStatus: "ACTIVE" },
         });
 
@@ -77,7 +80,7 @@ export async function POST(req: NextRequest) {
         await db.domainQueue.updateMany({
           where: {
             domain,
-            businessId: user.businessId,
+            businessId: currentBusiness?.id,
           },
           data: { status: "completed" },
         });

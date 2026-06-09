@@ -1,129 +1,46 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { checkBusiness } from "~/lib/check-business";
+import { generateCollectionSlug } from "~/lib/slug";
+import {
+  collectionBulkDeleteSchema,
+  collectionBulkPublishSchema,
+  collectionCreateSchema,
+  collectionModifyProductSchema,
+  collectionSetProductsSchema,
+  collectionUpdateSchema,
+} from "~/lib/validators/collections";
 import {
   createTRPCRouter,
+  featureGate,
+  getBusinessProcedure,
   ownerAdminProcedure,
-  protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 export const collectionsRouter = createTRPCRouter({
-  secureListAll: ownerAdminProcedure.query(async ({ ctx }) => {
-    const business = await checkBusiness();
-    if (!business) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "You are not authorized to access this resource",
-      });
-    }
-
-    const collections = await ctx.db.collection.findMany({
-      where: { businessId: business.id },
-    });
-    return collections;
-  }),
-
-  // Get all collections for a business (public)
-  getByBusiness: publicProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        includeUnpublished: z.boolean().default(false),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const where: Record<string, string | boolean> = {
-        businessId: input.businessId,
-      };
-
-      if (!input.includeUnpublished) {
-        where.published = true;
-      }
-
+  getAll: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
       const collections = await ctx.db.collection.findMany({
-        where,
-        include: {
-          _count: {
-            select: { collectionProducts: true },
-          },
-        },
-        orderBy: {
-          sortOrder: "asc",
-        },
+        where: { businessId },
+        include: { _count: { select: { collectionProducts: true } } },
+        orderBy: { sortOrder: "asc" },
       });
-
       return collections;
     }),
 
-  // Get single collection by slug (public)
-  getBySlug: publicProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        slug: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
+  getById: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(z.string())
+    .query(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
+
       const collection = await ctx.db.collection.findUnique({
-        where: {
-          businessId_slug: {
-            businessId: input.businessId,
-            slug: input.slug,
-          },
-        },
+        where: { id, businessId },
         include: {
-          collectionProducts: {
-            include: {
-              product: {
-                include: {
-                  images: {
-                    orderBy: { sortOrder: "asc" },
-                    take: 1,
-                  },
-                  variants: true,
-                },
-              },
-            },
-            orderBy: {
-              sortOrder: "asc",
-            },
-          },
-        },
-      });
-
-      if (!collection) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Collection not found",
-        });
-      }
-
-      return collection;
-    }),
-
-  // Get collection by ID (admin)
-  getById: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const collection = await ctx.db.collection.findUnique({
-        where: { id: input.id },
-        include: {
-          business: {
-            select: { id: true },
-          },
+          business: { select: { id: true } },
           collectionProducts: {
             include: {
               product: {
@@ -138,9 +55,7 @@ export const collectionsRouter = createTRPCRouter({
                 },
               },
             },
-            orderBy: {
-              sortOrder: "asc",
-            },
+            orderBy: { sortOrder: "asc" },
           },
         },
       });
@@ -152,114 +67,167 @@ export const collectionsRouter = createTRPCRouter({
         });
       }
 
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
+      return collection;
+    }),
+
+  getAllPublic: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("collections"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+      const collections = await ctx.db.collection.findMany({
+        where: { businessId, published: true },
+        include: { _count: { select: { collectionProducts: true } } },
+        orderBy: { sortOrder: "asc" },
       });
 
-      if (user?.businessId !== collection.business.id) {
+      return collections;
+    }),
+
+  getBySlug: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("collections"))
+    .input(z.string())
+    .query(async ({ ctx, input: slug }) => {
+      const { businessId } = ctx;
+      const collection = await ctx.db.collection.findUnique({
+        where: {
+          businessId_slug: {
+            businessId,
+            slug,
+          },
+        },
+        include: {
+          collectionProducts: {
+            include: {
+              product: {
+                include: {
+                  images: { orderBy: { sortOrder: "asc" }, take: 1 },
+                  variants: true,
+                  baseInventoryUnit: {
+                    select: { inventoryQty: true, allowBackorders: true },
+                  },
+                },
+              },
+            },
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      });
+
+      if (!collection) {
         throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
+          code: "NOT_FOUND",
+          message: "Collection not found",
         });
       }
 
       return collection;
     }),
 
-  // Create collection
-  create: protectedProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        name: z.string().min(1),
-        description: z.string().optional(),
-        imageUrl: z.string().url().optional(),
-        published: z.boolean().default(true),
-        metaTitle: z.string().optional(),
-        metaDescription: z.string().optional(),
-      }),
-    )
+  create: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(collectionCreateSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      const { businessId } = ctx;
 
       // Generate slug
-      let slug = generateSlug(input.name);
+      const baseSlug = generateCollectionSlug(input.name) || "collection";
+      let slug = baseSlug;
 
       // Ensure unique slug
       let counter = 1;
       while (true) {
+        if (counter > 1000) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Could not generate a unique URL slug.",
+          });
+        }
         const existing = await ctx.db.collection.findUnique({
           where: {
             businessId_slug: {
-              businessId: input.businessId,
+              businessId,
               slug,
             },
           },
         });
 
         if (!existing) break;
-        slug = `${generateSlug(input.name)}-${counter}`;
+        slug = `${baseSlug}-${counter}`;
         counter++;
+      }
+
+      // Validate product ownership before writing
+      const productIds = input.productIds;
+      if (productIds.length > 0) {
+        const owned = await ctx.db.product.findMany({
+          where: { id: { in: productIds }, businessId },
+          select: { id: true },
+        });
+        const ownedSet = new Set(owned.map((p) => p.id));
+        if (productIds.some((id) => !ownedSet.has(id))) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "One or more products were not found in your store.",
+          });
+        }
       }
 
       // Get max sort order
       const maxSort = await ctx.db.collection.findFirst({
-        where: { businessId: input.businessId },
+        where: { businessId },
         orderBy: { sortOrder: "desc" },
         select: { sortOrder: true },
       });
 
-      const collection = await ctx.db.collection.create({
-        data: {
-          businessId: input.businessId,
-          name: input.name,
-          slug,
-          description: input.description,
-          imageUrl: input.imageUrl,
-          published: input.published,
-          metaTitle: input.metaTitle,
-          metaDescription: input.metaDescription,
-          sortOrder: (maxSort?.sortOrder ?? 0) + 1,
-        },
+      const collection = await ctx.db.$transaction(async (tx) => {
+        const created = await tx.collection.create({
+          data: {
+            businessId,
+            name: input.name,
+            slug,
+            description: input.description,
+            imageUrl: input.imageUrl,
+            published: input.published,
+            metaTitle: input.metaTitle,
+            metaDescription: input.metaDescription,
+            metaKeywords: input.metaKeywords,
+            ogImage: input.ogImage,
+            sortOrder: (maxSort?.sortOrder ?? 0) + 1,
+          },
+        });
+
+        if (productIds.length > 0) {
+          await tx.collectionProduct.createMany({
+            data: productIds.map((productId, i) => ({
+              collectionId: created.id,
+              productId,
+              sortOrder: i,
+            })),
+          });
+        }
+
+        return created;
       });
 
       return collection;
     }),
 
-  // Update collection
-  update: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string().min(1).optional(),
-        description: z.string().optional().nullable(),
-        imageUrl: z.string().url().optional().nullable(),
-        published: z.boolean().optional(),
-        metaTitle: z.string().optional().nullable(),
-        metaDescription: z.string().optional().nullable(),
-      }),
-    )
+  update: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(collectionUpdateSchema)
     .mutation(async ({ ctx, input }) => {
-      const { id, ...updates } = input;
+      const { businessId } = ctx;
+
+      const { id, productIds, ...updates } = input;
 
       // Get collection with business
       const collection = await ctx.db.collection.findUnique({
-        where: { id },
+        where: { id, businessId },
         select: {
           businessId: true,
+          name: true,
           slug: true,
         },
       });
@@ -271,27 +239,21 @@ export const collectionsRouter = createTRPCRouter({
         });
       }
 
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== collection.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-
       // If name changed, update slug
       let slug = collection.slug;
-      if (updates.name && updates.name !== collection.slug) {
-        slug = generateSlug(updates.name);
+      if (updates.name && updates.name !== collection.name) {
+        const baseSlug = generateCollectionSlug(updates.name) || "collection";
+        slug = baseSlug;
 
         // Ensure unique
         let counter = 1;
         while (true) {
+          if (counter > 1000) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Could not generate a unique URL slug.",
+            });
+          }
           const existing = await ctx.db.collection.findUnique({
             where: {
               businessId_slug: {
@@ -302,34 +264,75 @@ export const collectionsRouter = createTRPCRouter({
           });
 
           if (!existing || existing.id === id) break;
-          slug = `${generateSlug(updates.name)}-${counter}`;
+          slug = `${baseSlug}-${counter}`;
           counter++;
         }
       }
 
-      const updated = await ctx.db.collection.update({
-        where: { id },
-        data: {
-          ...updates,
-          slug,
-        },
+      // Validate product ownership before writing
+      if (productIds.length > 0) {
+        const owned = await ctx.db.product.findMany({
+          where: { id: { in: productIds }, businessId },
+          select: { id: true },
+        });
+        const ownedSet = new Set(owned.map((p) => p.id));
+        if (productIds.some((pid) => !ownedSet.has(pid))) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "One or more products were not found in your store.",
+          });
+        }
+      }
+
+      const existing = await ctx.db.collectionProduct.findMany({
+        where: { collectionId: id },
+        select: { productId: true },
+      });
+
+      const currentIds = new Set(existing.map((cp) => cp.productId));
+      const inputIdSet = new Set(productIds);
+      const toRemove = [...currentIds].filter((pid) => !inputIdSet.has(pid));
+
+      const updated = await ctx.db.$transaction(async (tx) => {
+        const result = await tx.collection.update({
+          where: { id },
+          data: {
+            ...updates,
+            slug,
+          },
+        });
+
+        if (toRemove.length > 0) {
+          await tx.collectionProduct.deleteMany({
+            where: { collectionId: id, productId: { in: toRemove } },
+          });
+        }
+
+        for (let i = 0; i < productIds.length; i++) {
+          const productId = productIds[i]!;
+          await tx.collectionProduct.upsert({
+            where: { collectionId_productId: { collectionId: id, productId } },
+            create: { collectionId: id, productId, sortOrder: i },
+            update: { sortOrder: i },
+          });
+        }
+
+        return result;
       });
 
       return updated;
     }),
 
-  // Delete collection
-  delete: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      // Get collection with business
+  delete: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(z.string())
+    .mutation(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
+
       const collection = await ctx.db.collection.findUnique({
-        where: { id: input.id },
+        where: { id, businessId },
         select: {
+          id: true,
           businessId: true,
         },
       });
@@ -341,39 +344,22 @@ export const collectionsRouter = createTRPCRouter({
         });
       }
 
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== collection.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-
       await ctx.db.collection.delete({
-        where: { id: input.id },
+        where: { id, businessId },
       });
 
       return { success: true };
     }),
 
-  // Add product to collection
-  addProduct: protectedProcedure
-    .input(
-      z.object({
-        collectionId: z.string(),
-        productId: z.string(),
-      }),
-    )
+  addProduct: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(collectionModifyProductSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify collection ownership
+      const { businessId } = ctx;
+
       const collection = await ctx.db.collection.findUnique({
-        where: { id: input.collectionId },
-        select: { businessId: true },
+        where: { id: input.collectionId, businessId },
+        select: { id: true, businessId: true },
       });
 
       if (!collection) {
@@ -383,15 +369,15 @@ export const collectionsRouter = createTRPCRouter({
         });
       }
 
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
+      // Validate product belongs to this business
+      const ownedProduct = await ctx.db.product.findFirst({
+        where: { id: input.productId, businessId },
+        select: { id: true },
       });
-
-      if (user?.businessId !== collection.businessId) {
+      if (!ownedProduct) {
         throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
+          code: "NOT_FOUND",
+          message: "Product not found in your store.",
         });
       }
 
@@ -430,37 +416,21 @@ export const collectionsRouter = createTRPCRouter({
       return collectionProduct;
     }),
 
-  // Remove product from collection
-  removeProduct: protectedProcedure
-    .input(
-      z.object({
-        collectionId: z.string(),
-        productId: z.string(),
-      }),
-    )
+  removeProduct: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(collectionModifyProductSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify ownership
+      const { businessId } = ctx;
+
       const collection = await ctx.db.collection.findUnique({
-        where: { id: input.collectionId },
-        select: { businessId: true },
+        where: { id: input.collectionId, businessId },
+        select: { id: true, businessId: true },
       });
 
       if (!collection) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Collection not found",
-        });
-      }
-
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== collection.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
         });
       }
 
@@ -476,19 +446,16 @@ export const collectionsRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Update product positions in collection
-  updateProductOrder: protectedProcedure
-    .input(
-      z.object({
-        collectionId: z.string(),
-        productIds: z.array(z.string()),
-      }),
-    )
+  setProducts: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(collectionSetProductsSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify ownership
+      const { businessId } = ctx;
+      const { collectionId, productIds } = input;
+
       const collection = await ctx.db.collection.findUnique({
-        where: { id: input.collectionId },
-        select: { businessId: true },
+        where: { id: collectionId, businessId },
+        select: { id: true },
       });
 
       if (!collection) {
@@ -498,72 +465,197 @@ export const collectionsRouter = createTRPCRouter({
         });
       }
 
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== collection.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
+      // Validate product ownership before writing
+      if (productIds.length > 0) {
+        const owned = await ctx.db.product.findMany({
+          where: { id: { in: productIds }, businessId },
+          select: { id: true },
         });
+        const ownedSet = new Set(owned.map((p) => p.id));
+        if (productIds.some((id) => !ownedSet.has(id))) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "One or more products were not found in your store.",
+          });
+        }
       }
 
-      // Update sort orders in transaction
-      await ctx.db.$transaction(
-        input.productIds.map((productId, index) =>
-          ctx.db.collectionProduct.update({
-            where: {
-              collectionId_productId: {
-                collectionId: input.collectionId,
-                productId,
-              },
-            },
-            data: {
-              sortOrder: index,
-            },
-          }),
-        ),
-      );
+      const existing = await ctx.db.collectionProduct.findMany({
+        where: { collectionId },
+        select: { productId: true },
+      });
+
+      const currentIds = new Set(existing.map((cp) => cp.productId));
+      const inputIdSet = new Set(productIds);
+
+      const toRemove = [...currentIds].filter((id) => !inputIdSet.has(id));
+
+      await ctx.db.$transaction(async (tx) => {
+        if (toRemove.length > 0) {
+          await tx.collectionProduct.deleteMany({
+            where: { collectionId, productId: { in: toRemove } },
+          });
+        }
+        // Upsert every product in the desired order — creates new rows and
+        // updates sortOrder for products already in the collection.
+        for (let i = 0; i < productIds.length; i++) {
+          const productId = productIds[i]!;
+          await tx.collectionProduct.upsert({
+            where: { collectionId_productId: { collectionId, productId } },
+            create: { collectionId, productId, sortOrder: i },
+            update: { sortOrder: i },
+          });
+        }
+      });
 
       return { success: true };
     }),
 
-  // Update collection order
-  updateCollectionOrder: protectedProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        collectionIds: z.array(z.string()),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
+  duplicate: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(z.string())
+    .mutation(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
+
+      // Load source collection with its products
+      const source = await ctx.db.collection.findUnique({
+        where: { id, businessId },
+        include: {
+          collectionProducts: {
+            select: { productId: true, sortOrder: true },
+          },
+        },
       });
 
-      if (user?.businessId !== input.businessId) {
+      if (!source) {
         throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
+          code: "NOT_FOUND",
+          message: "Collection not found",
         });
       }
 
-      // Update sort orders in transaction
-      await ctx.db.$transaction(
-        input.collectionIds.map((collectionId, index) =>
-          ctx.db.collection.update({
-            where: { id: collectionId },
-            data: {
-              sortOrder: index,
-            },
-          }),
-        ),
-      );
+      // Generate a unique slug for the copy (same pattern as create)
+      const baseSlug =
+        generateCollectionSlug(`${source.name} copy`) || "collection";
+      let slug = baseSlug;
+      let counter = 1;
+      while (true) {
+        if (counter > 1000) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Could not generate a unique URL slug.",
+          });
+        }
+        const existing = await ctx.db.collection.findUnique({
+          where: { businessId_slug: { businessId, slug } },
+        });
+        if (!existing) break;
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
 
-      return { success: true };
+      // Compute sort order: max existing + 1
+      const maxSort = await ctx.db.collection.findFirst({
+        where: { businessId },
+        orderBy: { sortOrder: "desc" },
+        select: { sortOrder: true },
+      });
+
+      // Create the copy + product rows in a single transaction
+      const newCollection = await ctx.db.$transaction(async (tx) => {
+        const created = await tx.collection.create({
+          data: {
+            businessId,
+            name: `Copy of ${source.name}`,
+            slug,
+            description: source.description,
+            imageUrl: source.imageUrl,
+            metaTitle: source.metaTitle,
+            metaDescription: source.metaDescription,
+            metaKeywords: source.metaKeywords,
+            ogImage: source.ogImage,
+            published: false,
+            sortOrder: (maxSort?.sortOrder ?? 0) + 1,
+          },
+        });
+
+        if (source.collectionProducts.length > 0) {
+          await tx.collectionProduct.createMany({
+            data: source.collectionProducts.map((cp) => ({
+              collectionId: created.id,
+              productId: cp.productId,
+              sortOrder: cp.sortOrder,
+            })),
+          });
+        }
+
+        return created;
+      });
+
+      return newCollection;
+    }),
+
+  bulkSetPublished: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(collectionBulkPublishSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const result = await ctx.db.collection.updateMany({
+        where: { id: { in: input.ids }, businessId },
+        data: { published: input.published },
+      });
+      return { count: result.count };
+    }),
+
+  bulkDelete: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(collectionBulkDeleteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const result = await ctx.db.collection.deleteMany({
+        where: { id: { in: input.ids }, businessId },
+      });
+      return { count: result.count };
+    }),
+
+  getProductsByCollectionId: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("collections"))
+    .input(z.string())
+    .query(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
+      const collection = await ctx.db.collection.findUnique({
+        where: { id, businessId, published: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          collectionProducts: {
+            include: {
+              product: {
+                include: {
+                  images: { orderBy: { sortOrder: "asc" }, take: 1 },
+                  variants: true,
+                  baseInventoryUnit: {
+                    select: { inventoryQty: true, allowBackorders: true },
+                  },
+                },
+              },
+            },
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      });
+      if (!collection) return null;
+      return {
+        collection: {
+          id: collection.id,
+          name: collection.name,
+          slug: collection.slug,
+          description: collection.description,
+        },
+        products: collection.collectionProducts.map((cp) => cp.product),
+      };
     }),
 });

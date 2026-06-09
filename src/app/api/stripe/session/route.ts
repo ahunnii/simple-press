@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { stripeClient } from "~/lib/stripe/client";
@@ -23,20 +23,42 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Retrieve session - note: this gets it from platform account
-    // In production, you'd need to know which Connect account to use
+    // Verify the requesting browser is the one that initiated this checkout.
+    // The checkout form sets a `pending_session` cookie with the session ID
+    // before redirecting to Stripe. Anyone who obtained the URL from elsewhere
+    // (shared link, browser history) won't have this cookie.
+    const cookieHeader = req.headers.get("cookie") ?? "";
+    const pendingSession = cookieHeader
+      .split(";")
+      .map((c) => c.trim())
+      .find((c) => c.startsWith("pending_session="))
+      ?.split("=")[1];
+
+    if (!pendingSession || pendingSession !== sessionId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
     const session = await stripeClient.checkout.sessions.retrieve(sessionId, {
       stripeAccount: business.stripeAccountId,
     });
 
-    console.log(session);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       customer_email: session.customer_email,
       amount_total: session.amount_total,
       currency: session.currency,
       payment_status: session.payment_status,
     });
+
+    // Clear the cookie now that it has been consumed
+    response.cookies.set("pending_session", "", {
+      path: "/",
+      httpOnly: true,
+      maxAge: 0,
+      sameSite: "strict",
+      secure: true,
+    });
+
+    return response;
   } catch (error: unknown) {
     console.error("Retrieve session error:", error);
     return NextResponse.json(

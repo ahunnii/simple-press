@@ -1,0 +1,279 @@
+"use client";
+
+import { useCallback, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { useCart } from "~/providers/cart-context";
+
+type Props = {
+  business: {
+    id: string;
+    siteContent: {
+      primaryColor: string | null;
+    } | null;
+  };
+};
+
+export function DarkTrendCartContents({ business: _business }: Props) {
+  const router = useRouter();
+  const {
+    items,
+    incrementItem,
+    decrementItem,
+    removeItem,
+    updateQuantity,
+    total,
+  } = useCart();
+
+  // S-6: live region for cart mutation announcements
+  const [announcement, setAnnouncement] = useState("");
+  const announcementTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const announce = useCallback((msg: string) => {
+    setAnnouncement(msg);
+    if (announcementTimeout.current) clearTimeout(announcementTimeout.current);
+    announcementTimeout.current = setTimeout(() => setAnnouncement(""), 3000);
+  }, []);
+
+  const formatPrice = (cents: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(cents / 100);
+  };
+
+  const handleCheckout = () => {
+    router.push("/checkout");
+  };
+
+  if (items.length === 0) {
+    return (
+      <div className="py-16 text-center">
+        {/* N-1: decorative icon */}
+        <ShoppingBag aria-hidden="true" className="mx-auto mb-4 h-16 w-16 text-white/40" />
+        <h2 className="mb-2 text-2xl font-semibold text-white">
+          Your cart is empty
+        </h2>
+        <p className="mb-8 text-white/70">Add some products to get started!</p>
+        <Button
+          asChild
+          className="bg-violet-600 text-white hover:bg-violet-700"
+        >
+          <Link href="/shop">Shop Products</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-3">
+      {/* S-6: visually-hidden live region */}
+      <p
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcement}
+      </p>
+
+      {/* Cart Items */}
+      <div className="space-y-6 lg:col-span-2">
+        {/* Table Header - Desktop Only */}
+        <div className="hidden grid-cols-[2fr_1fr_1fr] gap-4 border-b border-white/20 pb-4 lg:grid">
+          <div className="text-sm font-semibold tracking-wider text-white uppercase">
+            Product
+          </div>
+          <div className="text-sm font-semibold tracking-wider text-white uppercase">
+            Quantity
+          </div>
+          <div className="text-sm font-semibold tracking-wider text-white uppercase">
+            Subtotal
+          </div>
+        </div>
+
+        {/* Cart Items */}
+        {items.map((item) => (
+          <div
+            key={`${item.productId}-${item.variantId}`}
+            className="grid grid-cols-1 gap-4 border-b border-white/10 pb-6 lg:grid-cols-[2fr_1fr_1fr] lg:items-center"
+          >
+            {/* Product Info */}
+            <div className="flex gap-4">
+              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-sm bg-zinc-900">
+                {item.imageUrl ? (
+                  <Image
+                    src={item.imageUrl}
+                    alt={item.productName}
+                    width={96}
+                    height={96}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-white/40">
+                    No image
+                  </div>
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-white">{item.productName}</h3>
+                {item.variantName && (
+                  <p className="text-sm text-white/70">
+                    <span className="text-white/50">Size:</span>{" "}
+                    {item.variantName}
+                  </p>
+                )}
+                {item.sku && (
+                  <p className="text-sm text-white/70">
+                    <span className="text-white/50">SKU:</span> {item.sku}
+                  </p>
+                )}
+                <p className="mt-2 text-lg font-semibold text-white">
+                  {formatPrice(item.price)}
+                </p>
+
+                {/* Remove button - mobile (M-9 touch target: h-10 w-10 via size) */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    removeItem(item.productId, item.variantId);
+                    announce(`Removed ${item.productName} from cart`);
+                  }}
+                  aria-label={`Remove ${item.productName} from cart`}
+                  className="mt-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 lg:hidden"
+                >
+                  {/* N-1: decorative icon */}
+                  <Trash2 aria-hidden="true" className="mr-1 h-4 w-4" />
+                  Remove
+                </Button>
+              </div>
+            </div>
+
+            {/* Quantity Controls */}
+            <div className="flex items-center gap-2">
+              <span className="mr-2 text-sm text-white/70 lg:hidden">
+                Quantity:
+              </span>
+              <div className="inline-flex items-center gap-2 rounded-md bg-zinc-900/50 px-2 py-1">
+                {/* C-3 + M-9: labelled, 40px touch target */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    decrementItem(item.productId, item.variantId);
+                    const newQty = Math.max(1, item.quantity - 1);
+                    announce(`Quantity updated to ${newQty}`);
+                  }}
+                  aria-label={`Decrease quantity of ${item.productName}`}
+                  className="h-10 w-10 rounded-sm bg-zinc-800 p-0 text-white/60 hover:bg-zinc-700 hover:text-white"
+                >
+                  {/* N-1: decorative icon */}
+                  <Minus aria-hidden="true" className="h-4 w-4" />
+                </Button>
+
+                {/* C-3: labelled quantity input */}
+                <Input
+                  type="number"
+                  min="1"
+                  max={item.maxInventory ?? 999}
+                  value={item.quantity}
+                  aria-label={`Quantity for ${item.productName}`}
+                  onChange={(e) => {
+                    const qty = parseInt(e.target.value);
+                    if (!isNaN(qty)) {
+                      updateQuantity(item.productId, item.variantId, qty);
+                      announce(`Quantity updated to ${qty}`);
+                    }
+                  }}
+                  className="h-8 w-14 border-none bg-transparent text-center text-white"
+                />
+
+                {/* C-3 + M-9: labelled, 40px touch target */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    incrementItem(item.productId, item.variantId);
+                    const newQty = item.quantity + 1;
+                    announce(`Quantity updated to ${newQty}`);
+                  }}
+                  aria-label={`Increase quantity of ${item.productName}`}
+                  className="h-10 w-10 rounded-sm bg-zinc-800 p-0 text-white/60 hover:bg-zinc-700 hover:text-white"
+                >
+                  {/* N-1: decorative icon */}
+                  <Plus aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Remove button - desktop (C-3) */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  removeItem(item.productId, item.variantId);
+                  announce(`Removed ${item.productName} from cart`);
+                }}
+                aria-label={`Remove ${item.productName} from cart`}
+                className="ml-2 hidden text-red-400 hover:bg-red-500/10 hover:text-red-300 lg:inline-flex"
+              >
+                {/* N-1: decorative icon */}
+                <Trash2 aria-hidden="true" className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Subtotal */}
+            <div className="flex items-center justify-between lg:justify-start">
+              <span className="text-sm text-white/70 lg:hidden">Subtotal:</span>
+              <p className="text-lg font-semibold text-white">
+                {formatPrice(item.price * item.quantity)}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Cart Totals */}
+      <div className="lg:col-span-1">
+        <div className="sticky top-4 space-y-6 rounded-sm bg-zinc-900/30 p-6">
+          <h2 className="text-xl font-semibold text-white">Cart totals</h2>
+
+          <div className="space-y-4">
+            <div className="flex justify-between border-b border-white/10 pb-4 text-white/80">
+              <span>Subtotal</span>
+              <span className="font-semibold text-white">
+                {formatPrice(total)}
+              </span>
+            </div>
+
+            <div className="flex justify-between text-white/80">
+              <span>Shipping</span>
+              <span className="font-semibold text-white">
+                Calculated at checkout
+              </span>
+            </div>
+
+            <div className="flex justify-between border-t border-white/20 pt-4 text-lg font-bold text-white">
+              <span>Total</span>
+              <span>{formatPrice(total)}</span>
+            </div>
+          </div>
+
+          {/* S-11: violet-600 */}
+          <Button
+            onClick={handleCheckout}
+            className="w-full bg-violet-600 py-6 text-base font-semibold text-white hover:bg-violet-700"
+            size="lg"
+          >
+            Proceed to checkout
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

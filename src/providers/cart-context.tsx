@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 // "use client";
 
 // import { createContext, useContext, useEffect, useState } from "react";
@@ -147,12 +148,14 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-type CartItem = {
+export type CartItem = {
   productId: string;
+  productSlug?: string | null;
   variantId: string | null;
   productName: string;
   variantName: string | null;
-  price: number; // in cents
+  price: number; // in cents (the actual sale/current price)
+  compareAtPrice?: number | null; // in cents (the original price, for strikethrough display)
   quantity: number;
   imageUrl: string | null;
   sku: string | null;
@@ -176,6 +179,11 @@ type CartContextType = {
   getItemQuantity: (productId: string, variantId: string | null) => number;
   total: number;
   itemCount: number;
+
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+
+  subtotal: number;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -185,6 +193,7 @@ const CART_STORAGE_KEY = "shopping-cart";
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Load cart from localStorage on mount (client-side only)
   useEffect(() => {
@@ -218,9 +227,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items, isHydrated]);
 
   // Generate unique key for cart item
-  const getItemKey = (productId: string, variantId: string | null) => {
-    return `${productId}-${variantId ?? "no-variant"}`;
-  };
+  // const getItemKey = (productId: string, variantId: string | null) => {
+  //   return `${productId}-${variantId ?? "no-variant"}`;
+  // };
 
   // Check if item is in cart
   const isInCart = useCallback(
@@ -246,7 +255,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Add item to cart
   const addItem = useCallback(
     (newItem: Omit<CartItem, "quantity">, quantity = 1) => {
+      let toastMsg: string | null = null;
+      let toastIsError = false;
+      let openCart = false;
+
       setItems((currentItems) => {
+        toastMsg = null;
+        toastIsError = false;
+        openCart = false;
+
         const existingIndex = currentItems.findIndex(
           (item) =>
             item.productId === newItem.productId &&
@@ -254,13 +271,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         );
 
         if (existingIndex > -1) {
-          // Item exists, update quantity
           const updated = [...currentItems];
           const newQuantity = updated[existingIndex]!.quantity + quantity;
 
-          // Check max inventory if provided
           if (newItem.maxInventory && newQuantity > newItem.maxInventory) {
-            toast.error(`Only ${newItem.maxInventory} available in stock`);
+            toastMsg = `Only ${newItem.maxInventory} available in stock`;
+            toastIsError = true;
             return currentItems;
           }
 
@@ -269,19 +285,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             quantity: newQuantity,
           };
 
-          toast.success(`Updated quantity in cart`);
+          toastMsg = `Updated quantity in cart`;
           return updated;
         }
 
-        // New item, add to cart
         if (newItem.maxInventory && quantity > newItem.maxInventory) {
-          toast.error(`Only ${newItem.maxInventory} available in stock`);
+          toastMsg = `Only ${newItem.maxInventory} available in stock`;
+          toastIsError = true;
           return currentItems;
         }
 
-        toast.success(`Added to cart`);
+        toastMsg = `${newItem.productName} added to cart`;
+        openCart = true;
         return [...currentItems, { ...newItem, quantity }];
       });
+
+      if (toastMsg !== null) {
+        if (toastIsError) toast.error(toastMsg);
+        else toast.success(toastMsg);
+      }
+      if (openCart) setIsOpen(true);
     },
     [],
   );
@@ -289,18 +312,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Remove item from cart
   const removeItem = useCallback(
     (productId: string, variantId: string | null) => {
+      let removed = false;
+
       setItems((currentItems) => {
+        removed = false;
         const filtered = currentItems.filter(
           (item) =>
             !(item.productId === productId && item.variantId === variantId),
         );
-
-        if (filtered.length < currentItems.length) {
-          toast.success("Removed from cart");
-        }
-
+        if (filtered.length < currentItems.length) removed = true;
         return filtered;
       });
+
+      if (removed) toast.success("Removed from cart");
     },
     [],
   );
@@ -313,20 +337,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      let maxInventoryHit: number | null = null;
+
       setItems((currentItems) => {
+        maxInventoryHit = null;
         return currentItems.map((item) => {
           if (item.productId === productId && item.variantId === variantId) {
-            // Check max inventory
             if (item.maxInventory && quantity > item.maxInventory) {
-              toast.error(`Only ${item.maxInventory} available in stock`);
+              maxInventoryHit = item.maxInventory;
               return item;
             }
-
             return { ...item, quantity };
           }
           return item;
         });
       });
+
+      if (maxInventoryHit !== null)
+        toast.error(`Only ${maxInventoryHit} available in stock`);
     },
     [removeItem],
   );
@@ -334,13 +362,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Increment item quantity
   const incrementItem = useCallback(
     (productId: string, variantId: string | null) => {
+      let maxInventoryHit: number | null = null;
+
       setItems((currentItems) => {
+        maxInventoryHit = null;
         return currentItems.map((item) => {
           if (item.productId === productId && item.variantId === variantId) {
             const newQuantity = item.quantity + 1;
 
             if (item.maxInventory && newQuantity > item.maxInventory) {
-              toast.error(`Only ${item.maxInventory} available in stock`);
+              maxInventoryHit = item.maxInventory;
               return item;
             }
 
@@ -349,6 +380,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           return item;
         });
       });
+
+      if (maxInventoryHit !== null)
+        toast.error(`Only ${maxInventoryHit} available in stock`);
     },
     [],
   );
@@ -356,14 +390,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Decrement item quantity
   const decrementItem = useCallback(
     (productId: string, variantId: string | null) => {
+      let removed = false;
+
       setItems((currentItems) => {
+        removed = false;
         return currentItems
           .map((item) => {
             if (item.productId === productId && item.variantId === variantId) {
               const newQuantity = item.quantity - 1;
 
               if (newQuantity <= 0) {
-                toast.success("Removed from cart");
+                removed = true;
                 return null;
               }
 
@@ -373,6 +410,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           })
           .filter((item): item is CartItem => item !== null);
       });
+
+      if (removed) toast.success("Removed from cart");
     },
     [],
   );
@@ -391,6 +430,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Calculate item count
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
   return (
     <CartContext.Provider
@@ -407,6 +450,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         getItemQuantity,
         total,
         itemCount,
+        isOpen,
+        setIsOpen,
+        subtotal,
       }}
     >
       {children}

@@ -27,6 +27,10 @@ type Props<CurrentForm extends FieldValues> = {
   editorContentClassName?: string;
   /** TipTap output format. Use "json" for ProseMirror JSON (recommended for DB). */
   output?: "html" | "json" | "text";
+  businessId?: string;
+  galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
+  required?: boolean;
 };
 
 export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
@@ -39,6 +43,10 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
   placeholder,
   editorContentClassName,
   output = "json",
+  businessId,
+  galleriesEnabled,
+  embedsEnabled,
+  required,
 }: Props<CurrentForm>) => {
   return (
     <FormField
@@ -48,7 +56,10 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
         const value = (field.value ?? EMPTY_TIPTAP_DOC) as unknown as Content;
         return (
           <FormItem className={cn("col-span-full", className)}>
-            <FormLabel>{label}</FormLabel>
+            <FormLabel>
+              {label}
+              {required && <span className="text-red-500">*</span>}
+            </FormLabel>
             <FormControl>
               <MinimalTiptapEditor
                 value={value}
@@ -59,6 +70,9 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
                 className="w-full"
                 editorContentClassName={editorContentClassName}
                 editorClassName="focus:outline-hidden"
+                businessId={businessId}
+                galleriesEnabled={galleriesEnabled}
+                embedsEnabled={embedsEnabled}
               />
             </FormControl>
             {description && <FormDescription>{description}</FormDescription>}

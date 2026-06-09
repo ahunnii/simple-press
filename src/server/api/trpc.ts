@@ -12,6 +12,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
 
@@ -166,17 +167,109 @@ export const ownerAdminProcedure = t.procedure
       select: { id: true },
     });
 
-    if (
-      ctx.session.user.businessId !== business?.id &&
-      ctx.session.user.role !== "ADMIN"
-    ) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
+    if (!business) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+    }
+
+    const user = ctx.session.user;
+
+    // PLATFORM_ADMIN bypasses membership check
+    if (user.platformRole !== "PLATFORM_ADMIN") {
+      const membership = await ctx.db.businessMembership.findUnique({
+        where: {
+          userId_businessId: { userId: user.id, businessId: business.id },
+        },
+        select: { role: true },
+      });
+      if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Not a business member",
+        });
+      }
     }
 
     return next({
       ctx: {
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
+        businessId: business.id,
+      },
+    });
+  });
+
+/**
+ * Platform Admin procedure
+ *
+ * For platform-wide administration tasks. Only accessible to users with PLATFORM_ADMIN role.
+ * This procedure bypasses business-scoping since platform admins work across all businesses.
+ *
+ * @see https://trpc.io/docs/procedures
+ */
+export const platformAdminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    if (ctx.session.user.platformRole !== "PLATFORM_ADMIN") {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Platform admin access required",
+      });
+    }
+
+    return next({
+      ctx: {
+        session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
+  });
+
+export const featureGate = (featureKey: string) =>
+  t.middleware(async ({ next }) => {
+    // const businessId = (ctx as unknown as { businessId: string }).businessId;
+    // 1. Get the flags using your existing helper
+    const { isEnabled, disabledByDependency } = await getBusinessFlags();
+
+    // 2. Check if the feature is active
+    if (!isEnabled(featureKey) || disabledByDependency.has(featureKey)) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: `The ${featureKey} feature is not enabled for this business. To enable it, head to the Features page found in the Settings section of the admin dashboard.`,
+      });
+    }
+
+    return next();
+  });
+
+export const getBusinessProcedure = () =>
+  t.middleware(async ({ ctx, next }) => {
+    const headersList = await headers();
+    const hostname = headersList.get("host") ?? "";
+
+    // Extract subdomain or custom domain
+    const domain = hostname.split(":")[0]; // Remove port
+
+    const business = await ctx.db.business.findFirst({
+      where: {
+        OR: [
+          { customDomain: domain },
+          { subdomain: domain?.split(".")[0] }, // Extract subdomain
+        ],
+      },
+      select: { id: true },
+    });
+
+    if (!business) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        businessId: business.id,
       },
     });
   });

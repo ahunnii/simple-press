@@ -1,10 +1,9 @@
-// app/api/stripe/connect/account/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { stripeClient } from "~/lib/stripe/client";
 import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
 
 export async function GET(request: NextRequest) {
   try {

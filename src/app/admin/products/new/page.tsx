@@ -1,19 +1,36 @@
-import { HydrateClient } from "~/trpc/server";
-
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { api } from "~/trpc/server";
 import { ProductForm } from "../_components/product-form";
-import { SiteHeader } from "../../_components/site-header";
-
-export const metadata = {
-  title: "Add Product",
-};
+import { TrailHeader } from "../../_components/trail-header";
 
 export default async function NewProductPage() {
+  const [flags, pools] = await Promise.all([
+    getBusinessFlags(),
+    api.baseInventoryUnit.list(),
+  ]);
+
+  const allCollections = flags.isEnabled("collections")
+    ? await api.collections.getAll()
+    : [];
+
   return (
-    <HydrateClient>
-      <SiteHeader title="Add Product" />
-      <div className="admin-container">
-        <ProductForm />
-      </div>
-    </HydrateClient>
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Products", href: "/admin/products" },
+          { label: "New Product" },
+        ]}
+      />
+
+      <ProductForm
+        galleriesEnabled={flags.isEnabled("galleries")}
+        collectionsEnabled={flags.isEnabled("collections")}
+        allCollections={allCollections}
+        pools={pools}
+      />
+    </>
   );
 }
+export const metadata = {
+  title: "New Product",
+};

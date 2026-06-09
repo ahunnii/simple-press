@@ -23,7 +23,7 @@ export function CTASection() {
               asChild
               className="w-full sm:w-auto"
             >
-              <Link href="/signup" className="gap-2">
+              <Link href="/platform/signup" className="gap-2">
                 Create Your Store
                 <ArrowRight className="h-4 w-4" />
               </Link>

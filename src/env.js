@@ -28,6 +28,15 @@ export const env = createEnv({
 
     INVITATION_CODE: z.string(),
     RESEND_API_KEY: z.string(),
+
+    DISCORD_WEBHOOK_URL: z.string().url(),
+    VPS_IP: z.string(),
+
+    HCAPTCHA_SECRET_KEY: z.string(),
+
+    SIMPLEPRESS_HASH_SECRET: z.string(),
+    ARTISANAL_FUTURES_API_URL: z.string().url(),
+    REDIS_URL: z.string().url().optional(),
   },
 
   /**
@@ -50,6 +59,11 @@ export const env = createEnv({
     NEXT_PUBLIC_EMAIL_FROM_NOREPLY: z.string(),
     NEXT_PUBLIC_EMAIL_FROM_ORDERS: z.string(),
     NEXT_PUBLIC_EMAIL_FROM_SUPPORT: z.string(),
+    NEXT_PUBLIC_HCAPTCHA_SITE_KEY: z.string(),
+    NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL: z
+      .string()
+      .email()
+      .default("csdt@generativejustice.org"),
   },
 
   /**
@@ -84,6 +98,16 @@ export const env = createEnv({
     NEXT_PUBLIC_EMAIL_FROM_NOREPLY: process.env.NEXT_PUBLIC_EMAIL_FROM_NOREPLY,
     NEXT_PUBLIC_EMAIL_FROM_ORDERS: process.env.NEXT_PUBLIC_EMAIL_FROM_ORDERS,
     NEXT_PUBLIC_EMAIL_FROM_SUPPORT: process.env.NEXT_PUBLIC_EMAIL_FROM_SUPPORT,
+    DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
+    VPS_IP: process.env.VPS_IP,
+    NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
+    NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL:
+      process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL,
+    HCAPTCHA_SECRET_KEY: process.env.HCAPTCHA_SECRET_KEY,
+
+    SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,
+    ARTISANAL_FUTURES_API_URL: process.env.ARTISANAL_FUTURES_API_URL,
+    REDIS_URL: process.env.REDIS_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

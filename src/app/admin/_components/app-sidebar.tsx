@@ -1,19 +1,30 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import * as React from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import {
+  IconCreditCard,
   IconDashboard,
+  IconDiscount,
+  IconFolder,
   IconHelp,
+  IconImageInPicture,
   IconLanguage,
   IconMail,
   IconPackage,
+  IconPackages,
   IconSettings,
   IconShoppingCart,
+  IconStar,
   IconTerminal,
+  IconUsers,
 } from "@tabler/icons-react";
+import { Building2, Globe, Users } from "lucide-react";
 
+import type { Session } from "~/server/better-auth/config";
 import { env } from "~/env";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import {
   Sidebar,
   SidebarContent,
@@ -29,8 +40,8 @@ import { NavUser } from "~/app/admin/_components/nav-user";
 
 import WelcomeNotification from "./welcome-notification";
 
-const data = {
-  navMain: [
+const getNavData = (session: Session | null) => {
+  const navMain = [
     {
       title: "Dashboard",
       url: "/admin/dashboard",
@@ -40,52 +51,145 @@ const data = {
       title: "Orders",
       url: "/admin/orders",
       icon: IconShoppingCart,
+      featureKey: "orders",
     },
-
+    {
+      title: "Customers",
+      url: "/admin/customers",
+      icon: IconUsers,
+    },
+    {
+      title: "Payments",
+      url: "/admin/payments",
+      icon: IconCreditCard,
+      featureKey: "payments",
+    },
     {
       title: "Products",
       url: "/admin/products",
       icon: IconPackage,
+      featureKey: "products",
     },
-
-    // {
-    //   title: "Discounts",
-    //   url: "/admin/discounts",
-    //   icon: IconDiscount,
-    // },
-    // {
-    //   title: "Collections",
-    //   url: "/admin/collections",
-    //   icon: IconFolder,
-    // },
+    {
+      title: "Inventory",
+      url: "/admin/inventory",
+      icon: IconPackages,
+      featureKey: "inventory",
+    },
+    {
+      title: "Collections",
+      url: "/admin/collections",
+      icon: IconFolder,
+      featureKey: "collections",
+    },
     {
       title: "Site content",
       url: "/admin/content",
       icon: IconLanguage,
     },
-  ],
-  navClouds: [],
-  navSecondary: [
     {
-      title: "Settings",
-      url: "/admin/settings",
-      icon: IconSettings,
+      title: "Discounts",
+      url: "/admin/discounts",
+      icon: IconDiscount,
+      featureKey: "coupons",
     },
     {
-      title: "Emails",
-      url: "/admin/emails",
-      icon: IconMail,
+      title: "Galleries",
+      url: "/admin/galleries",
+      icon: IconImageInPicture,
+      featureKey: "galleries",
     },
     {
-      title: "Get Help",
-      url: env.NEXT_PUBLIC_HELP_URL,
-      icon: IconHelp,
+      title: "Testimonials",
+      url: "/admin/testimonials",
+      icon: IconStar,
+      featureKey: "testimonials",
     },
-  ],
-  documents: [],
+    {
+      title: "Reviews",
+      url: "/admin/reviews",
+      icon: IconStar,
+      featureKey: "reviews",
+    },
+  ];
+
+  const navPlatformAdmin:
+    | {
+        title: string;
+        url: string;
+        icon: React.ComponentType<any>;
+      }[]
+    | [] =
+    session?.user.platformRole === "PLATFORM_ADMIN"
+      ? [
+          {
+            title: "Platform Users",
+            url: "/admin/platform/users",
+            icon: Users,
+          },
+          {
+            title: "Platform Businesses",
+            url: "/admin/platform/businesses",
+            icon: Building2,
+          },
+          {
+            title: "Platform Domains",
+            url: "/admin/platform/domains",
+            icon: Globe,
+          },
+        ]
+      : [];
+
+  return {
+    navMain,
+    navPlatformAdmin,
+    navSecondary: [
+      {
+        title: "Settings",
+        url: "/admin/settings",
+        icon: IconSettings,
+      },
+      {
+        title: "Emails",
+        url: "/admin/emails",
+        icon: IconMail,
+      },
+      {
+        title: "Get Help",
+        url: env.NEXT_PUBLIC_HELP_URL,
+        icon: IconHelp,
+      },
+    ],
+  };
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  session?: Session | null;
+  businessName?: string | null;
+  featureData?: { flags: Record<string, boolean> };
+};
+
+export function AppSidebar({
+  session,
+  businessName,
+  featureData,
+  ...props
+}: AppSidebarProps) {
+  const { isEnabled, isDisabledByDependency } = useFeatureFlags({
+    flags: featureData?.flags ?? {},
+  });
+
+  const navData = getNavData(session ?? null);
+
+  const filteredNavMain = useMemo(() => {
+    return navData.navMain.filter((item) => {
+      if (!item.featureKey) return true;
+      return (
+        isEnabled(item.featureKey) && !isDisabledByDependency(item.featureKey)
+      );
+    });
+  }, [navData.navMain, isEnabled, isDisabledByDependency]);
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -100,15 +204,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <IconTerminal className="size-8" />
                   simple_press
                 </span>
-                {/* <span className="text-sm text-gray-500">Artisanal Futures</span> */}
+                <span className="text-sm text-gray-500">
+                  {businessName ?? "Business"}
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={filteredNavMain} />
+        {navData.navPlatformAdmin.length > 0 && (
+          <NavMain items={navData.navPlatformAdmin} />
+        )}
+        <NavSecondary items={navData.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <WelcomeNotification />

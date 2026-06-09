@@ -3,6 +3,7 @@ export type FormVariant = {
   name: string;
   sku?: string;
   price?: number; // in cents
+  compareAtPrice?: number; // in cents
   inventoryQty: number;
   options: Record<string, string>; // { size: "Small", color: "Red" }
 };

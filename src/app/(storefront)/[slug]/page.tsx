@@ -1,36 +1,66 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { db } from "~/server/db";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { getCanonicalUrl } from "~/lib/canonical";
+import { api } from "~/trpc/server";
 
-export default async function PageView({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const page = await db.page.findFirst({
-    where: {
-      slug: params.slug,
-      published: true,
-    },
+import { BambooGenericPage } from "../_templates/bamboo/bamboo-generic-page";
+import { DarkTrendGenericPage } from "../_templates/dark-trend/dark-trend-generic-page";
+import { DefaultGenericPage } from "../_templates/default/default-generic-page";
+import { ElegantGenericPage } from "../_templates/elegant/elegant-generic-page";
+import { HappyBambooGenericPage } from "../_templates/happy-bamboo/happy-bamboo-generic-page";
+import { ModernGenericPage } from "../_templates/modern/modern-generic-page";
+import { NoiseGenericPage } from "../_templates/noise/noise-generic-page";
+import { PollenGenericPage } from "../_templates/pollen/pollen-generic-page";
+import { SledgeGenericPage } from "../_templates/sledge/sledge-generic-page";
+
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+export default async function PageView({ params }: Props) {
+  const { slug } = await params;
+  const business = await api.business.simplifiedGet();
+  if (!business) notFound();
+
+  const page = await api.content.getPageBySlug({
+    slug,
   });
 
-  if (!page) {
-    notFound();
-  }
+  if (!page) notFound();
 
-  return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="mb-6 text-4xl font-bold">{page.title}</h1>
+  const TemplateComponent =
+    {
+      "dark-trend": DarkTrendGenericPage,
+      elegant: ElegantGenericPage,
+      pollen: PollenGenericPage,
+      bamboo: BambooGenericPage,
+      "happy-bamboo": HappyBambooGenericPage,
+      noise: NoiseGenericPage,
+      modern: ModernGenericPage,
+      sledge: SledgeGenericPage,
+    }[business.templateId] ?? DefaultGenericPage;
 
-      {page.excerpt && (
-        <p className="mb-8 text-xl text-gray-600">{page.excerpt}</p>
-      )}
+  return <TemplateComponent business={business} page={page} />;
+}
 
-      <TiptapRenderer
-        content={page.content}
-        className="prose prose-lg max-w-none"
-      />
-    </div>
-  );
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+
+  const [page, business] = await Promise.all([
+    api.content.getPageBySlug({ slug }),
+    api.business.simplifiedGet(),
+  ]);
+
+  if (!page) return { title: "Page Not Found" };
+
+  return {
+    title: !!page.metaTitle ? page.metaTitle : page.title,
+    description: !!page.metaDescription ? page.metaDescription : page.excerpt,
+    ...(business && {
+      alternates: {
+        canonical: getCanonicalUrl(business, `/${slug}`),
+      },
+    }),
+  };
 }

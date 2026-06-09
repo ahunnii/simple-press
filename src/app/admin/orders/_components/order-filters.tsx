@@ -14,7 +14,11 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
-export function OrderFilters() {
+type OrderFiltersProps = {
+  orderCount?: number;
+};
+
+export function OrderFilters({ orderCount }: OrderFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
@@ -67,20 +71,24 @@ export function OrderFilters() {
         </form>
 
         {/* Status Filter */}
-        <div className="w-full md:w-48">
+        <div className="flex w-full items-center gap-2 md:w-48">
           <Select value={status} onValueChange={handleStatusChange}>
             <SelectTrigger>
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="open">Open</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
               <SelectItem value="refunded">Refunded</SelectItem>
             </SelectContent>
           </Select>
+          {hasFilters && (
+            <span className="text-muted-foreground ml-2 text-xs">
+              {typeof orderCount !== "undefined" ? `${orderCount} found` : null}
+            </span>
+          )}
         </div>
 
         {/* Clear Filters */}

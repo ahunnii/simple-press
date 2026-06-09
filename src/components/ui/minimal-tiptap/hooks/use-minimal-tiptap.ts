@@ -1,3 +1,4 @@
+import type { Extension } from "@tiptap/core";
 import type { Content, Editor, UseEditorOptions } from "@tiptap/react";
 import * as React from "react";
 import { TextStyle } from "@tiptap/extension-text-style";
@@ -12,10 +13,13 @@ import { cn } from "~/lib/utils";
 import {
   CodeBlockLowlight,
   Color,
+  Embed,
   FileHandler,
+  Gallery,
   HorizontalRule,
   Image,
   ResetMarksOnEnter,
+  TableKit,
   UnsetAllMarks,
 } from "../extensions";
 import { useThrottle } from "../hooks/use-throttle";
@@ -30,6 +34,9 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   onUpdate?: (content: Content) => void;
   onBlur?: (content: Content) => void;
   uploader?: (file: File) => Promise<string>;
+  businessId?: string;
+  galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
 }
 
 async function fakeuploader(file: File): Promise<string> {
@@ -47,9 +54,15 @@ async function fakeuploader(file: File): Promise<string> {
 const createExtensions = ({
   placeholder,
   uploader,
+  businessId,
+  galleriesEnabled,
+  embedsEnabled,
 }: {
   placeholder: string;
   uploader?: (file: File) => Promise<string>;
+  businessId?: string;
+  galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
 }) => [
   StarterKit.configure({
     blockquote: { HTMLAttributes: { class: "block-node" } },
@@ -108,7 +121,7 @@ const createExtensions = ({
         }),
       );
     },
-    onImageRemoved({ id, src }) {
+    onImageRemoved() {
       console.log("Image removed");
     },
     onValidationError(errors) {
@@ -186,6 +199,9 @@ const createExtensions = ({
   ResetMarksOnEnter,
   CodeBlockLowlight,
   Placeholder.configure({ placeholder: () => placeholder }),
+  Gallery.configure({ businessId, galleriesEnabled: galleriesEnabled !== false }),
+  Embed.configure({ embedsEnabled: embedsEnabled !== false }),
+  TableKit.configure({}),
 ];
 
 export const useMinimalTiptapEditor = ({
@@ -197,48 +213,99 @@ export const useMinimalTiptapEditor = ({
   onUpdate,
   onBlur,
   uploader,
+  businessId,
+  galleriesEnabled,
+  embedsEnabled,
   ...props
 }: UseMinimalTiptapEditorProps) => {
-  const throttledSetValue = useThrottle(
-    (value: Content) => onUpdate?.(value),
-    throttleDelay,
-  );
+  // const lastExternalValueRef = React.useRef<Content | undefined>(value);
+  const lastEmittedContentRef = React.useRef<Content | undefined>(undefined);
+
+  // const throttledSetValue = useThrottle(
+  //   (value: Content) => onUpdate?.(value),
+  //   throttleDelay,
+  // );
+  const throttledSetValue = useThrottle((content: Content) => {
+    onUpdate?.(content);
+    lastEmittedContentRef.current = content;
+  }, throttleDelay);
 
   const handleUpdate = React.useCallback(
     (editor: Editor) => throttledSetValue(getOutput(editor, output)),
     [output, throttledSetValue],
   );
 
-  const handleCreate = React.useCallback(
-    (editor: Editor) => {
-      if (value && editor.isEmpty) {
-        editor.commands.setContent(value);
-      }
-    },
-    [value],
-  );
+  // Keep initial value in a ref so handleCreate can be stable. Avoids useEditor
+  // seeing a new onCreate every time form value (new ref) triggers a re-render.
+  const initialValueRef = React.useRef(value);
+  initialValueRef.current = value;
+  // const handleCreate = React.useCallback((editor: Editor) => {
+  //   const initial = initialValueRef.current;
+  //   if (initial && editor.isEmpty) {
+  //     editor.commands.setContent(initial);
+  //   }
+  // }, []);
 
   const handleBlur = React.useCallback(
     (editor: Editor) => onBlur?.(getOutput(editor, output)),
     [output, onBlur],
   );
 
-  const editor = useEditor({
-    immediatelyRender: false,
-    extensions: createExtensions({ placeholder, uploader }),
-    editorProps: {
+  // Memoize extensions so useEditor doesn't recreate the editor on every render.
+  // Unstable extension array is a common cause of "Maximum update depth" with Tiptap.
+  const extensions = React.useMemo(
+    () =>
+      createExtensions({
+        placeholder,
+        uploader,
+        businessId,
+        galleriesEnabled,
+        embedsEnabled,
+      }) as unknown as Extension[],
+    [placeholder, uploader, businessId, galleriesEnabled, embedsEnabled],
+  );
+
+  const editorProps = React.useMemo(
+    () => ({
       attributes: {
         autocomplete: "off",
         autocorrect: "off",
         autocapitalize: "off",
         class: cn("focus:outline-hidden", editorClassName),
       },
-    },
+    }),
+    [editorClassName],
+  );
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions,
+    editorProps,
+    content: value,
     onUpdate: ({ editor }) => handleUpdate(editor),
-    onCreate: ({ editor }) => handleCreate(editor),
+    // onCreate: ({ editor }) => handleCreate(editor),
     onBlur: ({ editor }) => handleBlur(editor),
     ...props,
   });
+
+  // React.useEffect(() => {
+  //   if (!editor || value == null) return;
+  //   const last = lastExternalValueRef.current;
+  //   if (last === value) return;
+  //   if (JSON.stringify(last) === JSON.stringify(value)) return;
+
+  //   lastExternalValueRef.current = value;
+  //   editor.commands.setContent(value);
+  // }, [editor, value]);
+
+  React.useEffect(() => {
+    if (!editor || value == null) return;
+    const lastEmitted = lastEmittedContentRef.current;
+    if (JSON.stringify(lastEmitted) === JSON.stringify(value)) return;
+
+    lastEmittedContentRef.current = value;
+    editor.commands.setContent(value);
+  }, [editor, value]);
 
   return editor;
 };

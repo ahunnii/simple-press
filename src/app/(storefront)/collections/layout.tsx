@@ -1,17 +1,16 @@
 import { notFound } from "next/navigation";
 
-import { auth } from "~/server/better-auth";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 
-export default async function CollectionsLayout({
-  children,
-}: {
+type Props = {
   children: React.ReactNode;
-}) {
-  const session = await auth.api.getSession();
+};
+export default async function CollectionsLayout({ children }: Props) {
+  const { isEnabled } = await getBusinessFlags();
 
-  if (!session?.user && session?.user.role !== "ADMIN") {
+  if (!isEnabled("collections")) {
     notFound();
   }
 
-  return <div>{children}</div>;
+  return <>{children}</>;
 }

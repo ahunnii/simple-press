@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes, ReactNode } from "react";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
 import { cn } from "~/lib/utils";
@@ -16,7 +16,7 @@ type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;
   name: Path<CurrentForm>;
   label?: string;
-  description?: string;
+  description?: ReactNode;
   className?: string;
   disabled?: boolean;
   placeholder?: string;
@@ -31,6 +31,9 @@ type Props<CurrentForm extends FieldValues> = {
   type?: InputHTMLAttributes<HTMLInputElement>["type"];
   required?: boolean;
   autoFocus?: boolean;
+  labelClassName?: string;
+  inputClassName?: string;
+  descriptionClassName?: string;
 };
 
 export const InputFormField = <CurrentForm extends FieldValues>({
@@ -50,19 +53,33 @@ export const InputFormField = <CurrentForm extends FieldValues>({
   inputRef,
   required,
   autoFocus,
+  labelClassName,
+  inputClassName,
+  descriptionClassName,
 }: Props<CurrentForm>) => {
   return (
     <FormField
       control={form.control}
       name={name}
       render={({ field }) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { ref: _fieldRef, ...fieldRest } = field;
         return (
           <FormItem className={cn("col-span-full", className)}>
-            {label && <FormLabel>{label}</FormLabel>}
+            {label && (
+              <FormLabel className={cn(labelClassName)}>
+                {label} {required && <span className="text-red-500" aria-hidden="true">*</span>}
+                {/* {required && (
+                  <span className="items-center text-[10px] font-medium tracking-[0.05em] text-red-500">
+                    * REQUIRED
+                  </span>
+                )} */}
+              </FormLabel>
+            )}
             <FormControl>
               <Input
                 disabled={disabled}
+                className={inputClassName}
                 placeholder={placeholder ?? ""}
                 {...fieldRest}
                 ref={(el) => {
@@ -95,7 +112,11 @@ export const InputFormField = <CurrentForm extends FieldValues>({
                 autoFocus={autoFocus}
               />
             </FormControl>
-            {description && <FormDescription>{description}</FormDescription>}
+            {description && (
+              <FormDescription className={cn(descriptionClassName)}>
+                {description}
+              </FormDescription>
+            )}
             <FormMessage />
           </FormItem>
         );

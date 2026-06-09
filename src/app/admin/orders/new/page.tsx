@@ -1,25 +1,28 @@
-import { redirect } from "next/navigation";
-
-import { checkBusiness } from "~/lib/check-business";
-import { api, HydrateClient } from "~/trpc/server";
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
+import { api } from "~/trpc/server";
 
 import { ManualOrderForm } from "../_components/manual-order-form";
-import { SiteHeader } from "../../_components/site-header";
+import { TrailHeader } from "../../_components/trail-header";
 
 export default async function NewOrderPage() {
-  const business = await checkBusiness();
-
-  if (!business) {
-    redirect("/admin/welcome");
-  }
-  const products = await api.product.secureGetAll();
+  const products = await api.product
+    .secureGetAll()
+    .catch(rethrowTrpcForErrorBoundary);
 
   return (
-    <HydrateClient>
-      <SiteHeader title="Create Manual Order" />
-      <div className="admin-container">
-        <ManualOrderForm businessId={business?.id} products={products} />
-      </div>
-    </HydrateClient>
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Orders", href: "/admin/orders" },
+          { label: "New Manual Order" },
+        ]}
+      />
+
+      <ManualOrderForm products={products} />
+    </>
   );
 }
+
+export const metadata = {
+  title: "New Manual Order",
+};

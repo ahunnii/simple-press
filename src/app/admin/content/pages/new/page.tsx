@@ -1,21 +1,25 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { TrailHeader } from "~/app/admin/_components/trail-header";
 
-import { auth } from "~/server/better-auth";
-import { db } from "~/server/db";
-
-import { PageEditor } from "../../_components/page-editor";
+import { PageEditor } from "../_components/page-editor";
 
 export default async function NewPagePage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) redirect("/auth/sign-in");
+  const flags = await getBusinessFlags();
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { business: { select: { id: true, name: true } } },
-  });
-
-  if (!user?.business) redirect("/admin/welcome");
-
-  return <PageEditor business={user.business} />;
+  return (
+    <>
+      <TrailHeader
+        breadcrumbs={[
+          { label: "Content", href: "/admin/content" },
+          { label: "Pages", href: "/admin/content/pages" },
+          { label: "New Page" },
+        ]}
+      />
+      <PageEditor galleriesEnabled={flags.isEnabled("galleries")} embedsEnabled={flags.isEnabled("embeds")} />
+    </>
+  );
 }
+
+export const metadata = {
+  title: "New Page",
+};

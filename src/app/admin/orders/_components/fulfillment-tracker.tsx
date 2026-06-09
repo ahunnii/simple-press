@@ -1,16 +1,14 @@
 "use client";
 
 import type { Order } from "generated/prisma";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Package, Truck } from "lucide-react";
+import { Loader2, Package } from "lucide-react";
+import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 
 type Props = {
   order: Order;
@@ -18,43 +16,41 @@ type Props = {
 
 export function FulfillmentTracker({ order }: Props) {
   const router = useRouter();
-  const [trackingNumber, setTrackingNumber] = useState(
-    order.trackingNumber ?? "",
-  );
-  const [isUpdating, setIsUpdating] = useState(false);
+  const utils = api.useUtils();
 
   const updateFulfillmentMutation = api.order.updateFulfillment.useMutation({
     onSuccess: () => {
+      toast.dismiss();
+      toast.success("Fulfillment updated successfully");
+      void utils.order.invalidate();
       router.refresh();
     },
     onError: (error) => {
+      toast.dismiss();
       console.error("Update fulfillment error:", error);
-      alert("Failed to update fulfillment");
+      toast.error(error.message ?? "Failed to update fulfillment");
     },
-    onSettled: () => {
-      setIsUpdating(false);
+    onMutate: () => {
+      toast.loading("Updating fulfillment...");
     },
   });
-  const handleMarkFulfilled = async () => {
-    setIsUpdating(true);
 
+  const handleMarkFulfilled = () => {
     updateFulfillmentMutation.mutate({
       orderId: order.id,
       fulfillmentStatus: "fulfilled",
-      trackingNumber: trackingNumber ?? null,
     });
   };
 
-  const handleMarkUnfulfilled = async () => {
-    setIsUpdating(true);
+  const handleMarkUnfulfilled = () => {
     updateFulfillmentMutation.mutate({
       orderId: order.id,
       fulfillmentStatus: "unfulfilled",
-      trackingNumber: undefined,
     });
   };
 
   const isFulfilled = order.fulfillmentStatus === "fulfilled";
+  const isUpdating = updateFulfillmentMutation.isPending;
 
   return (
     <Card>
@@ -73,66 +69,38 @@ export function FulfillmentTracker({ order }: Props) {
       </CardHeader>
       <CardContent className="space-y-3">
         {isFulfilled ? (
-          <>
-            {order.trackingNumber && (
-              <div>
-                <Label className="text-xs text-gray-500">Tracking Number</Label>
-                <div className="mt-1 flex items-center gap-2">
-                  <Truck className="h-4 w-4 text-gray-400" />
-                  <span className="font-mono text-sm">
-                    {order.trackingNumber}
-                  </span>
-                </div>
-              </div>
+          <Button
+            onClick={handleMarkUnfulfilled}
+            disabled={isUpdating}
+            variant="outline"
+            size="sm"
+            className="w-full"
+          >
+            {isUpdating ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              "Mark as Unfulfilled"
             )}
-            <Button
-              onClick={handleMarkUnfulfilled}
-              disabled={isUpdating}
-              variant="outline"
-              size="sm"
-              className="w-full"
-            >
-              {isUpdating ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                "Mark as Unfulfilled"
-              )}
-            </Button>
-          </>
+          </Button>
         ) : (
-          <>
-            <div>
-              <Label htmlFor="tracking" className="text-sm">
-                Tracking Number (Optional)
-              </Label>
-              <Input
-                id="tracking"
-                type="text"
-                value={trackingNumber}
-                onChange={(e) => setTrackingNumber(e.target.value)}
-                placeholder="1Z999AA10123456784"
-                className="mt-1"
-              />
-            </div>
-            <Button
-              onClick={handleMarkFulfilled}
-              disabled={isUpdating}
-              size="sm"
-              className="w-full"
-            >
-              {isUpdating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                <>
-                  <Package className="mr-2 h-4 w-4" />
-                  Mark as Fulfilled
-                </>
-              )}
-            </Button>
-          </>
+          <Button
+            onClick={handleMarkFulfilled}
+            disabled={isUpdating}
+            size="sm"
+            className="w-full"
+          >
+            {isUpdating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <Package className="mr-2 h-4 w-4" />
+                Mark as Fulfilled
+              </>
+            )}
+          </Button>
         )}
       </CardContent>
     </Card>

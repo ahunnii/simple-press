@@ -7,7 +7,7 @@ import { Button } from "~/components/ui/button";
 import { RefreshButton } from "~/app/_components/refresh-button";
 
 export default async function NotFound() {
-  const business = await api.business.get();
+  const business = await api.business.simplifiedGet();
 
   return (
     <div className="bg-background relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4">

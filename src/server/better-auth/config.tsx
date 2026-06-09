@@ -1,0 +1,287 @@
+import * as Sentry from "@sentry/nextjs";
+import ResetPasswordEmail from "~/emails/reset-password";
+import VerifyEmail from "~/emails/verify-email";
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { captcha, organization } from "better-auth/plugins";
+
+import { env } from "~/env";
+import { getBusinessUrl } from "~/lib/business-url";
+import { checkBusiness, checkBusinessForEmail } from "~/lib/check-business";
+import { resend } from "~/lib/email/resend";
+import { EMAIL_FROM } from "~/lib/email/send";
+import { db } from "~/server/db";
+
+async function linkGuestOrdersToUser(user: {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+}) {
+  if (!user.emailVerified) return;
+  try {
+    const result = await db.customer.updateMany({
+      where: {
+        email: user.email.toLowerCase(),
+        userId: null,
+      },
+      data: { userId: user.id },
+    });
+    if (result.count > 0) {
+      console.log(
+        `[Auth Hook] Linked ${result.count} customer record(s) to user ${user.id}`,
+      );
+    }
+  } catch (err) {
+    Sentry.captureException(err, {
+      tags: { "auth.hook": "link-guest-orders" },
+      extra: { userId: user.id, email: user.email },
+    });
+  }
+}
+
+export const auth = betterAuth({
+  baseURL: {
+    allowedHosts: [
+      "*.localhost:3000", // custom domains (wildcard)
+      "localhost:3000", // local dev
+      `${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
+      `*.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
+      "zairesvisions.org",
+      "detroitpollinatorcompany.com",
+    ],
+
+    protocol: process.env.NODE_ENV === "development" ? "http" : "https",
+  },
+
+  database: prismaAdapter(db, {
+    provider: "postgresql", // or "sqlite" or "mysql"
+  }),
+
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: true,
+    autoSignIn: true,
+
+    resetPasswordTokenExpiresIn: 3600, // 1 hour
+
+    sendResetPassword: async ({ user, url }) => {
+      const business = await checkBusinessForEmail();
+      const domain = getBusinessUrl({
+        subdomain: business?.subdomain ?? "",
+        customDomain: business?.customDomain ?? null,
+        domainStatus: business?.domainStatus ?? "NONE",
+      });
+
+      const updatedResetUrl = url.replace(env.BETTER_AUTH_BASE_URL, domain);
+
+      resend.emails
+        .send({
+          from: `${business?.name} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+          to: user.email,
+          subject: "Reset your SimplePress password",
+          react: ResetPasswordEmail({
+            name: user.name,
+            businessName: business?.name ?? "",
+            resetUrl: updatedResetUrl,
+            logoUrl: business?.siteContent?.logoUrl ?? undefined,
+          }),
+        })
+        .catch((err) => {
+          Sentry.captureException(err, {
+            tags: { "auth.email": "password-reset" },
+          });
+        });
+    },
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({
+      user,
+      url,
+    }: {
+      user: { email: string; name: string };
+      url: string;
+    }) => {
+      const business = await checkBusinessForEmail();
+
+      const domain = getBusinessUrl({
+        subdomain: business?.subdomain ?? "",
+        customDomain: business?.customDomain ?? null,
+        domainStatus: business?.domainStatus ?? "NONE",
+      });
+
+      const updatedVerifyUrl = url.replace(env.BETTER_AUTH_BASE_URL, domain);
+      resend.emails
+        .send({
+          from: `${business?.name} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+          to: user.email,
+          subject: "Verify your email",
+          react: VerifyEmail({
+            name: user.name,
+            businessName: business?.name ?? "",
+            verifyUrl: updatedVerifyUrl,
+            logoUrl: business?.siteContent?.logoUrl ?? undefined,
+          }),
+        })
+        .catch((err) => {
+          Sentry.captureException(err, {
+            tags: { "auth.email": "verification" },
+          });
+        });
+    },
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    expiresIn: 3600, // 1 hour
+  },
+
+  socialProviders: {
+    discord: {
+      clientId: env.BETTER_AUTH_DISCORD_ID,
+      clientSecret: env.BETTER_AUTH_DISCORD_SECRET,
+      redirectURI: `${env.BETTER_AUTH_BASE_URL}/api/auth/callback/discord`,
+    },
+  },
+
+  user: {
+    additionalFields: {
+      platformRole: {
+        type: "string",
+        defaultValue: "BUSINESS_USER",
+      },
+      businessId: {
+        type: "string",
+        required: false,
+      },
+      businessRole: {
+        type: "string",
+        required: false,
+      },
+    },
+  },
+
+  plugins: [
+    organization({
+      schema: {
+        organization: { modelName: "business" },
+        member: {
+          modelName: "businessMembership",
+          fields: { organizationId: "businessId" },
+        },
+      },
+    }),
+    captcha({
+      provider: "hcaptcha",
+      secretKey: env.HCAPTCHA_SECRET_KEY,
+      siteKey: env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
+    }),
+  ],
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          await linkGuestOrdersToUser(user);
+        },
+      },
+      update: {
+        after: async (user) => {
+          await linkGuestOrdersToUser(user);
+        },
+      },
+    },
+    session: {
+      create: {
+        before: async (session) => {
+          const business = await checkBusiness();
+          if (!business) return { data: session };
+
+          const membership = await db.businessMembership.findFirst({
+            where: {
+              userId: session.userId,
+              businessId: business.id,
+            },
+            select: { id: true, businessId: true, role: true },
+          });
+
+          return {
+            data: {
+              ...session,
+              businessId: membership?.businessId ?? null,
+              membershipId: membership?.id ?? null,
+              membershipRole: membership?.role ?? null,
+              activeOrganizationId: business.id, // keep for org plugin compat
+            },
+          };
+        },
+      },
+    },
+  },
+
+  trustedOrigins: async () => {
+    const businesses = await db.business.findMany({
+      where: {
+        OR: [
+          // Active businesses with a valid custom domain
+          {
+            domainStatus: "ACTIVE",
+            customDomain: {
+              not: null,
+            },
+          },
+          // Inactive businesses with a valid subdomain
+          {
+            domainStatus: "NONE",
+            subdomain: {
+              not: "",
+            },
+          },
+          {
+            domainStatus: "PENDING_DNS",
+            subdomain: {
+              not: "",
+            },
+          },
+        ],
+      },
+      select: { customDomain: true, subdomain: true },
+    });
+
+    const domains = [
+      env.BETTER_AUTH_BASE_URL,
+      ...businesses.flatMap((b) => [
+        b.customDomain ? `https://${b.customDomain}` : null,
+        `https://${b.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
+        // Allow HTTP for local dev subdomains
+        process.env.NODE_ENV === "development"
+          ? `http://${b.subdomain}.localhost:3000`
+          : null,
+      ]),
+    ].filter((o): o is string => o !== null);
+
+    return domains;
+  },
+
+  session: {
+    additionalFields: {
+      businessId: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+      },
+      membershipId: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+      },
+      membershipRole: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+      },
+    },
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    },
+  },
+});
+
+export type Session = typeof auth.$Infer.Session;

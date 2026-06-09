@@ -1,22 +1,22 @@
 "use client";
 
-import { useCallback } from "react";
-import { IconFileExport } from "@tabler/icons-react";
+// import { useCallback } from "react";
+// import { IconFileExport } from "@tabler/icons-react";
 
-import { api } from "~/trpc/react";
-import { Button } from "~/components/ui/button";
+// import { api } from "~/trpc/react";
+// import { Button } from "~/components/ui/button";
 
-const FILENAME = "community-export.wxr";
+// const FILENAME = "community-export.wxr";
 
-function downloadXml(xml: string) {
-  const blob = new Blob([xml], { type: "application/xml" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = FILENAME;
-  a.click();
-  URL.revokeObjectURL(url);
-}
+// function downloadXml(xml: string) {
+//   const blob = new Blob([xml], { type: "application/xml" });
+//   const url = URL.createObjectURL(blob);
+//   const a = document.createElement("a");
+//   a.href = url;
+//   a.download = FILENAME;
+//   a.click();
+//   URL.revokeObjectURL(url);
+// }
 
 // export function ExportWordPressButton() {
 //   const { refetch, isFetching } = api.export.wordpressCommunityWxr.useQuery(

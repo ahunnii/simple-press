@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { GripVertical, Plus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Plus, Trash2, X } from "lucide-react";
 
 import type { FormVariant, FormVariantOption } from "../_validators/schema";
 import { Button } from "~/components/ui/button";
@@ -12,12 +12,16 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { NumberInput } from "~/components/ui/number-input";
 
 type Props = {
   variants: FormVariant[];
   onChange: (variants: FormVariant[]) => void;
+  /** When false, per-variant stock fields are hidden (unlimited stock). */
+  trackInventory?: boolean;
   basePrice: number; // in cents
   existingVariantOptions: FormVariantOption[];
 };
@@ -25,13 +29,87 @@ type Props = {
 export function VariantManager({
   variants,
   onChange,
+  trackInventory = false,
   basePrice,
   existingVariantOptions,
 }: Props) {
-  const [variantOptions, setVariantOptions] = useState<FormVariantOption[]>(
-    existingVariantOptions ?? [{ name: "Size", values: [] }],
+  const initialOptions = existingVariantOptions ?? [
+    { name: "Size", values: [] },
+  ];
+  const [variantOptions, setVariantOptions] =
+    useState<FormVariantOption[]>(initialOptions);
+  const [rawValuesInputs, setRawValuesInputs] = useState<string[]>(() =>
+    initialOptions.map((o) => o.values.join(", ")),
   );
   const [showOptionsEditor, setShowOptionsEditor] = useState(false);
+
+  // Selection state
+  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(
+    new Set(),
+  );
+
+  // Bulk edit inputs
+  const [bulkPriceInput, setBulkPriceInput] = useState<number | null>(null);
+  const [bulkQtyInput, setBulkQtyInput] = useState<number | null>(null);
+
+  // Reset selection when the number of variants changes
+  useEffect(() => {
+    setSelectedIndices(new Set());
+  }, [variants.length]);
+
+  const toggleSelect = (i: number) => {
+    setSelectedIndices((prev) => {
+      const next = new Set(prev);
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedIndices(
+      selectedIndices.size === variants.length
+        ? new Set()
+        : new Set(variants.map((_, i) => i)),
+    );
+  };
+
+  const applyBulkPrice = () => {
+    const dollars = bulkPriceInput;
+    if (dollars === null || isNaN(dollars) || dollars < 0) return;
+    const cents = Math.round(dollars * 100);
+    onChange(
+      variants.map((v, i) =>
+        selectedIndices.has(i) ? { ...v, price: cents } : v,
+      ),
+    );
+    setBulkPriceInput(null);
+  };
+
+  const applyBulkQty = () => {
+    const qty = bulkQtyInput;
+    if (qty === null || isNaN(qty) || qty < 0) return;
+    onChange(
+      variants.map((v, i) =>
+        selectedIndices.has(i) ? { ...v, inventoryQty: qty } : v,
+      ),
+    );
+    setBulkQtyInput(null);
+  };
+
+  const deleteSelected = () => {
+    onChange(variants.filter((_, i) => !selectedIndices.has(i)));
+    // selectedIndices reset handled by the variants.length useEffect
+  };
+
+  const prevShowOptionsEditor = useRef(showOptionsEditor);
+  useEffect(() => {
+    const justOpened = showOptionsEditor && !prevShowOptionsEditor.current;
+    prevShowOptionsEditor.current = showOptionsEditor;
+    if (justOpened) {
+      setRawValuesInputs(variantOptions.map((o) => o.values.join(", ")));
+    }
+  }, [showOptionsEditor, variantOptions]);
 
   // Generate all variant combinations from options
   const generateVariants = () => {
@@ -109,6 +187,7 @@ export function VariantManager({
 
   const addOption = () => {
     setVariantOptions([...variantOptions, { name: "", values: [] }]);
+    setRawValuesInputs((prev) => [...prev, ""]);
   };
 
   const updateOptionName = (index: number, name: string) => {
@@ -118,17 +197,32 @@ export function VariantManager({
   };
 
   const updateOptionValues = (index: number, valuesStr: string) => {
-    const updated = [...variantOptions];
-    updated[index]!.values = valuesStr
-      .split(",")
-      .map((v) => v.trim())
-      .filter(Boolean);
-    setVariantOptions(updated);
+    setRawValuesInputs((prev) => {
+      const next = [...prev];
+      next[index] = valuesStr;
+      return next;
+    });
+    setVariantOptions((prev) => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index]!,
+        values: valuesStr
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean),
+      };
+      return updated;
+    });
   };
 
   const removeOption = (index: number) => {
     setVariantOptions(variantOptions.filter((_, i) => i !== index));
+    setRawValuesInputs((prev) => prev.filter((_, i) => i !== index));
   };
+
+  const allSelected =
+    variants.length > 0 && selectedIndices.size === variants.length;
+  const someSelected = selectedIndices.size > 0 && !allSelected;
 
   return (
     <Card>
@@ -192,7 +286,7 @@ export function VariantManager({
                 </div>
                 <Input
                   placeholder="Values (comma separated, e.g., Small, Medium, Large)"
-                  value={option.values.join(",")}
+                  value={rawValuesInputs[index] ?? option.values.join(", ")}
                   onChange={(e) => updateOptionValues(index, e.target.value)}
                 />
               </div>
@@ -218,11 +312,87 @@ export function VariantManager({
         {/* Variants List */}
         {variants.length > 0 && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            {/* List header with select-all + count */}
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="select-all-variants"
+                checked={
+                  allSelected ? true : someSelected ? "indeterminate" : false
+                }
+                onCheckedChange={toggleSelectAll}
+                aria-label="Select all variants"
+              />
               <p className="text-sm text-gray-600">
-                {variants.length} variant{variants.length !== 1 ? "s" : ""}
+                {selectedIndices.size > 0
+                  ? `${selectedIndices.size} of ${variants.length} selected`
+                  : `${variants.length} variant${variants.length !== 1 ? "s" : ""}`}
               </p>
             </div>
+
+            {/* Bulk actions toolbar */}
+            {selectedIndices.size > 0 && (
+              <div className="bg-muted/50 flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2">
+                <span className="text-muted-foreground text-sm font-medium">
+                  Bulk edit:
+                </span>
+
+                <div className="flex items-center gap-1">
+                  <NumberInput
+                    step="0.01"
+                    min="0"
+                    placeholder="Price ($)"
+                    value={bulkPriceInput}
+                    onChange={(e) => setBulkPriceInput(e)}
+                    className="h-8 w-28"
+                    onKeyDown={(e) => e.key === "Enter" && applyBulkPrice()}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-8"
+                    onClick={applyBulkPrice}
+                    disabled={bulkPriceInput === null}
+                  >
+                    Set Price
+                  </Button>
+                </div>
+
+                {trackInventory && (
+                  <div className="flex items-center gap-1">
+                    <NumberInput
+                      step="1"
+                      min="0"
+                      placeholder="Qty"
+                      value={bulkQtyInput}
+                      onChange={(e) => setBulkQtyInput(e)}
+                      className="h-8 w-20"
+                      onKeyDown={(e) => e.key === "Enter" && applyBulkQty()}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      // variant="outline"
+                      className="h-8"
+                      onClick={applyBulkQty}
+                      disabled={bulkQtyInput === null}
+                    >
+                      Set Qty
+                    </Button>
+                  </div>
+                )}
+
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="destructive"
+                  className="ml-auto h-8"
+                  onClick={deleteSelected}
+                >
+                  <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                  Delete selected
+                </Button>
+              </div>
+            )}
 
             <div className="space-y-2">
               {variants.map((variant, index) => (
@@ -230,9 +400,15 @@ export function VariantManager({
                   key={index}
                   className="flex items-center gap-3 rounded-lg border bg-white p-3"
                 >
-                  <GripVertical className="h-4 w-4 shrink-0 text-gray-400" />
+                  <Checkbox
+                    checked={selectedIndices.has(index)}
+                    onCheckedChange={() => toggleSelect(index)}
+                    aria-label={`Select variant ${variant.name}`}
+                  />
 
-                  <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-4">
+                  {/* <GripVertical className="h-4 w-4 shrink-0 text-gray-400" /> */}
+
+                  <div className="grid flex-1 grid-cols-1 items-center gap-3 md:grid-cols-5">
                     <div>
                       <Label className="text-xs text-gray-500">Name</Label>
                       <p className="text-sm font-medium">{variant.name}</p>
@@ -264,20 +440,15 @@ export function VariantManager({
                       >
                         Price ($)
                       </Label>
-                      <Input
+                      <NumberInput
                         id={`price-${index}`}
-                        type="number"
                         step="0.01"
-                        value={
-                          variant.price ? (variant.price / 100).toFixed(2) : ""
-                        }
+                        value={variant.price ? variant.price / 100 : 0}
                         onChange={(e) =>
                           updateVariant(
                             index,
                             "price",
-                            e.target.value
-                              ? Math.round(parseFloat(e.target.value) * 100)
-                              : undefined,
+                            e ? Math.round(e * 100) : undefined,
                           )
                         }
                         placeholder={(basePrice / 100).toFixed(2)}
@@ -287,26 +458,51 @@ export function VariantManager({
 
                     <div>
                       <Label
-                        htmlFor={`qty-${index}`}
+                        htmlFor={`compare-at-price-${index}`}
                         className="text-xs text-gray-500"
                       >
-                        Stock
+                        Compare At ($)
                       </Label>
-                      <Input
-                        id={`qty-${index}`}
-                        type="number"
-                        min="0"
-                        value={variant.inventoryQty}
+                      <NumberInput
+                        id={`compare-at-price-${index}`}
+                        step="0.01"
+                        value={
+                          variant.compareAtPrice
+                            ? variant.compareAtPrice / 100
+                            : 0
+                        }
                         onChange={(e) =>
                           updateVariant(
                             index,
-                            "inventoryQty",
-                            parseInt(e.target.value) || 0,
+                            "compareAtPrice",
+                            e ? Math.round(e * 100) : undefined,
                           )
                         }
+                        placeholder="Optional"
                         className="h-8"
                       />
                     </div>
+
+                    {trackInventory && (
+                      <div>
+                        <Label
+                          htmlFor={`qty-${index}`}
+                          className="text-xs text-gray-500"
+                        >
+                          Stock
+                        </Label>
+                        <NumberInput
+                          id={`qty-${index}`}
+                          step="1"
+                          min="0"
+                          value={variant.inventoryQty}
+                          onChange={(e) =>
+                            updateVariant(index, "inventoryQty", e ?? 0)
+                          }
+                          className="h-8"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <Button

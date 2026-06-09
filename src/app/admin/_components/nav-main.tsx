@@ -3,9 +3,7 @@
 import type { Icon } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconCirclePlusFilled, IconMail } from "@tabler/icons-react";
 
-import { Button } from "~/components/ui/button";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -20,7 +18,7 @@ export function NavMain({
   items: {
     title: string;
     url: string;
-    icon?: Icon;
+    icon?: Icon | React.ComponentType<unknown>;
   }[];
 }) {
   const pathname = usePathname();

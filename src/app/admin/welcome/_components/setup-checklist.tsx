@@ -37,6 +37,7 @@ type Props = {
   };
   completedSteps: number;
   totalSteps: number;
+  vpsIp: string;
 };
 
 export function SetupChecklist({
@@ -44,6 +45,7 @@ export function SetupChecklist({
   setupSteps,
   completedSteps,
   totalSteps,
+  vpsIp,
 }: Props) {
   const progress = (completedSteps / totalSteps) * 100;
 
@@ -110,7 +112,7 @@ export function SetupChecklist({
               ? `Your store is accessible at ${business.customDomain ?? `${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`}`
               : "Set up your custom domain or use your free subdomain"
           }
-          action={<DomainSetup business={business} />}
+          action={<DomainSetup business={business} vpsIp={vpsIp} />}
         />
 
         {/* Step 4: Add First Product */}

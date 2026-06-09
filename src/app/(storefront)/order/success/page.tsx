@@ -1,37 +1,36 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { OrderConfirmation } from "../_components/order-confirmation";
-import { StorefrontFooter } from "../../_components/storefront-footer";
-import { StorefrontHeader } from "../../_components/storefront-header";
+import { BambooOrderSuccessPage } from "../../_templates/bamboo/cart-checkout/bamboo-order-success-page";
+import { DarkTrendOrderSuccessPage } from "../../_templates/dark-trend/cart-checkout/dark-trend-order-success-page";
+import { DefaultOrderSuccessPage } from "../../_templates/default/cart-checkout/default-order-success-page";
+import { ElegantOrderSuccessPage } from "../../_templates/elegant/cart-checkout/elegant-order-success-page";
+import { HappyBambooOrderSuccessPage } from "../../_templates/happy-bamboo/cart-checkout/happy-bamboo-order-success-page";
+import { ModernOrderSuccessPage } from "../../_templates/modern/cart-checkout/modern-order-success-page";
+import { NoiseOrderSuccessPage } from "../../_templates/noise/cart-checkout/noise-order-success-page";
+import { PollenOrderSuccessPage } from "../../_templates/pollen/cart-checkout/pollen-order-success-page";
+import { SledgeOrderSuccessPage } from "../../_templates/sledge/cart-checkout/sledge-order-success-page";
 
 export default async function OrderSuccessPage() {
-  // Find business
-  const business = await api.business.get();
+  const business = await api.business.simplifiedGet();
+  if (!business) notFound();
 
-  if (!business) {
-    notFound();
-  }
+  const TemplateComponent =
+    {
+      "dark-trend": DarkTrendOrderSuccessPage,
+      elegant: ElegantOrderSuccessPage,
+      bamboo: BambooOrderSuccessPage,
+      noise: NoiseOrderSuccessPage,
+      "happy-bamboo": HappyBambooOrderSuccessPage,
+      modern: ModernOrderSuccessPage,
+      pollen: PollenOrderSuccessPage,
+      sledge: SledgeOrderSuccessPage,
+    }[business.templateId] ?? DefaultOrderSuccessPage;
 
-  return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <StorefrontHeader business={business} />
-
-      <main className="flex-1 px-4 py-12">
-        <Suspense
-          fallback={
-            <div className="mx-auto max-w-2xl text-center">
-              <p>Loading...</p>
-            </div>
-          }
-        >
-          <OrderConfirmation business={business} />
-        </Suspense>
-      </main>
-
-      <StorefrontFooter business={business} />
-    </div>
-  );
+  return <TemplateComponent business={business} />;
 }
+
+export const metadata = {
+  title: "Order Details",
+};

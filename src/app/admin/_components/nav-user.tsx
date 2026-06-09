@@ -1,48 +1,11 @@
 "use client";
 
 import { UserButton } from "@daveyplate/better-auth-ui";
-import {
-  IconCreditCard,
-  IconDotsVertical,
-  IconLogout,
-  IconNotification,
-  IconUserCircle,
-} from "@tabler/icons-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "~/components/ui/sidebar";
+import { SidebarMenu, SidebarMenuItem } from "~/components/ui/sidebar";
 
-const initials = (
-  name: string | null | undefined,
-  email: string | null | undefined,
-) => {
-  if (name) {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("");
-  }
-  if (email) {
-    return email.split("@")[0];
-  }
-  return "?";
-};
 export function NavUser() {
-  const { isMobile } = useSidebar();
+  // const { isMobile } = useSidebar();
   // const { data: session } = useSession();
 
   return (

@@ -1,31 +1,44 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { getCanonicalUrl } from "~/lib/canonical";
+import { api } from "~/trpc/server";
 
-import { ContactForm } from "./_components/contact-form";
+import { BambooContactPage } from "../_templates/bamboo/contact/bamboo-contact-page";
+import { DarkTrendContactPage } from "../_templates/dark-trend/contact/dark-trend-contact-page";
+import { DefaultContactPage } from "../_templates/default/contact/default-contact-page";
+import { ElegantContactPage } from "../_templates/elegant/contact/elegant-contact-page";
+import { HappyBambooContactPage } from "../_templates/happy-bamboo/contact/happy-bamboo-contact-page";
+import { ModernContactPage } from "../_templates/modern/contact/modern-contact-page";
+import { NoiseContactPage } from "../_templates/noise/contact/noise-contact-page";
+import { PollenContactPage } from "../_templates/pollen/contact/pollen-contact-page";
+import { SledgeContactPage } from "../_templates/sledge/contact/sledge-contact-page";
 
 export default async function ContactPage() {
-  const domain = getCurrentDomain(await headers());
-  const business = await getBusinessByDomain(domain);
+  const business = await api.business.simplifiedGet();
+  if (!business) notFound();
+  const TemplateComponent =
+    {
+      "dark-trend": DarkTrendContactPage,
+      elegant: ElegantContactPage,
+      pollen: PollenContactPage,
+      modern: ModernContactPage,
+      bamboo: BambooContactPage,
+      "happy-bamboo": HappyBambooContactPage,
+      noise: NoiseContactPage,
+      sledge: SledgeContactPage,
+    }[business.templateId] ?? DefaultContactPage;
 
-  if (!business) {
-    redirect("/");
-  }
+  return <TemplateComponent business={business} />;
+}
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-lg bg-white p-8 shadow-sm">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">Contact Us</h1>
-          <p className="mb-8 text-gray-600">
-            Have a question? We&apos;d love to hear from you. Send us a message
-            and we&apos;ll respond as soon as possible.
-          </p>
-
-          <ContactForm businessName={business.name} />
-        </div>
-      </div>
-    </div>
-  );
+export async function generateMetadata() {
+  const business = await api.business.simplifiedGet();
+  return {
+    title: "Contact Us",
+    ...(business && {
+      alternates: {
+        canonical: getCanonicalUrl(business, "/contact"),
+      },
+    }),
+  };
 }

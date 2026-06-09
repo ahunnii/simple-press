@@ -4,9 +4,12 @@ import { useState } from "react";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
-import { encodeOAuthState, getCallbackUrl } from "~/lib/domain";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import {
+  buildStripeConnectAuthorizeUrl,
+  requestSignedStripeOAuthState,
+} from "./stripe-connect-utils";
 
 type StripeConnectButtonProps = {
   businessId: string;
@@ -19,7 +22,7 @@ export function ConnectStripeButton({
 }: StripeConnectButtonProps) {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     const clientId = process.env.NEXT_PUBLIC_STRIPE_CONNECT_CLIENT_ID;
 
     if (!clientId) {
@@ -27,26 +30,21 @@ export function ConnectStripeButton({
       return;
     }
 
-    // Get current URL to return to after OAuth
-    const returnUrl = window.location.href.split("?")[0]; // Remove query params
+    const returnUrl = window.location.href.split("?")[0] ?? "";
 
-    // Encode state
-    const state = encodeOAuthState({
-      businessId,
-      returnUrl: returnUrl ?? "",
-    });
+    try {
+      const signedState = await requestSignedStripeOAuthState({
+        businessId,
+        returnUrl,
+      });
 
-    // Build Stripe OAuth URL
-    const callbackUrl = getCallbackUrl();
-    const stripeUrl = new URL("https://connect.stripe.com/oauth/authorize");
-    stripeUrl.searchParams.set("response_type", "code");
-    stripeUrl.searchParams.set("client_id", clientId);
-    stripeUrl.searchParams.set("scope", "read_write");
-    stripeUrl.searchParams.set("redirect_uri", callbackUrl);
-    stripeUrl.searchParams.set("state", state);
-
-    // Redirect to Stripe
-    window.location.href = stripeUrl.toString();
+      window.location.href = buildStripeConnectAuthorizeUrl({
+        clientId,
+        signedState,
+      });
+    } catch {
+      toast.error("Failed to initiate Stripe connection. Please try again.");
+    }
   };
 
   const handleDisconnect = async () => {
@@ -58,6 +56,8 @@ export function ConnectStripeButton({
     try {
       const response = await fetch("/api/stripe/connect/disconnect", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessId }),
       });
 
       if (!response.ok) throw new Error("Failed to disconnect");
@@ -65,7 +65,9 @@ export function ConnectStripeButton({
       toast.success("Stripe disconnected");
       window.location.reload();
     } catch (error) {
-      toast.error("Failed to disconnect");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to disconnect",
+      );
     } finally {
       setIsDisconnecting(false);
     }

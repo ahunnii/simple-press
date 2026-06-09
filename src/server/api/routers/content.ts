@@ -1,172 +1,140 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { checkBusiness } from "~/lib/check-business";
+import {
+  pageSchema,
+  previewDraftSchema,
+  siteContentSchema,
+} from "~/lib/validators/content";
 import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-
-// Validation schemas
-const siteContentSchema = z.object({
-  // Hero Section
-  heroTitle: z.string().optional(),
-  heroSubtitle: z.string().optional(),
-  heroImageUrl: z.string().url().optional().or(z.literal("")),
-  heroButtonText: z.string().optional(),
-  heroButtonLink: z.string().optional(),
-
-  // About Section
-  aboutTitle: z.string().optional(),
-  aboutText: z.string().optional(),
-  aboutImageUrl: z.string().url().optional().or(z.literal("")),
-
-  // Features
-  features: z.any().optional(), // JSON array
-
-  // Footer
-  footerText: z.string().optional(),
-  socialLinks: z.any().optional(), // JSON object
-
-  // SEO
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  metaKeywords: z.string().optional(),
-  ogImage: z.string().url().optional().or(z.literal("")),
-  faviconUrl: z.string().url().optional().or(z.literal("")),
-
-  // Logo
-  logoUrl: z.string().url().optional().or(z.literal("")),
-  logoAltText: z.string().optional(),
-
-  // Colors
-  primaryColor: z.string().optional(),
-  secondaryColor: z.string().optional(),
-  accentColor: z.string().optional(),
-
-  // Navigation
-  navigationItems: z.any().optional(), // JSON array
-
-  // Template-specific
-  customFields: z.any().optional(), // JSON object
-});
-
-const pageSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug: z
-    .string()
-    .min(1, "Slug is required")
-    .regex(/^[a-z0-9-]+$/, "Slug must be lowercase with hyphens"),
-  content: z.any(),
-  excerpt: z.string().optional(),
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  metaKeywords: z.string().optional(),
-  ogImage: z.string().url().optional().or(z.literal("")),
-  published: z.boolean().default(true),
-  sortOrder: z.number().int().default(0),
-  type: z.enum(["page", "policy", "custom"]).default("page"),
-  template: z.enum(["default", "sidebar", "full-width"]).default("default"),
-});
+import {
+  createTRPCRouter,
+  featureGate,
+  getBusinessProcedure,
+  ownerAdminProcedure,
+  publicProcedure,
+} from "../trpc";
 
 export const contentRouter = createTRPCRouter({
   // ==========================================
   // SITE CONTENT (Homepage, SEO, etc.)
   // ==========================================
 
-  // Get site content
-  getSiteContent: protectedProcedure
-    .input(z.object({ businessId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
+  getSiteContent: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
 
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+    let siteContent = await ctx.db.siteContent.findUnique({
+      where: { businessId: businessId },
+    });
 
-      let siteContent = await ctx.db.siteContent.findUnique({
-        where: { businessId: input.businessId },
-      });
+    // Create if doesn't exist
+    siteContent ??= await ctx.db.siteContent.create({
+      data: {
+        businessId,
+      },
+    });
 
-      // Create if doesn't exist
-      siteContent ??= await ctx.db.siteContent.create({
-        data: {
-          businessId: input.businessId,
-        },
-      });
-
-      return siteContent;
-    }),
+    return siteContent;
+  }),
 
   // Update site content
-  updateSiteContent: protectedProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        data: siteContentSchema,
-      }),
-    )
+  updateSiteContent: ownerAdminProcedure
+    .input(siteContentSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
+      const { businessId } = ctx;
+
+      const { templateId, ...data } = input;
+
+      const siteContent = await ctx.db.siteContent.upsert({
+        where: { businessId },
+        create: {
+          businessId,
+          ...data,
+        },
+        update: {
+          ...data,
+          // Clear the preview draft whenever the owner publishes real content.
+          previewCustomFields: Prisma.JsonNull,
+          previewUpdatedAt: null,
+        },
       });
 
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
+      if (templateId) {
+        await ctx.db.business.update({
+          where: { id: businessId },
+          data: { templateId },
         });
       }
 
-      const siteContent = await ctx.db.siteContent.upsert({
-        where: { businessId: input.businessId },
+      return {
+        data: siteContent,
+        templateId,
+      };
+    }),
+
+  // Save a preview draft (owner-only, not visible to public visitors)
+  savePreviewDraft: ownerAdminProcedure
+    .input(previewDraftSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      await ctx.db.siteContent.upsert({
+        where: { businessId },
         create: {
-          businessId: input.businessId,
-          ...input.data,
+          businessId,
+          previewCustomFields: input.customFields as Prisma.InputJsonValue,
+          previewUpdatedAt: new Date(),
         },
-        update: input.data,
+        update: {
+          previewCustomFields: input.customFields as Prisma.InputJsonValue,
+          previewUpdatedAt: new Date(),
+        },
       });
 
-      return siteContent;
+      return { ok: true };
     }),
+
+  // Clear the preview draft (e.g., on editor unmount or explicit clear)
+  clearPreviewDraft: ownerAdminProcedure.mutation(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    await ctx.db.siteContent.updateMany({
+      where: { businessId },
+      data: {
+        previewCustomFields: Prisma.JsonNull,
+        previewUpdatedAt: null,
+      },
+    });
+
+    return { ok: true };
+  }),
 
   // ==========================================
   // PAGES
   // ==========================================
 
   // Get all pages
-  getPages: protectedProcedure
+  getPages: ownerAdminProcedure
     .input(
-      z.object({
-        businessId: z.string(),
-        type: z.enum(["page", "policy", "custom", "all"]).optional(),
-      }),
+      z
+        .object({
+          type: z.enum(["page", "policy", "custom", "all"]).optional(),
+        })
+        .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      const { businessId } = ctx;
 
       const pages = await ctx.db.page.findMany({
         where: {
-          businessId: input.businessId,
-          ...(input.type && input.type !== "all" ? { type: input.type } : {}),
+          businessId,
+          ...(input?.type && input?.type !== "all"
+            ? { type: input?.type }
+            : {}),
         },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       });
@@ -174,12 +142,45 @@ export const contentRouter = createTRPCRouter({
       return pages;
     }),
 
-  // Get single page
-  getPage: protectedProcedure
+  getSimplifiedPages: publicProcedure
+    .input(
+      z.object({
+        type: z.enum(["page", "policy", "custom", "all"]).optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      const pages = await ctx.db.page.findMany({
+        where: {
+          businessId: business.id,
+          ...(input.type && input.type !== "all" ? { type: input.type } : {}),
+          published: true,
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+        },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      });
+
+      return pages;
+    }),
+
+  getPageById: ownerAdminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const page = await ctx.db.page.findUnique({
-        where: { id: input.id },
+        where: { id: input.id, businessId },
         include: { business: { select: { id: true } } },
       });
 
@@ -190,68 +191,88 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== page.business.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-
       return page;
     }),
 
-  // Get page by slug (for storefront)
-  getPageBySlug: protectedProcedure
+  getPageBySlug: publicProcedure
     .input(
       z.object({
-        businessId: z.string(),
         slug: z.string(),
+        type: z.enum(["page", "policy", "blog", "custom"]).optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
+      const business = await checkBusiness();
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
       const page = await ctx.db.page.findUnique({
         where: {
           businessId_slug: {
-            businessId: input.businessId,
+            businessId: business.id,
             slug: input.slug,
           },
+          ...(input.type ? { type: input.type } : {}),
         },
       });
 
       return page;
     }),
 
-  // Create page
-  createPage: protectedProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        data: pageSchema,
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
+  getBlogPostBySlug: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("blog"))
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const page = await ctx.db.page.findUnique({
+        where: {
+          businessId_slug: {
+            businessId,
+            slug: input.slug,
+          },
+          type: "blog",
+        },
       });
 
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      return page;
+    }),
+
+  getBlogPages: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("blog"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+
+      const pages = await ctx.db.page.findMany({
+        where: {
+          businessId,
+          type: "blog",
+          published: true,
+        },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      });
+
+      return pages;
+    }),
+
+  // Create page
+  createPage: ownerAdminProcedure
+    .input(z.object({ data: pageSchema }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
 
       // Check if slug already exists
       const existing = await ctx.db.page.findUnique({
         where: {
           businessId_slug: {
-            businessId: input.businessId,
+            businessId,
             slug: input.data.slug,
           },
         },
@@ -267,7 +288,7 @@ export const contentRouter = createTRPCRouter({
       const page = await ctx.db.page.create({
         data: {
           ...input.data,
-          businessId: input.businessId,
+          businessId,
           content: input.data.content ?? EMPTY_TIPTAP_DOC,
         },
       });
@@ -276,7 +297,7 @@ export const contentRouter = createTRPCRouter({
     }),
 
   // Update page
-  updatePage: protectedProcedure
+  updatePage: ownerAdminProcedure
     .input(
       z.object({
         id: z.string(),
@@ -284,8 +305,9 @@ export const contentRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const existingPage = await ctx.db.page.findUnique({
-        where: { id: input.id },
+        where: { id: input.id, businessId },
         select: { businessId: true, slug: true },
       });
 
@@ -293,18 +315,6 @@ export const contentRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Page not found",
-        });
-      }
-
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== existingPage.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
         });
       }
 
@@ -332,15 +342,16 @@ export const contentRouter = createTRPCRouter({
         data: input.data,
       });
 
-      return page;
+      return { data: page, message: "Page updated successfully" };
     }),
 
   // Delete page
-  deletePage: protectedProcedure
+  deletePage: ownerAdminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const page = await ctx.db.page.findUnique({
-        where: { id: input.id },
+        where: { id: input.id, businessId },
         select: { businessId: true },
       });
 
@@ -348,18 +359,6 @@ export const contentRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Page not found",
-        });
-      }
-
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== page.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
         });
       }
 
@@ -371,31 +370,16 @@ export const contentRouter = createTRPCRouter({
     }),
 
   // Reorder pages
-  reorderPages: protectedProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        pageIds: z.array(z.string()),
-      }),
-    )
+  reorderPages: ownerAdminProcedure
+    .input(z.object({ pageIds: z.array(z.string()) }))
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      const { businessId } = ctx;
 
       // Update sort order for each page
       await Promise.all(
         input.pageIds.map((pageId, index) =>
           ctx.db.page.update({
-            where: { id: pageId },
+            where: { id: pageId, businessId },
             data: { sortOrder: index },
           }),
         ),

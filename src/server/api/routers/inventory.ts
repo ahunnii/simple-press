@@ -1,24 +1,19 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
 
 export const inventoryRouter = createTRPCRouter({
   // Get inventory levels for a product
-  getProductInventory: protectedProcedure
-    .input(
-      z.object({
-        productId: z.string(),
-      }),
-    )
+  getProductInventory: ownerAdminProcedure
+    .input(z.object({ productId: z.string() }))
     .query(async ({ ctx, input }) => {
-      // Verify user owns this product's business
+      const { businessId } = ctx;
+
       const product = await ctx.db.product.findUnique({
-        where: { id: input.productId },
+        where: { id: input.productId, businessId },
         include: {
-          business: {
-            select: { id: true },
-          },
+          business: { select: { id: true } },
           variants: {
             select: {
               id: true,
@@ -37,19 +32,6 @@ export const inventoryRouter = createTRPCRouter({
         });
       }
 
-      // Check user owns this business
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== product.business.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-
       return {
         productId: product.id,
         productName: product.name,
@@ -58,7 +40,7 @@ export const inventoryRouter = createTRPCRouter({
     }),
 
   // Update inventory for a variant
-  updateVariantInventory: protectedProcedure
+  updateVariantInventory: ownerAdminProcedure
     .input(
       z.object({
         variantId: z.string(),
@@ -70,18 +52,10 @@ export const inventoryRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Get variant with product and business
+      const { businessId } = ctx;
       const variant = await ctx.db.productVariant.findUnique({
-        where: { id: input.variantId },
-        include: {
-          product: {
-            include: {
-              business: {
-                select: { id: true },
-              },
-            },
-          },
-        },
+        where: { id: input.variantId, product: { businessId } },
+        select: { id: true, inventoryQty: true, productId: true },
       });
 
       if (!variant) {
@@ -91,43 +65,47 @@ export const inventoryRouter = createTRPCRouter({
         });
       }
 
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
+      const newQty = input.quantity;
 
-      if (user?.businessId !== variant.product.business.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
-
-      // Update inventory in transaction with history
       const result = await ctx.db.$transaction(async (tx) => {
-        // Update variant inventory
         const updated = await tx.productVariant.update({
-          where: { id: input.variantId },
-          data: {
-            inventoryQty: input.quantity,
-          },
+          where: { id: input.variantId, product: { businessId } },
+          data: { inventoryQty: newQty },
         });
 
-        // Create inventory history record
         await tx.inventoryHistory.create({
           data: {
             variantId: input.variantId,
             productId: variant.productId,
-            businessId: variant.product.business.id,
+            businessId,
             previousQty: variant.inventoryQty,
-            newQty: input.quantity,
-            changeQty: input.quantity - variant.inventoryQty,
+            newQty,
+            changeQty: newQty - variant.inventoryQty,
             reason: input.reason ?? "adjustment",
             note: input.note,
             userId: ctx.session.user.id,
           },
         });
+
+        // Reset alert flags atomically within the same transaction
+        const parent = await tx.product.findUnique({
+          where: { id: variant.productId },
+          select: { lowInventoryThreshold: true, lowInventoryAlertSent: true, outOfStockAlertSent: true },
+        });
+        if (parent) {
+          const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
+          if (parent.outOfStockAlertSent && newQty > 0) resetData.outOfStockAlertSent = false;
+          if (
+            parent.lowInventoryAlertSent &&
+            parent.lowInventoryThreshold !== null &&
+            newQty > parent.lowInventoryThreshold
+          ) {
+            resetData.lowInventoryAlertSent = false;
+          }
+          if (Object.keys(resetData).length > 0) {
+            await tx.product.update({ where: { id: variant.productId }, data: resetData });
+          }
+        }
 
         return updated;
       });
@@ -135,198 +113,188 @@ export const inventoryRouter = createTRPCRouter({
       return result;
     }),
 
-  // Deduct inventory (called when order is placed)
-  deductInventory: protectedProcedure
+  // Update inventory for a base product (no variants)
+  updateProductInventory: ownerAdminProcedure
     .input(
       z.object({
-        items: z.array(
-          z.object({
-            productId: z.string(),
-            variantId: z.string().nullable(),
-            quantity: z.number().int().positive(),
-          }),
-        ),
-        orderId: z.string(),
+        productId: z.string(),
+        quantity: z.number().int(),
+        reason: z
+          .enum(["restock", "adjustment", "correction", "damage", "return"])
+          .optional(),
+        note: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Process inventory deduction in transaction
-      await ctx.db.$transaction(async (tx) => {
-        for (const item of input.items) {
-          if (!item.variantId) continue; // Skip if no variant
-
-          // Get current inventory
-          const variant = await tx.productVariant.findUnique({
-            where: { id: item.variantId },
-            select: {
-              id: true,
-              inventoryQty: true,
-              productId: true,
-              product: {
-                select: {
-                  businessId: true,
-                  name: true,
-                },
-              },
-            },
-          });
-
-          if (!variant) continue;
-
-          const newQty = variant.inventoryQty - item.quantity;
-
-          // Update inventory
-          await tx.productVariant.update({
-            where: { id: item.variantId },
-            data: {
-              inventoryQty: newQty,
-            },
-          });
-
-          // Create history record
-          await tx.inventoryHistory.create({
-            data: {
-              variantId: item.variantId,
-              productId: variant.productId,
-              businessId: variant.product.businessId,
-              previousQty: variant.inventoryQty,
-              newQty,
-              changeQty: -item.quantity,
-              reason: "sale",
-              note: `Order #${input.orderId}`,
-              orderId: input.orderId,
-            },
-          });
-        }
-      });
-
-      return { success: true };
-    }),
-
-  // Restore inventory (called when order is refunded/cancelled)
-  restoreInventory: protectedProcedure
-    .input(
-      z.object({
-        orderId: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      // Get order with items
-      const order = await ctx.db.order.findUnique({
-        where: { id: input.orderId },
-        include: {
-          items: true,
+      const { businessId } = ctx;
+      const product = await ctx.db.product.findUnique({
+        where: { id: input.productId, businessId, variants: { none: {} } },
+        select: {
+          id: true,
+          inventoryQty: true,
+          lowInventoryThreshold: true,
+          lowInventoryAlertSent: true,
+          outOfStockAlertSent: true,
         },
       });
 
-      if (!order) {
+      if (!product) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Order not found",
+          message: "Product not found or has variants — use variant inventory update instead",
         });
       }
 
-      // Restore inventory in transaction
+      const newQty = input.quantity;
+
       await ctx.db.$transaction(async (tx) => {
-        for (const item of order.items) {
-          if (!item.productVariantId) continue;
+        await tx.product.update({
+          where: { id: product.id },
+          data: { inventoryQty: newQty },
+        });
 
-          const variant = await tx.productVariant.findUnique({
-            where: { id: item.productVariantId },
-            select: {
-              id: true,
-              inventoryQty: true,
-              productId: true,
-              product: {
-                select: { businessId: true },
-              },
-            },
-          });
+        await tx.inventoryHistory.create({
+          data: {
+            productId: product.id,
+            businessId,
+            previousQty: product.inventoryQty,
+            newQty,
+            changeQty: newQty - product.inventoryQty,
+            reason: input.reason ?? "adjustment",
+            note: input.note,
+            userId: ctx.session.user.id,
+          },
+        });
 
-          if (!variant) continue;
-
-          const newQty = variant.inventoryQty + item.quantity;
-
-          // Update inventory
-          await tx.productVariant.update({
-            where: { id: item.productVariantId },
-            data: {
-              inventoryQty: newQty,
-            },
-          });
-
-          // Create history record
-          await tx.inventoryHistory.create({
-            data: {
-              variantId: item.productVariantId,
-              productId: variant.productId,
-              businessId: variant.product.businessId,
-              previousQty: variant.inventoryQty,
-              newQty,
-              changeQty: item.quantity,
-              reason: "return",
-              note: `Refund/Cancel Order #${input.orderId}`,
-              orderId: input.orderId,
-            },
-          });
+        // Reset alert flags atomically
+        const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
+        if (product.outOfStockAlertSent && newQty > 0) resetData.outOfStockAlertSent = false;
+        if (
+          product.lowInventoryAlertSent &&
+          product.lowInventoryThreshold !== null &&
+          newQty > product.lowInventoryThreshold
+        ) {
+          resetData.lowInventoryAlertSent = false;
+        }
+        if (Object.keys(resetData).length > 0) {
+          await tx.product.update({ where: { id: product.id }, data: resetData });
         }
       });
 
-      return { success: true };
+      return { message: "Inventory updated successfully" };
     }),
 
-  // Get low stock alerts
-  getLowStockAlerts: protectedProcedure
-    .input(
-      z.object({
-        businessId: z.string(),
-        threshold: z.number().int().default(10),
-      }),
-    )
+  // Deduct inventory (called when order is placed)
+  // deductInventory: publicProcedure
+  //   .use(getBusinessProcedure())
+  //   .input(
+  //     z.object({
+  //       items: z.array(
+  //         z.object({
+  //           productId: z.string(),
+  //           variantId: z.string().nullable(),
+  //           quantity: z.number().int().positive(),
+  //         }),
+  //       ),
+  //       orderId: z.string(),
+  //     }),
+  //   )
+  //   .mutation(async ({ ctx, input }) => {
+  //     const business = await checkBusiness();
+  //     if (!business) {
+  //       throw new TRPCError({
+  //         code: "NOT_FOUND",
+  //         message: "Business not found",
+  //       });
+  //     }
+
+  //     // Process inventory deduction in transaction
+  //     await ctx.db.$transaction(async (tx) => {
+  //       for (const item of input.items) {
+  //         if (!item.variantId) continue; // Skip if no variant
+
+  //         // Get current inventory
+  //         const variant = await tx.productVariant.findUnique({
+  //           where: { id: item.variantId, product: { businessId: business.id } },
+  //           select: {
+  //             id: true,
+  //             inventoryQty: true,
+  //             productId: true,
+  //             product: {
+  //               select: {
+  //                 businessId: true,
+  //                 name: true,
+  //               },
+  //             },
+  //           },
+  //         });
+
+  //         if (!variant) continue;
+
+  //         const newQty = variant.inventoryQty - item.quantity;
+
+  //         // Update inventory
+  //         await tx.productVariant.update({
+  //           where: { id: item.variantId, product: { businessId: business.id } },
+  //           data: {
+  //             inventoryQty: newQty,
+  //           },
+  //         });
+
+  //         // Create history record
+  //         await tx.inventoryHistory.create({
+  //           data: {
+  //             variantId: item.variantId,
+  //             productId: variant.productId,
+  //             businessId: business.id,
+  //             previousQty: variant.inventoryQty,
+  //             newQty,
+  //             changeQty: -item.quantity,
+  //             reason: "sale",
+  //             note: `Order #${input.orderId}`,
+  //             orderId: input.orderId,
+  //           },
+  //         });
+  //       }
+  //     });
+
+  //     return { success: true };
+  //   }),
+
+  // Get low stock alerts (variants + base products)
+  getLowStockAlerts: ownerAdminProcedure
+    .input(z.object({ threshold: z.number().int().default(10) }))
     .query(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
+      const { businessId } = ctx;
 
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      const [lowStockVariants, lowStockBaseProducts] = await Promise.all([
+        ctx.db.productVariant.findMany({
+          where: {
+            product: { businessId, trackInventory: true },
+            inventoryQty: { lte: input.threshold, gte: 0 },
+          },
+          include: {
+            product: { select: { id: true, name: true, published: true } },
+          },
+          orderBy: { inventoryQty: "asc" },
+        }),
+        ctx.db.product.findMany({
+          where: {
+            businessId,
+            trackInventory: true,
+            variants: { none: {} },
+            inventoryQty: { lte: input.threshold, gte: 0 },
+          },
+          select: { id: true, name: true, sku: true, inventoryQty: true, published: true },
+          orderBy: { inventoryQty: "asc" },
+        }),
+      ]);
 
-      // Get variants with low stock
-      const lowStockVariants = await ctx.db.productVariant.findMany({
-        where: {
-          product: {
-            businessId: input.businessId,
-          },
-          inventoryQty: {
-            lte: input.threshold,
-            gte: 0,
-          },
-        },
-        include: {
-          product: {
-            select: {
-              id: true,
-              name: true,
-              published: true,
-            },
-          },
-        },
-        orderBy: {
-          inventoryQty: "asc",
-        },
-      });
-
-      return lowStockVariants;
+      return { variants: lowStockVariants, baseProducts: lowStockBaseProducts };
     }),
 
   // Get inventory history
-  getInventoryHistory: protectedProcedure
+  getInventoryHistory: ownerAdminProcedure
     .input(
       z.object({
         variantId: z.string().optional(),
@@ -335,6 +303,7 @@ export const inventoryRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
       const where: Record<string, string> = {};
 
       if (input.variantId) {
@@ -347,7 +316,10 @@ export const inventoryRouter = createTRPCRouter({
 
       // Get history records
       const history = await ctx.db.inventoryHistory.findMany({
-        where,
+        where: {
+          ...where,
+          businessId,
+        },
         include: {
           variant: {
             select: {
@@ -377,10 +349,9 @@ export const inventoryRouter = createTRPCRouter({
     }),
 
   // Bulk update inventory from CSV
-  bulkUpdateInventory: protectedProcedure
+  bulkUpdateInventory: ownerAdminProcedure
     .input(
       z.object({
-        businessId: z.string(),
         updates: z.array(
           z.object({
             sku: z.string(),
@@ -390,18 +361,7 @@ export const inventoryRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Verify ownership
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { businessId: true },
-      });
-
-      if (user?.businessId !== input.businessId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Not authorized",
-        });
-      }
+      const { businessId } = ctx;
 
       const results = {
         success: 0,
@@ -412,52 +372,94 @@ export const inventoryRouter = createTRPCRouter({
       // Process each update
       for (const update of input.updates) {
         try {
-          // Find variant by SKU
+          // Try variant SKU first
           const variant = await ctx.db.productVariant.findFirst({
-            where: {
-              sku: update.sku,
-              product: {
-                businessId: input.businessId,
-              },
-            },
-            include: {
-              product: {
-                select: {
-                  businessId: true,
+            where: { sku: update.sku, product: { businessId } },
+            select: { id: true, inventoryQty: true, productId: true },
+          });
+
+          if (variant) {
+            await ctx.db.$transaction(async (tx) => {
+              await tx.productVariant.update({
+                where: { id: variant.id, product: { businessId } },
+                data: { inventoryQty: update.quantity },
+              });
+              await tx.inventoryHistory.create({
+                data: {
+                  variantId: variant.id,
+                  productId: variant.productId,
+                  businessId,
+                  previousQty: variant.inventoryQty,
+                  newQty: update.quantity,
+                  changeQty: update.quantity - variant.inventoryQty,
+                  reason: "adjustment",
+                  note: "Bulk update via CSV",
+                  userId: ctx.session.user.id,
                 },
-              },
+              });
+              // Reset alert flags atomically
+              const parent = await tx.product.findUnique({
+                where: { id: variant.productId },
+                select: { lowInventoryThreshold: true, lowInventoryAlertSent: true, outOfStockAlertSent: true },
+              });
+              if (parent) {
+                const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
+                if (parent.outOfStockAlertSent && update.quantity > 0) resetData.outOfStockAlertSent = false;
+                if (parent.lowInventoryAlertSent && parent.lowInventoryThreshold !== null && update.quantity > parent.lowInventoryThreshold) {
+                  resetData.lowInventoryAlertSent = false;
+                }
+                if (Object.keys(resetData).length > 0) {
+                  await tx.product.update({ where: { id: variant.productId }, data: resetData });
+                }
+              }
+            });
+            results.success++;
+            continue;
+          }
+
+          // Fall back to base product SKU (no variants)
+          const baseProduct = await ctx.db.product.findFirst({
+            where: { sku: update.sku, businessId, variants: { none: {} } },
+            select: {
+              id: true,
+              inventoryQty: true,
+              lowInventoryThreshold: true,
+              lowInventoryAlertSent: true,
+              outOfStockAlertSent: true,
             },
           });
 
-          if (!variant) {
+          if (!baseProduct) {
             results.failed++;
             results.errors.push(`SKU ${update.sku} not found`);
             continue;
           }
 
           await ctx.db.$transaction(async (tx) => {
-            // Update inventory
-            await tx.productVariant.update({
-              where: { id: variant.id },
-              data: {
-                inventoryQty: update.quantity,
-              },
+            await tx.product.update({
+              where: { id: baseProduct.id },
+              data: { inventoryQty: update.quantity },
             });
-
-            // Create history
             await tx.inventoryHistory.create({
               data: {
-                variantId: variant.id,
-                productId: variant.productId,
-                businessId: variant.product.businessId,
-                previousQty: variant.inventoryQty,
+                productId: baseProduct.id,
+                businessId,
+                previousQty: baseProduct.inventoryQty,
                 newQty: update.quantity,
-                changeQty: update.quantity - variant.inventoryQty,
+                changeQty: update.quantity - baseProduct.inventoryQty,
                 reason: "adjustment",
                 note: "Bulk update via CSV",
                 userId: ctx.session.user.id,
               },
             });
+            const resetData: { outOfStockAlertSent?: boolean; lowInventoryAlertSent?: boolean } = {};
+            if (baseProduct.outOfStockAlertSent && update.quantity > 0) resetData.outOfStockAlertSent = false;
+            if (baseProduct.lowInventoryAlertSent && baseProduct.lowInventoryThreshold !== null && update.quantity > baseProduct.lowInventoryThreshold) {
+              resetData.lowInventoryAlertSent = false;
+            }
+            if (Object.keys(resetData).length > 0) {
+              await tx.product.update({ where: { id: baseProduct.id }, data: resetData });
+            }
           });
 
           results.success++;

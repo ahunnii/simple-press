@@ -1,0 +1,188 @@
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
+
+const contactHeaderData: TemplateField[] = [
+  {
+    key: "default.contact.eyebrow",
+    label: "Page Eyebrow",
+    description: "Small label above the heading",
+    type: "text",
+    page: "contact",
+    group: "contact.header",
+    defaultValue: "Get in touch",
+    placeholder: "Get in touch",
+  },
+  {
+    key: "default.contact.heading",
+    label: "Page Heading",
+    description: "Main heading for the Contact page",
+    type: "text",
+    page: "contact",
+    group: "contact.header",
+    gridColumn: "col-span-full",
+    defaultValue: "Say hello.",
+    placeholder: "Say hello.",
+  },
+  {
+    key: "default.contact.description",
+    label: "Tagline",
+    description: "Short line below the heading",
+    type: "text",
+    page: "contact",
+    group: "contact.header",
+    gridColumn: "col-span-full",
+    defaultValue: "I read every message myself and reply within a day.",
+    placeholder: "I read every message myself and reply within a day.",
+  },
+];
+
+const contactFaqData: TemplateField[] = [
+  {
+    key: "default.contact.faq-1-q",
+    label: "FAQ 1 — Question",
+    description: "First frequently asked question",
+    type: "text",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue: "How long does shipping take?",
+    placeholder: "How long does shipping take?",
+  },
+  {
+    key: "default.contact.faq-1-a",
+    label: "FAQ 1 — Answer",
+    description: "Answer to the first FAQ",
+    type: "textarea",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "Orders ship within 1–2 business days. US delivery is 3–5 days standard. International varies by region.",
+  },
+  {
+    key: "default.contact.faq-2-q",
+    label: "FAQ 2 — Question",
+    description: "Second frequently asked question",
+    type: "text",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue: "What's your return policy?",
+  },
+  {
+    key: "default.contact.faq-2-a",
+    label: "FAQ 2 — Answer",
+    description: "Answer to the second FAQ",
+    type: "textarea",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "30 days, no questions asked. Send anything back in its original condition and I'll refund you in full.",
+  },
+  {
+    key: "default.contact.faq-3-q",
+    label: "FAQ 3 — Question",
+    description: "Third frequently asked question",
+    type: "text",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue: "Do you take custom orders?",
+  },
+  {
+    key: "default.contact.faq-3-a",
+    label: "FAQ 3 — Answer",
+    description: "Answer to the third FAQ",
+    type: "textarea",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "Sometimes — it depends on what you have in mind. Send me an email with the details and I'll let you know.",
+  },
+  {
+    key: "default.contact.faq-4-q",
+    label: "FAQ 4 — Question",
+    description: "Fourth frequently asked question",
+    type: "text",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue: "How do I care for my piece?",
+  },
+  {
+    key: "default.contact.faq-4-a",
+    label: "FAQ 4 — Answer",
+    description: "Answer to the fourth FAQ",
+    type: "textarea",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "Care instructions are on the product page and included with your order. When in doubt, hand-wash or wipe clean.",
+  },
+  {
+    key: "default.contact.faq-5-q",
+    label: "FAQ 5 — Question",
+    description: "Fifth frequently asked question",
+    type: "text",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue: "Can I cancel or change my order?",
+  },
+  {
+    key: "default.contact.faq-5-a",
+    label: "FAQ 5 — Answer",
+    description: "Answer to the fifth FAQ",
+    type: "textarea",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "Yes, as long as it hasn't shipped yet. Contact me as soon as you can and I'll sort it out.",
+  },
+  {
+    key: "default.contact.faq-6-q",
+    label: "FAQ 6 — Question",
+    description: "Sixth frequently asked question",
+    type: "text",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue: "Do you ship internationally?",
+  },
+  {
+    key: "default.contact.faq-6-a",
+    label: "FAQ 6 — Answer",
+    description: "Answer to the sixth FAQ",
+    type: "textarea",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "Yes — most countries. Shipping is calculated at checkout. Customs fees, if any, are the buyer's responsibility.",
+  },
+];
+
+export const defaultContactData: TemplateField[] = [
+  ...contactHeaderData,
+  ...contactFaqData,
+];
+
+export const defaultContactFieldGroups: TemplateFieldGroup[] = [
+  {
+    id: "contact.header",
+    title: "Contact Header",
+    description: "Heading and tagline for the Contact page",
+    icon: "📧",
+    columns: 2,
+  },
+  {
+    id: "contact.faq",
+    title: "Contact — FAQ",
+    description: "Frequently asked questions shown below the form",
+    icon: "❓",
+    columns: 2,
+  },
+];

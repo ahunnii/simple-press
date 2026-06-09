@@ -12,7 +12,7 @@ export const metadata = {
 };
 
 export default async function NotPermittedPage() {
-  const business = await api.business.get();
+  const business = await api.business.simplifiedGet();
   if (!business) {
     notFound();
   }

@@ -21,20 +21,6 @@ async function main() {
           primaryColor: "#3b82f6",
         },
       },
-      users: {
-        create: {
-          email: "demo@example.com",
-          name: "Demo User",
-          role: "ADMIN",
-          accounts: {
-            create: {
-              accountId: "demo-user",
-              providerId: "credential",
-              password: hashedPassword,
-            },
-          },
-        },
-      },
     },
   });
 

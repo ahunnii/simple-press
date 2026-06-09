@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import type { Editor } from "@tiptap/react";
 import type { VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
+import { useEditorState } from "@tiptap/react";
 
 import type { toggleVariants } from "~/components/ui/toggle";
 import {
@@ -151,9 +153,14 @@ export const SectionThree: React.FC<SectionThreeProps> = ({
   size,
   variant,
 }) => {
-  const color =
-    editor.getAttributes("textStyle")?.color ?? "hsl(var(--foreground))";
-  const [selectedColor, setSelectedColor] = React.useState(color);
+  const color = useEditorState({
+    editor,
+    selector: (ctx) =>
+      ctx.editor.getAttributes("textStyle")?.color ?? "hsl(var(--foreground))",
+  });
+  const [selectedColor, setSelectedColor] = React.useState(
+    color ?? "hsl(var(--foreground))",
+  );
 
   const handleColorChange = React.useCallback(
     (value: string) => {
@@ -175,7 +182,7 @@ export const SectionThree: React.FC<SectionThreeProps> = ({
   );
 
   React.useEffect(() => {
-    setSelectedColor(color);
+    setSelectedColor(color ?? "hsl(var(--foreground))");
   }, [color]);
 
   return (

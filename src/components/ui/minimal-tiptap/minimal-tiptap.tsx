@@ -8,6 +8,7 @@ import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
 
 import { LinkBubbleMenu } from "./components/bubble-menu/link-bubble-menu";
+import { TableBubbleMenu } from "./components/bubble-menu/table-bubble-menu";
 import { MeasuredContainer } from "./components/measured-container";
 import { SectionFive } from "./components/section/five";
 import { SectionFour } from "./components/section/four";
@@ -15,7 +16,6 @@ import { SectionOne } from "./components/section/one";
 import { SectionThree } from "./components/section/three";
 import { SectionTwo } from "./components/section/two";
 import { useMinimalTiptapEditor } from "./hooks/use-minimal-tiptap";
-import { useTiptapEditor } from "./hooks/use-tiptap-editor";
 
 export interface MinimalTiptapProps extends Omit<
   UseMinimalTiptapEditorProps,
@@ -27,7 +27,15 @@ export interface MinimalTiptapProps extends Omit<
   editorContentClassName?: string;
 }
 
-const Toolbar = ({ editor }: { editor: Editor }) => (
+const Toolbar = ({
+  editor,
+  galleriesEnabled,
+  embedsEnabled,
+}: {
+  editor: Editor;
+  galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
+}) => (
   <div className="border-border flex h-12 shrink-0 overflow-x-auto border-b p-2">
     <div className="flex w-max items-center gap-px">
       <SectionOne editor={editor} activeLevels={[1, 2, 3, 4, 5, 6]} />
@@ -63,8 +71,10 @@ const Toolbar = ({ editor }: { editor: Editor }) => (
 
       <SectionFive
         editor={editor}
-        activeActions={["codeBlock", "blockquote", "horizontalRule"]}
+        activeActions={["codeBlock", "blockquote", "horizontalRule", "gallery", "embed", "table"]}
         mainActionCount={0}
+        galleriesEnabled={galleriesEnabled}
+        embedsEnabled={embedsEnabled}
       />
     </div>
   </div>
@@ -75,11 +85,15 @@ export const MinimalTiptapEditor = ({
   onChange,
   className,
   editorContentClassName,
+  galleriesEnabled,
+  embedsEnabled,
   ...props
 }: MinimalTiptapProps) => {
   const editor = useMinimalTiptapEditor({
     value,
     onUpdate: onChange,
+    galleriesEnabled,
+    embedsEnabled,
     ...props,
   });
 
@@ -93,6 +107,8 @@ export const MinimalTiptapEditor = ({
         editor={editor}
         className={className}
         editorContentClassName={editorContentClassName}
+        galleriesEnabled={galleriesEnabled}
+        embedsEnabled={embedsEnabled}
       />
     </EditorContext.Provider>
   );
@@ -106,10 +122,14 @@ export const MainMinimalTiptapEditor = ({
   editor: providedEditor,
   className,
   editorContentClassName,
+  galleriesEnabled,
+  embedsEnabled,
 }: MinimalTiptapProps & { editor: Editor }) => {
-  const { editor } = useTiptapEditor(providedEditor);
-
-  if (!editor) {
+  // Use provided editor directly. Do not subscribe to full editor state here,
+  // or every transaction (e.g. from gallery) re-renders the whole toolbar and
+  // can cause "Maximum update depth exceeded". Each section subscribes narrowly
+  // via useEditorState where it needs to reflect selection/active state.
+  if (!providedEditor) {
     return null;
   }
 
@@ -123,12 +143,13 @@ export const MainMinimalTiptapEditor = ({
         className,
       )}
     >
-      <Toolbar editor={editor} />
+      <Toolbar editor={providedEditor} galleriesEnabled={galleriesEnabled} embedsEnabled={embedsEnabled} />
       <EditorContent
-        editor={editor}
+        editor={providedEditor}
         className={cn("minimal-tiptap-editor", editorContentClassName)}
       />
-      <LinkBubbleMenu editor={editor} />
+      <LinkBubbleMenu editor={providedEditor} />
+      <TableBubbleMenu editor={providedEditor} />
     </MeasuredContainer>
   );
 };

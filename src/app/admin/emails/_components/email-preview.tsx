@@ -1,19 +1,35 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
+import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
+import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
+import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
+import OrderFulfilledEmail from "~/emails/order-fulfilled";
+import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
+import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
+import ResetPasswordEmail from "~/emails/reset-password";
+import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
+import VerifyEmail from "~/emails/verify-email";
 import WelcomeEmail from "~/emails/welcome";
 
+import type { RouterOutputs } from "~/trpc/react";
 import { renderEmail } from "~/lib/email/render";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
-export function EmailPreview({ business, sampleOrder }: any) {
+type Props = {
+  business: NonNullable<
+    RouterOutputs["business"]["getForEmailPreview"]
+  >["business"];
+  sampleOrder: NonNullable<
+    RouterOutputs["business"]["getForEmailPreview"]
+  >["sampleOrder"];
+};
+
+export function EmailPreview({ business, sampleOrder }: Props) {
   const [html, setHtml] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -47,7 +63,7 @@ export function EmailPreview({ business, sampleOrder }: any) {
           country: "US",
         },
         businessName: business.name,
-        businessLogoUrl: business.siteContent?.logoUrl,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
         businessUrl: `https://${business.subdomain}.yourdomain.com`,
       }),
     );
@@ -66,7 +82,75 @@ export function EmailPreview({ business, sampleOrder }: any) {
         carrier: "UPS",
         estimatedDelivery: "Monday, March 15",
         businessName: business.name,
-        businessLogoUrl: business.siteContent?.logoUrl,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewNewOrderOwner = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      NewOrderNotificationEmail({
+        orderNumber: sampleOrder?.orderNumber ?? 1001,
+        customerName: "John Doe",
+        customerEmail: "john@example.com",
+        items: sampleOrder?.items?.map((item) => ({
+          productName: item.productName,
+          variantName: item.variantName,
+          quantity: item.quantity,
+          total: Math.round(item.total),
+        })) ?? [
+          {
+            productName: "Sample Product",
+            variantName: "Medium / Blue",
+            quantity: 2,
+            total: 5998,
+          },
+        ],
+        subtotal: sampleOrder?.subtotal ?? 5998,
+        shipping: sampleOrder?.shipping ?? 500,
+        tax: sampleOrder?.tax ?? 540,
+        discount: sampleOrder?.discount ?? 0,
+        total: sampleOrder?.total ?? 7038,
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+        adminOrderUrl: `https://${business.subdomain}.yourdomain.com/admin/orders/sample`,
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewOrderFulfilled = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      OrderFulfilledEmail({
+        orderNumber: sampleOrder?.orderNumber ?? 1001,
+        customerName: "John Doe",
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+        businessUrl: `https://${business.subdomain}.yourdomain.com`,
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewOrderRefunded = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      OrderRefundedEmail({
+        orderNumber: sampleOrder?.orderNumber ?? 1001,
+        customerName: "John Doe",
+        refundAmountCents: 7038,
+        orderTotalCents: 7038,
+        isFullRefund: true,
+        reason: "Customer requested refund",
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+        businessUrl: `https://${business.subdomain}.yourdomain.com`,
       }),
     );
     setHtml(rendered);
@@ -80,7 +164,7 @@ export function EmailPreview({ business, sampleOrder }: any) {
         name: "John Doe",
         businessName: business.name,
         businessUrl: `https://${business.subdomain}.yourdomain.com`,
-        logoUrl: business.siteContent?.logoUrl,
+        logoUrl: business.siteContent?.logoUrl ?? "",
       }),
     );
     setHtml(rendered);
@@ -96,6 +180,92 @@ export function EmailPreview({ business, sampleOrder }: any) {
         subject: "Question about your products",
         message: "Hi, I was wondering if you have this item in stock...",
         businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewTestimonialInvite = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      TestimonialInviteEmail({
+        businessName: business.name,
+        inviteUrl: "https://example.com/testimonials/submit?code=sample",
+        logoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+  const previewVerifyEmail = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      VerifyEmail({
+        name: "John Doe",
+        businessName: business.name,
+        verifyUrl: "https://example.com/verify?code=sample",
+        logoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewResetPassword = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      ResetPasswordEmail({
+        name: "John Doe",
+        businessName: business.name,
+        resetUrl: "https://example.com/reset?code=sample",
+        logoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+  };
+
+  const previewLowInventoryAlert = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      LowInventoryAlertEmail({
+        productName: "Sample T-Shirt",
+        variantName: "Medium / Blue",
+        currentQty: 3,
+        threshold: 5,
+        adminProductUrl: `https://${business.subdomain}.yourdomain.com/admin/products/sample`,
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewOutOfStockAlert = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      OutOfStockAlertEmail({
+        productName: "Sample T-Shirt",
+        variantName: "Medium / Blue",
+        adminProductUrl: `https://${business.subdomain}.yourdomain.com/admin/products/sample`,
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewBackorderAlert = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      BackorderAlertEmail({
+        productName: "Sample T-Shirt",
+        variantName: "Medium / Blue",
+        adminProductUrl: `https://${business.subdomain}.yourdomain.com/admin/products/sample`,
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
       }),
     );
     setHtml(rendered);
@@ -103,8 +273,13 @@ export function EmailPreview({ business, sampleOrder }: any) {
   };
 
   return (
-    <div className="mx-auto max-w-7xl p-8">
-      <h1 className="mb-8 text-3xl font-bold">Email Previews</h1>
+    <div className="admin-container">
+      <div className="admin-header">
+        <div>
+          <h1>Email Previews</h1>
+          <p>See how your emails will look to your customers</p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card>
@@ -129,6 +304,30 @@ export function EmailPreview({ business, sampleOrder }: any) {
               Order Shipped
             </Button>
             <Button
+              onClick={previewNewOrderOwner}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              New Order (owner)
+            </Button>
+            <Button
+              onClick={previewOrderFulfilled}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Order Fulfilled (no tracking)
+            </Button>
+            <Button
+              onClick={previewOrderRefunded}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Order Refunded
+            </Button>
+            <Button
               onClick={previewWelcome}
               disabled={isLoading}
               variant="outline"
@@ -143,6 +342,54 @@ export function EmailPreview({ business, sampleOrder }: any) {
               className="w-full justify-start"
             >
               Contact Form
+            </Button>
+            <Button
+              onClick={previewTestimonialInvite}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Testimonial Invite
+            </Button>
+            <Button
+              onClick={previewVerifyEmail}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Verify Email
+            </Button>
+            <Button
+              onClick={previewResetPassword}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Reset Password
+            </Button>
+            <Button
+              onClick={previewLowInventoryAlert}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Low Inventory Alert (owner)
+            </Button>
+            <Button
+              onClick={previewOutOfStockAlert}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Out of Stock Alert (owner)
+            </Button>
+            <Button
+              onClick={previewBackorderAlert}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Out of Stock — Backorders On (owner)
             </Button>
           </CardContent>
         </Card>
