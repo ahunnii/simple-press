@@ -1,0 +1,241 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useUploadFiles } from "@better-upload/client";
+import { toast } from "sonner";
+
+import type { PendingFile } from "~/components/inputs/pending-image-grid";
+import { getImageDimensions, getStoredPath } from "~/lib/uploads";
+import { api } from "~/trpc/react";
+
+/** Maximum files per single upload request (matches the `images` route). */
+const UPLOAD_BATCH_SIZE = 10;
+
+/** Maximum file size accepted by the `images` route: 5 MB. */
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+
+export type DeferredImageUploadConfig = {
+  /** Upload route name. Defaults to `"images"`. */
+  route?: string;
+};
+
+export type DeferredUploadResult = Array<{
+  url: string;
+  width?: number;
+  height?: number;
+}>;
+
+export type UseDeferredImageUpload = {
+  /** Current list of locally-staged files (not yet uploaded). */
+  pendingFiles: PendingFile[];
+  /** Whether an upload batch is currently in-flight. */
+  isUploading: boolean;
+  /**
+   * Stage additional files. Client-side validation rejects non-images and
+   * files over 5 MB; rejected files are surfaced via a toast.
+   */
+  addFiles: (files: File[] | FileList) => void;
+  /** Remove a single staged file by its client id. Revokes the object URL. */
+  removeFile: (id: string) => void;
+  /** Replace the entire staged list (used after DnD reorder). */
+  reorder: (items: PendingFile[]) => void;
+  /** Clear all staged files and revoke their object URLs. */
+  clear: () => void;
+  /**
+   * Upload all staged files in order, returning an array of
+   * `{ url, width?, height? }` in the original file order.
+   *
+   * Accumulates uploaded URLs incrementally. If any batch fails the method
+   * calls `discard()` on all already-uploaded URLs and then re-throws so the
+   * caller can handle the error.
+   */
+  uploadAll: () => Promise<DeferredUploadResult>;
+  /**
+   * Delete already-uploaded S3 objects via the shared `upload.discardUploads`
+   * mutation. Exposed so consumers can clean up when their save step fails
+   * *after* a successful `uploadAll()`.
+   */
+  discard: (urls: string[]) => void;
+};
+
+/**
+ * Manages the hold-in-memory → batch-upload lifecycle for deferred image
+ * uploads. Designed so any admin create-form can adopt it without re-implementing
+ * chunking, dims capture, partial-upload cleanup, or object-URL lifecycle.
+ */
+export function useDeferredImageUpload(
+  config?: DeferredImageUploadConfig,
+): UseDeferredImageUpload {
+  const route = config?.route ?? "images";
+
+  const nextIdRef = useRef(0);
+  // Keep a ref mirror of pendingFiles so the unmount cleanup can revoke
+  // object URLs without capturing stale state.
+  const pendingFilesRef = useRef<PendingFile[]>([]);
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const uploadHook = useUploadFiles({ api: "/api/upload", route });
+
+  const discardMutation = api.upload.discardUploads.useMutation();
+
+  // Mirror state into ref so the unmount cleanup always sees the latest list.
+  useEffect(() => {
+    pendingFilesRef.current = pendingFiles;
+  }, [pendingFiles]);
+
+  // Revoke all object URLs on unmount
+  useEffect(() => {
+    return () => {
+      pendingFilesRef.current.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+    };
+  }, []);
+
+  const addFiles = useCallback((files: File[] | FileList) => {
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
+
+    const valid: File[] = [];
+    const skippedSize: string[] = [];
+    const skippedType: string[] = [];
+
+    for (const file of fileArray) {
+      if (!file.type.startsWith("image/")) {
+        skippedType.push(file.name);
+        continue;
+      }
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        skippedSize.push(file.name);
+        continue;
+      }
+      valid.push(file);
+    }
+
+    if (skippedSize.length > 0) {
+      toast.warning(
+        `Skipped ${skippedSize.length} file${skippedSize.length > 1 ? "s" : ""} over 5 MB: ${skippedSize.join(", ")}`,
+      );
+    }
+    if (skippedType.length > 0) {
+      toast.warning(
+        `Skipped ${skippedType.length} non-image file${skippedType.length > 1 ? "s" : ""}: ${skippedType.join(", ")}`,
+      );
+    }
+
+    if (valid.length === 0) return;
+
+    const newItems: PendingFile[] = valid.map((file) => ({
+      id: `pending-${(nextIdRef.current++).toString()}`,
+      previewUrl: URL.createObjectURL(file),
+      file,
+    }));
+
+    setPendingFiles((prev) => [...prev, ...newItems]);
+  }, []);
+
+  const removeFile = useCallback((id: string) => {
+    setPendingFiles((prev) => {
+      const removed = prev.find((f) => f.id === id);
+      if (removed) URL.revokeObjectURL(removed.previewUrl);
+      return prev.filter((f) => f.id !== id);
+    });
+  }, []);
+
+  const reorder = useCallback((items: PendingFile[]) => {
+    setPendingFiles(items);
+  }, []);
+
+  const clear = useCallback(() => {
+    setPendingFiles((prev) => {
+      prev.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+      return [];
+    });
+  }, []);
+
+  const discard = useCallback(
+    (urls: string[]) => {
+      if (urls.length > 0) {
+        discardMutation.mutate({ urls });
+      }
+    },
+    [discardMutation],
+  );
+
+  const uploadAll = useCallback(async (): Promise<DeferredUploadResult> => {
+    // Snapshot the list at call-time so that mutations during upload don't
+    // affect which files we process.
+    const snapshot = [...pendingFiles];
+
+    if (snapshot.length === 0) return [];
+
+    setIsUploading(true);
+
+    // Accumulate uploaded URLs incrementally so the catch block can clean them
+    // all up if a later batch fails.
+    const uploadedUrls: string[] = [];
+
+    try {
+      // Capture natural dimensions from object URLs before uploading.
+      const dimsMap = new Map<string, { width?: number; height?: number }>();
+      await Promise.all(
+        snapshot.map(async (pf) => {
+          const dims = await getImageDimensions(pf.previewUrl);
+          dimsMap.set(pf.id, dims);
+        }),
+      );
+
+      // Split into batches of at most UPLOAD_BATCH_SIZE (server route cap).
+      const batches: PendingFile[][] = [];
+      for (let i = 0; i < snapshot.length; i += UPLOAD_BATCH_SIZE) {
+        batches.push(snapshot.slice(i, i + UPLOAD_BATCH_SIZE));
+      }
+
+      // Result list populated in original file order.
+      const results: DeferredUploadResult = [];
+
+      for (const batch of batches) {
+        const result = await uploadHook.uploadAsync(batch.map((pf) => pf.file));
+
+        // Record URLs from this batch before checking for failures so the
+        // catch block can clean up even partially successful batches.
+        for (let i = 0; i < result.files.length; i++) {
+          const uploadedFile = result.files[i];
+          const pendingFile = batch[i];
+          if (!uploadedFile || !pendingFile) continue;
+
+          const url = getStoredPath(uploadedFile);
+          uploadedUrls.push(url);
+
+          const dims = dimsMap.get(pendingFile.id) ?? {};
+          results.push({ url, ...dims });
+        }
+
+        if (result.failedFiles.length > 0) {
+          const names = result.failedFiles.map((ff) => ff.name).join(", ");
+          throw new Error(`Some images failed to upload: ${names}`);
+        }
+      }
+
+      return results;
+    } catch (err) {
+      // Clean up any objects that were successfully uploaded before the error.
+      if (uploadedUrls.length > 0) {
+        discard(uploadedUrls);
+      }
+      throw err;
+    } finally {
+      setIsUploading(false);
+    }
+  }, [pendingFiles, uploadHook, discard]);
+
+  return {
+    pendingFiles,
+    isUploading,
+    addFiles,
+    removeFile,
+    reorder,
+    clear,
+    uploadAll,
+    discard,
+  };
+}

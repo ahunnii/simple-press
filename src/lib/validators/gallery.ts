@@ -1,20 +1,28 @@
 import { z } from "zod";
 
+const galleryInitialImageSchema = z.object({
+  url: z.string(),
+  altText: z.string().max(200).optional(),
+  caption: z.string().max(300).optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+});
+
 export const galleryCreateSchema = z.object({
-  name: z.string().min(1),
-  slug: z.string().min(1),
-  description: z.string().optional(),
+  name: z.string().trim().min(1, "Name is required").max(120),
+  description: z.string().max(1000).optional(),
   layout: z.enum(["grid", "masonry", "carousel", "collage", "justified"]),
   columns: z.number().min(1).max(5),
-  gap: z.number(),
+  gap: z.number().int().min(0).max(64),
   aspectRatio: z.enum(["1:1", "4:3", "16:9", "3:4", "original"]).optional(),
   captionStyle: z.enum(["overlay", "hover", "below"]).optional(),
   showCaptions: z.boolean(),
   enableLightbox: z.boolean(),
+  images: z.array(galleryInitialImageSchema).optional(),
 });
 
 export const galleryUpdateSchema = galleryCreateSchema
-  .omit({ slug: true })
+  .omit({ images: true })
   .extend({
     id: z.string(),
   });
@@ -27,8 +35,8 @@ export const galleryImageCreateSchema = z.object({
   images: z.array(
     z.object({
       url: z.string(),
-      altText: z.string().optional(),
-      caption: z.string().optional(),
+      altText: z.string().max(200).optional(),
+      caption: z.string().max(300).optional(),
       width: z.number().optional(),
       height: z.number().optional(),
     }),
@@ -42,6 +50,6 @@ export const galleryReorderImagesSchema = z.object({
 
 export const galleryUpdateImageSchema = z.object({
   id: z.string(),
-  altText: z.string().optional(),
-  caption: z.string().optional(),
+  altText: z.string().max(200).optional(),
+  caption: z.string().max(300).optional(),
 });

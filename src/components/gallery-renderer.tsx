@@ -207,14 +207,14 @@ export function GalleryRenderer({
                 aria-label="Previous image"
                 className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
               >
-                ←
+                <span aria-hidden="true">←</span>
               </button>
               <button
                 onClick={nextImage}
                 aria-label="Next image"
                 className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
               >
-                →
+                <span aria-hidden="true">→</span>
               </button>
 
               <button
@@ -280,6 +280,8 @@ function GridLayout({ gallery, onImageClick }: LayoutProps) {
               <img
                 src={image.url}
                 alt={image.altText ?? ""}
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full rounded-lg object-cover"
               />
               {gallery.showCaptions && !isBelow && (
@@ -293,6 +295,8 @@ function GridLayout({ gallery, onImageClick }: LayoutProps) {
               <img
                 src={image.url}
                 alt={image.altText ?? ""}
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full rounded-lg object-cover"
               />
               {gallery.showCaptions && !isBelow && (
@@ -341,6 +345,8 @@ function MasonryLayout({ gallery, onImageClick }: LayoutProps) {
               <img
                 src={image.url}
                 alt={image.altText ?? ""}
+                loading="lazy"
+                decoding="async"
                 className="h-auto w-full rounded-[inherit] transition-transform group-hover:scale-110"
               />
               {gallery.showCaptions && !isBelow && (
@@ -352,6 +358,8 @@ function MasonryLayout({ gallery, onImageClick }: LayoutProps) {
               <img
                 src={image.url}
                 alt={image.altText ?? ""}
+                loading="lazy"
+                decoding="async"
                 className="h-auto w-full rounded-[inherit] transition-transform group-hover:scale-110"
               />
               {gallery.showCaptions && !isBelow && (
@@ -426,14 +434,14 @@ function CarouselLayout({
             aria-label="Previous image"
             className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
           >
-            ←
+            <span aria-hidden="true">←</span>
           </button>
           <button
             onClick={next}
             aria-label="Next image"
             className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
           >
-            →
+            <span aria-hidden="true">→</span>
           </button>
 
           <div className="mt-4 flex justify-center gap-2">
@@ -496,6 +504,8 @@ function CollageLayout({ gallery, onImageClick }: LayoutProps) {
               <img
                 src={image.url}
                 alt={image.altText ?? ""}
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
               />
               {gallery.showCaptions && !isBelow && (
@@ -514,6 +524,8 @@ function CollageLayout({ gallery, onImageClick }: LayoutProps) {
               <img
                 src={image.url}
                 alt={image.altText ?? ""}
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
               />
               {gallery.showCaptions && !isBelow && (
@@ -566,6 +578,8 @@ function JustifiedLayout({ gallery, onImageClick }: LayoutProps) {
               <img
                 src={image.url}
                 alt={image.altText ?? ""}
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
               />
               {gallery.showCaptions && !isBelow && (
@@ -584,6 +598,8 @@ function JustifiedLayout({ gallery, onImageClick }: LayoutProps) {
               <img
                 src={image.url}
                 alt={image.altText ?? ""}
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
               />
               {gallery.showCaptions && !isBelow && (

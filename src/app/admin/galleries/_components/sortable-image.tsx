@@ -46,28 +46,31 @@ export function SortableImage({ image, onDelete, onEdit }: Props) {
       <div
         {...attributes}
         {...listeners}
+        aria-label="Drag to reorder"
         className="absolute top-2 left-2 cursor-grab rounded bg-black/50 p-1 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
       >
-        <GripVertical className="h-4 w-4 text-white" />
+        <GripVertical className="h-4 w-4 text-white" aria-hidden="true" />
       </div>
 
       <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <Button
           variant="secondary"
           size="sm"
+          aria-label="Edit image"
           onClick={() => onEdit(image)}
           className="h-8 w-8 p-0"
         >
-          <Pencil className="h-4 w-4" />
+          <Pencil className="h-4 w-4" aria-hidden="true" />
         </Button>
 
         <Button
           variant="destructive"
           size="sm"
+          aria-label="Delete image"
           onClick={() => onDelete(image.id)}
           className="h-8 w-8 p-0"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
 

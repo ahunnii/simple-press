@@ -31,6 +31,10 @@ type ImageEditModalProps = {
   onSuccess: () => void;
 };
 
+// Mirrors galleryUpdateImageSchema limits in src/lib/validators/gallery.ts
+const ALT_MAX = 200;
+const CAPTION_MAX = 300;
+
 export function ImageEditModal({
   image,
   isOpen,
@@ -90,10 +94,16 @@ export function ImageEditModal({
                 onChange={(e) => setAltText(e.target.value)}
                 placeholder="Describe the image for accessibility"
                 className="mt-2"
+                maxLength={ALT_MAX}
               />
-              <p className="mt-1 text-xs text-gray-500">
-                Used by screen readers and when image can&apos;t load
-              </p>
+              <div className="mt-1 flex items-start justify-between gap-2">
+                <p className="text-xs text-gray-500">
+                  Used by screen readers and when image can&apos;t load
+                </p>
+                <span className="shrink-0 text-xs text-gray-500">
+                  {altText.length}/{ALT_MAX}
+                </span>
+              </div>
             </div>
 
             {/* Caption */}
@@ -106,10 +116,16 @@ export function ImageEditModal({
                 placeholder="Add a caption to display with the image"
                 rows={3}
                 className="mt-2"
+                maxLength={CAPTION_MAX}
               />
-              <p className="mt-1 text-xs text-gray-500">
-                Displayed below or over the image if captions are enabled
-              </p>
+              <div className="mt-1 flex items-start justify-between gap-2">
+                <p className="text-xs text-gray-500">
+                  Displayed below or over the image if captions are enabled
+                </p>
+                <span className="shrink-0 text-xs text-gray-500">
+                  {caption.length}/{CAPTION_MAX}
+                </span>
+              </div>
             </div>
           </div>
 

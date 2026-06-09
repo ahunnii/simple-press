@@ -26,7 +26,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { GalleryUpdateData } from "~/lib/validators/gallery";
-import { getStoredPath } from "~/lib/uploads";
+import { getImageDimensions, getStoredPath } from "~/lib/uploads";
 import { cn } from "~/lib/utils";
 import { galleryUpdateSchema } from "~/lib/validators/gallery";
 import { api } from "~/trpc/react";
@@ -68,6 +68,10 @@ import { UploadDropzone } from "~/components/ui/upload-dropzone";
 import { ImageEditModal } from "./image-edit-modal";
 import { SortableImage } from "./sortable-image";
 
+// Mirrors galleryUpdateSchema caps in src/lib/validators/gallery.ts
+const NAME_MAX = 120;
+const DESCRIPTION_MAX = 1000;
+
 type GalleryEditorProps = {
   gallery: Gallery & { images: GalleryImage[] };
   businessId: string;
@@ -78,6 +82,7 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
   const utils = api.useUtils();
   const dndId = useId();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [pendingDeleteImageId, setPendingDeleteImageId] = useState<string | null>(null);
   const [editingImage, setEditingImage] = useState<GalleryImage | null>(null);
   const [images, setImages] = useState(gallery.images);
 
@@ -109,7 +114,7 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
 
   const uploadFiles = useUploadFiles({
     api: "/api/upload",
-    route: "images",
+    route: "galleryImages",
 
     onBeforeUpload: () => {
       toast.loading("Uploading images...");
@@ -121,13 +126,27 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
     onUploadComplete: ({ files }) => {
       toast.dismiss();
       toast.success("Images uploaded");
-      addImagesMutation.mutate({
-        galleryId: gallery.id,
-        images: files.map((file) => ({
-          url: getStoredPath(file),
-          altText: file.name,
-          caption: "",
-        })),
+
+      // Resolve natural dimensions for each uploaded file client-side.
+      // Best-effort: if any image fails to load, we just omit width/height.
+      const imageDataPromises = files.map(async (file) => {
+        const url = getStoredPath(file);
+        const dims = await getImageDimensions(url);
+        return { url, ...dims };
+      });
+
+      void Promise.all(imageDataPromises).then((resolved) => {
+        addImagesMutation.mutate({
+          galleryId: gallery.id,
+          images: resolved.map(({ url, width, height }) => ({
+            url,
+            altText: "",
+            caption: "",
+            ...(width !== undefined && height !== undefined
+              ? { width, height }
+              : {}),
+          })),
+        });
       });
     },
   });
@@ -176,6 +195,9 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
     },
   });
 
+  // Cleans up S3 objects that uploaded successfully but were never persisted.
+  const discardMutation = api.upload.discardUploads.useMutation();
+
   const addImagesMutation = api.gallery.addImages.useMutation({
     onSuccess: (result) => {
       toast.dismiss();
@@ -184,9 +206,15 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
       void utils.gallery.invalidate();
       router.refresh();
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       toast.dismiss();
       toast.error(error.message ?? "Failed to add images");
+      // The images uploaded to S3 but the DB write failed — discard the
+      // orphaned objects so they don't accumulate.
+      const urls = variables.images.map((img) => img.url);
+      if (urls.length > 0) {
+        discardMutation.mutate({ urls });
+      }
     },
     onMutate: () => {
       toast.loading("Adding images...");
@@ -252,15 +280,21 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
   };
 
   const handleDeleteImage = (imageId: string) => {
-    if (confirm("Delete this image?")) {
-      deleteImageMutation.mutate(imageId);
-      setImages(images.filter((img) => img.id !== imageId));
-    }
+    setPendingDeleteImageId(imageId);
+  };
+
+  const confirmDeleteImage = () => {
+    if (!pendingDeleteImageId) return;
+    const idToDelete = pendingDeleteImageId;
+    setPendingDeleteImageId(null);
+    setImages((prev) => prev.filter((img) => img.id !== idToDelete));
+    deleteImageMutation.mutate(idToDelete);
   };
 
   const isUploading = uploadFiles.isPending || addImagesMutation.isPending;
   const isSubmitting = updateMutation.isPending || reorderMutation.isPending;
   const isDeleting = deleteGalleryMutation.isPending;
+  const isDeletingImage = deleteImageMutation.isPending;
 
   const layout = form.watch("layout");
   const showCaptions = form.watch("showCaptions");
@@ -414,9 +448,14 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
                       <FormItem>
                         <FormLabel>Name</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} maxLength={NAME_MAX} />
                         </FormControl>
-                        <FormMessage />
+                        <div className="flex items-center justify-between">
+                          <FormMessage />
+                          <span className="text-muted-foreground ml-auto text-xs">
+                            {field.value?.length ?? 0}/{NAME_MAX}
+                          </span>
+                        </div>
                       </FormItem>
                     )}
                   />
@@ -428,9 +467,14 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Textarea {...field} rows={3} />
+                          <Textarea {...field} rows={3} maxLength={DESCRIPTION_MAX} />
                         </FormControl>
-                        <FormMessage />
+                        <div className="flex items-center justify-between">
+                          <FormMessage />
+                          <span className="text-muted-foreground ml-auto text-xs">
+                            {field.value?.length ?? 0}/{DESCRIPTION_MAX}
+                          </span>
+                        </div>
                       </FormItem>
                     )}
                   />
@@ -634,7 +678,7 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
         </div>
       </Form>
 
-      {/* Delete Dialog */}
+      {/* Delete Gallery Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -655,6 +699,39 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isDeleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Image Dialog */}
+      <AlertDialog
+        open={pendingDeleteImageId !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteImageId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete image</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this image? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingImage}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDeleteImage();
+              }}
+              disabled={isDeletingImage}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeletingImage ? "Deleting…" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

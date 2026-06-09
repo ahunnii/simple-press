@@ -206,6 +206,41 @@ const router: Router = {
         };
       },
     }),
+    // Gallery images get their own `gallery-` key prefix so that deleting a
+    // gallery only ever targets gallery-owned S3 objects — it can never collide
+    // with product/collection/site images (which use the `image-` prefix).
+    galleryImages: route({
+      fileTypes: ["image/*"],
+      multipleFiles: true,
+      maxFiles: 10,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
+
+      onBeforeUpload: async ({ req }) => {
+        const user = await auth.api.getSession({ headers: req.headers });
+        if (!user) {
+          throw new RejectUpload("Not logged in!");
+        }
+
+        const business = await checkBusiness();
+
+        if (!business) {
+          throw new RejectUpload("Business not found!");
+        }
+
+        return {
+          generateObjectInfo: ({ file }) => {
+            const ext = safeImageExt(file.name);
+            const key = uniqueKey(business.id, "gallery", ext);
+            return {
+              key,
+              metadata: {
+                pathName: `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${key}`,
+              },
+            };
+          },
+        };
+      },
+    }),
     testimonials: route({
       fileTypes: ["image/*"],
       multipleFiles: true,

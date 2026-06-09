@@ -1,15 +1,17 @@
 "use client";
 
+import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, ImagePlus, PlusCircle, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { GalleryCreateData } from "~/lib/validators/gallery";
 import { cn } from "~/lib/utils";
 import { galleryCreateSchema } from "~/lib/validators/gallery";
+import { useDeferredImageUpload } from "~/hooks/use-deferred-image-upload";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -37,58 +39,123 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { PendingImageGrid } from "~/components/inputs/pending-image-grid";
 
 import { LayoutPreview } from "./layout-preview";
 
-const slugify = (text: string) =>
-  text
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/--+/g, "-")
-    .trim();
+// Mirrors galleryCreateSchema caps in src/lib/validators/gallery.ts
+const NAME_MAX = 120;
+const DESCRIPTION_MAX = 1000;
+
+const NEW_GALLERY_DEFAULTS: GalleryCreateData = {
+  name: "",
+  description: "",
+  layout: "grid",
+  columns: 3,
+  gap: 16,
+  aspectRatio: "1:1",
+  captionStyle: "overlay",
+  showCaptions: true,
+  enableLightbox: true,
+};
 
 export function NewGalleryForm() {
   const router = useRouter();
   const utils = api.useUtils();
 
+  // Ref tracks whether the "Save & create another" button was clicked
+  const createAnotherRef = useRef<boolean>(false);
+
+  // Track whether we're waiting for createMutation to settle (set in onSubmit,
+  // cleared in mutation callbacks)
+  const [isSaving, setIsSaving] = useState(false);
+
+  const upload = useDeferredImageUpload({ route: "galleryImages" });
+
   const form = useForm<GalleryCreateData>({
     resolver: zodResolver(galleryCreateSchema),
-    defaultValues: {
-      name: "",
-      slug: "",
-      description: "",
-      layout: "grid",
-      columns: 3,
-      gap: 16,
-      aspectRatio: "1:1",
-      captionStyle: "overlay",
-      showCaptions: true,
-      enableLightbox: true,
-    },
+    defaultValues: NEW_GALLERY_DEFAULTS,
   });
 
   const createMutation = api.gallery.create.useMutation({
     onSuccess: ({ data, message }) => {
       toast.dismiss();
-      toast.success(message);
+      setIsSaving(false);
       void utils.gallery.invalidate();
-      router.push(`/admin/galleries/${data.id}`);
+
+      if (createAnotherRef.current) {
+        createAnotherRef.current = false;
+        upload.clear();
+        form.reset(NEW_GALLERY_DEFAULTS);
+        toast.success("Gallery created — add another");
+        router.push("/admin/galleries/new");
+      } else {
+        toast.success(message);
+        router.push(`/admin/galleries/${data.id}`);
+      }
     },
-    onError: (error) => {
+    onError: (error, variables) => {
+      createAnotherRef.current = false;
+      setIsSaving(false);
       toast.dismiss();
       toast.error(error.message || "Failed to create gallery");
-    },
-    onMutate: () => {
-      toast.loading("Creating gallery...");
+      // If the upload succeeded but the DB write failed, discard the orphaned
+      // S3 objects so they don't accumulate.
+      if (variables.images && variables.images.length > 0) {
+        upload.discard(variables.images.map((img) => img.url));
+      }
     },
   });
 
-  const onSubmit = (data: GalleryCreateData) => {
-    createMutation.mutate({
-      ...data,
-      description: data.description?.trim() ?? undefined,
-    });
+  const onSubmit = useCallback(
+    async (formData: GalleryCreateData) => {
+      setIsSaving(true);
+      toast.loading(
+        upload.pendingFiles.length > 0
+          ? "Uploading images…"
+          : "Creating gallery…",
+      );
+
+      try {
+        if (upload.pendingFiles.length > 0) {
+          // uploadAll() handles its own partial-upload cleanup on failure
+          const uploadedInfos = await upload.uploadAll();
+
+          toast.dismiss();
+          toast.loading("Creating gallery…");
+
+          const images = uploadedInfos.map(({ url, width, height }) => ({
+            url,
+            altText: "" as string,
+            caption: "" as string,
+            ...(width !== undefined && height !== undefined
+              ? { width, height }
+              : {}),
+          }));
+
+          createMutation.mutate({ ...formData, images });
+        } else {
+          createMutation.mutate({ ...formData });
+        }
+      } catch (err) {
+        // uploadAll() threw — it already discarded any partial uploads
+        toast.dismiss();
+        const message =
+          err instanceof Error ? err.message : "Upload failed. Please try again.";
+        toast.error(message);
+        createAnotherRef.current = false;
+        setIsSaving(false);
+      }
+    },
+    [upload, createMutation],
+  );
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    upload.addFiles(files);
+    // Reset input so the same files can be re-selected
+    e.target.value = "";
   };
 
   const layout = form.watch("layout");
@@ -96,7 +163,8 @@ export function NewGalleryForm() {
   const gap = form.watch("gap");
   const aspectRatio = form.watch("aspectRatio");
   const showCaptions = form.watch("showCaptions");
-  const isDirty = form.formState.isDirty;
+  const isDirty = form.formState.isDirty || upload.pendingFiles.length > 0;
+  const isProcessing = isSaving || upload.isUploading || createMutation.isPending;
 
   return (
     <Form {...form}>
@@ -130,8 +198,30 @@ export function NewGalleryForm() {
               <Link href="/admin/galleries">Cancel</Link>
             </Button>
 
-            <Button type="submit" size="sm" disabled={createMutation.isPending}>
-              {createMutation.isPending ? (
+            {/* Save & create another */}
+            <Button
+              type="submit"
+              variant="outline"
+              size="sm"
+              disabled={isProcessing}
+              onClick={() => {
+                createAnotherRef.current = true;
+              }}
+              className="hidden sm:inline-flex"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Save &amp; create another
+            </Button>
+
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isProcessing}
+              onClick={() => {
+                createAnotherRef.current = false;
+              }}
+            >
+              {isProcessing ? (
                 <>
                   <span className="saving-indicator" />
                   Saving...
@@ -169,47 +259,15 @@ export function NewGalleryForm() {
                       <Input
                         {...field}
                         placeholder="My Gallery"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          const currentSlug = form.getValues("slug");
-                          const prevName = field.value;
-                          if (
-                            !currentSlug ||
-                            currentSlug === slugify(prevName)
-                          ) {
-                            form.setValue("slug", slugify(e.target.value), {
-                              shouldDirty: true,
-                            });
-                          }
-                        }}
+                        maxLength={NAME_MAX}
                       />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="slug"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Slug <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="my-gallery"
-                        onChange={(e) =>
-                          field.onChange(slugify(e.target.value))
-                        }
-                      />
-                    </FormControl>
-                    <p className="text-muted-foreground text-xs">
-                      URL: /galleries/{form.watch("slug") || "my-gallery"}
-                    </p>
-                    <FormMessage />
+                    <div className="flex items-center justify-between">
+                      <FormMessage />
+                      <span className="text-muted-foreground ml-auto text-xs">
+                        {field.value?.length ?? 0}/{NAME_MAX}
+                      </span>
+                    </div>
                   </FormItem>
                 )}
               />
@@ -225,12 +283,72 @@ export function NewGalleryForm() {
                         {...field}
                         placeholder="Describe what this gallery is about..."
                         rows={3}
+                        maxLength={DESCRIPTION_MAX}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <div className="flex items-center justify-between">
+                      <FormMessage />
+                      <span className="text-muted-foreground ml-auto text-xs">
+                        {field.value?.length ?? 0}/{DESCRIPTION_MAX}
+                      </span>
+                    </div>
                   </FormItem>
                 )}
               />
+            </CardContent>
+          </Card>
+
+          {/* Images — deferred upload */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Images</CardTitle>
+              <CardDescription>
+                Select images to add on save. Nothing is uploaded until you
+                click Save.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <label
+                htmlFor="pending-image-input"
+                className={cn(
+                  "border-input text-foreground flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed px-4 py-8 transition-colors",
+                  isProcessing
+                    ? "cursor-not-allowed opacity-50"
+                    : "hover:bg-accent",
+                )}
+              >
+                <ImagePlus className="mb-2 h-6 w-6" aria-hidden="true" />
+                <span className="text-sm font-semibold">
+                  Click to select images
+                </span>
+                <span className="text-muted-foreground mt-1 text-xs">
+                  JPEG, PNG, WebP, GIF, AVIF — max 5 MB each
+                </span>
+                <input
+                  id="pending-image-input"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  disabled={isProcessing}
+                  className="sr-only"
+                  onChange={handleFileInput}
+                />
+              </label>
+
+              {upload.pendingFiles.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-muted-foreground text-sm">
+                    {upload.pendingFiles.length}{" "}
+                    {upload.pendingFiles.length === 1 ? "image" : "images"}{" "}
+                    selected — drag to reorder
+                  </p>
+                  <PendingImageGrid
+                    items={upload.pendingFiles}
+                    onReorder={upload.reorder}
+                    onRemove={upload.removeFile}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -258,7 +376,8 @@ export function NewGalleryForm() {
                       <SelectContent>
                         <SelectItem value="grid">
                           <div className="flex items-center gap-2">
-                            <span>⊞</span>
+                            {/* A2: decorative glyph is aria-hidden */}
+                            <span aria-hidden="true">⊞</span>
                             <div>
                               <div className="font-medium">Grid</div>
                               <div className="text-xs text-gray-500">
@@ -269,7 +388,7 @@ export function NewGalleryForm() {
                         </SelectItem>
                         <SelectItem value="masonry">
                           <div className="flex items-center gap-2">
-                            <span>▦</span>
+                            <span aria-hidden="true">▦</span>
                             <div>
                               <div className="font-medium">Masonry</div>
                               <div className="text-xs text-gray-500">
@@ -280,7 +399,7 @@ export function NewGalleryForm() {
                         </SelectItem>
                         <SelectItem value="carousel">
                           <div className="flex items-center gap-2">
-                            <span>⊏</span>
+                            <span aria-hidden="true">⊏</span>
                             <div>
                               <div className="font-medium">Carousel</div>
                               <div className="text-xs text-gray-500">
@@ -291,7 +410,7 @@ export function NewGalleryForm() {
                         </SelectItem>
                         <SelectItem value="collage">
                           <div className="flex items-center gap-2">
-                            <span>▤</span>
+                            <span aria-hidden="true">▤</span>
                             <div>
                               <div className="font-medium">Collage</div>
                               <div className="text-xs text-gray-500">
@@ -302,7 +421,7 @@ export function NewGalleryForm() {
                         </SelectItem>
                         <SelectItem value="justified">
                           <div className="flex items-center gap-2">
-                            <span>▬</span>
+                            <span aria-hidden="true">▬</span>
                             <div>
                               <div className="font-medium">Justified</div>
                               <div className="text-xs text-gray-500">

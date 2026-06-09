@@ -1,6 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { generateGallerySlug } from "~/lib/slug";
+import { deleteStoredObjects } from "~/lib/s3/delete";
 import {
   galleryCreateSchema,
   galleryImageCreateSchema,
@@ -79,12 +81,51 @@ export const galleryRouter = createTRPCRouter({
     .input(galleryCreateSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const gallery = await ctx.db.gallery.create({
-        data: {
-          ...input,
-          businessId,
-        },
+
+      // Auto-generate a unique slug from the gallery name (never user-supplied)
+      const baseSlug = generateGallerySlug(input.name) || "gallery";
+      let slug = baseSlug;
+      let counter = 1;
+      while (true) {
+        if (counter > 1000) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Could not generate a unique slug.",
+          });
+        }
+        const existing = await ctx.db.gallery.findUnique({
+          where: { businessId_slug: { businessId, slug } },
+        });
+        if (!existing) break;
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+
+      const { images, ...galleryData } = input;
+
+      const gallery = await ctx.db.$transaction(async (tx) => {
+        const created = await tx.gallery.create({
+          data: {
+            ...galleryData,
+            slug,
+            businessId,
+          },
+          include: { images: true },
+        });
+
+        if (images && images.length > 0) {
+          await tx.galleryImage.createMany({
+            data: images.map((img, index) => ({
+              ...img,
+              galleryId: created.id,
+              sortOrder: index,
+            })),
+          });
+        }
+
+        return created;
       });
+
       return { data: gallery, message: "Gallery created successfully!" };
     }),
 
@@ -107,9 +148,34 @@ export const galleryRouter = createTRPCRouter({
     .input(z.string())
     .mutation(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
+
+      // Fetch image URLs before the cascade removes the rows
+      const gallery = await ctx.db.gallery.findUnique({
+        where: { id, businessId },
+        select: { images: { select: { url: true } } },
+      });
+
       await ctx.db.gallery.delete({
         where: { id, businessId },
       });
+
+      // Clean up S3 objects — best-effort, after the DB delete
+      if (gallery) {
+        const urlsToDelete: string[] = [];
+        for (const img of gallery.images) {
+          // Only delete from S3 if no other GalleryImage row references this URL
+          const remaining = await ctx.db.galleryImage.count({
+            where: { url: img.url },
+          });
+          if (remaining === 0) {
+            urlsToDelete.push(img.url);
+          }
+        }
+        if (urlsToDelete.length > 0) {
+          await deleteStoredObjects(urlsToDelete);
+        }
+      }
+
       return { data: id, message: "Gallery deleted successfully!" };
     }),
 
@@ -118,6 +184,16 @@ export const galleryRouter = createTRPCRouter({
     .use(featureGate("galleries"))
     .input(galleryImageCreateSchema)
     .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // Verify the gallery belongs to this business (prevents cross-tenant IDOR)
+      const gallery = await ctx.db.gallery.findFirst({
+        where: { id: input.galleryId, businessId },
+      });
+      if (!gallery) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Gallery not found" });
+      }
+
       // Get current max sort order
       const maxSort = await ctx.db.galleryImage.aggregate({
         where: { galleryId: input.galleryId },
@@ -186,6 +262,94 @@ export const galleryRouter = createTRPCRouter({
       const image = await ctx.db.galleryImage.delete({
         where: { id, gallery: { businessId } },
       });
+
+      // Clean up S3 object — best-effort, after the DB delete.
+      // Only delete if no other GalleryImage row references the same URL
+      // (the duplicate mutation reuses URLs across galleries).
+      const remaining = await ctx.db.galleryImage.count({
+        where: { url: image.url },
+      });
+      if (remaining === 0) {
+        await deleteStoredObjects([image.url]);
+      }
+
       return { data: image, message: "Image deleted successfully!" };
+    }),
+
+  // Duplicate a gallery (clone settings + image rows, reuse S3 urls)
+  duplicate: ownerAdminProcedure
+    .use(featureGate("galleries"))
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // Load the source gallery (must belong to this business)
+      const source = await ctx.db.gallery.findUnique({
+        where: { id: input.id, businessId },
+        include: { images: { orderBy: { sortOrder: "asc" } } },
+      });
+
+      if (!source) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Gallery not found",
+        });
+      }
+
+      // Auto-generate a unique slug for the clone
+      const baseName = `Copy of ${source.name}`;
+      const baseSlug = generateGallerySlug(baseName) || "gallery";
+      let slug = baseSlug;
+      let counter = 1;
+      while (true) {
+        if (counter > 1000) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Could not generate a unique slug.",
+          });
+        }
+        const existing = await ctx.db.gallery.findUnique({
+          where: { businessId_slug: { businessId, slug } },
+        });
+        if (!existing) break;
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+
+      const cloned = await ctx.db.$transaction(async (tx) => {
+        const newGallery = await tx.gallery.create({
+          data: {
+            businessId,
+            name: baseName,
+            slug,
+            description: source.description,
+            layout: source.layout,
+            columns: source.columns,
+            gap: source.gap,
+            aspectRatio: source.aspectRatio,
+            captionStyle: source.captionStyle,
+            showCaptions: source.showCaptions,
+            enableLightbox: source.enableLightbox,
+          },
+        });
+
+        if (source.images.length > 0) {
+          await tx.galleryImage.createMany({
+            data: source.images.map((img, index) => ({
+              galleryId: newGallery.id,
+              url: img.url,
+              altText: img.altText,
+              caption: img.caption,
+              width: img.width,
+              height: img.height,
+              sortOrder: index,
+            })),
+          });
+        }
+
+        return newGallery;
+      });
+
+      return { data: cloned, message: "Gallery duplicated successfully!" };
     }),
 });

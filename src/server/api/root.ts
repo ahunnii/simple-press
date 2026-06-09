@@ -19,6 +19,7 @@ import { platformRouter } from "./routers/platform";
 import { productRouter } from "./routers/product";
 import { reviewRouter } from "./routers/review";
 import { testimonialRouter } from "./routers/testimonials";
+import { uploadRouter } from "./routers/upload";
 
 /**
  * This is the primary router for your server.
@@ -50,6 +51,8 @@ export const appRouter = createTRPCRouter({
   contact: contactRouter,
 
   external: externalRouter,
+
+  upload: uploadRouter,
 });
 
 // export type definition of API
