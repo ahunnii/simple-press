@@ -47,12 +47,12 @@ Inside the gallery editor, use the **Images** tab to add photos.
 
 Switch to the **Settings** tab in the gallery editor to choose how your images are arranged. There are five layout types:
 
-| Layout | Description |
-|---|---|
-| **Grid** | Uniform rows and columns — all images the same size |
-| **Masonry** | Pinterest-style cascading columns — variable heights create a waterfall effect |
-| **Carousel** | One image at a time with left/right navigation and dot indicators; keyboard arrow keys also work |
-| **Collage** | The first image is large (spanning two columns), the remaining images fill smaller cells around it |
+| Layout        | Description                                                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Grid**      | Uniform rows and columns — all images the same size                                                                       |
+| **Masonry**   | Pinterest-style cascading columns — variable heights create a waterfall effect                                            |
+| **Carousel**  | One image at a time with left/right navigation and dot indicators; keyboard arrow keys also work                          |
+| **Collage**   | The first image is large (spanning two columns), the remaining images fill smaller cells around it                        |
 | **Justified** | Images fill each row edge-to-edge at a fixed row height, stretching to maintain aspect ratio — similar to Flickr's layout |
 
 A **live preview** updates as you change settings so you can see the layout before saving.

@@ -28,10 +28,10 @@ The code string customers type at checkout. It is automatically uppercased when 
 
 Choose the **type** and **value**:
 
-| Type | How it works |
-|------|-------------|
-| **Percentage** | Deducts a percentage of the cart subtotal. Enter a number from 1–100 (e.g., `20` for 20% off). |
-| **Fixed Amount** | Deducts a flat dollar amount. Enter the dollar value (e.g., `10` for $10 off). |
+| Type             | How it works                                                                                   |
+| ---------------- | ---------------------------------------------------------------------------------------------- |
+| **Percentage**   | Deducts a percentage of the cart subtotal. Enter a number from 1–100 (e.g., `20` for 20% off). |
+| **Fixed Amount** | Deducts a flat dollar amount. Enter the dollar value (e.g., `10` for $10 off).                 |
 
 The discount can never exceed the cart total — if the discount amount is larger than what's in the cart, the total is simply reduced to $0.
 
@@ -116,3 +116,5 @@ The platform can automatically deactivate codes that are past their expiration d
 - **Influencer codes:** Create unique codes per collaborator (e.g., `JANE15`) with a usage cap to track redemptions per partnership.
 - **Cap your percentage codes:** A 20% code without a maximum discount cap can be very costly on large orders. Use the Maximum Discount field to protect your margins.
 - **Banner + code pairing:** If you're running an active promotion, enable the storefront banner so visitors see the code without having to look for it.
+
+---

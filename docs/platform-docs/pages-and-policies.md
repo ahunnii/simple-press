@@ -22,12 +22,12 @@ Click **Create Page** in the top right. The editor has two tabs: **Content** and
 
 #### Content Tab
 
-| Field | What it's for |
-|---|---|
-| **Title** | The page's heading, shown on the storefront |
-| **Slug** | The URL path for the page (e.g., slug `our-story` → `yourstore.com/our-story`). Auto-generated from the title when creating a new page; you can edit it manually. Must be unique. |
-| **Short Description** | A brief summary of the page — used as the fallback meta description if no SEO description is set |
-| **Content** | The full page body, written in the rich text editor (TipTap). Supports headings, bold/italic, links, lists, and block quotes. |
+| Field                 | What it's for                                                                                                                                                                     |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Title**             | The page's heading, shown on the storefront                                                                                                                                       |
+| **Slug**              | The URL path for the page (e.g., slug `our-story` → `yourstore.com/our-story`). Auto-generated from the title when creating a new page; you can edit it manually. Must be unique. |
+| **Short Description** | A brief summary of the page — used as the fallback meta description if no SEO description is set                                                                                  |
+| **Content**           | The full page body, written in the rich text editor (TipTap). Supports headings, bold/italic, links, lists, and block quotes.                                                     |
 
 **[Photo: Page editor — Content tab showing title field, slug field (with "/" prefix), short description, and TipTap editor open]**
 
@@ -46,9 +46,9 @@ If you have the **Galleries** feature enabled, you can insert a gallery directly
 
 #### SEO Tab
 
-| Field | Notes |
-|---|---|
-| **Meta Title** | Shown in browser tabs and search results. Aim for under 60 characters. Falls back to the page title if left blank. |
+| Field                | Notes                                                                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Meta Title**       | Shown in browser tabs and search results. Aim for under 60 characters. Falls back to the page title if left blank.               |
 | **Meta Description** | Shown as the preview snippet in search results. Aim for under 160 characters. Falls back to the short description if left blank. |
 
 **[Photo: Page editor — SEO tab showing meta title (with character count) and meta description fields]**
@@ -108,12 +108,12 @@ In the admin sidebar, go to **Content > Policies**. This opens the policies edit
 
 ### The Four Policies
 
-| Tab | Slug | Storefront URL |
-|---|---|---|
-| Privacy | `privacy-policy` | `yourstore.com/privacy-policy` |
-| Terms | `terms-of-service` | `yourstore.com/terms-of-service` |
-| Returns | `refund-policy` | `yourstore.com/refund-policy` |
-| Shipping | `shipping-policy` | `yourstore.com/shipping-policy` |
+| Tab      | Slug               | Storefront URL                   |
+| -------- | ------------------ | -------------------------------- |
+| Privacy  | `privacy-policy`   | `yourstore.com/privacy-policy`   |
+| Terms    | `terms-of-service` | `yourstore.com/terms-of-service` |
+| Returns  | `refund-policy`    | `yourstore.com/refund-policy`    |
+| Shipping | `shipping-policy`  | `yourstore.com/shipping-policy`  |
 
 Each policy has a fixed slug — you cannot change the URL for a policy page.
 
@@ -147,7 +147,7 @@ If you haven't saved content for a policy yet, the page does not exist on your s
 
 On your **Privacy Policy** and **Terms of Service** pages, a notice is automatically appended at the bottom of the page on the storefront. It reads:
 
-> *This store is hosted on the SimplePress platform, operated by Center for Generative Justice LLC. Your use of this store is also subject to the SimplePress Terms of Service and Privacy Policy.*
+> _This store is hosted on the SimplePress platform, operated by Center for Generative Justice LLC. Your use of this store is also subject to the SimplePress Terms of Service and Privacy Policy._
 
 **This notice cannot be removed.** It is required because your store runs on the SimplePress platform and customers are subject to both your policies and the platform's policies.
 
@@ -160,6 +160,7 @@ The notice only appears on `privacy-policy` and `terms-of-service` — it does n
 ## What You Can and Cannot Do
 
 **You can:**
+
 - Create, edit, publish, unpublish, and delete custom pages at any time
 - Manually edit a page's slug at any time (including after it's published)
 - Set per-page SEO metadata independently of the global site SEO
@@ -168,6 +169,7 @@ The notice only appears on `privacy-policy` and `terms-of-service` — it does n
 - Leave a policy blank — it simply won't appear on your storefront until you save content
 
 **You cannot:**
+
 - Use the same slug on two pages — duplicates are blocked with an error
 - Change the slug of a policy page — policy slugs are fixed (`privacy-policy`, `terms-of-service`, `refund-policy`, `shipping-policy`)
 - Remove the platform policy notice from your Privacy Policy or Terms of Service pages
@@ -181,3 +183,5 @@ The notice only appears on `privacy-policy` and `terms-of-service` — it does n
 Pages is **on by default** and is not owner-toggleable. If you can't access Content > Pages, contact support.
 
 > **Depends on:** The Blog feature depends on Pages being enabled.
+
+---

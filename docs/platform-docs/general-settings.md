@@ -93,3 +93,5 @@ Click **Save Changes** in the top toolbar. The toolbar also shows an **Unsaved C
 - **Change your store slug** — set at signup, locked permanently. If you need a different URL, you can configure a custom domain in **Settings > Domain**.
 - **Remove the support email entirely** — it is required.
 - **Edit your store slug from here or anywhere else in the admin** — it is read-only across the entire platform.
+
+---

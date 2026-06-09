@@ -217,3 +217,5 @@ Select the products you want to export (or select all), then click **Export**. T
   - SEO per product — metaTitle/metaDescription exist in the DB but are absent from the product form. Not documented.
   - featured flag — exists in DB and is importable via CSV, but there's no toggle in the product form itself; omitted from the manual creation section.
                                                                                                                                                               -->
+
+---

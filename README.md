@@ -42,3 +42,5 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 - [ ] Unsaved changes warning when leaving product form
 - [ ] Align types: add variants to edit page / shared types to avoid casting
 - [ ] Need to switch Float to Int for priceInCents
+
+stripe listen --forward-to localhost:3000/api/webhooks/stripe

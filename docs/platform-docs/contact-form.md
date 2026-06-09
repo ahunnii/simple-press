@@ -20,13 +20,13 @@ You can link to it from your storefront navigation by adding a link to `/contact
 
 All contact forms include the following:
 
-| Field | Required | Notes |
-| ----- | -------- | ----- |
-| Name | Yes | Customer's full name |
-| Email | Yes | Where you'll reply |
-| Message | Yes | Min 10 characters; max varies by template (180 chars by default, 500 on the Elegant template) |
-| Phone | No | Optional phone number |
-| Preferred Contact Method | No | Email / Phone / No Preference |
+| Field                    | Required | Notes                                                                                         |
+| ------------------------ | -------- | --------------------------------------------------------------------------------------------- |
+| Name                     | Yes      | Customer's full name                                                                          |
+| Email                    | Yes      | Where you'll reply                                                                            |
+| Message                  | Yes      | Min 10 characters; max varies by template (180 chars by default, 500 on the Elegant template) |
+| Phone                    | No       | Optional phone number                                                                         |
+| Preferred Contact Method | No       | Email / Phone / No Preference                                                                 |
 
 A **captcha** is shown at the bottom to prevent spam. Customers must complete it before submitting.
 
@@ -107,3 +107,5 @@ Check your spam folder. Submissions come from a noreply system address with your
 - Set up an automatic reply to customers
 - Disable the contact form yourself (contact support if needed)
 - Redirect customers to a custom URL after they submit
+
+---

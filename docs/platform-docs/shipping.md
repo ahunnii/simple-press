@@ -69,3 +69,5 @@ Customers see an order summary that breaks down:
 - Configure rates by region, zone, or destination country
 - Use carrier-calculated rates (e.g., live USPS or UPS quotes)
 - Set a weight-based rate
+
+---

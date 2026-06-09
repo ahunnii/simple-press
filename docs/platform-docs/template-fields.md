@@ -20,19 +20,19 @@ Fields are organized into **tabs by page** — Homepage, About, Contact, Blog, P
 
 Depending on your template, you'll encounter several types of fields:
 
-| Type | What It Is |
-|------|------------|
-| **Text** | A single line — headlines, labels, taglines |
-| **Textarea** | A longer block of plain text — paragraphs, descriptions |
-| **Rich Text** | Formatted content with bold, italics, links, and lists via the TipTap editor |
-| **Image** | A single uploaded image — heroes, section backgrounds, team photos |
-| **Video** | A video URL (e.g. a hosted video link) — used in select templates for background or feature videos |
-| **URL** | A plain link — useful for external references or custom media |
-| **Color** | A color picker — accent colors, button colors, background fills |
-| **Number** | A numeric value — e.g. years in business, item counts |
-| **Boolean** | An on/off toggle — show or hide a section |
-| **Gallery** | Link one of your saved Galleries to a template section (e.g. a homepage photo grid) |
-| **List** | A repeating set of rows — e.g. a row of feature cards, each with an icon, title, and description |
+| Type          | What It Is                                                                                         |
+| ------------- | -------------------------------------------------------------------------------------------------- |
+| **Text**      | A single line — headlines, labels, taglines                                                        |
+| **Textarea**  | A longer block of plain text — paragraphs, descriptions                                            |
+| **Rich Text** | Formatted content with bold, italics, links, and lists via the TipTap editor                       |
+| **Image**     | A single uploaded image — heroes, section backgrounds, team photos                                 |
+| **Video**     | A video URL (e.g. a hosted video link) — used in select templates for background or feature videos |
+| **URL**       | A plain link — useful for external references or custom media                                      |
+| **Color**     | A color picker — accent colors, button colors, background fills                                    |
+| **Number**    | A numeric value — e.g. years in business, item counts                                              |
+| **Boolean**   | An on/off toggle — show or hide a section                                                          |
+| **Gallery**   | Link one of your saved Galleries to a template section (e.g. a homepage photo grid)                |
+| **List**      | A repeating set of rows — e.g. a row of feature cards, each with an icon, title, and description   |
 
 Not every field type appears in every template — you'll only see what your active template supports.
 
@@ -113,3 +113,5 @@ If there's something on your storefront you'd like to change but can't find a fi
 - [ ] Image upload field with a preview visible
 - [ ] Gallery selector field (dropdown showing saved galleries)
 - [ ] The Save / Reset toolbar
+
+---

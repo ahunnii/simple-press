@@ -147,3 +147,5 @@ These are authoritative third-party references for sales tax law and compliance.
 ---
 
 _Again: this page is for informational purposes only. It is not legal or tax advice. Consult a qualified tax professional for guidance specific to your situation._
+
+---

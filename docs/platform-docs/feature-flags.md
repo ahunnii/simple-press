@@ -24,11 +24,11 @@ Only a subset of features are owner-toggleable. The rest are always on or can on
 
 ### E-Commerce
 
-| Feature | Default | Notes |
-| ------- | ------- | ----- |
-| **Products** | On | Enables your product catalog and all product-related admin pages. Disabling this also disables Orders, Cart, Inventory, Coupons, Collections, and Reviews — they all depend on Products. |
-| **Orders** | On | Enables order receiving, management, fulfillment, and all order-related features. Requires Products. |
-| **Collections** | Off | Groups products into curated collections visible on your storefront. Requires Products. |
+| Feature         | Default | Notes                                                                                                                                                                                    |
+| --------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Products**    | On      | Enables your product catalog and all product-related admin pages. Disabling this also disables Orders, Cart, Inventory, Coupons, Collections, and Reviews — they all depend on Products. |
+| **Orders**      | On      | Enables order receiving, management, fulfillment, and all order-related features. Requires Products.                                                                                     |
+| **Collections** | Off     | Groups products into curated collections visible on your storefront. Requires Products.                                                                                                  |
 
 The following E-Commerce features are always on (platform-managed) and do not appear as toggles:
 
@@ -38,18 +38,18 @@ The following E-Commerce features are always on (platform-managed) and do not ap
 
 ### Content
 
-| Feature | Default | Notes |
-| ------- | ------- | ----- |
-| **Galleries** | On | Image galleries shown on your storefront. |
-| **Blog** | Off | Blog with posts and articles. |
+| Feature       | Default | Notes                                     |
+| ------------- | ------- | ----------------------------------------- |
+| **Galleries** | On      | Image galleries shown on your storefront. |
+| **Blog**      | Off     | Blog with posts and articles.             |
 
 **Custom Pages** (your `/about`, `/contact`, policies, etc.) is always on and cannot be disabled.
 
 ### Marketing
 
-| Feature | Default | Notes |
-| ------- | ------- | ----- |
-| **Testimonials** | On | Customer testimonials collection and display. |
+| Feature          | Default | Notes                                         |
+| ---------------- | ------- | --------------------------------------------- |
+| **Testimonials** | On      | Customer testimonials collection and display. |
 
 The following Marketing features are always on or require platform activation:
 
@@ -121,10 +121,10 @@ Keep Products enabled but disable Orders temporarily. Your products are visible 
 
 Some features are not toggleable by you and require the platform team to enable them:
 
-| Feature | Why |
-| ------- | --- |
-| **Product Reviews** | Off by default; enables customer review submissions and moderation |
-| **Coupons & Discounts** | Off by default; enables discount codes at checkout |
+| Feature                 | Why                                                                |
+| ----------------------- | ------------------------------------------------------------------ |
+| **Product Reviews**     | Off by default; enables customer review submissions and moderation |
+| **Coupons & Discounts** | Off by default; enables discount codes at checkout                 |
 
 To request either of these, contact support. Once enabled by the platform team, the feature will appear active in your admin even though you won't see a toggle for it.
 
@@ -146,3 +146,5 @@ No. Customer Accounts is a platform feature that is always on.
 
 **A feature I need isn't on this page. What do I do?**
 Some features are managed by the platform team and don't have owner-facing toggles. Contact support and we can make the change for you.
+
+---

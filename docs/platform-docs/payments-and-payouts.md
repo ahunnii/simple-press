@@ -22,10 +22,10 @@ The page is organized into three cards:
 
 Once your Stripe account is connected, the balance card shows two figures:
 
-| Field | What it means |
-| ----- | ------------- |
-| **Available to Pay Out** | Funds that are cleared and ready to be sent to your bank |
-| **Pending** | Funds from recent transactions still in Stripe's processing window |
+| Field                    | What it means                                                      |
+| ------------------------ | ------------------------------------------------------------------ |
+| **Available to Pay Out** | Funds that are cleared and ready to be sent to your bank           |
+| **Pending**              | Funds from recent transactions still in Stripe's processing window |
 
 Funds move from Pending → Available as Stripe processes them (typically within 2–7 business days, depending on your payout schedule).
 
@@ -46,13 +46,13 @@ The Recent Payouts card lists the last 5 payouts Stripe has sent to your bank ac
 - **Amount** — the payout total
 - **Status** — one of the following:
 
-| Status | Meaning |
-| ------ | ------- |
-| Paid | Successfully deposited to your bank |
-| In Transit | Sent to your bank, not yet settled |
-| Pending | Queued but not yet initiated |
-| Failed | The payout did not complete |
-| Canceled | The payout was cancelled before it left Stripe |
+| Status     | Meaning                                        |
+| ---------- | ---------------------------------------------- |
+| Paid       | Successfully deposited to your bank            |
+| In Transit | Sent to your bank, not yet settled             |
+| Pending    | Queued but not yet initiated                   |
+| Failed     | The payout did not complete                    |
+| Canceled   | The payout was cancelled before it left Stripe |
 
 - **Estimated Arrival** — the date Stripe expects the funds to land in your bank
 
@@ -81,11 +81,11 @@ Both figures reset on January 1 each year.
 
 The card displays two progress bars — one for transactions, one for revenue — showing how close you are to each threshold. The card's status badge will be one of:
 
-| Badge | Meaning |
-| ----- | ------- |
-| **Below Thresholds** | You haven't reached either limit yet |
-| **Verified** | You've crossed a threshold and completed Stripe verification |
-| **Action Required** | You've crossed a threshold but haven't completed verification |
+| Badge                | Meaning                                                       |
+| -------------------- | ------------------------------------------------------------- |
+| **Below Thresholds** | You haven't reached either limit yet                          |
+| **Verified**         | You've crossed a threshold and completed Stripe verification  |
+| **Action Required**  | You've crossed a threshold but haven't completed verification |
 
 **📷 Photo:** INFORM Act Compliance card in three states: below threshold (green progress bars), approaching threshold (amber warning alert at top of page), and action required (red badge + destructive alert).
 
@@ -151,3 +151,5 @@ Stripe connection is managed in **Settings → Integrations**. See the [Integrat
 - Manually initiate a payout — Stripe handles this automatically on your account's schedule
 - See more than the last 5 payouts in the admin — open your Stripe Dashboard for full payout history
 - See balance broken down by product, order, or time period — Stripe Dashboard is the place for detailed reporting
+
+---

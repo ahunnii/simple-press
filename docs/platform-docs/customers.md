@@ -15,14 +15,14 @@ At the top of the page you'll see two summary cards:
 
 The table below shows every customer with the following columns:
 
-| Column | What it shows |
-|---|---|
-| Name | First and last name (if provided) |
-| Email | The email address used at checkout or signup |
-| Orders | Total number of orders placed |
-| Total Spent | Lifetime spend across all orders |
-| Marketing | Whether the customer has opted in or out of marketing emails |
-| Joined | The date their customer record was first created |
+| Column      | What it shows                                                |
+| ----------- | ------------------------------------------------------------ |
+| Name        | First and last name (if provided)                            |
+| Email       | The email address used at checkout or signup                 |
+| Orders      | Total number of orders placed                                |
+| Total Spent | Lifetime spend across all orders                             |
+| Marketing   | Whether the customer has opted in or out of marketing emails |
+| Joined      | The date their customer record was first created             |
 
 You can search by name or email using the search bar. The table updates to match your query.
 
