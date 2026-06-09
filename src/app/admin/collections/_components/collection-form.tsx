@@ -24,7 +24,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ArrowLeft, GripVertical, PlusCircle, Save, Search, Trash2, TriangleAlert, Upload, X } from "lucide-react";
+import { ArrowLeft, ExternalLink, GripVertical, PlusCircle, Save, Search, Trash2, TriangleAlert, Upload, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -100,7 +100,7 @@ function SortableProductRow({
       <button
         type="button"
         aria-label="Drag to reorder"
-        className="cursor-move text-gray-400 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        className="flex h-9 w-9 cursor-move items-center justify-center text-gray-400 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         {...attributes}
         {...listeners}
       >
@@ -121,7 +121,7 @@ function SortableProductRow({
       <button
         type="button"
         aria-label={`Remove ${product.name}`}
-        className="shrink-0 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         onClick={onRemove}
       >
         <X className="h-4 w-4" />
@@ -257,6 +257,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
 
   const form = useForm<CollectionFormData>({
     resolver: zodResolver(collectionFormSchema),
+    mode: "onTouched",
     defaultValues: {
       ...collection,
       published: collection?.published ?? true,
@@ -290,41 +291,26 @@ export function CollectionForm({ collection, allProducts }: Props) {
   });
 
   const createMutation = api.collections.create.useMutation({
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       toast.dismiss();
-      const loadingToastId = toast.loading("Saving collection products...");
+      void utils.collections.invalidate();
 
-      try {
-        await utils.client.collections.setProducts.mutate({
-          collectionId: data.id,
-          productIds: form.getValues("productIds"),
-        });
-        toast.dismiss(loadingToastId);
-        void utils.collections.invalidate();
-
-        if (createAnotherRef.current) {
-          createAnotherRef.current = false;
-          // Reset all form state for a fresh create
-          form.reset(NEW_COLLECTION_DEFAULTS);
-          setProductSearch("");
-          setOgImageFile(null);
-          setOgImageRemoved(false);
-          // Clear the image file inputs so the same file can be re-selected
-          if (imageFileInputRef.current) imageFileInputRef.current.value = "";
-          if (ogImageFileInputRef.current)
-            ogImageFileInputRef.current.value = "";
-          toast.success("Collection created — add another");
-          router.push("/admin/collections/new");
-        } else {
-          toast.success("Collection created successfully");
-          router.push(`/admin/collections/${data.id}`);
-        }
-      } catch (err) {
+      if (createAnotherRef.current) {
         createAnotherRef.current = false;
-        toast.dismiss(loadingToastId);
-        const message =
-          err instanceof Error ? err.message : "Failed to save products";
-        toast.error(message);
+        // Reset all form state for a fresh create
+        form.reset(NEW_COLLECTION_DEFAULTS);
+        setProductSearch("");
+        setOgImageFile(null);
+        setOgImageRemoved(false);
+        // Clear the image file inputs so the same file can be re-selected
+        if (imageFileInputRef.current) imageFileInputRef.current.value = "";
+        if (ogImageFileInputRef.current)
+          ogImageFileInputRef.current.value = "";
+        toast.success("Collection created — add another");
+        router.push("/admin/collections/new");
+      } else {
+        toast.success("Collection created successfully");
+        router.push(`/admin/collections/${data.id}`);
       }
     },
     onError: (err) => {
@@ -338,40 +324,26 @@ export function CollectionForm({ collection, allProducts }: Props) {
   });
 
   const updateMutation = api.collections.update.useMutation({
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       toast.dismiss();
-      const loadingToastId = toast.loading("Saving collection products...");
+      toast.success("Collection updated successfully");
 
-      try {
-        await utils.client.collections.setProducts.mutate({
-          collectionId: data.id,
-          productIds: form.getValues("productIds"),
-        });
-        toast.dismiss(loadingToastId);
-        toast.success("Collection updated successfully");
-
-        void utils.collections.invalidate();
-        const values = form.getValues();
-        form.reset({
-          ...values,
-          name: data.name,
-          description: data.description ?? undefined,
-          imageUrl: data.imageUrl ?? undefined,
-          published: data.published,
-          metaTitle: data.metaTitle ?? undefined,
-          metaDescription: data.metaDescription ?? undefined,
-          metaKeywords: data.metaKeywords ?? undefined,
-          ogImage: data.ogImage ?? undefined,
-        });
-        setOgImageFile(null);
-        setOgImageRemoved(false);
-        router.refresh();
-      } catch (err) {
-        toast.dismiss(loadingToastId);
-        const message =
-          err instanceof Error ? err.message : "Failed to save products";
-        toast.error(message);
-      }
+      void utils.collections.invalidate();
+      const values = form.getValues();
+      form.reset({
+        ...values,
+        name: data.name,
+        description: data.description ?? undefined,
+        imageUrl: data.imageUrl ?? undefined,
+        published: data.published,
+        metaTitle: data.metaTitle ?? undefined,
+        metaDescription: data.metaDescription ?? undefined,
+        metaKeywords: data.metaKeywords ?? undefined,
+        ogImage: data.ogImage ?? undefined,
+      });
+      setOgImageFile(null);
+      setOgImageRemoved(false);
+      router.refresh();
     },
     onError: (err) => {
       toast.dismiss();
@@ -449,6 +421,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
         metaDescription: data.metaDescription ?? undefined,
         metaKeywords: data.metaKeywords ?? undefined,
         ogImage: resolvedOgImage,
+        productIds: data.productIds,
       });
     } else {
       createMutation.mutate({
@@ -460,6 +433,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
         metaDescription: data.metaDescription ?? undefined,
         metaKeywords: data.metaKeywords ?? undefined,
         ogImage: resolvedOgImage,
+        productIds: data.productIds,
       });
     }
   };
@@ -492,7 +466,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
               </Button>
               <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
               <div className="hidden min-w-0 items-center gap-2 sm:flex">
-                <h1 className="text-base font-medium">
+                <h1 className="truncate text-base font-medium">
                   {collection?.id
                     ? (collection?.name ?? "Edit Collection")
                     : "New Collection"}
@@ -516,14 +490,32 @@ export function CollectionForm({ collection, allProducts }: Props) {
             </div>
 
             <div className="toolbar-actions">
+              {collection?.id && collection.published && (
+                <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
+                  <a
+                    href={`/collections/${collection.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="View on storefront"
+                    title="View on storefront"
+                  >
+                    <ExternalLink className="h-4 w-4 lg:mr-2" />
+                    <span className="hidden lg:inline">View on storefront</span>
+                  </a>
+                </Button>
+              )}
+
               <FormField
                 control={form.control}
                 name="published"
                 render={({ field }) => (
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="published">Published</Label>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Label htmlFor="published" className="text-sm">
+                      Published
+                    </Label>
                     <Switch
                       id="published"
+                      aria-label="Published"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />

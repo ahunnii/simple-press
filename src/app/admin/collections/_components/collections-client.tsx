@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Copy,
+  ExternalLink,
   EyeOff,
   Eye,
   MoreVertical,
@@ -30,13 +31,16 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -303,29 +307,6 @@ export function CollectionsClient({ collections }: Props) {
             {/* Search + Filter bar (sticky so it stays reachable while scrolling) */}
             <div className="sticky top-0 z-20 mb-6 rounded-lg border bg-white p-4 shadow-sm">
               <div className="flex flex-col gap-4 md:flex-row md:items-center">
-                {/* Select-all checkbox */}
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="select-all-collections"
-                    checked={
-                      allFilteredSelected
-                        ? true
-                        : someFilteredSelected
-                          ? "indeterminate"
-                          : false
-                    }
-                    onCheckedChange={handleSelectAll}
-                    aria-label="Select all collections"
-                    disabled={!hasResults}
-                  />
-                  <label
-                    htmlFor="select-all-collections"
-                    className="cursor-pointer text-sm text-gray-600 md:sr-only"
-                  >
-                    Select all
-                  </label>
-                </div>
-
                 {/* Search */}
                 <div className="relative flex-1">
                   <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -384,7 +365,7 @@ export function CollectionsClient({ collections }: Props) {
                     className="border-blue-300 bg-white text-blue-700 hover:bg-blue-50"
                   >
                     <Eye className="mr-1.5 h-3.5 w-3.5" />
-                    Publish
+                    <span className="hidden sm:inline">Publish</span>
                   </Button>
                   <Button
                     size="sm"
@@ -394,7 +375,7 @@ export function CollectionsClient({ collections }: Props) {
                     className="border-blue-300 bg-white text-blue-700 hover:bg-blue-50"
                   >
                     <EyeOff className="mr-1.5 h-3.5 w-3.5" />
-                    Unpublish
+                    <span className="hidden sm:inline">Unpublish</span>
                   </Button>
                   <Button
                     size="sm"
@@ -404,7 +385,7 @@ export function CollectionsClient({ collections }: Props) {
                     className="border-red-300 bg-white text-red-600 hover:bg-red-50"
                   >
                     <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                    Delete
+                    <span className="hidden sm:inline">Delete</span>
                   </Button>
                 </div>
                 <button
@@ -427,23 +408,55 @@ export function CollectionsClient({ collections }: Props) {
               </Card>
             ) : (
               <>
-                {/* Collections Grid */}
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {paginated.map((collection) => {
-                    const isSelected = selectedIds.has(collection.id);
-                    return (
-                      <Card
-                        key={collection.id}
-                        onClick={() =>
-                          router.push(`/admin/collections/${collection.id}`)
-                        }
-                        className={`cursor-pointer overflow-hidden transition-shadow hover:shadow-md ${isSelected ? "ring-2 ring-blue-500 ring-offset-1" : ""}`}
-                      >
-                        {collection.imageUrl && (
-                          <div className="relative h-48 bg-gray-100">
-                            {/* Checkbox overlay on image */}
-                            <div
-                              className="absolute top-2 left-2 z-10 p-1"
+                {/* Collections Table */}
+                <Card>
+                  <Table>
+                    <TableCaption className="sr-only">
+                      Collections
+                    </TableCaption>
+                    <TableHeader>
+                      <TableRow>
+                        {/* Select-all */}
+                        <TableHead scope="col" className="w-10">
+                          <Checkbox
+                            id="select-all-collections"
+                            checked={
+                              allFilteredSelected
+                                ? true
+                                : someFilteredSelected
+                                  ? "indeterminate"
+                                  : false
+                            }
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Select all collections"
+                            disabled={!hasResults}
+                          />
+                        </TableHead>
+                        <TableHead scope="col">Collection</TableHead>
+                        <TableHead scope="col" className="hidden md:table-cell">Products</TableHead>
+                        <TableHead scope="col" className="hidden md:table-cell">Status</TableHead>
+                        <TableHead scope="col" className="hidden md:table-cell">Storefront</TableHead>
+                        <TableHead scope="col">
+                          <span className="sr-only">Actions</span>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {paginated.map((collection) => {
+                        const isSelected = selectedIds.has(collection.id);
+                        return (
+                          <TableRow
+                            key={collection.id}
+                            data-state={isSelected ? "selected" : undefined}
+                            onClick={() =>
+                              router.push(
+                                `/admin/collections/${collection.id}`,
+                              )
+                            }
+                            className="cursor-pointer"
+                          >
+                            {/* Select */}
+                            <TableCell
                               onClick={(e) => e.stopPropagation()}
                             >
                               <Checkbox
@@ -452,106 +465,138 @@ export function CollectionsClient({ collections }: Props) {
                                   toggleCard(collection.id)
                                 }
                                 aria-label={`Select ${collection.name}`}
-                                className="h-5 w-5 border-white bg-white/90 shadow-sm"
                               />
-                            </div>
-                            <Image
-                              src={collection.imageUrl}
-                              alt={collection.name}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        )}
+                            </TableCell>
 
-                        <CardHeader>
-                          <div className="flex items-start justify-between gap-2">
-                            {/* Checkbox shown when no image */}
-                            {!collection.imageUrl && (
-                              <div
-                                className="shrink-0 p-1"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Checkbox
-                                  checked={isSelected}
-                                  onCheckedChange={() =>
-                                    toggleCard(collection.id)
-                                  }
-                                  aria-label={`Select ${collection.name}`}
-                                  className="h-5 w-5"
-                                />
+                            {/* Collection name + thumbnail */}
+                            <TableCell className="whitespace-normal">
+                              <div className="flex items-center gap-3">
+                                {collection.imageUrl ? (
+                                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-gray-100">
+                                    <Image
+                                      src={collection.imageUrl}
+                                      alt=""
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="h-10 w-10 shrink-0 rounded bg-gray-100" />
+                                )}
+                                <div className="min-w-0">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Link
+                                      href={`/admin/collections/${collection.id}`}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="font-medium hover:underline"
+                                    >
+                                      {collection.name}
+                                    </Link>
+                                    {!collection.published && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="md:hidden"
+                                      >
+                                        Draft
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  {collection.description && (
+                                    <p className="text-muted-foreground line-clamp-1 text-sm">
+                                      {collection.description}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
-                            )}
-                            <div className="flex-1">
-                              <CardTitle className="text-lg">
-                                <Link
-                                  href={`/admin/collections/${collection.id}`}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="hover:underline"
-                                >
-                                  {collection.name}
-                                </Link>
-                              </CardTitle>
-                              <CardDescription className="mt-1 line-clamp-2">
-                                {collection.description ?? "No description"}
-                              </CardDescription>
-                            </div>
-                            {!collection.published && (
-                              <Badge variant="secondary">Draft</Badge>
-                            )}
-                          </div>
-                        </CardHeader>
+                            </TableCell>
 
-                        <CardContent>
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm text-gray-500">
-                              {collection._count.collectionProducts} products
-                            </p>
+                            {/* Products count */}
+                            <TableCell className="hidden md:table-cell">
+                              {collection._count.collectionProducts}
+                            </TableCell>
 
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => e.stopPropagation()}
+                            {/* Status */}
+                            <TableCell className="hidden md:table-cell">
+                              {collection.published ? (
+                                <Badge variant="default">Published</Badge>
+                              ) : (
+                                <Badge variant="secondary">Draft</Badge>
+                              )}
+                            </TableCell>
+
+                            {/* Storefront link */}
+                            <TableCell
+                              className="hidden md:table-cell"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {collection.published && collection.slug ? (
+                                <a
+                                  href={`/collections/${collection.slug}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
+                                  aria-label={`View ${collection.name} on storefront (opens in new tab)`}
                                 >
-                                  <MoreVertical className="h-4 w-4" />
-                                  <span className="sr-only">Actions</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    href={`/admin/collections/${collection.id}`}
+                                  <ExternalLink className="h-4 w-4" />
+                                  <span>View</span>
+                                </a>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+
+                            {/* Actions */}
+                            <TableCell
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
                                   >
-                                    <Pencil className="mr-2 h-4 w-4" />
-                                    Edit
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    handleDuplicate(collection.id)
-                                  }
-                                  disabled={duplicateMutation.isPending}
-                                >
-                                  <Copy className="mr-2 h-4 w-4" />
-                                  Duplicate
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="text-red-600 focus:text-red-600"
-                                  onClick={() => setDeleteId(collection.id)}
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
+                                    <MoreVertical className="h-4 w-4" />
+                                    <span className="sr-only">
+                                      Actions for {collection.name}
+                                    </span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem asChild>
+                                    <Link
+                                      href={`/admin/collections/${collection.id}`}
+                                    >
+                                      <Pencil className="mr-2 h-4 w-4" />
+                                      Edit
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleDuplicate(collection.id)
+                                    }
+                                    disabled={duplicateMutation.isPending}
+                                  >
+                                    <Copy className="mr-2 h-4 w-4" />
+                                    Duplicate
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-red-600 focus:text-red-600"
+                                    onClick={() =>
+                                      setDeleteId(collection.id)
+                                    }
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </Card>
 
                 {/* Pagination */}
                 {totalPages > 1 && (

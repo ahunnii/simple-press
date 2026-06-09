@@ -138,6 +138,12 @@ export const collectionsRouter = createTRPCRouter({
       // Ensure unique slug
       let counter = 1;
       while (true) {
+        if (counter > 1000) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Could not generate a unique URL slug.",
+          });
+        }
         const existing = await ctx.db.collection.findUnique({
           where: {
             businessId_slug: {
@@ -152,6 +158,22 @@ export const collectionsRouter = createTRPCRouter({
         counter++;
       }
 
+      // Validate product ownership before writing
+      const productIds = input.productIds;
+      if (productIds.length > 0) {
+        const owned = await ctx.db.product.findMany({
+          where: { id: { in: productIds }, businessId },
+          select: { id: true },
+        });
+        const ownedSet = new Set(owned.map((p) => p.id));
+        if (productIds.some((id) => !ownedSet.has(id))) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "One or more products were not found in your store.",
+          });
+        }
+      }
+
       // Get max sort order
       const maxSort = await ctx.db.collection.findFirst({
         where: { businessId },
@@ -159,20 +181,34 @@ export const collectionsRouter = createTRPCRouter({
         select: { sortOrder: true },
       });
 
-      const collection = await ctx.db.collection.create({
-        data: {
-          businessId,
-          name: input.name,
-          slug,
-          description: input.description,
-          imageUrl: input.imageUrl,
-          published: input.published,
-          metaTitle: input.metaTitle,
-          metaDescription: input.metaDescription,
-          metaKeywords: input.metaKeywords,
-          ogImage: input.ogImage,
-          sortOrder: (maxSort?.sortOrder ?? 0) + 1,
-        },
+      const collection = await ctx.db.$transaction(async (tx) => {
+        const created = await tx.collection.create({
+          data: {
+            businessId,
+            name: input.name,
+            slug,
+            description: input.description,
+            imageUrl: input.imageUrl,
+            published: input.published,
+            metaTitle: input.metaTitle,
+            metaDescription: input.metaDescription,
+            metaKeywords: input.metaKeywords,
+            ogImage: input.ogImage,
+            sortOrder: (maxSort?.sortOrder ?? 0) + 1,
+          },
+        });
+
+        if (productIds.length > 0) {
+          await tx.collectionProduct.createMany({
+            data: productIds.map((productId, i) => ({
+              collectionId: created.id,
+              productId,
+              sortOrder: i,
+            })),
+          });
+        }
+
+        return created;
       });
 
       return collection;
@@ -184,7 +220,7 @@ export const collectionsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const { id, ...updates } = input;
+      const { id, productIds, ...updates } = input;
 
       // Get collection with business
       const collection = await ctx.db.collection.findUnique({
@@ -212,6 +248,12 @@ export const collectionsRouter = createTRPCRouter({
         // Ensure unique
         let counter = 1;
         while (true) {
+          if (counter > 1000) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Could not generate a unique URL slug.",
+            });
+          }
           const existing = await ctx.db.collection.findUnique({
             where: {
               businessId_slug: {
@@ -227,12 +269,55 @@ export const collectionsRouter = createTRPCRouter({
         }
       }
 
-      const updated = await ctx.db.collection.update({
-        where: { id },
-        data: {
-          ...updates,
-          slug,
-        },
+      // Validate product ownership before writing
+      if (productIds.length > 0) {
+        const owned = await ctx.db.product.findMany({
+          where: { id: { in: productIds }, businessId },
+          select: { id: true },
+        });
+        const ownedSet = new Set(owned.map((p) => p.id));
+        if (productIds.some((pid) => !ownedSet.has(pid))) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "One or more products were not found in your store.",
+          });
+        }
+      }
+
+      const existing = await ctx.db.collectionProduct.findMany({
+        where: { collectionId: id },
+        select: { productId: true },
+      });
+
+      const currentIds = new Set(existing.map((cp) => cp.productId));
+      const inputIdSet = new Set(productIds);
+      const toRemove = [...currentIds].filter((pid) => !inputIdSet.has(pid));
+
+      const updated = await ctx.db.$transaction(async (tx) => {
+        const result = await tx.collection.update({
+          where: { id },
+          data: {
+            ...updates,
+            slug,
+          },
+        });
+
+        if (toRemove.length > 0) {
+          await tx.collectionProduct.deleteMany({
+            where: { collectionId: id, productId: { in: toRemove } },
+          });
+        }
+
+        for (let i = 0; i < productIds.length; i++) {
+          const productId = productIds[i]!;
+          await tx.collectionProduct.upsert({
+            where: { collectionId_productId: { collectionId: id, productId } },
+            create: { collectionId: id, productId, sortOrder: i },
+            update: { sortOrder: i },
+          });
+        }
+
+        return result;
       });
 
       return updated;
@@ -281,6 +366,18 @@ export const collectionsRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Collection not found",
+        });
+      }
+
+      // Validate product belongs to this business
+      const ownedProduct = await ctx.db.product.findFirst({
+        where: { id: input.productId, businessId },
+        select: { id: true },
+      });
+      if (!ownedProduct) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found in your store.",
         });
       }
 
@@ -368,6 +465,21 @@ export const collectionsRouter = createTRPCRouter({
         });
       }
 
+      // Validate product ownership before writing
+      if (productIds.length > 0) {
+        const owned = await ctx.db.product.findMany({
+          where: { id: { in: productIds }, businessId },
+          select: { id: true },
+        });
+        const ownedSet = new Set(owned.map((p) => p.id));
+        if (productIds.some((id) => !ownedSet.has(id))) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "One or more products were not found in your store.",
+          });
+        }
+      }
+
       const existing = await ctx.db.collectionProduct.findMany({
         where: { collectionId },
         select: { productId: true },
@@ -428,6 +540,12 @@ export const collectionsRouter = createTRPCRouter({
       let slug = baseSlug;
       let counter = 1;
       while (true) {
+        if (counter > 1000) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Could not generate a unique URL slug.",
+          });
+        }
         const existing = await ctx.db.collection.findUnique({
           where: { businessId_slug: { businessId, slug } },
         });

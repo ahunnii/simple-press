@@ -26,20 +26,20 @@ export const collectionFormSchema = z.object({
   metaKeywords: z.string().optional().nullable(),
   ogImage: z.string().url().optional().nullable(),
   imageFile: z.instanceof(File).optional().nullable(),
-  productIds: z.array(z.string()),
+  productIds: z
+    .array(z.string())
+    .max(500, "Too many products in one collection"),
 });
 
 export type CollectionFormData = z.infer<typeof collectionFormSchema>;
 
 export const collectionCreateSchema = collectionFormSchema.omit({
   imageFile: true,
-  productIds: true,
 });
 
 export const collectionUpdateSchema = collectionFormSchema
   .omit({
     imageFile: true,
-    productIds: true,
   })
   .extend({
     id: z.string(),
@@ -52,14 +52,22 @@ export const collectionModifyProductSchema = z.object({
 
 export const collectionSetProductsSchema = z.object({
   collectionId: z.string(),
-  productIds: z.array(z.string()),
+  productIds: z
+    .array(z.string())
+    .max(500, "Too many products in one collection"),
 });
 
 export const collectionBulkPublishSchema = z.object({
-  ids: z.array(z.string()).min(1, "At least one collection id is required"),
+  ids: z
+    .array(z.string())
+    .min(1, "At least one collection id is required")
+    .max(1000, "Too many collections selected"),
   published: z.boolean(),
 });
 
 export const collectionBulkDeleteSchema = z.object({
-  ids: z.array(z.string()).min(1, "At least one collection id is required"),
+  ids: z
+    .array(z.string())
+    .min(1, "At least one collection id is required")
+    .max(1000, "Too many collections selected"),
 });

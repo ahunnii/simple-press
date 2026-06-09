@@ -224,7 +224,7 @@ export function DiscountForm({ initialDiscount }: Props) {
               </Button>
               <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
               <div className="hidden min-w-0 items-center gap-2 sm:flex">
-                <h1 className="text-base font-medium">
+                <h1 className="truncate text-base font-medium">
                   {initialDiscount
                     ? form.watch("code") || "Edit Discount"
                     : "New Discount"}
@@ -245,10 +245,13 @@ export function DiscountForm({ initialDiscount }: Props) {
                 control={form.control}
                 name="active"
                 render={({ field }) => (
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="active">Active</Label>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Label htmlFor="active" className="text-sm">
+                      Active
+                    </Label>
                     <Switch
                       id="active"
+                      aria-label="Active"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />

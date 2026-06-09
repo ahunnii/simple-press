@@ -614,7 +614,7 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
               </Button>
               <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
               <div className="hidden min-w-0 items-center gap-2 sm:flex">
-                <h1 className="text-base font-medium">
+                <h1 className="truncate text-base font-medium">
                   {product
                     ? form.watch("name") || "Edit Product"
                     : "New Product"}
@@ -635,10 +635,13 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                 control={form.control}
                 name="published"
                 render={({ field }) => (
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="published">Published</Label>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Label htmlFor="published" className="text-sm">
+                      Published
+                    </Label>
                     <Switch
                       id="published"
+                      aria-label="Published"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
