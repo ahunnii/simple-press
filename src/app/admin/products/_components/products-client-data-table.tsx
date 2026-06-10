@@ -23,7 +23,7 @@ import {
 import { DeleteProductAlertDialog } from "./delete-product-alert-dialog";
 
 type Props = {
-  products: RouterOutputs["product"]["secureListAll"];
+  products: RouterOutputs["product"]["secureList"]["products"];
 };
 
 export function ProductsTable({ products }: Props) {

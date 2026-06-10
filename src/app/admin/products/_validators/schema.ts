@@ -6,6 +6,7 @@ export type FormVariant = {
   compareAtPrice?: number; // in cents
   inventoryQty: number;
   options: Record<string, string>; // { size: "Small", color: "Red" }
+  imageUrl?: string | null;
 };
 
 export type FormVariantOption = {

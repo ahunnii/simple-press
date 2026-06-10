@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { useCart } from "~/providers/cart-context";
 
 type Props = {
@@ -16,12 +17,30 @@ export function ModernVariantSelector({
   setSelectedVariantId,
 }: Props) {
   const { addItem } = useCart();
+  const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+
+  useEffect(() => {
+    setVariantImageUrl(selectedVariant?.imageUrl ?? null);
+  }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  const BACKORDER_MAX = 100;
+  const isBackordered =
+    product.trackInventory &&
+    !!product.allowBackorders &&
+    (selectedVariant?.inventoryQty ?? 0) === 0;
+  const effectiveMax = !product.trackInventory
+    ? BACKORDER_MAX
+    : (selectedVariant?.inventoryQty ?? 0) > 0
+      ? (selectedVariant?.inventoryQty ?? 0)
+      : product.allowBackorders
+        ? BACKORDER_MAX
+        : 0;
 
   const handleAddToCart = () => {
     if (!selectedVariant) return;
@@ -33,9 +52,9 @@ export function ModernVariantSelector({
         productName: product.name,
         variantName: selectedVariant.name,
         price: selectedVariant.price ?? product.price,
-        imageUrl: product.images[0]?.url ?? null,
+        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
         sku: selectedVariant.sku,
-        maxInventory: selectedVariant.inventoryQty,
+        maxInventory: effectiveMax,
       },
       quantity,
     );
@@ -91,7 +110,7 @@ export function ModernVariantSelector({
       </div>
 
       {/* Quantity Selection */}
-      {selectedVariant && selectedVariant.inventoryQty > 0 && (
+      {selectedVariant && effectiveMax > 0 && (
         <div role="group" aria-label="Quantity">
           <span className="text-foreground mb-3 block text-xs font-semibold tracking-widest uppercase">
             Quantity
@@ -115,14 +134,8 @@ export function ModernVariantSelector({
             </span>
             <button
               type="button"
-              onClick={() =>
-                setQuantity(
-                  product.trackInventory
-                    ? Math.min(selectedVariant.inventoryQty, quantity + 1)
-                    : quantity + 1,
-                )
-              }
-              disabled={quantity >= selectedVariant.inventoryQty}
+              onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+              disabled={quantity >= effectiveMax}
               className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
               aria-label="Increase quantity"
             >
@@ -130,7 +143,9 @@ export function ModernVariantSelector({
             </button>
           </div>
           <p className="text-muted-foreground mt-2 text-sm">
-            {selectedVariant.inventoryQty} available
+            {isBackordered
+              ? "Backordered — ships when available"
+              : `${selectedVariant.inventoryQty} available`}
           </p>
         </div>
       )}

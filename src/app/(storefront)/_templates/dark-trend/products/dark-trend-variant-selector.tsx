@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 
@@ -17,12 +18,31 @@ export function DarkTrendVariantSelector({
   setSelectedVariantId,
 }: Props) {
   const { addItem } = useCart();
+  const { setVariantImageUrl } = useVariantImage();
+
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [liveMessage, setLiveMessage] = useState("");
+
+  useEffect(() => {
+    setVariantImageUrl(selectedVariant?.imageUrl ?? null);
+  }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  const BACKORDER_MAX = 100;
+  const isBackordered =
+    product.trackInventory &&
+    !!product.allowBackorders &&
+    (selectedVariant?.inventoryQty ?? 0) === 0;
+  const effectiveMax = !product.trackInventory
+    ? BACKORDER_MAX
+    : (selectedVariant?.inventoryQty ?? 0) > 0
+      ? (selectedVariant?.inventoryQty ?? 0)
+      : product.allowBackorders
+        ? BACKORDER_MAX
+        : 0;
 
   const handleAddToCart = () => {
     if (!selectedVariant) return;
@@ -34,9 +54,9 @@ export function DarkTrendVariantSelector({
         productName: product.name,
         variantName: selectedVariant.name,
         price: selectedVariant.price ?? product.price,
-        imageUrl: product.images[0]?.url ?? null,
+        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
         sku: selectedVariant.sku,
-        maxInventory: selectedVariant.inventoryQty,
+        maxInventory: effectiveMax,
       },
       quantity, // ← Add specified quantity
     );
@@ -54,7 +74,11 @@ export function DarkTrendVariantSelector({
     }, 2000);
   };
 
-  const isCartDisabled = !selectedVariant || selectedVariant.inventoryQty === 0;
+  const isCartDisabled =
+    !selectedVariant ||
+    (product.trackInventory &&
+      selectedVariant.inventoryQty === 0 &&
+      !product.allowBackorders);
 
   return (
     <div className="space-y-4">
@@ -75,7 +99,14 @@ export function DarkTrendVariantSelector({
           </span>
           <div className="flex flex-wrap gap-3">
             {product.variants.map((variant) => {
-              const isOutOfStock = variant.inventoryQty === 0;
+              const isOutOfStock =
+                product.trackInventory &&
+                variant.inventoryQty === 0 &&
+                !product.allowBackorders;
+              const isBackorderVariant =
+                product.trackInventory &&
+                variant.inventoryQty === 0 &&
+                !!product.allowBackorders;
               return (
                 <Button
                   key={variant.id}
@@ -97,6 +128,7 @@ export function DarkTrendVariantSelector({
                 >
                   {variant.name}
                   {isOutOfStock && " (Out of Stock)"}
+                  {isBackorderVariant && " (Pre-order)"}
                 </Button>
               );
             })}
@@ -136,12 +168,8 @@ export function DarkTrendVariantSelector({
 
               <Button
                 variant="outline"
-                onClick={() =>
-                  setQuantity(
-                    Math.min(selectedVariant.inventoryQty, quantity + 1),
-                  )
-                }
-                disabled={quantity >= selectedVariant.inventoryQty}
+                onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+                disabled={quantity >= effectiveMax}
                 className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
                 aria-label="Increase quantity"
                 aria-describedby="dt-variant-stock-msg"
@@ -149,7 +177,9 @@ export function DarkTrendVariantSelector({
                 <Plus className="h-4 w-4" aria-hidden="true" />
               </Button>
               <span id="dt-variant-stock-msg" className="text-sm text-white/60">
-                {selectedVariant.inventoryQty} available
+                {isBackordered
+                  ? "Backordered — ships when available"
+                  : `${selectedVariant.inventoryQty} available`}
               </span>
             </div>
           </div>

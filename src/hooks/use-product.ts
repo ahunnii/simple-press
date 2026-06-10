@@ -160,7 +160,7 @@ export function useProduct(
           displayCompareAtPrice && displayCompareAtPrice > displayPrice
             ? displayCompareAtPrice
             : null,
-        imageUrl: product.images[0]?.url ?? null,
+        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
         sku: selectedVariant?.sku ?? null,
         maxInventory, // Pass max for validation
       },

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { useCart } from "~/providers/cart-context";
 
 type VariantSelectorProps = {
@@ -19,11 +20,30 @@ export function ElegantVariantSelector({
   setSelectedVariantId,
 }: VariantSelectorProps) {
   const { addItem } = useCart();
+  const { setVariantImageUrl } = useVariantImage();
+
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+
+  useEffect(() => {
+    setVariantImageUrl(selectedVariant?.imageUrl ?? null);
+  }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  const BACKORDER_MAX = 100;
+  const isBackordered =
+    product.trackInventory &&
+    !!product.allowBackorders &&
+    (selectedVariant?.inventoryQty ?? 0) === 0;
+  const effectiveMax = !product.trackInventory
+    ? BACKORDER_MAX
+    : (selectedVariant?.inventoryQty ?? 0) > 0
+      ? (selectedVariant?.inventoryQty ?? 0)
+      : product.allowBackorders
+        ? BACKORDER_MAX
+        : 0;
 
   const handleAddToCart = () => {
     if (!selectedVariant) return;
@@ -35,9 +55,9 @@ export function ElegantVariantSelector({
         productName: product.name,
         variantName: selectedVariant.name,
         price: selectedVariant.price ?? product.price,
-        imageUrl: product.images[0]?.url ?? null,
+        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
         sku: selectedVariant.sku,
-        maxInventory: selectedVariant.inventoryQty,
+        maxInventory: effectiveMax,
       },
       quantity,
     );
@@ -71,7 +91,14 @@ export function ElegantVariantSelector({
         >
           {product.variants.map((variant) => {
             const isSelected = selectedVariant?.id === variant.id;
-            const outOfStock = variant.inventoryQty === 0;
+            const outOfStock =
+              product.trackInventory &&
+              variant.inventoryQty === 0 &&
+              !product.allowBackorders;
+            const isBackorderVariant =
+              product.trackInventory &&
+              variant.inventoryQty === 0 &&
+              !!product.allowBackorders;
             return (
               <button
                 key={variant.id}
@@ -87,6 +114,7 @@ export function ElegantVariantSelector({
               >
                 {variant.name}
                 {outOfStock && " · sold out"}
+                {isBackorderVariant && " · pre-order"}
               </button>
             );
           })}
@@ -94,7 +122,7 @@ export function ElegantVariantSelector({
       </div>
 
       {/* Qty stepper */}
-      {selectedVariant && selectedVariant.inventoryQty > 0 && (
+      {selectedVariant && effectiveMax > 0 && (
         <div style={{ marginBottom: 24 }}>
           <div
             style={{
@@ -157,12 +185,8 @@ export function ElegantVariantSelector({
             </span>
             <button
               type="button"
-              onClick={() =>
-                setQuantity(
-                  Math.min(selectedVariant.inventoryQty, quantity + 1),
-                )
-              }
-              disabled={quantity >= selectedVariant.inventoryQty}
+              onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+              disabled={quantity >= effectiveMax}
               aria-label="Increase quantity"
               style={{
                 width: 28,
@@ -173,19 +197,16 @@ export function ElegantVariantSelector({
                 borderRadius: 999,
                 border: "none",
                 background: "transparent",
-                cursor:
-                  quantity >= selectedVariant.inventoryQty
-                    ? "not-allowed"
-                    : "pointer",
+                cursor: quantity >= effectiveMax ? "not-allowed" : "pointer",
                 color:
-                  quantity >= selectedVariant.inventoryQty
+                  quantity >= effectiveMax
                     ? "var(--el-ink-mute, #9a9485)"
                     : "var(--el-ink, #1c1a17)",
               }}
             >
               <Plus aria-hidden={true} style={{ width: 13, height: 13 }} />
             </button>
-            {selectedVariant.inventoryQty <= 5 && (
+            {isBackordered ? (
               <span
                 style={{
                   fontSize: 11,
@@ -195,10 +216,24 @@ export function ElegantVariantSelector({
                   letterSpacing: "0.1em",
                 }}
               >
-                {selectedVariant.inventoryQty === 1
-                  ? "Last one"
-                  : `${selectedVariant.inventoryQty} left`}
+                Backordered — ships when available
               </span>
+            ) : (
+              selectedVariant.inventoryQty <= 5 && (
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: "var(--el-ink-soft, #6b6659)",
+                    paddingRight: 8,
+                    fontFamily: "var(--font-mono, ui-monospace)",
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  {selectedVariant.inventoryQty === 1
+                    ? "Last one"
+                    : `${selectedVariant.inventoryQty} left`}
+                </span>
+              )
             )}
           </div>
         </div>
@@ -209,7 +244,7 @@ export function ElegantVariantSelector({
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={!selectedVariant || selectedVariant.inventoryQty === 0}
+          disabled={!selectedVariant || effectiveMax === 0}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -224,18 +259,16 @@ export function ElegantVariantSelector({
             fontWeight: 500,
             background: isAdded
               ? "var(--el-sage, #4a5240)"
-              : !selectedVariant || selectedVariant.inventoryQty === 0
+              : !selectedVariant || effectiveMax === 0
                 ? "var(--el-cream-3, #e0d9c8)"
                 : "var(--el-ink, #1c1a17)",
             color:
-              !selectedVariant || selectedVariant.inventoryQty === 0
+              !selectedVariant || effectiveMax === 0
                 ? "var(--el-ink-soft, #6b6659)"
                 : "var(--el-paper, #fbf8f2)",
             border: "none",
             cursor:
-              !selectedVariant || selectedVariant.inventoryQty === 0
-                ? "not-allowed"
-                : "pointer",
+              !selectedVariant || effectiveMax === 0 ? "not-allowed" : "pointer",
             fontFamily: "var(--font-sans, sans-serif)",
             transition: `background 0.4s ${ease}`,
           }}

@@ -8,6 +8,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import type { Product } from "~/types";
 import { parseCardAdditionalFields } from "~/lib/products";
 import {
@@ -84,6 +85,16 @@ export function SledgeProductPage({
   const [activeTab, setActiveTab] = useState<"description" | "additional">(
     "description",
   );
+
+  const { variantImageUrl } = useVariantImage();
+  // Jump to the variant's image when the selected variant changes.
+  // Depend only on variantImageUrl so manual thumbnail clicks are not overridden.
+  useEffect(() => {
+    if (!variantImageUrl) return;
+    const idx = product.images.findIndex((img) => img.url === variantImageUrl);
+    if (idx >= 0) setActiveImg(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variantImageUrl]);
 
   // Lightbox focus management
   const lightboxCloseRef = useRef<HTMLButtonElement>(null);

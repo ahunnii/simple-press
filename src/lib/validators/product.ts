@@ -29,6 +29,7 @@ export const variantSchema = z.object({
   compareAtPrice: z.coerce.number().nonnegative().optional(),
   inventoryQty: z.coerce.number().int().nonnegative(),
   options: z.record(z.string(), z.string()),
+  imageUrl: z.string().url().optional().nullable(),
 });
 
 export const productFormSchema = z.object({
@@ -70,4 +71,23 @@ export const productUpdateSchema = productFormSchema
     variants: z.array(variantSchema),
   });
 
+export const productListFiltersSchema = z
+  .object({
+    search: z.string().optional(),
+    status: z.enum(["all", "published", "draft"]).optional(),
+    sort: z
+      .enum([
+        "newest",
+        "oldest",
+        "name-asc",
+        "name-desc",
+        "price-asc",
+        "price-desc",
+      ])
+      .optional(),
+    page: z.number().int().positive().optional(),
+  })
+  .optional();
+
 export type ProductFormSchema = z.infer<typeof productFormSchema>;
+export type ProductListFiltersSchema = z.infer<typeof productListFiltersSchema>;

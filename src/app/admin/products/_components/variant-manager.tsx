@@ -1,9 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2, X } from "lucide-react";
+import { ImageIcon, Plus, Trash2, X } from "lucide-react";
+import { toast } from "sonner";
 
-import type { FormVariant, FormVariantOption } from "../_validators/schema";
+import type { FormProductImage, FormVariant, FormVariantOption } from "../_validators/schema";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -16,6 +27,13 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { NumberInput } from "~/components/ui/number-input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+
+const MAX_VARIANTS = 100;
 
 type Props = {
   variants: FormVariant[];
@@ -24,6 +42,7 @@ type Props = {
   trackInventory?: boolean;
   basePrice: number; // in cents
   existingVariantOptions: FormVariantOption[];
+  images: FormProductImage[];
 };
 
 export function VariantManager({
@@ -32,6 +51,7 @@ export function VariantManager({
   trackInventory = false,
   basePrice,
   existingVariantOptions,
+  images,
 }: Props) {
   const initialOptions = existingVariantOptions ?? [
     { name: "Size", values: [] },
@@ -51,6 +71,10 @@ export function VariantManager({
   // Bulk edit inputs
   const [bulkPriceInput, setBulkPriceInput] = useState<number | null>(null);
   const [bulkQtyInput, setBulkQtyInput] = useState<number | null>(null);
+
+  // Regen-confirm dialog state
+  const [showRegenConfirm, setShowRegenConfirm] = useState(false);
+  const pendingRegen = useRef<{ merged: FormVariant[]; droppedCount: number } | null>(null);
 
   // Reset selection when the number of variants changes
   useEffect(() => {
@@ -111,18 +135,12 @@ export function VariantManager({
     }
   }, [showOptionsEditor, variantOptions]);
 
-  // Generate all variant combinations from options
-  const generateVariants = () => {
-    if (variantOptions.every((opt) => opt.values.length === 0)) {
-      return [];
-    }
-
-    // Get options that have values
-    const activeOptions = variantOptions.filter((opt) => opt.values.length > 0);
-
+  // Generate all variant combinations from a validated set of active options.
+  const generateVariantsFromActive = (
+    activeOptions: Array<{ name: string; values: string[] }>,
+  ): FormVariant[] => {
     if (activeOptions.length === 0) return [];
 
-    // Generate all combinations
     const combinations: FormVariant[] = [];
 
     const generate = (
@@ -131,7 +149,7 @@ export function VariantManager({
     ) => {
       if (optionIndex === activeOptions.length) {
         const name = activeOptions
-          .map((opt) => currentOptions[opt.name])
+          .map((opt) => currentOptions[opt.name] ?? "")
           .join(" / ");
 
         combinations.push({
@@ -144,11 +162,9 @@ export function VariantManager({
       }
 
       const option = activeOptions[optionIndex];
-      for (const value of option?.values ?? []) {
-        generate(
-          { ...currentOptions, [option?.name ?? ""]: value },
-          optionIndex + 1,
-        );
+      if (!option) return;
+      for (const value of option.values) {
+        generate({ ...currentOptions, [option.name]: value }, optionIndex + 1);
       }
     };
 
@@ -157,7 +173,41 @@ export function VariantManager({
   };
 
   const handleGenerateVariants = () => {
-    const newVariants = generateVariants();
+    // 1. Separate options that have values but no name from truly active options.
+    const optionsWithValues = variantOptions.filter(
+      (opt) => opt.values.length > 0,
+    );
+    const unnamedWithValues = optionsWithValues.filter(
+      (opt) => opt.name.trim() === "",
+    );
+
+    // 2. Reject unnamed value-bearing options.
+    if (unnamedWithValues.length > 0) {
+      toast.error("Every option with values needs a name.");
+      return;
+    }
+
+    // Active = trimmed name AND at least one value.
+    const activeOptions = variantOptions
+      .filter((opt) => opt.name.trim() !== "" && opt.values.length > 0)
+      .map((opt) => ({ name: opt.name.trim(), values: opt.values }));
+
+    // 3. Require at least one active option.
+    if (activeOptions.length === 0) {
+      toast.error("Add at least one option with a name and at least one value.");
+      return;
+    }
+
+    // 4. Cap combinations.
+    const count = activeOptions.reduce((acc, opt) => acc * opt.values.length, 1);
+    if (count > MAX_VARIANTS) {
+      toast.error(
+        `That's ${count} combinations — the maximum is ${MAX_VARIANTS}. Reduce your options or values.`,
+      );
+      return;
+    }
+
+    const newVariants = generateVariantsFromActive(activeOptions);
 
     // Merge with existing variants (preserve custom prices, SKUs, etc.)
     const merged = newVariants.map((newVar) => {
@@ -167,8 +217,35 @@ export function VariantManager({
       return existing ?? newVar;
     });
 
+    // 5. Warn before dropping existing variants.
+    const newOptionsKeys = new Set(merged.map((v) => JSON.stringify(v.options)));
+    const droppedCount = variants.filter(
+      (v) => !newOptionsKeys.has(JSON.stringify(v.options)),
+    ).length;
+
+    if (variants.length > 0 && droppedCount > 0) {
+      pendingRegen.current = { merged, droppedCount };
+      setShowRegenConfirm(true);
+      return;
+    }
+
+    // Nothing dropped — apply immediately.
     onChange(merged);
     setShowOptionsEditor(false);
+  };
+
+  const confirmRegen = () => {
+    if (pendingRegen.current) {
+      onChange(pendingRegen.current.merged);
+      pendingRegen.current = null;
+    }
+    setShowRegenConfirm(false);
+    setShowOptionsEditor(false);
+  };
+
+  const cancelRegen = () => {
+    pendingRegen.current = null;
+    setShowRegenConfirm(false);
   };
 
   const updateVariant = <K extends keyof FormVariant>(
@@ -406,6 +483,82 @@ export function VariantManager({
                     aria-label={`Select variant ${variant.name}`}
                   />
 
+                  {/* Variant image picker */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label={`Set image for ${variant.name}`}
+                        disabled={images.length === 0}
+                        title={
+                          images.length === 0
+                            ? "Add product images first"
+                            : variant.imageUrl
+                              ? "Change variant image"
+                              : "Assign a gallery image"
+                        }
+                        className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded border bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {variant.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={variant.imageUrl}
+                            alt={`Image for ${variant.name}`}
+                            className="h-12 w-12 rounded object-cover"
+                          />
+                        ) : (
+                          <ImageIcon className="h-5 w-5 text-gray-400" />
+                        )}
+                      </button>
+                    </PopoverTrigger>
+                    {images.length > 0 && (
+                      <PopoverContent className="w-56 p-2" align="start">
+                        <p className="mb-2 text-xs font-medium text-gray-500">
+                          Pick a gallery image
+                        </p>
+                        <div className="grid grid-cols-4 gap-1">
+                          {/* "None" option */}
+                          <button
+                            type="button"
+                            aria-label="Remove variant image"
+                            onClick={() =>
+                              updateVariant(index, "imageUrl", null)
+                            }
+                            className={`flex h-10 w-10 items-center justify-center rounded border text-xs text-gray-400 hover:border-gray-400 ${
+                              !variant.imageUrl
+                                ? "border-blue-500 ring-1 ring-blue-500"
+                                : "border-gray-200"
+                            }`}
+                          >
+                            None
+                          </button>
+                          {images.map((img) => (
+                            <button
+                              key={img.url}
+                              type="button"
+                              aria-label={img.altText ?? img.url}
+                              onClick={() =>
+                                updateVariant(index, "imageUrl", img.url)
+                              }
+                              className={`overflow-hidden rounded border hover:border-gray-400 ${
+                                variant.imageUrl === img.url
+                                  ? "border-blue-500 ring-1 ring-blue-500"
+                                  : "border-gray-200"
+                              }`}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={img.url}
+                                alt={img.altText ?? ""}
+                                className="h-10 w-10 object-cover"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    )}
+                  </Popover>
+
                   {/* <GripVertical className="h-4 w-4 shrink-0 text-gray-400" /> */}
 
                   <div className="grid flex-1 grid-cols-1 items-center gap-3 md:grid-cols-5">
@@ -526,6 +679,28 @@ export function VariantManager({
           </p>
         )}
       </CardContent>
+
+      {/* Confirm dialog — shown when regenerating would drop existing variants */}
+      <AlertDialog open={showRegenConfirm} onOpenChange={setShowRegenConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove existing variants?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Regenerating will remove{" "}
+              {pendingRegen.current?.droppedCount ?? 0} variant
+              {(pendingRegen.current?.droppedCount ?? 0) !== 1 ? "s" : ""} that
+              no longer match these options. Any custom prices, SKUs, or stock
+              values on those variants will be lost. Continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelRegen}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRegen}>
+              Yes, regenerate
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

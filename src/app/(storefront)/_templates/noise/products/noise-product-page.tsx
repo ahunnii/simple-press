@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -34,6 +35,16 @@ export function NoiseProductPage({
   const [activeImg, setActiveImg] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const lightboxCloseRef = useRef<HTMLButtonElement>(null);
+
+  const { variantImageUrl } = useVariantImage();
+  // Jump to the variant's image when the selected variant changes.
+  // Depend only on variantImageUrl so manual thumbnail clicks are not overridden.
+  useEffect(() => {
+    if (!variantImageUrl) return;
+    const idx = product.images.findIndex((img) => img.url === variantImageUrl);
+    if (idx >= 0) setActiveImg(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variantImageUrl]);
   const enlargeTriggerRef = useRef<HTMLButtonElement>(null);
   const reduce = useReducedMotion();
 

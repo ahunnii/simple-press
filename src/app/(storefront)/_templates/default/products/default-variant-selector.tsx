@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { useCart } from "~/providers/cart-context";
 
 type Props = {
@@ -16,11 +17,30 @@ export function DefaultVariantSelector({
   setSelectedVariantId,
 }: Props) {
   const { addItem } = useCart();
+  const { setVariantImageUrl } = useVariantImage();
+
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+
+  useEffect(() => {
+    setVariantImageUrl(selectedVariant?.imageUrl ?? null);
+  }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  const BACKORDER_MAX = 100;
+  const isBackordered =
+    product.trackInventory &&
+    !!product.allowBackorders &&
+    (selectedVariant?.inventoryQty ?? 0) === 0;
+  const effectiveMax = !product.trackInventory
+    ? BACKORDER_MAX
+    : (selectedVariant?.inventoryQty ?? 0) > 0
+      ? (selectedVariant?.inventoryQty ?? 0)
+      : product.allowBackorders
+        ? BACKORDER_MAX
+        : 0;
 
   const addToCartDisabled =
     !selectedVariant ||
@@ -39,11 +59,9 @@ export function DefaultVariantSelector({
         productName: product.name,
         variantName: selectedVariant.name,
         price: selectedVariant.price ?? product.price,
-        imageUrl: product.images[0]?.url ?? null,
+        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
         sku: selectedVariant.sku,
-        maxInventory: product.trackInventory
-          ? selectedVariant.inventoryQty
-          : undefined,
+        maxInventory: effectiveMax,
       },
       quantity,
     );
@@ -152,18 +170,8 @@ export function DefaultVariantSelector({
               </span>
               <button
                 type="button"
-                onClick={() =>
-                  setQuantity(
-                    product.trackInventory
-                      ? Math.min(selectedVariant.inventoryQty, quantity + 1)
-                      : quantity + 1,
-                  )
-                }
-                disabled={
-                  product.trackInventory &&
-                  !product.allowBackorders &&
-                  quantity >= selectedVariant.inventoryQty
-                }
+                onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+                disabled={quantity >= effectiveMax}
                 aria-label="Increase quantity"
                 className="flex h-full flex-1 items-center justify-center rounded-r-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6]"
               >
@@ -190,18 +198,15 @@ export function DefaultVariantSelector({
           </div>
 
           {/* Stock hint */}
-          {product.trackInventory && selectedVariant.inventoryQty > 0 && (
+          {product.trackInventory && (
             <p className="text-xs text-[#6b6b6b]">
-              {selectedVariant.inventoryQty} available
+              {isBackordered
+                ? "Pre-order — ships when available"
+                : selectedVariant.inventoryQty > 0
+                  ? `${selectedVariant.inventoryQty} available`
+                  : null}
             </p>
           )}
-          {product.trackInventory &&
-            selectedVariant.inventoryQty === 0 &&
-            product.allowBackorders && (
-              <p className="text-xs text-[#6b6b6b]">
-                Pre-order — ships when available
-              </p>
-            )}
         </div>
       )}
     </div>

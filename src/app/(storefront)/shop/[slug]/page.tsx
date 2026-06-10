@@ -8,6 +8,8 @@ import {
 import { api } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
 
+import { VariantImageProvider } from "../../_components/product-page/variant-image-context";
+
 import { BambooProductPage } from "../../_templates/bamboo/products/bamboo-product-page";
 import { DarkTrendProductPage } from "../../_templates/dark-trend/products/dark-trend-product-page";
 import { DefaultProductPage } from "../../_templates/default/products/default-product-page";
@@ -57,7 +59,9 @@ export default async function ProductDetailPage({ params }: Props) {
   return (
     <>
       <JsonLd data={[productSchema, breadcrumbSchema]} />
-      <TemplateComponent product={product} business={business} />
+      <VariantImageProvider>
+        <TemplateComponent product={product} business={business} />
+      </VariantImageProvider>
     </>
   );
 }

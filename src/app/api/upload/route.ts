@@ -5,7 +5,7 @@ import { RejectUpload, route } from "@better-upload/server";
 import { toRouteHandler } from "@better-upload/server/adapters/next";
 
 import { env } from "~/env";
-import { checkBusiness } from "~/lib/check-business";
+import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { s3Client } from "~/lib/s3/client";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
@@ -38,6 +38,26 @@ function uniqueKey(businessId: string, prefix: string, ext: string): string {
   return `${businessId}/${prefix}-${crypto.randomBytes(8).toString("hex")}${ext}`;
 }
 
+async function requireBusinessManager(req: Request) {
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session) throw new RejectUpload("Not logged in!");
+  const business = await checkBusiness();
+  if (!business) throw new RejectUpload("Business not found!");
+  const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
+  if (!isPlatformAdmin) {
+    const membership = await checkBusinessMembership(business.id, session.user.id);
+    if (
+      !membership ||
+      (membership.role !== "OWNER" && membership.role !== "MANAGER")
+    ) {
+      throw new RejectUpload(
+        "You do not have permission to upload to this business.",
+      );
+    }
+  }
+  return { business, session };
+}
+
 const router: Router = {
   client: s3Client,
   bucketName: env.NEXT_PUBLIC_STORAGE_BUCKET_NAME,
@@ -45,15 +65,9 @@ const router: Router = {
     image: route({
       fileTypes: ["image/*"],
       multipleFiles: false,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
       onBeforeUpload: async ({ req, file }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-        const business = await checkBusiness();
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
 
         const ext = safeImageExt(file.name);
         const key = uniqueKey(business.id, "image", ext);
@@ -81,14 +95,7 @@ const router: Router = {
       multipleFiles: false,
       maxFileSize: 1024 * 1024 * 20, // 20MB
       onBeforeUpload: async ({ req, file }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-        const business = await checkBusiness();
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
 
         const ext = safeVideoExt(file.name);
         const key = uniqueKey(business.id, "video", ext);
@@ -112,15 +119,9 @@ const router: Router = {
     logo: route({
       fileTypes: ["image/*"],
       multipleFiles: false,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
       onBeforeUpload: async ({ req, file }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-        const business = await checkBusiness();
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
 
         const ext = safeImageExt(file.name);
         const key = `${business.id}/logo${ext}`;
@@ -145,15 +146,10 @@ const router: Router = {
     favicon: route({
       fileTypes: ["image/*"],
       multipleFiles: false,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
       onBeforeUpload: async ({ req, file }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-        const business = await checkBusiness();
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
+
         const ext = safeImageExt(file.name);
         const key = `${business.id}/favicon${ext}`;
         return {
@@ -181,16 +177,7 @@ const router: Router = {
       maxFileSize: 1024 * 1024 * 5, // 5MB
 
       onBeforeUpload: async ({ req }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-
-        const business = await checkBusiness();
-
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
 
         return {
           generateObjectInfo: ({ file }) => {
@@ -216,16 +203,7 @@ const router: Router = {
       maxFileSize: 1024 * 1024 * 5, // 5MB
 
       onBeforeUpload: async ({ req }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-
-        const business = await checkBusiness();
-
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
 
         return {
           generateObjectInfo: ({ file }) => {

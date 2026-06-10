@@ -2,9 +2,11 @@ import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { deleteStoredObjects } from "~/lib/s3/delete";
 import {
   productCreateSchema,
   productImageSchema,
+  productListFiltersSchema,
   productUpdateSchema,
 } from "~/lib/validators/product";
 import {
@@ -126,6 +128,71 @@ export const productRouter = createTRPCRouter({
       return products;
     }),
 
+  secureList: ownerAdminProcedure
+    .use(featureGate("products"))
+    .input(productListFiltersSchema)
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const where: Prisma.ProductWhereInput = { businessId };
+
+      // Status filter
+      if (input?.status === "published") {
+        where.published = true;
+      } else if (input?.status === "draft") {
+        where.published = false;
+      }
+
+      // Search filter — match name, slug, product sku, or any variant sku
+      const searchQuery = input?.search?.trim();
+      if (searchQuery) {
+        where.OR = [
+          { name: { contains: searchQuery, mode: "insensitive" } },
+          { slug: { contains: searchQuery, mode: "insensitive" } },
+          { sku: { contains: searchQuery, mode: "insensitive" } },
+          {
+            variants: {
+              some: { sku: { contains: searchQuery, mode: "insensitive" } },
+            },
+          },
+        ];
+      }
+
+      // Sort
+      type ProductOrderBy = Prisma.ProductOrderByWithRelationInput;
+      const orderByMap: Record<string, ProductOrderBy> = {
+        newest: { createdAt: "desc" },
+        oldest: { createdAt: "asc" },
+        "name-asc": { name: "asc" },
+        "name-desc": { name: "desc" },
+        "price-asc": { price: "asc" },
+        "price-desc": { price: "desc" },
+      };
+      const orderBy: ProductOrderBy =
+        (input?.sort ? orderByMap[input.sort] : undefined) ??
+        orderByMap.newest!;
+
+      // Pagination — page size tuned for large catalogs (≈300 products → 6 pages)
+      const pageSize = 50;
+      const page = input?.page ?? 1;
+      const skip = (page - 1) * pageSize;
+
+      const include = {
+        images: { orderBy: { sortOrder: "asc" } as const, take: 1 },
+        variants: { select: { price: true, compareAtPrice: true } },
+        _count: { select: { variants: true } },
+      };
+
+      const [products, totalCount] = await ctx.db.$transaction([
+        ctx.db.product.findMany({ where, include, orderBy, skip, take: pageSize }),
+        ctx.db.product.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      return { products, totalCount, page, pageSize, totalPages };
+    }),
+
   secureGetAll: ownerAdminProcedure
     .use(featureGate("products"))
     .query(async ({ ctx }) => {
@@ -214,6 +281,7 @@ export const productRouter = createTRPCRouter({
               compareAtPrice: v.compareAtPrice ?? null,
               inventoryQty: v.inventoryQty,
               options: v.options,
+              imageUrl: v.imageUrl ?? null,
             })),
           },
         },
@@ -368,6 +436,7 @@ export const productRouter = createTRPCRouter({
                   compareAtPrice: v.compareAtPrice ?? null,
                   inventoryQty: v.inventoryQty,
                   options: v.options,
+                  imageUrl: v.imageUrl ?? null,
                 },
               });
               // Write history if qty changed
@@ -397,6 +466,7 @@ export const productRouter = createTRPCRouter({
                   compareAtPrice: v.compareAtPrice ?? null,
                   inventoryQty: v.inventoryQty,
                   options: v.options,
+                  imageUrl: v.imageUrl ?? null,
                 },
               });
               // Write history for new variant with initial stock
@@ -430,9 +500,37 @@ export const productRouter = createTRPCRouter({
     .input(z.string())
     .mutation(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
-      const product = await ctx.db.product.delete({
+
+      // Fetch image URLs before the cascade removes the rows
+      const product = await ctx.db.product.findUnique({
+        where: { id, businessId },
+        select: {
+          id: true,
+          ogImage: true,
+          images: { select: { url: true } },
+        },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+
+      await ctx.db.product.delete({
         where: { id, businessId },
       });
+
+      // Clean up S3 objects — best-effort, after the DB delete
+      const urlsToDelete = [
+        ...product.images.map((img) => img.url),
+        product.ogImage,
+      ].filter((u): u is string => !!u);
+
+      if (urlsToDelete.length > 0) {
+        await deleteStoredObjects(urlsToDelete);
+      }
 
       return {
         message: "Product deleted successfully!",
@@ -472,11 +570,20 @@ export const productRouter = createTRPCRouter({
 
       // Delete removed images
       const toDelete = [...existingIds].filter((id) => !newIds.has(id));
+      const removedUrls = product.images
+        .filter((img) => toDelete.includes(img.id))
+        .map((img) => img.url);
+
       await ctx.db.image.deleteMany({
         where: {
           id: { in: toDelete },
         },
       });
+
+      // Clean up S3 objects — best-effort, after the DB delete
+      if (removedUrls.length > 0) {
+        await deleteStoredObjects(removedUrls);
+      }
 
       // Update or create images
       await Promise.all(

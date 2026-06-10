@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { api } from "~/trpc/react";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { useProduct } from "~/hooks/use-product";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 
@@ -26,6 +27,16 @@ export function ModernProductPage({
   } = useProduct(product);
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  const { variantImageUrl } = useVariantImage();
+  // Jump to the variant's image when the selected variant changes.
+  // Depend only on variantImageUrl so manual thumbnail clicks are not overridden.
+  useEffect(() => {
+    if (!variantImageUrl) return;
+    const idx = product.images.findIndex((img) => img.url === variantImageUrl);
+    if (idx >= 0) setSelectedImageIndex(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variantImageUrl]);
 
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,

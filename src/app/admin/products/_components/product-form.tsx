@@ -244,8 +244,10 @@ export function ProductForm({
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
+  const createAnotherRef = useRef(false);
   const utils = api.useUtils();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [variantManagerKey, setVariantManagerKey] = useState(0);
 
   // Images state (kept separate as they're uploaded independently via Better Upload)
   const [images, setImages] = useState<FormProductImage[]>([]);
@@ -428,6 +430,9 @@ export function ProductForm({
   });
 
   const onSubmit = async (data: ProductFormSchema) => {
+    const createAnother = createAnotherRef.current;
+    createAnotherRef.current = false;
+
     // Convert price to cents
     const priceInCents = Math.round(data.price * 100);
     const compareAtPriceInCents = data.compareAtPrice
@@ -479,6 +484,7 @@ export function ProductForm({
           compareAtPrice: v.compareAtPrice ?? undefined,
           inventoryQty: v.inventoryQty,
           options: v.options,
+          imageUrl: v.imageUrl ?? null,
         })),
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,
@@ -547,6 +553,7 @@ export function ProductForm({
           compareAtPrice: v.compareAtPrice ?? undefined,
           inventoryQty: v.inventoryQty,
           options: v.options,
+          imageUrl: v.imageUrl ?? null,
         })),
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,
@@ -581,13 +588,19 @@ export function ProductForm({
       }
 
       if (response.productId) {
-        // toast.success("Product created!", {
-        //   action: {
-        //     label: "Create another",
-        //     onClick: () => router.push("/admin/products/new"),
-        //   },
-        // });
-        router.push(`/admin/products/${response.productId}`);
+        if (createAnother) {
+          form.reset();
+          setImages([]);
+          setVariants([]);
+          setCollectionIds([]);
+          setBaselineCollectionIds([]);
+          setOgImageFile(null);
+          setOgImageRemoved(false);
+          setVariantManagerKey((k) => k + 1);
+          window.scrollTo({ top: 0 });
+        } else {
+          router.push(`/admin/products/${response.productId}`);
+        }
       } else {
         form.reset({ ...data });
         requestAnimationFrame(() => {
@@ -716,6 +729,33 @@ export function ProductForm({
               >
                 Reset
               </Button>
+
+              {!product && (
+                <Button
+                  type="submit"
+                  variant="outline"
+                  size="sm"
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    createAnotherRef.current = true;
+                  }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="saving-indicator" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">
+                        Save &amp; create another
+                      </span>
+                      <span className="sm:hidden">Save+</span>
+                    </>
+                  )}
+                </Button>
+              )}
 
               <Button type="submit" size="sm" disabled={isSubmitting}>
                 {isSubmitting ? (
@@ -1060,6 +1100,7 @@ export function ProductForm({
 
                 {/* Variants */}
                 <VariantManager
+                  key={variantManagerKey}
                   variants={variants}
                   onChange={setVariants}
                   trackInventory={form.watch("trackInventory")}
@@ -1069,6 +1110,7 @@ export function ProductForm({
                       | Array<{ options: Record<string, string> }>
                       | undefined,
                   )}
+                  images={images}
                 />
               </TabsContent>
 

@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
@@ -36,6 +37,16 @@ export function ElegantProductPage({
   const [shown, setShown] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<TabKey>("details");
+
+  const { variantImageUrl } = useVariantImage();
+  // Jump to the variant's image when the selected variant changes.
+  // Depend only on variantImageUrl so manual thumbnail clicks are not overridden.
+  useEffect(() => {
+    if (!variantImageUrl) return;
+    const idx = product.images.findIndex((img) => img.url === variantImageUrl);
+    if (idx >= 0) setSelectedImageIndex(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variantImageUrl]);
   const tabListRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
 

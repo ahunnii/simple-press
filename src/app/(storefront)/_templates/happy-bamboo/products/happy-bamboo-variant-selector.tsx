@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
@@ -18,11 +19,30 @@ export function HappyBambooVariantSelector({
   setSelectedVariantId,
 }: Props) {
   const { addItem } = useCart();
+  const { setVariantImageUrl } = useVariantImage();
+
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+
+  useEffect(() => {
+    setVariantImageUrl(selectedVariant?.imageUrl ?? null);
+  }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  const BACKORDER_MAX = 100;
+  const isBackordered =
+    product.trackInventory &&
+    !!product.allowBackorders &&
+    (selectedVariant?.inventoryQty ?? 0) === 0;
+  const effectiveMax = !product.trackInventory
+    ? BACKORDER_MAX
+    : (selectedVariant?.inventoryQty ?? 0) > 0
+      ? (selectedVariant?.inventoryQty ?? 0)
+      : product.allowBackorders
+        ? BACKORDER_MAX
+        : 0;
 
   const addToCartDisabled =
     !selectedVariant ||
@@ -41,11 +61,9 @@ export function HappyBambooVariantSelector({
         productName: product.name,
         variantName: selectedVariant.name,
         price: selectedVariant.price ?? product.price,
-        imageUrl: product.images[0]?.url ?? null,
+        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
         sku: selectedVariant.sku,
-        maxInventory: product.trackInventory
-          ? selectedVariant.inventoryQty
-          : undefined,
+        maxInventory: effectiveMax,
       },
       quantity, // ← Add specified quantity
     );
@@ -104,7 +122,9 @@ export function HappyBambooVariantSelector({
 
       {selectedVariant && product.trackInventory && (
         <span role="status" aria-live="polite" className="text-sm">
-          {selectedVariant?.inventoryQty ?? 0} available
+          {isBackordered
+            ? "Backordered — ships when available"
+            : `${selectedVariant?.inventoryQty ?? 0} available`}
         </span>
       )}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -129,13 +149,8 @@ export function HappyBambooVariantSelector({
                 variant="ghost"
                 size="icon"
                 className="size-10"
-                onClick={() =>
-                  setQuantity(
-                    product.trackInventory
-                      ? Math.min(selectedVariant.inventoryQty, quantity + 1)
-                      : quantity + 1,
-                  )
-                }
+                onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+                disabled={quantity >= effectiveMax}
                 aria-label="Increase quantity"
               >
                 <Plus className="size-4" />
