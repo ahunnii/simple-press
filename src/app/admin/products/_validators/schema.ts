@@ -19,4 +19,6 @@ export type FormProductImage = {
   url: string;
   altText: string | null;
   sortOrder: number;
+  /** Present when this image is pending upload. `url` is a local blob: object URL. */
+  file?: File;
 };

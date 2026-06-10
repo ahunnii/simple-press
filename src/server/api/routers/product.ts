@@ -16,6 +16,27 @@ import {
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import type { DbClient } from "~/server/db";
+
+/**
+ * Deletes the given S3 objects, but only those whose URL is no longer referenced
+ * by any Image row or any Product.ogImage. Call AFTER the owning rows are removed.
+ * Best-effort (deleteStoredObjects never throws).
+ */
+async function deleteUnreferencedImageObjects(db: DbClient, urls: string[]) {
+  const unique = [...new Set(urls.filter((u): u is string => !!u))];
+  if (unique.length === 0) return;
+  const [imageRefs, ogRefs] = await Promise.all([
+    db.image.findMany({ where: { url: { in: unique } }, select: { url: true } }),
+    db.product.findMany({ where: { ogImage: { in: unique } }, select: { ogImage: true } }),
+  ]);
+  const referenced = new Set<string>([
+    ...imageRefs.map((i) => i.url),
+    ...ogRefs.map((p) => p.ogImage).filter((u): u is string => !!u),
+  ]);
+  const toDelete = unique.filter((u) => !referenced.has(u));
+  if (toDelete.length > 0) await deleteStoredObjects(toDelete);
+}
 
 export const productRouter = createTRPCRouter({
   getFeatured: publicProcedure
@@ -522,19 +543,67 @@ export const productRouter = createTRPCRouter({
         where: { id, businessId },
       });
 
-      // Clean up S3 objects — best-effort, after the DB delete
+      // Clean up S3 objects — reference-counted, best-effort, after the DB delete
       const urlsToDelete = [
         ...product.images.map((img) => img.url),
         product.ogImage,
       ].filter((u): u is string => !!u);
 
-      if (urlsToDelete.length > 0) {
-        await deleteStoredObjects(urlsToDelete);
-      }
+      await deleteUnreferencedImageObjects(ctx.db, urlsToDelete);
 
       return {
         message: "Product deleted successfully!",
         productId: product.id,
+      };
+    }),
+
+  bulkSetPublished: ownerAdminProcedure
+    .use(featureGate("products"))
+    .input(z.object({ ids: z.array(z.string()).min(1), published: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const result = await ctx.db.product.updateMany({
+        where: { id: { in: input.ids }, businessId },
+        data: { published: input.published },
+      });
+
+      return {
+        count: result.count,
+        message: `${result.count} product(s) updated`,
+      };
+    }),
+
+  bulkDelete: ownerAdminProcedure
+    .use(featureGate("products"))
+    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // Fetch image URLs before cascade removes the rows (scoped to businessId)
+      const products = await ctx.db.product.findMany({
+        where: { id: { in: input.ids }, businessId },
+        select: {
+          id: true,
+          ogImage: true,
+          images: { select: { url: true } },
+        },
+      });
+
+      const result = await ctx.db.product.deleteMany({
+        where: { id: { in: input.ids }, businessId },
+      });
+
+      // Clean up S3 objects — reference-counted, best-effort, after the DB delete
+      const urlsToDelete = products
+        .flatMap((p) => [...p.images.map((img) => img.url), p.ogImage])
+        .filter((u): u is string => !!u);
+
+      await deleteUnreferencedImageObjects(ctx.db, urlsToDelete);
+
+      return {
+        count: result.count,
+        message: `${result.count} product(s) deleted`,
       };
     }),
 
@@ -580,10 +649,8 @@ export const productRouter = createTRPCRouter({
         },
       });
 
-      // Clean up S3 objects — best-effort, after the DB delete
-      if (removedUrls.length > 0) {
-        await deleteStoredObjects(removedUrls);
-      }
+      // Clean up S3 objects — reference-counted, best-effort, after the DB delete
+      await deleteUnreferencedImageObjects(ctx.db, removedUrls);
 
       // Update or create images
       await Promise.all(
@@ -616,6 +683,123 @@ export const productRouter = createTRPCRouter({
         productId: input.productId,
         message: "Images synced successfully",
       };
+    }),
+
+  duplicate: ownerAdminProcedure
+    .use(featureGate("products"))
+    .input(z.string())
+    .mutation(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
+
+      // 1. Fetch source product (scoped to businessId)
+      const source = await ctx.db.product.findUnique({
+        where: { id, businessId },
+        include: {
+          variants: true,
+          images: true,
+          collectionProducts: { select: { collectionId: true } },
+        },
+      });
+
+      if (!source) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+
+      // 2. Compute a unique slug for this business
+      const baseSlug = `${source.slug}-copy`;
+      const candidateSlugs = [
+        baseSlug,
+        ...Array.from({ length: 49 }, (_, i) => `${baseSlug}-${i + 2}`),
+      ];
+
+      const existingSlugs = await ctx.db.product.findMany({
+        where: { businessId, slug: { in: candidateSlugs } },
+        select: { slug: true },
+      });
+      const takenSlugs = new Set(existingSlugs.map((p) => p.slug));
+      const newSlug = candidateSlugs.find((s) => !takenSlugs.has(s));
+
+      if (!newSlug) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Could not generate a unique slug for the duplicated product",
+        });
+      }
+
+      // 3. Create the duplicate in a transaction (shared S3 image URLs — reference-counted deletion handles safety)
+      const newProduct = await ctx.db.$transaction(async (tx) => {
+        return tx.product.create({
+          data: {
+            name: `${source.name} (Copy)`,
+            slug: newSlug,
+            excerpt: source.excerpt,
+            description: source.description,
+            price: source.price,
+            compareAtPrice: source.compareAtPrice,
+            cost: source.cost,
+            sku: source.sku,
+            barcode: source.barcode,
+            trackInventory: source.trackInventory,
+            inventoryQty: source.inventoryQty,
+            allowBackorders: source.allowBackorders,
+            lowInventoryThreshold: source.lowInventoryThreshold,
+            baseInventoryUnitId: source.baseInventoryUnitId,
+            baseUnitsConsumed: source.baseUnitsConsumed,
+            weight: source.weight,
+            weightUnit: source.weightUnit,
+            metaTitle: source.metaTitle,
+            metaDescription: source.metaDescription,
+            metaKeywords: source.metaKeywords,
+            ogImage: source.ogImage,
+            additionalFields: source.additionalFields
+              ? (JSON.parse(
+                  JSON.stringify(source.additionalFields),
+                ) as Prisma.InputJsonValue)
+              : undefined,
+            businessId,
+            // Reset transient/computed fields
+            published: false,
+            featured: false,
+            reservedQty: 0,
+            lowInventoryAlertSent: false,
+            outOfStockAlertSent: false,
+            sortOrder: 0,
+            variants: {
+              create: source.variants.map((v) => ({
+                name: v.name,
+                sku: v.sku,
+                barcode: v.barcode,
+                price: v.price,
+                compareAtPrice: v.compareAtPrice,
+                inventoryQty: v.inventoryQty,
+                options: JSON.parse(
+                  JSON.stringify(v.options),
+                ) as Prisma.InputJsonValue,
+                imageUrl: v.imageUrl,
+                reservedQty: 0,
+              })),
+            },
+            images: {
+              create: source.images.map((img) => ({
+                url: img.url,
+                altText: img.altText,
+                sortOrder: img.sortOrder,
+                businessId: img.businessId,
+              })),
+            },
+            collectionProducts: {
+              create: source.collectionProducts.map((cp) => ({
+                collectionId: cp.collectionId,
+              })),
+            },
+          },
+        });
+      });
+
+      return { productId: newProduct.id, message: "Product duplicated" };
     }),
 
   getProductImportHistory: ownerAdminProcedure

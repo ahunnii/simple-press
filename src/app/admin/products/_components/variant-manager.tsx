@@ -346,6 +346,7 @@ export function VariantManager({
                 <div className="flex gap-2">
                   <Input
                     placeholder="Option name (e.g., Size, Color)"
+                    aria-label={`Option ${index + 1} name`}
                     value={option.name}
                     onChange={(e) => updateOptionName(index, e.target.value)}
                     className="flex-1"
@@ -363,6 +364,7 @@ export function VariantManager({
                 </div>
                 <Input
                   placeholder="Values (comma separated, e.g., Small, Medium, Large)"
+                  aria-label={`Option ${index + 1} values (comma separated)`}
                   value={rawValuesInputs[index] ?? option.values.join(", ")}
                   onChange={(e) => updateOptionValues(index, e.target.value)}
                 />

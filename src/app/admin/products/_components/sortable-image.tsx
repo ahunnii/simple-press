@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, X } from "lucide-react";
@@ -44,11 +43,11 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
 
         {/* Image Preview */}
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded bg-gray-100">
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={image.url}
             alt={image.altText ?? "Product image"}
-            fill
-            className="object-cover"
+            className="h-24 w-24 object-cover"
           />
         </div>
 

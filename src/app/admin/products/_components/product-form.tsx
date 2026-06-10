@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useUploadFile } from "@better-upload/client";
+import { useUploadFile, useUploadFiles } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Search, Trash2, Upload, X } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -13,6 +13,7 @@ import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
+import { getStoredPath } from "~/lib/uploads";
 import { productFormSchema } from "~/lib/validators/product";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
@@ -357,6 +358,14 @@ export function ProductForm({
     },
   });
 
+  const galleryUploader = useUploadFiles({
+    api: "/api/upload",
+    route: "images",
+    onError: (error) => {
+      toast.error(error.message ?? "Image upload failed.");
+    },
+  });
+
   // Auto-generate slug from name (only for new products)
   const handleNameChange = (value: string | null) => {
     if (!value) return;
@@ -458,9 +467,47 @@ export function ProductForm({
       resolvedOgImage = data.ogImage ?? null;
     }
 
+    // Resolve gallery images: upload any pending (blob:) images before saving.
+    const pendingImages = images.filter((img) => img.file);
+    let resolvedImages = images.map((img, idx) => ({
+      id: img.id,
+      url: img.url,
+      altText: img.altText,
+      sortOrder: idx,
+    }));
+    if (pendingImages.length > 0) {
+      let galleryResult;
+      try {
+        galleryResult = await galleryUploader.upload(
+          pendingImages.map((p) => p.file!),
+        );
+      } catch {
+        toast.error("Failed to upload images.");
+        return;
+      }
+      if (galleryResult.failedFiles.length > 0) {
+        toast.error("Some images failed to upload.");
+        return;
+      }
+      const fileToUrl = new Map<File, string>();
+      for (const f of galleryResult.files) {
+        fileToUrl.set(f.raw, getStoredPath(f));
+      }
+      resolvedImages = images.map((img, idx) => ({
+        id: img.id,
+        url: img.file ? (fileToUrl.get(img.file) ?? "") : img.url,
+        altText: img.altText,
+        sortOrder: idx,
+      }));
+      if (resolvedImages.some((i) => !i.url)) {
+        toast.error("Failed to resolve uploaded images.");
+        return;
+      }
+    }
+
     if (product) {
       // Update existing product
-      imagesToSyncRef.current = images;
+      imagesToSyncRef.current = resolvedImages;
 
       await updateProductMutation.mutateAsync({
         id: product.id,
@@ -567,10 +614,10 @@ export function ProductForm({
         ogImage: resolvedOgImage ?? null,
       });
 
-      if (response.productId && images.length > 0) {
+      if (response.productId && resolvedImages.length > 0) {
         await syncImagesMutation.mutateAsync({
           productId: response.productId,
-          images: images.map((image) => ({
+          images: resolvedImages.map((image) => ({
             url: image.url,
             altText: image.altText,
             sortOrder: image.sortOrder,
@@ -614,7 +661,8 @@ export function ProductForm({
     updateProductMutation.isPending ||
     createProductMutation.isPending ||
     syncImagesMutation.isPending ||
-    ogImageUploader.isPending;
+    ogImageUploader.isPending ||
+    galleryUploader.isPending;
 
   const isDeleting = deleteProductMutation.isPending;
 
@@ -1211,39 +1259,26 @@ export function ProductForm({
                                 }
 
                                 return filtered.map((collection) => (
-                                  <div
+                                  <label
                                     key={collection.id}
                                     className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-gray-50"
-                                    onClick={() =>
-                                      setCollectionIds((prev) => {
-                                        const next = new Set(prev);
-                                        if (next.has(collection.id))
-                                          next.delete(collection.id);
-                                        else next.add(collection.id);
-                                        return [...next];
-                                      })
-                                    }
                                   >
-                                    <span
+                                    <Checkbox
                                       className="shrink-0"
-                                      onClick={(e) => e.stopPropagation()}
-                                      onKeyDown={(e) => e.stopPropagation()}
-                                    >
-                                      <Checkbox
-                                        checked={collectionIds.includes(
-                                          collection.id,
-                                        )}
-                                        onCheckedChange={() =>
-                                          setCollectionIds((prev) => {
-                                            const next = new Set(prev);
-                                            if (next.has(collection.id))
-                                              next.delete(collection.id);
-                                            else next.add(collection.id);
-                                            return [...next];
-                                          })
-                                        }
-                                      />
-                                    </span>
+                                      aria-label={collection.name}
+                                      checked={collectionIds.includes(
+                                        collection.id,
+                                      )}
+                                      onCheckedChange={() =>
+                                        setCollectionIds((prev) => {
+                                          const next = new Set(prev);
+                                          if (next.has(collection.id))
+                                            next.delete(collection.id);
+                                          else next.add(collection.id);
+                                          return [...next];
+                                        })
+                                      }
+                                    />
                                     <div className="flex-1">
                                       <p className="font-medium">
                                         {collection.name}
@@ -1257,7 +1292,7 @@ export function ProductForm({
                                           : ""}
                                       </p>
                                     </div>
-                                  </div>
+                                  </label>
                                 ));
                               })()}
                             </div>
