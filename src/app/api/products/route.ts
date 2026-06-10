@@ -32,6 +32,7 @@ export async function GET() {
         where: { published: true },
         orderBy: { createdAt: "desc" },
         select: {
+          id: true,
           name: true,
           slug: true,
           price: true,
@@ -58,6 +59,7 @@ export async function GET() {
   });
 
   const products = business.products.map((product) => ({
+    id: product.id,
     name: product.name,
     price: product.price,
     priceFormatted: formatPrice(product.price),
