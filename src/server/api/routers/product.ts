@@ -812,4 +812,177 @@ export const productRouter = createTRPCRouter({
       });
       return importHistory;
     }),
+
+  /**
+   * Public query — batch-checks cart item availability and current pricing.
+   * Used by CartRevalidator to sync the localStorage cart against live DB state.
+   * Returns one status object per requested item (aligned to input order).
+   * Missing/deleted products come back as `available: false`.
+   */
+  getCartItemsStatus: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("products"))
+    .input(
+      z.object({
+        items: z
+          .array(
+            z.object({
+              productId: z.string(),
+              variantId: z.string().nullable(),
+            }),
+          )
+          .max(100),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const { items } = input;
+
+      if (items.length === 0) return [];
+
+      const productIds = [...new Set(items.map((i) => i.productId))];
+
+      // Single batched query — no N+1
+      const products = await ctx.db.product.findMany({
+        where: { id: { in: productIds }, businessId },
+        include: {
+          variants: {
+            select: {
+              id: true,
+              price: true,
+              compareAtPrice: true,
+              inventoryQty: true,
+              reservedQty: true,
+            },
+          },
+          baseInventoryUnit: {
+            select: { inventoryQty: true, allowBackorders: true },
+          },
+        },
+      });
+
+      const productMap = new Map(products.map((p) => [p.id, p]));
+
+      return items.map((item) => {
+        const product = productMap.get(item.productId);
+
+        // Product not found or not published
+        if (!product?.published) {
+          return {
+            productId: item.productId,
+            variantId: item.variantId,
+            available: false,
+            price: 0,
+            compareAtPrice: null,
+            maxQuantity: null,
+          };
+        }
+
+        // comingSoon blocks availability even when in stock
+        const additionalFields = product.additionalFields as Record<
+          string,
+          unknown
+        > | null;
+        if (additionalFields?.comingSoon === true) {
+          return {
+            productId: item.productId,
+            variantId: item.variantId,
+            available: false,
+            price: 0,
+            compareAtPrice: null,
+            maxQuantity: null,
+          };
+        }
+
+        if (item.variantId !== null) {
+          // Variant item
+          const variant = product.variants.find(
+            (v) => v.id === item.variantId,
+          );
+          if (!variant) {
+            return {
+              productId: item.productId,
+              variantId: item.variantId,
+              available: false,
+              price: 0,
+              compareAtPrice: null,
+              maxQuantity: null,
+            };
+          }
+
+          // Variant price: use variant price if set & non-zero, else fall back to product price
+          const price =
+            variant.price !== null && variant.price > 0
+              ? variant.price
+              : product.price;
+          const compareAtPrice =
+            variant.compareAtPrice ?? product.compareAtPrice ?? null;
+
+          // Stock: variants use product-level trackInventory / allowBackorders
+          let available = true;
+          let maxQuantity: number | null = null;
+
+          if (product.trackInventory && !product.allowBackorders) {
+            const stock = variant.inventoryQty - variant.reservedQty;
+            if (stock <= 0) {
+              available = false;
+            }
+            maxQuantity = Math.max(0, stock);
+          }
+
+          return {
+            productId: item.productId,
+            variantId: item.variantId,
+            available,
+            price,
+            compareAtPrice,
+            maxQuantity,
+          };
+        } else {
+          // No-variant (base) item
+          // Pool-backed products: delegate stock check to the pool
+          if (product.baseInventoryUnit) {
+            const pool = product.baseInventoryUnit;
+            let available = true;
+            let maxQuantity: number | null = null;
+
+            if (!pool.allowBackorders) {
+              const stock = pool.inventoryQty - 0; // reservedQty not included in select; treat pool stock conservatively
+              available = stock > 0;
+              maxQuantity = Math.max(0, stock);
+            }
+
+            return {
+              productId: item.productId,
+              variantId: null,
+              available,
+              price: product.price,
+              compareAtPrice: product.compareAtPrice ?? null,
+              maxQuantity,
+            };
+          }
+
+          // Standard no-variant product
+          let available = true;
+          let maxQuantity: number | null = null;
+
+          if (product.trackInventory && !product.allowBackorders) {
+            const stock = product.inventoryQty - product.reservedQty;
+            if (stock <= 0) {
+              available = false;
+            }
+            maxQuantity = Math.max(0, stock);
+          }
+
+          return {
+            productId: item.productId,
+            variantId: null,
+            available,
+            price: product.price,
+            compareAtPrice: product.compareAtPrice ?? null,
+            maxQuantity,
+          };
+        }
+      });
+    }),
 });

@@ -10,21 +10,37 @@ import { s3Client } from "~/lib/s3/client";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
 
-const ALLOWED_IMAGE_EXTS = new Set([
+// Raster formats only — used for content uploads (product/collection/blog/OG
+// images, galleries, testimonials). SVG is intentionally excluded here: an SVG
+// can carry embedded scripts, so we don't accept it for content that is sourced
+// from owners (and, for testimonials, untrusted users).
+const ALLOWED_RASTER_IMAGE_EXTS = new Set([
   ".jpg",
   ".jpeg",
   ".png",
   ".gif",
   ".webp",
-  ".svg",
   ".avif",
 ]);
 
+// Logo/favicon may additionally be SVG — a common, legitimate format for these,
+// rendered only in controlled brand contexts.
+const ALLOWED_IMAGE_EXTS = new Set([...ALLOWED_RASTER_IMAGE_EXTS, ".svg"]);
+
 const ALLOWED_VIDEO_EXTS = new Set([".mp4", ".webm", ".mov", ".avi"]);
 
+/** Allows SVG — use only for logo/favicon. */
 function safeImageExt(filename: string): string {
   const ext = path.extname(filename).toLowerCase();
   if (!ALLOWED_IMAGE_EXTS.has(ext)) throw new RejectUpload("Invalid file type");
+  return ext;
+}
+
+/** Raster-only (no SVG) — use for all content/user image uploads. */
+function safeRasterImageExt(filename: string): string {
+  const ext = path.extname(filename).toLowerCase();
+  if (!ALLOWED_RASTER_IMAGE_EXTS.has(ext))
+    throw new RejectUpload("Invalid file type");
   return ext;
 }
 
@@ -69,7 +85,7 @@ const router: Router = {
       onBeforeUpload: async ({ req, file }) => {
         const { business } = await requireBusinessManager(req);
 
-        const ext = safeImageExt(file.name);
+        const ext = safeRasterImageExt(file.name);
         const key = uniqueKey(business.id, "image", ext);
         return {
           objectInfo: {
@@ -181,7 +197,7 @@ const router: Router = {
 
         return {
           generateObjectInfo: ({ file }) => {
-            const ext = safeImageExt(file.name);
+            const ext = safeRasterImageExt(file.name);
             const key = uniqueKey(business.id, "image", ext);
             return {
               key,
@@ -207,7 +223,7 @@ const router: Router = {
 
         return {
           generateObjectInfo: ({ file }) => {
-            const ext = safeImageExt(file.name);
+            const ext = safeRasterImageExt(file.name);
             const key = uniqueKey(business.id, "gallery", ext);
             return {
               key,
@@ -256,7 +272,7 @@ const router: Router = {
 
         return {
           generateObjectInfo: ({ file }) => {
-            const ext = safeImageExt(file.name);
+            const ext = safeRasterImageExt(file.name);
             const key = `${businessId}/testimonials/${crypto.randomBytes(8).toString("hex")}${ext}`;
             const pathName = `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${key}`;
             return {

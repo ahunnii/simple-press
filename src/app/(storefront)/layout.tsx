@@ -5,6 +5,7 @@ import { TemplateSelectorDevTool } from "~/components/development/template-selec
 import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { PreviewOverlay } from "~/components/preview/preview-overlay";
 
+import { CartRevalidator } from "./_components/cart-revalidator";
 import { BambooLayout } from "./_templates/bamboo/layout/bamboo-general-layout";
 import { DarkTrendLayout } from "./_templates/dark-trend/layout/dark-trend-layout";
 import { DefaultLayout } from "./_templates/default/layout/default-layout";
@@ -51,6 +52,7 @@ export default async function StorefrontLayout({ children }: Props) {
       <TemplateLayout business={business}>
         <>{children}</>
       </TemplateLayout>
+      <CartRevalidator />
       <PreviewOverlay />
       <TemplateSelectorDevTool />
     </HydrateClient>
