@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api, HydrateClient } from "~/trpc/server";
 import { TemplateSelectorDevTool } from "~/components/development/template-selector";
+import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { PreviewOverlay } from "~/components/preview/preview-overlay";
 
 import { BambooLayout } from "./_templates/bamboo/layout/bamboo-general-layout";
@@ -21,6 +22,16 @@ type Props = {
 export default async function StorefrontLayout({ children }: Props) {
   const business = await api.business.simplifiedGetWithProducts();
   if (!business) notFound();
+
+  if (business.maintenance?.active) {
+    return (
+      <MaintenanceScreen
+        variant={business.maintenance.variant}
+        message={business.maintenance.message}
+        businessName={business.name}
+      />
+    );
+  }
 
   const TemplateLayout =
     {

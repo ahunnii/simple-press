@@ -162,6 +162,11 @@ model Business {
   // Testimonials
   testimonialsAutoApprove Boolean @default(false) // when true, customer submissions are auto-approved
 
+  // Storefront availability (owner-controlled, storefront only)
+  maintenanceMode    Boolean @default(false)
+  maintenanceVariant String  @default("maintenance") // "maintenance" | "coming_soon"
+  maintenanceMessage String?
+
   // Analytics
   umamiWebsiteId String? // Each business gets their own website ID
   umamiEnabled   Boolean @default(false)
@@ -1060,4 +1065,15 @@ model PlatformInvite {
   @@index([email])
   @@index([code])
   @@index([businessId])
+}
+
+// ============================================
+// PLATFORM CONFIGURATION
+// ============================================
+
+model PlatformConfig {
+  id                 String   @id @default("singleton")
+  maintenanceMode    Boolean  @default(false)
+  maintenanceMessage String?
+  updatedAt          DateTime @updatedAt
 }

@@ -1,8 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
+import { getPlatformMaintenance } from "~/lib/maintenance";
 import { getSession } from "~/server/better-auth/server";
 import { api, HydrateClient } from "~/trpc/server";
+import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { AppSidebar } from "~/app/admin/_components/app-sidebar";
 
@@ -33,6 +35,19 @@ export default async function AdminLayout({ children }: Props) {
     if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
       redirect("/not-permitted");
     }
+  }
+
+  const platformMaintenance = await getPlatformMaintenance();
+  if (
+    platformMaintenance.active &&
+    session.user.platformRole !== "PLATFORM_ADMIN"
+  ) {
+    return (
+      <MaintenanceScreen
+        variant="maintenance"
+        message={platformMaintenance.message}
+      />
+    );
   }
 
   const businessName = business?.name ?? null;

@@ -479,6 +479,39 @@ export const platformRouter = createTRPCRouter({
       };
     }),
 
+  getMaintenance: platformAdminProcedure.query(async ({ ctx }) => {
+    const config = await ctx.db.platformConfig.findUnique({
+      where: { id: "singleton" },
+    });
+    return {
+      enabled: config?.maintenanceMode ?? false,
+      message: config?.maintenanceMessage ?? null,
+    };
+  }),
+
+  setMaintenance: platformAdminProcedure
+    .input(
+      z.object({
+        enabled: z.boolean(),
+        message: z.string().max(500).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.platformConfig.upsert({
+        where: { id: "singleton" },
+        create: {
+          id: "singleton",
+          maintenanceMode: input.enabled,
+          maintenanceMessage: input.message ?? null,
+        },
+        update: {
+          maintenanceMode: input.enabled,
+          maintenanceMessage: input.message ?? null,
+        },
+      });
+      return { success: true };
+    }),
+
   getDashboardStats: platformAdminProcedure.query(async ({ ctx }) => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);

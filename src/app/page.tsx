@@ -4,6 +4,7 @@ import {
 } from "~/lib/structured-data";
 import { api, HydrateClient } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
+import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { PreviewOverlay } from "~/components/preview/preview-overlay";
 
 import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
@@ -40,6 +41,16 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
 
   if (!business) {
     return <PlatformLandingPageComponent />;
+  }
+
+  if (business.maintenance?.active) {
+    return (
+      <MaintenanceScreen
+        variant={business.maintenance.variant}
+        message={business.maintenance.message}
+        businessName={business.name}
+      />
+    );
   }
 
   const TemplateComponent =

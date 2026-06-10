@@ -4,6 +4,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import {
+  getPlatformMaintenance,
+  resolveStorefrontMaintenance,
+} from "~/lib/maintenance";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { stripeClient } from "~/lib/stripe/client";
 import {
@@ -112,6 +116,9 @@ export const businessRouter = createTRPCRouter({
         shippingFlatRate: true,
         freeShippingThreshold: true,
         offersInStorePickup: true,
+        maintenanceMode: true,
+        maintenanceVariant: true,
+        maintenanceMessage: true,
         products: {
           where: { published: true },
           include: {
@@ -148,15 +155,27 @@ export const businessRouter = createTRPCRouter({
       }
     }
     // Never ship the raw draft field to clients.
-    const { stripeAccountId, ...rest } = businessData;
+    const { stripeAccountId, maintenanceMode, maintenanceVariant, maintenanceMessage, ...rest } = businessData;
     const { siteContent, ...restWithoutSiteContent } = rest;
     const sanitizedSiteContent = siteContent
       ? (({ previewCustomFields: _drop, ...safe }) => safe)(siteContent)
       : siteContent;
+
+    const platform = await getPlatformMaintenance();
+    const maintenance = resolveStorefrontMaintenance({
+      platform,
+      business: {
+        maintenanceMode,
+        maintenanceVariant,
+        maintenanceMessage: maintenanceMessage ?? null,
+      },
+    });
+
     return {
       ...restWithoutSiteContent,
       siteContent: sanitizedSiteContent,
       isStripeConnected: !!stripeAccountId,
+      maintenance,
     };
   }),
 
@@ -609,6 +628,44 @@ export const businessRouter = createTRPCRouter({
       });
       return { success: true };
     }),
+
+  updateMaintenanceMode: ownerAdminProcedure
+    .input(
+      z.object({
+        maintenanceMode: z.boolean(),
+        maintenanceVariant: z.enum(["maintenance", "coming_soon"]),
+        maintenanceMessage: z.string().max(500).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.business.update({
+        where: { id: ctx.businessId },
+        data: {
+          maintenanceMode: input.maintenanceMode,
+          maintenanceVariant: input.maintenanceVariant,
+          maintenanceMessage: input.maintenanceMessage ?? null,
+        },
+      });
+      return { success: true };
+    }),
+
+  getMaintenanceSettings: ownerAdminProcedure.query(async ({ ctx }) => {
+    const business = await ctx.db.business.findUnique({
+      where: { id: ctx.businessId },
+      select: {
+        maintenanceMode: true,
+        maintenanceVariant: true,
+        maintenanceMessage: true,
+      },
+    });
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+    return business;
+  }),
 
   getWith: ownerAdminProcedure
     .input(

@@ -168,6 +168,11 @@ export type ReviewVote = $Result.DefaultSelection<Prisma.$ReviewVotePayload>
  * 
  */
 export type PlatformInvite = $Result.DefaultSelection<Prisma.$PlatformInvitePayload>
+/**
+ * Model PlatformConfig
+ * 
+ */
+export type PlatformConfig = $Result.DefaultSelection<Prisma.$PlatformConfigPayload>
 
 /**
  * Enums
@@ -638,6 +643,16 @@ export class PrismaClient<
     * ```
     */
   get platformInvite(): Prisma.PlatformInviteDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.platformConfig`: Exposes CRUD operations for the **PlatformConfig** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PlatformConfigs
+    * const platformConfigs = await prisma.platformConfig.findMany()
+    * ```
+    */
+  get platformConfig(): Prisma.PlatformConfigDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1109,7 +1124,8 @@ export namespace Prisma {
     TestimonialInvite: 'TestimonialInvite',
     ProductReview: 'ProductReview',
     ReviewVote: 'ReviewVote',
-    PlatformInvite: 'PlatformInvite'
+    PlatformInvite: 'PlatformInvite',
+    PlatformConfig: 'PlatformConfig'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1128,7 +1144,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "product" | "productVariant" | "collection" | "collectionProduct" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "product" | "productVariant" | "collection" | "collectionProduct" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "platformConfig"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3426,6 +3442,80 @@ export namespace Prisma {
           }
         }
       }
+      PlatformConfig: {
+        payload: Prisma.$PlatformConfigPayload<ExtArgs>
+        fields: Prisma.PlatformConfigFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PlatformConfigFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformConfigPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PlatformConfigFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+          }
+          findFirst: {
+            args: Prisma.PlatformConfigFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformConfigPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PlatformConfigFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+          }
+          findMany: {
+            args: Prisma.PlatformConfigFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformConfigPayload>[]
+          }
+          create: {
+            args: Prisma.PlatformConfigCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+          }
+          createMany: {
+            args: Prisma.PlatformConfigCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PlatformConfigCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformConfigPayload>[]
+          }
+          delete: {
+            args: Prisma.PlatformConfigDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+          }
+          update: {
+            args: Prisma.PlatformConfigUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+          }
+          deleteMany: {
+            args: Prisma.PlatformConfigDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PlatformConfigUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PlatformConfigUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformConfigPayload>[]
+          }
+          upsert: {
+            args: Prisma.PlatformConfigUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+          }
+          aggregate: {
+            args: Prisma.PlatformConfigAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePlatformConfig>
+          }
+          groupBy: {
+            args: Prisma.PlatformConfigGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PlatformConfigGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PlatformConfigCountArgs<ExtArgs>
+            result: $Utils.Optional<PlatformConfigCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3553,6 +3643,7 @@ export namespace Prisma {
     productReview?: ProductReviewOmit
     reviewVote?: ReviewVoteOmit
     platformInvite?: PlatformInviteOmit
+    platformConfig?: PlatformConfigOmit
   }
 
   /* Types for Logging */
@@ -9983,6 +10074,9 @@ export namespace Prisma {
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean | null
     testimonialsAutoApprove: boolean | null
+    maintenanceMode: boolean | null
+    maintenanceVariant: string | null
+    maintenanceMessage: string | null
     umamiWebsiteId: string | null
     umamiEnabled: boolean | null
     status: string | null
@@ -10010,6 +10104,9 @@ export namespace Prisma {
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean | null
     testimonialsAutoApprove: boolean | null
+    maintenanceMode: boolean | null
+    maintenanceVariant: string | null
+    maintenanceMessage: string | null
     umamiWebsiteId: string | null
     umamiEnabled: boolean | null
     status: string | null
@@ -10037,6 +10134,9 @@ export namespace Prisma {
     stripeAccountId: number
     stripeAutoTaxEnabled: number
     testimonialsAutoApprove: number
+    maintenanceMode: number
+    maintenanceVariant: number
+    maintenanceMessage: number
     umamiWebsiteId: number
     umamiEnabled: number
     status: number
@@ -10077,6 +10177,9 @@ export namespace Prisma {
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
     testimonialsAutoApprove?: true
+    maintenanceMode?: true
+    maintenanceVariant?: true
+    maintenanceMessage?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -10104,6 +10207,9 @@ export namespace Prisma {
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
     testimonialsAutoApprove?: true
+    maintenanceMode?: true
+    maintenanceVariant?: true
+    maintenanceMessage?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -10131,6 +10237,9 @@ export namespace Prisma {
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
     testimonialsAutoApprove?: true
+    maintenanceMode?: true
+    maintenanceVariant?: true
+    maintenanceMessage?: true
     umamiWebsiteId?: true
     umamiEnabled?: true
     status?: true
@@ -10246,6 +10355,9 @@ export namespace Prisma {
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean
     testimonialsAutoApprove: boolean
+    maintenanceMode: boolean
+    maintenanceVariant: string
+    maintenanceMessage: string | null
     umamiWebsiteId: string | null
     umamiEnabled: boolean
     status: string
@@ -10293,6 +10405,9 @@ export namespace Prisma {
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: boolean
+    maintenanceMessage?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -10339,6 +10454,9 @@ export namespace Prisma {
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: boolean
+    maintenanceMessage?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -10367,6 +10485,9 @@ export namespace Prisma {
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: boolean
+    maintenanceMessage?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -10395,6 +10516,9 @@ export namespace Prisma {
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: boolean
+    maintenanceMessage?: boolean
     umamiWebsiteId?: boolean
     umamiEnabled?: boolean
     status?: boolean
@@ -10406,7 +10530,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -10468,6 +10592,9 @@ export namespace Prisma {
       stripeAccountId: string | null
       stripeAutoTaxEnabled: boolean
       testimonialsAutoApprove: boolean
+      maintenanceMode: boolean
+      maintenanceVariant: string
+      maintenanceMessage: string | null
       umamiWebsiteId: string | null
       umamiEnabled: boolean
       status: string
@@ -10933,6 +11060,9 @@ export namespace Prisma {
     readonly stripeAccountId: FieldRef<"Business", 'String'>
     readonly stripeAutoTaxEnabled: FieldRef<"Business", 'Boolean'>
     readonly testimonialsAutoApprove: FieldRef<"Business", 'Boolean'>
+    readonly maintenanceMode: FieldRef<"Business", 'Boolean'>
+    readonly maintenanceVariant: FieldRef<"Business", 'String'>
+    readonly maintenanceMessage: FieldRef<"Business", 'String'>
     readonly umamiWebsiteId: FieldRef<"Business", 'String'>
     readonly umamiEnabled: FieldRef<"Business", 'Boolean'>
     readonly status: FieldRef<"Business", 'String'>
@@ -43044,6 +43174,988 @@ export namespace Prisma {
 
 
   /**
+   * Model PlatformConfig
+   */
+
+  export type AggregatePlatformConfig = {
+    _count: PlatformConfigCountAggregateOutputType | null
+    _min: PlatformConfigMinAggregateOutputType | null
+    _max: PlatformConfigMaxAggregateOutputType | null
+  }
+
+  export type PlatformConfigMinAggregateOutputType = {
+    id: string | null
+    maintenanceMode: boolean | null
+    maintenanceMessage: string | null
+    updatedAt: Date | null
+  }
+
+  export type PlatformConfigMaxAggregateOutputType = {
+    id: string | null
+    maintenanceMode: boolean | null
+    maintenanceMessage: string | null
+    updatedAt: Date | null
+  }
+
+  export type PlatformConfigCountAggregateOutputType = {
+    id: number
+    maintenanceMode: number
+    maintenanceMessage: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PlatformConfigMinAggregateInputType = {
+    id?: true
+    maintenanceMode?: true
+    maintenanceMessage?: true
+    updatedAt?: true
+  }
+
+  export type PlatformConfigMaxAggregateInputType = {
+    id?: true
+    maintenanceMode?: true
+    maintenanceMessage?: true
+    updatedAt?: true
+  }
+
+  export type PlatformConfigCountAggregateInputType = {
+    id?: true
+    maintenanceMode?: true
+    maintenanceMessage?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PlatformConfigAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PlatformConfig to aggregate.
+     */
+    where?: PlatformConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlatformConfigs to fetch.
+     */
+    orderBy?: PlatformConfigOrderByWithRelationInput | PlatformConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PlatformConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlatformConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlatformConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PlatformConfigs
+    **/
+    _count?: true | PlatformConfigCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PlatformConfigMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PlatformConfigMaxAggregateInputType
+  }
+
+  export type GetPlatformConfigAggregateType<T extends PlatformConfigAggregateArgs> = {
+        [P in keyof T & keyof AggregatePlatformConfig]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePlatformConfig[P]>
+      : GetScalarType<T[P], AggregatePlatformConfig[P]>
+  }
+
+
+
+
+  export type PlatformConfigGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PlatformConfigWhereInput
+    orderBy?: PlatformConfigOrderByWithAggregationInput | PlatformConfigOrderByWithAggregationInput[]
+    by: PlatformConfigScalarFieldEnum[] | PlatformConfigScalarFieldEnum
+    having?: PlatformConfigScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PlatformConfigCountAggregateInputType | true
+    _min?: PlatformConfigMinAggregateInputType
+    _max?: PlatformConfigMaxAggregateInputType
+  }
+
+  export type PlatformConfigGroupByOutputType = {
+    id: string
+    maintenanceMode: boolean
+    maintenanceMessage: string | null
+    updatedAt: Date
+    _count: PlatformConfigCountAggregateOutputType | null
+    _min: PlatformConfigMinAggregateOutputType | null
+    _max: PlatformConfigMaxAggregateOutputType | null
+  }
+
+  type GetPlatformConfigGroupByPayload<T extends PlatformConfigGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PlatformConfigGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PlatformConfigGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PlatformConfigGroupByOutputType[P]>
+            : GetScalarType<T[P], PlatformConfigGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PlatformConfigSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    maintenanceMode?: boolean
+    maintenanceMessage?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["platformConfig"]>
+
+  export type PlatformConfigSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    maintenanceMode?: boolean
+    maintenanceMessage?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["platformConfig"]>
+
+  export type PlatformConfigSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    maintenanceMode?: boolean
+    maintenanceMessage?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["platformConfig"]>
+
+  export type PlatformConfigSelectScalar = {
+    id?: boolean
+    maintenanceMode?: boolean
+    maintenanceMessage?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PlatformConfigOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "maintenanceMode" | "maintenanceMessage" | "updatedAt", ExtArgs["result"]["platformConfig"]>
+
+  export type $PlatformConfigPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PlatformConfig"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      maintenanceMode: boolean
+      maintenanceMessage: string | null
+      updatedAt: Date
+    }, ExtArgs["result"]["platformConfig"]>
+    composites: {}
+  }
+
+  type PlatformConfigGetPayload<S extends boolean | null | undefined | PlatformConfigDefaultArgs> = $Result.GetResult<Prisma.$PlatformConfigPayload, S>
+
+  type PlatformConfigCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PlatformConfigFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PlatformConfigCountAggregateInputType | true
+    }
+
+  export interface PlatformConfigDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PlatformConfig'], meta: { name: 'PlatformConfig' } }
+    /**
+     * Find zero or one PlatformConfig that matches the filter.
+     * @param {PlatformConfigFindUniqueArgs} args - Arguments to find a PlatformConfig
+     * @example
+     * // Get one PlatformConfig
+     * const platformConfig = await prisma.platformConfig.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PlatformConfigFindUniqueArgs>(args: SelectSubset<T, PlatformConfigFindUniqueArgs<ExtArgs>>): Prisma__PlatformConfigClient<$Result.GetResult<Prisma.$PlatformConfigPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PlatformConfig that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PlatformConfigFindUniqueOrThrowArgs} args - Arguments to find a PlatformConfig
+     * @example
+     * // Get one PlatformConfig
+     * const platformConfig = await prisma.platformConfig.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PlatformConfigFindUniqueOrThrowArgs>(args: SelectSubset<T, PlatformConfigFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PlatformConfigClient<$Result.GetResult<Prisma.$PlatformConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PlatformConfig that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformConfigFindFirstArgs} args - Arguments to find a PlatformConfig
+     * @example
+     * // Get one PlatformConfig
+     * const platformConfig = await prisma.platformConfig.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PlatformConfigFindFirstArgs>(args?: SelectSubset<T, PlatformConfigFindFirstArgs<ExtArgs>>): Prisma__PlatformConfigClient<$Result.GetResult<Prisma.$PlatformConfigPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PlatformConfig that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformConfigFindFirstOrThrowArgs} args - Arguments to find a PlatformConfig
+     * @example
+     * // Get one PlatformConfig
+     * const platformConfig = await prisma.platformConfig.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PlatformConfigFindFirstOrThrowArgs>(args?: SelectSubset<T, PlatformConfigFindFirstOrThrowArgs<ExtArgs>>): Prisma__PlatformConfigClient<$Result.GetResult<Prisma.$PlatformConfigPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PlatformConfigs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformConfigFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PlatformConfigs
+     * const platformConfigs = await prisma.platformConfig.findMany()
+     * 
+     * // Get first 10 PlatformConfigs
+     * const platformConfigs = await prisma.platformConfig.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const platformConfigWithIdOnly = await prisma.platformConfig.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PlatformConfigFindManyArgs>(args?: SelectSubset<T, PlatformConfigFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlatformConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PlatformConfig.
+     * @param {PlatformConfigCreateArgs} args - Arguments to create a PlatformConfig.
+     * @example
+     * // Create one PlatformConfig
+     * const PlatformConfig = await prisma.platformConfig.create({
+     *   data: {
+     *     // ... data to create a PlatformConfig
+     *   }
+     * })
+     * 
+     */
+    create<T extends PlatformConfigCreateArgs>(args: SelectSubset<T, PlatformConfigCreateArgs<ExtArgs>>): Prisma__PlatformConfigClient<$Result.GetResult<Prisma.$PlatformConfigPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PlatformConfigs.
+     * @param {PlatformConfigCreateManyArgs} args - Arguments to create many PlatformConfigs.
+     * @example
+     * // Create many PlatformConfigs
+     * const platformConfig = await prisma.platformConfig.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PlatformConfigCreateManyArgs>(args?: SelectSubset<T, PlatformConfigCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PlatformConfigs and returns the data saved in the database.
+     * @param {PlatformConfigCreateManyAndReturnArgs} args - Arguments to create many PlatformConfigs.
+     * @example
+     * // Create many PlatformConfigs
+     * const platformConfig = await prisma.platformConfig.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PlatformConfigs and only return the `id`
+     * const platformConfigWithIdOnly = await prisma.platformConfig.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PlatformConfigCreateManyAndReturnArgs>(args?: SelectSubset<T, PlatformConfigCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlatformConfigPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PlatformConfig.
+     * @param {PlatformConfigDeleteArgs} args - Arguments to delete one PlatformConfig.
+     * @example
+     * // Delete one PlatformConfig
+     * const PlatformConfig = await prisma.platformConfig.delete({
+     *   where: {
+     *     // ... filter to delete one PlatformConfig
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PlatformConfigDeleteArgs>(args: SelectSubset<T, PlatformConfigDeleteArgs<ExtArgs>>): Prisma__PlatformConfigClient<$Result.GetResult<Prisma.$PlatformConfigPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PlatformConfig.
+     * @param {PlatformConfigUpdateArgs} args - Arguments to update one PlatformConfig.
+     * @example
+     * // Update one PlatformConfig
+     * const platformConfig = await prisma.platformConfig.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PlatformConfigUpdateArgs>(args: SelectSubset<T, PlatformConfigUpdateArgs<ExtArgs>>): Prisma__PlatformConfigClient<$Result.GetResult<Prisma.$PlatformConfigPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PlatformConfigs.
+     * @param {PlatformConfigDeleteManyArgs} args - Arguments to filter PlatformConfigs to delete.
+     * @example
+     * // Delete a few PlatformConfigs
+     * const { count } = await prisma.platformConfig.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PlatformConfigDeleteManyArgs>(args?: SelectSubset<T, PlatformConfigDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PlatformConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformConfigUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PlatformConfigs
+     * const platformConfig = await prisma.platformConfig.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PlatformConfigUpdateManyArgs>(args: SelectSubset<T, PlatformConfigUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PlatformConfigs and returns the data updated in the database.
+     * @param {PlatformConfigUpdateManyAndReturnArgs} args - Arguments to update many PlatformConfigs.
+     * @example
+     * // Update many PlatformConfigs
+     * const platformConfig = await prisma.platformConfig.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PlatformConfigs and only return the `id`
+     * const platformConfigWithIdOnly = await prisma.platformConfig.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PlatformConfigUpdateManyAndReturnArgs>(args: SelectSubset<T, PlatformConfigUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlatformConfigPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PlatformConfig.
+     * @param {PlatformConfigUpsertArgs} args - Arguments to update or create a PlatformConfig.
+     * @example
+     * // Update or create a PlatformConfig
+     * const platformConfig = await prisma.platformConfig.upsert({
+     *   create: {
+     *     // ... data to create a PlatformConfig
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PlatformConfig we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PlatformConfigUpsertArgs>(args: SelectSubset<T, PlatformConfigUpsertArgs<ExtArgs>>): Prisma__PlatformConfigClient<$Result.GetResult<Prisma.$PlatformConfigPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PlatformConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformConfigCountArgs} args - Arguments to filter PlatformConfigs to count.
+     * @example
+     * // Count the number of PlatformConfigs
+     * const count = await prisma.platformConfig.count({
+     *   where: {
+     *     // ... the filter for the PlatformConfigs we want to count
+     *   }
+     * })
+    **/
+    count<T extends PlatformConfigCountArgs>(
+      args?: Subset<T, PlatformConfigCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PlatformConfigCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PlatformConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformConfigAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PlatformConfigAggregateArgs>(args: Subset<T, PlatformConfigAggregateArgs>): Prisma.PrismaPromise<GetPlatformConfigAggregateType<T>>
+
+    /**
+     * Group by PlatformConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlatformConfigGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PlatformConfigGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PlatformConfigGroupByArgs['orderBy'] }
+        : { orderBy?: PlatformConfigGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PlatformConfigGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPlatformConfigGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PlatformConfig model
+   */
+  readonly fields: PlatformConfigFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PlatformConfig.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PlatformConfigClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PlatformConfig model
+   */
+  interface PlatformConfigFieldRefs {
+    readonly id: FieldRef<"PlatformConfig", 'String'>
+    readonly maintenanceMode: FieldRef<"PlatformConfig", 'Boolean'>
+    readonly maintenanceMessage: FieldRef<"PlatformConfig", 'String'>
+    readonly updatedAt: FieldRef<"PlatformConfig", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PlatformConfig findUnique
+   */
+  export type PlatformConfigFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which PlatformConfig to fetch.
+     */
+    where: PlatformConfigWhereUniqueInput
+  }
+
+  /**
+   * PlatformConfig findUniqueOrThrow
+   */
+  export type PlatformConfigFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which PlatformConfig to fetch.
+     */
+    where: PlatformConfigWhereUniqueInput
+  }
+
+  /**
+   * PlatformConfig findFirst
+   */
+  export type PlatformConfigFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which PlatformConfig to fetch.
+     */
+    where?: PlatformConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlatformConfigs to fetch.
+     */
+    orderBy?: PlatformConfigOrderByWithRelationInput | PlatformConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PlatformConfigs.
+     */
+    cursor?: PlatformConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlatformConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlatformConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PlatformConfigs.
+     */
+    distinct?: PlatformConfigScalarFieldEnum | PlatformConfigScalarFieldEnum[]
+  }
+
+  /**
+   * PlatformConfig findFirstOrThrow
+   */
+  export type PlatformConfigFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which PlatformConfig to fetch.
+     */
+    where?: PlatformConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlatformConfigs to fetch.
+     */
+    orderBy?: PlatformConfigOrderByWithRelationInput | PlatformConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PlatformConfigs.
+     */
+    cursor?: PlatformConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlatformConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlatformConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PlatformConfigs.
+     */
+    distinct?: PlatformConfigScalarFieldEnum | PlatformConfigScalarFieldEnum[]
+  }
+
+  /**
+   * PlatformConfig findMany
+   */
+  export type PlatformConfigFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which PlatformConfigs to fetch.
+     */
+    where?: PlatformConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlatformConfigs to fetch.
+     */
+    orderBy?: PlatformConfigOrderByWithRelationInput | PlatformConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PlatformConfigs.
+     */
+    cursor?: PlatformConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlatformConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlatformConfigs.
+     */
+    skip?: number
+    distinct?: PlatformConfigScalarFieldEnum | PlatformConfigScalarFieldEnum[]
+  }
+
+  /**
+   * PlatformConfig create
+   */
+  export type PlatformConfigCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+    /**
+     * The data needed to create a PlatformConfig.
+     */
+    data: XOR<PlatformConfigCreateInput, PlatformConfigUncheckedCreateInput>
+  }
+
+  /**
+   * PlatformConfig createMany
+   */
+  export type PlatformConfigCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PlatformConfigs.
+     */
+    data: PlatformConfigCreateManyInput | PlatformConfigCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PlatformConfig createManyAndReturn
+   */
+  export type PlatformConfigCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+    /**
+     * The data used to create many PlatformConfigs.
+     */
+    data: PlatformConfigCreateManyInput | PlatformConfigCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PlatformConfig update
+   */
+  export type PlatformConfigUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+    /**
+     * The data needed to update a PlatformConfig.
+     */
+    data: XOR<PlatformConfigUpdateInput, PlatformConfigUncheckedUpdateInput>
+    /**
+     * Choose, which PlatformConfig to update.
+     */
+    where: PlatformConfigWhereUniqueInput
+  }
+
+  /**
+   * PlatformConfig updateMany
+   */
+  export type PlatformConfigUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PlatformConfigs.
+     */
+    data: XOR<PlatformConfigUpdateManyMutationInput, PlatformConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which PlatformConfigs to update
+     */
+    where?: PlatformConfigWhereInput
+    /**
+     * Limit how many PlatformConfigs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PlatformConfig updateManyAndReturn
+   */
+  export type PlatformConfigUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+    /**
+     * The data used to update PlatformConfigs.
+     */
+    data: XOR<PlatformConfigUpdateManyMutationInput, PlatformConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which PlatformConfigs to update
+     */
+    where?: PlatformConfigWhereInput
+    /**
+     * Limit how many PlatformConfigs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PlatformConfig upsert
+   */
+  export type PlatformConfigUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+    /**
+     * The filter to search for the PlatformConfig to update in case it exists.
+     */
+    where: PlatformConfigWhereUniqueInput
+    /**
+     * In case the PlatformConfig found by the `where` argument doesn't exist, create a new PlatformConfig with this data.
+     */
+    create: XOR<PlatformConfigCreateInput, PlatformConfigUncheckedCreateInput>
+    /**
+     * In case the PlatformConfig was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PlatformConfigUpdateInput, PlatformConfigUncheckedUpdateInput>
+  }
+
+  /**
+   * PlatformConfig delete
+   */
+  export type PlatformConfigDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+    /**
+     * Filter which PlatformConfig to delete.
+     */
+    where: PlatformConfigWhereUniqueInput
+  }
+
+  /**
+   * PlatformConfig deleteMany
+   */
+  export type PlatformConfigDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PlatformConfigs to delete
+     */
+    where?: PlatformConfigWhereInput
+    /**
+     * Limit how many PlatformConfigs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PlatformConfig without action
+   */
+  export type PlatformConfigDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlatformConfig
+     */
+    select?: PlatformConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PlatformConfig
+     */
+    omit?: PlatformConfigOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -43148,6 +44260,9 @@ export namespace Prisma {
     stripeAccountId: 'stripeAccountId',
     stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
     testimonialsAutoApprove: 'testimonialsAutoApprove',
+    maintenanceMode: 'maintenanceMode',
+    maintenanceVariant: 'maintenanceVariant',
+    maintenanceMessage: 'maintenanceMessage',
     umamiWebsiteId: 'umamiWebsiteId',
     umamiEnabled: 'umamiEnabled',
     status: 'status',
@@ -43661,6 +44776,16 @@ export namespace Prisma {
   };
 
   export type PlatformInviteScalarFieldEnum = (typeof PlatformInviteScalarFieldEnum)[keyof typeof PlatformInviteScalarFieldEnum]
+
+
+  export const PlatformConfigScalarFieldEnum: {
+    id: 'id',
+    maintenanceMode: 'maintenanceMode',
+    maintenanceMessage: 'maintenanceMessage',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PlatformConfigScalarFieldEnum = (typeof PlatformConfigScalarFieldEnum)[keyof typeof PlatformConfigScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -44244,6 +45369,9 @@ export namespace Prisma {
     stripeAccountId?: StringNullableFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
     testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
+    maintenanceMode?: BoolFilter<"Business"> | boolean
+    maintenanceVariant?: StringFilter<"Business"> | string
+    maintenanceMessage?: StringNullableFilter<"Business"> | string | null
     umamiWebsiteId?: StringNullableFilter<"Business"> | string | null
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
@@ -44289,6 +45417,9 @@ export namespace Prisma {
     stripeAccountId?: SortOrderInput | SortOrder
     stripeAutoTaxEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
+    maintenanceMode?: SortOrder
+    maintenanceVariant?: SortOrder
+    maintenanceMessage?: SortOrderInput | SortOrder
     umamiWebsiteId?: SortOrderInput | SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -44337,6 +45468,9 @@ export namespace Prisma {
     businessAddress?: StringNullableFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
     testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
+    maintenanceMode?: BoolFilter<"Business"> | boolean
+    maintenanceVariant?: StringFilter<"Business"> | string
+    maintenanceMessage?: StringNullableFilter<"Business"> | string | null
     umamiWebsiteId?: StringNullableFilter<"Business"> | string | null
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
@@ -44382,6 +45516,9 @@ export namespace Prisma {
     stripeAccountId?: SortOrderInput | SortOrder
     stripeAutoTaxEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
+    maintenanceMode?: SortOrder
+    maintenanceVariant?: SortOrder
+    maintenanceMessage?: SortOrderInput | SortOrder
     umamiWebsiteId?: SortOrderInput | SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -44418,6 +45555,9 @@ export namespace Prisma {
     stripeAccountId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     testimonialsAutoApprove?: BoolWithAggregatesFilter<"Business"> | boolean
+    maintenanceMode?: BoolWithAggregatesFilter<"Business"> | boolean
+    maintenanceVariant?: StringWithAggregatesFilter<"Business"> | string
+    maintenanceMessage?: StringNullableWithAggregatesFilter<"Business"> | string | null
     umamiWebsiteId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     umamiEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     status?: StringWithAggregatesFilter<"Business"> | string
@@ -47106,6 +48246,53 @@ export namespace Prisma {
     createdBy?: StringNullableWithAggregatesFilter<"PlatformInvite"> | string | null
   }
 
+  export type PlatformConfigWhereInput = {
+    AND?: PlatformConfigWhereInput | PlatformConfigWhereInput[]
+    OR?: PlatformConfigWhereInput[]
+    NOT?: PlatformConfigWhereInput | PlatformConfigWhereInput[]
+    id?: StringFilter<"PlatformConfig"> | string
+    maintenanceMode?: BoolFilter<"PlatformConfig"> | boolean
+    maintenanceMessage?: StringNullableFilter<"PlatformConfig"> | string | null
+    updatedAt?: DateTimeFilter<"PlatformConfig"> | Date | string
+  }
+
+  export type PlatformConfigOrderByWithRelationInput = {
+    id?: SortOrder
+    maintenanceMode?: SortOrder
+    maintenanceMessage?: SortOrderInput | SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PlatformConfigWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PlatformConfigWhereInput | PlatformConfigWhereInput[]
+    OR?: PlatformConfigWhereInput[]
+    NOT?: PlatformConfigWhereInput | PlatformConfigWhereInput[]
+    maintenanceMode?: BoolFilter<"PlatformConfig"> | boolean
+    maintenanceMessage?: StringNullableFilter<"PlatformConfig"> | string | null
+    updatedAt?: DateTimeFilter<"PlatformConfig"> | Date | string
+  }, "id">
+
+  export type PlatformConfigOrderByWithAggregationInput = {
+    id?: SortOrder
+    maintenanceMode?: SortOrder
+    maintenanceMessage?: SortOrderInput | SortOrder
+    updatedAt?: SortOrder
+    _count?: PlatformConfigCountOrderByAggregateInput
+    _max?: PlatformConfigMaxOrderByAggregateInput
+    _min?: PlatformConfigMinOrderByAggregateInput
+  }
+
+  export type PlatformConfigScalarWhereWithAggregatesInput = {
+    AND?: PlatformConfigScalarWhereWithAggregatesInput | PlatformConfigScalarWhereWithAggregatesInput[]
+    OR?: PlatformConfigScalarWhereWithAggregatesInput[]
+    NOT?: PlatformConfigScalarWhereWithAggregatesInput | PlatformConfigScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PlatformConfig"> | string
+    maintenanceMode?: BoolWithAggregatesFilter<"PlatformConfig"> | boolean
+    maintenanceMessage?: StringNullableWithAggregatesFilter<"PlatformConfig"> | string | null
+    updatedAt?: DateTimeWithAggregatesFilter<"PlatformConfig"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
@@ -47556,6 +48743,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -47601,6 +48791,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -47646,6 +48839,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -47691,6 +48887,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -47736,6 +48935,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -47764,6 +48966,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -47792,6 +48997,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -50838,6 +52046,55 @@ export namespace Prisma {
     createdBy?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type PlatformConfigCreateInput = {
+    id?: string
+    maintenanceMode?: boolean
+    maintenanceMessage?: string | null
+    updatedAt?: Date | string
+  }
+
+  export type PlatformConfigUncheckedCreateInput = {
+    id?: string
+    maintenanceMode?: boolean
+    maintenanceMessage?: string | null
+    updatedAt?: Date | string
+  }
+
+  export type PlatformConfigUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PlatformConfigUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PlatformConfigCreateManyInput = {
+    id?: string
+    maintenanceMode?: boolean
+    maintenanceMessage?: string | null
+    updatedAt?: Date | string
+  }
+
+  export type PlatformConfigUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PlatformConfigUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -51441,6 +52698,9 @@ export namespace Prisma {
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
+    maintenanceMode?: SortOrder
+    maintenanceVariant?: SortOrder
+    maintenanceMessage?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -51474,6 +52734,9 @@ export namespace Prisma {
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
+    maintenanceMode?: SortOrder
+    maintenanceVariant?: SortOrder
+    maintenanceMessage?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -51501,6 +52764,9 @@ export namespace Prisma {
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
+    maintenanceMode?: SortOrder
+    maintenanceVariant?: SortOrder
+    maintenanceMessage?: SortOrder
     umamiWebsiteId?: SortOrder
     umamiEnabled?: SortOrder
     status?: SortOrder
@@ -53383,6 +54649,27 @@ export namespace Prisma {
     usedAt?: SortOrder
     usedBy?: SortOrder
     createdBy?: SortOrder
+  }
+
+  export type PlatformConfigCountOrderByAggregateInput = {
+    id?: SortOrder
+    maintenanceMode?: SortOrder
+    maintenanceMessage?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PlatformConfigMaxOrderByAggregateInput = {
+    id?: SortOrder
+    maintenanceMode?: SortOrder
+    maintenanceMessage?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PlatformConfigMinOrderByAggregateInput = {
+    id?: SortOrder
+    maintenanceMode?: SortOrder
+    maintenanceMessage?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type SessionCreateNestedManyWithoutUserInput = {
@@ -56943,6 +58230,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -56987,6 +58277,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -57090,6 +58383,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -57134,6 +58430,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -58731,6 +60030,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -58775,6 +60077,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -58835,6 +60140,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -58879,6 +60187,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -58960,6 +60271,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -59004,6 +60318,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -59337,6 +60654,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -59381,6 +60701,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -59883,6 +61206,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -59927,6 +61253,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -60009,6 +61338,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -60053,6 +61385,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -60470,6 +61805,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -60514,6 +61852,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -60669,6 +62010,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -60713,6 +62057,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -60794,6 +62141,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -60838,6 +62188,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -61203,6 +62556,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -61247,6 +62603,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -61586,6 +62945,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -61630,6 +62992,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -61983,6 +63348,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -62027,6 +63395,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -62871,6 +64242,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -62915,6 +64289,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -63053,6 +64430,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -63097,6 +64477,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -63322,6 +64705,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -63366,6 +64752,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -63719,6 +65108,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -63763,6 +65155,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -63929,6 +65324,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -63973,6 +65371,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -64167,6 +65568,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -64211,6 +65615,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -64287,6 +65694,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -64331,6 +65741,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -64391,6 +65804,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -64435,6 +65851,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -64479,6 +65898,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -64523,6 +65945,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -64583,6 +66008,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -64627,6 +66055,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -64671,6 +66102,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -64715,6 +66149,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -64775,6 +66212,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -64819,6 +66259,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -64863,6 +66306,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -64907,6 +66353,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -64999,6 +66448,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -65043,6 +66495,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -65202,6 +66657,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -65246,6 +66704,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -65353,6 +66814,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -65397,6 +66861,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -65494,6 +66961,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -65538,6 +67008,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -65645,6 +67118,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -65689,6 +67165,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -66388,6 +67867,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -66432,6 +67914,9 @@ export namespace Prisma {
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
     umamiWebsiteId?: string | null
     umamiEnabled?: boolean
     status?: string
@@ -66529,6 +68014,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
@@ -66573,6 +68061,9 @@ export namespace Prisma {
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
     umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string

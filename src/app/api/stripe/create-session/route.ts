@@ -6,6 +6,7 @@ import * as Sentry from "@sentry/nextjs";
 import { env } from "~/env";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { getPlatformMaintenance } from "~/lib/maintenance";
 import {
   releaseReservation,
   reserveInventory,
@@ -83,6 +84,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Store payment processing not configured" },
         { status: 400 },
+      );
+    }
+
+    // Maintenance guard: reject checkout while platform or store is in maintenance.
+    const platformMaintenance = await getPlatformMaintenance();
+    if (platformMaintenance.active || business.maintenanceMode) {
+      return NextResponse.json(
+        { error: "This store is temporarily unavailable. Please try again later." },
+        { status: 503 },
       );
     }
 

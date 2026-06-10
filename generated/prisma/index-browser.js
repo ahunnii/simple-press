@@ -197,6 +197,9 @@ exports.Prisma.BusinessScalarFieldEnum = {
   stripeAccountId: 'stripeAccountId',
   stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
   testimonialsAutoApprove: 'testimonialsAutoApprove',
+  maintenanceMode: 'maintenanceMode',
+  maintenanceVariant: 'maintenanceVariant',
+  maintenanceMessage: 'maintenanceMessage',
   umamiWebsiteId: 'umamiWebsiteId',
   umamiEnabled: 'umamiEnabled',
   status: 'status',
@@ -634,6 +637,13 @@ exports.Prisma.PlatformInviteScalarFieldEnum = {
   createdBy: 'createdBy'
 };
 
+exports.Prisma.PlatformConfigScalarFieldEnum = {
+  id: 'id',
+  maintenanceMode: 'maintenanceMode',
+  maintenanceMessage: 'maintenanceMessage',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -710,7 +720,8 @@ exports.Prisma.ModelName = {
   TestimonialInvite: 'TestimonialInvite',
   ProductReview: 'ProductReview',
   ReviewVote: 'ReviewVote',
-  PlatformInvite: 'PlatformInvite'
+  PlatformInvite: 'PlatformInvite',
+  PlatformConfig: 'PlatformConfig'
 };
 
 /**
