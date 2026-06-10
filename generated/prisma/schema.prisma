@@ -143,7 +143,6 @@ model Business {
   supportEmail    String?
   phoneNumber     String?
   businessAddress String?
-  taxId           String? // For tax purposes
 
   // Integrations
   stripeAccountId      String? @unique
@@ -431,8 +430,12 @@ model Customer {
   acceptsMarketing Boolean @default(false)
 
   // Stats
-  totalSpent Float @default(0)
-  orderCount Int   @default(0)
+  totalSpent Int @default(0)
+  orderCount Int @default(0)
+
+  // GDPR/CCPA data-subject rights
+  deletionRequestedAt DateTime?
+  anonymizedAt        DateTime?
 
   // Link to authenticated user (if they've signed in)
   userId String?

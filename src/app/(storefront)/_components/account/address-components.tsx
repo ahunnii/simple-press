@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MapPin, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import type { AccountAddressBookPageProps } from "../../_templates/types";
+import { formatDate } from "~/lib/format-date";
 import { api } from "~/trpc/react";
 import {
   AlertDialog,
@@ -530,6 +532,140 @@ export function AddressBookContent({
 }
 
 /**
+ * Data privacy section — download export and request deletion.
+ */
+function DataPrivacySection({
+  customer,
+}: {
+  customer: AccountAddressBookPageProps["customer"];
+}) {
+  const router = useRouter();
+  const utils = api.useUtils();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const requestDeletionMutation = api.customer.requestDeletion.useMutation({
+    onSuccess: () => {
+      toast.success(
+        "Deletion request submitted. The store owner will process your request.",
+      );
+      router.refresh();
+    },
+    onError: () => {
+      toast.error("Failed to submit deletion request. Please try again.");
+    },
+  });
+
+  async function handleExport() {
+    setIsExporting(true);
+    try {
+      const data = await utils.customer.exportMyData.fetch();
+      if (!data) {
+        toast.info("No personal data found for your account.");
+        return;
+      }
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `my-data-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("Your data export has been downloaded.");
+    } catch {
+      toast.error("Failed to export data. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
+  return (
+    <>
+      <div className="rounded-lg border p-6">
+        <h3 className="text-foreground font-semibold">Data &amp; Privacy</h3>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Download a copy of your personal data or request account deletion.
+        </p>
+
+        <div className="mt-4 space-y-4">
+          {/* Download export */}
+          <div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isExporting}
+              onClick={() => void handleExport()}
+            >
+              {isExporting ? "Preparing export…" : "Download my data"}
+            </Button>
+          </div>
+
+          {/* Deletion */}
+          <div>
+            {customer?.deletionRequestedAt ? (
+              <p className="text-muted-foreground text-sm">
+                Account deletion requested on{" "}
+                {formatDate(customer.deletionRequestedAt)}.
+              </p>
+            ) : customer?.anonymizedAt ? (
+              <p className="text-muted-foreground text-sm">
+                This account has been anonymized.
+              </p>
+            ) : (
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={!customer}
+                onClick={() => setDeleteDialogOpen(true)}
+              >
+                Request account deletion
+              </Button>
+            )}
+            {!customer && (
+              <p className="text-muted-foreground mt-1 text-xs">
+                Place your first order to enable data deletion requests.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Request account deletion?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This requests permanent deletion of your personal data. Your past
+              orders are retained (anonymized) for legal and tax reasons. The
+              store owner will process your request.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={requestDeletionMutation.isPending}
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                requestDeletionMutation.mutate();
+              }}
+            >
+              {requestDeletionMutation.isPending
+                ? "Submitting…"
+                : "Request deletion"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
+/**
  * Marketing preferences toggle content.
  * Wrap this in a template-specific layout component.
  */
@@ -593,6 +729,8 @@ export function PreferencesContent({
           )}
         </div>
       </div>
+
+      <DataPrivacySection customer={customer} />
     </div>
   );
 }

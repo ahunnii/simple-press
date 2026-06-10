@@ -1,7 +1,9 @@
+import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import { notifyDiscordDeletionRequest } from "~/lib/discord/notification";
 import { normalizeEmail } from "~/lib/utils";
 import {
   createTRPCRouter,
@@ -424,6 +426,263 @@ export const customerRouter = createTRPCRouter({
           data: { isDefault: true },
         }),
       ]);
+
+      return { success: true };
+    }),
+
+  // Export all personal data for the current user (GDPR/CCPA data portability)
+  exportMyData: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx.session.user;
+
+    const business = await checkBusiness();
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
+    const customer = await ctx.db.customer.findFirst({
+      where: {
+        userId: user.id,
+        businessId: business.id,
+      },
+      include: {
+        shippingAddresses: true,
+        orders: {
+          include: {
+            items: true,
+            shippingAddress: true,
+          },
+          orderBy: { createdAt: "desc" },
+        },
+        reviews: true,
+        testimonials: true,
+      },
+    });
+
+    if (!customer) return null;
+
+    return {
+      exportedAt: new Date().toISOString(),
+      business: { id: business.id, name: business.name },
+      profile: {
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        phone: customer.phone,
+        acceptsMarketing: customer.acceptsMarketing,
+        createdAt: customer.createdAt,
+      },
+      addresses: customer.shippingAddresses.map((a) => ({
+        id: a.id,
+        firstName: a.firstName,
+        lastName: a.lastName,
+        company: a.company,
+        address1: a.address1,
+        address2: a.address2,
+        city: a.city,
+        province: a.province,
+        country: a.country,
+        zip: a.zip,
+        phone: a.phone,
+        isDefault: a.isDefault,
+        createdAt: a.createdAt,
+      })),
+      orders: customer.orders.map((o) => ({
+        id: o.id,
+        orderNumber: o.orderNumber,
+        status: o.status,
+        paymentStatus: o.paymentStatus,
+        fulfillmentStatus: o.fulfillmentStatus,
+        subtotal: o.subtotal,
+        tax: o.tax,
+        shipping: o.shipping,
+        discount: o.discount,
+        total: o.total,
+        createdAt: o.createdAt,
+        items: o.items.map((i) => ({
+          productName: i.productName,
+          variantName: i.variantName,
+          sku: i.sku,
+          price: i.price,
+          quantity: i.quantity,
+          total: i.total,
+        })),
+        shippingAddress: o.shippingAddress
+          ? {
+              firstName: o.shippingAddress.firstName,
+              lastName: o.shippingAddress.lastName,
+              address1: o.shippingAddress.address1,
+              address2: o.shippingAddress.address2,
+              city: o.shippingAddress.city,
+              province: o.shippingAddress.province,
+              country: o.shippingAddress.country,
+              zip: o.shippingAddress.zip,
+            }
+          : null,
+      })),
+      reviews: customer.reviews.map((r) => ({
+        id: r.id,
+        productId: r.productId,
+        rating: r.rating,
+        title: r.title,
+        comment: r.comment,
+        reviewDate: r.reviewDate,
+        isApproved: r.isApproved,
+        createdAt: r.createdAt,
+      })),
+      testimonials: customer.testimonials.map((t) => ({
+        id: t.id,
+        text: t.text,
+        title: t.title,
+        isApproved: t.isApproved,
+        testimonialDate: t.testimonialDate,
+        createdAt: t.createdAt,
+      })),
+    };
+  }),
+
+  // Request deletion of personal data (GDPR right to erasure / CCPA right to delete)
+  requestDeletion: protectedProcedure.mutation(async ({ ctx }) => {
+    const user = ctx.session.user;
+
+    const business = await checkBusiness();
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+
+    const customer = await ctx.db.customer.findFirst({
+      where: {
+        userId: user.id,
+        businessId: business.id,
+      },
+    });
+
+    if (!customer) {
+      return { success: true, hadData: false };
+    }
+
+    if (customer.anonymizedAt) {
+      return { success: true, alreadyAnonymized: true };
+    }
+
+    if (customer.deletionRequestedAt) {
+      return { success: true, alreadyRequested: true };
+    }
+
+    await ctx.db.customer.update({
+      where: { id: customer.id },
+      data: { deletionRequestedAt: new Date() },
+    });
+
+    // Best-effort Discord notification — failure must not fail the mutation
+    void notifyDiscordDeletionRequest({
+      customerId: customer.id,
+      businessName: business.name,
+    }).catch((err: unknown) => {
+      Sentry.captureException(err, {
+        tags: { "discord.notification": "deletion-request" },
+        extra: { customerId: customer.id, businessId: business.id },
+      });
+    });
+
+    return { success: true, requested: true };
+  }),
+
+  // Anonymize a customer's personal data (owner/admin action)
+  anonymize: ownerAdminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const customer = await ctx.db.customer.findFirst({
+        where: { id: input.id, businessId },
+      });
+
+      if (!customer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
+        });
+      }
+
+      if (customer.anonymizedAt) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Customer already anonymized",
+        });
+      }
+
+      const placeholder = `anonymized-${input.id}@anonymized.invalid`;
+
+      await ctx.db.$transaction(async (tx) => {
+        await tx.shippingAddress.updateMany({
+          where: { customerId: input.id },
+          data: {
+            firstName: "Anonymized",
+            lastName: "Anonymized",
+            company: null,
+            address1: "—",
+            address2: null,
+            city: "—",
+            province: null,
+            zip: "—",
+            phone: null,
+          },
+        });
+
+        await tx.order.updateMany({
+          where: { customerId: input.id },
+          data: {
+            customerEmail: placeholder,
+            customerName: null,
+            customerFirstName: null,
+            customerLastName: null,
+            customerPhone: null,
+          },
+        });
+
+        await tx.testimonial.updateMany({
+          where: { customerId: input.id },
+          data: {
+            customerName: "Anonymous",
+            customerEmail: null,
+            customerTitle: null,
+            customerCompany: null,
+          },
+        });
+
+        await tx.productReview.updateMany({
+          where: { customerId: input.id },
+          data: {
+            customerName: "Anonymous",
+            customerEmail: null,
+            customerTitle: null,
+          },
+        });
+
+        await tx.testimonialInvite.deleteMany({
+          where: { customerId: input.id },
+        });
+
+        await tx.customer.update({
+          where: { id: input.id },
+          data: {
+            email: placeholder,
+            firstName: null,
+            lastName: null,
+            phone: null,
+            acceptsMarketing: false,
+            userId: null,
+            anonymizedAt: new Date(),
+            deletionRequestedAt: null,
+          },
+        });
+      });
 
       return { success: true };
     }),

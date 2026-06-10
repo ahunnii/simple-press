@@ -194,7 +194,6 @@ exports.Prisma.BusinessScalarFieldEnum = {
   supportEmail: 'supportEmail',
   phoneNumber: 'phoneNumber',
   businessAddress: 'businessAddress',
-  taxId: 'taxId',
   stripeAccountId: 'stripeAccountId',
   stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
   testimonialsAutoApprove: 'testimonialsAutoApprove',
@@ -340,6 +339,8 @@ exports.Prisma.CustomerScalarFieldEnum = {
   acceptsMarketing: 'acceptsMarketing',
   totalSpent: 'totalSpent',
   orderCount: 'orderCount',
+  deletionRequestedAt: 'deletionRequestedAt',
+  anonymizedAt: 'anonymizedAt',
   userId: 'userId',
   businessId: 'businessId'
 };

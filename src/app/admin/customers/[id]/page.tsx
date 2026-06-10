@@ -18,6 +18,7 @@ import {
 
 import { TrailHeader } from "../../_components/trail-header";
 import { OrdersTable } from "../../orders/_components/orders-table";
+import { CustomerPrivacyActions } from "./_components/customer-privacy-actions";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -143,6 +144,14 @@ export default async function CustomerDetailPage({ params }: Props) {
                 </div>
               </CardContent>
             </Card>
+
+            <CustomerPrivacyActions
+              customer={{
+                id: customer.id,
+                deletionRequestedAt: customer.deletionRequestedAt,
+                anonymizedAt: customer.anonymizedAt,
+              }}
+            />
           </div>
         </div>
       </div>

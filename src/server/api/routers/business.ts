@@ -659,7 +659,6 @@ export const businessRouter = createTRPCRouter({
         ownerEmail: z.string(),
         supportEmail: z.string().optional(),
         businessAddress: z.string().optional(),
-        taxId: z.string().optional(),
         phoneNumber: z.string().optional(),
       }),
     )
@@ -670,7 +669,6 @@ export const businessRouter = createTRPCRouter({
         ownerEmail,
         supportEmail,
         businessAddress,
-        taxId,
         phoneNumber,
       } = input;
 
@@ -681,7 +679,6 @@ export const businessRouter = createTRPCRouter({
           ownerEmail,
           supportEmail,
           businessAddress,
-          taxId,
           phoneNumber,
         },
       });

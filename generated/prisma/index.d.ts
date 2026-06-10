@@ -9980,7 +9980,6 @@ export namespace Prisma {
     supportEmail: string | null
     phoneNumber: string | null
     businessAddress: string | null
-    taxId: string | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean | null
     testimonialsAutoApprove: boolean | null
@@ -10008,7 +10007,6 @@ export namespace Prisma {
     supportEmail: string | null
     phoneNumber: string | null
     businessAddress: string | null
-    taxId: string | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean | null
     testimonialsAutoApprove: boolean | null
@@ -10036,7 +10034,6 @@ export namespace Prisma {
     supportEmail: number
     phoneNumber: number
     businessAddress: number
-    taxId: number
     stripeAccountId: number
     stripeAutoTaxEnabled: number
     testimonialsAutoApprove: number
@@ -10077,7 +10074,6 @@ export namespace Prisma {
     supportEmail?: true
     phoneNumber?: true
     businessAddress?: true
-    taxId?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
     testimonialsAutoApprove?: true
@@ -10105,7 +10101,6 @@ export namespace Prisma {
     supportEmail?: true
     phoneNumber?: true
     businessAddress?: true
-    taxId?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
     testimonialsAutoApprove?: true
@@ -10133,7 +10128,6 @@ export namespace Prisma {
     supportEmail?: true
     phoneNumber?: true
     businessAddress?: true
-    taxId?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
     testimonialsAutoApprove?: true
@@ -10249,7 +10243,6 @@ export namespace Prisma {
     supportEmail: string | null
     phoneNumber: string | null
     businessAddress: string | null
-    taxId: string | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean
     testimonialsAutoApprove: boolean
@@ -10297,7 +10290,6 @@ export namespace Prisma {
     supportEmail?: boolean
     phoneNumber?: boolean
     businessAddress?: boolean
-    taxId?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -10344,7 +10336,6 @@ export namespace Prisma {
     supportEmail?: boolean
     phoneNumber?: boolean
     businessAddress?: boolean
-    taxId?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -10373,7 +10364,6 @@ export namespace Prisma {
     supportEmail?: boolean
     phoneNumber?: boolean
     businessAddress?: boolean
-    taxId?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -10402,7 +10392,6 @@ export namespace Prisma {
     supportEmail?: boolean
     phoneNumber?: boolean
     businessAddress?: boolean
-    taxId?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -10417,7 +10406,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "taxId" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -10476,7 +10465,6 @@ export namespace Prisma {
       supportEmail: string | null
       phoneNumber: string | null
       businessAddress: string | null
-      taxId: string | null
       stripeAccountId: string | null
       stripeAutoTaxEnabled: boolean
       testimonialsAutoApprove: boolean
@@ -10942,7 +10930,6 @@ export namespace Prisma {
     readonly supportEmail: FieldRef<"Business", 'String'>
     readonly phoneNumber: FieldRef<"Business", 'String'>
     readonly businessAddress: FieldRef<"Business", 'String'>
-    readonly taxId: FieldRef<"Business", 'String'>
     readonly stripeAccountId: FieldRef<"Business", 'String'>
     readonly stripeAutoTaxEnabled: FieldRef<"Business", 'Boolean'>
     readonly testimonialsAutoApprove: FieldRef<"Business", 'Boolean'>
@@ -19622,6 +19609,8 @@ export namespace Prisma {
     acceptsMarketing: boolean | null
     totalSpent: number | null
     orderCount: number | null
+    deletionRequestedAt: Date | null
+    anonymizedAt: Date | null
     userId: string | null
     businessId: string | null
   }
@@ -19637,6 +19626,8 @@ export namespace Prisma {
     acceptsMarketing: boolean | null
     totalSpent: number | null
     orderCount: number | null
+    deletionRequestedAt: Date | null
+    anonymizedAt: Date | null
     userId: string | null
     businessId: string | null
   }
@@ -19652,6 +19643,8 @@ export namespace Prisma {
     acceptsMarketing: number
     totalSpent: number
     orderCount: number
+    deletionRequestedAt: number
+    anonymizedAt: number
     userId: number
     businessId: number
     _all: number
@@ -19679,6 +19672,8 @@ export namespace Prisma {
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
+    deletionRequestedAt?: true
+    anonymizedAt?: true
     userId?: true
     businessId?: true
   }
@@ -19694,6 +19689,8 @@ export namespace Prisma {
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
+    deletionRequestedAt?: true
+    anonymizedAt?: true
     userId?: true
     businessId?: true
   }
@@ -19709,6 +19706,8 @@ export namespace Prisma {
     acceptsMarketing?: true
     totalSpent?: true
     orderCount?: true
+    deletionRequestedAt?: true
+    anonymizedAt?: true
     userId?: true
     businessId?: true
     _all?: true
@@ -19811,6 +19810,8 @@ export namespace Prisma {
     acceptsMarketing: boolean
     totalSpent: number
     orderCount: number
+    deletionRequestedAt: Date | null
+    anonymizedAt: Date | null
     userId: string | null
     businessId: string
     _count: CustomerCountAggregateOutputType | null
@@ -19845,6 +19846,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    deletionRequestedAt?: boolean
+    anonymizedAt?: boolean
     userId?: boolean
     businessId?: boolean
     user?: boolean | Customer$userArgs<ExtArgs>
@@ -19868,6 +19871,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    deletionRequestedAt?: boolean
+    anonymizedAt?: boolean
     userId?: boolean
     businessId?: boolean
     user?: boolean | Customer$userArgs<ExtArgs>
@@ -19885,6 +19890,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    deletionRequestedAt?: boolean
+    anonymizedAt?: boolean
     userId?: boolean
     businessId?: boolean
     user?: boolean | Customer$userArgs<ExtArgs>
@@ -19902,11 +19909,13 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: boolean
     orderCount?: boolean
+    deletionRequestedAt?: boolean
+    anonymizedAt?: boolean
     userId?: boolean
     businessId?: boolean
   }
 
-  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "acceptsMarketing" | "totalSpent" | "orderCount" | "userId" | "businessId", ExtArgs["result"]["customer"]>
+  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "acceptsMarketing" | "totalSpent" | "orderCount" | "deletionRequestedAt" | "anonymizedAt" | "userId" | "businessId", ExtArgs["result"]["customer"]>
   export type CustomerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Customer$userArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -19951,6 +19960,8 @@ export namespace Prisma {
       acceptsMarketing: boolean
       totalSpent: number
       orderCount: number
+      deletionRequestedAt: Date | null
+      anonymizedAt: Date | null
       userId: string | null
       businessId: string
     }, ExtArgs["result"]["customer"]>
@@ -20391,8 +20402,10 @@ export namespace Prisma {
     readonly lastName: FieldRef<"Customer", 'String'>
     readonly phone: FieldRef<"Customer", 'String'>
     readonly acceptsMarketing: FieldRef<"Customer", 'Boolean'>
-    readonly totalSpent: FieldRef<"Customer", 'Float'>
+    readonly totalSpent: FieldRef<"Customer", 'Int'>
     readonly orderCount: FieldRef<"Customer", 'Int'>
+    readonly deletionRequestedAt: FieldRef<"Customer", 'DateTime'>
+    readonly anonymizedAt: FieldRef<"Customer", 'DateTime'>
     readonly userId: FieldRef<"Customer", 'String'>
     readonly businessId: FieldRef<"Customer", 'String'>
   }
@@ -43132,7 +43145,6 @@ export namespace Prisma {
     supportEmail: 'supportEmail',
     phoneNumber: 'phoneNumber',
     businessAddress: 'businessAddress',
-    taxId: 'taxId',
     stripeAccountId: 'stripeAccountId',
     stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
     testimonialsAutoApprove: 'testimonialsAutoApprove',
@@ -43299,6 +43311,8 @@ export namespace Prisma {
     acceptsMarketing: 'acceptsMarketing',
     totalSpent: 'totalSpent',
     orderCount: 'orderCount',
+    deletionRequestedAt: 'deletionRequestedAt',
+    anonymizedAt: 'anonymizedAt',
     userId: 'userId',
     businessId: 'businessId'
   };
@@ -44227,7 +44241,6 @@ export namespace Prisma {
     supportEmail?: StringNullableFilter<"Business"> | string | null
     phoneNumber?: StringNullableFilter<"Business"> | string | null
     businessAddress?: StringNullableFilter<"Business"> | string | null
-    taxId?: StringNullableFilter<"Business"> | string | null
     stripeAccountId?: StringNullableFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
     testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
@@ -44273,7 +44286,6 @@ export namespace Prisma {
     supportEmail?: SortOrderInput | SortOrder
     phoneNumber?: SortOrderInput | SortOrder
     businessAddress?: SortOrderInput | SortOrder
-    taxId?: SortOrderInput | SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     stripeAutoTaxEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
@@ -44323,7 +44335,6 @@ export namespace Prisma {
     supportEmail?: StringNullableFilter<"Business"> | string | null
     phoneNumber?: StringNullableFilter<"Business"> | string | null
     businessAddress?: StringNullableFilter<"Business"> | string | null
-    taxId?: StringNullableFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
     testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
     umamiWebsiteId?: StringNullableFilter<"Business"> | string | null
@@ -44368,7 +44379,6 @@ export namespace Prisma {
     supportEmail?: SortOrderInput | SortOrder
     phoneNumber?: SortOrderInput | SortOrder
     businessAddress?: SortOrderInput | SortOrder
-    taxId?: SortOrderInput | SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     stripeAutoTaxEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
@@ -44405,7 +44415,6 @@ export namespace Prisma {
     supportEmail?: StringNullableWithAggregatesFilter<"Business"> | string | null
     phoneNumber?: StringNullableWithAggregatesFilter<"Business"> | string | null
     businessAddress?: StringNullableWithAggregatesFilter<"Business"> | string | null
-    taxId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     stripeAccountId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     testimonialsAutoApprove?: BoolWithAggregatesFilter<"Business"> | boolean
@@ -45171,8 +45180,10 @@ export namespace Prisma {
     lastName?: StringNullableFilter<"Customer"> | string | null
     phone?: StringNullableFilter<"Customer"> | string | null
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
-    totalSpent?: FloatFilter<"Customer"> | number
+    totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
+    deletionRequestedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    anonymizedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     userId?: StringNullableFilter<"Customer"> | string | null
     businessId?: StringFilter<"Customer"> | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -45195,6 +45206,8 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    deletionRequestedAt?: SortOrderInput | SortOrder
+    anonymizedAt?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     businessId?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -45219,8 +45232,10 @@ export namespace Prisma {
     lastName?: StringNullableFilter<"Customer"> | string | null
     phone?: StringNullableFilter<"Customer"> | string | null
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
-    totalSpent?: FloatFilter<"Customer"> | number
+    totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
+    deletionRequestedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    anonymizedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     userId?: StringNullableFilter<"Customer"> | string | null
     businessId?: StringFilter<"Customer"> | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -45243,6 +45258,8 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    deletionRequestedAt?: SortOrderInput | SortOrder
+    anonymizedAt?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     businessId?: SortOrder
     _count?: CustomerCountOrderByAggregateInput
@@ -45264,8 +45281,10 @@ export namespace Prisma {
     lastName?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     phone?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     acceptsMarketing?: BoolWithAggregatesFilter<"Customer"> | boolean
-    totalSpent?: FloatWithAggregatesFilter<"Customer"> | number
+    totalSpent?: IntWithAggregatesFilter<"Customer"> | number
     orderCount?: IntWithAggregatesFilter<"Customer"> | number
+    deletionRequestedAt?: DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
+    anonymizedAt?: DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
     userId?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     businessId?: StringWithAggregatesFilter<"Customer"> | string
   }
@@ -47534,7 +47553,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -47580,7 +47598,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -47626,7 +47643,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -47672,7 +47688,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -47718,7 +47733,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -47747,7 +47761,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -47776,7 +47789,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -48669,6 +48681,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
@@ -48689,6 +48703,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
@@ -48707,8 +48723,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
@@ -48727,8 +48745,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
@@ -48749,6 +48769,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     userId?: string | null
     businessId: string
   }
@@ -48762,8 +48784,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type CustomerUncheckedUpdateManyInput = {
@@ -48775,8 +48799,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
@@ -51412,7 +51438,6 @@ export namespace Prisma {
     supportEmail?: SortOrder
     phoneNumber?: SortOrder
     businessAddress?: SortOrder
-    taxId?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
@@ -51446,7 +51471,6 @@ export namespace Prisma {
     supportEmail?: SortOrder
     phoneNumber?: SortOrder
     businessAddress?: SortOrder
-    taxId?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
@@ -51474,7 +51498,6 @@ export namespace Prisma {
     supportEmail?: SortOrder
     phoneNumber?: SortOrder
     businessAddress?: SortOrder
-    taxId?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
@@ -52202,6 +52225,8 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    deletionRequestedAt?: SortOrder
+    anonymizedAt?: SortOrder
     userId?: SortOrder
     businessId?: SortOrder
   }
@@ -52222,6 +52247,8 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    deletionRequestedAt?: SortOrder
+    anonymizedAt?: SortOrder
     userId?: SortOrder
     businessId?: SortOrder
   }
@@ -52237,6 +52264,8 @@ export namespace Prisma {
     acceptsMarketing?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
+    deletionRequestedAt?: SortOrder
+    anonymizedAt?: SortOrder
     userId?: SortOrder
     businessId?: SortOrder
   }
@@ -56543,6 +56572,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
@@ -56562,6 +56593,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
@@ -56780,8 +56813,10 @@ export namespace Prisma {
     lastName?: StringNullableFilter<"Customer"> | string | null
     phone?: StringNullableFilter<"Customer"> | string | null
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
-    totalSpent?: FloatFilter<"Customer"> | number
+    totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
+    deletionRequestedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    anonymizedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     userId?: StringNullableFilter<"Customer"> | string | null
     businessId?: StringFilter<"Customer"> | string
   }
@@ -56905,7 +56940,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -56950,7 +56984,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -57054,7 +57087,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -57099,7 +57131,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -57517,6 +57548,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
@@ -57536,6 +57569,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     userId?: string | null
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
@@ -58693,7 +58728,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -58738,7 +58772,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -58799,7 +58832,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -58844,7 +58876,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -58926,7 +58957,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -58971,7 +59001,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -59305,7 +59334,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -59350,7 +59378,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -59853,7 +59880,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -59898,7 +59924,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -59981,7 +60006,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -60026,7 +60050,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -60444,7 +60467,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -60489,7 +60511,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -60645,7 +60666,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -60690,7 +60710,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -60772,7 +60791,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -60817,7 +60835,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -61183,7 +61200,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -61228,7 +61244,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -61371,6 +61386,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
@@ -61390,6 +61407,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
@@ -61501,8 +61520,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
@@ -61520,8 +61541,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
@@ -61560,7 +61583,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -61605,7 +61627,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -61652,6 +61673,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
@@ -61671,6 +61694,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     userId?: string | null
     businessId: string
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
@@ -61955,7 +61980,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -62000,7 +62024,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -62051,8 +62074,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
@@ -62070,8 +62095,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
@@ -62841,7 +62868,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -62886,7 +62912,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -63025,7 +63050,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -63070,7 +63094,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -63296,7 +63319,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -63341,7 +63363,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -63695,7 +63716,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -63740,7 +63760,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -63907,7 +63926,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -63952,7 +63970,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -64147,7 +64164,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -64192,7 +64208,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -64269,7 +64284,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -64314,7 +64328,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -64375,7 +64388,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -64420,7 +64432,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -64465,7 +64476,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -64510,7 +64520,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -64571,7 +64580,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -64616,7 +64624,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -64661,7 +64668,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -64706,7 +64712,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -64767,7 +64772,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -64812,7 +64816,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -64857,7 +64860,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -64902,7 +64904,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -64995,7 +64996,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -65040,7 +65040,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -65200,7 +65199,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -65245,7 +65243,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -65292,6 +65289,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
@@ -65311,6 +65310,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
@@ -65349,7 +65350,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -65394,7 +65394,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -65445,8 +65444,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
@@ -65464,8 +65465,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
@@ -65488,7 +65491,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -65533,7 +65535,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -65580,6 +65581,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
@@ -65599,6 +65602,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
@@ -65637,7 +65642,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -65682,7 +65686,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -65733,8 +65736,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
@@ -65752,8 +65757,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
@@ -65862,6 +65869,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
@@ -65881,6 +65890,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
@@ -66108,8 +66119,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
@@ -66127,8 +66140,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
@@ -66370,7 +66385,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -66415,7 +66429,6 @@ export namespace Prisma {
     supportEmail?: string | null
     phoneNumber?: string | null
     businessAddress?: string | null
-    taxId?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
     testimonialsAutoApprove?: boolean
@@ -66513,7 +66526,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -66558,7 +66570,6 @@ export namespace Prisma {
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    taxId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
@@ -66679,6 +66690,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     businessId: string
   }
 
@@ -66827,8 +66840,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
@@ -66846,8 +66861,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
@@ -66865,8 +66882,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -67047,6 +67066,8 @@ export namespace Prisma {
     acceptsMarketing?: boolean
     totalSpent?: number
     orderCount?: number
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
     userId?: string | null
   }
 
@@ -67497,8 +67518,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
@@ -67516,8 +67539,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
@@ -67535,8 +67560,10 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
-    totalSpent?: FloatFieldUpdateOperationsInput | number
+    totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 

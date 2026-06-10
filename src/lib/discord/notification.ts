@@ -1,5 +1,45 @@
 import { env } from "~/env";
 
+export async function notifyDiscordDeletionRequest({
+  customerId,
+  businessName,
+}: {
+  customerId: string;
+  businessName: string;
+}) {
+  const webhookUrl = env.DISCORD_WEBHOOK_URL;
+
+  if (!webhookUrl) return;
+
+  await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      embeds: [
+        {
+          title: "🗑️ Customer Deletion Request",
+          description:
+            "A customer has requested deletion of their personal data. Please process this request.",
+          color: 0xed4245,
+          fields: [
+            {
+              name: "Business",
+              value: businessName,
+              inline: true,
+            },
+            {
+              name: "Customer ID",
+              value: `\`${customerId}\``,
+              inline: false,
+            },
+          ],
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    }),
+  });
+}
+
 export async function notifyDiscordDomainRemoved({
   domain,
   businessName,
