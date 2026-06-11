@@ -18,7 +18,7 @@ const checkoutItemSchema = z.object({
   price: z.number().nonnegative(),
   quantity: z.number().int().min(1).max(100),
   imageUrl: z.string().nullable(),
-  sku: z.string().optional(),
+  sku: z.string().nullable().optional(),
 });
 
 const checkoutCustomerInfoSchema = z.object({
