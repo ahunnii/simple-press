@@ -4,6 +4,11 @@ import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
+import { computeSubtotalCents } from "~/lib/checkout/pricing";
+import {
+  checkCartAvailability,
+  computePoolDemand,
+} from "~/lib/checkout/validate-cart";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { getPlatformMaintenance } from "~/lib/maintenance";
@@ -200,19 +205,7 @@ export async function POST(req: NextRequest) {
     const productMap = new Map(productsNoVariant.map((p) => [p.id, p]));
 
     // Aggregate base units demanded per pool across the whole cart
-    const poolDemand = new Map<string, number>();
-    for (const item of itemList) {
-      if (!item.variantId) {
-        const p = productMap.get(item.productId);
-        if (p?.baseInventoryUnitId) {
-          const cur = poolDemand.get(p.baseInventoryUnitId) ?? 0;
-          poolDemand.set(
-            p.baseInventoryUnitId,
-            cur + (p.baseUnitsConsumed ?? 1) * (Number(item.quantity) || 1),
-          );
-        }
-      }
-    }
+    const poolDemand = computePoolDemand(itemList, productMap);
 
     const poolIds = [...poolDemand.keys()];
     const pools =
@@ -229,107 +222,13 @@ export async function POST(req: NextRequest) {
         : [];
     const poolMap = new Map(pools.map((p) => [p.id, p]));
 
-    const unavailableItems: string[] = [];
-    const unavailableItemIds: {
-      productId: string;
-      variantId: string | null;
-    }[] = [];
-    const unavailableIdKeySet = new Set<string>();
-
-    const pushUnavailable = (
-      name: string,
-      productId: string,
-      variantId: string | null,
-    ) => {
-      unavailableItems.push(name);
-      const key = `${productId}-${variantId ?? "base"}`;
-      if (!unavailableIdKeySet.has(key)) {
-        unavailableIdKeySet.add(key);
-        unavailableItemIds.push({ productId, variantId });
-      }
-    };
-
-    for (const item of itemList) {
-      const name = item.variantName
-        ? `${item.productName} (${item.variantName})`
-        : item.productName;
-      const qty = Number(item.quantity) || 1;
-
-      if (item.variantId) {
-        const variant = variantMap.get(item.variantId);
-        if (!variant?.product.published) {
-          pushUnavailable(name, item.productId, item.variantId);
-          continue;
-        }
-        const variantProductFields = variant.product.additionalFields as Record<
-          string,
-          unknown
-        > | null;
-        if (variantProductFields?.comingSoon === true) {
-          pushUnavailable(name, item.productId, item.variantId);
-          continue;
-        }
-        if (
-          variant.product.trackInventory &&
-          !variant.product.allowBackorders &&
-          variant.inventoryQty - variant.reservedQty < qty
-        ) {
-          pushUnavailable(name, item.productId, item.variantId);
-          continue;
-        }
-      } else {
-        const product = productMap.get(item.productId);
-        if (!product?.published) {
-          pushUnavailable(name, item.productId, null);
-          continue;
-        }
-        if (product._count.variants > 0) {
-          pushUnavailable(name, item.productId, null);
-          continue;
-        }
-        const productFields = product.additionalFields as Record<
-          string,
-          unknown
-        > | null;
-        if (productFields?.comingSoon === true) {
-          pushUnavailable(name, item.productId, null);
-          continue;
-        }
-        // Pool inventory check — pool demand is validated in aggregate after the loop
-        if (!product.baseInventoryUnitId) {
-          if (
-            product.trackInventory &&
-            !product.allowBackorders &&
-            product.inventoryQty - product.reservedQty < qty
-          ) {
-            pushUnavailable(name, item.productId, null);
-          }
-        }
-      }
-    }
-
-    // Aggregate pool check: compare total pool demand vs available qty (inventoryQty - reservedQty)
-    for (const [poolId, demand] of poolDemand) {
-      const pool = poolMap.get(poolId);
-      if (
-        !pool ||
-        (!pool.allowBackorders &&
-          pool.inventoryQty - pool.reservedQty < demand)
-      ) {
-        // Mark all items drawing from this pool as unavailable
-        for (const item of itemList) {
-          if (!item.variantId) {
-            const p = productMap.get(item.productId);
-            if (p?.baseInventoryUnitId === poolId) {
-              const n = item.variantName
-                ? `${item.productName} (${item.variantName})`
-                : item.productName;
-              pushUnavailable(n, item.productId, null);
-            }
-          }
-        }
-      }
-    }
+    const { unavailableItems, unavailableItemIds } = checkCartAvailability({
+      items: itemList,
+      variantMap,
+      productMap,
+      poolDemand,
+      poolMap,
+    });
 
     if (unavailableItems.length > 0) {
       const uniqueNames = [...new Set(unavailableItems)];
@@ -376,12 +275,7 @@ export async function POST(req: NextRequest) {
 
     // Always use server-fetched prices for subtotal — never trust client-supplied amounts.
     // This ensures discounts and free-shipping thresholds are computed against real prices.
-    const subtotalCents = itemList.reduce((sum, item) => {
-      const serverPrice = item.variantId
-        ? (variantMap.get(item.variantId)?.price ?? 0)
-        : (productMap.get(item.productId)?.price ?? 0);
-      return sum + serverPrice * item.quantity;
-    }, 0);
+    const subtotalCents = computeSubtotalCents(itemList, variantMap, productMap);
 
     const rawDiscountId =
       typeof discountCodeId === "string" && discountCodeId.trim() !== ""
