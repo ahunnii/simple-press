@@ -905,7 +905,14 @@
 /* ─── Product page grid ─────────────────────────────────────────────────── */
 .noise .vn-product-grid,
 .visual-noise .vn-product-grid {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .noise .vn-product-grid,
+  .visual-noise .vn-product-grid {
+    grid-template-columns: 88px minmax(0, 1fr) minmax(0, 1fr);
+  }
 }
 
 /* ─── Hero overlay (replaces inline rgba) ───────────────────────────────── */

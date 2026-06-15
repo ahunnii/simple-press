@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -26,15 +25,8 @@ export function NoiseProductActions({
     quantity,
     setSelectedVariantId,
     additionalFields,
+    justAdded,
   } = useProduct(product);
-
-  const [isAdded, setIsAdded] = useState(false);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   /* Price split: major / minor for styled display */
   const priceStr = formatPrice(displayPrice);
@@ -159,16 +151,16 @@ export function NoiseProductActions({
 
               {/* Add to bag */}
               <button
-                onClick={addToCart}
+                onClick={handleAddToCart}
                 className="flex flex-1 items-center justify-between px-5 py-4 font-mono text-[12px] tracking-[0.24em] uppercase transition-all"
                 style={{
-                  background: isAdded ? "var(--vn-steel)" : "var(--vn-ink)",
+                  background: justAdded ? "var(--vn-steel)" : "var(--vn-ink)",
                   color: "var(--vn-bone)",
-                  border: `1.5px solid ${isAdded ? "var(--vn-steel)" : "var(--vn-ink)"}`,
+                  border: `1.5px solid ${justAdded ? "var(--vn-steel)" : "var(--vn-ink)"}`,
                 }}
               >
                 <span className="flex items-center gap-2">
-                  {isAdded ? (
+                  {justAdded ? (
                     <>
                       <Check className="size-3.5" />
                       Added to bag
@@ -217,7 +209,7 @@ export function NoiseProductActions({
 
       {/* S-2: live region for add-to-cart announcements (no-variant path) */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
-        {isAdded ? `${product.name} added to bag` : ""}
+        {justAdded ? `${product.name} added to bag` : ""}
       </div>
     </>
   );

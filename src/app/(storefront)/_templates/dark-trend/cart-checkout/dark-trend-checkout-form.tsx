@@ -3,14 +3,11 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, Loader2, Tag, X } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
-import {
-  calculateShipping,
-  shippingConfigFromBusiness,
-} from "~/lib/shipping-utils";
+import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -24,152 +21,29 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { useCart } from "~/providers/cart-context";
-
-import { DarkTrendDiscountInput } from "./dark-trend-discount-input";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
 };
 
 export function DarkTrendCheckoutForm({ business }: Props) {
-  const { items, removeItem, total } = useCart();
-  const shippingConfig = shippingConfigFromBusiness(business);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const f = useCheckoutForm(business);
+
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
   // M-11: ref to focus error alert when set
   const errorAlertRef = useRef<HTMLDivElement>(null);
 
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-
-  const [addressLine1, setAddressLine1] = useState("");
-  const [addressLine2, setAddressLine2] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [country, setCountry] = useState<"US" | "CA">("US");
-
-  const [deliveryMethod, setDeliveryMethod] = useState<"ship" | "pickup">(
-    "ship",
-  );
-
-  const [appliedDiscount, setAppliedDiscount] = useState<{
-    id: string;
-    code: string;
-    discountAmount: number;
-  } | null>(null);
-
-  const subtotal = total;
-  const discountAmount = appliedDiscount?.discountAmount ?? 0;
-  const shipping =
-    deliveryMethod === "pickup"
-      ? 0
-      : calculateShipping(subtotal, shippingConfig);
-  const finalTotal = subtotal - discountAmount + shipping;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const onSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
-    setIsProcessing(true);
-
-    try {
-      if (!email || !name || !phone.trim()) {
-        throw new Error("Please fill in all required contact fields");
-      }
-
-      if (
-        deliveryMethod === "ship" &&
-        (!addressLine1.trim() ||
-          !city.trim() ||
-          !state.trim() ||
-          !postalCode.trim())
-      ) {
-        throw new Error("Please fill in all required shipping fields");
-      }
-
-      if (items.length === 0) {
-        throw new Error("Your cart is empty");
-      }
-
-      const response = await fetch("/api/stripe/create-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items,
-          deliveryMethod,
-          customerInfo: {
-            email,
-            name,
-            phone: phone.trim(),
-            shippingAddress:
-              deliveryMethod === "ship"
-                ? {
-                    line1: addressLine1.trim(),
-                    line2: addressLine2.trim() || null,
-                    city: city.trim(),
-                    state: state.trim(),
-                    postalCode: postalCode.trim(),
-                    country,
-                    phone: phone.trim(),
-                  }
-                : null,
-          },
-          discountCodeId: appliedDiscount?.id ?? null,
-          discountAmount: appliedDiscount?.discountAmount ?? 0,
-        }),
-      });
-
-      const data = (await response.json()) as {
-        error?: string;
-        unavailableItems?: string[];
-        unavailableItemIds?: { productId: string; variantId: string | null }[];
-        sessionUrl?: string;
-        sessionId?: string;
-      };
-
-      if (!response.ok) {
-        if (data.unavailableItemIds && data.unavailableItemIds.length > 0) {
-          for (const row of data.unavailableItemIds) {
-            removeItem(row.productId, row.variantId);
-          }
-        }
-        if (data.unavailableItems && data.unavailableItems.length > 0) {
-          const removedMsg =
-            data.unavailableItemIds && data.unavailableItemIds.length > 0
-              ? `The following items were out of stock or no longer available and have been removed from your cart: ${data.unavailableItems.join(", ")}.`
-              : `${data.error ?? "Some items are unavailable."} Remove or update: ${data.unavailableItems.join(", ")}`;
-          setError(removedMsg);
-        } else {
-          setError(data.error ?? "Failed to create checkout session");
-        }
-        setIsProcessing(false);
-        // M-11: focus error alert
-        setTimeout(() => errorAlertRef.current?.focus(), 50);
-        return;
-      }
-
-      const sessionUrl = data.sessionUrl;
-      if (!sessionUrl) {
-        setError("Failed to create checkout session");
-        setIsProcessing(false);
-        setTimeout(() => errorAlertRef.current?.focus(), 50);
-        return;
-      }
-
-      window.location.href = sessionUrl;
-    } catch (err: unknown) {
-      setError((err as Error).message ?? "Failed to create checkout session");
-      setIsProcessing(false);
+    await f.handleSubmit(e);
+    // M-11: focus error alert if an error was set
+    if (f.error) {
       setTimeout(() => errorAlertRef.current?.focus(), 50);
     }
   };
 
-  if (items.length === 0) {
+  if (f.items.length === 0) {
     return (
       <div className="py-16 text-center">
         <p className="mb-4 text-white/70">Your cart is empty</p>
@@ -184,7 +58,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={onSubmit}>
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Customer Information */}
         <div className="space-y-6 lg:col-span-2">
@@ -204,13 +78,13 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                 <Input
                   id="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={f.email}
+                  onChange={(e) => f.setEmail(e.target.value)}
                   placeholder="you@example.com"
                   className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                   required
                   aria-required="true"
-                  aria-invalid={submitAttempted && !email ? true : undefined}
+                  aria-invalid={submitAttempted && !f.email ? true : undefined}
                 />
               </div>
               <div>
@@ -220,14 +94,14 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                 <Input
                   id="name"
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={f.name}
+                  onChange={(e) => f.setName(e.target.value)}
                   placeholder="John Doe"
                   className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                   required
                   aria-required="true"
                   aria-invalid={
-                    submitAttempted && !name.trim() ? true : undefined
+                    submitAttempted && !f.name.trim() ? true : undefined
                   }
                 />
               </div>
@@ -238,14 +112,14 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                 <PhoneInput
                   id="phone"
                   autoComplete="tel"
-                  value={phone}
-                  onChange={(val) => setPhone(val)}
+                  value={f.phone}
+                  onChange={(val) => f.setPhone(val)}
                   placeholder="+1 555 123 4567"
                   className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                   required
                   aria-required="true"
                   aria-invalid={
-                    submitAttempted && !phone.trim() ? true : undefined
+                    submitAttempted && !f.phone.trim() ? true : undefined
                   }
                 />
               </div>
@@ -253,7 +127,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
           </Card>
 
           {/* Delivery Method */}
-          {shippingConfig.offersInStorePickup && (
+          {f.shippingConfig.offersInStorePickup && (
             <Card className="border-white/20 bg-zinc-900/30">
               <CardHeader>
                 <CardTitle className="text-white">Delivery</CardTitle>
@@ -263,10 +137,10 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
-                    onClick={() => setDeliveryMethod("ship")}
-                    aria-pressed={deliveryMethod === "ship"}
+                    onClick={() => f.setDeliveryMethod("ship")}
+                    aria-pressed={f.deliveryMethod === "ship"}
                     className={
-                      deliveryMethod === "ship"
+                      f.deliveryMethod === "ship"
                         ? "bg-violet-600 text-white hover:bg-violet-700"
                         : "border border-white/20 bg-transparent text-white hover:bg-white/10"
                     }
@@ -275,10 +149,10 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   </Button>
                   <Button
                     type="button"
-                    onClick={() => setDeliveryMethod("pickup")}
-                    aria-pressed={deliveryMethod === "pickup"}
+                    onClick={() => f.setDeliveryMethod("pickup")}
+                    aria-pressed={f.deliveryMethod === "pickup"}
                     className={
-                      deliveryMethod === "pickup"
+                      f.deliveryMethod === "pickup"
                         ? "bg-violet-600 text-white hover:bg-violet-700"
                         : "border border-white/20 bg-transparent text-white hover:bg-white/10"
                     }
@@ -287,7 +161,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   </Button>
                 </div>
                 <p className="text-sm text-white/70">
-                  {deliveryMethod === "pickup"
+                  {f.deliveryMethod === "pickup"
                     ? "No shipping charge. You'll pick up your order at the store."
                     : "Shipping cost is based on your store's shipping settings."}
                 </p>
@@ -296,7 +170,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
           )}
 
           {/* Shipping Address */}
-          {deliveryMethod === "ship" && (
+          {f.deliveryMethod === "ship" && (
             <Card className="border-white/20 bg-zinc-900/30">
               <CardHeader>
                 <CardTitle className="text-white">Shipping Address</CardTitle>
@@ -314,14 +188,14 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                     id="address-line1"
                     type="text"
                     autoComplete="shipping address-line1"
-                    value={addressLine1}
-                    onChange={(e) => setAddressLine1(e.target.value)}
+                    value={f.addressLine1}
+                    onChange={(e) => f.setAddressLine1(e.target.value)}
                     placeholder="Street address, P.O. box"
                     className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-                    required={deliveryMethod === "ship"}
+                    required={f.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={
-                      submitAttempted && !addressLine1.trim() ? true : undefined
+                      submitAttempted && !f.addressLine1.trim() ? true : undefined
                     }
                   />
                 </div>
@@ -333,8 +207,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                     id="address-line2"
                     type="text"
                     autoComplete="shipping address-line2"
-                    value={addressLine2}
-                    onChange={(e) => setAddressLine2(e.target.value)}
+                    value={f.addressLine2}
+                    onChange={(e) => f.setAddressLine2(e.target.value)}
                     placeholder="Apartment, suite, etc."
                     className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
                   />
@@ -348,13 +222,13 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       id="city"
                       type="text"
                       autoComplete="shipping address-level2"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
+                      value={f.city}
+                      onChange={(e) => f.setCity(e.target.value)}
                       className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-                      required={deliveryMethod === "ship"}
+                      required={f.deliveryMethod === "ship"}
                       aria-required="true"
                       aria-invalid={
-                        submitAttempted && !city.trim() ? true : undefined
+                        submitAttempted && !f.city.trim() ? true : undefined
                       }
                     />
                   </div>
@@ -366,14 +240,14 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       id="state"
                       type="text"
                       autoComplete="shipping address-level1"
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
+                      value={f.state}
+                      onChange={(e) => f.setState(e.target.value)}
                       placeholder="e.g. CA or ON"
                       className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-                      required={deliveryMethod === "ship"}
+                      required={f.deliveryMethod === "ship"}
                       aria-required="true"
                       aria-invalid={
-                        submitAttempted && !state.trim() ? true : undefined
+                        submitAttempted && !f.state.trim() ? true : undefined
                       }
                     />
                   </div>
@@ -387,13 +261,13 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       id="postal"
                       type="text"
                       autoComplete="shipping postal-code"
-                      value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value)}
+                      value={f.postalCode}
+                      onChange={(e) => f.setPostalCode(e.target.value)}
                       className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-                      required={deliveryMethod === "ship"}
+                      required={f.deliveryMethod === "ship"}
                       aria-required="true"
                       aria-invalid={
-                        submitAttempted && !postalCode.trim() ? true : undefined
+                        submitAttempted && !f.postalCode.trim() ? true : undefined
                       }
                     />
                   </div>
@@ -406,8 +280,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       Country *
                     </Label>
                     <Select
-                      value={country}
-                      onValueChange={(v) => setCountry(v as "US" | "CA")}
+                      value={f.country}
+                      onValueChange={(v) => f.setCountry(v as "US" | "CA")}
                     >
                       <SelectTrigger
                         id="country"
@@ -437,7 +311,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
             <CardContent className="space-y-4">
               {/* Items */}
               <div className="max-h-64 space-y-3 overflow-y-auto">
-                {items.map((item) => (
+                {f.items.map((item) => (
                   <div
                     key={`${item.productId}-${item.variantId}`}
                     className="flex gap-3"
@@ -477,39 +351,136 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                 ))}
               </div>
 
-              {/* Discount Code Input */}
-              <div className="pt-4">
-                <DarkTrendDiscountInput
-                  businessId={business.id}
-                  cartTotal={subtotal}
-                  onDiscountApplied={setAppliedDiscount}
-                />
+              {/* Discount Code Input — inline, dark-trend style */}
+              <div className="space-y-3 pt-4">
+                {f.discountCodeLabel && f.discountAmount > 0 ? (
+                  <div
+                    role="status"
+                    className="rounded-md border border-green-500/50 bg-green-500/10 p-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/20">
+                          <span
+                            aria-hidden="true"
+                            className="text-green-400 text-xs font-bold"
+                          >
+                            ✓
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-green-400">
+                            Discount Applied: {f.discountCodeLabel}
+                          </p>
+                          <p className="text-sm text-green-500">
+                            You saved {formatPrice(f.discountAmount)}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={f.clearDiscount}
+                        aria-label={`Remove discount ${f.discountCodeLabel}`}
+                        className="text-green-400 hover:bg-green-500/10 hover:text-green-300"
+                      >
+                        <X aria-hidden="true" className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Tag
+                        aria-hidden="true"
+                        className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-white/40"
+                      />
+                      <Input
+                        type="text"
+                        placeholder="Discount code"
+                        aria-label="Discount code"
+                        value={f.discountCodeInput}
+                        onChange={(e) => {
+                          f.setDiscountCodeInput(e.target.value.toUpperCase());
+                          f.setDiscountFieldError(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            f.handleApplyDiscount();
+                          }
+                        }}
+                        aria-invalid={!!f.discountFieldError}
+                        aria-describedby={
+                          f.discountFieldError
+                            ? "discount-code-error"
+                            : undefined
+                        }
+                        className="border-white/20 bg-zinc-900/50 pl-10 text-white placeholder:text-white/40"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={f.handleApplyDiscount}
+                      disabled={
+                        f.isValidatingDiscount || !f.discountCodeInput.trim()
+                      }
+                      aria-label="Apply discount code"
+                      className="border border-white/60 bg-transparent font-medium text-white hover:bg-white/10"
+                    >
+                      {f.isValidatingDiscount ? (
+                        <>
+                          <Loader2
+                            aria-hidden="true"
+                            className="mr-1 h-4 w-4 animate-spin"
+                          />
+                          Applying…
+                        </>
+                      ) : (
+                        "Apply"
+                      )}
+                    </Button>
+                  </div>
+                )}
+                {f.discountFieldError && (
+                  <Alert
+                    variant="destructive"
+                    className="border-red-500/50 bg-red-500/10"
+                  >
+                    <AlertDescription
+                      id="discount-code-error"
+                      className="text-sm text-red-400"
+                    >
+                      {f.discountFieldError}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
 
               <div className="space-y-2 border-t border-white/20 pt-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-white/70">Subtotal</span>
-                  <span className="text-white">{formatPrice(subtotal)}</span>
+                  <span className="text-white">{formatPrice(f.subtotal)}</span>
                 </div>
-                {appliedDiscount && (
+                {f.discountAmount > 0 && f.discountCodeLabel && (
                   <div className="flex justify-between text-sm text-green-400">
-                    <span>Discount ({appliedDiscount.code})</span>
-                    <span>-{formatPrice(discountAmount)}</span>
+                    <span>Discount ({f.discountCodeLabel})</span>
+                    <span>-{formatPrice(f.discountAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
                   <span className="text-white/70">Shipping</span>
                   <span className="text-white">
-                    {deliveryMethod === "pickup"
+                    {f.deliveryMethod === "pickup"
                       ? "In-store pickup (free)"
-                      : shipping === 0
+                      : f.shipping === 0
                         ? "Free"
-                        : formatPrice(shipping)}
+                        : formatPrice(f.shipping)}
                   </span>
                 </div>
                 <div className="flex justify-between border-t border-white/20 pt-2 font-bold text-white">
                   <span>Estimated total</span>
-                  <span>{formatPrice(finalTotal)}</span>
+                  <span>{formatPrice(f.finalTotal)}</span>
                 </div>
                 <p className="text-xs text-white/60">
                   Tax and final total are confirmed on Stripe Checkout.
@@ -518,14 +489,14 @@ export function DarkTrendCheckoutForm({ business }: Props) {
 
               {/* M-11: error alert with persistent live region and focus wrapper */}
               <div role="alert" aria-live="assertive" aria-atomic="true">
-                {error && (
+                {f.error && (
                   <div ref={errorAlertRef} tabIndex={-1}>
                     <Alert
                       variant="destructive"
                       className="border-red-500/50 bg-red-500/10"
                     >
                       <AlertDescription className="text-red-400">
-                        {error}
+                        {f.error}
                       </AlertDescription>
                     </Alert>
                   </div>
@@ -535,12 +506,12 @@ export function DarkTrendCheckoutForm({ business }: Props) {
               {/* S-11 + N-1: violet-600, aria-hidden icons */}
               <Button
                 type="submit"
-                disabled={isProcessing}
-                aria-busy={isProcessing}
+                disabled={f.isProcessing}
+                aria-busy={f.isProcessing}
                 className="w-full bg-violet-600 py-6 text-base font-semibold text-white hover:bg-violet-700"
                 size="lg"
               >
-                {isProcessing ? (
+                {f.isProcessing ? (
                   <>
                     <Loader2
                       aria-hidden="true"

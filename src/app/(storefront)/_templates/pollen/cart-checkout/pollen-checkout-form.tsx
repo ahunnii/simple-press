@@ -1,17 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
-import {
-  calculateShipping,
-  shippingConfigFromBusiness,
-} from "~/lib/shipping-utils";
-import { api } from "~/trpc/react";
+import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import {
   Select,
@@ -21,7 +17,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { useCart } from "~/providers/cart-context";
 
 const inputClass =
   "w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-[#215935] focus:ring-2 focus:ring-[#215935]/20 focus:outline-none px-3 py-2 text-sm";
@@ -34,176 +29,17 @@ type Props = {
 };
 
 export function PollenCheckoutForm({ business }: Props) {
-  const { items, removeItem, subtotal } = useCart();
-  const shippingConfig = shippingConfigFromBusiness(business);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const f = useCheckoutForm(business);
+
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-
-  const [addressLine1, setAddressLine1] = useState("");
-  const [addressLine2, setAddressLine2] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [country, setCountry] = useState<"US" | "CA">("US");
-
-  const [deliveryMethod, setDeliveryMethod] = useState<"ship" | "pickup">(
-    "ship",
-  );
-
-  const [discountCodeInput, setDiscountCodeInput] = useState("");
-  const [discountCodeId, setDiscountCodeId] = useState<string | null>(null);
-  const [discountAmount, setDiscountAmount] = useState(0);
-  const [discountCodeLabel, setDiscountCodeLabel] = useState<string | null>(
-    null,
-  );
-  const [discountFieldError, setDiscountFieldError] = useState<string | null>(
-    null,
-  );
-
-  const validateDiscountMutation = api.discount.validate.useMutation({
-    onSuccess: (data) => {
-      setDiscountCodeId(data.discount.id);
-      setDiscountAmount(data.discount.discountAmount);
-      setDiscountCodeLabel(data.discount.code);
-      setDiscountFieldError(null);
-    },
-    onError: (err) => {
-      setDiscountCodeId(null);
-      setDiscountAmount(0);
-      setDiscountCodeLabel(null);
-      setDiscountFieldError(err.message ?? "Invalid code");
-    },
-  });
-
-  // Reset discount when cart changes
-  useEffect(() => {
-    setDiscountCodeId(null);
-    setDiscountAmount(0);
-    setDiscountCodeLabel(null);
-    setDiscountFieldError(null);
-  }, [subtotal]);
-
-  const shipping =
-    deliveryMethod === "pickup"
-      ? 0
-      : calculateShipping(subtotal, shippingConfig);
-  const finalTotal = subtotal - discountAmount + shipping;
-
-  const handleApplyDiscount = () => {
-    const code = discountCodeInput.trim();
-    if (!code) {
-      setDiscountFieldError("Enter a discount code");
-      return;
-    }
-    if (subtotal <= 0) {
-      setDiscountFieldError("Your cart is empty");
-      return;
-    }
-    setDiscountFieldError(null);
-    validateDiscountMutation.mutate({ code, cartTotal: subtotal });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const onSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
-    setIsProcessing(true);
-
-    try {
-      if (!email || !name || !phone.trim()) {
-        throw new Error("Please fill in all required contact fields");
-      }
-
-      if (
-        deliveryMethod === "ship" &&
-        (!addressLine1.trim() ||
-          !city.trim() ||
-          !state.trim() ||
-          !postalCode.trim())
-      ) {
-        throw new Error("Please fill in all required shipping fields");
-      }
-
-      if (items.length === 0) {
-        throw new Error("Your cart is empty");
-      }
-
-      const response = await fetch("/api/stripe/create-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items,
-          deliveryMethod,
-          customerInfo: {
-            email,
-            name,
-            phone: phone.trim(),
-            shippingAddress:
-              deliveryMethod === "ship"
-                ? {
-                    line1: addressLine1.trim(),
-                    line2: addressLine2.trim() || null,
-                    city: city.trim(),
-                    state: state.trim(),
-                    postalCode: postalCode.trim(),
-                    country,
-                    phone: phone.trim(),
-                  }
-                : null,
-          },
-          discountCodeId: discountCodeId,
-          discountAmount: discountCodeId != null ? discountAmount : 0,
-        }),
-      });
-
-      const data = (await response.json()) as {
-        error?: string;
-        unavailableItems?: string[];
-        unavailableItemIds?: { productId: string; variantId: string | null }[];
-        sessionUrl?: string;
-        sessionId?: string;
-      };
-
-      if (!response.ok) {
-        if (data.unavailableItemIds && data.unavailableItemIds.length > 0) {
-          for (const row of data.unavailableItemIds) {
-            removeItem(row.productId, row.variantId);
-          }
-        }
-        if (data.unavailableItems && data.unavailableItems.length > 0) {
-          const removedMsg =
-            data.unavailableItemIds && data.unavailableItemIds.length > 0
-              ? `The following items were out of stock or no longer available and have been removed from your cart: ${data.unavailableItems.join(", ")}.`
-              : `${data.error ?? "Some items are unavailable."} Remove or update: ${data.unavailableItems.join(", ")}`;
-          setError(removedMsg);
-        } else {
-          setError(data.error ?? "Failed to create checkout session");
-        }
-        setIsProcessing(false);
-        return;
-      }
-
-      const sessionUrl = data.sessionUrl;
-      if (!sessionUrl) {
-        setError("Failed to create checkout session");
-        setIsProcessing(false);
-        return;
-      }
-
-      window.location.href = sessionUrl;
-    } catch (err: unknown) {
-      setError((err as Error).message ?? "Failed to create checkout session");
-      setIsProcessing(false);
-    }
+    await f.handleSubmit(e);
   };
 
-  if (items.length === 0) {
+  if (f.items.length === 0) {
     return (
       <div className="py-16 text-center">
         <p className="mb-6 text-gray-600">Your cart is empty</p>
@@ -218,7 +54,7 @@ export function PollenCheckoutForm({ business }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-10 lg:flex-row">
+    <form onSubmit={onSubmit} className="flex flex-col gap-10 lg:flex-row">
       {/* Left column — form fields */}
       <div className="flex-1 space-y-10">
         <p className="text-sm text-gray-600">Fields marked * are required.</p>
@@ -233,13 +69,13 @@ export function PollenCheckoutForm({ business }: Props) {
               <input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={f.email}
+                onChange={(e) => f.setEmail(e.target.value)}
                 placeholder="you@example.com"
                 className={inputClass}
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !email ? true : undefined}
+                aria-invalid={submitAttempted && !f.email ? true : undefined}
               />
             </div>
             <div>
@@ -249,14 +85,14 @@ export function PollenCheckoutForm({ business }: Props) {
               <input
                 id="name"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={f.name}
+                onChange={(e) => f.setName(e.target.value)}
                 placeholder="Jane Doe"
                 className={inputClass}
                 required
                 aria-required="true"
                 aria-invalid={
-                  submitAttempted && !name.trim() ? true : undefined
+                  submitAttempted && !f.name.trim() ? true : undefined
                 }
               />
             </div>
@@ -267,14 +103,14 @@ export function PollenCheckoutForm({ business }: Props) {
               <PhoneInput
                 id="phone"
                 autoComplete="tel"
-                value={phone}
-                onChange={(val) => setPhone(val)}
+                value={f.phone}
+                onChange={(val) => f.setPhone(val)}
                 placeholder="+1 555 123 4567"
                 className={inputClass}
                 required
                 aria-required="true"
                 aria-invalid={
-                  submitAttempted && !phone.trim() ? true : undefined
+                  submitAttempted && !f.phone.trim() ? true : undefined
                 }
               />
             </div>
@@ -287,48 +123,46 @@ export function PollenCheckoutForm({ business }: Props) {
           <div className="flex gap-2">
             <input
               type="text"
-              value={discountCodeInput}
+              value={f.discountCodeInput}
               onChange={(e) =>
-                setDiscountCodeInput(e.target.value.toUpperCase())
+                f.setDiscountCodeInput(e.target.value.toUpperCase())
               }
               placeholder="SAVE20"
               autoComplete="off"
               aria-label="Discount code"
-              aria-invalid={!!discountFieldError}
+              aria-invalid={!!f.discountFieldError}
               aria-describedby={
-                discountFieldError ? "discount-error" : undefined
+                f.discountFieldError ? "discount-error" : undefined
               }
               className={`${inputClass} flex-1`}
             />
             <button
               type="button"
-              onClick={handleApplyDiscount}
-              disabled={
-                validateDiscountMutation.isPending || items.length === 0
-              }
+              onClick={f.handleApplyDiscount}
+              disabled={f.isValidatingDiscount || f.items.length === 0}
               className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
-              {validateDiscountMutation.isPending ? (
+              {f.isValidatingDiscount ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
                 "Apply"
               )}
             </button>
           </div>
-          {discountFieldError && (
+          {f.discountFieldError && (
             <p
               id="discount-error"
               role="alert"
               className="mt-2 text-sm text-red-600"
             >
-              {discountFieldError}
+              {f.discountFieldError}
             </p>
           )}
-          {discountCodeLabel && discountAmount > 0 && (
+          {f.discountCodeLabel && f.discountAmount > 0 && (
             <p role="status" className="mt-2 text-sm text-green-700">
               Code{" "}
               <span className="font-mono font-semibold">
-                {discountCodeLabel}
+                {f.discountCodeLabel}
               </span>{" "}
               applied.
             </p>
@@ -336,16 +170,16 @@ export function PollenCheckoutForm({ business }: Props) {
         </section>
 
         {/* Delivery Method */}
-        {shippingConfig.offersInStorePickup && (
+        {f.shippingConfig.offersInStorePickup && (
           <section>
             <h2 className={sectionHeadingClass}>Delivery</h2>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => setDeliveryMethod("ship")}
-                aria-pressed={deliveryMethod === "ship"}
+                onClick={() => f.setDeliveryMethod("ship")}
+                aria-pressed={f.deliveryMethod === "ship"}
                 className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                  deliveryMethod === "ship"
+                  f.deliveryMethod === "ship"
                     ? "bg-[#215935] text-white"
                     : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
                 }`}
@@ -354,10 +188,10 @@ export function PollenCheckoutForm({ business }: Props) {
               </button>
               <button
                 type="button"
-                onClick={() => setDeliveryMethod("pickup")}
-                aria-pressed={deliveryMethod === "pickup"}
+                onClick={() => f.setDeliveryMethod("pickup")}
+                aria-pressed={f.deliveryMethod === "pickup"}
                 className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                  deliveryMethod === "pickup"
+                  f.deliveryMethod === "pickup"
                     ? "bg-[#215935] text-white"
                     : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
                 }`}
@@ -366,7 +200,7 @@ export function PollenCheckoutForm({ business }: Props) {
               </button>
             </div>
             <p className="mt-2 text-sm text-gray-600">
-              {deliveryMethod === "pickup"
+              {f.deliveryMethod === "pickup"
                 ? "No shipping charge. You'll pick up your order at the store."
                 : "Shipping cost is based on your store's shipping settings."}
             </p>
@@ -374,7 +208,7 @@ export function PollenCheckoutForm({ business }: Props) {
         )}
 
         {/* Shipping Address */}
-        {deliveryMethod === "ship" && (
+        {f.deliveryMethod === "ship" && (
           <section>
             <h2 className={sectionHeadingClass}>Shipping Address</h2>
             <p className="mb-4 text-sm text-gray-600">
@@ -390,14 +224,14 @@ export function PollenCheckoutForm({ business }: Props) {
                   id="address-line1"
                   type="text"
                   autoComplete="shipping address-line1"
-                  value={addressLine1}
-                  onChange={(e) => setAddressLine1(e.target.value)}
+                  value={f.addressLine1}
+                  onChange={(e) => f.setAddressLine1(e.target.value)}
                   placeholder="Street address, P.O. box"
                   className={inputClass}
-                  required={deliveryMethod === "ship"}
+                  required={f.deliveryMethod === "ship"}
                   aria-required="true"
                   aria-invalid={
-                    submitAttempted && !addressLine1.trim() ? true : undefined
+                    submitAttempted && !f.addressLine1.trim() ? true : undefined
                   }
                 />
               </div>
@@ -409,8 +243,8 @@ export function PollenCheckoutForm({ business }: Props) {
                   id="address-line2"
                   type="text"
                   autoComplete="shipping address-line2"
-                  value={addressLine2}
-                  onChange={(e) => setAddressLine2(e.target.value)}
+                  value={f.addressLine2}
+                  onChange={(e) => f.setAddressLine2(e.target.value)}
                   placeholder="Apartment, suite, etc."
                   className={inputClass}
                 />
@@ -424,13 +258,13 @@ export function PollenCheckoutForm({ business }: Props) {
                     id="city"
                     type="text"
                     autoComplete="shipping address-level2"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    value={f.city}
+                    onChange={(e) => f.setCity(e.target.value)}
                     className={inputClass}
-                    required={deliveryMethod === "ship"}
+                    required={f.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={
-                      submitAttempted && !city.trim() ? true : undefined
+                      submitAttempted && !f.city.trim() ? true : undefined
                     }
                   />
                 </div>
@@ -442,14 +276,14 @@ export function PollenCheckoutForm({ business }: Props) {
                     id="state"
                     type="text"
                     autoComplete="shipping address-level1"
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
+                    value={f.state}
+                    onChange={(e) => f.setState(e.target.value)}
                     placeholder="e.g. CA or ON"
                     className={inputClass}
-                    required={deliveryMethod === "ship"}
+                    required={f.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={
-                      submitAttempted && !state.trim() ? true : undefined
+                      submitAttempted && !f.state.trim() ? true : undefined
                     }
                   />
                 </div>
@@ -463,13 +297,13 @@ export function PollenCheckoutForm({ business }: Props) {
                     id="postal"
                     type="text"
                     autoComplete="shipping postal-code"
-                    value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
+                    value={f.postalCode}
+                    onChange={(e) => f.setPostalCode(e.target.value)}
                     className={inputClass}
-                    required={deliveryMethod === "ship"}
+                    required={f.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={
-                      submitAttempted && !postalCode.trim() ? true : undefined
+                      submitAttempted && !f.postalCode.trim() ? true : undefined
                     }
                   />
                 </div>
@@ -482,8 +316,8 @@ export function PollenCheckoutForm({ business }: Props) {
                     Country *
                   </label>
                   <Select
-                    value={country}
-                    onValueChange={(v) => setCountry(v as "US" | "CA")}
+                    value={f.country}
+                    onValueChange={(v) => f.setCountry(v as "US" | "CA")}
                   >
                     <SelectTrigger
                       id="country"
@@ -513,7 +347,7 @@ export function PollenCheckoutForm({ business }: Props) {
 
           {/* Items */}
           <div className="max-h-64 space-y-4 overflow-y-auto">
-            {items.map((item) => (
+            {f.items.map((item) => (
               <div
                 key={`${item.productId}-${item.variantId}`}
                 className="flex items-center gap-3"
@@ -553,22 +387,22 @@ export function PollenCheckoutForm({ business }: Props) {
           <div className="mt-5 space-y-2 border-t border-gray-200 pt-5">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal</span>
-              <span className="text-gray-900">{formatPrice(subtotal)}</span>
+              <span className="text-gray-900">{formatPrice(f.subtotal)}</span>
             </div>
-            {discountAmount > 0 && discountCodeLabel && (
+            {f.discountAmount > 0 && f.discountCodeLabel && (
               <div className="flex justify-between text-sm text-green-700">
-                <span>Discount ({discountCodeLabel})</span>
-                <span>-{formatPrice(discountAmount)}</span>
+                <span>Discount ({f.discountCodeLabel})</span>
+                <span>-{formatPrice(f.discountAmount)}</span>
               </div>
             )}
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Shipping</span>
               <span className="text-gray-900">
-                {deliveryMethod === "pickup"
+                {f.deliveryMethod === "pickup"
                   ? "In-store pickup (free)"
-                  : shipping === 0
+                  : f.shipping === 0
                     ? "Free"
-                    : formatPrice(shipping)}
+                    : formatPrice(f.shipping)}
               </span>
             </div>
             <div className="flex justify-between border-t border-gray-200 pt-3">
@@ -576,7 +410,7 @@ export function PollenCheckoutForm({ business }: Props) {
                 Estimated total
               </span>
               <span className="text-lg font-bold text-gray-900">
-                {formatPrice(finalTotal)}
+                {formatPrice(f.finalTotal)}
               </span>
             </div>
             <p className="text-xs text-gray-500">
@@ -585,20 +419,20 @@ export function PollenCheckoutForm({ business }: Props) {
           </div>
 
           <div role="alert" aria-live="assertive" aria-atomic="true">
-            {error && (
+            {f.error && (
               <Alert variant="destructive" className="mt-4">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{f.error}</AlertDescription>
               </Alert>
             )}
           </div>
 
           <button
             type="submit"
-            disabled={isProcessing}
-            aria-busy={isProcessing}
+            disabled={f.isProcessing}
+            aria-busy={f.isProcessing}
             className="mt-5 w-full rounded-md bg-[#215935] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#1a4729] disabled:opacity-50"
           >
-            {isProcessing ? (
+            {f.isProcessing ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 Processing...

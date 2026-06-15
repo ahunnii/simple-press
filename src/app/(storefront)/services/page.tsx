@@ -2,21 +2,19 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
-import { PollenServicesPage } from "../_templates/pollen/services/pollen-services-page";
+import { getTemplate } from "../_templates/registry";
 
 export default async function ServicesPage() {
   const business = await api.business.simplifiedGet();
   if (!business) notFound();
-  if (business.templateId !== "pollen") {
+
+  const t = getTemplate(business.templateId);
+
+  if (!t.ServicesPage) {
     notFound();
   }
 
-  const TemplateComponent =
-    {
-      pollen: PollenServicesPage,
-    }[business.templateId] ?? PollenServicesPage;
-
-  return <TemplateComponent business={business} />;
+  return <t.ServicesPage business={business} />;
 }
 
 export const metadata = {

@@ -10,15 +10,7 @@ import { JsonLd } from "~/components/json-ld";
 
 import { VariantImageProvider } from "../../_components/product-page/variant-image-context";
 
-import { BambooProductPage } from "../../_templates/bamboo/products/bamboo-product-page";
-import { DarkTrendProductPage } from "../../_templates/dark-trend/products/dark-trend-product-page";
-import { DefaultProductPage } from "../../_templates/default/products/default-product-page";
-import { ElegantProductPage } from "../../_templates/elegant/products/elegant-product-page";
-import { HappyBambooProductPage } from "../../_templates/happy-bamboo/products/happy-bamboo-product-page";
-import { ModernProductPage } from "../../_templates/modern/products/modern-product-page";
-import { NoiseProductPage } from "../../_templates/noise/products/noise-product-page";
-import { PollenProductPage } from "../../_templates/pollen/products/pollen-product-page";
-import { SledgeProductPage } from "../../_templates/sledge/products/sledge-product-page";
+import { getTemplate } from "../../_templates/registry";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -37,17 +29,7 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
-  const TemplateComponent =
-    {
-      modern: ModernProductPage,
-      elegant: ElegantProductPage,
-      bamboo: BambooProductPage,
-      "dark-trend": DarkTrendProductPage,
-      "happy-bamboo": HappyBambooProductPage,
-      noise: NoiseProductPage,
-      pollen: PollenProductPage,
-      sledge: SledgeProductPage,
-    }[business.templateId] ?? DefaultProductPage;
+  const t = getTemplate(business.templateId);
 
   const productSchema = buildProductSchema(product, business);
   const breadcrumbSchema = buildBreadcrumbSchema(business, [
@@ -60,7 +42,7 @@ export default async function ProductDetailPage({ params }: Props) {
     <>
       <JsonLd data={[productSchema, breadcrumbSchema]} />
       <VariantImageProvider>
-        <TemplateComponent product={product} business={business} />
+        <t.ProductPage product={product} business={business} />
       </VariantImageProvider>
     </>
   );

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -22,15 +21,8 @@ export function SledgeProductActions({
     quantity,
     setSelectedVariantId,
     additionalFields,
+    justAdded,
   } = useProduct(product);
-
-  const [isAdded, setIsAdded] = useState(false);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   const stockQty = product.trackInventory ? (product.inventoryQty ?? 0) : null;
   const showStockCount = stockQty !== null && stockQty > 0 && inStock;
@@ -61,7 +53,7 @@ export function SledgeProductActions({
     <div className="flex flex-col gap-3">
       {/* S-2: sr-only live region to announce add-to-cart */}
       <span className="sr-only" role="status">
-        {isAdded ? `${product.name} added to cart` : ""}
+        {justAdded ? `${product.name} added to cart` : ""}
       </span>
 
       {showStockCount && (
@@ -114,13 +106,13 @@ export function SledgeProductActions({
 
           <button
             type="button"
-            onClick={addToCart}
+            onClick={handleAddToCart}
             className={cn(
               "sl-btn flex-1",
-              isAdded && "bg-[var(--sl-green)] text-[var(--sl-ink)]",
+              justAdded && "bg-[var(--sl-green)] text-[var(--sl-ink)]",
             )}
           >
-            {isAdded ? (
+            {justAdded ? (
               <>
                 <Check className="size-4" />
                 Added!

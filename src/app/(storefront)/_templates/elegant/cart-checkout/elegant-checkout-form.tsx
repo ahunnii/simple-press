@@ -1,17 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
-import {
-  calculateShipping,
-  shippingConfigFromBusiness,
-} from "~/lib/shipping-utils";
-import { api } from "~/trpc/react";
+import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -23,107 +19,34 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { useCart } from "~/providers/cart-context";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
 };
 
 export function ElegantCheckoutForm({ business }: Props) {
-  const { items, removeItem, subtotal } = useCart();
-  const shippingConfig = shippingConfigFromBusiness(business);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-
-  const [addressLine1, setAddressLine1] = useState("");
-  const [addressLine2, setAddressLine2] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [country, setCountry] = useState<"US" | "CA">("US");
+  const f = useCheckoutForm(business);
 
   const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
-  const [deliveryMethod, setDeliveryMethod] = useState<"ship" | "pickup">(
-    "ship",
-  );
-
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  const [discountCodeInput, setDiscountCodeInput] = useState("");
-  const [discountCodeId, setDiscountCodeId] = useState<string | null>(null);
-  const [discountAmount, setDiscountAmount] = useState(0);
-  const [discountCodeLabel, setDiscountCodeLabel] = useState<string | null>(
-    null,
-  );
-  const [discountFieldError, setDiscountFieldError] = useState<string | null>(
-    null,
-  );
-
-  const validateDiscountMutation = api.discount.validate.useMutation({
-    onSuccess: (data) => {
-      setDiscountCodeId(data.discount.id);
-      setDiscountAmount(data.discount.discountAmount);
-      setDiscountCodeLabel(data.discount.code);
-      setDiscountFieldError(null);
-    },
-    onError: (err) => {
-      setDiscountCodeId(null);
-      setDiscountAmount(0);
-      setDiscountCodeLabel(null);
-      setDiscountFieldError(err.message ?? "Invalid code");
-    },
-  });
-
-  // Reset discount when cart changes
-  useEffect(() => {
-    setDiscountCodeId(null);
-    setDiscountAmount(0);
-    setDiscountCodeLabel(null);
-    setDiscountFieldError(null);
-  }, [subtotal]);
-
-  const shipping =
-    deliveryMethod === "pickup"
-      ? 0
-      : calculateShipping(subtotal, shippingConfig);
-  const finalTotal = subtotal - discountAmount + shipping;
-
-  const handleApplyDiscount = () => {
-    const code = discountCodeInput.trim();
-    if (!code) {
-      setDiscountFieldError("Enter a discount code");
-      return;
-    }
-    if (subtotal <= 0) {
-      setDiscountFieldError("Your cart is empty");
-      return;
-    }
-    setDiscountFieldError(null);
-    validateDiscountMutation.mutate({ code, cartTotal: subtotal });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setFieldErrors({});
 
     // Per-field client-side validation
     const errors: Record<string, string> = {};
-    if (!email.trim()) errors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(email))
+    if (!f.email.trim()) errors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(f.email))
       errors.email = "Enter a valid email address";
-    if (!name.trim()) errors.name = "Full name is required";
-    if (!phone.trim()) errors.phone = "Phone number is required";
-    if (deliveryMethod === "ship") {
-      if (!addressLine1.trim())
+    if (!f.name.trim()) errors.name = "Full name is required";
+    if (!f.phone.trim()) errors.phone = "Phone number is required";
+    if (f.deliveryMethod === "ship") {
+      if (!f.addressLine1.trim())
         errors["address-line1"] = "Street address is required";
-      if (!city.trim()) errors.city = "City is required";
-      if (!state.trim()) errors.state = "State or province is required";
-      if (!postalCode.trim()) errors.postal = "ZIP or postal code is required";
+      if (!f.city.trim()) errors.city = "City is required";
+      if (!f.state.trim()) errors.state = "State or province is required";
+      if (!f.postalCode.trim()) errors.postal = "ZIP or postal code is required";
     }
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -131,81 +54,7 @@ export function ElegantCheckoutForm({ business }: Props) {
       return;
     }
 
-    if (items.length === 0) {
-      setError("Your cart is empty");
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      const response = await fetch("/api/stripe/create-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items,
-          deliveryMethod,
-          customerInfo: {
-            email,
-            name,
-            phone: phone.trim(),
-            shippingAddress:
-              deliveryMethod === "ship"
-                ? {
-                    line1: addressLine1.trim(),
-                    line2: addressLine2.trim() || null,
-                    city: city.trim(),
-                    state: state.trim(),
-                    postalCode: postalCode.trim(),
-                    country,
-                    phone: phone.trim(),
-                  }
-                : null,
-          },
-          discountCodeId: discountCodeId,
-          discountAmount: discountCodeId != null ? discountAmount : 0,
-        }),
-      });
-
-      const data = (await response.json()) as {
-        error?: string;
-        unavailableItems?: string[];
-        unavailableItemIds?: { productId: string; variantId: string | null }[];
-        sessionUrl?: string;
-        sessionId?: string;
-      };
-
-      if (!response.ok) {
-        if (data.unavailableItemIds && data.unavailableItemIds.length > 0) {
-          for (const row of data.unavailableItemIds) {
-            removeItem(row.productId, row.variantId);
-          }
-        }
-        if (data.unavailableItems && data.unavailableItems.length > 0) {
-          const removedMsg =
-            data.unavailableItemIds && data.unavailableItemIds.length > 0
-              ? `The following items were out of stock or no longer available and have been removed from your cart: ${data.unavailableItems.join(", ")}.`
-              : `${data.error ?? "Some items are unavailable."} Remove or update: ${data.unavailableItems.join(", ")}`;
-          setError(removedMsg);
-        } else {
-          setError(data.error ?? "Failed to create checkout session");
-        }
-        setIsProcessing(false);
-        return;
-      }
-
-      const sessionUrl = data.sessionUrl;
-      if (!sessionUrl) {
-        setError("Failed to create checkout session");
-        setIsProcessing(false);
-        return;
-      }
-
-      window.location.href = sessionUrl;
-    } catch (err: unknown) {
-      setError((err as Error).message ?? "Failed to create checkout session");
-      setIsProcessing(false);
-    }
+    await f.handleSubmit(e);
   };
 
   const eyebrow = (label: string) => (
@@ -226,14 +75,14 @@ export function ElegantCheckoutForm({ business }: Props) {
     }
     if (next !== null) {
       e.preventDefault();
-      setDeliveryMethod(methods[next]!);
+      f.setDeliveryMethod(methods[next]!);
       const group = e.currentTarget.closest('[role="radiogroup"]');
       const btns = group?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
       btns?.[next]?.focus();
     }
   };
 
-  if (items.length === 0) {
+  if (f.items.length === 0) {
     return (
       <div style={{ padding: "60px 0", textAlign: "center" }}>
         <p
@@ -301,11 +150,11 @@ export function ElegantCheckoutForm({ business }: Props) {
               <Input
                 id="email"
                 type="email"
-                value={email}
+                value={f.email}
                 onChange={(e) => {
-                  setEmail(e.target.value);
+                  f.setEmail(e.target.value);
                   if (fieldErrors.email)
-                    setFieldErrors((f) => ({ ...f, email: "" }));
+                    setFieldErrors((prev) => ({ ...prev, email: "" }));
                 }}
                 placeholder="you@example.com"
                 required
@@ -323,11 +172,11 @@ export function ElegantCheckoutForm({ business }: Props) {
               <Input
                 id="name"
                 type="text"
-                value={name}
+                value={f.name}
                 onChange={(e) => {
-                  setName(e.target.value);
+                  f.setName(e.target.value);
                   if (fieldErrors.name)
-                    setFieldErrors((f) => ({ ...f, name: "" }));
+                    setFieldErrors((prev) => ({ ...prev, name: "" }));
                 }}
                 placeholder="Jane Doe"
                 required
@@ -345,11 +194,11 @@ export function ElegantCheckoutForm({ business }: Props) {
               <PhoneInput
                 id="phone"
                 autoComplete="tel"
-                value={phone}
+                value={f.phone}
                 onChange={(val) => {
-                  setPhone(val);
+                  f.setPhone(val);
                   if (fieldErrors.phone)
-                    setFieldErrors((f) => ({ ...f, phone: "" }));
+                    setFieldErrors((prev) => ({ ...prev, phone: "" }));
                 }}
                 placeholder="+1 555 123 4567"
                 required
@@ -381,9 +230,9 @@ export function ElegantCheckoutForm({ business }: Props) {
               <Input
                 id="discount-code"
                 type="text"
-                value={discountCodeInput}
+                value={f.discountCodeInput}
                 onChange={(e) =>
-                  setDiscountCodeInput(e.target.value.toUpperCase())
+                  f.setDiscountCodeInput(e.target.value.toUpperCase())
                 }
                 placeholder="SAVE20"
                 autoComplete="off"
@@ -392,10 +241,8 @@ export function ElegantCheckoutForm({ business }: Props) {
             </ElegantField>
             <button
               type="button"
-              onClick={handleApplyDiscount}
-              disabled={
-                validateDiscountMutation.isPending || items.length === 0
-              }
+              onClick={f.handleApplyDiscount}
+              disabled={f.isValidatingDiscount || f.items.length === 0}
               style={{
                 padding: "10px 20px",
                 borderRadius: 999,
@@ -409,13 +256,11 @@ export function ElegantCheckoutForm({ business }: Props) {
                 cursor: "pointer",
                 fontFamily: "var(--font-sans, sans-serif)",
                 opacity:
-                  validateDiscountMutation.isPending || items.length === 0
-                    ? 0.5
-                    : 1,
+                  f.isValidatingDiscount || f.items.length === 0 ? 0.5 : 1,
                 whiteSpace: "nowrap",
               }}
             >
-              {validateDiscountMutation.isPending ? (
+              {f.isValidatingDiscount ? (
                 <Loader2 aria-hidden={true} className="h-4 w-4 animate-spin" />
               ) : (
                 "Apply"
@@ -423,7 +268,7 @@ export function ElegantCheckoutForm({ business }: Props) {
             </button>
           </div>
           <div aria-live="polite" aria-atomic="true">
-            {discountFieldError && (
+            {f.discountFieldError && (
               <p
                 style={{
                   marginTop: 8,
@@ -432,10 +277,10 @@ export function ElegantCheckoutForm({ business }: Props) {
                   fontFamily: "var(--font-sans, sans-serif)",
                 }}
               >
-                {discountFieldError}
+                {f.discountFieldError}
               </p>
             )}
-            {discountCodeLabel && discountAmount > 0 && (
+            {f.discountCodeLabel && f.discountAmount > 0 && (
               <p
                 style={{
                   marginTop: 8,
@@ -445,14 +290,14 @@ export function ElegantCheckoutForm({ business }: Props) {
                   letterSpacing: "0.1em",
                 }}
               >
-                Code {discountCodeLabel} applied.
+                Code {f.discountCodeLabel} applied.
               </p>
             )}
           </div>
         </fieldset>
 
         {/* Delivery method */}
-        {shippingConfig.offersInStorePickup && (
+        {f.shippingConfig.offersInStorePickup && (
           <fieldset style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
             {eyebrow("Delivery")}
             <div
@@ -465,9 +310,9 @@ export function ElegantCheckoutForm({ business }: Props) {
                   key={method}
                   type="button"
                   role="radio"
-                  aria-checked={deliveryMethod === method}
-                  tabIndex={deliveryMethod === method ? 0 : -1}
-                  onClick={() => setDeliveryMethod(method)}
+                  aria-checked={f.deliveryMethod === method}
+                  tabIndex={f.deliveryMethod === method ? 0 : -1}
+                  onClick={() => f.setDeliveryMethod(method)}
                   onKeyDown={(e) => handleDeliveryKeyDown(e, method)}
                   className="el-delivery-btn"
                 >
@@ -483,7 +328,7 @@ export function ElegantCheckoutForm({ business }: Props) {
                 fontFamily: "var(--font-sans, sans-serif)",
               }}
             >
-              {deliveryMethod === "pickup"
+              {f.deliveryMethod === "pickup"
                 ? "No shipping charge. Pick up at the store."
                 : "Shipping calculated at checkout."}
             </p>
@@ -491,7 +336,7 @@ export function ElegantCheckoutForm({ business }: Props) {
         )}
 
         {/* Shipping address */}
-        {deliveryMethod === "ship" && (
+        {f.deliveryMethod === "ship" && (
           <fieldset style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
             {eyebrow("Shipping address")}
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -504,14 +349,17 @@ export function ElegantCheckoutForm({ business }: Props) {
                   id="address-line1"
                   type="text"
                   autoComplete="shipping address-line1"
-                  value={addressLine1}
+                  value={f.addressLine1}
                   onChange={(e) => {
-                    setAddressLine1(e.target.value);
+                    f.setAddressLine1(e.target.value);
                     if (fieldErrors["address-line1"])
-                      setFieldErrors((f) => ({ ...f, "address-line1": "" }));
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        "address-line1": "",
+                      }));
                   }}
                   placeholder="Street address, P.O. box"
-                  required={deliveryMethod === "ship"}
+                  required={f.deliveryMethod === "ship"}
                   className="el-co-input"
                   aria-required="true"
                   aria-invalid={fieldErrors["address-line1"] ? true : undefined}
@@ -527,8 +375,8 @@ export function ElegantCheckoutForm({ business }: Props) {
                   id="address-line2"
                   type="text"
                   autoComplete="shipping address-line2"
-                  value={addressLine2}
-                  onChange={(e) => setAddressLine2(e.target.value)}
+                  value={f.addressLine2}
+                  onChange={(e) => f.setAddressLine2(e.target.value)}
                   placeholder="Apartment, suite, etc."
                   className="el-co-input"
                 />
@@ -549,13 +397,13 @@ export function ElegantCheckoutForm({ business }: Props) {
                     id="city"
                     type="text"
                     autoComplete="shipping address-level2"
-                    value={city}
+                    value={f.city}
                     onChange={(e) => {
-                      setCity(e.target.value);
+                      f.setCity(e.target.value);
                       if (fieldErrors.city)
-                        setFieldErrors((f) => ({ ...f, city: "" }));
+                        setFieldErrors((prev) => ({ ...prev, city: "" }));
                     }}
-                    required={deliveryMethod === "ship"}
+                    required={f.deliveryMethod === "ship"}
                     className="el-co-input"
                     aria-required="true"
                     aria-invalid={fieldErrors.city ? true : undefined}
@@ -573,14 +421,14 @@ export function ElegantCheckoutForm({ business }: Props) {
                     id="state"
                     type="text"
                     autoComplete="shipping address-level1"
-                    value={state}
+                    value={f.state}
                     onChange={(e) => {
-                      setState(e.target.value);
+                      f.setState(e.target.value);
                       if (fieldErrors.state)
-                        setFieldErrors((f) => ({ ...f, state: "" }));
+                        setFieldErrors((prev) => ({ ...prev, state: "" }));
                     }}
                     placeholder="CA or ON"
-                    required={deliveryMethod === "ship"}
+                    required={f.deliveryMethod === "ship"}
                     className="el-co-input"
                     aria-required="true"
                     aria-invalid={fieldErrors.state ? true : undefined}
@@ -606,13 +454,13 @@ export function ElegantCheckoutForm({ business }: Props) {
                     id="postal"
                     type="text"
                     autoComplete="shipping postal-code"
-                    value={postalCode}
+                    value={f.postalCode}
                     onChange={(e) => {
-                      setPostalCode(e.target.value);
+                      f.setPostalCode(e.target.value);
                       if (fieldErrors.postal)
-                        setFieldErrors((f) => ({ ...f, postal: "" }));
+                        setFieldErrors((prev) => ({ ...prev, postal: "" }));
                     }}
-                    required={deliveryMethod === "ship"}
+                    required={f.deliveryMethod === "ship"}
                     className="el-co-input"
                     aria-required="true"
                     aria-invalid={fieldErrors.postal ? true : undefined}
@@ -623,8 +471,8 @@ export function ElegantCheckoutForm({ business }: Props) {
                 </ElegantField>
                 <ElegantField label="Country *" htmlFor="country">
                   <Select
-                    value={country}
-                    onValueChange={(v) => setCountry(v as "US" | "CA")}
+                    value={f.country}
+                    onValueChange={(v) => f.setCountry(v as "US" | "CA")}
                   >
                     <SelectTrigger
                       id="country"
@@ -680,7 +528,7 @@ export function ElegantCheckoutForm({ business }: Props) {
               overflowY: "auto",
             }}
           >
-            {items.map((item) => (
+            {f.items.map((item) => (
               <div
                 key={`${item.productId}-${item.variantId}`}
                 style={{ display: "flex", alignItems: "center", gap: 12 }}
@@ -769,12 +617,12 @@ export function ElegantCheckoutForm({ business }: Props) {
             }}
           >
             {[
-              { label: "Subtotal", value: formatPrice(subtotal) },
-              ...(discountAmount > 0 && discountCodeLabel
+              { label: "Subtotal", value: formatPrice(f.subtotal) },
+              ...(f.discountAmount > 0 && f.discountCodeLabel
                 ? [
                     {
-                      label: `Discount (${discountCodeLabel})`,
-                      value: `−${formatPrice(discountAmount)}`,
+                      label: `Discount (${f.discountCodeLabel})`,
+                      value: `−${formatPrice(f.discountAmount)}`,
                       green: true,
                     },
                   ]
@@ -782,11 +630,11 @@ export function ElegantCheckoutForm({ business }: Props) {
               {
                 label: "Shipping",
                 value:
-                  deliveryMethod === "pickup"
+                  f.deliveryMethod === "pickup"
                     ? "Pickup (free)"
-                    : shipping === 0
+                    : f.shipping === 0
                       ? "Free"
-                      : formatPrice(shipping),
+                      : formatPrice(f.shipping),
               },
             ].map(({ label, value, green }) => (
               <div
@@ -846,23 +694,23 @@ export function ElegantCheckoutForm({ business }: Props) {
                   color: "var(--el-ink, #1c1a17)",
                 }}
               >
-                {formatPrice(finalTotal)}
+                {formatPrice(f.finalTotal)}
               </span>
             </div>
           </div>
 
           <div role="alert" aria-live="assertive" aria-atomic="true">
-            {error && (
+            {f.error && (
               <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{f.error}</AlertDescription>
               </Alert>
             )}
           </div>
 
           <button
             type="submit"
-            disabled={isProcessing}
-            aria-busy={isProcessing}
+            disabled={f.isProcessing}
+            aria-busy={f.isProcessing}
             style={{
               display: "flex",
               alignItems: "center",
@@ -878,14 +726,14 @@ export function ElegantCheckoutForm({ business }: Props) {
               background: "var(--el-ink, #1c1a17)",
               color: "var(--el-paper, #fbf8f2)",
               border: "none",
-              cursor: isProcessing ? "not-allowed" : "pointer",
-              opacity: isProcessing ? 0.7 : 1,
+              cursor: f.isProcessing ? "not-allowed" : "pointer",
+              opacity: f.isProcessing ? 0.7 : 1,
               fontFamily: "var(--font-sans, sans-serif)",
               transition: `background 0.4s ${ease}`,
             }}
             className="el-pay-btn"
           >
-            {isProcessing ? (
+            {f.isProcessing ? (
               <>
                 <Loader2 aria-hidden={true} className="h-4 w-4 animate-spin" />
                 Processing…

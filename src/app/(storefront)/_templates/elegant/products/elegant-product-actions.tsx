@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { ArrowRight, Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -27,16 +26,10 @@ export function ElegantProductActions({
     setSelectedVariantId,
     formatPrice,
     displayPrice,
+    justAdded,
   } = useProduct(product);
 
-  const [isAdded, setIsAdded] = useState(false);
   const additional = parseCardAdditionalFields(product.additionalFields);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   if (Object.keys(variantOptions).length > 0) {
     return (
@@ -231,7 +224,7 @@ export function ElegantProductActions({
       >
         <button
           type="button"
-          onClick={addToCart}
+          onClick={handleAddToCart}
           style={{
             flex: 1,
             display: "inline-flex",
@@ -244,7 +237,7 @@ export function ElegantProductActions({
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             fontWeight: 500,
-            background: isAdded
+            background: justAdded
               ? "var(--el-sage, #4a5240)"
               : "var(--el-ink, #1c1a17)",
             color: "var(--el-paper, #fbf8f2)",
@@ -254,7 +247,7 @@ export function ElegantProductActions({
             transition: `background 0.4s ${ease}`,
           }}
         >
-          {isAdded ? (
+          {justAdded ? (
             <>
               <Check aria-hidden={true} style={{ width: 14, height: 14 }} />
               Added to bag
@@ -271,7 +264,7 @@ export function ElegantProductActions({
         </button>
       </div>
       <span className="sr-only" aria-live="polite" aria-atomic="true">
-        {isAdded ? "Added to bag" : ""}
+        {justAdded ? "Added to bag" : ""}
       </span>
 
       {product.trackInventory &&

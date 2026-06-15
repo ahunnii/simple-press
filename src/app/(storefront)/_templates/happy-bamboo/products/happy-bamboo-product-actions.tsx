@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -24,15 +23,8 @@ export function HappyBambooProductActions({
     handleIncrement,
     quantity,
     setSelectedVariantId,
+    justAdded,
   } = useProduct(product);
-
-  const [isAdded, setIsAdded] = useState(false);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   return (
     <>
@@ -89,8 +81,8 @@ export function HappyBambooProductActions({
                     <Plus className="size-4" />
                   </Button>
                 </div>
-                <Button size="lg" onClick={addToCart} className="flex">
-                  {isAdded ? (
+                <Button size="lg" onClick={handleAddToCart} className="flex">
+                  {justAdded ? (
                     <>
                       <Check className="h-4 w-4" aria-hidden="true" />
                       Added to Cart
@@ -109,7 +101,7 @@ export function HappyBambooProductActions({
                 aria-atomic="true"
                 className="sr-only"
               >
-                {isAdded ? "Added to cart" : ""}
+                {justAdded ? "Added to cart" : ""}
               </span>
               {product.trackInventory &&
                 product.allowBackorders &&

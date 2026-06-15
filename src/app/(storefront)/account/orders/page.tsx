@@ -3,15 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 
-import { BambooOrdersPage } from "../../_templates/bamboo/account/bamboo-orders-page";
-import { DarkTrendOrdersPage } from "../../_templates/dark-trend/account/dark-trend-orders-page";
-import { DefaultOrdersPage } from "../../_templates/default/account/default-orders-page";
-import { ElegantOrdersPage } from "../../_templates/elegant/account/elegant-orders-page";
-import { HappyBambooOrdersPage } from "../../_templates/happy-bamboo/account/happy-bamboo-orders-page";
-import { ModernOrdersPage } from "../../_templates/modern/account/modern-orders-page";
-import { NoiseOrdersPage } from "../../_templates/noise/account/noise-orders-page";
-import { PollenOrdersPage } from "../../_templates/pollen/account/pollen-orders-page";
-import { SledgeOrdersPage } from "../../_templates/sledge/account/sledge-orders-page";
+import { getTemplate } from "../../_templates/registry";
 
 export const metadata = {
   title: "My Orders",
@@ -30,17 +22,7 @@ export default async function OrdersPage() {
 
   if (!business) notFound();
 
-  const TemplateComponent =
-    {
-      "dark-trend": DarkTrendOrdersPage,
-      elegant: ElegantOrdersPage,
-      pollen: PollenOrdersPage,
-      modern: ModernOrdersPage,
-      bamboo: BambooOrdersPage,
-      "happy-bamboo": HappyBambooOrdersPage,
-      noise: NoiseOrdersPage,
-      sledge: SledgeOrdersPage,
-    }[business.templateId] ?? DefaultOrdersPage;
+  const t = getTemplate(business.templateId);
 
-  return <TemplateComponent business={business} orders={orders} />;
+  return <t.OrdersPage business={business} orders={orders} />;
 }

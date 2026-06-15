@@ -3,7 +3,10 @@
 import { useState } from "react";
 
 import type { DefaultCheckoutPageTemplateProps } from "~/app/(storefront)/_templates/types";
-import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
+import {
+  calculateShipping,
+  shippingConfigFromBusiness,
+} from "~/lib/shipping-utils";
 import { useCart } from "~/providers/cart-context";
 
 import { useDiscountCode } from "./use-discount-code";
@@ -43,6 +46,7 @@ type UseCheckoutFormReturn = {
   discountFieldError: string | null;
   setDiscountFieldError: (v: string | null) => void;
   handleApplyDiscount: () => void;
+  clearDiscount: () => void;
   isValidatingDiscount: boolean;
   // Submit
   isProcessing: boolean;
@@ -51,12 +55,16 @@ type UseCheckoutFormReturn = {
   // Helpers
   shippingConfig: ReturnType<typeof shippingConfigFromBusiness>;
   items: ReturnType<typeof useCart>["items"];
+  // Computed totals
+  subtotal: number;
+  shipping: number;
+  finalTotal: number;
 };
 
 export function useCheckoutForm(
   business: CheckoutFormBusiness,
 ): UseCheckoutFormReturn {
-  const { items, removeItem } = useCart();
+  const { items, removeItem, subtotal } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -78,6 +86,12 @@ export function useCheckoutForm(
   );
 
   const discount = useDiscountCode();
+
+  const shipping =
+    deliveryMethod === "pickup"
+      ? 0
+      : calculateShipping(subtotal, shippingConfig);
+  const finalTotal = subtotal - discount.discountAmount + shipping;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,11 +214,15 @@ export function useCheckoutForm(
     discountFieldError: discount.discountFieldError,
     setDiscountFieldError: discount.setDiscountFieldError,
     handleApplyDiscount: discount.handleApplyDiscount,
+    clearDiscount: discount.clearDiscount,
     isValidatingDiscount: discount.isValidating,
     isProcessing,
     error,
     handleSubmit,
     shippingConfig,
     items,
+    subtotal,
+    shipping,
+    finalTotal,
   };
 }

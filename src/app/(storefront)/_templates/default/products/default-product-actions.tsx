@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -21,15 +20,8 @@ export function DefaultProductActions({
     quantity,
     additionalFields,
     setSelectedVariantId,
+    justAdded,
   } = useProduct(product);
-
-  const [isAdded, setIsAdded] = useState(false);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   return (
     <>
@@ -93,10 +85,10 @@ export function DefaultProductActions({
               {/* Add to cart */}
               <button
                 type="button"
-                onClick={addToCart}
+                onClick={handleAddToCart}
                 className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a] active:translate-y-px"
               >
-                {isAdded ? (
+                {justAdded ? (
                   <>
                     <Check className="h-4 w-4" aria-hidden="true" />
                     Added to bag
@@ -107,7 +99,7 @@ export function DefaultProductActions({
               </button>
               {/* Live region sibling — announces state change reliably across all AT */}
               <span className="sr-only" aria-live="polite" aria-atomic="true">
-                {isAdded ? "Added to bag" : ""}
+                {justAdded ? "Added to bag" : ""}
               </span>
             </div>
           )}

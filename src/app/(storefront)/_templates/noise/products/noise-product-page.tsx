@@ -191,7 +191,11 @@ export function NoiseProductPage({
           }}
         >
           {/* ── Col 1: Vertical thumbnail strip ── */}
-          <div className="hidden flex-col gap-2.5 md:flex">
+          <div
+            role="group"
+            aria-label="Product image thumbnails"
+            className="hidden flex-col gap-2.5 md:flex"
+          >
             {images.slice(0, 4).map((img, i) => (
               <button
                 key={img.id}
@@ -292,6 +296,44 @@ export function NoiseProductPage({
             )}
           </div>
 
+          {/* Mobile: horizontal thumbnail strip (between image and details) */}
+          {images.length > 1 && (
+            <div
+              role="group"
+              aria-label="Product image thumbnails"
+              className="grid grid-cols-4 gap-2 md:hidden"
+            >
+              {images.slice(0, 4).map((img, i) => (
+                <button
+                  key={img.id}
+                  onClick={() => setActiveImg(i)}
+                  aria-label={`View image ${i + 1}`}
+                  aria-pressed={activeImg === i}
+                  className="relative overflow-hidden transition-all"
+                  style={{
+                    aspectRatio: "4 / 5",
+                    background: "var(--vn-steel)",
+                    border:
+                      activeImg === i
+                        ? "1px solid var(--vn-ink)"
+                        : "1px solid var(--vn-rule)",
+                    outline:
+                      activeImg === i ? "2px solid var(--vn-bone)" : "none",
+                    outlineOffset: "-4px",
+                  }}
+                >
+                  <Image
+                    src={img.url}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="25vw"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* ── Col 3: Detail panel ── */}
           <FadeIn
             delay={0.12}
@@ -340,40 +382,6 @@ export function NoiseProductPage({
             <NoiseProductActions product={product} business={business} />
           </FadeIn>
         </div>
-
-        {/* Mobile: horizontal thumbnail strip (below main image) */}
-        {images.length > 1 && (
-          <div
-            className="mx-auto mt-4 grid grid-cols-4 gap-2 md:hidden"
-            style={{ maxWidth: "1280px" }}
-          >
-            {images.slice(0, 4).map((img, i) => (
-              <button
-                key={img.id}
-                onClick={() => setActiveImg(i)}
-                aria-label={`View image ${i + 1}`}
-                aria-pressed={activeImg === i}
-                className="relative overflow-hidden"
-                style={{
-                  aspectRatio: "4 / 5",
-                  background: "var(--vn-steel)",
-                  border:
-                    activeImg === i
-                      ? "1px solid var(--vn-ink)"
-                      : "1px solid var(--vn-rule)",
-                }}
-              >
-                <Image
-                  src={img.url}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="25vw"
-                />
-              </button>
-            ))}
-          </div>
-        )}
       </section>
 
       {/* ── Description tabs / accordion ── */}

@@ -23,17 +23,15 @@ export function DarkTrendProductActions({
     setSelectedVariantId,
     additionalFields,
     isInventoryTracked,
+    justAdded,
   } = useProduct(product);
 
-  const [isAdded, setIsAdded] = useState(false);
   const [liveMessage, setLiveMessage] = useState("");
 
   const addToCart = () => {
     handleAddToCart();
-    setIsAdded(true);
     setLiveMessage(`Added ${quantity} × ${product.name} to cart`);
     setTimeout(() => {
-      setIsAdded(false);
       setLiveMessage("");
     }, 2000);
   };
@@ -134,10 +132,10 @@ export function DarkTrendProductActions({
               type="button"
               onClick={addToCart}
               className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
-                isAdded ? "bg-primary" : "bg-primary hover:bg-primary/90"
+                justAdded ? "bg-primary" : "bg-primary hover:bg-primary/90"
               }`}
             >
-              {isAdded ? (
+              {justAdded ? (
                 <>
                   <Check className="h-4 w-4" aria-hidden="true" />
                   Added to Cart

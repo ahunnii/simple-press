@@ -7,7 +7,6 @@ import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
-import { calculateShipping } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -21,14 +20,12 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { useCart } from "~/providers/cart-context";
 
 type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
 };
 
 export function CheckoutForm({ business }: CheckoutFormProps) {
-  const { subtotal } = useCart();
   const {
     email,
     setEmail,
@@ -62,6 +59,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
     handleSubmit,
     shippingConfig,
     items,
+    subtotal,
+    shipping,
+    finalTotal,
   } = useCheckoutForm(business);
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
@@ -75,12 +75,6 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
   // primaryColor is used only for the delivery method toggle indicator and
   // the submit button; falls back to the CSS --primary token when absent.
   const primaryColor = business.siteContent?.primaryColor ?? undefined;
-
-  const shipping =
-    deliveryMethod === "pickup"
-      ? 0
-      : calculateShipping(subtotal, shippingConfig);
-  const finalTotal = subtotal - discountAmount + shipping;
 
   if (items.length === 0) {
     return (

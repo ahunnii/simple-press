@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -26,21 +25,14 @@ export function PollenProductActions({
     quantity,
     setSelectedVariantId,
     additionalFields,
+    justAdded,
   } = useProduct(product);
-
-  const [isAdded, setIsAdded] = useState(false);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   return (
     <>
       {/* S-2: live region for add-to-cart announcement */}
       <span className="sr-only" role="status" aria-live="polite">
-        {isAdded ? `${product.name} added to cart` : ""}
+        {justAdded ? `${product.name} added to cart` : ""}
       </span>
 
       {Object.keys(variantOptions).length > 0 ? (
@@ -108,10 +100,10 @@ export function PollenProductActions({
               </div>
               <Button
                 size="lg"
-                onClick={addToCart}
+                onClick={handleAddToCart}
                 className="flex-1 gap-2 bg-[#215935] text-white hover:bg-[#1a4729] sm:flex-none"
               >
-                {isAdded ? (
+                {justAdded ? (
                   <>
                     <Check className="h-4 w-4" aria-hidden="true" />
                     Added to Cart
