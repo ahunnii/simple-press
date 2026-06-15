@@ -56,3 +56,4 @@ skills/
 /blob-report/
 /playwright/.cache/
 e2e/.seed-data.json
+.env.e2e.local

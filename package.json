@@ -30,6 +30,7 @@
     "test:e2e:db:up": "scripts/e2e-pg.sh up",
     "test:e2e:db:down": "scripts/e2e-pg.sh down",
     "test:e2e:run": "playwright test",
+    "test:e2e:stripe": "scripts/e2e-stripe.sh",
     "typecheck": "tsc --noEmit"
   },
   "prisma": {

@@ -14,6 +14,9 @@ const PORT = 3000;
 
 export default defineConfig({
   testDir: "./e2e",
+  // The real Stripe test-mode suite lives in e2e/live and runs via its own
+  // config (playwright.stripe.config.ts) + `pnpm test:e2e:stripe`.
+  testIgnore: "**/live/**",
   globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

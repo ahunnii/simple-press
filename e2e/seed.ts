@@ -30,10 +30,19 @@ async function main() {
 
     // Several templates gate the checkout form behind `isStripeConnected`
     // (= !!stripeAccountId). A dummy id flips that on; no real Stripe call is
-    // made because create-session is stubbed in the specs.
+    // made because create-session is stubbed in the (stubbed) specs.
+    //
+    // For the real Stripe test-mode suite, the `default` tenant must point at a
+    // real charges-enabled test connected account so create-session/webhook hit
+    // Stripe for real. E2E_STRIPE_ACCOUNT_ID supplies it when running that suite.
+    const realAccountId = process.env.E2E_STRIPE_ACCOUNT_ID;
+    const stripeAccountId =
+      templateId === "default" && realAccountId
+        ? realAccountId
+        : `acct_e2e_${templateId}`;
     await db.business.update({
       where: { id: business.id },
-      data: { stripeAccountId: `acct_e2e_${templateId}` },
+      data: { stripeAccountId },
     });
 
     // Minimal SiteContent so storefront layouts that expect the relation render
