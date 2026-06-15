@@ -49,3 +49,10 @@ yarn-error.log*
 skills/
 # Sentry Config File
 .env.sentry-build-plugin
+
+# playwright e2e
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+e2e/.seed-data.json

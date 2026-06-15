@@ -554,7 +554,7 @@ export const PAGE_METADATA = {
 export { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 export function isContentEmpty(content: TiptapJSON): boolean {
-  if (content === null) {
+  if (content === null || content === undefined) {
     return true;
   }
 
