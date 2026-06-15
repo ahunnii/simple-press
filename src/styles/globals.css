@@ -1331,7 +1331,8 @@
 
 /* ── Hero scroll-pulse line ── */
 .elegant .el-scroll-pulse-line {
-  animation: el-scroll-pulse 2.2s var(--el-ease, cubic-bezier(0.22, 1, 0.36, 1)) infinite;
+  animation: el-scroll-pulse 2.2s var(--el-ease, cubic-bezier(0.22, 1, 0.36, 1))
+    infinite;
 }
 
 /* ── Reduced-motion overrides ── */
@@ -2941,6 +2942,12 @@
     text-transform: uppercase;
     color: var(--sl-coral-aa);
   }
+}
+
+/* Unlayered so it overrides Tailwind's built-in .container max-widths
+   (which live in the utilities layer and otherwise win on layer order). */
+.happy-bamboo .container {
+  @apply max-w-7xl;
 }
 
 @layer admin {
