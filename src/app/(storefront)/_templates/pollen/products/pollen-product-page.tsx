@@ -20,6 +20,8 @@ import {
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
 
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
+import { TrackView } from "~/components/analytics/track-view";
 import { PollenProductCard } from "../shared/pollen-product-card";
 import { PollenProductActions } from "./pollen-product-actions";
 
@@ -51,6 +53,10 @@ export function PollenProductPage({
 
   return (
     <PageTransition>
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       <section className="mx-auto mt-28 max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <FadeIn direction="none" duration={0.3}>
           {/* N-1: aria-hidden on decorative ArrowLeft icon */}

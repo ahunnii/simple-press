@@ -21,6 +21,8 @@ import {
 } from "~/components/page-animations";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
+import { TrackView } from "~/components/analytics/track-view";
 import { NoiseProductCard } from "../shared/noise-product-card";
 import { NoiseProductActions } from "./noise-product-actions";
 
@@ -102,6 +104,10 @@ export function NoiseProductPage({
 
   return (
     <PageTransition>
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       {/* ── Breadcrumb ── */}
       <div
         className="flex items-center justify-between px-7 py-3.5"

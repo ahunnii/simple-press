@@ -19,6 +19,8 @@ import {
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
+import { TrackView } from "~/components/analytics/track-view";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
@@ -182,6 +184,10 @@ export function SledgeProductPage({
 
   return (
     <PageTransition>
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       {/* Breadcrumb */}
       <nav
         className={cn(SLEDGE_PAGE_CONTAINER, "pt-8 pb-2")}

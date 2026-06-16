@@ -12,6 +12,8 @@ import { useVariantImage } from "~/app/(storefront)/_components/product-page/var
 import { useProduct } from "~/hooks/use-product";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
+import { TrackView } from "~/components/analytics/track-view";
 import { ModernProductCard } from "../shared/modern-product-card";
 import { ModernProductActions } from "./modern-product-actions";
 
@@ -52,6 +54,10 @@ export function ModernProductPage({
 
   return (
     <div className="bg-background">
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       {/* Breadcrumb */}
       <div className="border-border border-b">
         <div className="mx-auto max-w-7xl px-6 py-4 lg:px-8">

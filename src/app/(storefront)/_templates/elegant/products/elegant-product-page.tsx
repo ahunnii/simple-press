@@ -14,6 +14,8 @@ import { useProduct } from "~/hooks/use-product";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { ProductDetailsAdditionalInfoAccordion } from "~/app/(storefront)/_components/product-page/additional-info-accordion";
 
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
+import { TrackView } from "~/components/analytics/track-view";
 import { ElegantProductCard } from "../shared/elegant-product-card";
 import { ElegantProductActions } from "./elegant-product-actions";
 
@@ -100,6 +102,10 @@ export function ElegantProductPage({
 
   return (
     <>
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       {/* ── Product section ── */}
       <section
         style={{

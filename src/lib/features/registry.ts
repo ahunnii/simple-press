@@ -153,6 +153,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
   },
 
   // ─── MARKETING ──────────────────────────────────────────────────────────────
+  analytics: {
+    key: "analytics",
+    label: "Analytics",
+    description: "View visitor, page, and event analytics for your storefront",
+    category: "marketing",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    hidesNav: ["analytics"],
+  },
   testimonials: {
     key: "testimonials",
     label: "Testimonials",

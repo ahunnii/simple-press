@@ -51,6 +51,10 @@ export const env = createEnv({
     // Optional: when set on a preview env, all outbound email is rerouted to
     // this single inbox instead of being dropped.
     EMAIL_REDIRECT_TO: z.string().email().optional(),
+
+    // Umami platform service account credentials (server-only, never exposed to client).
+    UMAMI_API_USERNAME: z.string(),
+    UMAMI_API_PASSWORD: z.string(),
   },
 
   /**
@@ -125,6 +129,8 @@ export const env = createEnv({
     PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
     IS_PREVIEW_ENV: process.env.IS_PREVIEW_ENV,
     EMAIL_REDIRECT_TO: process.env.EMAIL_REDIRECT_TO,
+    UMAMI_API_USERNAME: process.env.UMAMI_API_USERNAME,
+    UMAMI_API_PASSWORD: process.env.UMAMI_API_PASSWORD,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { CheckCircle, Package } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
+import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 
 type Business = {
@@ -95,6 +96,13 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
 
   return (
     <div className="mx-auto max-w-2xl">
+      {/* Fire purchase analytics event once — idempotent via sessionStorage */}
+      {orderDetails && (
+        <TrackPurchase
+          sessionId={sessionId}
+          amountCents={orderDetails.amount_total}
+        />
+      )}
       <div className="mb-8 text-center">
         <div
           className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full"

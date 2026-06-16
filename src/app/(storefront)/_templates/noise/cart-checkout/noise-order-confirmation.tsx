@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import { formatPrice } from "~/lib/prices";
+import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 
 const NEXT_STEPS = [
@@ -120,6 +121,13 @@ export function NoiseOrderConfirmation({ business }: Props) {
 
   return (
     <>
+      {/* Fire purchase analytics event once — idempotent via sessionStorage */}
+      {orderDetails && (
+        <TrackPurchase
+          sessionId={sessionId}
+          amountCents={orderDetails.amount_total}
+        />
+      )}
       {/* Success hero — ink background */}
       <section
         className="border-foreground grid border-b-2 md:grid-cols-2"

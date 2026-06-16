@@ -21,6 +21,8 @@ import {
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
 
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
+import { TrackView } from "~/components/analytics/track-view";
 import { BambooHorizontalProductCard } from "../shared/bamboo-product-card";
 import { DEFAULT_LUCIDE_ICONS_WITH_LABELS } from "../shop";
 import { BambooProductActions } from "./bamboo-product-actions";
@@ -56,6 +58,10 @@ export function BambooProductPage({
 
   return (
     <PageTransition>
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       <section className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
         {/* Breadcrumb */}
         <FadeIn direction="none" duration={0.3}>

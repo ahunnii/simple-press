@@ -148,6 +148,8 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
+
 export type CartItem = {
   productId: string;
   productSlug?: string | null;
@@ -324,6 +326,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         else toast.success(toastMsg);
       }
       if (openCart) setIsOpen(true);
+
+      // Fire analytics event when item was successfully added or quantity updated
+      if (!toastIsError && toastMsg !== null) {
+        track(ANALYTICS_EVENTS.ADD_TO_CART, {
+          productId: newItem.productId,
+          name: newItem.productName,
+        });
+      }
     },
     [],
   );

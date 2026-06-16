@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 
 import { formatPrice } from "~/lib/prices";
+import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 
 const NEXT_STEPS = [
@@ -113,6 +114,13 @@ export function SledgeOrderConfirmation({ business }: Props) {
 
   return (
     <>
+      {/* Fire purchase analytics event once — idempotent via sessionStorage */}
+      {orderDetails && (
+        <TrackPurchase
+          sessionId={sessionId}
+          amountCents={orderDetails.amount_total}
+        />
+      )}
       <section className="bg-white px-7 pt-16 pb-10 md:pt-20 md:pb-14">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 flex size-[72px] items-center justify-center rounded-full bg-[var(--sl-cream)] text-[var(--sl-coral)]">

@@ -75,19 +75,25 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const business = await checkBusiness();
 
-  // Determine which Umami website ID to inject:
-  // - Resolved storefront with its own Umami config → use per-business ID
-  // - Platform domain (no business) → fall back to platform-wide env var
-  const umamiWebsiteId =
-    business?.umamiEnabled && business.umamiWebsiteId
-      ? business.umamiWebsiteId
-      : env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+  // Decide which Umami website ID (if any) to inject.
+  let umamiWebsiteId: string | undefined;
+  if (business) {
+    // Tenant storefront: track only when the store has explicitly opted in.
+    // No fallback to the platform ID — un-opted-in stores are never tracked.
+    if (business.umamiEnabled && business.umamiWebsiteId) {
+      umamiWebsiteId = business.umamiWebsiteId;
+    }
+  } else if (env.NEXT_PUBLIC_ENABLE_UMAMI) {
+    // Platform's own pages (no tenant): gated by NEXT_PUBLIC_ENABLE_UMAMI,
+    // which now serves only as the platform-pages master switch.
+    umamiWebsiteId = env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+  }
 
   return (
     <html lang="en" className={`${geist.variable}`}>
       <body>
         <Providers>
-          {env.NEXT_PUBLIC_ENABLE_UMAMI && (
+          {umamiWebsiteId && (
             <Script defer src="/umami.js" data-website-id={umamiWebsiteId} />
           )}
           <TooltipProvider>

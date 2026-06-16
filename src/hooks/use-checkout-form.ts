@@ -7,6 +7,7 @@ import {
   calculateShipping,
   shippingConfigFromBusiness,
 } from "~/lib/shipping-utils";
+import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
 import { useCart } from "~/providers/cart-context";
 
 import { useDiscountCode } from "./use-discount-code";
@@ -116,6 +117,11 @@ export function useCheckoutForm(
       if (items.length === 0) {
         throw new Error("Your cart is empty");
       }
+
+      // Track begin-checkout with cart value in dollars (2 decimal places)
+      track(ANALYTICS_EVENTS.BEGIN_CHECKOUT, {
+        value: Math.round(finalTotal) / 100,
+      });
 
       const response = await fetch("/api/stripe/create-session", {
         method: "POST",

@@ -13,6 +13,8 @@ import { useProduct } from "~/hooks/use-product";
 import { Spotlight } from "~/components/ui/spotlight-new";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
 
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
+import { TrackView } from "~/components/analytics/track-view";
 import { DarkTrendProductCard } from "../shared/dark-trend-product-card";
 import { DarkTrendProductActions } from "./dark-trend-product-actions";
 import { DarkTrendProductDetails } from "./dark-trend-product-details";
@@ -45,6 +47,10 @@ export function DarkTrendProductPage({
 
   return (
     <div className="relative min-h-screen overflow-x-hidden pt-16 pb-20">
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       <Spotlight />
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         {/* Back Link */}

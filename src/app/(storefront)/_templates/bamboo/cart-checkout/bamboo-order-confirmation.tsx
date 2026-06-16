@@ -7,6 +7,7 @@ import { CheckCircle2, Package } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
+import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 
 type Props = {
@@ -96,6 +97,13 @@ export function BambooOrderConfirmation({ business }: Props) {
 
   return (
     <div className="mx-auto max-w-3xl">
+      {/* Fire purchase analytics event once — idempotent via sessionStorage */}
+      {orderDetails && (
+        <TrackPurchase
+          sessionId={sessionId}
+          amountCents={orderDetails.amount_total}
+        />
+      )}
       {/* Success Header */}
       <div className="mb-12 text-center">
         <div

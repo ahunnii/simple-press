@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { CheckCircle, Package } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
+import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 
 type Props = {
@@ -103,6 +104,13 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
 
   return (
     <div className="mx-auto max-w-3xl">
+      {/* Fire purchase analytics event once — idempotent via sessionStorage */}
+      {orderDetails && (
+        <TrackPurchase
+          sessionId={sessionId}
+          amountCents={orderDetails.amount_total}
+        />
+      )}
       {/* Success Header */}
       <div className="mb-12 text-center">
         <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20">

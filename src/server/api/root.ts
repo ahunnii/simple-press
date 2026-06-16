@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
+import { analyticsRouter } from "./routers/analytics";
 import { baseInventoryUnitRouter } from "./routers/base-inventory-unit";
 import { businessRouter } from "./routers/business";
 import { collectionsRouter } from "./routers/collections";
@@ -27,6 +28,7 @@ import { uploadRouter } from "./routers/upload";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+  analytics: analyticsRouter,
   baseInventoryUnit: baseInventoryUnitRouter,
   domain: domainRouter,
   discount: discountRouter,
