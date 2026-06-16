@@ -88,7 +88,9 @@ export const analyticsRouter = createTRPCRouter({
     const { startAt, endAt } = resolveRange(input.range);
     const websiteId = business.umamiWebsiteId;
 
-    const rows = await getMetrics({ websiteId, startAt, endAt, type: "url", limit: 10 });
+    // Umami's metrics API expects the page-path column as "path" (not "url");
+    // passing "url" returns 400 bad-request on current Umami versions.
+    const rows = await getMetrics({ websiteId, startAt, endAt, type: "path", limit: 10 });
 
     return { configured: true as const, rows };
   }),
