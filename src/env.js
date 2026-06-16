@@ -53,8 +53,14 @@ export const env = createEnv({
     EMAIL_REDIRECT_TO: z.string().email().optional(),
 
     // Umami platform service account credentials (server-only, never exposed to client).
+    // The password may be provided either as plain text (UMAMI_API_PASSWORD) or
+    // base64-encoded (UMAMI_API_PASSWORD_B64). Prefer the base64 form in hosting
+    // platforms that mangle special characters (e.g. Coolify strips quotes, and
+    // dotenv-expand interprets `$`). Base64 contains no characters any env layer
+    // will alter. The client uses the base64 value when present.
     UMAMI_API_USERNAME: z.string(),
-    UMAMI_API_PASSWORD: z.string(),
+    UMAMI_API_PASSWORD: z.string().optional(),
+    UMAMI_API_PASSWORD_B64: z.string().optional(),
   },
 
   /**
@@ -131,6 +137,7 @@ export const env = createEnv({
     EMAIL_REDIRECT_TO: process.env.EMAIL_REDIRECT_TO,
     UMAMI_API_USERNAME: process.env.UMAMI_API_USERNAME,
     UMAMI_API_PASSWORD: process.env.UMAMI_API_PASSWORD,
+    UMAMI_API_PASSWORD_B64: process.env.UMAMI_API_PASSWORD_B64,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

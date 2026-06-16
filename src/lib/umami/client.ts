@@ -65,13 +65,33 @@ const TOKEN_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 let cachedToken: string | null = null;
 let tokenExpiresAt = 0;
 
+/**
+ * Resolve the service-account password from env.
+ *
+ * Prefers the base64-encoded form (`UMAMI_API_PASSWORD_B64`) so the secret can
+ * survive hosting platforms that mangle special characters — Coolify strips
+ * quotes, and dotenv-expand interprets a literal `$` as a variable reference.
+ * Base64 contains no such characters. Falls back to the plain value.
+ */
+function resolvePassword(): string {
+  if (env.UMAMI_API_PASSWORD_B64) {
+    return Buffer.from(env.UMAMI_API_PASSWORD_B64, "base64").toString("utf8");
+  }
+  if (env.UMAMI_API_PASSWORD) {
+    return env.UMAMI_API_PASSWORD;
+  }
+  throw new Error(
+    "Umami API password is not configured (set UMAMI_API_PASSWORD or UMAMI_API_PASSWORD_B64)",
+  );
+}
+
 async function fetchToken(): Promise<string> {
   const res = await fetch(`${env.UMAMI_BASE_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       username: env.UMAMI_API_USERNAME,
-      password: env.UMAMI_API_PASSWORD,
+      password: resolvePassword(),
     }),
     // Do not cache auth requests
     cache: "no-store",
