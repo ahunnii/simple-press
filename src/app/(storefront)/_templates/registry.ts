@@ -231,6 +231,17 @@ import { SledgeAccountSettingsPage } from "./sledge/account/sledge-account-setti
 import { SledgeProductPage } from "./sledge/products/sledge-product-page";
 
 // ---------------------------------------------------------------------------
+// Vii (Skinbar VII) — homepage-only pass; all other slots fall back to default
+// ---------------------------------------------------------------------------
+import { ViiLayout } from "./vii/layout/vii-layout";
+import { ViiAboutPage } from "./vii/about/vii-about-page";
+import { ViiContactPage } from "./vii/contact/vii-contact-page";
+import { ViiShopPage } from "./vii/shop/vii-shop-page";
+import { ViiProductPage } from "./vii/products/vii-product-page";
+import { ViiCollectionsPage } from "./vii/collections/vii-collections-page";
+import { ViiCollectionPage } from "./vii/collections/vii-collection-page";
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -492,6 +503,16 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: SledgeOrderDetailPage,
     OrdersPage: SledgeOrdersPage,
     PreferencesPage: SledgePreferencesPage,
+  },
+
+  vii: {
+    Layout: ViiLayout,
+    AboutPage: ViiAboutPage,
+    ContactPage: ViiContactPage,
+    ShopPage: ViiShopPage,
+    ProductPage: ViiProductPage,
+    CollectionsPage: ViiCollectionsPage,
+    CollectionPage: ViiCollectionPage,
   },
 };
 

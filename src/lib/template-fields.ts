@@ -42,6 +42,7 @@ import {
   sledgeData,
   sledgeFieldGroups,
 } from "~/app/(storefront)/_templates/sledge";
+import { viiData, viiFieldGroups } from "~/app/(storefront)/_templates/vii";
 
 export type TemplatePage =
   | "homepage"
@@ -370,6 +371,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...noiseFieldGroups,
   ...sledgeFieldGroups,
   ...elegantFieldGroups,
+  ...viiFieldGroups,
   ...defaultTemplateFieldGroups,
 };
 
@@ -422,6 +424,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...noiseData,
   ...sledgeData,
   ...elegantData,
+  ...viiData,
   ...defaultTemplateData,
 };
 

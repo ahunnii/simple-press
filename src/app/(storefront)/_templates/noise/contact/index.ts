@@ -122,15 +122,14 @@ export const DEFAULT_FAQ: {
   },
   {
     _id: "d3",
-    question: "Can I visit the atelier?",
-    answer:
-      "Please do. Book a 45-minute fitting slot via the form above — we'll have your size pulled and tea waiting. Walk-ins welcome on Friday and Saturday afternoons.",
+    question: "Can I visit the shop?",
+    answer: "Please do. Walk-ins welcome on Friday and Saturday afternoons.",
   },
   {
     _id: "d4",
     question: "What's the return policy?",
     answer:
-      "14-day exchange on stock pieces. Return postage on us within the US. Numbered editions and commissioned work are final sale.",
+      "14-day exchange on stock pieces. Return postage on us within the US. Commissioned work are final sale.",
   },
   {
     _id: "d5",

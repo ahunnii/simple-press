@@ -3095,3 +3095,115 @@
 .animate-slide-up {
   animation: slide-up 0.6s ease-out;
 }
+
+/* ─── Skinbar VII — design tokens ──────────────────────────────────────────
+   Scoped to .vii so they never bleed into other templates.                 */
+
+.vii {
+  --vii-cream: #ede3ce;       /* body background */
+  --vii-paper: #fbf8f1;       /* cards / surfaces */
+  --vii-navy: #1e3540;        /* foreground text + dark sections */
+  --vii-slate: #384f65;       /* secondary dark */
+  --vii-copper: #b35e2f;      /* accent: italic display words + CTAs (on light bg) */
+  --vii-copper-light: #d98a5b;/* lightened copper for accents on dark/navy bg (AA contrast) */
+  --vii-clay: #a47a60;
+  --vii-tan: #c1aa91;
+  --vii-glacier: #9fc8d0;
+  --vii-ink-soft: #4a5560;    /* secondary text */
+  --radius: 0.2rem;
+  --font-serif: var(--font-vii-serif), "Playfair Display", serif;
+  --font-sans: var(--font-vii-sans), "Jost", sans-serif;
+  background: var(--vii-cream);
+  color: var(--vii-navy);
+}
+
+/* Focus ring */
+.vii *:focus-visible {
+  outline: 2px solid var(--vii-copper);
+  outline-offset: 2px;
+}
+
+/* Scroll-reveal utility — toggled by useViiReveal hook */
+.vii .vii-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vii .vii-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Marquee keyframe — used by homepage marquee band */
+@keyframes vii-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Reduced-motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  .vii .vii-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .vii [style*="vii-marquee"] {
+    animation-play-state: paused !important;
+  }
+}
+
+/* Contact page — two-column layout collapses on small screens */
+@media (max-width: 860px) {
+  .vii .vii-contact-columns {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* Contact form — underline-style inputs scoped to .vii */
+.vii
+  .vii-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
+.vii .vii-contact-form textarea {
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1.5px solid var(--vii-tan);
+  background: transparent;
+  padding: 10px 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  outline: none;
+  width: 100%;
+  color: var(--vii-navy);
+}
+
+.vii
+  .vii-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not(
+    [type="tel"]
+  )::placeholder,
+.vii .vii-contact-form textarea::placeholder {
+  color: var(--vii-ink-soft);
+  opacity: 0.55;
+}
+
+.vii
+  .vii-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
+.vii .vii-contact-form textarea:focus {
+  border-bottom-color: var(--vii-copper);
+  box-shadow: none;
+}
+
+.vii .vii-contact-form .vii-field-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--vii-ink-soft);
+  display: block;
+  margin-bottom: 6px;
+}
