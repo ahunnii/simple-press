@@ -9,7 +9,6 @@ import { api } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
 
 import { VariantImageProvider } from "../../_components/product-page/variant-image-context";
-
 import { getTemplate } from "../../_templates/registry";
 
 type Props = {

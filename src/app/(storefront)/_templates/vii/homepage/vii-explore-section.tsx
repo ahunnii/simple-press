@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
 type Props = {
@@ -50,7 +51,10 @@ export function ViiExploreSection({
         <div
           ref={headerRef}
           className={`vii-reveal${headerVisible ? " is-visible" : ""}`}
-          style={{ textAlign: "center", marginBottom: "clamp(32px, 5vw, 56px)" }}
+          style={{
+            textAlign: "center",
+            marginBottom: "clamp(32px, 5vw, 56px)",
+          }}
         >
           {overline && (
             <p
@@ -128,8 +132,7 @@ export function ViiExploreSection({
                 }}
               >
                 {tabs.map((tab, i) => {
-                  const label =
-                    typeof tab.label === "string" ? tab.label : "";
+                  const label = typeof tab.label === "string" ? tab.label : "";
                   return (
                     <li key={tab._id ?? i}>
                       <span

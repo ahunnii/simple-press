@@ -8,13 +8,15 @@ const uniq = (prefix: string) =>
     .toString(36)
     .slice(2, 7)}`;
 
-export function createBusiness(opts: {
-  subdomain?: string;
-  templateId?: string;
-  name?: string;
-  customDomain?: string | null;
-  status?: string;
-} = {}) {
+export function createBusiness(
+  opts: {
+    subdomain?: string;
+    templateId?: string;
+    name?: string;
+    customDomain?: string | null;
+    status?: string;
+  } = {},
+) {
   const sub = opts.subdomain ?? uniq("biz");
   return db.business.create({
     data: {
@@ -77,8 +79,7 @@ export function createProduct(
       reservedQty: opts.reservedQty ?? 0,
       ...(opts.additionalFields !== undefined
         ? {
-            additionalFields:
-              opts.additionalFields as Prisma.InputJsonValue,
+            additionalFields: opts.additionalFields as Prisma.InputJsonValue,
           }
         : {}),
     },

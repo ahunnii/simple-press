@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, Home, Package, PowerOff, Shield, Wrench } from "lucide-react";
+import {
+  FileText,
+  Home,
+  Package,
+  PowerOff,
+  Shield,
+  Wrench,
+} from "lucide-react";
 
 import {
   Card,

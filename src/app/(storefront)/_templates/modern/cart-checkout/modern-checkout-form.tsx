@@ -294,7 +294,9 @@ export function ModernCheckoutForm({ business }: Props) {
                     required={f.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={
-                      submitAttempted && !f.addressLine1.trim() ? true : undefined
+                      submitAttempted && !f.addressLine1.trim()
+                        ? true
+                        : undefined
                     }
                     value={f.addressLine1}
                     onChange={(e) => f.setAddressLine1(e.target.value)}
@@ -380,7 +382,9 @@ export function ModernCheckoutForm({ business }: Props) {
                   <select
                     id="country"
                     value={f.country}
-                    onChange={(e) => f.setCountry(e.target.value as "US" | "CA")}
+                    onChange={(e) =>
+                      f.setCountry(e.target.value as "US" | "CA")
+                    }
                     aria-required="true"
                     className={inputClass}
                   >

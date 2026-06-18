@@ -1,14 +1,15 @@
 import Image from "next/image";
 
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import { db } from "~/server/db";
-import { ServiceBookingDialog } from "~/components/service-booking-dialog";
-import { type TiptapJSON, TiptapRenderer } from "~/components/tiptap-renderer";
-import { EmbedFrame } from "~/components/embed-frame";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
+import { db } from "~/server/db";
+import { EmbedFrame } from "~/components/embed-frame";
+import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from ".";
 
@@ -73,7 +74,7 @@ export async function ServiceTemplateTwo({
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       {/* ── Hero video ────────────────────────────────────────────────────── */}
       {heroVideoSrc ? (
         <section className="relative w-full bg-black">
@@ -86,11 +87,11 @@ export async function ServiceTemplateTwo({
           </div>
           <div className="bg-background px-4 py-10 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-5xl">
-              <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+              <h1 className="text-foreground text-3xl font-bold sm:text-4xl">
                 {service.name}
               </h1>
               {service.description && (
-                <p className="mt-3 text-base text-muted-foreground sm:text-lg">
+                <p className="text-muted-foreground mt-3 text-base sm:text-lg">
                   {service.description}
                 </p>
               )}
@@ -98,13 +99,13 @@ export async function ServiceTemplateTwo({
           </div>
         </section>
       ) : (
-        <section className="border-b border-border bg-muted/30 py-14">
+        <section className="border-border bg-muted/30 border-b py-14">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+            <h1 className="text-foreground text-3xl font-bold sm:text-4xl">
               {service.name}
             </h1>
             {service.description && (
-              <p className="mt-3 text-base text-muted-foreground sm:text-lg">
+              <p className="text-muted-foreground mt-3 text-base sm:text-lg">
                 {service.description}
               </p>
             )}
@@ -120,7 +121,7 @@ export async function ServiceTemplateTwo({
               {gallery.images.map((img) => (
                 <div
                   key={img.id}
-                  className="relative aspect-square overflow-hidden rounded-lg bg-muted"
+                  className="bg-muted relative aspect-square overflow-hidden rounded-lg"
                 >
                   <Image
                     src={img.url}
@@ -138,7 +139,7 @@ export async function ServiceTemplateTwo({
 
       {/* ── Intro body ────────────────────────────────────────────────────── */}
       {introBodyJson && (
-        <section className="border-y border-border bg-background py-16 md:py-24">
+        <section className="border-border bg-background border-y py-16 md:py-24">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div className="prose prose-neutral max-w-none">
               <TiptapRenderer content={introBodyJson} />
@@ -155,16 +156,16 @@ export async function ServiceTemplateTwo({
               {highlights.map((hl, i) => (
                 <div
                   key={i}
-                  className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6 shadow-sm"
+                  className="border-border bg-card flex flex-col gap-3 rounded-xl border p-6 shadow-sm"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
                     <hl.icon
-                      className="h-5 w-5 text-primary"
+                      className="text-primary h-5 w-5"
                       aria-hidden="true"
                     />
                   </div>
-                  <h3 className="font-semibold text-foreground">{hl.title}</h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
+                  <h3 className="text-foreground font-semibold">{hl.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
                     {hl.description}
                   </p>
                 </div>
@@ -178,7 +179,7 @@ export async function ServiceTemplateTwo({
       {items.length > 0 && (
         <section className="py-16 md:py-24">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 className="mb-10 text-2xl font-semibold text-foreground sm:text-3xl">
+            <h2 className="text-foreground mb-10 text-2xl font-semibold sm:text-3xl">
               Our Services
             </h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -205,7 +206,7 @@ function ServiceItemCard({
   embedsEnabled: boolean;
 }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+    <div className="border-border bg-card flex flex-col overflow-hidden rounded-xl border shadow-sm transition-shadow hover:shadow-md">
       {item.image && (
         <div className="relative aspect-video w-full overflow-hidden">
           <Image
@@ -218,21 +219,21 @@ function ServiceItemCard({
         </div>
       )}
       <div className="flex flex-1 flex-col gap-2 p-5">
-        <h3 className="text-base font-semibold text-foreground">{item.name}</h3>
+        <h3 className="text-foreground text-base font-semibold">{item.name}</h3>
         {item.description && (
-          <p className="flex-1 text-sm leading-relaxed text-muted-foreground">
+          <p className="text-muted-foreground flex-1 text-sm leading-relaxed">
             {item.description}
           </p>
         )}
         <div className="mt-2 flex items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex flex-wrap gap-2 text-xs">
             {item.priceLabel && (
-              <span className="rounded-full bg-muted px-2.5 py-0.5 font-medium">
+              <span className="bg-muted rounded-full px-2.5 py-0.5 font-medium">
                 {item.priceLabel}
               </span>
             )}
             {item.durationLabel && (
-              <span className="rounded-full bg-muted px-2.5 py-0.5">
+              <span className="bg-muted rounded-full px-2.5 py-0.5">
                 {item.durationLabel}
               </span>
             )}

@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -149,7 +149,9 @@ export function HappyBambooVariantSelector({
                 variant="ghost"
                 size="icon"
                 className="size-10"
-                onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+                onClick={() =>
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
+                }
                 disabled={quantity >= effectiveMax}
                 aria-label="Increase quantity"
               >

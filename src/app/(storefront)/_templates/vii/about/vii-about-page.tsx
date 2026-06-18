@@ -1,7 +1,7 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import { PageTransition } from "~/components/page-animations";
-import { parseTemplateListRows } from "~/lib/template-fields";
 import type { TemplateListRow } from "~/lib/template-fields";
+import { parseTemplateListRows } from "~/lib/template-fields";
+import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { ViiContactCtaSection } from "../homepage/vii-contact-cta-section";

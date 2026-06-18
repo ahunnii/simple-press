@@ -37,7 +37,8 @@ function makeSession(opts: {
     object: "item",
     description: li.description ?? "Test Product",
     quantity: li.quantity ?? 1,
-    amount_total: li.amountTotal ?? (li.unitAmount ?? 1000) * (li.quantity ?? 1),
+    amount_total:
+      li.amountTotal ?? (li.unitAmount ?? 1000) * (li.quantity ?? 1),
     price: {
       id: `price_${i}`,
       unit_amount: li.unitAmount ?? 1000,
@@ -68,14 +69,21 @@ function makeSession(opts: {
     amount_total: opts.amountTotal ?? 1000,
     payment_status: opts.paymentStatus ?? "paid",
     payment_intent:
-      opts.paymentIntent !== undefined ? opts.paymentIntent : `pi_test_${Date.now()}`,
+      opts.paymentIntent !== undefined
+        ? opts.paymentIntent
+        : `pi_test_${Date.now()}`,
     total_details: {
       amount_discount: 0,
       amount_shipping: opts.amountShipping ?? 0,
       amount_tax: opts.amountTax ?? 0,
       breakdown: null,
     },
-    line_items: { data: lineItemData, has_more: false, object: "list", url: "" },
+    line_items: {
+      data: lineItemData,
+      has_more: false,
+      object: "list",
+      url: "",
+    },
     metadata: {},
   } as unknown as Stripe.Checkout.Session;
 }

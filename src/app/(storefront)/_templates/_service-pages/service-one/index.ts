@@ -59,7 +59,8 @@ export const serviceOneFields: TemplateField[] = [
   {
     key: "service-one.cta-link",
     label: "CTA Button Link",
-    description: "URL the CTA button points to (leave blank to hide the button)",
+    description:
+      "URL the CTA button points to (leave blank to hide the button)",
     type: "url",
     page: "homepage",
     group: "service-one.cta",

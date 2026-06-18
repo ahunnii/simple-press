@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
   bandImage?: string;
@@ -48,7 +49,7 @@ export function ViiAboutBand({ bandImage, label, statement }: Props) {
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(to bottom, rgba(30,53,64,0.7) 0%, rgba(30,53,64,0.85) 100%)",
+            "linear-gradient(to bottom, color-mix(in srgb, var(--vii-navy) 70%, transparent) 0%, color-mix(in srgb, var(--vii-navy) 85%, transparent) 100%)",
         }}
       />
 
@@ -64,18 +65,9 @@ export function ViiAboutBand({ bandImage, label, statement }: Props) {
         }}
       >
         {label.trim() && (
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 12,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "var(--vii-tan)",
-              marginBottom: 22,
-            }}
-          >
+          <ViiOverline align="center" tone="dark" style={{ marginBottom: 22 }}>
             {label}
-          </p>
+          </ViiOverline>
         )}
 
         <h2

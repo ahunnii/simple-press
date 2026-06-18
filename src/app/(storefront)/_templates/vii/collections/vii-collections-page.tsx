@@ -76,7 +76,12 @@ export function ViiCollectionsPage({
       >
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           {list.length === 0 ? (
-            <div style={{ padding: "clamp(48px, 8vw, 96px) 0", textAlign: "center" }}>
+            <div
+              style={{
+                padding: "clamp(48px, 8vw, 96px) 0",
+                textAlign: "center",
+              }}
+            >
               <p
                 style={{
                   fontFamily: "var(--font-sans)",
@@ -120,7 +125,9 @@ export function ViiCollectionsPage({
                       sizes="(max-width: 640px) 100vw, 33vw"
                     />
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div
+                    style={{ display: "flex", flexDirection: "column", gap: 6 }}
+                  >
                     <h2
                       className="transition-opacity group-hover:opacity-70"
                       style={{

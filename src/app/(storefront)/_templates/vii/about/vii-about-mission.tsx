@@ -1,6 +1,7 @@
 "use client";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
   overline: string;
@@ -29,21 +30,16 @@ export function ViiAboutMission({
       <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
         >
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--vii-ink-soft)",
-                marginBottom: 14,
-              }}
+            <ViiOverline
+              align="center"
+              tone="light"
+              style={{ marginBottom: 14 }}
             >
               {overline}
-            </p>
+            </ViiOverline>
           )}
 
           <h2
@@ -67,7 +63,7 @@ export function ViiAboutMission({
         {body && (
           <div
             ref={bodyRef}
-            className={`vii-reveal${bodyVisible ? "is-visible" : ""}`}
+            className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
             style={{ marginTop: 32 }}
           >
             <p
@@ -76,7 +72,8 @@ export function ViiAboutMission({
                 fontSize: "clamp(15px, 1.4vw, 17px)",
                 lineHeight: 1.8,
                 color: "var(--vii-ink-soft)",
-                margin: 0,
+                margin: "0 auto",
+                maxWidth: "62ch",
               }}
             >
               {body}

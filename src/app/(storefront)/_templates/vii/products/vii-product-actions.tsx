@@ -7,7 +7,16 @@ import { useProduct } from "~/hooks/use-product";
 
 import { ViiVariantSelector } from "./vii-variant-selector";
 
-export function ViiProductActions({ product }: DefaultProductPageTemplateProps) {
+type ViiProductActionsProps = DefaultProductPageTemplateProps & {
+  selectedVariantId: string | null;
+  setSelectedVariantId: (variantId: string | null) => void;
+};
+
+export function ViiProductActions({
+  product,
+  selectedVariantId,
+  setSelectedVariantId,
+}: ViiProductActionsProps) {
   const {
     inStock,
     variantOptions,
@@ -17,16 +26,16 @@ export function ViiProductActions({ product }: DefaultProductPageTemplateProps) 
     handleIncrement,
     quantity,
     additionalFields,
-    setSelectedVariantId,
     justAdded,
   } = useProduct(product);
 
-  const stepperBorder = "1px solid rgba(30,53,64,0.25)";
+  const stepperBorder = "1px solid var(--vii-hairline-strong)";
 
   if (Object.keys(variantOptions).length > 0) {
     return (
       <ViiVariantSelector
         product={product}
+        selectedVariantId={selectedVariantId}
         setSelectedVariantId={setSelectedVariantId}
       />
     );
@@ -105,7 +114,7 @@ export function ViiProductActions({ product }: DefaultProductPageTemplateProps) 
               display: "inline-flex",
               alignItems: "center",
               height: 48,
-              width: 120,
+              width: 132,
               flexShrink: 0,
               borderRadius: "var(--radius)",
               border: stepperBorder,
@@ -239,7 +248,7 @@ export function ViiProductActions({ product }: DefaultProductPageTemplateProps) 
           style={{
             fontFamily: "var(--font-sans)",
             fontSize: 14,
-            color: "var(--vii-clay)",
+            color: "var(--vii-ink-soft)",
             margin: 0,
           }}
         >

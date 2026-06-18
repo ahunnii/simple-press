@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
 type Props = {
@@ -84,57 +85,57 @@ export function ViiBrandsSection({ overline, heading, logos }: Props) {
               padding: 0,
             }}
           >
-          {logos.map((logo, i) => {
-            const image = typeof logo.image === "string" ? logo.image : "";
-            const name = typeof logo.name === "string" ? logo.name : "";
-            const link =
-              typeof logo.link === "string" && logo.link.trim()
-                ? logo.link
-                : "";
-            if (!image) return null;
+            {logos.map((logo, i) => {
+              const image = typeof logo.image === "string" ? logo.image : "";
+              const name = typeof logo.name === "string" ? logo.name : "";
+              const link =
+                typeof logo.link === "string" && logo.link.trim()
+                  ? logo.link
+                  : "";
+              if (!image) return null;
 
-            const isExternal = /^https?:\/\//i.test(link);
-            const img = (
-              <span
-                style={{
-                  position: "relative",
-                  display: "block",
-                  width: "clamp(110px, 16vw, 160px)",
-                  height: "clamp(56px, 8vw, 80px)",
-                }}
-              >
-                <Image
-                  src={image}
-                  alt={name || "Brand logo"}
-                  fill
-                  sizes="160px"
-                  style={{ objectFit: "contain" }}
-                />
-              </span>
-            );
+              const isExternal = /^https?:\/\//i.test(link);
+              const img = (
+                <span
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    width: "clamp(110px, 16vw, 160px)",
+                    height: "clamp(56px, 8vw, 80px)",
+                  }}
+                >
+                  <Image
+                    src={image}
+                    alt={name || "Brand logo"}
+                    fill
+                    sizes="160px"
+                    style={{ objectFit: "contain" }}
+                  />
+                </span>
+              );
 
-            return (
-              <li key={logo._id ?? i}>
-                {link ? (
-                  <a
-                    href={link}
-                    {...(isExternal
-                      ? { target: "_blank", rel: "noopener noreferrer" }
-                      : {})}
-                    aria-label={name || "Brand"}
-                    className="inline-block transition-opacity hover:opacity-70 focus-visible:opacity-70"
-                  >
-                    {img}
-                    {isExternal && (
-                      <span className="sr-only"> (opens in new tab)</span>
-                    )}
-                  </a>
-                ) : (
-                  img
-                )}
-              </li>
-            );
-          })}
+              return (
+                <li key={logo._id ?? i}>
+                  {link ? (
+                    <a
+                      href={link}
+                      {...(isExternal
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
+                      aria-label={name || "Brand"}
+                      className="inline-block transition-opacity hover:opacity-70 focus-visible:opacity-70"
+                    >
+                      {img}
+                      {isExternal && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
+                    </a>
+                  ) : (
+                    img
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>

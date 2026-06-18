@@ -4,9 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import type { Product } from "~/types";
 import type { RouterOutputs } from "~/trpc/react";
+import type { Product } from "~/types";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiProductCard } from "../shared/vii-product-card";
 
@@ -39,21 +40,28 @@ export function ViiShopClient({
 
   const { ref, visible } = useViiReveal(0.05);
 
-  const hairline = "1px solid rgba(30,53,64,0.2)";
+  const hairline = "1px solid var(--vii-hairline)";
 
   return (
     <>
       {/* Products */}
       <section
-        aria-label="Products"
+        aria-labelledby="vii-shop-products-heading"
         style={{
           background: "var(--vii-paper)",
-          padding: "clamp(40px, 6vw, 72px) clamp(24px, 6vw, 96px) clamp(64px, 9vw, 112px)",
+          padding:
+            "clamp(40px, 6vw, 72px) clamp(24px, 6vw, 96px) clamp(64px, 9vw, 112px)",
         }}
       >
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <h2 id="vii-shop-products-heading" className="sr-only">Products</h2>
           {products.length === 0 ? (
-            <div style={{ padding: "clamp(48px, 8vw, 96px) 0", textAlign: "center" }}>
+            <div
+              style={{
+                padding: "clamp(48px, 8vw, 96px) 0",
+                textAlign: "center",
+              }}
+            >
               <p
                 style={{
                   fontFamily: "var(--font-sans)",
@@ -93,7 +101,13 @@ export function ViiShopClient({
                   {filtered.length} product{filtered.length !== 1 ? "s" : ""}
                 </span>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "clamp(16px, 3vw, 28px)" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "clamp(16px, 3vw, 28px)",
+                  }}
+                >
                   {/* In-stock toggle */}
                   <label
                     style={{
@@ -110,7 +124,11 @@ export function ViiShopClient({
                       type="checkbox"
                       checked={inStockOnly}
                       onChange={(e) => handleInStock(e.target.checked)}
-                      style={{ accentColor: "var(--vii-copper)", width: 15, height: 15 }}
+                      style={{
+                        accentColor: "var(--vii-copper)",
+                        width: 15,
+                        height: 15,
+                      }}
                     />
                     In stock only
                   </label>
@@ -134,11 +152,11 @@ export function ViiShopClient({
                         handleSort(e.target.value as keyof typeof SORT_LABELS)
                       }
                       style={{
-                        height: 38,
+                        height: 44,
                         cursor: "pointer",
                         appearance: "none",
                         borderRadius: "var(--radius)",
-                        border: "1px solid rgba(30,53,64,0.25)",
+                        border: "1px solid var(--vii-hairline-strong)",
                         background: "var(--vii-paper)",
                         padding: "0 30px 0 12px",
                         fontFamily: "var(--font-sans)",
@@ -164,7 +182,12 @@ export function ViiShopClient({
 
               {/* Grid */}
               {paginated.length === 0 ? (
-                <div style={{ padding: "clamp(40px, 6vw, 72px) 0", textAlign: "center" }}>
+                <div
+                  style={{
+                    padding: "clamp(40px, 6vw, 72px) 0",
+                    textAlign: "center",
+                  }}
+                >
                   <p
                     style={{
                       fontFamily: "var(--font-sans)",
@@ -179,12 +202,17 @@ export function ViiShopClient({
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(220px, 1fr))",
                     gap: "clamp(20px, 3vw, 36px)",
                   }}
                 >
                   {paginated.map((product, index) => (
-                    <ViiProductCard key={product.id} product={product} index={index} />
+                    <ViiProductCard
+                      key={product.id}
+                      product={product}
+                      index={index}
+                    />
                   ))}
                 </div>
               )}
@@ -208,17 +236,53 @@ export function ViiShopClient({
                   >
                     Previous
                   </ViiPageButton>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                    <ViiPageButton
-                      key={p}
-                      onClick={() => handlePage(p)}
-                      active={p === currentPage}
-                      ariaLabel={`Page ${p}`}
-                      ariaCurrent={p === currentPage}
-                    >
-                      {p}
-                    </ViiPageButton>
-                  ))}
+                  {(() => {
+                    // Build windowed page list: first, last, current ± 1, with ellipsis gaps
+                    const pages: (number | "ellipsis-start" | "ellipsis-end")[] = [];
+                    const delta = 1;
+                    const rangeStart = Math.max(2, currentPage - delta);
+                    const rangeEnd = Math.min(totalPages - 1, currentPage + delta);
+
+                    pages.push(1);
+                    if (rangeStart > 2) pages.push("ellipsis-start");
+                    for (let p = rangeStart; p <= rangeEnd; p++) pages.push(p);
+                    if (rangeEnd < totalPages - 1) pages.push("ellipsis-end");
+                    if (totalPages > 1) pages.push(totalPages);
+
+                    return pages.map((p) => {
+                      if (p === "ellipsis-start" || p === "ellipsis-end") {
+                        return (
+                          <span
+                            key={p}
+                            aria-hidden="true"
+                            style={{
+                              height: 44,
+                              minWidth: 44,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontFamily: "var(--font-sans)",
+                              fontSize: 13,
+                              color: "var(--vii-ink-soft)",
+                            }}
+                          >
+                            …
+                          </span>
+                        );
+                      }
+                      return (
+                        <ViiPageButton
+                          key={p}
+                          onClick={() => handlePage(p)}
+                          active={p === currentPage}
+                          ariaLabel={`Page ${p}`}
+                          ariaCurrent={p === currentPage}
+                        >
+                          {p}
+                        </ViiPageButton>
+                      );
+                    });
+                  })()}
                   <ViiPageButton
                     onClick={() => handlePage(currentPage + 1)}
                     disabled={currentPage === totalPages}
@@ -276,7 +340,14 @@ export function ViiShopClient({
               >
                 {collectionsHeading}
               </h2>
-              <div aria-hidden="true" style={{ height: 1, background: "rgba(30,53,64,0.2)", marginTop: "clamp(16px, 2vw, 22px)" }} />
+              <div
+                aria-hidden="true"
+                style={{
+                  height: 1,
+                  background: "var(--vii-hairline)",
+                  marginTop: "clamp(16px, 2vw, 22px)",
+                }}
+              />
             </div>
 
             <div
@@ -332,7 +403,11 @@ export function ViiShopClient({
                     </h3>
                     <ArrowRight
                       aria-hidden="true"
-                      style={{ width: 15, height: 15, color: "var(--vii-copper)" }}
+                      style={{
+                        width: 15,
+                        height: 15,
+                        color: "var(--vii-copper)",
+                      }}
                       className="transition-transform group-hover:translate-x-1"
                     />
                   </div>
@@ -382,17 +457,17 @@ function ViiPageButton({
       aria-label={ariaLabel}
       aria-current={ariaCurrent ? "page" : undefined}
       style={{
-        height: 38,
-        minWidth: wide ? undefined : 38,
-        padding: wide ? "0 16px" : 0,
+        height: 44,
+        minWidth: wide ? undefined : 44,
+        padding: wide ? "0 18px" : 0,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         borderRadius: "var(--radius)",
         border: active
-          ? "1px solid var(--vii-copper)"
-          : "1px solid rgba(30,53,64,0.25)",
-        background: active ? "var(--vii-copper)" : "transparent",
+          ? "1px solid var(--vii-copper-deep)"
+          : "1px solid var(--vii-hairline-strong)",
+        background: active ? "var(--vii-copper-deep)" : "transparent",
         color: active ? "var(--vii-paper)" : "var(--vii-navy)",
         fontFamily: "var(--font-sans)",
         fontSize: 13,

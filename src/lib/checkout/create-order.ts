@@ -146,8 +146,7 @@ export async function createOrderFromCheckout(
           createErr.code === "P2002" &&
           (createErr.meta?.target as string[] | undefined)?.some(
             (f) =>
-              f === "orderNumber" ||
-              f === "Order_businessId_orderNumber_key",
+              f === "orderNumber" || f === "Order_businessId_orderNumber_key",
           );
         if (attempt < 2 && isOrderNumberConflict) {
           orderNumber = await getNextOrderNumber();

@@ -16,7 +16,6 @@
  *   amountCents — order total in cents as returned by Stripe (`amount_total`);
  *                 converted to dollars before being sent to Umami.
  */
-
 import { useEffect } from "react";
 
 import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";

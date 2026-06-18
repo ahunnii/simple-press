@@ -5,7 +5,9 @@ import { api } from "~/trpc/server";
 import { resolveFields } from "..";
 import { ViiShopClient } from "./vii-shop-client";
 
-export async function ViiShopPage({ business }: DefaultProductsPageTemplateProps) {
+export async function ViiShopPage({
+  business,
+}: DefaultProductsPageTemplateProps) {
   const customFields = business?.siteContent?.customFields as
     | Record<string, unknown>
     | undefined;
@@ -34,7 +36,8 @@ export async function ViiShopPage({ business }: DefaultProductsPageTemplateProps
         style={{
           background: "var(--vii-cream)",
           // Top value clears the fixed header (announcement bar + nav ≈ 106px)
-          padding: "clamp(124px, 13vw, 150px) clamp(24px, 6vw, 96px) clamp(40px, 5vw, 64px)",
+          padding:
+            "clamp(124px, 13vw, 150px) clamp(24px, 6vw, 96px) clamp(40px, 5vw, 64px)",
         }}
       >
         <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>

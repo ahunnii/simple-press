@@ -6,11 +6,7 @@ import { toast } from "sonner";
 
 import { formatDate } from "~/lib/format-date";
 import { api } from "~/trpc/react";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "~/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -106,7 +102,7 @@ export function CustomerPrivacyActions({
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm">
                 <p>This action is irreversible and will:</p>
-                <ul className="list-disc pl-5 space-y-1">
+                <ul className="list-disc space-y-1 pl-5">
                   <li>Scrub name, email, and phone from the customer record</li>
                   <li>Redact all saved shipping addresses</li>
                   <li>

@@ -1,7 +1,7 @@
+import type { Variant } from "./_components/availability-editor";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../../_components/trail-header";
-import type { Variant } from "./_components/availability-editor";
 import { AvailabilityEditor } from "./_components/availability-editor";
 
 export default async function StorefrontAvailabilityPage() {

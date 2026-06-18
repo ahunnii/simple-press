@@ -8,13 +8,13 @@ import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { computeSavingsLabel } from "~/lib/prices";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { Spotlight } from "~/components/ui/spotlight-new";
+import { TrackView } from "~/components/analytics/track-view";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
 
-import { ANALYTICS_EVENTS } from "~/lib/umami/track";
-import { TrackView } from "~/components/analytics/track-view";
 import { DarkTrendProductCard } from "../shared/dark-trend-product-card";
 import { DarkTrendProductActions } from "./dark-trend-product-actions";
 import { DarkTrendProductDetails } from "./dark-trend-product-details";

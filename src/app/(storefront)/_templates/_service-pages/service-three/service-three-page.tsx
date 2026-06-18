@@ -1,8 +1,9 @@
 import Image from "next/image";
 
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
-import { type TiptapJSON, TiptapRenderer } from "~/components/tiptap-renderer";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from ".";
 
@@ -55,7 +56,7 @@ export async function ServiceTemplateThree({
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative h-[70vh] min-h-[360px] w-full overflow-hidden">
         <Image
@@ -70,11 +71,11 @@ export async function ServiceTemplateThree({
         <div className="absolute inset-0 flex items-end pb-14">
           <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
             {subheading && (
-              <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-white/80">
+              <p className="mb-2 text-sm font-semibold tracking-widest text-white/80 uppercase">
                 {subheading}
               </p>
             )}
-            <h1 className="text-4xl font-bold leading-tight text-white drop-shadow-md sm:text-5xl lg:text-6xl">
+            <h1 className="text-4xl leading-tight font-bold text-white drop-shadow-md sm:text-5xl lg:text-6xl">
               {service.name}
             </h1>
             {service.description && (
@@ -118,20 +119,20 @@ export async function ServiceTemplateThree({
 
       {/* ── Pull quote ────────────────────────────────────────────────────── */}
       {quote && (
-        <section className="border-y border-border bg-muted/30 py-16">
+        <section className="border-border bg-muted/30 border-y py-16">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <blockquote className="text-center">
               <span
-                className="text-5xl leading-none text-muted-foreground/40 select-none"
+                className="text-muted-foreground/40 text-5xl leading-none select-none"
                 aria-hidden="true"
               >
                 &ldquo;
               </span>
-              <p className="mt-2 text-xl font-medium italic leading-relaxed text-foreground sm:text-2xl">
+              <p className="text-foreground mt-2 text-xl leading-relaxed font-medium italic sm:text-2xl">
                 {quote}
               </p>
               <span
-                className="mt-2 block text-5xl leading-none text-muted-foreground/40 select-none"
+                className="text-muted-foreground/40 mt-2 block text-5xl leading-none select-none"
                 aria-hidden="true"
               >
                 &rdquo;
@@ -145,7 +146,7 @@ export async function ServiceTemplateThree({
       {items.length > 0 && (
         <section className="py-16 md:py-24">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 className="mb-10 text-2xl font-semibold text-foreground sm:text-3xl">
+            <h2 className="text-foreground mb-10 text-2xl font-semibold sm:text-3xl">
               Our Services
             </h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -172,7 +173,7 @@ function ServiceItemCard({
   embedsEnabled: boolean;
 }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+    <div className="border-border bg-card flex flex-col overflow-hidden rounded-xl border shadow-sm transition-shadow hover:shadow-md">
       {item.image && (
         <div className="relative aspect-video w-full overflow-hidden">
           <Image
@@ -185,21 +186,21 @@ function ServiceItemCard({
         </div>
       )}
       <div className="flex flex-1 flex-col gap-2 p-5">
-        <h3 className="text-base font-semibold text-foreground">{item.name}</h3>
+        <h3 className="text-foreground text-base font-semibold">{item.name}</h3>
         {item.description && (
-          <p className="flex-1 text-sm leading-relaxed text-muted-foreground">
+          <p className="text-muted-foreground flex-1 text-sm leading-relaxed">
             {item.description}
           </p>
         )}
         <div className="mt-2 flex items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex flex-wrap gap-2 text-xs">
             {item.priceLabel && (
-              <span className="rounded-full bg-muted px-2.5 py-0.5 font-medium">
+              <span className="bg-muted rounded-full px-2.5 py-0.5 font-medium">
                 {item.priceLabel}
               </span>
             )}
             {item.durationLabel && (
-              <span className="rounded-full bg-muted px-2.5 py-0.5">
+              <span className="bg-muted rounded-full px-2.5 py-0.5">
                 {item.durationLabel}
               </span>
             )}

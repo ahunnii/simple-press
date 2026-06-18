@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
 type Props = {
@@ -130,9 +131,7 @@ export function ViiDetroitSection({
               {heading}
               {heading && headingAccent ? " " : ""}
               {headingAccent && (
-                <em
-                  style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
-                >
+                <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
                   {headingAccent}
                 </em>
               )}
@@ -210,7 +209,10 @@ export function ViiDetroitSection({
                 }}
               >
                 {ctaText}
-                <ArrowRight aria-hidden="true" style={{ width: 14, height: 14 }} />
+                <ArrowRight
+                  aria-hidden="true"
+                  style={{ width: 14, height: 14 }}
+                />
               </Link>
             </div>
           )}

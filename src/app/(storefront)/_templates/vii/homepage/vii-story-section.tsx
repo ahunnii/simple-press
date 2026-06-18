@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
 type Props = {
@@ -14,7 +15,12 @@ type Props = {
   cards: TemplateListRow[];
 };
 
-export function ViiStorySection({ heading, headingAccent, intro, cards }: Props) {
+export function ViiStorySection({
+  heading,
+  headingAccent,
+  intro,
+  cards,
+}: Props) {
   const [current, setCurrent] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
   const { ref: textRef, visible: textVisible } = useViiReveal(0.1);
@@ -123,9 +129,7 @@ export function ViiStorySection({ heading, headingAccent, intro, cards }: Props)
                   borderRadius: "0.15rem",
                   overflow: "hidden",
                   background: "var(--vii-slate)",
-                  transition: reducedMotion
-                    ? "none"
-                    : "opacity 0.4s ease",
+                  transition: reducedMotion ? "none" : "opacity 0.4s ease",
                 }}
               >
                 {cards.map((card, i) => {

@@ -35,7 +35,9 @@ export function AvailabilityEditor({
 }: Props) {
   const router = useRouter();
 
-  const [maintenanceMode, setMaintenanceMode] = useState(initialMaintenanceMode);
+  const [maintenanceMode, setMaintenanceMode] = useState(
+    initialMaintenanceMode,
+  );
   const [maintenanceVariant, setMaintenanceVariant] = useState<Variant>(
     initialMaintenanceVariant,
   );
@@ -87,7 +89,10 @@ export function AvailabilityEditor({
           {/* Enable toggle */}
           <div className="flex items-center justify-between gap-4">
             <div>
-              <Label htmlFor="maintenance-mode-switch" className="text-sm font-medium">
+              <Label
+                htmlFor="maintenance-mode-switch"
+                className="text-sm font-medium"
+              >
                 Enable maintenance mode for my storefront
               </Label>
               <p className="mt-0.5 text-sm text-gray-500">
@@ -119,7 +124,10 @@ export function AvailabilityEditor({
                       value="maintenance"
                       id="variant-maintenance"
                     />
-                    <Label htmlFor="variant-maintenance" className="cursor-pointer font-normal">
+                    <Label
+                      htmlFor="variant-maintenance"
+                      className="cursor-pointer font-normal"
+                    >
                       Under maintenance
                       <span className="ml-2 text-xs text-gray-500">
                         — site is temporarily unavailable for updates
@@ -131,7 +139,10 @@ export function AvailabilityEditor({
                       value="coming_soon"
                       id="variant-coming-soon"
                     />
-                    <Label htmlFor="variant-coming-soon" className="cursor-pointer font-normal">
+                    <Label
+                      htmlFor="variant-coming-soon"
+                      className="cursor-pointer font-normal"
+                    >
                       Coming soon
                       <span className="ml-2 text-xs text-gray-500">
                         — store is launching soon
@@ -143,7 +154,10 @@ export function AvailabilityEditor({
 
               {/* Custom message */}
               <div className="space-y-2">
-                <Label htmlFor="maintenance-message" className="text-sm font-medium">
+                <Label
+                  htmlFor="maintenance-message"
+                  className="text-sm font-medium"
+                >
                   Custom message{" "}
                   <span className="font-normal text-gray-500">(optional)</span>
                 </Label>
@@ -179,10 +193,7 @@ export function AvailabilityEditor({
           )}
 
           <div className="flex justify-end">
-            <Button
-              onClick={handleSave}
-              disabled={updateMutation.isPending}
-            >
+            <Button onClick={handleSave} disabled={updateMutation.isPending}>
               {updateMutation.isPending ? "Saving..." : "Save changes"}
             </Button>
           </div>

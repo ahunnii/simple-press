@@ -19,7 +19,7 @@ export function MaintenanceScreen({ variant, message, businessName }: Props) {
       <div className="bg-background flex min-h-dvh flex-col items-center justify-center px-4">
         <main className="flex max-w-lg flex-col items-center text-center">
           {businessName && (
-            <p className="text-muted-foreground mb-4 text-sm font-medium uppercase tracking-widest">
+            <p className="text-muted-foreground mb-4 text-sm font-medium tracking-widest uppercase">
               {businessName}
             </p>
           )}

@@ -1,13 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Procedures resolve the tenant from the request host via `next/headers`. Mock it
-// with a mutable host so we can act as different tenants in one process.
-const reqHost = vi.hoisted(() => ({ value: "tenant-a.simplepress.test" }));
-vi.mock("next/headers", () => ({
-  headers: () => Promise.resolve(new Headers({ host: reqHost.value })),
-  cookies: () => Promise.resolve(new Headers()),
-}));
-
 import { createTestCaller } from "../helpers/caller";
 import { resetDb } from "../helpers/db";
 import {
@@ -15,6 +7,14 @@ import {
   createOrder,
   createOwnerUser,
 } from "../helpers/factories";
+
+// Procedures resolve the tenant from the request host via `next/headers`. Mock it
+// with a mutable host so we can act as different tenants in one process.
+const reqHost = vi.hoisted(() => ({ value: "tenant-a.simplepress.test" }));
+vi.mock("next/headers", () => ({
+  headers: () => Promise.resolve(new Headers({ host: reqHost.value })),
+  cookies: () => Promise.resolve(new Headers()),
+}));
 
 describe("multi-tenant isolation", () => {
   beforeEach(resetDb);

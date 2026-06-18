@@ -6,6 +6,7 @@ import { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 
 import type { PoolDeductionResult } from "~/lib/inventory";
+import type { ReservationEntry } from "~/lib/inventory/reservation";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import { getBusinessUrl } from "~/lib/business-url";
 import { createOrderFromCheckout } from "~/lib/checkout/create-order";
@@ -20,10 +21,7 @@ import {
   sendPoolOutOfStockAlert,
 } from "~/lib/email/templates";
 import { deductPoolInventory } from "~/lib/inventory";
-import {
-  releaseReservation,
-  type ReservationEntry,
-} from "~/lib/inventory/reservation";
+import { releaseReservation } from "~/lib/inventory/reservation";
 import { stripeClient } from "~/lib/stripe/client";
 import { normalizeEmail } from "~/lib/utils";
 import { db } from "~/server/db";

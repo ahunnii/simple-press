@@ -8,10 +8,12 @@ import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { computeSavingsLabel } from "~/lib/prices";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
+import { TrackView } from "~/components/analytics/track-view";
 import {
   FadeIn,
   PageTransition,
@@ -21,8 +23,6 @@ import {
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
 
-import { ANALYTICS_EVENTS } from "~/lib/umami/track";
-import { TrackView } from "~/components/analytics/track-view";
 import { BambooHorizontalProductCard } from "../shared/bamboo-product-card";
 import { DEFAULT_LUCIDE_ICONS_WITH_LABELS } from "../shop";
 import { BambooProductActions } from "./bamboo-product-actions";

@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 
+import { ViiOverline } from "../shared/vii-overline";
+
 type Props = {
   heroImage?: string;
   overline: string;
@@ -53,7 +55,7 @@ export function ViiAboutHero({ heroImage, overline, heading }: Props) {
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(to top, rgba(30,53,64,0.82) 0%, rgba(30,53,64,0.3) 55%, rgba(30,53,64,0.12) 100%)",
+            "linear-gradient(to top, color-mix(in srgb, var(--vii-navy) 82%, transparent) 0%, color-mix(in srgb, var(--vii-navy) 30%, transparent) 55%, color-mix(in srgb, var(--vii-navy) 12%, transparent) 100%)",
           zIndex: 1,
         }}
       />
@@ -68,18 +70,9 @@ export function ViiAboutHero({ heroImage, overline, heading }: Props) {
         }}
       >
         {overline && (
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 11,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "var(--vii-tan)",
-              marginBottom: 16,
-            }}
-          >
+          <ViiOverline align="left" tone="dark" style={{ marginBottom: 16 }}>
             {overline}
-          </p>
+          </ViiOverline>
         )}
 
         <h1

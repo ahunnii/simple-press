@@ -7,15 +7,15 @@ import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
-import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
-import { ProductDetailsAdditionalInfoAccordion } from "~/app/(storefront)/_components/product-page/additional-info-accordion";
-
-import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { TrackView } from "~/components/analytics/track-view";
+import { ProductDetailsAdditionalInfoAccordion } from "~/app/(storefront)/_components/product-page/additional-info-accordion";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+
 import { ElegantProductCard } from "../shared/elegant-product-card";
 import { ElegantProductActions } from "./elegant-product-actions";
 

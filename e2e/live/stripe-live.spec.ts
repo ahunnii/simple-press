@@ -48,7 +48,9 @@ test("default: real Stripe checkout → paid → webhook creates order", async (
   // Real UI: product page → add to cart → checkout → submit (no stub).
   await page.goto(`${base}/shop/${tenant.productSlug}`);
   await page.getByRole("button", { name: "Add to cart" }).click();
-  await expect(page.getByRole("button", { name: "Added to bag" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Added to bag" }),
+  ).toBeVisible();
 
   await page.goto(`${base}/checkout`);
   await fillCheckout(page, SAMPLE_CHECKOUT);
@@ -63,13 +65,19 @@ test("default: real Stripe checkout → paid → webhook creates order", async (
   // behind a styled label → force-click), then wait for the card field to render.
   const cardRadio = page.getByRole("radio", { name: /^card$/i });
   if ((await cardRadio.count()) > 0) {
-    await cardRadio.first().click({ force: true }).catch(() => undefined);
+    await cardRadio
+      .first()
+      .click({ force: true })
+      .catch(() => undefined);
   }
 
   // Replace the prefilled phone (Stripe flags the seed's 555 number as invalid).
   const phone = page.getByRole("textbox", { name: /phone/i });
   if ((await phone.count()) > 0) {
-    await phone.first().fill("+14155550123").catch(() => undefined);
+    await phone
+      .first()
+      .fill("+14155550123")
+      .catch(() => undefined);
   }
 
   // Card fields — same-origin in the main frame, else a Stripe Elements iframe.

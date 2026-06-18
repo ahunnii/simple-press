@@ -30,8 +30,7 @@ export const viiSanctuaryFields: TemplateField[] = [
   {
     key: "vii-sanctuary.hero-image",
     label: "Hero Image",
-    description:
-      "Full-viewport hero image. Used when no video is configured.",
+    description: "Full-viewport hero image. Used when no video is configured.",
     type: "image",
     page: "homepage",
     group: "vii-sanctuary.hero",
@@ -465,8 +464,7 @@ export const viiAtelierFields: TemplateField[] = [
     page: "homepage",
     group: "vii-atelier.quote",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Every skin has a story. We listen before we touch.",
+    defaultValue: "Every skin has a story. We listen before we touch.",
     placeholder: "A brand statement or meaningful quote…",
   },
   {

@@ -189,14 +189,19 @@ async function main() {
       } else {
         // Dry-run: still tally what would change
         for (const dup of duplicates) {
-          const [ordersCount, addressesCount, testimonialsCount, invitesCount, reviewsCount] =
-            await Promise.all([
-              db.order.count({ where: { customerId: dup.id } }),
-              db.shippingAddress.count({ where: { customerId: dup.id } }),
-              db.testimonial.count({ where: { customerId: dup.id } }),
-              db.testimonialInvite.count({ where: { customerId: dup.id } }),
-              db.productReview.count({ where: { customerId: dup.id } }),
-            ]);
+          const [
+            ordersCount,
+            addressesCount,
+            testimonialsCount,
+            invitesCount,
+            reviewsCount,
+          ] = await Promise.all([
+            db.order.count({ where: { customerId: dup.id } }),
+            db.shippingAddress.count({ where: { customerId: dup.id } }),
+            db.testimonial.count({ where: { customerId: dup.id } }),
+            db.testimonialInvite.count({ where: { customerId: dup.id } }),
+            db.productReview.count({ where: { customerId: dup.id } }),
+          ]);
           stats.ordersReassigned += ordersCount;
           stats.addressesReassigned += addressesCount;
           stats.testimonialsReassigned += testimonialsCount;
@@ -219,7 +224,9 @@ async function main() {
   console.log(`Orders reassigned:            ${stats.ordersReassigned}`);
   console.log(`Addresses reassigned:         ${stats.addressesReassigned}`);
   console.log(`Testimonials reassigned:      ${stats.testimonialsReassigned}`);
-  console.log(`TestimonialInvites reassigned:${stats.testimonialInvitesReassigned}`);
+  console.log(
+    `TestimonialInvites reassigned:${stats.testimonialInvitesReassigned}`,
+  );
   console.log(`Reviews reassigned:           ${stats.reviewsReassigned}`);
 
   if (DRY_RUN) {

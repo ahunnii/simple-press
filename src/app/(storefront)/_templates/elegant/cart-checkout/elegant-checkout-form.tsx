@@ -46,7 +46,8 @@ export function ElegantCheckoutForm({ business }: Props) {
         errors["address-line1"] = "Street address is required";
       if (!f.city.trim()) errors.city = "City is required";
       if (!f.state.trim()) errors.state = "State or province is required";
-      if (!f.postalCode.trim()) errors.postal = "ZIP or postal code is required";
+      if (!f.postalCode.trim())
+        errors.postal = "ZIP or postal code is required";
     }
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);

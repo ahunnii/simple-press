@@ -15,7 +15,6 @@
  *     data={{ productId: product.id }}
  *   />
  */
-
 import { useEffect } from "react";
 
 import { track } from "~/lib/umami/track";

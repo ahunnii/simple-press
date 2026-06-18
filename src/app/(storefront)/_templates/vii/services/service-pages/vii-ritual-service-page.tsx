@@ -16,16 +16,16 @@
  *    Each step contains the item name, duration/price, description, and Book.
  * 4. Full-bleed navy closing CTA with background image.
  */
-
 import Image from "next/image";
 
-import { ServiceBookingDialog } from "~/components/service-booking-dialog";
-import { type TiptapJSON, TiptapRenderer } from "~/components/tiptap-renderer";
+import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { PageTransition } from "~/components/page-animations";
+import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
+
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
-
-import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import { resolveRitualFields } from "./fields";
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -272,7 +272,7 @@ function RitualStep({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-ritual-step${isReversed ? " is-reversed" : ""}${visible ? " is-visible" : ""}`}
+      className={`vii-reveal vii-ritual-step${isReversed ? "is-reversed" : ""}${visible ? " is-visible" : ""}`}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",

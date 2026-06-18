@@ -3,7 +3,9 @@
 import Image from "next/image";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
   overline: string;
@@ -135,18 +137,9 @@ export function ViiAboutTeam({ overline, heading, intro, members }: Props) {
           }}
         >
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--vii-ink-soft)",
-                marginBottom: 14,
-              }}
-            >
+            <ViiOverline align="center" tone="light" style={{ marginBottom: 14 }}>
               {overline}
-            </p>
+            </ViiOverline>
           )}
 
           <h2
@@ -182,7 +175,7 @@ export function ViiAboutTeam({ overline, heading, intro, members }: Props) {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
             gap: "clamp(28px, 4vw, 48px)",
           }}
         >

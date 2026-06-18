@@ -135,8 +135,7 @@ export function ProductsTable({ products }: Props) {
     },
   });
 
-  const bulkPending =
-    bulkSetPublished.isPending || bulkDelete.isPending;
+  const bulkPending = bulkSetPublished.isPending || bulkDelete.isPending;
 
   return (
     <div className="space-y-2">
@@ -193,7 +192,13 @@ export function ProductsTable({ products }: Props) {
               <tr>
                 <th className="px-4 py-3 text-left">
                   <Checkbox
-                    checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                    checked={
+                      allSelected
+                        ? true
+                        : someSelected
+                          ? "indeterminate"
+                          : false
+                    }
                     onCheckedChange={toggleAll}
                     aria-label="Select all products on this page"
                   />
@@ -358,9 +363,13 @@ export function ProductsTable({ products }: Props) {
       <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {selectedCount} product{selectedCount !== 1 ? "s" : ""}?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete {selectedCount} product{selectedCount !== 1 ? "s" : ""}?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete {selectedCount} selected product{selectedCount !== 1 ? "s" : ""} and all associated images. This action cannot be undone.
+              This will permanently delete {selectedCount} selected product
+              {selectedCount !== 1 ? "s" : ""} and all associated images. This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

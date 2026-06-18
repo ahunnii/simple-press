@@ -1,8 +1,8 @@
 import "./test-env";
 import "@testing-library/jest-dom/vitest";
 
-import { afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
+import { afterEach } from "vitest";
 
 // happy-dom + Node can leave the global `localStorage` without working methods.
 // Install a single in-memory Storage shared by `globalThis` and `window` so both

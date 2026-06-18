@@ -50,7 +50,8 @@ const shopIntroData: TemplateField[] = [
   {
     key: "vii.shop.collections-overline",
     label: "Collections Strip Overline",
-    description: "Small caps label above the collections strip at the bottom of the shop page.",
+    description:
+      "Small caps label above the collections strip at the bottom of the shop page.",
     type: "text",
     page: "shop",
     group: "shop.intro",

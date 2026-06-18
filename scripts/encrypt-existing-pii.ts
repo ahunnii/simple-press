@@ -21,8 +21,9 @@
  *   APPLY=1 pnpm tsx scripts/encrypt-existing-pii.ts  # same as --apply
  */
 
-import { Prisma, PrismaClient } from "../generated/prisma";
 import { fieldEncryptionExtension } from "prisma-field-encryption";
+
+import { Prisma, PrismaClient } from "../generated/prisma";
 
 // ---------------------------------------------------------------------------
 // Bootstrap: we need the encryption key before env validation runs, so we
@@ -32,9 +33,7 @@ import { fieldEncryptionExtension } from "prisma-field-encryption";
 
 const encryptionKey = process.env.PRISMA_FIELD_ENCRYPTION_KEY;
 if (!encryptionKey) {
-  console.error(
-    "ERROR: PRISMA_FIELD_ENCRYPTION_KEY is not set. Aborting.",
-  );
+  console.error("ERROR: PRISMA_FIELD_ENCRYPTION_KEY is not set. Aborting.");
   process.exit(1);
 }
 
@@ -89,9 +88,7 @@ async function encryptCustomers(): Promise<{
       continue;
     }
 
-    console.log(
-      `  [Customer] id=${row.id} — phone needs encryption`,
-    );
+    console.log(`  [Customer] id=${row.id} — phone needs encryption`);
 
     if (!DRY_RUN) {
       // Read the decrypted value via the ORM (extension decrypts on read).
@@ -152,9 +149,7 @@ async function encryptShippingAddresses(): Promise<{
       continue;
     }
 
-    console.log(
-      `  [ShippingAddress] id=${row.id} — needs encryption`,
-    );
+    console.log(`  [ShippingAddress] id=${row.id} — needs encryption`);
 
     if (!DRY_RUN) {
       // Read via ORM (extension decrypts) so we pass plaintext back in.
@@ -214,9 +209,7 @@ async function encryptOrders(): Promise<{
       continue;
     }
 
-    console.log(
-      `  [Order] id=${row.id} — customerPhone needs encryption`,
-    );
+    console.log(`  [Order] id=${row.id} — customerPhone needs encryption`);
 
     if (!DRY_RUN) {
       const order = await db.order.findUnique({

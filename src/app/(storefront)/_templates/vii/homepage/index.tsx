@@ -36,8 +36,7 @@ const homepageHeroData: TemplateField[] = [
   {
     key: "vii.homepage.hero-heading",
     label: "Hero Body Copy",
-    description:
-      "The main paragraph text overlaid on the hero image or video.",
+    description: "The main paragraph text overlaid on the hero image or video.",
     type: "textarea",
     page: "homepage",
     group: "homepage.hero",
@@ -242,8 +241,7 @@ const homepageStoryData: TemplateField[] = [
   {
     key: "vii.homepage.story-heading-accent",
     label: "Studio Heading Accent Word",
-    description:
-      "The italic copper accent word completing the studio heading.",
+    description: "The italic copper accent word completing the studio heading.",
     type: "text",
     page: "homepage",
     group: "homepage.story",
@@ -264,8 +262,7 @@ const homepageStoryData: TemplateField[] = [
   {
     key: "vii.homepage.story-cards",
     label: "Studio Photos",
-    description:
-      "Photos shown in the studio image carousel. Up to 6 cards.",
+    description: "Photos shown in the studio image carousel. Up to 6 cards.",
     type: "list",
     page: "homepage",
     group: "homepage.story",
@@ -582,6 +579,69 @@ const homepageInstagramData: TemplateField[] = [
     page: "homepage",
     group: "homepage.instagram",
     gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.instagram-embed",
+    label: "Embed Below Instagram",
+    description:
+      "Optional embed (e.g. an Instagram feed widget, map, or video) shown directly beneath the Instagram strip. Paste an embed URL or <iframe> snippet.",
+    type: "iframe",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.instagram-feed-url",
+    label: "Instagram Embed (native)",
+    description:
+      "Paste a link to an Instagram profile, post, or reel to embed it natively below the photo strip using Instagram's official embed card. This is separate from the generic embed field above — it renders Instagram's own iframe rather than a sandboxed iframe, so interactions like liking or following work as expected.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.instagram-feed-width",
+    label: "Native Embed Width (px)",
+    description:
+      "Maximum width of the native Instagram embed card. Instagram allows 326–540px; values outside that range are clamped. Leave blank for the default (540).",
+    type: "number",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-1",
+    placeholder: "540",
+  },
+  {
+    key: "vii.homepage.instagram-feed-align",
+    label: "Center the Native Embed",
+    description:
+      "When on, the native Instagram card is centered in its section. Turn off to align it to the left.",
+    type: "boolean",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
+  {
+    key: "vii.homepage.instagram-feed-frame",
+    label: "Frame the Native Embed",
+    description:
+      "When on, wraps the native Instagram card in a bordered, rounded card with a soft shadow.",
+    type: "boolean",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
+  {
+    key: "vii.homepage.instagram-feed-bg",
+    label: "Native Embed Background",
+    description:
+      "Background color of the section behind the native Instagram embed. Leave blank to use the template's cream background.",
+    type: "color",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-1",
   },
 ];
 

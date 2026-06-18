@@ -7,13 +7,13 @@ import { ArrowLeft } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
-import { api } from "~/trpc/react";
-import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
-import { useProduct } from "~/hooks/use-product";
-import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
-
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
+import { api } from "~/trpc/react";
+import { useProduct } from "~/hooks/use-product";
 import { TrackView } from "~/components/analytics/track-view";
+import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+
 import { ModernProductCard } from "../shared/modern-product-card";
 import { ModernProductActions } from "./modern-product-actions";
 

@@ -4,8 +4,8 @@ import Link from "next/link";
 import type { DefaultFooterTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api } from "~/trpc/server";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
+import { InstagramIcon } from "~/components/icons/instagram-icon";
 
 import { resolveFields } from "../index";
 

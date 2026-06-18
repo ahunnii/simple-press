@@ -14,7 +14,14 @@
 import type { Content } from "@tiptap/react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useUploadFile } from "@better-upload/client";
-import { ChevronDown, ChevronUp, Plus, Trash, Trash2, Upload } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Trash,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import type {
@@ -32,7 +39,10 @@ import {
   getLucideTemplateIcon,
   TEMPLATE_LUCIDE_ICON_NAMES,
 } from "~/lib/lucide-template-icons";
-import { parseTemplateIframeValue, parseTemplateListRows } from "~/lib/template-fields";
+import {
+  parseTemplateIframeValue,
+  parseTemplateListRows,
+} from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";

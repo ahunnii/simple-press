@@ -8,11 +8,12 @@ import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
-import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import { TrackView } from "~/components/analytics/track-view";
 import {
   FadeIn,
   PageTransition,
@@ -20,9 +21,8 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
-import { ANALYTICS_EVENTS } from "~/lib/umami/track";
-import { TrackView } from "~/components/analytics/track-view";
 import { NoiseProductCard } from "../shared/noise-product-card";
 import { NoiseProductActions } from "./noise-product-actions";
 

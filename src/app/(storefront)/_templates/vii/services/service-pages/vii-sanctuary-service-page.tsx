@@ -12,18 +12,18 @@
  *    duration/price chips, description, and a copper "Book" CTA.
  * 5. Closing contact CTA section (reuses ViiContactCtaSection).
  */
-
 import { useState } from "react";
 import Image from "next/image";
 
+import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { parseTemplateListRows } from "~/lib/template-fields";
-import { ServiceBookingDialog } from "~/components/service-booking-dialog";
-import { type TiptapJSON, TiptapRenderer } from "~/components/tiptap-renderer";
 import { PageTransition } from "~/components/page-animations";
+import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
+
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
-
-import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import { resolveSanctuaryFields } from "./fields";
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -728,9 +728,7 @@ function TreatmentMenu({
             {menuHeading || (
               <>
                 The{" "}
-                <em
-                  style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
-                >
+                <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
                   treatment
                 </em>{" "}
                 menu

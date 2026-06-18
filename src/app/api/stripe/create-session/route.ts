@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
+import type { ReservationEntry } from "~/lib/inventory/reservation";
 import { env } from "~/env";
 import { computeSubtotalCents } from "~/lib/checkout/pricing";
 import {
@@ -11,12 +12,11 @@ import {
 } from "~/lib/checkout/validate-cart";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
-import { getPlatformMaintenance } from "~/lib/maintenance";
 import {
   releaseReservation,
   reserveInventory,
-  type ReservationEntry,
 } from "~/lib/inventory/reservation";
+import { getPlatformMaintenance } from "~/lib/maintenance";
 import { checkoutLimiter, getClientIp } from "~/lib/rate-limit";
 import {
   calculateShipping,
@@ -96,7 +96,10 @@ export async function POST(req: NextRequest) {
     const platformMaintenance = await getPlatformMaintenance();
     if (platformMaintenance.active || business.maintenanceMode) {
       return NextResponse.json(
-        { error: "This store is temporarily unavailable. Please try again later." },
+        {
+          error:
+            "This store is temporarily unavailable. Please try again later.",
+        },
         { status: 503 },
       );
     }
@@ -124,7 +127,10 @@ export async function POST(req: NextRequest) {
       }
     } catch (sweeperErr) {
       // Non-fatal — availability check will be slightly conservative at worst
-      console.warn("[create-session] Stale reservation sweeper error:", sweeperErr);
+      console.warn(
+        "[create-session] Stale reservation sweeper error:",
+        sweeperErr,
+      );
     }
 
     // Validate cart: all items must exist, be published, and be in stock
@@ -275,7 +281,11 @@ export async function POST(req: NextRequest) {
 
     // Always use server-fetched prices for subtotal — never trust client-supplied amounts.
     // This ensures discounts and free-shipping thresholds are computed against real prices.
-    const subtotalCents = computeSubtotalCents(itemList, variantMap, productMap);
+    const subtotalCents = computeSubtotalCents(
+      itemList,
+      variantMap,
+      productMap,
+    );
 
     const rawDiscountId =
       typeof discountCodeId === "string" && discountCodeId.trim() !== ""
@@ -521,7 +531,10 @@ export async function POST(req: NextRequest) {
       const qty = Number(item.quantity) || 1;
       if (item.variantId) {
         const variant = variantMap.get(item.variantId);
-        if (variant?.product.trackInventory && !variant.product.allowBackorders) {
+        if (
+          variant?.product.trackInventory &&
+          !variant.product.allowBackorders
+        ) {
           reservationEntries.push({ variantId: item.variantId, qty });
         }
       } else {
@@ -613,10 +626,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Align Stripe session expiry with our reservation window.
-    sessionParams.expires_at = Math.floor(Date.now() / 1000) + RESERVATION_SECONDS;
+    sessionParams.expires_at =
+      Math.floor(Date.now() / 1000) + RESERVATION_SECONDS;
 
     // Create Stripe Checkout session
-    let session: Awaited<ReturnType<typeof stripeClient.checkout.sessions.create>>;
+    let session: Awaited<
+      ReturnType<typeof stripeClient.checkout.sessions.create>
+    >;
     try {
       session = await stripeClient.checkout.sessions.create(sessionParams, {
         stripeAccount: business.stripeAccountId, // Connect to store's Stripe account

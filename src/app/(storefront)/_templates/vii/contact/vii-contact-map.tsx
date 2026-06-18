@@ -48,7 +48,10 @@ export function ViiContactMap({ heading, mapImage, mapsUrl }: Props) {
           rel="noopener noreferrer"
           aria-label="View our location on Google Maps (opens in a new tab)"
           className="group relative block aspect-[21/9] w-full overflow-hidden"
-          style={{ borderRadius: "var(--radius)", background: "var(--vii-slate)" }}
+          style={{
+            borderRadius: "var(--radius)",
+            background: "var(--vii-slate)",
+          }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

@@ -1,7 +1,12 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
-import { parseTemplateListRows } from "~/lib/template-fields";
+import {
+  parseTemplateIframeValue,
+  parseTemplateListRows,
+} from "~/lib/template-fields";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
+import { EmbedFrame } from "~/components/embed-frame";
+import { InstagramEmbed } from "~/components/instagram-embed";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -107,6 +112,11 @@ export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
     // Instagram
     "vii.homepage.instagram-handle",
     "vii.homepage.instagram-gallery",
+    "vii.homepage.instagram-feed-url",
+    "vii.homepage.instagram-feed-width",
+    "vii.homepage.instagram-feed-align",
+    "vii.homepage.instagram-feed-frame",
+    "vii.homepage.instagram-feed-bg",
   ]);
 
   // ── Parse list fields from raw customFields ───────────────────────────────

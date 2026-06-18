@@ -33,7 +33,8 @@ const pollenSpaFields: TemplateField[] = [
   {
     key: "pollen-spa.intro-label",
     label: "Intro Label",
-    description: "Small uppercase label above the intro heading (e.g. 'Our Approach')",
+    description:
+      "Small uppercase label above the intro heading (e.g. 'Our Approach')",
     type: "text",
     page: "homepage",
     group: "pollen-spa.intro",
@@ -66,7 +67,8 @@ const pollenSpaFields: TemplateField[] = [
   {
     key: "pollen-spa.intro-accent-image",
     label: "Intro Accent Image",
-    description: "Supporting image shown beside the intro text (portrait orientation works best)",
+    description:
+      "Supporting image shown beside the intro text (portrait orientation works best)",
     type: "image",
     page: "homepage",
     group: "pollen-spa.intro",
@@ -134,14 +136,16 @@ const pollenSpaFieldGroups: TemplateFieldGroup[] = [
   {
     id: "pollen-spa.intro",
     title: "Introduction",
-    description: "Two-column intro section: label, heading, rich-text body, and accent image",
+    description:
+      "Two-column intro section: label, heading, rich-text body, and accent image",
     icon: "📝",
     columns: 1,
   },
   {
     id: "pollen-spa.items",
     title: "Services Grid",
-    description: "Heading and sub-heading above the grid of individual service items",
+    description:
+      "Heading and sub-heading above the grid of individual service items",
     icon: "🌿",
     columns: 1,
   },
@@ -296,7 +300,8 @@ const pollenListFields: TemplateField[] = [
   {
     key: "pollen-list.accent-color",
     label: "Accent Stripe Color",
-    description: "Color of the thin decorative stripe above the page title (hex)",
+    description:
+      "Color of the thin decorative stripe above the page title (hex)",
     type: "color",
     page: "homepage",
     group: "pollen-list.hero",
@@ -331,7 +336,8 @@ const pollenListFields: TemplateField[] = [
   {
     key: "pollen-list.intro-body",
     label: "Intro Body",
-    description: "Rich-text description centred above the alternating item rows",
+    description:
+      "Rich-text description centred above the alternating item rows",
     type: "richtext",
     page: "homepage",
     group: "pollen-list.intro",

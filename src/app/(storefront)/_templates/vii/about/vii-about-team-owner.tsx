@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
   overline: string;
@@ -50,18 +51,9 @@ export function ViiAboutTeamOwner({
           className={`vii-reveal${textVisible ? " is-visible" : ""}`}
         >
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--vii-ink-soft)",
-                marginBottom: 14,
-              }}
-            >
+            <ViiOverline align="left" tone="light" style={{ marginBottom: 14 }}>
               {overline}
-            </p>
+            </ViiOverline>
           )}
 
           <h2

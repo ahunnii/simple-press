@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
 import type { BrowserContext, Locator, Page } from "@playwright/test";
 
-import { SEED_FILE, type SeedTenant } from "./global-setup";
+import type { SeedTenant } from "./global-setup";
+
+import { SEED_FILE } from "./global-setup";
 
 let cache: SeedTenant[] | null = null;
 

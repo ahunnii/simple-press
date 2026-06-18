@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { useCart } from "~/providers/cart-context";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 type VariantSelectorProps = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -268,7 +268,9 @@ export function ElegantVariantSelector({
                 : "var(--el-paper, #fbf8f2)",
             border: "none",
             cursor:
-              !selectedVariant || effectiveMax === 0 ? "not-allowed" : "pointer",
+              !selectedVariant || effectiveMax === 0
+                ? "not-allowed"
+                : "pointer",
             fontFamily: "var(--font-sans, sans-serif)",
             transition: `background 0.4s ${ease}`,
           }}

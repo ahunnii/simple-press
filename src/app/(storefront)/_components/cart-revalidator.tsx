@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-import { useCart } from "~/providers/cart-context";
 import { api } from "~/trpc/react";
+import { useCart } from "~/providers/cart-context";
 
 /**
  * Invisible component that reconciles the localStorage cart against live

@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { ImageIcon, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
-import type { FormProductImage, FormVariant, FormVariantOption } from "../_validators/schema";
+import type {
+  FormProductImage,
+  FormVariant,
+  FormVariantOption,
+} from "../_validators/schema";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -74,7 +78,10 @@ export function VariantManager({
 
   // Regen-confirm dialog state
   const [showRegenConfirm, setShowRegenConfirm] = useState(false);
-  const pendingRegen = useRef<{ merged: FormVariant[]; droppedCount: number } | null>(null);
+  const pendingRegen = useRef<{
+    merged: FormVariant[];
+    droppedCount: number;
+  } | null>(null);
 
   // Reset selection when the number of variants changes
   useEffect(() => {
@@ -194,12 +201,17 @@ export function VariantManager({
 
     // 3. Require at least one active option.
     if (activeOptions.length === 0) {
-      toast.error("Add at least one option with a name and at least one value.");
+      toast.error(
+        "Add at least one option with a name and at least one value.",
+      );
       return;
     }
 
     // 4. Cap combinations.
-    const count = activeOptions.reduce((acc, opt) => acc * opt.values.length, 1);
+    const count = activeOptions.reduce(
+      (acc, opt) => acc * opt.values.length,
+      1,
+    );
     if (count > MAX_VARIANTS) {
       toast.error(
         `That's ${count} combinations — the maximum is ${MAX_VARIANTS}. Reduce your options or values.`,
@@ -218,7 +230,9 @@ export function VariantManager({
     });
 
     // 5. Warn before dropping existing variants.
-    const newOptionsKeys = new Set(merged.map((v) => JSON.stringify(v.options)));
+    const newOptionsKeys = new Set(
+      merged.map((v) => JSON.stringify(v.options)),
+    );
     const droppedCount = variants.filter(
       (v) => !newOptionsKeys.has(JSON.stringify(v.options)),
     ).length;
@@ -688,8 +702,8 @@ export function VariantManager({
           <AlertDialogHeader>
             <AlertDialogTitle>Remove existing variants?</AlertDialogTitle>
             <AlertDialogDescription>
-              Regenerating will remove{" "}
-              {pendingRegen.current?.droppedCount ?? 0} variant
+              Regenerating will remove {pendingRegen.current?.droppedCount ?? 0}{" "}
+              variant
               {(pendingRegen.current?.droppedCount ?? 0) !== 1 ? "s" : ""} that
               no longer match these options. Any custom prices, SKUs, or stock
               values on those variants will be lost. Continue?

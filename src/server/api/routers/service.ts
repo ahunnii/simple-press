@@ -352,7 +352,9 @@ export const serviceRouter = createTRPCRouter({
         data: {
           ...rest,
           ...(safeSrc !== undefined ? { bookingEmbedSrc: safeSrc } : {}),
-          ...(safeHeight !== undefined ? { bookingEmbedHeight: safeHeight } : {}),
+          ...(safeHeight !== undefined
+            ? { bookingEmbedHeight: safeHeight }
+            : {}),
         },
       });
 

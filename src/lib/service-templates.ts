@@ -11,20 +11,18 @@
  */
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { groupFieldsByGroup } from "~/lib/template-fields";
-
 import {
   serviceOneFieldGroups,
   serviceOneFields,
 } from "~/app/(storefront)/_templates/_service-pages/service-one";
 import {
-  serviceTwoFieldGroups,
-  serviceTwoFields,
-} from "~/app/(storefront)/_templates/_service-pages/service-two";
-import {
   serviceThreeFieldGroups,
   serviceThreeFields,
 } from "~/app/(storefront)/_templates/_service-pages/service-three";
-
+import {
+  serviceTwoFieldGroups,
+  serviceTwoFields,
+} from "~/app/(storefront)/_templates/_service-pages/service-two";
 import { pollenServiceTemplateDefs } from "~/app/(storefront)/_templates/pollen/services/service-pages/fields";
 import { viiServiceTemplateDefs } from "~/app/(storefront)/_templates/vii/services/service-pages/fields";
 

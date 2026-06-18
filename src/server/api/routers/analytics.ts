@@ -41,88 +41,106 @@ export const analyticsRouter = createTRPCRouter({
   /**
    * overview — aggregate stats + active visitor count + daily pageviews series.
    */
-  overview: ownerAdminProcedure.input(rangeSchema).query(async ({ ctx, input }) => {
-    const { businessId } = ctx;
+  overview: ownerAdminProcedure
+    .input(rangeSchema)
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
 
-    const business = await ctx.db.business.findFirst({
-      where: { id: businessId },
-      select: { umamiWebsiteId: true, umamiEnabled: true },
-    });
+      const business = await ctx.db.business.findFirst({
+        where: { id: businessId },
+        select: { umamiWebsiteId: true, umamiEnabled: true },
+      });
 
-    if (!business?.umamiEnabled || !business.umamiWebsiteId) {
-      return NOT_CONFIGURED;
-    }
+      if (!business?.umamiEnabled || !business.umamiWebsiteId) {
+        return NOT_CONFIGURED;
+      }
 
-    const { startAt, endAt } = resolveRange(input.range);
-    const websiteId = business.umamiWebsiteId;
+      const { startAt, endAt } = resolveRange(input.range);
+      const websiteId = business.umamiWebsiteId;
 
-    const [stats, active, pageviewsSeries] = await Promise.all([
-      getStats({ websiteId, startAt, endAt }),
-      getActive({ websiteId }),
-      getPageviewsSeries({ websiteId, startAt, endAt, unit: "day", timezone: "UTC" }),
-    ]);
+      const [stats, active, pageviewsSeries] = await Promise.all([
+        getStats({ websiteId, startAt, endAt }),
+        getActive({ websiteId }),
+        getPageviewsSeries({
+          websiteId,
+          startAt,
+          endAt,
+          unit: "day",
+          timezone: "UTC",
+        }),
+      ]);
 
-    return {
-      configured: true as const,
-      stats,
-      active,
-      pageviewsSeries,
-    };
-  }),
+      return {
+        configured: true as const,
+        stats,
+        active,
+        pageviewsSeries,
+      };
+    }),
 
   /**
    * topPages — top URLs by pageview count.
    */
-  topPages: ownerAdminProcedure.input(rangeSchema).query(async ({ ctx, input }) => {
-    const { businessId } = ctx;
+  topPages: ownerAdminProcedure
+    .input(rangeSchema)
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
 
-    const business = await ctx.db.business.findFirst({
-      where: { id: businessId },
-      select: { umamiWebsiteId: true, umamiEnabled: true },
-    });
+      const business = await ctx.db.business.findFirst({
+        where: { id: businessId },
+        select: { umamiWebsiteId: true, umamiEnabled: true },
+      });
 
-    if (!business?.umamiEnabled || !business.umamiWebsiteId) {
-      return NOT_CONFIGURED;
-    }
+      if (!business?.umamiEnabled || !business.umamiWebsiteId) {
+        return NOT_CONFIGURED;
+      }
 
-    const { startAt, endAt } = resolveRange(input.range);
-    const websiteId = business.umamiWebsiteId;
+      const { startAt, endAt } = resolveRange(input.range);
+      const websiteId = business.umamiWebsiteId;
 
-    // Umami's metrics API expects the page-path column as "path" (not "url");
-    // passing "url" returns 400 bad-request on current Umami versions.
-    const rows = await getMetrics({ websiteId, startAt, endAt, type: "path", limit: 10 });
+      // Umami's metrics API expects the page-path column as "path" (not "url");
+      // passing "url" returns 400 bad-request on current Umami versions.
+      const rows = await getMetrics({
+        websiteId,
+        startAt,
+        endAt,
+        type: "path",
+        limit: 10,
+      });
 
-    return { configured: true as const, rows };
-  }),
+      return { configured: true as const, rows };
+    }),
 
   /**
    * topReferrers — top referrer domains.
    */
-  topReferrers: ownerAdminProcedure.input(rangeSchema).query(async ({ ctx, input }) => {
-    const { businessId } = ctx;
+  topReferrers: ownerAdminProcedure
+    .input(rangeSchema)
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
 
-    const business = await ctx.db.business.findFirst({
-      where: { id: businessId },
-      select: { umamiWebsiteId: true, umamiEnabled: true },
-    });
+      const business = await ctx.db.business.findFirst({
+        where: { id: businessId },
+        select: { umamiWebsiteId: true, umamiEnabled: true },
+      });
 
-    if (!business?.umamiEnabled || !business.umamiWebsiteId) {
-      return NOT_CONFIGURED;
-    }
+      if (!business?.umamiEnabled || !business.umamiWebsiteId) {
+        return NOT_CONFIGURED;
+      }
 
-    const { startAt, endAt } = resolveRange(input.range);
-    const websiteId = business.umamiWebsiteId;
+      const { startAt, endAt } = resolveRange(input.range);
+      const websiteId = business.umamiWebsiteId;
 
-    const rows = await getMetrics({
-      websiteId,
-      startAt,
-      endAt,
-      type: "referrer",
-      limit: 10,
-    });
+      const rows = await getMetrics({
+        websiteId,
+        startAt,
+        endAt,
+        type: "referrer",
+        limit: 10,
+      });
 
-    return { configured: true as const, rows };
-  }),
+      return { configured: true as const, rows };
+    }),
 
   /**
    * events — custom commerce event counts (add-to-cart, begin-checkout, product-view).
@@ -130,44 +148,46 @@ export const analyticsRouter = createTRPCRouter({
    * Uses getMetrics with type="event" to get per-event-name counts.
    * websiteId is always derived server-side from ctx.businessId (IDOR guardrail).
    */
-  events: ownerAdminProcedure.input(rangeSchema).query(async ({ ctx, input }) => {
-    const { businessId } = ctx;
+  events: ownerAdminProcedure
+    .input(rangeSchema)
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
 
-    const business = await ctx.db.business.findFirst({
-      where: { id: businessId },
-      select: { umamiWebsiteId: true, umamiEnabled: true },
-    });
+      const business = await ctx.db.business.findFirst({
+        where: { id: businessId },
+        select: { umamiWebsiteId: true, umamiEnabled: true },
+      });
 
-    if (!business?.umamiEnabled || !business.umamiWebsiteId) {
-      return NOT_CONFIGURED;
-    }
+      if (!business?.umamiEnabled || !business.umamiWebsiteId) {
+        return NOT_CONFIGURED;
+      }
 
-    const { startAt, endAt } = resolveRange(input.range);
-    const websiteId = business.umamiWebsiteId;
+      const { startAt, endAt } = resolveRange(input.range);
+      const websiteId = business.umamiWebsiteId;
 
-    // Fetch all custom event counts for the range
-    const rows = await getMetrics({
-      websiteId,
-      startAt,
-      endAt,
-      type: "event",
-      limit: 50,
-    });
+      // Fetch all custom event counts for the range
+      const rows = await getMetrics({
+        websiteId,
+        startAt,
+        endAt,
+        type: "event",
+        limit: 50,
+      });
 
-    // Extract counts for the three known commerce events (default to 0)
-    const find = (name: string) => rows.find((r) => r.x === name)?.y ?? 0;
+      // Extract counts for the three known commerce events (default to 0)
+      const find = (name: string) => rows.find((r) => r.x === name)?.y ?? 0;
 
-    return {
-      configured: true as const,
-      rows,
-      commerce: {
-        addToCart: find(ANALYTICS_EVENTS.ADD_TO_CART),
-        beginCheckout: find(ANALYTICS_EVENTS.BEGIN_CHECKOUT),
-        productView: find(ANALYTICS_EVENTS.PRODUCT_VIEW),
-        purchase: find(ANALYTICS_EVENTS.PURCHASE),
-      },
-    };
-  }),
+      return {
+        configured: true as const,
+        rows,
+        commerce: {
+          addToCart: find(ANALYTICS_EVENTS.ADD_TO_CART),
+          beginCheckout: find(ANALYTICS_EVENTS.BEGIN_CHECKOUT),
+          productView: find(ANALYTICS_EVENTS.PRODUCT_VIEW),
+          purchase: find(ANALYTICS_EVENTS.PURCHASE),
+        },
+      };
+    }),
 
   /**
    * embedEngagement — iframe click-through and approximate dwell counts.

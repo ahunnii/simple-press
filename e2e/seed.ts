@@ -4,9 +4,11 @@ import { writeFileSync } from "node:fs";
 // SKIP_ENV_VALIDATION before `~/server/db` (via the factories) constructs.
 import "../tests/helpers/test-env";
 
+import type { SeedTenant } from "./global-setup";
+
 import { db } from "../tests/helpers/db";
 import { createBusiness, createProduct } from "../tests/helpers/factories";
-import { SEED_FILE, type SeedTenant, TEMPLATES } from "./global-setup";
+import { SEED_FILE, TEMPLATES } from "./global-setup";
 
 // Run via `tsx` from e2e/global-setup.ts. Seeds one tenant (with a published
 // product) per template and writes the lookup table the specs read.
@@ -16,7 +18,9 @@ async function main() {
   const stale = { business: { subdomain: { startsWith: "e2e-" } } };
   await db.product.deleteMany({ where: stale });
   await db.siteContent.deleteMany({ where: stale });
-  await db.business.deleteMany({ where: { subdomain: { startsWith: "e2e-" } } });
+  await db.business.deleteMany({
+    where: { subdomain: { startsWith: "e2e-" } },
+  });
 
   const tenants: SeedTenant[] = [];
 

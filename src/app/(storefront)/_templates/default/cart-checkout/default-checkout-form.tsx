@@ -83,7 +83,9 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                     placeholder="you@example.com"
                     required
                     aria-required="true"
-                    aria-invalid={submitAttempted && !f.email ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !f.email ? true : undefined
+                    }
                   />
                 </div>
                 <div>
@@ -139,7 +141,9 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 >
                   <Button
                     type="button"
-                    variant={f.deliveryMethod === "ship" ? "default" : "outline"}
+                    variant={
+                      f.deliveryMethod === "ship" ? "default" : "outline"
+                    }
                     aria-pressed={f.deliveryMethod === "ship"}
                     onClick={() => f.setDeliveryMethod("ship")}
                     style={
@@ -391,7 +395,9 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   <Button
                     type="button"
                     onClick={f.handleApplyDiscount}
-                    disabled={f.isValidatingDiscount || !f.discountCodeInput.trim()}
+                    disabled={
+                      f.isValidatingDiscount || !f.discountCodeInput.trim()
+                    }
                     variant="outline"
                     aria-label={
                       f.isValidatingDiscount

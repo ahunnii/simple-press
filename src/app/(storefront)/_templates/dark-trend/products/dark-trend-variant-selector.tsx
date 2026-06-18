@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -168,7 +168,9 @@ export function DarkTrendVariantSelector({
 
               <Button
                 variant="outline"
-                onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+                onClick={() =>
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
+                }
                 disabled={quantity >= effectiveMax}
                 className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
                 aria-label="Increase quantity"

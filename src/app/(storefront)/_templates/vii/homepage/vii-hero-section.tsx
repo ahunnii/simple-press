@@ -105,7 +105,9 @@ export function ViiHeroSection({
           <button
             type="button"
             onClick={toggleVideo}
-            aria-label={videoPaused ? "Play background video" : "Pause background video"}
+            aria-label={
+              videoPaused ? "Play background video" : "Pause background video"
+            }
             style={{
               position: "absolute",
               bottom: 24,

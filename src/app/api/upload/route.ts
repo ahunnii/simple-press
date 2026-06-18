@@ -61,7 +61,10 @@ async function requireBusinessManager(req: Request) {
   if (!business) throw new RejectUpload("Business not found!");
   const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
   if (!isPlatformAdmin) {
-    const membership = await checkBusinessMembership(business.id, session.user.id);
+    const membership = await checkBusinessMembership(
+      business.id,
+      session.user.id,
+    );
     if (
       !membership ||
       (membership.role !== "OWNER" && membership.role !== "MANAGER")

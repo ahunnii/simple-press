@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import { ServiceBookingDialog } from "~/components/service-booking-dialog";
-import { type TiptapJSON, TiptapRenderer } from "~/components/tiptap-renderer";
 import { buttonVariants } from "~/components/ui/button";
+import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from ".";
 
@@ -57,7 +58,7 @@ export async function ServiceTemplateOne({
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative h-[60vh] min-h-[300px] w-full overflow-hidden">
         <Image
@@ -84,11 +85,13 @@ export async function ServiceTemplateOne({
       </section>
 
       {/* ── Intro section ─────────────────────────────────────────────────── */}
-      {(Boolean(introHeading) || Boolean(introBodyJson) || Boolean(ctaLink)) && (
-        <section className="border-b border-border bg-background py-16 md:py-24">
+      {(Boolean(introHeading) ||
+        Boolean(introBodyJson) ||
+        Boolean(ctaLink)) && (
+        <section className="border-border bg-background border-b py-16 md:py-24">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             {introHeading && (
-              <h2 className="mb-6 text-2xl font-semibold text-foreground sm:text-3xl">
+              <h2 className="text-foreground mb-6 text-2xl font-semibold sm:text-3xl">
                 {introHeading}
               </h2>
             )}
@@ -99,10 +102,7 @@ export async function ServiceTemplateOne({
             )}
             {ctaLink && ctaText && (
               <div className="mt-8">
-                <Link
-                  href={ctaLink}
-                  className={buttonVariants({ size: "lg" })}
-                >
+                <Link href={ctaLink} className={buttonVariants({ size: "lg" })}>
                   {ctaText}
                 </Link>
               </div>
@@ -115,7 +115,7 @@ export async function ServiceTemplateOne({
       {items.length > 0 && (
         <section className="bg-muted/30 py-16 md:py-24">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 className="mb-10 text-2xl font-semibold text-foreground sm:text-3xl">
+            <h2 className="text-foreground mb-10 text-2xl font-semibold sm:text-3xl">
               Our Services
             </h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -142,7 +142,7 @@ function ServiceItemCard({
   embedsEnabled: boolean;
 }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+    <div className="border-border bg-card flex flex-col overflow-hidden rounded-xl border shadow-sm transition-shadow hover:shadow-md">
       {item.image && (
         <div className="relative aspect-video w-full overflow-hidden">
           <Image
@@ -155,21 +155,21 @@ function ServiceItemCard({
         </div>
       )}
       <div className="flex flex-1 flex-col gap-2 p-5">
-        <h3 className="text-base font-semibold text-foreground">{item.name}</h3>
+        <h3 className="text-foreground text-base font-semibold">{item.name}</h3>
         {item.description && (
-          <p className="flex-1 text-sm leading-relaxed text-muted-foreground">
+          <p className="text-muted-foreground flex-1 text-sm leading-relaxed">
             {item.description}
           </p>
         )}
         <div className="mt-2 flex items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex flex-wrap gap-2 text-xs">
             {item.priceLabel && (
-              <span className="rounded-full bg-muted px-2.5 py-0.5 font-medium">
+              <span className="bg-muted rounded-full px-2.5 py-0.5 font-medium">
                 {item.priceLabel}
               </span>
             )}
             {item.durationLabel && (
-              <span className="rounded-full bg-muted px-2.5 py-0.5">
+              <span className="bg-muted rounded-full px-2.5 py-0.5">
                 {item.durationLabel}
               </span>
             )}

@@ -1,15 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import { ServiceBookingDialog } from "~/components/service-booking-dialog";
-import { type TiptapJSON, TiptapRenderer } from "~/components/tiptap-renderer";
 import { buttonVariants } from "~/components/ui/button";
 import {
   FadeIn,
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
+import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { PollenGeneralLayout } from "../../layout/pollen-general-layout";
 import { resolvePollenSpaFields } from "./fields";
@@ -153,15 +154,16 @@ export function PollenSpaServicePage({
                   {itemsSubheading}
                 </p>
               )}
-              {!itemsSubheading && itemsHeading && (
-                <div className="mb-12" />
-              )}
+              {!itemsSubheading && itemsHeading && <div className="mb-12" />}
             </FadeIn>
 
             <StaggerContainer className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {publishedItems.map((item) => (
                 <StaggerItem key={item.id}>
-                  <PollenSpaItemCard item={item} embedsEnabled={embedsEnabled} />
+                  <PollenSpaItemCard
+                    item={item}
+                    embedsEnabled={embedsEnabled}
+                  />
                 </StaggerItem>
               ))}
             </StaggerContainer>

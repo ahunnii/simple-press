@@ -136,7 +136,8 @@ const contactReviewData: TemplateField[] = [
   {
     key: "vii.contact.review-heading",
     label: "Review Heading",
-    description: "The plain part of the review-prompt heading (e.g. 'Loved your visit?').",
+    description:
+      "The plain part of the review-prompt heading (e.g. 'Loved your visit?').",
     type: "text",
     page: "contact",
     group: "contact.review",

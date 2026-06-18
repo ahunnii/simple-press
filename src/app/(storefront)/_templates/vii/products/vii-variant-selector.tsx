@@ -4,21 +4,27 @@ import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { useCart } from "~/providers/cart-context";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
+  selectedVariantId: string | null;
   setSelectedVariantId: (variantId: string | null) => void;
 };
 
-export function ViiVariantSelector({ product, setSelectedVariantId }: Props) {
+export function ViiVariantSelector({
+  product,
+  selectedVariantId,
+  setSelectedVariantId,
+}: Props) {
   const { addItem } = useCart();
   const { setVariantImageUrl } = useVariantImage();
 
-  const [selectedVariant, setSelectedVariant] = useState(
-    product.variants[0] ?? null,
-  );
+  const selectedVariant =
+    product.variants.find((v) => v.id === selectedVariantId) ??
+    product.variants[0] ??
+    null;
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
 
@@ -68,7 +74,7 @@ export function ViiVariantSelector({ product, setSelectedVariantId }: Props) {
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  const stepperBorder = "1px solid rgba(30,53,64,0.25)";
+  const stepperBorder = "1px solid var(--vii-hairline-strong)";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -128,7 +134,6 @@ export function ViiVariantSelector({ product, setSelectedVariantId }: Props) {
                 type="button"
                 onClick={() => {
                   if (outOfStock) return;
-                  setSelectedVariant(variant);
                   setSelectedVariantId(variant.id);
                 }}
                 aria-disabled={outOfStock || undefined}
@@ -137,8 +142,8 @@ export function ViiVariantSelector({ product, setSelectedVariantId }: Props) {
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  height: 40,
-                  minWidth: 48,
+                  height: 44,
+                  minWidth: 52,
                   padding: "0 14px",
                   borderRadius: "var(--radius)",
                   border: isSelected
@@ -157,7 +162,11 @@ export function ViiVariantSelector({ product, setSelectedVariantId }: Props) {
                 {isBackorder && !isSelected && (
                   <span
                     aria-hidden="true"
-                    style={{ marginLeft: 6, fontSize: 10, color: "var(--vii-ink-soft)" }}
+                    style={{
+                      marginLeft: 6,
+                      fontSize: 10,
+                      color: "var(--vii-ink-soft)",
+                    }}
                   >
                     (pre-order)
                   </span>
@@ -180,7 +189,7 @@ export function ViiVariantSelector({ product, setSelectedVariantId }: Props) {
                 display: "inline-flex",
                 alignItems: "center",
                 height: 48,
-                width: 120,
+                width: 132,
                 flexShrink: 0,
                 borderRadius: "var(--radius)",
                 border: stepperBorder,
@@ -223,7 +232,9 @@ export function ViiVariantSelector({ product, setSelectedVariantId }: Props) {
               </span>
               <button
                 type="button"
-                onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+                onClick={() =>
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
+                }
                 disabled={quantity >= effectiveMax}
                 aria-label="Increase quantity"
                 style={{

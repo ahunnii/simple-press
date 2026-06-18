@@ -191,10 +191,10 @@ export async function getStats(params: BaseParams): Promise<UmamiStats> {
   };
 
   try {
-    const raw = (await umamiFetch(
-      `/api/websites/${params.websiteId}/stats`,
-      { startAt: params.startAt, endAt: params.endAt },
-    )) as Record<string, MetricValue>;
+    const raw = (await umamiFetch(`/api/websites/${params.websiteId}/stats`, {
+      startAt: params.startAt,
+      endAt: params.endAt,
+    })) as Record<string, MetricValue>;
 
     return {
       pageviews: extractValue(raw.pageviews),
@@ -204,7 +204,9 @@ export async function getStats(params: BaseParams): Promise<UmamiStats> {
       totaltime: extractValue(raw.totaltime),
     };
   } catch (err) {
-    Sentry.captureException(err, { tags: { service: "umami", endpoint: "stats" } });
+    Sentry.captureException(err, {
+      tags: { service: "umami", endpoint: "stats" },
+    });
     return empty;
   }
 }
@@ -222,12 +224,13 @@ export async function getActive(
     )) as { visitors?: number } | number;
 
     // Umami returns either `{ visitors: N }` or just a number depending on version
-    const visitors =
-      typeof raw === "number" ? raw : (raw?.visitors ?? 0);
+    const visitors = typeof raw === "number" ? raw : (raw?.visitors ?? 0);
 
     return { visitors };
   } catch (err) {
-    Sentry.captureException(err, { tags: { service: "umami", endpoint: "active" } });
+    Sentry.captureException(err, {
+      tags: { service: "umami", endpoint: "active" },
+    });
     return { visitors: 0 };
   }
 }
@@ -272,15 +275,12 @@ export async function getMetrics(
   params: BaseParams & { type: string; limit?: number },
 ): Promise<UmamiMetricRow[]> {
   try {
-    const raw = (await umamiFetch(
-      `/api/websites/${params.websiteId}/metrics`,
-      {
-        startAt: params.startAt,
-        endAt: params.endAt,
-        type: params.type,
-        limit: params.limit ?? 10,
-      },
-    )) as UmamiMetricRow[];
+    const raw = (await umamiFetch(`/api/websites/${params.websiteId}/metrics`, {
+      startAt: params.startAt,
+      endAt: params.endAt,
+      type: params.type,
+      limit: params.limit ?? 10,
+    })) as UmamiMetricRow[];
 
     return Array.isArray(raw) ? raw : [];
   } catch (err) {

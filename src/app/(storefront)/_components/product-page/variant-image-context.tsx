@@ -8,7 +8,9 @@ type VariantImageContextValue = {
   setVariantImageUrl: (url: string | null) => void;
 };
 
-const VariantImageContext = createContext<VariantImageContextValue | null>(null);
+const VariantImageContext = createContext<VariantImageContextValue | null>(
+  null,
+);
 
 /**
  * Shares the selected variant's image between a template's variant selector and

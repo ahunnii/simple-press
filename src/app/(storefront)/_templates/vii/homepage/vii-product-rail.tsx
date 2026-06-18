@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import type { Product } from "~/types";
 import type { RouterOutputs } from "~/trpc/react";
+import type { Product } from "~/types";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiProductCard } from "../shared/vii-product-card";
 
@@ -38,11 +39,7 @@ export function ViiProductRail({
     <section
       aria-labelledby={heading ? "vii-product-rail-heading" : undefined}
       aria-label={
-        heading
-          ? undefined
-          : overline?.trim()
-            ? overline
-            : "Featured products"
+        heading ? undefined : overline?.trim() ? overline : "Featured products"
       }
       style={{
         background: "var(--vii-paper)",
@@ -115,7 +112,9 @@ export function ViiProductRail({
 
         {/* CTA */}
         {ctaText && (
-          <div style={{ textAlign: "center", marginTop: "clamp(36px, 5vw, 56px)" }}>
+          <div
+            style={{ textAlign: "center", marginTop: "clamp(36px, 5vw, 56px)" }}
+          >
             <Link
               href={ctaHref}
               style={{
@@ -134,7 +133,10 @@ export function ViiProductRail({
               }}
             >
               {ctaText}
-              <ArrowRight aria-hidden="true" style={{ width: 14, height: 14 }} />
+              <ArrowRight
+                aria-hidden="true"
+                style={{ width: 14, height: 14 }}
+              />
             </Link>
           </div>
         )}

@@ -23,11 +23,7 @@ export default async function BlogPage() {
   const t = getTemplate(business.templateId);
 
   return (
-    <t.BlogPage
-      pages={pages}
-      customFields={customFields}
-      business={business}
-    />
+    <t.BlogPage pages={pages} customFields={customFields} business={business} />
   );
 }
 

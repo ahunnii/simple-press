@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
 type Props = {
@@ -107,7 +108,10 @@ export function ViiJourneysSection({
         <div
           ref={headerRef}
           className={`vii-reveal${headerVisible ? " is-visible" : ""}`}
-          style={{ textAlign: "center", marginBottom: "clamp(40px, 6vw, 64px)" }}
+          style={{
+            textAlign: "center",
+            marginBottom: "clamp(40px, 6vw, 64px)",
+          }}
         >
           {overline && (
             <p

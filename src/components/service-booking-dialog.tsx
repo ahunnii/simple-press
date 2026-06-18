@@ -2,7 +2,6 @@
 
 import { ExternalLink } from "lucide-react";
 
-import { EmbedFrame } from "~/components/embed-frame";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -11,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
+import { EmbedFrame } from "~/components/embed-frame";
 
 type ServiceBookingDialogProps = {
   /** Label for the trigger button. Defaults to "Book". */
@@ -43,7 +43,12 @@ export function ServiceBookingDialog({
   // No booking configured — show a disabled button
   if (!embedSrc) {
     return (
-      <Button variant="outline" size="sm" disabled aria-label="No booking available">
+      <Button
+        variant="outline"
+        size="sm"
+        disabled
+        aria-label="No booking available"
+      >
         {triggerLabel}
       </Button>
     );
@@ -56,7 +61,7 @@ export function ServiceBookingDialog({
         href={embedSrc}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium shadow-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         {triggerLabel}
         <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />

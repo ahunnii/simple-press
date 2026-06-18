@@ -4,8 +4,8 @@ import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { getSession } from "~/server/better-auth/server";
 import { api, HydrateClient } from "~/trpc/server";
-import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
+import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { AppSidebar } from "~/app/admin/_components/app-sidebar";
 
 type Props = {

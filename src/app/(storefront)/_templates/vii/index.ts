@@ -1,9 +1,9 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
-import { viiHomepageData, viiHomepageFieldGroups } from "./homepage";
 import { viiAboutData, viiAboutFieldGroups } from "./about";
 import { viiContactData, viiContactFieldGroups } from "./contact";
+import { viiHomepageData, viiHomepageFieldGroups } from "./homepage";
 import { viiShopData, viiShopFieldGroups } from "./shop";
 
 // ─── Global: Branding ─────────────────────────────────────────────────────────

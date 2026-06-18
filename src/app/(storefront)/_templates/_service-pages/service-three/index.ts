@@ -61,7 +61,8 @@ export const serviceThreeFields: TemplateField[] = [
   {
     key: "service-three.quote",
     label: "Pull Quote",
-    description: "A standout quote or statement displayed prominently on the page",
+    description:
+      "A standout quote or statement displayed prominently on the page",
     type: "textarea",
     page: "homepage",
     group: "service-three.quote",

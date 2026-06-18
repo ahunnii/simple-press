@@ -26,7 +26,8 @@ export function ViiCollectionPage({
         style={{
           background: "var(--vii-cream)",
           // Top value clears the fixed header (announcement bar + nav ≈ 106px)
-          padding: "clamp(124px, 13vw, 150px) clamp(24px, 6vw, 96px) clamp(32px, 4vw, 56px)",
+          padding:
+            "clamp(124px, 13vw, 150px) clamp(24px, 6vw, 96px) clamp(32px, 4vw, 56px)",
         }}
       >
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
@@ -131,12 +132,18 @@ export function ViiCollectionPage({
         aria-label={`${collection.name} products`}
         style={{
           background: "var(--vii-paper)",
-          padding: "clamp(40px, 6vw, 72px) clamp(24px, 6vw, 96px) clamp(64px, 9vw, 112px)",
+          padding:
+            "clamp(40px, 6vw, 72px) clamp(24px, 6vw, 96px) clamp(64px, 9vw, 112px)",
         }}
       >
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           {products.length === 0 ? (
-            <div style={{ padding: "clamp(48px, 8vw, 96px) 0", textAlign: "center" }}>
+            <div
+              style={{
+                padding: "clamp(48px, 8vw, 96px) 0",
+                textAlign: "center",
+              }}
+            >
               <p
                 style={{
                   fontFamily: "var(--font-sans)",

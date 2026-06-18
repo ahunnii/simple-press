@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Download, Plus, Upload } from "lucide-react";
 
-import { getSession } from "~/server/better-auth/server";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
+import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import {
@@ -15,8 +15,8 @@ import {
 
 import { TrailHeader } from "../_components/trail-header";
 import { ProductFilters } from "./_components/product-filters";
-import { ProductsPagination } from "./_components/products-pagination";
 import { ProductsTable } from "./_components/products-client-data-table";
+import { ProductsPagination } from "./_components/products-pagination";
 
 type Props = {
   searchParams: Promise<{
@@ -106,7 +106,9 @@ export default async function ProductsPage({ searchParams }: Props) {
         </div>
 
         {/* Filters */}
-        <ProductFilters productCount={hasActiveFilters ? totalCount : undefined} />
+        <ProductFilters
+          productCount={hasActiveFilters ? totalCount : undefined}
+        />
 
         {/* Products List */}
         {products.length === 0 ? (

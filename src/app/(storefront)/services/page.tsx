@@ -26,20 +26,20 @@ export default async function ServicesPage() {
   const services = await api.services.getAllPublic();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
         <header className="mb-12">
-          <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+          <h1 className="text-foreground text-3xl font-bold sm:text-4xl">
             Services
           </h1>
         </header>
 
         {services.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-24 text-center">
-            <p className="text-lg font-medium text-muted-foreground">
+          <div className="border-border flex flex-col items-center justify-center rounded-xl border border-dashed py-24 text-center">
+            <p className="text-muted-foreground text-lg font-medium">
               No services available yet.
             </p>
-            <p className="mt-1 text-sm text-muted-foreground/70">
+            <p className="text-muted-foreground/70 mt-1 text-sm">
               Check back soon.
             </p>
           </div>
@@ -49,7 +49,7 @@ export default async function ServicesPage() {
               <Link
                 key={service.id}
                 href={`/services/${service.slug}`}
-                className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="group border-border bg-card focus-visible:ring-ring flex flex-col overflow-hidden rounded-xl border shadow-sm transition-shadow hover:shadow-md focus-visible:ring-2 focus-visible:outline-none"
               >
                 {service.image ? (
                   <div className="relative aspect-video w-full overflow-hidden">
@@ -62,18 +62,18 @@ export default async function ServicesPage() {
                     />
                   </div>
                 ) : (
-                  <div className="aspect-video w-full bg-muted" />
+                  <div className="bg-muted aspect-video w-full" />
                 )}
                 <div className="flex flex-1 flex-col gap-2 p-5">
-                  <h2 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                  <h2 className="text-foreground group-hover:text-primary text-lg font-semibold transition-colors">
                     {service.name}
                   </h2>
                   {service.description && (
-                    <p className="flex-1 text-sm leading-relaxed text-muted-foreground line-clamp-3">
+                    <p className="text-muted-foreground line-clamp-3 flex-1 text-sm leading-relaxed">
                       {service.description}
                     </p>
                   )}
-                  <span className="mt-3 self-start text-sm font-medium text-primary">
+                  <span className="text-primary mt-3 self-start text-sm font-medium">
                     Learn more &rarr;
                   </span>
                 </div>

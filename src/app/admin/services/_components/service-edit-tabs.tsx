@@ -13,7 +13,11 @@ type Props = {
   storefrontTemplateId: string;
 };
 
-export function ServiceEditTabs({ service, embedsEnabled, storefrontTemplateId }: Props) {
+export function ServiceEditTabs({
+  service,
+  embedsEnabled,
+  storefrontTemplateId,
+}: Props) {
   return (
     <Tabs defaultValue="details" className="w-full">
       <div className="border-b bg-white px-4 py-2 sm:px-6">
@@ -25,15 +29,15 @@ export function ServiceEditTabs({ service, embedsEnabled, storefrontTemplateId }
       </div>
 
       <TabsContent value="details" className="mt-0">
-        <ServiceForm service={service} storefrontTemplateId={storefrontTemplateId} />
+        <ServiceForm
+          service={service}
+          storefrontTemplateId={storefrontTemplateId}
+        />
       </TabsContent>
 
       <TabsContent value="items" className="mt-0">
         <div className="admin-container">
-          <ServiceItemsEditor
-            serviceId={service.id}
-            items={service.items}
-          />
+          <ServiceItemsEditor serviceId={service.id} items={service.items} />
         </div>
       </TabsContent>
 

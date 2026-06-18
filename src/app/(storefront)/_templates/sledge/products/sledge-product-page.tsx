@@ -8,7 +8,6 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import type { Product } from "~/types";
 import { parseCardAdditionalFields } from "~/lib/products";
 import {
@@ -16,13 +15,14 @@ import {
   isContentEmpty,
   parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
-import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { TrackView } from "~/components/analytics/track-view";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 import { resolveFields } from "..";
 import {

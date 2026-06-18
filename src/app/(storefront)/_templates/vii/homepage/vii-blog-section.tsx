@@ -208,7 +208,10 @@ export function ViiBlogSection({
               }}
             >
               {ctaText}
-              <ArrowRight aria-hidden="true" style={{ width: 14, height: 14 }} />
+              <ArrowRight
+                aria-hidden="true"
+                style={{ width: 14, height: 14 }}
+              />
             </Link>
           </div>
         )}

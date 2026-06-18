@@ -481,7 +481,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const newCompare = snap.compareAtPrice;
         const newMaxInv = snap.maxQuantity ?? undefined;
 
-        if (newPrice !== item.price || newCompare !== (item.compareAtPrice ?? null)) {
+        if (
+          newPrice !== item.price ||
+          newCompare !== (item.compareAtPrice ?? null)
+        ) {
           priceChanged = true;
         }
 
@@ -501,7 +504,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Reference-stable guard: if nothing changed, return the same array
-      if (!itemsRemoved && !priceChanged && next.length === currentItems.length) {
+      if (
+        !itemsRemoved &&
+        !priceChanged &&
+        next.length === currentItems.length
+      ) {
         // Check quantities weren't clamped either
         const unchanged = next.every(
           (n, i) => n.quantity === currentItems[i]?.quantity,
@@ -514,13 +521,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     // Show at most one toast after state update (read flags set above)
     // Using a microtask so we read the final flag values after setItems callback
-    Promise.resolve().then(() => {
-      if (itemsRemoved) {
-        toast("Some items in your cart are no longer available and were removed.");
-      } else if (priceChanged) {
-        toast("Some prices in your cart were updated.");
-      }
-    }).catch(() => undefined);
+    Promise.resolve()
+      .then(() => {
+        if (itemsRemoved) {
+          toast(
+            "Some items in your cart are no longer available and were removed.",
+          );
+        } else if (priceChanged) {
+          toast("Some prices in your cart were updated.");
+        }
+      })
+      .catch(() => undefined);
   }, []);
 
   // Calculate total

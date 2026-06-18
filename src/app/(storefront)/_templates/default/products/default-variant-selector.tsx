@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { useCart } from "~/providers/cart-context";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -170,7 +170,9 @@ export function DefaultVariantSelector({
               </span>
               <button
                 type="button"
-                onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+                onClick={() =>
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
+                }
                 disabled={quantity >= effectiveMax}
                 aria-label="Increase quantity"
                 className="flex h-full flex-1 items-center justify-center rounded-r-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6]"

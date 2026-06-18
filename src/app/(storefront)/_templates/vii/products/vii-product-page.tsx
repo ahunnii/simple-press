@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
@@ -11,14 +12,14 @@ import {
   isContentEmpty,
   parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
+import { TrackView } from "~/components/analytics/track-view";
 import { PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-page/product-gallery-vertical-sticky";
 
-import { ANALYTICS_EVENTS } from "~/lib/umami/track";
-import { TrackView } from "~/components/analytics/track-view";
 import { resolveFields } from "..";
 import { ViiProductCard } from "../shared/vii-product-card";
 import { ViiProductActions } from "./vii-product-actions";
@@ -37,7 +38,7 @@ function AccordionItem({
       open={defaultOpen}
       className="group"
       style={{
-        borderBottom: "1px solid rgba(30,53,64,0.18)",
+        borderBottom: "1px solid var(--vii-hairline)",
         padding: "20px 0",
       }}
     >
@@ -82,7 +83,10 @@ function AccordionItem({
   );
 }
 
-export function ViiProductPage({ product, business }: DefaultProductPageTemplateProps) {
+export function ViiProductPage({
+  product,
+  business,
+}: DefaultProductPageTemplateProps) {
   const {
     formatPrice,
     displayPrice,
@@ -90,6 +94,8 @@ export function ViiProductPage({ product, business }: DefaultProductPageTemplate
     isOnSale,
     displayCompareAtPrice,
     displayTrustBadges,
+    selectedVariantId,
+    setSelectedVariantId,
   } = useProduct(product);
 
   const { data: relatedProducts } = api.product.getRelated.useQuery({
@@ -108,8 +114,16 @@ export function ViiProductPage({ product, business }: DefaultProductPageTemplate
       business?.siteContent?.customFields,
       "vii.global.product-trust-badges",
     ),
-    [{ label: "Ships in 1-2 business days" }, { label: "Free returns within 30 days" }],
+    [
+      { label: "Ships in 1-2 business days" },
+      { label: "Free returns within 30 days" },
+    ],
   );
+
+  const trustBadges =
+    displayTrustBadges.length > 0
+      ? displayTrustBadges
+      : (globalProductTrustBadges ?? []);
 
   return (
     <PageTransition>
@@ -129,6 +143,7 @@ export function ViiProductPage({ product, business }: DefaultProductPageTemplate
           aria-label="Breadcrumb"
           style={{
             display: "flex",
+            flexWrap: "wrap",
             alignItems: "center",
             gap: 8,
             // Top value clears the fixed header (announcement bar + nav ≈ 106px)
@@ -145,7 +160,10 @@ export function ViiProductPage({ product, business }: DefaultProductPageTemplate
             Home
           </Link>
           <span aria-hidden="true">/</span>
-          <Link href="/shop" style={{ color: "inherit", textDecoration: "none" }}>
+          <Link
+            href="/shop"
+            style={{ color: "inherit", textDecoration: "none" }}
+          >
             Shop
           </Link>
           <span aria-hidden="true">/</span>
@@ -256,11 +274,15 @@ export function ViiProductPage({ product, business }: DefaultProductPageTemplate
             )}
 
             {/* Actions */}
-            <ViiProductActions product={product} business={business} />
+            <ViiProductActions
+              product={product}
+              business={business}
+              selectedVariantId={selectedVariantId}
+              setSelectedVariantId={setSelectedVariantId}
+            />
 
             {/* Trust signals */}
-            {((globalProductTrustBadges?.length ?? 0) > 0 ||
-              displayTrustBadges.length > 0) && (
+            {trustBadges.length > 0 && (
               <div
                 style={{
                   display: "flex",
@@ -272,19 +294,24 @@ export function ViiProductPage({ product, business }: DefaultProductPageTemplate
                   color: "var(--vii-ink-soft)",
                 }}
               >
-                {globalProductTrustBadges?.map((badge) => (
-                  <span key={badge.label}>
-                    <span aria-hidden="true" style={{ color: "var(--vii-copper)" }}>
-                      ✓
-                    </span>{" "}
-                    {badge.label}
-                  </span>
-                ))}
-                {displayTrustBadges.map((badge) => (
-                  <span key={badge.label}>
-                    <span aria-hidden="true" style={{ color: "var(--vii-copper)" }}>
-                      ✓
-                    </span>{" "}
+                {trustBadges.map((badge) => (
+                  <span
+                    key={badge.label}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    <Check
+                      aria-hidden="true"
+                      style={{
+                        width: 14,
+                        height: 14,
+                        color: "var(--vii-copper)",
+                        flexShrink: 0,
+                      }}
+                    />
                     {badge.label}
                   </span>
                 ))}
@@ -292,68 +319,67 @@ export function ViiProductPage({ product, business }: DefaultProductPageTemplate
             )}
 
             {/* Accordion */}
-            <div style={{ marginTop: 8, borderTop: "1px solid rgba(30,53,64,0.18)" }}>
-              <AccordionItem summary="Details" defaultOpen>
-                {!isAdditionalEmpty ? (
-                  <TiptapRenderer
-                    content={additionalFields?.additionalInformation as TiptapJSON}
-                    className="prose prose-sm max-w-none"
-                  />
-                ) : (
-                  <p style={{ margin: 0 }}>
-                    Materials, care instructions, and any other details about this
-                    product. Edit this from your product settings under
-                    &apos;Additional Information&apos; in the admin panel.
-                  </p>
-                )}
-              </AccordionItem>
-              {f["vii.global.product-shipping-description"] && (
-                <AccordionItem summary="Shipping &amp; returns">
-                  <p style={{ margin: 0 }}>
-                    {f["vii.global.product-shipping-description"]}
-                  </p>
-                </AccordionItem>
-              )}
-              {f["vii.global.product-question-description"] && (
-                <AccordionItem summary="Ask a question">
-                  <p style={{ margin: 0 }}>
-                    {f["vii.global.product-question-description"]}{" "}
-                    <Link
-                      href="/contact"
-                      style={{
-                        color: "var(--vii-navy)",
-                        textDecoration: "underline",
-                        textUnderlineOffset: 2,
-                      }}
-                    >
-                      You can reach out to us here.
-                    </Link>
-                  </p>
-                </AccordionItem>
-              )}
-            </div>
-
-            {/* Shipping link */}
-            <p
+            <div
               style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 12,
-                color: "var(--vii-ink-soft)",
-                margin: 0,
+                marginTop: 8,
+                borderTop: "1px solid var(--vii-hairline)",
               }}
             >
-              <Link
-                href="/shipping-policy"
+              {!isAdditionalEmpty && (
+                <AccordionItem summary="Details" defaultOpen>
+                  <TiptapRenderer
+                    content={
+                      additionalFields?.additionalInformation as TiptapJSON
+                    }
+                    className="prose prose-sm max-w-none"
+                  />
+                </AccordionItem>
+              )}
+              <AccordionItem summary="Shipping &amp; returns">
+                {f["vii.global.product-shipping-description"] && (
+                  <p style={{ margin: "0 0 8px" }}>
+                    {f["vii.global.product-shipping-description"]}
+                  </p>
+                )}
+                <p style={{ margin: 0 }}>
+                  Calculated at checkout.{" "}
+                  <Link
+                    href="/shipping-policy"
+                    style={{
+                      color: "var(--vii-navy)",
+                      textDecoration: "underline",
+                      textUnderlineOffset: 2,
+                    }}
+                  >
+                    View shipping policy
+                  </Link>
+                </p>
+              </AccordionItem>
+            </div>
+
+            {/* Ask a question — inline */}
+            {f["vii.global.product-question-description"] && (
+              <p
                 style={{
-                  color: "var(--vii-navy)",
-                  textDecoration: "underline",
-                  textUnderlineOffset: 2,
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 12,
+                  color: "var(--vii-ink-soft)",
+                  margin: 0,
                 }}
               >
-                Shipping
-              </Link>{" "}
-              calculated at checkout
-            </p>
+                {f["vii.global.product-question-description"]}{" "}
+                <Link
+                  href="/contact"
+                  style={{
+                    color: "var(--vii-navy)",
+                    textDecoration: "underline",
+                    textUnderlineOffset: 2,
+                  }}
+                >
+                  You can reach out to us here.
+                </Link>
+              </p>
+            )}
           </div>
         </div>
 
@@ -362,7 +388,7 @@ export function ViiProductPage({ product, business }: DefaultProductPageTemplate
           <section
             aria-labelledby="vii-related-heading"
             style={{
-              borderTop: "1px solid rgba(30,53,64,0.18)",
+              borderTop: "1px solid var(--vii-hairline)",
               padding: "clamp(56px, 8vw, 96px) 0 clamp(64px, 9vw, 112px)",
             }}
           >
@@ -402,7 +428,9 @@ export function ViiProductPage({ product, business }: DefaultProductPageTemplate
                   }}
                 >
                   You may also{" "}
-                  <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+                  <em
+                    style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+                  >
                     like
                   </em>
                 </h2>

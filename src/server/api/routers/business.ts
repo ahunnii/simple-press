@@ -155,7 +155,13 @@ export const businessRouter = createTRPCRouter({
       }
     }
     // Never ship the raw draft field to clients.
-    const { stripeAccountId, maintenanceMode, maintenanceVariant, maintenanceMessage, ...rest } = businessData;
+    const {
+      stripeAccountId,
+      maintenanceMode,
+      maintenanceVariant,
+      maintenanceMessage,
+      ...rest
+    } = businessData;
     const { siteContent, ...restWithoutSiteContent } = rest;
     const sanitizedSiteContent = siteContent
       ? (({ previewCustomFields: _drop, ...safe }) => safe)(siteContent)
@@ -721,13 +727,8 @@ export const businessRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const {
-        name,
-        ownerEmail,
-        supportEmail,
-        businessAddress,
-        phoneNumber,
-      } = input;
+      const { name, ownerEmail, supportEmail, businessAddress, phoneNumber } =
+        input;
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },

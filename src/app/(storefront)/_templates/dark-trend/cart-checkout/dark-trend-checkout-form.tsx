@@ -195,7 +195,9 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                     required={f.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={
-                      submitAttempted && !f.addressLine1.trim() ? true : undefined
+                      submitAttempted && !f.addressLine1.trim()
+                        ? true
+                        : undefined
                     }
                   />
                 </div>
@@ -267,7 +269,9 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       required={f.deliveryMethod === "ship"}
                       aria-required="true"
                       aria-invalid={
-                        submitAttempted && !f.postalCode.trim() ? true : undefined
+                        submitAttempted && !f.postalCode.trim()
+                          ? true
+                          : undefined
                       }
                     />
                   </div>
@@ -363,7 +367,7 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/20">
                           <span
                             aria-hidden="true"
-                            className="text-green-400 text-xs font-bold"
+                            className="text-xs font-bold text-green-400"
                           >
                             ✓
                           </span>

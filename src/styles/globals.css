@@ -3111,6 +3111,8 @@
   --vii-tan: #c1aa91;
   --vii-glacier: #9fc8d0;
   --vii-ink-soft: #4a5560;    /* secondary text */
+  --vii-hairline: color-mix(in srgb, var(--vii-navy) 20%, transparent);
+  --vii-hairline-strong: color-mix(in srgb, var(--vii-navy) 25%, transparent);
   --radius: 0.2rem;
   --font-serif: var(--font-vii-serif), "Playfair Display", serif;
   --font-sans: var(--font-vii-sans), "Jost", sans-serif;
@@ -3122,6 +3124,17 @@
 .vii *:focus-visible {
   outline: 2px solid var(--vii-copper);
   outline-offset: 2px;
+}
+
+/* Display headings get balanced line breaks; long prose avoids orphans. */
+.vii h1,
+.vii h2,
+.vii h3 {
+  text-wrap: balance;
+}
+
+.vii p {
+  text-wrap: pretty;
 }
 
 /* Scroll-reveal utility — armed only once useViiReveal adds `.vii-js` to the

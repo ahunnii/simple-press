@@ -105,6 +105,51 @@ export function isVideoEmbed(src: string): boolean {
   }
 }
 
+/**
+ * Validates and canonicalises an Instagram URL for use as an embed permalink.
+ *
+ * Accepts any URL whose hostname is exactly `instagram.com`,
+ * `www.instagram.com`, or any `*.instagram.com` subdomain (e.g.
+ * `m.instagram.com`). Uses the same exact-match-or-dot-suffix check as
+ * `isVideoEmbed` to avoid accepting `evilinstagram.com`.
+ *
+ * The returned URL is normalised:
+ * - Protocol forced to `https:`
+ * - Hostname normalised to `www.instagram.com`
+ * - Query string and fragment stripped (removes tracking params such as
+ *   `utm_source`, etc.)
+ * - Pathname preserved exactly; a single trailing slash is appended if the
+ *   last path segment has no file extension (i.e. looks like a resource
+ *   path, not a file download).
+ *
+ * Returns the clean canonical URL string, or `null` when the input cannot be
+ * parsed, uses a non-HTTPS protocol, or is not an Instagram domain.
+ */
+export function sanitizeInstagramUrl(input: string): string | null {
+  try {
+    const url = new URL(input.trim());
+
+    if (url.protocol !== "https:") return null;
+
+    const host = url.hostname;
+    const isInstagram =
+      host === "instagram.com" || host.endsWith(".instagram.com");
+    if (!isInstagram) return null;
+
+    // Ensure a trailing slash when the pathname has no file extension.
+    const { pathname } = url;
+    const lastSegment = pathname.split("/").pop() ?? "";
+    const normalizedPath =
+      lastSegment.includes(".") || pathname.endsWith("/")
+        ? pathname
+        : `${pathname}/`;
+
+    return `https://www.instagram.com${normalizedPath}`;
+  } catch {
+    return null;
+  }
+}
+
 /** Parsed result from `parseEmbedInput`. */
 export type ParsedEmbedInput = { src: string; width?: number; height?: number };
 

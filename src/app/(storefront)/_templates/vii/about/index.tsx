@@ -275,7 +275,8 @@ const aboutTeamData: TemplateField[] = [
   {
     key: "vii.about.team-overline",
     label: "Team Overline",
-    description: "Small uppercase label above the team grid heading (optional).",
+    description:
+      "Small uppercase label above the team grid heading (optional).",
     type: "text",
     page: "about",
     group: "about.team",

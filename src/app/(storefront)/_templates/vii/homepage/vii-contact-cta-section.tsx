@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
   contactImage?: string;
@@ -60,7 +61,7 @@ export function ViiContactCtaSection({
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(to bottom, rgba(30,53,64,0.65) 0%, rgba(30,53,64,0.85) 100%)",
+            "linear-gradient(to bottom, color-mix(in srgb, var(--vii-navy) 65%, transparent) 0%, color-mix(in srgb, var(--vii-navy) 85%, transparent) 100%)",
         }}
       />
 
@@ -79,7 +80,7 @@ export function ViiContactCtaSection({
           <h2
             id="contact-cta-heading"
             style={{
-              fontFamily: "var(--font-vii-serif, serif)",
+              fontFamily: "var(--font-serif)",
               fontSize: "clamp(36px, 6vw, 72px)",
               fontWeight: 400,
               fontStyle: "italic",
@@ -93,24 +94,15 @@ export function ViiContactCtaSection({
         )}
 
         {subheading && (
-          <p
-            style={{
-              fontFamily: "var(--font-vii-sans, sans-serif)",
-              fontSize: 12,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--vii-tan)",
-              marginBottom: 24,
-            }}
-          >
+          <ViiOverline align="center" tone="dark" style={{ marginBottom: 24 }}>
             {subheading}
-          </p>
+          </ViiOverline>
         )}
 
         {body && (
           <p
             style={{
-              fontFamily: "var(--font-vii-sans, sans-serif)",
+              fontFamily: "var(--font-sans)",
               fontSize: "clamp(14px, 1.3vw, 16px)",
               lineHeight: 1.7,
               color: "var(--vii-paper)",
@@ -131,7 +123,7 @@ export function ViiContactCtaSection({
               href={buttonHref}
               style={{
                 display: "inline-block",
-                fontFamily: "var(--font-vii-sans, sans-serif)",
+                fontFamily: "var(--font-sans)",
                 fontSize: 13,
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
@@ -160,11 +152,14 @@ export function ViiContactCtaSection({
             <a
               href={`tel:${phone.replace(/\s/g, "")}`}
               style={{
-                fontFamily: "var(--font-vii-sans, sans-serif)",
+                fontFamily: "var(--font-sans)",
                 fontSize: "clamp(15px, 1.5vw, 18px)",
                 color: "var(--vii-paper)",
                 textDecoration: "none",
                 letterSpacing: "0.06em",
+                display: "inline-flex",
+                alignItems: "center",
+                minHeight: 44,
               }}
             >
               {phone}
@@ -174,11 +169,14 @@ export function ViiContactCtaSection({
             <a
               href={`mailto:${email}`}
               style={{
-                fontFamily: "var(--font-vii-sans, sans-serif)",
+                fontFamily: "var(--font-sans)",
                 fontSize: "clamp(14px, 1.3vw, 16px)",
                 color: "var(--vii-tan)",
                 textDecoration: "none",
                 letterSpacing: "0.06em",
+                display: "inline-flex",
+                alignItems: "center",
+                minHeight: 44,
               }}
             >
               {email}

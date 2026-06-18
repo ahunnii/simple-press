@@ -1,19 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import { ServiceBookingDialog } from "~/components/service-booking-dialog";
-import { type TiptapJSON, TiptapRenderer } from "~/components/tiptap-renderer";
-import { buttonVariants } from "~/components/ui/button";
 import {
   getListFieldValue,
   parseTemplateImageListRows,
 } from "~/lib/template-fields";
+import { buttonVariants } from "~/components/ui/button";
 import {
   FadeIn,
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
+import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { PollenGeneralLayout } from "../../layout/pollen-general-layout";
 import { resolvePollenBloomFields } from "./fields";
@@ -102,7 +103,7 @@ export function PollenBloomServicePage({
                   <div
                     className={`relative overflow-hidden rounded-2xl ${
                       idx === 0 && galleryImages.length === 4
-                        ? "aspect-[3/4] row-span-2"
+                        ? "row-span-2 aspect-[3/4]"
                         : "aspect-[3/4]"
                     }`}
                   >

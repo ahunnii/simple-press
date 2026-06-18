@@ -2,6 +2,18 @@ import type { ComponentType } from "react";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { DefaultCheckoutPageTemplateProps } from "~/app/(storefront)/_templates/types";
+import { CartProvider } from "~/providers/cart-context";
+import { CheckoutForm as BambooCheckoutForm } from "~/app/(storefront)/_templates/bamboo/cart-checkout/bamboo-checkout-form";
+import { DarkTrendCheckoutForm } from "~/app/(storefront)/_templates/dark-trend/cart-checkout/dark-trend-checkout-form";
+import { DefaultCheckoutForm } from "~/app/(storefront)/_templates/default/cart-checkout/default-checkout-form";
+import { ElegantCheckoutForm } from "~/app/(storefront)/_templates/elegant/cart-checkout/elegant-checkout-form";
+import { HappyBambooCheckoutForm } from "~/app/(storefront)/_templates/happy-bamboo/cart-checkout/happy-bamboo-checkout-form";
+import { ModernCheckoutForm } from "~/app/(storefront)/_templates/modern/cart-checkout/modern-checkout-form";
+import { NoiseCheckoutForm } from "~/app/(storefront)/_templates/noise/cart-checkout/noise-checkout-form";
+import { PollenCheckoutForm } from "~/app/(storefront)/_templates/pollen/cart-checkout/pollen-checkout-form";
+import { SledgeCheckoutForm } from "~/app/(storefront)/_templates/sledge/cart-checkout/sledge-checkout-form";
+
 // --- Shared mocks: every template form imports the same externals, so mocking
 // them here covers all nine. ---
 
@@ -20,7 +32,11 @@ vi.mock("~/trpc/react", () => {
   };
   const proxy: unknown = new Proxy(() => undefined, {
     get(_t, prop) {
-      if (prop === "useQuery" || prop === "useMutation" || prop === "useSuspenseQuery") {
+      if (
+        prop === "useQuery" ||
+        prop === "useMutation" ||
+        prop === "useSuspenseQuery"
+      ) {
         return () => hookResult;
       }
       return proxy;
@@ -51,9 +67,13 @@ vi.mock("next/image", () => ({
 }));
 
 vi.mock("next/link", () => ({
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  ),
+  default: ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => <a href={href}>{children}</a>,
 }));
 
 vi.mock("sonner", () => ({
@@ -62,18 +82,6 @@ vi.mock("sonner", () => ({
     error: () => undefined,
   }),
 }));
-
-import type { DefaultCheckoutPageTemplateProps } from "~/app/(storefront)/_templates/types";
-import { CheckoutForm as BambooCheckoutForm } from "~/app/(storefront)/_templates/bamboo/cart-checkout/bamboo-checkout-form";
-import { DarkTrendCheckoutForm } from "~/app/(storefront)/_templates/dark-trend/cart-checkout/dark-trend-checkout-form";
-import { DefaultCheckoutForm } from "~/app/(storefront)/_templates/default/cart-checkout/default-checkout-form";
-import { ElegantCheckoutForm } from "~/app/(storefront)/_templates/elegant/cart-checkout/elegant-checkout-form";
-import { HappyBambooCheckoutForm } from "~/app/(storefront)/_templates/happy-bamboo/cart-checkout/happy-bamboo-checkout-form";
-import { ModernCheckoutForm } from "~/app/(storefront)/_templates/modern/cart-checkout/modern-checkout-form";
-import { NoiseCheckoutForm } from "~/app/(storefront)/_templates/noise/cart-checkout/noise-checkout-form";
-import { PollenCheckoutForm } from "~/app/(storefront)/_templates/pollen/cart-checkout/pollen-checkout-form";
-import { SledgeCheckoutForm } from "~/app/(storefront)/_templates/sledge/cart-checkout/sledge-checkout-form";
-import { CartProvider } from "~/providers/cart-context";
 
 type BusinessProp = DefaultCheckoutPageTemplateProps["business"];
 
@@ -126,15 +134,18 @@ describe("checkout form renders for every template", () => {
     localStorage.setItem(CART_KEY, JSON.stringify([seededItem]));
   });
 
-  it.each(TEMPLATE_FORMS)("%s checkout form mounts with inputs", async (_name, Form) => {
-    render(
-      <CartProvider>
-        <Form business={business} />
-      </CartProvider>,
-    );
+  it.each(TEMPLATE_FORMS)(
+    "%s checkout form mounts with inputs",
+    async (_name, Form) => {
+      render(
+        <CartProvider>
+          <Form business={business} />
+        </CartProvider>,
+      );
 
-    // After cart hydration, the form shows contact/address inputs.
-    const textboxes = await screen.findAllByRole("textbox");
-    expect(textboxes.length).toBeGreaterThan(0);
-  });
+      // After cart hydration, the form shows contact/address inputs.
+      const textboxes = await screen.findAllByRole("textbox");
+      expect(textboxes.length).toBeGreaterThan(0);
+    },
+  );
 });

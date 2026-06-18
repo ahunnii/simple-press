@@ -2,6 +2,7 @@ import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { DbClient } from "~/server/db";
 import { deleteStoredObjects } from "~/lib/s3/delete";
 import {
   productCreateSchema,
@@ -16,7 +17,6 @@ import {
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import type { DbClient } from "~/server/db";
 
 /**
  * Deletes the given S3 objects, but only those whose URL is no longer referenced
@@ -27,8 +27,14 @@ async function deleteUnreferencedImageObjects(db: DbClient, urls: string[]) {
   const unique = [...new Set(urls.filter((u): u is string => !!u))];
   if (unique.length === 0) return;
   const [imageRefs, ogRefs] = await Promise.all([
-    db.image.findMany({ where: { url: { in: unique } }, select: { url: true } }),
-    db.product.findMany({ where: { ogImage: { in: unique } }, select: { ogImage: true } }),
+    db.image.findMany({
+      where: { url: { in: unique } },
+      select: { url: true },
+    }),
+    db.product.findMany({
+      where: { ogImage: { in: unique } },
+      select: { ogImage: true },
+    }),
   ]);
   const referenced = new Set<string>([
     ...imageRefs.map((i) => i.url),
@@ -205,7 +211,13 @@ export const productRouter = createTRPCRouter({
       };
 
       const [products, totalCount] = await ctx.db.$transaction([
-        ctx.db.product.findMany({ where, include, orderBy, skip, take: pageSize }),
+        ctx.db.product.findMany({
+          where,
+          include,
+          orderBy,
+          skip,
+          take: pageSize,
+        }),
         ctx.db.product.count({ where }),
       ]);
 
@@ -559,7 +571,9 @@ export const productRouter = createTRPCRouter({
 
   bulkSetPublished: ownerAdminProcedure
     .use(featureGate("products"))
-    .input(z.object({ ids: z.array(z.string()).min(1), published: z.boolean() }))
+    .input(
+      z.object({ ids: z.array(z.string()).min(1), published: z.boolean() }),
+    )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
@@ -725,7 +739,8 @@ export const productRouter = createTRPCRouter({
       if (!newSlug) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Could not generate a unique slug for the duplicated product",
+          message:
+            "Could not generate a unique slug for the duplicated product",
         });
       }
 
@@ -896,9 +911,7 @@ export const productRouter = createTRPCRouter({
 
         if (item.variantId !== null) {
           // Variant item
-          const variant = product.variants.find(
-            (v) => v.id === item.variantId,
-          );
+          const variant = product.variants.find((v) => v.id === item.variantId);
           if (!variant) {
             return {
               productId: item.productId,

@@ -53,10 +53,8 @@ export function ViiAnnouncementBar({
   announcementLinkText = "Learn More",
   announcementLinkHref = "/contact",
 }: ViiAnnouncementBarProps) {
-  const { data: discountBanner, isLoading } = api.discount.getActiveBanner.useQuery(
-    undefined,
-    { staleTime: 60_000 },
-  );
+  const { data: discountBanner, isLoading } =
+    api.discount.getActiveBanner.useQuery(undefined, { staleTime: 60_000 });
 
   // While discount query resolves, render nothing to avoid flash.
   // (If there's announcement text we could show it immediately, but waiting a
@@ -83,7 +81,12 @@ export function ViiAnnouncementBar({
           <strong>{discountBanner.code}</strong>
         </span>
         {isExternal ? (
-          <a href={href} style={linkStyle} target="_blank" rel="noopener noreferrer">
+          <a
+            href={href}
+            style={linkStyle}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Shop →<span className="sr-only">(opens in new tab)</span>
           </a>
         ) : (
@@ -110,8 +113,14 @@ export function ViiAnnouncementBar({
     >
       <span>{announcementText}</span>
       {isExternal ? (
-        <a href={announcementLinkHref} style={linkStyle} target="_blank" rel="noopener noreferrer">
-          {announcementLinkText} →<span className="sr-only">(opens in new tab)</span>
+        <a
+          href={announcementLinkHref}
+          style={linkStyle}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {announcementLinkText} →
+          <span className="sr-only">(opens in new tab)</span>
         </a>
       ) : (
         <Link href={announcementLinkHref} style={linkStyle}>

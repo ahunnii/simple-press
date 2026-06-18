@@ -2,6 +2,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { CartItem } from "./cart-context";
+
+import { CartProvider, useCart } from "./cart-context";
+
 // Cart shows toasts via sonner; stub it so tests don't touch the toast portal.
 vi.mock("sonner", () => ({
   toast: Object.assign(() => undefined, {
@@ -9,8 +13,6 @@ vi.mock("sonner", () => ({
     error: () => undefined,
   }),
 }));
-
-import { CartProvider, useCart, type CartItem } from "./cart-context";
 
 const SAMPLE: Omit<CartItem, "quantity"> = {
   productId: "p1",

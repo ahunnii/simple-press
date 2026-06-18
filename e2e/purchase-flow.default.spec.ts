@@ -21,13 +21,13 @@ test("default: add to cart → checkout → order success", async ({ page }) => 
   // Product page → add to cart.
   await page.goto(`${base}/shop/${tenant.productSlug}`);
   await page.getByRole("button", { name: "Add to cart" }).click();
-  await expect(page.getByRole("button", { name: "Added to bag" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Added to bag" }),
+  ).toBeVisible();
 
   // Cart persists in localStorage; land on checkout with a hydrated cart.
   await page.goto(`${base}/checkout`);
-  await expect(
-    page.getByRole("button", { name: SUBMIT_NAME }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: SUBMIT_NAME })).toBeVisible();
 
   const stub = stubStripe(page, {
     sessionId: "cs_test_e2e_default",

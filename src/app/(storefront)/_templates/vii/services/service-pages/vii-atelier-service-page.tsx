@@ -17,16 +17,15 @@
  *    Thin 1px tan rules between rows. No card borders, no shadows.
  * 4. Closing CTA (reuses ViiContactCtaSection).
  */
-
 import Image from "next/image";
 
+import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import { parseTemplateListRows } from "~/lib/template-fields";
-import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { PageTransition } from "~/components/page-animations";
+import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
-
-import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import { resolveAtelierFields } from "./fields";
 
 // ─── Sub-components ────────────────────────────────────────────────────────────

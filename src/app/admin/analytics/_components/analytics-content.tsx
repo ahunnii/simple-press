@@ -1,7 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart2, Clock, Eye, ExternalLink, MousePointerClick, ShoppingBag, ShoppingCart, CreditCard, Users } from "lucide-react";
+import {
+  BarChart2,
+  Clock,
+  CreditCard,
+  ExternalLink,
+  Eye,
+  MousePointerClick,
+  ShoppingBag,
+  ShoppingCart,
+  Users,
+} from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -12,7 +22,11 @@ import {
   YAxis,
 } from "recharts";
 
-import type { UmamiMetricRow, UmamiPageviewSeries, UmamiStats } from "~/lib/umami/client";
+import type {
+  UmamiMetricRow,
+  UmamiPageviewSeries,
+  UmamiStats,
+} from "~/lib/umami/client";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 // ─── Stat cards ───────────────────────────────────────────────────────────────
@@ -97,7 +111,12 @@ function EventsSection({
   rows: UmamiMetricRow[];
 }) {
   // Other events beyond the known commerce events
-  const KNOWN = new Set(["add-to-cart", "begin-checkout", "product-view", "purchase"]);
+  const KNOWN = new Set([
+    "add-to-cart",
+    "begin-checkout",
+    "product-view",
+    "purchase",
+  ]);
   const otherRows = rows.filter((r) => !KNOWN.has(r.x));
 
   return (
@@ -147,7 +166,9 @@ function EventsSection({
                 {rows.map((row, i) => (
                   <tr key={i} className="border-b last:border-0">
                     <td className="py-2 pr-4 font-mono text-xs">{row.x}</td>
-                    <td className="py-2 text-right">{row.y.toLocaleString()}</td>
+                    <td className="py-2 text-right">
+                      {row.y.toLocaleString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -172,8 +193,8 @@ function EmbedEngagementSection({
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Embed Engagement</h2>
       <p className="text-muted-foreground text-sm">
-        Tracks visitor interactions with third-party embedded widgets (e.g. booking
-        forms). Due to browser cross-origin security, only click-ins and
+        Tracks visitor interactions with third-party embedded widgets (e.g.
+        booking forms). Due to browser cross-origin security, only click-ins and
         approximate dwell time can be measured — exact in-frame activity is not
         accessible to the parent page.
       </p>
@@ -410,11 +431,7 @@ export function AnalyticsContent({
       {/* Top pages + referrers */}
       <div className="grid gap-6 lg:grid-cols-2">
         {topPages.configured ? (
-          <MetricTable
-            title="Top Pages"
-            rows={topPages.rows}
-            label="URL"
-          />
+          <MetricTable title="Top Pages" rows={topPages.rows} label="URL" />
         ) : (
           <NotConfiguredState />
         )}

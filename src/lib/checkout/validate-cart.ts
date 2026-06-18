@@ -1,9 +1,4 @@
-import type {
-  CartLineItem,
-  PoolMap,
-  ProductMap,
-  VariantMap,
-} from "./types";
+import type { CartLineItem, PoolMap, ProductMap, VariantMap } from "./types";
 
 export interface CartAvailabilityResult {
   /** Display names of unavailable items (may contain duplicates, as before). */
