@@ -20,6 +20,13 @@ export function useViiReveal(threshold = 0.1): {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    const el = ref.current;
+
+    // Arm the reveal system: the `.vii-js` flag gates the hidden state in CSS,
+    // so without JS (or before this effect runs) content stays fully visible
+    // rather than shipping blank. Added to the scope root on first mount.
+    el?.closest(".vii")?.classList.add("vii-js");
+
     // Honour the user's motion preference — skip animation entirely.
     if (
       typeof window !== "undefined" &&
@@ -29,7 +36,6 @@ export function useViiReveal(threshold = 0.1): {
       return;
     }
 
-    const el = ref.current;
     if (!el) return;
 
     const io = new IntersectionObserver(

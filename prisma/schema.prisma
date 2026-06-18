@@ -187,6 +187,7 @@ model Business {
   // Relationships
   products    Product[]
   collections Collection[]
+  services    Service[]
   orders      Order[]
   customers   Customer[]
   siteContent SiteContent?
@@ -409,6 +410,71 @@ model CollectionProduct {
   @@unique([collectionId, productId])
   @@index([collectionId])
   @@index([productId])
+}
+
+model Service {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  slug        String
+  description String?
+  image       String?
+
+  // Which per-service page template renders this service's detail page
+  serviceTemplateId String @default("service-one")
+
+  // { key: value } — service-page template fields
+  customFields Json?
+
+  published Boolean @default(false)
+  sortOrder  Int     @default(0)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  ogImage         String?
+
+  // Multi-tenancy
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  items ServiceItem[]
+
+  @@unique([businessId, slug])
+  @@index([businessId, published])
+}
+
+model ServiceItem {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  description String?
+  image       String?
+
+  // Display-only pricing / duration (not e-commerce)
+  priceLabel    String?
+  durationLabel String?
+
+  // External booking iframe (sanitized HTTPS URL only)
+  bookingEmbedSrc    String?
+  bookingEmbedHeight Int?
+
+  published Boolean @default(false)
+  sortOrder  Int     @default(0)
+
+  // Parent service
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  // Denormalized for scoping queries without joining Service
+  businessId String
+
+  @@index([serviceId])
+  @@index([businessId])
 }
 
 model Image {

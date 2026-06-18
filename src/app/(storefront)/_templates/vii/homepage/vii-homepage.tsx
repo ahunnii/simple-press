@@ -1,25 +1,44 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
+import { parseTemplateListRows } from "~/lib/template-fields";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
-import { parseTemplateListRows } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
-import { ViiHeroSection } from "./vii-hero-section";
-import { ViiWellbeingSection } from "./vii-wellbeing-section";
-import { ViiCategorySection } from "./vii-category-section";
-import { ViiStorySection } from "./vii-story-section";
-import { ViiJourneysSection } from "./vii-journeys-section";
-import { ViiProductRail } from "./vii-product-rail";
-import { ViiImageBand } from "./vii-image-band";
-import { ViiTestimonialQuote } from "./vii-testimonial-quote";
-import { ViiExploreSection } from "./vii-explore-section";
+import { ViiBlogSection } from "./vii-blog-section";
 import { ViiBrandsSection } from "./vii-brands-section";
+import { ViiCategorySection } from "./vii-category-section";
 import { ViiContactCtaSection } from "./vii-contact-cta-section";
+import { ViiDetroitSection } from "./vii-detroit-section";
+import { ViiHeroSection } from "./vii-hero-section";
+import { ViiImageBand } from "./vii-image-band";
 import { ViiInstagramStrip } from "./vii-instagram-strip";
+import { ViiProductRail } from "./vii-product-rail";
+import { ViiStorySection } from "./vii-story-section";
+import { ViiTestimonialQuote } from "./vii-testimonial-quote";
+import { ViiVideoFeature } from "./vii-video-feature";
 
 export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
   const homepage = await api.business.getHomepage();
+
+  // Blog posts for the journal section. `getBlogPages` is gated behind the
+  // "blog" feature flag, so when it's disabled the catch yields an empty array
+  // and the section renders nothing.
+  const blogPages = await api.content.getBlogPages().catch(() => []);
+  const blogPosts = blogPages.map((page) => ({
+    id: page.id,
+    title: page.title,
+    slug: page.slug,
+    excerpt: page.excerpt ?? "",
+    image: page.image ?? "",
+  }));
+
+  // Testimonial for the quote section. Fails gracefully when the feature is
+  // disabled or there are no approved reviews yet.
+  const testimonials = await api.testimonial
+    .listRandom({ limit: 1 })
+    .catch(() => []);
+  const latestTestimonial = testimonials[0] ?? null;
 
   const customFields = homepage?.siteContent?.customFields as
     | Record<string, unknown>
@@ -33,47 +52,51 @@ export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
     "vii.homepage.hero-heading",
     "vii.homepage.hero-cta-text",
     "vii.homepage.hero-cta-link",
-    // Wellbeing
-    "vii.homepage.wellbeing-heading",
-    "vii.homepage.wellbeing-heading-accent",
-    "vii.homepage.wellbeing-body",
     // Categories
     "vii.homepage.categories-overline",
     "vii.homepage.categories-heading",
+    // Video feature
+    "vii.homepage.video-overline",
+    "vii.homepage.video-heading",
+    "vii.homepage.video-heading-accent",
+    "vii.homepage.video-body",
+    "vii.homepage.video-file",
+    "vii.homepage.video-poster",
+    "vii.homepage.video-cta-text",
+    "vii.homepage.video-cta-link",
+    // Image Band
+    "vii.homepage.band-image",
+    // Inside the Studio (Story)
+    "vii.homepage.story-heading",
+    "vii.homepage.story-heading-accent",
+    "vii.homepage.story-intro",
     // Product rail
     "vii.homepage.product-rail-overline",
     "vii.homepage.product-rail-heading",
     "vii.homepage.product-rail-collection",
     "vii.homepage.product-rail-cta-text",
     "vii.homepage.product-rail-cta-link",
+    // Testimonial
+    "vii.homepage.testimonial-image",
+    "vii.homepage.testimonial-quote",
+    "vii.homepage.testimonial-author",
     // Brands
     "vii.homepage.brands-overline",
     "vii.homepage.brands-heading",
-    // Story
-    "vii.homepage.story-heading",
-    "vii.homepage.story-heading-accent",
-    "vii.homepage.story-intro",
-    // Journeys
-    "vii.homepage.journeys-overline",
-    "vii.homepage.journeys-heading-accent",
-    "vii.homepage.journeys-intro",
-    // Band
-    "vii.homepage.band-image",
-    // Testimonial
-    "vii.homepage.quote-image",
-    "vii.homepage.quote-text",
-    "vii.homepage.quote-author",
-    // Explore
-    "vii.homepage.explore-overline",
-    "vii.homepage.explore-heading",
-    "vii.homepage.explore-image",
-    "vii.homepage.explore-gallery-link-text",
-    "vii.homepage.explore-gallery-link",
-    "vii.homepage.explore-package-title",
-    "vii.homepage.explore-package-body",
-    "vii.homepage.explore-package-image",
-    "vii.homepage.explore-package-cta-text",
-    "vii.homepage.explore-package-cta-link",
+    // Blog
+    "vii.homepage.blog-heading",
+    "vii.homepage.blog-heading-accent",
+    "vii.homepage.blog-intro",
+    "vii.homepage.blog-cta-text",
+    "vii.homepage.blog-cta-link",
+    // Detroit / Location
+    "vii.homepage.detroit-overline",
+    "vii.homepage.detroit-heading",
+    "vii.homepage.detroit-heading-accent",
+    "vii.homepage.detroit-body",
+    "vii.homepage.detroit-image",
+    "vii.homepage.detroit-cta-text",
+    "vii.homepage.detroit-cta-link",
     // Contact
     "vii.homepage.contact-image",
     "vii.homepage.contact-heading",
@@ -87,23 +110,17 @@ export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
   ]);
 
   // ── Parse list fields from raw customFields ───────────────────────────────
-  const awards = parseTemplateListRows(
-    customFields?.["vii.homepage.wellbeing-awards"],
+  const categoryCards = parseTemplateListRows(
+    customFields?.["vii.homepage.categories-cards"],
   );
   const storyCards = parseTemplateListRows(
     customFields?.["vii.homepage.story-cards"],
   );
-  const journeysCards = parseTemplateListRows(
-    customFields?.["vii.homepage.journeys-cards"],
-  );
-  const exploreTabs = parseTemplateListRows(
-    customFields?.["vii.homepage.explore-tabs"],
-  );
-  const categoryCards = parseTemplateListRows(
-    customFields?.["vii.homepage.categories-cards"],
-  );
   const brandLogos = parseTemplateListRows(
     customFields?.["vii.homepage.brands-logos"],
+  );
+  const detroitDetails = parseTemplateListRows(
+    customFields?.["vii.homepage.detroit-details"],
   );
 
   // ── Resolve product rail (collection → fallback to latest products) ────────
@@ -118,18 +135,27 @@ export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
 
   // ── Resolve Instagram gallery ─────────────────────────────────────────────
   const instagramGalleryId = f["vii.homepage.instagram-gallery"];
-  const instagramGallery =
-    instagramGalleryId?.trim()
-      ? await db.gallery.findUnique({
-          where: { id: instagramGalleryId },
-          include: { images: { orderBy: { sortOrder: "asc" } } },
-        })
-      : null;
+  const instagramGallery = instagramGalleryId?.trim()
+    ? await db.gallery.findUnique({
+        where: { id: instagramGalleryId },
+        include: { images: { orderBy: { sortOrder: "asc" } } },
+      })
+    : null;
   const instagramImages =
     instagramGallery?.images.map((img) => ({
       url: img.url,
       altText: img.altText ?? "",
     })) ?? [];
+
+  // ── Testimonial resolution (manual override wins; fallback to DB) ─────────
+  const testimonialQuote =
+    (f["vii.homepage.testimonial-quote"]?.trim()
+      ? f["vii.homepage.testimonial-quote"]
+      : latestTestimonial?.text) ?? "";
+  const testimonialAuthor =
+    (f["vii.homepage.testimonial-quote"]?.trim()
+      ? f["vii.homepage.testimonial-author"]
+      : latestTestimonial?.customerName) ?? "";
 
   return (
     <HydrateClient>
@@ -144,38 +170,39 @@ export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
           heroCtaLink={f["vii.homepage.hero-cta-link"] ?? "/contact"}
         />
 
-        {/* 2. Wellbeing */}
-        <ViiWellbeingSection
-          heading={f["vii.homepage.wellbeing-heading"] ?? ""}
-          headingAccent={f["vii.homepage.wellbeing-heading-accent"] ?? ""}
-          body={f["vii.homepage.wellbeing-body"] ?? ""}
-          awards={awards}
-        />
-
-        {/* 3. Categories */}
+        {/* 2. Categories */}
         <ViiCategorySection
           overline={f["vii.homepage.categories-overline"] ?? ""}
           heading={f["vii.homepage.categories-heading"] ?? ""}
           cards={categoryCards}
         />
 
-        {/* 4. Story */}
-        <ViiStorySection
-          heading={f["vii.homepage.story-heading"] ?? ""}
-          headingAccent={f["vii.homepage.story-heading-accent"] ?? ""}
-          intro={f["vii.homepage.story-intro"] ?? ""}
-          cards={storyCards}
+        {/* 4. Text + Video */}
+        <ViiVideoFeature
+          overline={f["vii.homepage.video-overline"] ?? ""}
+          heading={f["vii.homepage.video-heading"] ?? ""}
+          headingAccent={f["vii.homepage.video-heading-accent"] ?? ""}
+          body={f["vii.homepage.video-body"] ?? ""}
+          videoSrc={f["vii.homepage.video-file"] ?? undefined}
+          posterSrc={f["vii.homepage.video-poster"] ?? undefined}
+          ctaText={f["vii.homepage.video-cta-text"] ?? ""}
+          ctaHref={f["vii.homepage.video-cta-link"] ?? "/about"}
         />
 
-        {/* 4. Journeys */}
-        <ViiJourneysSection
-          overline={f["vii.homepage.journeys-overline"] ?? ""}
-          headingAccent={f["vii.homepage.journeys-heading-accent"] ?? ""}
-          intro={f["vii.homepage.journeys-intro"] ?? ""}
-          cards={journeysCards}
-        />
+        {/* 5. Image Band */}
+        <ViiImageBand bandImage={f["vii.homepage.band-image"] ?? undefined} />
 
-        {/* 6. Product Rail */}
+        {/* 6. Inside the Studio */}
+        {storyCards.length > 0 ? (
+          <ViiStorySection
+            heading={f["vii.homepage.story-heading"] ?? ""}
+            headingAccent={f["vii.homepage.story-heading-accent"] ?? ""}
+            intro={f["vii.homepage.story-intro"] ?? ""}
+            cards={storyCards}
+          />
+        ) : null}
+
+        {/* 7. Product Rail */}
         <ViiProductRail
           overline={f["vii.homepage.product-rail-overline"] ?? ""}
           heading={f["vii.homepage.product-rail-heading"] ?? ""}
@@ -184,41 +211,51 @@ export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
           products={railProducts}
         />
 
-        {/* 7. Image Band */}
-        <ViiImageBand bandImage={f["vii.homepage.band-image"] ?? undefined} />
+        {/* 8. Testimonial Quote */}
+        {testimonialQuote ? (
+          <ViiTestimonialQuote
+            quoteImage={f["vii.homepage.testimonial-image"] ?? undefined}
+            quoteText={testimonialQuote}
+            quoteAuthor={testimonialAuthor}
+          />
+        ) : null}
 
-        {/* 6. Testimonial Quote */}
-        <ViiTestimonialQuote
-          quoteImage={f["vii.homepage.quote-image"] ?? undefined}
-          quoteText={f["vii.homepage.quote-text"] ?? ""}
-          quoteAuthor={f["vii.homepage.quote-author"] ?? ""}
-        />
-
-        {/* 7. Explore */}
-        <ViiExploreSection
-          overline={f["vii.homepage.explore-overline"] ?? ""}
-          heading={f["vii.homepage.explore-heading"] ?? ""}
-          exploreImage={f["vii.homepage.explore-image"] ?? undefined}
-          tabs={exploreTabs}
-          galleryLinkText={f["vii.homepage.explore-gallery-link-text"] ?? ""}
-          galleryLink={f["vii.homepage.explore-gallery-link"] ?? "/gallery"}
-          packageTitle={f["vii.homepage.explore-package-title"] ?? ""}
-          packageBody={f["vii.homepage.explore-package-body"] ?? ""}
-          packageImage={f["vii.homepage.explore-package-image"] ?? undefined}
-          packageCtaText={f["vii.homepage.explore-package-cta-text"] ?? ""}
-          packageCtaLink={
-            f["vii.homepage.explore-package-cta-link"] ?? "/contact"
-          }
-        />
-
-        {/* 10. Brands We Carry */}
+        {/* 9. Brands We Carry */}
         <ViiBrandsSection
           overline={f["vii.homepage.brands-overline"] ?? ""}
           heading={f["vii.homepage.brands-heading"] ?? ""}
           logos={brandLogos}
         />
 
-        {/* 11. Contact CTA */}
+        {/* 10. Blog / Journal */}
+        <ViiBlogSection
+          heading={f["vii.homepage.blog-heading"] ?? ""}
+          headingAccent={f["vii.homepage.blog-heading-accent"] ?? ""}
+          intro={f["vii.homepage.blog-intro"] ?? ""}
+          ctaText={f["vii.homepage.blog-cta-text"] ?? "Read the journal"}
+          ctaHref={f["vii.homepage.blog-cta-link"] ?? "/blog"}
+          posts={blogPosts}
+        />
+
+        {/* 11. Instagram Strip */}
+        <ViiInstagramStrip
+          handle={f["vii.homepage.instagram-handle"] ?? ""}
+          images={instagramImages}
+        />
+
+        {/* 12. Rooted in Detroit */}
+        <ViiDetroitSection
+          overline={f["vii.homepage.detroit-overline"] ?? ""}
+          heading={f["vii.homepage.detroit-heading"] ?? ""}
+          headingAccent={f["vii.homepage.detroit-heading-accent"] ?? ""}
+          body={f["vii.homepage.detroit-body"] ?? ""}
+          image={f["vii.homepage.detroit-image"] ?? undefined}
+          details={detroitDetails}
+          ctaText={f["vii.homepage.detroit-cta-text"] ?? ""}
+          ctaHref={f["vii.homepage.detroit-cta-link"] ?? "/contact"}
+        />
+
+        {/* 13. Contact CTA */}
         <ViiContactCtaSection
           contactImage={f["vii.homepage.contact-image"] ?? undefined}
           heading={f["vii.homepage.contact-heading"] ?? ""}
@@ -226,12 +263,6 @@ export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
           body={f["vii.homepage.contact-body"] ?? ""}
           phone={f["vii.homepage.contact-phone"] ?? ""}
           email={f["vii.homepage.contact-email"] ?? ""}
-        />
-
-        {/* 9. Instagram Strip */}
-        <ViiInstagramStrip
-          handle={f["vii.homepage.instagram-handle"] ?? ""}
-          images={instagramImages}
         />
       </PageTransition>
     </HydrateClient>

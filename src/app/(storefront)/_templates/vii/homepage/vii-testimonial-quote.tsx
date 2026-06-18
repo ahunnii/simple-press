@@ -19,7 +19,7 @@ export function ViiTestimonialQuote({
 
   return (
     <section
-      aria-label="Guest testimonial"
+      aria-label="Customer testimonial"
       style={{
         position: "relative",
         overflow: "hidden",
@@ -64,10 +64,7 @@ export function ViiTestimonialQuote({
           textAlign: "center",
         }}
       >
-        <blockquote
-          style={{ margin: 0, padding: 0 }}
-          cite={quoteAuthor ? undefined : undefined}
-        >
+        <blockquote style={{ margin: 0, padding: 0 }}>
           <p
             style={{
               fontFamily: "var(--font-vii-serif, serif)",

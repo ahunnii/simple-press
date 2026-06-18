@@ -63,9 +63,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
   return (
     <footer
       style={{
-        background: "var(--vii-navy)",
-        color: "var(--vii-cream)",
-        marginTop: 80,
+        background: "var(--vii-paper)",
+        color: "var(--vii-navy)",
       }}
     >
       {/* ── Main grid ── */}
@@ -98,7 +97,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                     fontSize: "28px",
                     fontWeight: 500,
                     letterSpacing: "0.02em",
-                    color: "var(--vii-cream)",
+                    color: "var(--vii-navy)",
                     lineHeight: 1,
                   }}
                 >
@@ -111,7 +110,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                       fontSize: "9px",
                       letterSpacing: "0.36em",
                       textTransform: "uppercase",
-                      color: "var(--vii-tan)",
+                      color: "var(--vii-ink-soft)",
                       fontWeight: 400,
                       marginTop: "6px",
                     }}
@@ -129,7 +128,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                   fontFamily: "var(--font-sans)",
                   fontSize: "13px",
                   lineHeight: 1.7,
-                  color: "var(--vii-tan)",
+                  color: "var(--vii-ink-soft)",
                   maxWidth: "280px",
                 }}
               >
@@ -144,7 +143,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                   <a
                     href={socialLinks.instagram}
                     className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-70"
-                    style={{ color: "var(--vii-tan)" }}
+                    style={{ color: "var(--vii-ink-soft)" }}
                     aria-label="Instagram"
                   >
                     <InstagramIcon className="h-4 w-4" />
@@ -154,7 +153,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                   <a
                     href={socialLinks.facebook}
                     className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-70"
-                    style={{ color: "var(--vii-tan)" }}
+                    style={{ color: "var(--vii-ink-soft)" }}
                     aria-label="Facebook"
                   >
                     <FacebookIcon className="h-4 w-4" />
@@ -187,7 +186,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                   fontSize: "10px",
                   letterSpacing: "0.28em",
                   textTransform: "uppercase",
-                  color: "var(--vii-tan)",
+                  color: "var(--vii-ink-soft)",
                   fontWeight: 500,
                   marginBottom: "20px",
                 }}
@@ -202,7 +201,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                       fontFamily: "var(--font-sans)",
                       fontSize: "11px",
                       fontWeight: 600,
-                      color: "var(--vii-cream)",
+                      color: "var(--vii-navy)",
                       marginBottom: "4px",
                       letterSpacing: "0.06em",
                       textTransform: "uppercase",
@@ -215,7 +214,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                       fontFamily: "var(--font-sans)",
                       fontSize: "13px",
                       lineHeight: 1.8,
-                      color: "var(--vii-tan)",
+                      color: "var(--vii-ink-soft)",
                     }}
                   >
                     {address}
@@ -230,7 +229,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                       fontFamily: "var(--font-sans)",
                       fontSize: "11px",
                       fontWeight: 600,
-                      color: "var(--vii-cream)",
+                      color: "var(--vii-navy)",
                       marginBottom: "4px",
                       letterSpacing: "0.06em",
                       textTransform: "uppercase",
@@ -243,7 +242,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                       fontFamily: "var(--font-sans)",
                       fontSize: "13px",
                       lineHeight: 1.8,
-                      color: "var(--vii-tan)",
+                      color: "var(--vii-ink-soft)",
                     }}
                   >
                     {email && (
@@ -269,7 +268,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
         className="mx-auto flex flex-col gap-3 px-8 py-5 sm:flex-row sm:items-center sm:justify-between"
         style={{
           maxWidth: "1320px",
-          borderTop: "1px solid rgba(193,170,145,0.2)",
+          borderTop: "1px solid rgba(30,53,64,0.12)",
         }}
       >
         <span
@@ -277,7 +276,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             fontFamily: "var(--font-sans)",
             fontSize: "11px",
             letterSpacing: "0.1em",
-            color: "var(--vii-tan)",
+            color: "var(--vii-ink-soft)",
           }}
         >
           © {new Date().getFullYear()} {name}
@@ -290,7 +289,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             fontSize: "10px",
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: "var(--vii-tan)",
+            color: "var(--vii-ink-soft)",
           }}
         >
           {privacyPolicy ? (
@@ -357,7 +356,7 @@ function ViiFooterCol({
           fontSize: "10px",
           letterSpacing: "0.28em",
           textTransform: "uppercase",
-          color: "var(--vii-tan)",
+          color: "var(--vii-ink-soft)",
           fontWeight: 500,
           marginBottom: "20px",
         }}
@@ -372,7 +371,7 @@ function ViiFooterCol({
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "13px",
-                color: "var(--vii-cream)",
+                color: "var(--vii-navy)",
                 textDecoration: "none",
                 lineHeight: 1.5,
                 transition: "opacity 0.2s",

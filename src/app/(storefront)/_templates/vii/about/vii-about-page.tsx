@@ -5,11 +5,12 @@ import type { TemplateListRow } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
 import { ViiContactCtaSection } from "../homepage/vii-contact-cta-section";
+import { ViiAboutBand } from "./vii-about-band";
 import { ViiAboutHero } from "./vii-about-hero";
-import { ViiAboutIntro } from "./vii-about-intro";
 import { ViiAboutMission } from "./vii-about-mission";
-import { ViiAboutPhilosophy } from "./vii-about-philosophy";
 import { ViiAboutSteps } from "./vii-about-steps";
+import { ViiAboutTeam } from "./vii-about-team";
+import { ViiAboutTeamOwner } from "./vii-about-team-owner";
 
 // Built-in example facial steps, used when the owner hasn't configured any.
 const DEFAULT_STEPS: TemplateListRow[] = [
@@ -51,6 +52,31 @@ const DEFAULT_STEPS: TemplateListRow[] = [
   },
 ];
 
+// Built-in example team, used when the owner hasn't configured any members.
+const DEFAULT_TEAM: TemplateListRow[] = [
+  {
+    _id: "default-member-1",
+    image: "",
+    name: "Maya Brooks",
+    role: "Licensed Esthetician",
+    bio: "A corrective-skincare specialist with a gentle touch and a love for teaching clients the why behind every product.",
+  },
+  {
+    _id: "default-member-2",
+    image: "",
+    name: "Devon Carter",
+    role: "Esthetician & Waxing Specialist",
+    bio: "Known for fast, painless service and a calm, easygoing chair-side manner that puts first-timers at ease.",
+  },
+  {
+    _id: "default-member-3",
+    image: "",
+    name: "Priya Nair",
+    role: "Skin Therapist",
+    bio: "Brings a holistic, results-driven approach and a deep knowledge of ingredients to every custom facial.",
+  },
+];
+
 export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
     | Record<string, unknown>
@@ -61,38 +87,47 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
     "vii.about.hero-image",
     "vii.about.hero-overline",
     "vii.about.hero-heading",
-    // Intro
-    "vii.about.intro-overline",
-    "vii.about.intro-heading",
-    "vii.about.intro-heading-accent",
-    "vii.about.intro-body",
     // Mission
-    "vii.about.mission-image",
+    "vii.about.mission-overline",
     "vii.about.mission-heading",
     "vii.about.mission-heading-accent",
     "vii.about.mission-body",
-    // Philosophy
-    "vii.about.philosophy-overline",
-    "vii.about.philosophy-heading",
-    "vii.about.philosophy-heading-accent",
-    "vii.about.philosophy-body",
-    "vii.about.philosophy-image",
     // Steps
     "vii.about.steps-overline",
     "vii.about.steps-heading",
     "vii.about.steps-heading-accent",
     "vii.about.steps-intro",
+    // Band
+    "vii.about.band-image",
+    "vii.about.band-label",
+    "vii.about.band-statement",
+    // Owner spotlight
+    "vii.about.owner-overline",
+    "vii.about.owner-heading",
+    "vii.about.owner-heading-accent",
+    "vii.about.owner-role",
+    "vii.about.owner-body",
+    "vii.about.owner-image",
+    // Team grid
+    "vii.about.team-overline",
+    "vii.about.team-heading",
+    "vii.about.team-intro",
     // CTA
     "vii.about.cta-image",
     "vii.about.cta-heading",
     "vii.about.cta-subheading",
     "vii.about.cta-body",
+    "vii.about.cta-button-label",
+    "vii.about.cta-button-link",
     "vii.about.cta-phone",
     "vii.about.cta-email",
   ]);
 
   const parsedSteps = parseTemplateListRows(customFields?.["vii.about.steps"]);
   const steps = parsedSteps.length > 0 ? parsedSteps : DEFAULT_STEPS;
+
+  const parsedTeam = parseTemplateListRows(customFields?.["vii.about.team"]);
+  const team = parsedTeam.length > 0 ? parsedTeam : DEFAULT_TEAM;
 
   return (
     <PageTransition>
@@ -103,32 +138,15 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
         heading={f["vii.about.hero-heading"] ?? "About"}
       />
 
-      {/* 2. Intro */}
-      <ViiAboutIntro
-        overline={f["vii.about.intro-overline"] ?? ""}
-        heading={f["vii.about.intro-heading"] ?? ""}
-        headingAccent={f["vii.about.intro-heading-accent"] ?? ""}
-        body={f["vii.about.intro-body"] ?? ""}
-      />
-
-      {/* 3. Mission */}
+      {/* 2. Mission */}
       <ViiAboutMission
-        missionImage={f["vii.about.mission-image"] ?? undefined}
+        overline={f["vii.about.mission-overline"] ?? ""}
         heading={f["vii.about.mission-heading"] ?? ""}
         headingAccent={f["vii.about.mission-heading-accent"] ?? ""}
         body={f["vii.about.mission-body"] ?? ""}
       />
 
-      {/* 4. Philosophy */}
-      <ViiAboutPhilosophy
-        overline={f["vii.about.philosophy-overline"] ?? ""}
-        heading={f["vii.about.philosophy-heading"] ?? ""}
-        headingAccent={f["vii.about.philosophy-heading-accent"] ?? ""}
-        body={f["vii.about.philosophy-body"] ?? ""}
-        philosophyImage={f["vii.about.philosophy-image"] ?? undefined}
-      />
-
-      {/* 5. Six-step facial ritual */}
+      {/* 3. Six-step facial ritual */}
       <ViiAboutSteps
         overline={f["vii.about.steps-overline"] ?? ""}
         heading={f["vii.about.steps-heading"] ?? ""}
@@ -137,12 +155,39 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
         steps={steps}
       />
 
-      {/* 6. Closing contact CTA */}
+      {/* 4. Atmospheric brand-statement band */}
+      <ViiAboutBand
+        bandImage={f["vii.about.band-image"] ?? undefined}
+        label={f["vii.about.band-label"] ?? ""}
+        statement={f["vii.about.band-statement"] ?? ""}
+      />
+
+      {/* 5. Meet the team — owner spotlight */}
+      <ViiAboutTeamOwner
+        overline={f["vii.about.owner-overline"] ?? ""}
+        heading={f["vii.about.owner-heading"] ?? ""}
+        headingAccent={f["vii.about.owner-heading-accent"] ?? ""}
+        role={f["vii.about.owner-role"] ?? ""}
+        body={f["vii.about.owner-body"] ?? ""}
+        ownerImage={f["vii.about.owner-image"] ?? undefined}
+      />
+
+      {/* 6. Meet the team — grid */}
+      <ViiAboutTeam
+        overline={f["vii.about.team-overline"] ?? ""}
+        heading={f["vii.about.team-heading"] ?? ""}
+        intro={f["vii.about.team-intro"] ?? ""}
+        members={team}
+      />
+
+      {/* 7. Closing contact CTA */}
       <ViiContactCtaSection
         contactImage={f["vii.about.cta-image"] ?? undefined}
         heading={f["vii.about.cta-heading"] ?? ""}
         subheading={f["vii.about.cta-subheading"] ?? ""}
         body={f["vii.about.cta-body"] ?? ""}
+        buttonLabel={f["vii.about.cta-button-label"] ?? ""}
+        buttonHref={f["vii.about.cta-button-link"] ?? ""}
         phone={f["vii.about.cta-phone"] ?? ""}
         email={f["vii.about.cta-email"] ?? ""}
       />

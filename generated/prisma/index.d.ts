@@ -69,6 +69,16 @@ export type Collection = $Result.DefaultSelection<Prisma.$CollectionPayload>
  */
 export type CollectionProduct = $Result.DefaultSelection<Prisma.$CollectionProductPayload>
 /**
+ * Model Service
+ * 
+ */
+export type Service = $Result.DefaultSelection<Prisma.$ServicePayload>
+/**
+ * Model ServiceItem
+ * 
+ */
+export type ServiceItem = $Result.DefaultSelection<Prisma.$ServiceItemPayload>
+/**
  * Model Image
  * 
  */
@@ -443,6 +453,26 @@ export class PrismaClient<
     * ```
     */
   get collectionProduct(): Prisma.CollectionProductDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.service`: Exposes CRUD operations for the **Service** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Services
+    * const services = await prisma.service.findMany()
+    * ```
+    */
+  get service(): Prisma.ServiceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.serviceItem`: Exposes CRUD operations for the **ServiceItem** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ServiceItems
+    * const serviceItems = await prisma.serviceItem.findMany()
+    * ```
+    */
+  get serviceItem(): Prisma.ServiceItemDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.image`: Exposes CRUD operations for the **Image** model.
@@ -1105,6 +1135,8 @@ export namespace Prisma {
     ProductVariant: 'ProductVariant',
     Collection: 'Collection',
     CollectionProduct: 'CollectionProduct',
+    Service: 'Service',
+    ServiceItem: 'ServiceItem',
     Image: 'Image',
     Customer: 'Customer',
     ShippingAddress: 'ShippingAddress',
@@ -1144,7 +1176,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "product" | "productVariant" | "collection" | "collectionProduct" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "platformConfig"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "platformConfig"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1959,6 +1991,154 @@ export namespace Prisma {
           count: {
             args: Prisma.CollectionProductCountArgs<ExtArgs>
             result: $Utils.Optional<CollectionProductCountAggregateOutputType> | number
+          }
+        }
+      }
+      Service: {
+        payload: Prisma.$ServicePayload<ExtArgs>
+        fields: Prisma.ServiceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ServiceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServicePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ServiceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServicePayload>
+          }
+          findFirst: {
+            args: Prisma.ServiceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServicePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ServiceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServicePayload>
+          }
+          findMany: {
+            args: Prisma.ServiceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServicePayload>[]
+          }
+          create: {
+            args: Prisma.ServiceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServicePayload>
+          }
+          createMany: {
+            args: Prisma.ServiceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ServiceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServicePayload>[]
+          }
+          delete: {
+            args: Prisma.ServiceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServicePayload>
+          }
+          update: {
+            args: Prisma.ServiceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServicePayload>
+          }
+          deleteMany: {
+            args: Prisma.ServiceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ServiceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ServiceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServicePayload>[]
+          }
+          upsert: {
+            args: Prisma.ServiceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServicePayload>
+          }
+          aggregate: {
+            args: Prisma.ServiceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateService>
+          }
+          groupBy: {
+            args: Prisma.ServiceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ServiceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ServiceCountArgs<ExtArgs>
+            result: $Utils.Optional<ServiceCountAggregateOutputType> | number
+          }
+        }
+      }
+      ServiceItem: {
+        payload: Prisma.$ServiceItemPayload<ExtArgs>
+        fields: Prisma.ServiceItemFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ServiceItemFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceItemPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ServiceItemFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceItemPayload>
+          }
+          findFirst: {
+            args: Prisma.ServiceItemFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceItemPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ServiceItemFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceItemPayload>
+          }
+          findMany: {
+            args: Prisma.ServiceItemFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceItemPayload>[]
+          }
+          create: {
+            args: Prisma.ServiceItemCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceItemPayload>
+          }
+          createMany: {
+            args: Prisma.ServiceItemCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ServiceItemCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceItemPayload>[]
+          }
+          delete: {
+            args: Prisma.ServiceItemDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceItemPayload>
+          }
+          update: {
+            args: Prisma.ServiceItemUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceItemPayload>
+          }
+          deleteMany: {
+            args: Prisma.ServiceItemDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ServiceItemUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ServiceItemUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceItemPayload>[]
+          }
+          upsert: {
+            args: Prisma.ServiceItemUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceItemPayload>
+          }
+          aggregate: {
+            args: Prisma.ServiceItemAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateServiceItem>
+          }
+          groupBy: {
+            args: Prisma.ServiceItemGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ServiceItemGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ServiceItemCountArgs<ExtArgs>
+            result: $Utils.Optional<ServiceItemCountAggregateOutputType> | number
           }
         }
       }
@@ -3623,6 +3803,8 @@ export namespace Prisma {
     productVariant?: ProductVariantOmit
     collection?: CollectionOmit
     collectionProduct?: CollectionProductOmit
+    service?: ServiceOmit
+    serviceItem?: ServiceItemOmit
     image?: ImageOmit
     customer?: CustomerOmit
     shippingAddress?: ShippingAddressOmit
@@ -3802,6 +3984,7 @@ export namespace Prisma {
   export type BusinessCountOutputType = {
     products: number
     collections: number
+    services: number
     orders: number
     customers: number
     images: number
@@ -3821,6 +4004,7 @@ export namespace Prisma {
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | BusinessCountOutputTypeCountProductsArgs
     collections?: boolean | BusinessCountOutputTypeCountCollectionsArgs
+    services?: boolean | BusinessCountOutputTypeCountServicesArgs
     orders?: boolean | BusinessCountOutputTypeCountOrdersArgs
     customers?: boolean | BusinessCountOutputTypeCountCustomersArgs
     images?: boolean | BusinessCountOutputTypeCountImagesArgs
@@ -3860,6 +4044,13 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountCollectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CollectionWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountServicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ServiceWhereInput
   }
 
   /**
@@ -4105,6 +4296,37 @@ export namespace Prisma {
    */
   export type CollectionCountOutputTypeCountCollectionProductsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CollectionProductWhereInput
+  }
+
+
+  /**
+   * Count Type ServiceCountOutputType
+   */
+
+  export type ServiceCountOutputType = {
+    items: number
+  }
+
+  export type ServiceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    items?: boolean | ServiceCountOutputTypeCountItemsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ServiceCountOutputType without action
+   */
+  export type ServiceCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceCountOutputType
+     */
+    select?: ServiceCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ServiceCountOutputType without action
+   */
+  export type ServiceCountOutputTypeCountItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ServiceItemWhereInput
   }
 
 
@@ -10419,6 +10641,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
+    services?: boolean | Business$servicesArgs<ExtArgs>
     orders?: boolean | Business$ordersArgs<ExtArgs>
     customers?: boolean | Business$customersArgs<ExtArgs>
     siteContent?: boolean | Business$siteContentArgs<ExtArgs>
@@ -10534,6 +10757,7 @@ export namespace Prisma {
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
+    services?: boolean | Business$servicesArgs<ExtArgs>
     orders?: boolean | Business$ordersArgs<ExtArgs>
     customers?: boolean | Business$customersArgs<ExtArgs>
     siteContent?: boolean | Business$siteContentArgs<ExtArgs>
@@ -10559,6 +10783,7 @@ export namespace Prisma {
     objects: {
       products: Prisma.$ProductPayload<ExtArgs>[]
       collections: Prisma.$CollectionPayload<ExtArgs>[]
+      services: Prisma.$ServicePayload<ExtArgs>[]
       orders: Prisma.$OrderPayload<ExtArgs>[]
       customers: Prisma.$CustomerPayload<ExtArgs>[]
       siteContent: Prisma.$SiteContentPayload<ExtArgs> | null
@@ -11000,6 +11225,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     products<T extends Business$productsArgs<ExtArgs> = {}>(args?: Subset<T, Business$productsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     collections<T extends Business$collectionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$collectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    services<T extends Business$servicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$servicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     orders<T extends Business$ordersArgs<ExtArgs> = {}>(args?: Subset<T, Business$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     customers<T extends Business$customersArgs<ExtArgs> = {}>(args?: Subset<T, Business$customersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     siteContent<T extends Business$siteContentArgs<ExtArgs> = {}>(args?: Subset<T, Business$siteContentArgs<ExtArgs>>): Prisma__SiteContentClient<$Result.GetResult<Prisma.$SiteContentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -11505,6 +11731,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: CollectionScalarFieldEnum | CollectionScalarFieldEnum[]
+  }
+
+  /**
+   * Business.services
+   */
+  export type Business$servicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+    where?: ServiceWhereInput
+    orderBy?: ServiceOrderByWithRelationInput | ServiceOrderByWithRelationInput[]
+    cursor?: ServiceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ServiceScalarFieldEnum | ServiceScalarFieldEnum[]
   }
 
   /**
@@ -18505,6 +18755,2467 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: CollectionProductInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Service
+   */
+
+  export type AggregateService = {
+    _count: ServiceCountAggregateOutputType | null
+    _avg: ServiceAvgAggregateOutputType | null
+    _sum: ServiceSumAggregateOutputType | null
+    _min: ServiceMinAggregateOutputType | null
+    _max: ServiceMaxAggregateOutputType | null
+  }
+
+  export type ServiceAvgAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type ServiceSumAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type ServiceMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    slug: string | null
+    description: string | null
+    image: string | null
+    serviceTemplateId: string | null
+    published: boolean | null
+    sortOrder: number | null
+    metaTitle: string | null
+    metaDescription: string | null
+    ogImage: string | null
+    businessId: string | null
+  }
+
+  export type ServiceMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    slug: string | null
+    description: string | null
+    image: string | null
+    serviceTemplateId: string | null
+    published: boolean | null
+    sortOrder: number | null
+    metaTitle: string | null
+    metaDescription: string | null
+    ogImage: string | null
+    businessId: string | null
+  }
+
+  export type ServiceCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    name: number
+    slug: number
+    description: number
+    image: number
+    serviceTemplateId: number
+    customFields: number
+    published: number
+    sortOrder: number
+    metaTitle: number
+    metaDescription: number
+    ogImage: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type ServiceAvgAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type ServiceSumAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type ServiceMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    slug?: true
+    description?: true
+    image?: true
+    serviceTemplateId?: true
+    published?: true
+    sortOrder?: true
+    metaTitle?: true
+    metaDescription?: true
+    ogImage?: true
+    businessId?: true
+  }
+
+  export type ServiceMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    slug?: true
+    description?: true
+    image?: true
+    serviceTemplateId?: true
+    published?: true
+    sortOrder?: true
+    metaTitle?: true
+    metaDescription?: true
+    ogImage?: true
+    businessId?: true
+  }
+
+  export type ServiceCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    slug?: true
+    description?: true
+    image?: true
+    serviceTemplateId?: true
+    customFields?: true
+    published?: true
+    sortOrder?: true
+    metaTitle?: true
+    metaDescription?: true
+    ogImage?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type ServiceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Service to aggregate.
+     */
+    where?: ServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Services to fetch.
+     */
+    orderBy?: ServiceOrderByWithRelationInput | ServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Services from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Services.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Services
+    **/
+    _count?: true | ServiceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ServiceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ServiceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ServiceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ServiceMaxAggregateInputType
+  }
+
+  export type GetServiceAggregateType<T extends ServiceAggregateArgs> = {
+        [P in keyof T & keyof AggregateService]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateService[P]>
+      : GetScalarType<T[P], AggregateService[P]>
+  }
+
+
+
+
+  export type ServiceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ServiceWhereInput
+    orderBy?: ServiceOrderByWithAggregationInput | ServiceOrderByWithAggregationInput[]
+    by: ServiceScalarFieldEnum[] | ServiceScalarFieldEnum
+    having?: ServiceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ServiceCountAggregateInputType | true
+    _avg?: ServiceAvgAggregateInputType
+    _sum?: ServiceSumAggregateInputType
+    _min?: ServiceMinAggregateInputType
+    _max?: ServiceMaxAggregateInputType
+  }
+
+  export type ServiceGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    name: string
+    slug: string
+    description: string | null
+    image: string | null
+    serviceTemplateId: string
+    customFields: JsonValue | null
+    published: boolean
+    sortOrder: number
+    metaTitle: string | null
+    metaDescription: string | null
+    ogImage: string | null
+    businessId: string
+    _count: ServiceCountAggregateOutputType | null
+    _avg: ServiceAvgAggregateOutputType | null
+    _sum: ServiceSumAggregateOutputType | null
+    _min: ServiceMinAggregateOutputType | null
+    _max: ServiceMaxAggregateOutputType | null
+  }
+
+  type GetServiceGroupByPayload<T extends ServiceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ServiceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ServiceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ServiceGroupByOutputType[P]>
+            : GetScalarType<T[P], ServiceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ServiceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    slug?: boolean
+    description?: boolean
+    image?: boolean
+    serviceTemplateId?: boolean
+    customFields?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    metaTitle?: boolean
+    metaDescription?: boolean
+    ogImage?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    items?: boolean | Service$itemsArgs<ExtArgs>
+    _count?: boolean | ServiceCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["service"]>
+
+  export type ServiceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    slug?: boolean
+    description?: boolean
+    image?: boolean
+    serviceTemplateId?: boolean
+    customFields?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    metaTitle?: boolean
+    metaDescription?: boolean
+    ogImage?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["service"]>
+
+  export type ServiceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    slug?: boolean
+    description?: boolean
+    image?: boolean
+    serviceTemplateId?: boolean
+    customFields?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    metaTitle?: boolean
+    metaDescription?: boolean
+    ogImage?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["service"]>
+
+  export type ServiceSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    slug?: boolean
+    description?: boolean
+    image?: boolean
+    serviceTemplateId?: boolean
+    customFields?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    metaTitle?: boolean
+    metaDescription?: boolean
+    ogImage?: boolean
+    businessId?: boolean
+  }
+
+  export type ServiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "description" | "image" | "serviceTemplateId" | "customFields" | "published" | "sortOrder" | "metaTitle" | "metaDescription" | "ogImage" | "businessId", ExtArgs["result"]["service"]>
+  export type ServiceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    items?: boolean | Service$itemsArgs<ExtArgs>
+    _count?: boolean | ServiceCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type ServiceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type ServiceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $ServicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Service"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      items: Prisma.$ServiceItemPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      name: string
+      slug: string
+      description: string | null
+      image: string | null
+      serviceTemplateId: string
+      customFields: Prisma.JsonValue | null
+      published: boolean
+      sortOrder: number
+      metaTitle: string | null
+      metaDescription: string | null
+      ogImage: string | null
+      businessId: string
+    }, ExtArgs["result"]["service"]>
+    composites: {}
+  }
+
+  type ServiceGetPayload<S extends boolean | null | undefined | ServiceDefaultArgs> = $Result.GetResult<Prisma.$ServicePayload, S>
+
+  type ServiceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ServiceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ServiceCountAggregateInputType | true
+    }
+
+  export interface ServiceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Service'], meta: { name: 'Service' } }
+    /**
+     * Find zero or one Service that matches the filter.
+     * @param {ServiceFindUniqueArgs} args - Arguments to find a Service
+     * @example
+     * // Get one Service
+     * const service = await prisma.service.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ServiceFindUniqueArgs>(args: SelectSubset<T, ServiceFindUniqueArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Service that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ServiceFindUniqueOrThrowArgs} args - Arguments to find a Service
+     * @example
+     * // Get one Service
+     * const service = await prisma.service.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ServiceFindUniqueOrThrowArgs>(args: SelectSubset<T, ServiceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Service that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceFindFirstArgs} args - Arguments to find a Service
+     * @example
+     * // Get one Service
+     * const service = await prisma.service.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ServiceFindFirstArgs>(args?: SelectSubset<T, ServiceFindFirstArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Service that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceFindFirstOrThrowArgs} args - Arguments to find a Service
+     * @example
+     * // Get one Service
+     * const service = await prisma.service.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ServiceFindFirstOrThrowArgs>(args?: SelectSubset<T, ServiceFindFirstOrThrowArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Services that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Services
+     * const services = await prisma.service.findMany()
+     * 
+     * // Get first 10 Services
+     * const services = await prisma.service.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const serviceWithIdOnly = await prisma.service.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ServiceFindManyArgs>(args?: SelectSubset<T, ServiceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Service.
+     * @param {ServiceCreateArgs} args - Arguments to create a Service.
+     * @example
+     * // Create one Service
+     * const Service = await prisma.service.create({
+     *   data: {
+     *     // ... data to create a Service
+     *   }
+     * })
+     * 
+     */
+    create<T extends ServiceCreateArgs>(args: SelectSubset<T, ServiceCreateArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Services.
+     * @param {ServiceCreateManyArgs} args - Arguments to create many Services.
+     * @example
+     * // Create many Services
+     * const service = await prisma.service.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ServiceCreateManyArgs>(args?: SelectSubset<T, ServiceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Services and returns the data saved in the database.
+     * @param {ServiceCreateManyAndReturnArgs} args - Arguments to create many Services.
+     * @example
+     * // Create many Services
+     * const service = await prisma.service.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Services and only return the `id`
+     * const serviceWithIdOnly = await prisma.service.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ServiceCreateManyAndReturnArgs>(args?: SelectSubset<T, ServiceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Service.
+     * @param {ServiceDeleteArgs} args - Arguments to delete one Service.
+     * @example
+     * // Delete one Service
+     * const Service = await prisma.service.delete({
+     *   where: {
+     *     // ... filter to delete one Service
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ServiceDeleteArgs>(args: SelectSubset<T, ServiceDeleteArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Service.
+     * @param {ServiceUpdateArgs} args - Arguments to update one Service.
+     * @example
+     * // Update one Service
+     * const service = await prisma.service.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ServiceUpdateArgs>(args: SelectSubset<T, ServiceUpdateArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Services.
+     * @param {ServiceDeleteManyArgs} args - Arguments to filter Services to delete.
+     * @example
+     * // Delete a few Services
+     * const { count } = await prisma.service.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ServiceDeleteManyArgs>(args?: SelectSubset<T, ServiceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Services.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Services
+     * const service = await prisma.service.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ServiceUpdateManyArgs>(args: SelectSubset<T, ServiceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Services and returns the data updated in the database.
+     * @param {ServiceUpdateManyAndReturnArgs} args - Arguments to update many Services.
+     * @example
+     * // Update many Services
+     * const service = await prisma.service.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Services and only return the `id`
+     * const serviceWithIdOnly = await prisma.service.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ServiceUpdateManyAndReturnArgs>(args: SelectSubset<T, ServiceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Service.
+     * @param {ServiceUpsertArgs} args - Arguments to update or create a Service.
+     * @example
+     * // Update or create a Service
+     * const service = await prisma.service.upsert({
+     *   create: {
+     *     // ... data to create a Service
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Service we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ServiceUpsertArgs>(args: SelectSubset<T, ServiceUpsertArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Services.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceCountArgs} args - Arguments to filter Services to count.
+     * @example
+     * // Count the number of Services
+     * const count = await prisma.service.count({
+     *   where: {
+     *     // ... the filter for the Services we want to count
+     *   }
+     * })
+    **/
+    count<T extends ServiceCountArgs>(
+      args?: Subset<T, ServiceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ServiceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Service.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ServiceAggregateArgs>(args: Subset<T, ServiceAggregateArgs>): Prisma.PrismaPromise<GetServiceAggregateType<T>>
+
+    /**
+     * Group by Service.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ServiceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ServiceGroupByArgs['orderBy'] }
+        : { orderBy?: ServiceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ServiceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetServiceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Service model
+   */
+  readonly fields: ServiceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Service.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ServiceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    items<T extends Service$itemsArgs<ExtArgs> = {}>(args?: Subset<T, Service$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Service model
+   */
+  interface ServiceFieldRefs {
+    readonly id: FieldRef<"Service", 'String'>
+    readonly createdAt: FieldRef<"Service", 'DateTime'>
+    readonly updatedAt: FieldRef<"Service", 'DateTime'>
+    readonly name: FieldRef<"Service", 'String'>
+    readonly slug: FieldRef<"Service", 'String'>
+    readonly description: FieldRef<"Service", 'String'>
+    readonly image: FieldRef<"Service", 'String'>
+    readonly serviceTemplateId: FieldRef<"Service", 'String'>
+    readonly customFields: FieldRef<"Service", 'Json'>
+    readonly published: FieldRef<"Service", 'Boolean'>
+    readonly sortOrder: FieldRef<"Service", 'Int'>
+    readonly metaTitle: FieldRef<"Service", 'String'>
+    readonly metaDescription: FieldRef<"Service", 'String'>
+    readonly ogImage: FieldRef<"Service", 'String'>
+    readonly businessId: FieldRef<"Service", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Service findUnique
+   */
+  export type ServiceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Service to fetch.
+     */
+    where: ServiceWhereUniqueInput
+  }
+
+  /**
+   * Service findUniqueOrThrow
+   */
+  export type ServiceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Service to fetch.
+     */
+    where: ServiceWhereUniqueInput
+  }
+
+  /**
+   * Service findFirst
+   */
+  export type ServiceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Service to fetch.
+     */
+    where?: ServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Services to fetch.
+     */
+    orderBy?: ServiceOrderByWithRelationInput | ServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Services.
+     */
+    cursor?: ServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Services from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Services.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Services.
+     */
+    distinct?: ServiceScalarFieldEnum | ServiceScalarFieldEnum[]
+  }
+
+  /**
+   * Service findFirstOrThrow
+   */
+  export type ServiceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Service to fetch.
+     */
+    where?: ServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Services to fetch.
+     */
+    orderBy?: ServiceOrderByWithRelationInput | ServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Services.
+     */
+    cursor?: ServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Services from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Services.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Services.
+     */
+    distinct?: ServiceScalarFieldEnum | ServiceScalarFieldEnum[]
+  }
+
+  /**
+   * Service findMany
+   */
+  export type ServiceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Services to fetch.
+     */
+    where?: ServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Services to fetch.
+     */
+    orderBy?: ServiceOrderByWithRelationInput | ServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Services.
+     */
+    cursor?: ServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Services from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Services.
+     */
+    skip?: number
+    distinct?: ServiceScalarFieldEnum | ServiceScalarFieldEnum[]
+  }
+
+  /**
+   * Service create
+   */
+  export type ServiceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Service.
+     */
+    data: XOR<ServiceCreateInput, ServiceUncheckedCreateInput>
+  }
+
+  /**
+   * Service createMany
+   */
+  export type ServiceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Services.
+     */
+    data: ServiceCreateManyInput | ServiceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Service createManyAndReturn
+   */
+  export type ServiceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * The data used to create many Services.
+     */
+    data: ServiceCreateManyInput | ServiceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Service update
+   */
+  export type ServiceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Service.
+     */
+    data: XOR<ServiceUpdateInput, ServiceUncheckedUpdateInput>
+    /**
+     * Choose, which Service to update.
+     */
+    where: ServiceWhereUniqueInput
+  }
+
+  /**
+   * Service updateMany
+   */
+  export type ServiceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Services.
+     */
+    data: XOR<ServiceUpdateManyMutationInput, ServiceUncheckedUpdateManyInput>
+    /**
+     * Filter which Services to update
+     */
+    where?: ServiceWhereInput
+    /**
+     * Limit how many Services to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Service updateManyAndReturn
+   */
+  export type ServiceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * The data used to update Services.
+     */
+    data: XOR<ServiceUpdateManyMutationInput, ServiceUncheckedUpdateManyInput>
+    /**
+     * Filter which Services to update
+     */
+    where?: ServiceWhereInput
+    /**
+     * Limit how many Services to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Service upsert
+   */
+  export type ServiceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Service to update in case it exists.
+     */
+    where: ServiceWhereUniqueInput
+    /**
+     * In case the Service found by the `where` argument doesn't exist, create a new Service with this data.
+     */
+    create: XOR<ServiceCreateInput, ServiceUncheckedCreateInput>
+    /**
+     * In case the Service was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ServiceUpdateInput, ServiceUncheckedUpdateInput>
+  }
+
+  /**
+   * Service delete
+   */
+  export type ServiceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+    /**
+     * Filter which Service to delete.
+     */
+    where: ServiceWhereUniqueInput
+  }
+
+  /**
+   * Service deleteMany
+   */
+  export type ServiceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Services to delete
+     */
+    where?: ServiceWhereInput
+    /**
+     * Limit how many Services to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Service.items
+   */
+  export type Service$itemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemInclude<ExtArgs> | null
+    where?: ServiceItemWhereInput
+    orderBy?: ServiceItemOrderByWithRelationInput | ServiceItemOrderByWithRelationInput[]
+    cursor?: ServiceItemWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ServiceItemScalarFieldEnum | ServiceItemScalarFieldEnum[]
+  }
+
+  /**
+   * Service without action
+   */
+  export type ServiceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Service
+     */
+    select?: ServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Service
+     */
+    omit?: ServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ServiceItem
+   */
+
+  export type AggregateServiceItem = {
+    _count: ServiceItemCountAggregateOutputType | null
+    _avg: ServiceItemAvgAggregateOutputType | null
+    _sum: ServiceItemSumAggregateOutputType | null
+    _min: ServiceItemMinAggregateOutputType | null
+    _max: ServiceItemMaxAggregateOutputType | null
+  }
+
+  export type ServiceItemAvgAggregateOutputType = {
+    bookingEmbedHeight: number | null
+    sortOrder: number | null
+  }
+
+  export type ServiceItemSumAggregateOutputType = {
+    bookingEmbedHeight: number | null
+    sortOrder: number | null
+  }
+
+  export type ServiceItemMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    description: string | null
+    image: string | null
+    priceLabel: string | null
+    durationLabel: string | null
+    bookingEmbedSrc: string | null
+    bookingEmbedHeight: number | null
+    published: boolean | null
+    sortOrder: number | null
+    serviceId: string | null
+    businessId: string | null
+  }
+
+  export type ServiceItemMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    description: string | null
+    image: string | null
+    priceLabel: string | null
+    durationLabel: string | null
+    bookingEmbedSrc: string | null
+    bookingEmbedHeight: number | null
+    published: boolean | null
+    sortOrder: number | null
+    serviceId: string | null
+    businessId: string | null
+  }
+
+  export type ServiceItemCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    name: number
+    description: number
+    image: number
+    priceLabel: number
+    durationLabel: number
+    bookingEmbedSrc: number
+    bookingEmbedHeight: number
+    published: number
+    sortOrder: number
+    serviceId: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type ServiceItemAvgAggregateInputType = {
+    bookingEmbedHeight?: true
+    sortOrder?: true
+  }
+
+  export type ServiceItemSumAggregateInputType = {
+    bookingEmbedHeight?: true
+    sortOrder?: true
+  }
+
+  export type ServiceItemMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    description?: true
+    image?: true
+    priceLabel?: true
+    durationLabel?: true
+    bookingEmbedSrc?: true
+    bookingEmbedHeight?: true
+    published?: true
+    sortOrder?: true
+    serviceId?: true
+    businessId?: true
+  }
+
+  export type ServiceItemMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    description?: true
+    image?: true
+    priceLabel?: true
+    durationLabel?: true
+    bookingEmbedSrc?: true
+    bookingEmbedHeight?: true
+    published?: true
+    sortOrder?: true
+    serviceId?: true
+    businessId?: true
+  }
+
+  export type ServiceItemCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    description?: true
+    image?: true
+    priceLabel?: true
+    durationLabel?: true
+    bookingEmbedSrc?: true
+    bookingEmbedHeight?: true
+    published?: true
+    sortOrder?: true
+    serviceId?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type ServiceItemAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ServiceItem to aggregate.
+     */
+    where?: ServiceItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceItems to fetch.
+     */
+    orderBy?: ServiceItemOrderByWithRelationInput | ServiceItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ServiceItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ServiceItems
+    **/
+    _count?: true | ServiceItemCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ServiceItemAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ServiceItemSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ServiceItemMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ServiceItemMaxAggregateInputType
+  }
+
+  export type GetServiceItemAggregateType<T extends ServiceItemAggregateArgs> = {
+        [P in keyof T & keyof AggregateServiceItem]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateServiceItem[P]>
+      : GetScalarType<T[P], AggregateServiceItem[P]>
+  }
+
+
+
+
+  export type ServiceItemGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ServiceItemWhereInput
+    orderBy?: ServiceItemOrderByWithAggregationInput | ServiceItemOrderByWithAggregationInput[]
+    by: ServiceItemScalarFieldEnum[] | ServiceItemScalarFieldEnum
+    having?: ServiceItemScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ServiceItemCountAggregateInputType | true
+    _avg?: ServiceItemAvgAggregateInputType
+    _sum?: ServiceItemSumAggregateInputType
+    _min?: ServiceItemMinAggregateInputType
+    _max?: ServiceItemMaxAggregateInputType
+  }
+
+  export type ServiceItemGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    name: string
+    description: string | null
+    image: string | null
+    priceLabel: string | null
+    durationLabel: string | null
+    bookingEmbedSrc: string | null
+    bookingEmbedHeight: number | null
+    published: boolean
+    sortOrder: number
+    serviceId: string
+    businessId: string
+    _count: ServiceItemCountAggregateOutputType | null
+    _avg: ServiceItemAvgAggregateOutputType | null
+    _sum: ServiceItemSumAggregateOutputType | null
+    _min: ServiceItemMinAggregateOutputType | null
+    _max: ServiceItemMaxAggregateOutputType | null
+  }
+
+  type GetServiceItemGroupByPayload<T extends ServiceItemGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ServiceItemGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ServiceItemGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ServiceItemGroupByOutputType[P]>
+            : GetScalarType<T[P], ServiceItemGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ServiceItemSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    description?: boolean
+    image?: boolean
+    priceLabel?: boolean
+    durationLabel?: boolean
+    bookingEmbedSrc?: boolean
+    bookingEmbedHeight?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    serviceId?: boolean
+    businessId?: boolean
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["serviceItem"]>
+
+  export type ServiceItemSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    description?: boolean
+    image?: boolean
+    priceLabel?: boolean
+    durationLabel?: boolean
+    bookingEmbedSrc?: boolean
+    bookingEmbedHeight?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    serviceId?: boolean
+    businessId?: boolean
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["serviceItem"]>
+
+  export type ServiceItemSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    description?: boolean
+    image?: boolean
+    priceLabel?: boolean
+    durationLabel?: boolean
+    bookingEmbedSrc?: boolean
+    bookingEmbedHeight?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    serviceId?: boolean
+    businessId?: boolean
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["serviceItem"]>
+
+  export type ServiceItemSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    description?: boolean
+    image?: boolean
+    priceLabel?: boolean
+    durationLabel?: boolean
+    bookingEmbedSrc?: boolean
+    bookingEmbedHeight?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    serviceId?: boolean
+    businessId?: boolean
+  }
+
+  export type ServiceItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "description" | "image" | "priceLabel" | "durationLabel" | "bookingEmbedSrc" | "bookingEmbedHeight" | "published" | "sortOrder" | "serviceId" | "businessId", ExtArgs["result"]["serviceItem"]>
+  export type ServiceItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }
+  export type ServiceItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }
+  export type ServiceItemIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    service?: boolean | ServiceDefaultArgs<ExtArgs>
+  }
+
+  export type $ServiceItemPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ServiceItem"
+    objects: {
+      service: Prisma.$ServicePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      name: string
+      description: string | null
+      image: string | null
+      priceLabel: string | null
+      durationLabel: string | null
+      bookingEmbedSrc: string | null
+      bookingEmbedHeight: number | null
+      published: boolean
+      sortOrder: number
+      serviceId: string
+      businessId: string
+    }, ExtArgs["result"]["serviceItem"]>
+    composites: {}
+  }
+
+  type ServiceItemGetPayload<S extends boolean | null | undefined | ServiceItemDefaultArgs> = $Result.GetResult<Prisma.$ServiceItemPayload, S>
+
+  type ServiceItemCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ServiceItemFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ServiceItemCountAggregateInputType | true
+    }
+
+  export interface ServiceItemDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ServiceItem'], meta: { name: 'ServiceItem' } }
+    /**
+     * Find zero or one ServiceItem that matches the filter.
+     * @param {ServiceItemFindUniqueArgs} args - Arguments to find a ServiceItem
+     * @example
+     * // Get one ServiceItem
+     * const serviceItem = await prisma.serviceItem.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ServiceItemFindUniqueArgs>(args: SelectSubset<T, ServiceItemFindUniqueArgs<ExtArgs>>): Prisma__ServiceItemClient<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ServiceItem that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ServiceItemFindUniqueOrThrowArgs} args - Arguments to find a ServiceItem
+     * @example
+     * // Get one ServiceItem
+     * const serviceItem = await prisma.serviceItem.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ServiceItemFindUniqueOrThrowArgs>(args: SelectSubset<T, ServiceItemFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ServiceItemClient<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ServiceItem that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceItemFindFirstArgs} args - Arguments to find a ServiceItem
+     * @example
+     * // Get one ServiceItem
+     * const serviceItem = await prisma.serviceItem.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ServiceItemFindFirstArgs>(args?: SelectSubset<T, ServiceItemFindFirstArgs<ExtArgs>>): Prisma__ServiceItemClient<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ServiceItem that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceItemFindFirstOrThrowArgs} args - Arguments to find a ServiceItem
+     * @example
+     * // Get one ServiceItem
+     * const serviceItem = await prisma.serviceItem.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ServiceItemFindFirstOrThrowArgs>(args?: SelectSubset<T, ServiceItemFindFirstOrThrowArgs<ExtArgs>>): Prisma__ServiceItemClient<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ServiceItems that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceItemFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ServiceItems
+     * const serviceItems = await prisma.serviceItem.findMany()
+     * 
+     * // Get first 10 ServiceItems
+     * const serviceItems = await prisma.serviceItem.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const serviceItemWithIdOnly = await prisma.serviceItem.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ServiceItemFindManyArgs>(args?: SelectSubset<T, ServiceItemFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ServiceItem.
+     * @param {ServiceItemCreateArgs} args - Arguments to create a ServiceItem.
+     * @example
+     * // Create one ServiceItem
+     * const ServiceItem = await prisma.serviceItem.create({
+     *   data: {
+     *     // ... data to create a ServiceItem
+     *   }
+     * })
+     * 
+     */
+    create<T extends ServiceItemCreateArgs>(args: SelectSubset<T, ServiceItemCreateArgs<ExtArgs>>): Prisma__ServiceItemClient<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ServiceItems.
+     * @param {ServiceItemCreateManyArgs} args - Arguments to create many ServiceItems.
+     * @example
+     * // Create many ServiceItems
+     * const serviceItem = await prisma.serviceItem.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ServiceItemCreateManyArgs>(args?: SelectSubset<T, ServiceItemCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ServiceItems and returns the data saved in the database.
+     * @param {ServiceItemCreateManyAndReturnArgs} args - Arguments to create many ServiceItems.
+     * @example
+     * // Create many ServiceItems
+     * const serviceItem = await prisma.serviceItem.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ServiceItems and only return the `id`
+     * const serviceItemWithIdOnly = await prisma.serviceItem.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ServiceItemCreateManyAndReturnArgs>(args?: SelectSubset<T, ServiceItemCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ServiceItem.
+     * @param {ServiceItemDeleteArgs} args - Arguments to delete one ServiceItem.
+     * @example
+     * // Delete one ServiceItem
+     * const ServiceItem = await prisma.serviceItem.delete({
+     *   where: {
+     *     // ... filter to delete one ServiceItem
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ServiceItemDeleteArgs>(args: SelectSubset<T, ServiceItemDeleteArgs<ExtArgs>>): Prisma__ServiceItemClient<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ServiceItem.
+     * @param {ServiceItemUpdateArgs} args - Arguments to update one ServiceItem.
+     * @example
+     * // Update one ServiceItem
+     * const serviceItem = await prisma.serviceItem.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ServiceItemUpdateArgs>(args: SelectSubset<T, ServiceItemUpdateArgs<ExtArgs>>): Prisma__ServiceItemClient<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ServiceItems.
+     * @param {ServiceItemDeleteManyArgs} args - Arguments to filter ServiceItems to delete.
+     * @example
+     * // Delete a few ServiceItems
+     * const { count } = await prisma.serviceItem.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ServiceItemDeleteManyArgs>(args?: SelectSubset<T, ServiceItemDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ServiceItems.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceItemUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ServiceItems
+     * const serviceItem = await prisma.serviceItem.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ServiceItemUpdateManyArgs>(args: SelectSubset<T, ServiceItemUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ServiceItems and returns the data updated in the database.
+     * @param {ServiceItemUpdateManyAndReturnArgs} args - Arguments to update many ServiceItems.
+     * @example
+     * // Update many ServiceItems
+     * const serviceItem = await prisma.serviceItem.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ServiceItems and only return the `id`
+     * const serviceItemWithIdOnly = await prisma.serviceItem.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ServiceItemUpdateManyAndReturnArgs>(args: SelectSubset<T, ServiceItemUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ServiceItem.
+     * @param {ServiceItemUpsertArgs} args - Arguments to update or create a ServiceItem.
+     * @example
+     * // Update or create a ServiceItem
+     * const serviceItem = await prisma.serviceItem.upsert({
+     *   create: {
+     *     // ... data to create a ServiceItem
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ServiceItem we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ServiceItemUpsertArgs>(args: SelectSubset<T, ServiceItemUpsertArgs<ExtArgs>>): Prisma__ServiceItemClient<$Result.GetResult<Prisma.$ServiceItemPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ServiceItems.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceItemCountArgs} args - Arguments to filter ServiceItems to count.
+     * @example
+     * // Count the number of ServiceItems
+     * const count = await prisma.serviceItem.count({
+     *   where: {
+     *     // ... the filter for the ServiceItems we want to count
+     *   }
+     * })
+    **/
+    count<T extends ServiceItemCountArgs>(
+      args?: Subset<T, ServiceItemCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ServiceItemCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ServiceItem.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceItemAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ServiceItemAggregateArgs>(args: Subset<T, ServiceItemAggregateArgs>): Prisma.PrismaPromise<GetServiceItemAggregateType<T>>
+
+    /**
+     * Group by ServiceItem.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceItemGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ServiceItemGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ServiceItemGroupByArgs['orderBy'] }
+        : { orderBy?: ServiceItemGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ServiceItemGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetServiceItemGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ServiceItem model
+   */
+  readonly fields: ServiceItemFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ServiceItem.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ServiceItemClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    service<T extends ServiceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ServiceDefaultArgs<ExtArgs>>): Prisma__ServiceClient<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ServiceItem model
+   */
+  interface ServiceItemFieldRefs {
+    readonly id: FieldRef<"ServiceItem", 'String'>
+    readonly createdAt: FieldRef<"ServiceItem", 'DateTime'>
+    readonly updatedAt: FieldRef<"ServiceItem", 'DateTime'>
+    readonly name: FieldRef<"ServiceItem", 'String'>
+    readonly description: FieldRef<"ServiceItem", 'String'>
+    readonly image: FieldRef<"ServiceItem", 'String'>
+    readonly priceLabel: FieldRef<"ServiceItem", 'String'>
+    readonly durationLabel: FieldRef<"ServiceItem", 'String'>
+    readonly bookingEmbedSrc: FieldRef<"ServiceItem", 'String'>
+    readonly bookingEmbedHeight: FieldRef<"ServiceItem", 'Int'>
+    readonly published: FieldRef<"ServiceItem", 'Boolean'>
+    readonly sortOrder: FieldRef<"ServiceItem", 'Int'>
+    readonly serviceId: FieldRef<"ServiceItem", 'String'>
+    readonly businessId: FieldRef<"ServiceItem", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ServiceItem findUnique
+   */
+  export type ServiceItemFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemInclude<ExtArgs> | null
+    /**
+     * Filter, which ServiceItem to fetch.
+     */
+    where: ServiceItemWhereUniqueInput
+  }
+
+  /**
+   * ServiceItem findUniqueOrThrow
+   */
+  export type ServiceItemFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemInclude<ExtArgs> | null
+    /**
+     * Filter, which ServiceItem to fetch.
+     */
+    where: ServiceItemWhereUniqueInput
+  }
+
+  /**
+   * ServiceItem findFirst
+   */
+  export type ServiceItemFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemInclude<ExtArgs> | null
+    /**
+     * Filter, which ServiceItem to fetch.
+     */
+    where?: ServiceItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceItems to fetch.
+     */
+    orderBy?: ServiceItemOrderByWithRelationInput | ServiceItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ServiceItems.
+     */
+    cursor?: ServiceItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ServiceItems.
+     */
+    distinct?: ServiceItemScalarFieldEnum | ServiceItemScalarFieldEnum[]
+  }
+
+  /**
+   * ServiceItem findFirstOrThrow
+   */
+  export type ServiceItemFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemInclude<ExtArgs> | null
+    /**
+     * Filter, which ServiceItem to fetch.
+     */
+    where?: ServiceItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceItems to fetch.
+     */
+    orderBy?: ServiceItemOrderByWithRelationInput | ServiceItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ServiceItems.
+     */
+    cursor?: ServiceItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ServiceItems.
+     */
+    distinct?: ServiceItemScalarFieldEnum | ServiceItemScalarFieldEnum[]
+  }
+
+  /**
+   * ServiceItem findMany
+   */
+  export type ServiceItemFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemInclude<ExtArgs> | null
+    /**
+     * Filter, which ServiceItems to fetch.
+     */
+    where?: ServiceItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceItems to fetch.
+     */
+    orderBy?: ServiceItemOrderByWithRelationInput | ServiceItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ServiceItems.
+     */
+    cursor?: ServiceItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceItems.
+     */
+    skip?: number
+    distinct?: ServiceItemScalarFieldEnum | ServiceItemScalarFieldEnum[]
+  }
+
+  /**
+   * ServiceItem create
+   */
+  export type ServiceItemCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ServiceItem.
+     */
+    data: XOR<ServiceItemCreateInput, ServiceItemUncheckedCreateInput>
+  }
+
+  /**
+   * ServiceItem createMany
+   */
+  export type ServiceItemCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ServiceItems.
+     */
+    data: ServiceItemCreateManyInput | ServiceItemCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ServiceItem createManyAndReturn
+   */
+  export type ServiceItemCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * The data used to create many ServiceItems.
+     */
+    data: ServiceItemCreateManyInput | ServiceItemCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ServiceItem update
+   */
+  export type ServiceItemUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ServiceItem.
+     */
+    data: XOR<ServiceItemUpdateInput, ServiceItemUncheckedUpdateInput>
+    /**
+     * Choose, which ServiceItem to update.
+     */
+    where: ServiceItemWhereUniqueInput
+  }
+
+  /**
+   * ServiceItem updateMany
+   */
+  export type ServiceItemUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ServiceItems.
+     */
+    data: XOR<ServiceItemUpdateManyMutationInput, ServiceItemUncheckedUpdateManyInput>
+    /**
+     * Filter which ServiceItems to update
+     */
+    where?: ServiceItemWhereInput
+    /**
+     * Limit how many ServiceItems to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ServiceItem updateManyAndReturn
+   */
+  export type ServiceItemUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * The data used to update ServiceItems.
+     */
+    data: XOR<ServiceItemUpdateManyMutationInput, ServiceItemUncheckedUpdateManyInput>
+    /**
+     * Filter which ServiceItems to update
+     */
+    where?: ServiceItemWhereInput
+    /**
+     * Limit how many ServiceItems to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ServiceItem upsert
+   */
+  export type ServiceItemUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ServiceItem to update in case it exists.
+     */
+    where: ServiceItemWhereUniqueInput
+    /**
+     * In case the ServiceItem found by the `where` argument doesn't exist, create a new ServiceItem with this data.
+     */
+    create: XOR<ServiceItemCreateInput, ServiceItemUncheckedCreateInput>
+    /**
+     * In case the ServiceItem was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ServiceItemUpdateInput, ServiceItemUncheckedUpdateInput>
+  }
+
+  /**
+   * ServiceItem delete
+   */
+  export type ServiceItemDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemInclude<ExtArgs> | null
+    /**
+     * Filter which ServiceItem to delete.
+     */
+    where: ServiceItemWhereUniqueInput
+  }
+
+  /**
+   * ServiceItem deleteMany
+   */
+  export type ServiceItemDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ServiceItems to delete
+     */
+    where?: ServiceItemWhereInput
+    /**
+     * Limit how many ServiceItems to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ServiceItem without action
+   */
+  export type ServiceItemDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceItem
+     */
+    select?: ServiceItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceItem
+     */
+    omit?: ServiceItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceItemInclude<ExtArgs> | null
   }
 
 
@@ -44400,6 +47111,47 @@ export namespace Prisma {
   export type CollectionProductScalarFieldEnum = (typeof CollectionProductScalarFieldEnum)[keyof typeof CollectionProductScalarFieldEnum]
 
 
+  export const ServiceScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    name: 'name',
+    slug: 'slug',
+    description: 'description',
+    image: 'image',
+    serviceTemplateId: 'serviceTemplateId',
+    customFields: 'customFields',
+    published: 'published',
+    sortOrder: 'sortOrder',
+    metaTitle: 'metaTitle',
+    metaDescription: 'metaDescription',
+    ogImage: 'ogImage',
+    businessId: 'businessId'
+  };
+
+  export type ServiceScalarFieldEnum = (typeof ServiceScalarFieldEnum)[keyof typeof ServiceScalarFieldEnum]
+
+
+  export const ServiceItemScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    name: 'name',
+    description: 'description',
+    image: 'image',
+    priceLabel: 'priceLabel',
+    durationLabel: 'durationLabel',
+    bookingEmbedSrc: 'bookingEmbedSrc',
+    bookingEmbedHeight: 'bookingEmbedHeight',
+    published: 'published',
+    sortOrder: 'sortOrder',
+    serviceId: 'serviceId',
+    businessId: 'businessId'
+  };
+
+  export type ServiceItemScalarFieldEnum = (typeof ServiceItemScalarFieldEnum)[keyof typeof ServiceItemScalarFieldEnum]
+
+
   export const ImageScalarFieldEnum: {
     id: 'id',
     createdAt: 'createdAt',
@@ -45383,6 +48135,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFilter<"Business"> | boolean
     products?: ProductListRelationFilter
     collections?: CollectionListRelationFilter
+    services?: ServiceListRelationFilter
     orders?: OrderListRelationFilter
     customers?: CustomerListRelationFilter
     siteContent?: XOR<SiteContentNullableScalarRelationFilter, SiteContentWhereInput> | null
@@ -45431,6 +48184,7 @@ export namespace Prisma {
     offersInStorePickup?: SortOrder
     products?: ProductOrderByRelationAggregateInput
     collections?: CollectionOrderByRelationAggregateInput
+    services?: ServiceOrderByRelationAggregateInput
     orders?: OrderOrderByRelationAggregateInput
     customers?: CustomerOrderByRelationAggregateInput
     siteContent?: SiteContentOrderByWithRelationInput
@@ -45482,6 +48236,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFilter<"Business"> | boolean
     products?: ProductListRelationFilter
     collections?: CollectionListRelationFilter
+    services?: ServiceListRelationFilter
     orders?: OrderListRelationFilter
     customers?: CustomerListRelationFilter
     siteContent?: XOR<SiteContentNullableScalarRelationFilter, SiteContentWhereInput> | null
@@ -46226,6 +48981,219 @@ export namespace Prisma {
     sortOrder?: IntWithAggregatesFilter<"CollectionProduct"> | number
     collectionId?: StringWithAggregatesFilter<"CollectionProduct"> | string
     productId?: StringWithAggregatesFilter<"CollectionProduct"> | string
+  }
+
+  export type ServiceWhereInput = {
+    AND?: ServiceWhereInput | ServiceWhereInput[]
+    OR?: ServiceWhereInput[]
+    NOT?: ServiceWhereInput | ServiceWhereInput[]
+    id?: StringFilter<"Service"> | string
+    createdAt?: DateTimeFilter<"Service"> | Date | string
+    updatedAt?: DateTimeFilter<"Service"> | Date | string
+    name?: StringFilter<"Service"> | string
+    slug?: StringFilter<"Service"> | string
+    description?: StringNullableFilter<"Service"> | string | null
+    image?: StringNullableFilter<"Service"> | string | null
+    serviceTemplateId?: StringFilter<"Service"> | string
+    customFields?: JsonNullableFilter<"Service">
+    published?: BoolFilter<"Service"> | boolean
+    sortOrder?: IntFilter<"Service"> | number
+    metaTitle?: StringNullableFilter<"Service"> | string | null
+    metaDescription?: StringNullableFilter<"Service"> | string | null
+    ogImage?: StringNullableFilter<"Service"> | string | null
+    businessId?: StringFilter<"Service"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    items?: ServiceItemListRelationFilter
+  }
+
+  export type ServiceOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    description?: SortOrderInput | SortOrder
+    image?: SortOrderInput | SortOrder
+    serviceTemplateId?: SortOrder
+    customFields?: SortOrderInput | SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    metaTitle?: SortOrderInput | SortOrder
+    metaDescription?: SortOrderInput | SortOrder
+    ogImage?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+    items?: ServiceItemOrderByRelationAggregateInput
+  }
+
+  export type ServiceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    businessId_slug?: ServiceBusinessIdSlugCompoundUniqueInput
+    AND?: ServiceWhereInput | ServiceWhereInput[]
+    OR?: ServiceWhereInput[]
+    NOT?: ServiceWhereInput | ServiceWhereInput[]
+    createdAt?: DateTimeFilter<"Service"> | Date | string
+    updatedAt?: DateTimeFilter<"Service"> | Date | string
+    name?: StringFilter<"Service"> | string
+    slug?: StringFilter<"Service"> | string
+    description?: StringNullableFilter<"Service"> | string | null
+    image?: StringNullableFilter<"Service"> | string | null
+    serviceTemplateId?: StringFilter<"Service"> | string
+    customFields?: JsonNullableFilter<"Service">
+    published?: BoolFilter<"Service"> | boolean
+    sortOrder?: IntFilter<"Service"> | number
+    metaTitle?: StringNullableFilter<"Service"> | string | null
+    metaDescription?: StringNullableFilter<"Service"> | string | null
+    ogImage?: StringNullableFilter<"Service"> | string | null
+    businessId?: StringFilter<"Service"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    items?: ServiceItemListRelationFilter
+  }, "id" | "businessId_slug">
+
+  export type ServiceOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    description?: SortOrderInput | SortOrder
+    image?: SortOrderInput | SortOrder
+    serviceTemplateId?: SortOrder
+    customFields?: SortOrderInput | SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    metaTitle?: SortOrderInput | SortOrder
+    metaDescription?: SortOrderInput | SortOrder
+    ogImage?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+    _count?: ServiceCountOrderByAggregateInput
+    _avg?: ServiceAvgOrderByAggregateInput
+    _max?: ServiceMaxOrderByAggregateInput
+    _min?: ServiceMinOrderByAggregateInput
+    _sum?: ServiceSumOrderByAggregateInput
+  }
+
+  export type ServiceScalarWhereWithAggregatesInput = {
+    AND?: ServiceScalarWhereWithAggregatesInput | ServiceScalarWhereWithAggregatesInput[]
+    OR?: ServiceScalarWhereWithAggregatesInput[]
+    NOT?: ServiceScalarWhereWithAggregatesInput | ServiceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Service"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Service"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Service"> | Date | string
+    name?: StringWithAggregatesFilter<"Service"> | string
+    slug?: StringWithAggregatesFilter<"Service"> | string
+    description?: StringNullableWithAggregatesFilter<"Service"> | string | null
+    image?: StringNullableWithAggregatesFilter<"Service"> | string | null
+    serviceTemplateId?: StringWithAggregatesFilter<"Service"> | string
+    customFields?: JsonNullableWithAggregatesFilter<"Service">
+    published?: BoolWithAggregatesFilter<"Service"> | boolean
+    sortOrder?: IntWithAggregatesFilter<"Service"> | number
+    metaTitle?: StringNullableWithAggregatesFilter<"Service"> | string | null
+    metaDescription?: StringNullableWithAggregatesFilter<"Service"> | string | null
+    ogImage?: StringNullableWithAggregatesFilter<"Service"> | string | null
+    businessId?: StringWithAggregatesFilter<"Service"> | string
+  }
+
+  export type ServiceItemWhereInput = {
+    AND?: ServiceItemWhereInput | ServiceItemWhereInput[]
+    OR?: ServiceItemWhereInput[]
+    NOT?: ServiceItemWhereInput | ServiceItemWhereInput[]
+    id?: StringFilter<"ServiceItem"> | string
+    createdAt?: DateTimeFilter<"ServiceItem"> | Date | string
+    updatedAt?: DateTimeFilter<"ServiceItem"> | Date | string
+    name?: StringFilter<"ServiceItem"> | string
+    description?: StringNullableFilter<"ServiceItem"> | string | null
+    image?: StringNullableFilter<"ServiceItem"> | string | null
+    priceLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    durationLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
+    bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
+    published?: BoolFilter<"ServiceItem"> | boolean
+    sortOrder?: IntFilter<"ServiceItem"> | number
+    serviceId?: StringFilter<"ServiceItem"> | string
+    businessId?: StringFilter<"ServiceItem"> | string
+    service?: XOR<ServiceScalarRelationFilter, ServiceWhereInput>
+  }
+
+  export type ServiceItemOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    image?: SortOrderInput | SortOrder
+    priceLabel?: SortOrderInput | SortOrder
+    durationLabel?: SortOrderInput | SortOrder
+    bookingEmbedSrc?: SortOrderInput | SortOrder
+    bookingEmbedHeight?: SortOrderInput | SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    serviceId?: SortOrder
+    businessId?: SortOrder
+    service?: ServiceOrderByWithRelationInput
+  }
+
+  export type ServiceItemWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ServiceItemWhereInput | ServiceItemWhereInput[]
+    OR?: ServiceItemWhereInput[]
+    NOT?: ServiceItemWhereInput | ServiceItemWhereInput[]
+    createdAt?: DateTimeFilter<"ServiceItem"> | Date | string
+    updatedAt?: DateTimeFilter<"ServiceItem"> | Date | string
+    name?: StringFilter<"ServiceItem"> | string
+    description?: StringNullableFilter<"ServiceItem"> | string | null
+    image?: StringNullableFilter<"ServiceItem"> | string | null
+    priceLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    durationLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
+    bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
+    published?: BoolFilter<"ServiceItem"> | boolean
+    sortOrder?: IntFilter<"ServiceItem"> | number
+    serviceId?: StringFilter<"ServiceItem"> | string
+    businessId?: StringFilter<"ServiceItem"> | string
+    service?: XOR<ServiceScalarRelationFilter, ServiceWhereInput>
+  }, "id">
+
+  export type ServiceItemOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    image?: SortOrderInput | SortOrder
+    priceLabel?: SortOrderInput | SortOrder
+    durationLabel?: SortOrderInput | SortOrder
+    bookingEmbedSrc?: SortOrderInput | SortOrder
+    bookingEmbedHeight?: SortOrderInput | SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    serviceId?: SortOrder
+    businessId?: SortOrder
+    _count?: ServiceItemCountOrderByAggregateInput
+    _avg?: ServiceItemAvgOrderByAggregateInput
+    _max?: ServiceItemMaxOrderByAggregateInput
+    _min?: ServiceItemMinOrderByAggregateInput
+    _sum?: ServiceItemSumOrderByAggregateInput
+  }
+
+  export type ServiceItemScalarWhereWithAggregatesInput = {
+    AND?: ServiceItemScalarWhereWithAggregatesInput | ServiceItemScalarWhereWithAggregatesInput[]
+    OR?: ServiceItemScalarWhereWithAggregatesInput[]
+    NOT?: ServiceItemScalarWhereWithAggregatesInput | ServiceItemScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ServiceItem"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ServiceItem"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ServiceItem"> | Date | string
+    name?: StringWithAggregatesFilter<"ServiceItem"> | string
+    description?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
+    image?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
+    priceLabel?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
+    durationLabel?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
+    bookingEmbedSrc?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
+    bookingEmbedHeight?: IntNullableWithAggregatesFilter<"ServiceItem"> | number | null
+    published?: BoolWithAggregatesFilter<"ServiceItem"> | boolean
+    sortOrder?: IntWithAggregatesFilter<"ServiceItem"> | number
+    serviceId?: StringWithAggregatesFilter<"ServiceItem"> | string
+    businessId?: StringWithAggregatesFilter<"ServiceItem"> | string
   }
 
   export type ImageWhereInput = {
@@ -48757,6 +51725,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -48805,6 +51774,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -48853,6 +51823,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -48901,6 +51872,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -49794,6 +52766,253 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     collectionId?: StringFieldUpdateOperationsInput | string
     productId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ServiceCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    description?: string | null
+    image?: string | null
+    serviceTemplateId?: string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: boolean
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    ogImage?: string | null
+    business: BusinessCreateNestedOneWithoutServicesInput
+    items?: ServiceItemCreateNestedManyWithoutServiceInput
+  }
+
+  export type ServiceUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    description?: string | null
+    image?: string | null
+    serviceTemplateId?: string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: boolean
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    ogImage?: string | null
+    businessId: string
+    items?: ServiceItemUncheckedCreateNestedManyWithoutServiceInput
+  }
+
+  export type ServiceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceTemplateId?: StringFieldUpdateOperationsInput | string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutServicesNestedInput
+    items?: ServiceItemUpdateManyWithoutServiceNestedInput
+  }
+
+  export type ServiceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceTemplateId?: StringFieldUpdateOperationsInput | string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    items?: ServiceItemUncheckedUpdateManyWithoutServiceNestedInput
+  }
+
+  export type ServiceCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    description?: string | null
+    image?: string | null
+    serviceTemplateId?: string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: boolean
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    ogImage?: string | null
+    businessId: string
+  }
+
+  export type ServiceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceTemplateId?: StringFieldUpdateOperationsInput | string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ServiceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceTemplateId?: StringFieldUpdateOperationsInput | string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ServiceItemCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    description?: string | null
+    image?: string | null
+    priceLabel?: string | null
+    durationLabel?: string | null
+    bookingEmbedSrc?: string | null
+    bookingEmbedHeight?: number | null
+    published?: boolean
+    sortOrder?: number
+    businessId: string
+    service: ServiceCreateNestedOneWithoutItemsInput
+  }
+
+  export type ServiceItemUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    description?: string | null
+    image?: string | null
+    priceLabel?: string | null
+    durationLabel?: string | null
+    bookingEmbedSrc?: string | null
+    bookingEmbedHeight?: number | null
+    published?: boolean
+    sortOrder?: number
+    serviceId: string
+    businessId: string
+  }
+
+  export type ServiceItemUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
+    service?: ServiceUpdateOneRequiredWithoutItemsNestedInput
+  }
+
+  export type ServiceItemUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    serviceId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ServiceItemCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    description?: string | null
+    image?: string | null
+    priceLabel?: string | null
+    durationLabel?: string | null
+    bookingEmbedSrc?: string | null
+    bookingEmbedHeight?: number | null
+    published?: boolean
+    sortOrder?: number
+    serviceId: string
+    businessId: string
+  }
+
+  export type ServiceItemUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ServiceItemUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    serviceId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ImageCreateInput = {
@@ -52568,6 +55787,12 @@ export namespace Prisma {
     none?: CollectionWhereInput
   }
 
+  export type ServiceListRelationFilter = {
+    every?: ServiceWhereInput
+    some?: ServiceWhereInput
+    none?: ServiceWhereInput
+  }
+
   export type OrderListRelationFilter = {
     every?: OrderWhereInput
     some?: OrderWhereInput
@@ -52638,6 +55863,10 @@ export namespace Prisma {
   }
 
   export type CollectionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ServiceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -53399,6 +56628,147 @@ export namespace Prisma {
   }
 
   export type CollectionProductSumOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type ServiceItemListRelationFilter = {
+    every?: ServiceItemWhereInput
+    some?: ServiceItemWhereInput
+    none?: ServiceItemWhereInput
+  }
+
+  export type ServiceItemOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ServiceBusinessIdSlugCompoundUniqueInput = {
+    businessId: string
+    slug: string
+  }
+
+  export type ServiceCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    description?: SortOrder
+    image?: SortOrder
+    serviceTemplateId?: SortOrder
+    customFields?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    metaTitle?: SortOrder
+    metaDescription?: SortOrder
+    ogImage?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type ServiceAvgOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type ServiceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    description?: SortOrder
+    image?: SortOrder
+    serviceTemplateId?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    metaTitle?: SortOrder
+    metaDescription?: SortOrder
+    ogImage?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type ServiceMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    description?: SortOrder
+    image?: SortOrder
+    serviceTemplateId?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    metaTitle?: SortOrder
+    metaDescription?: SortOrder
+    ogImage?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type ServiceSumOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type ServiceScalarRelationFilter = {
+    is?: ServiceWhereInput
+    isNot?: ServiceWhereInput
+  }
+
+  export type ServiceItemCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    image?: SortOrder
+    priceLabel?: SortOrder
+    durationLabel?: SortOrder
+    bookingEmbedSrc?: SortOrder
+    bookingEmbedHeight?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    serviceId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type ServiceItemAvgOrderByAggregateInput = {
+    bookingEmbedHeight?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type ServiceItemMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    image?: SortOrder
+    priceLabel?: SortOrder
+    durationLabel?: SortOrder
+    bookingEmbedSrc?: SortOrder
+    bookingEmbedHeight?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    serviceId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type ServiceItemMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    image?: SortOrder
+    priceLabel?: SortOrder
+    durationLabel?: SortOrder
+    bookingEmbedSrc?: SortOrder
+    bookingEmbedHeight?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    serviceId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type ServiceItemSumOrderByAggregateInput = {
+    bookingEmbedHeight?: SortOrder
     sortOrder?: SortOrder
   }
 
@@ -55022,6 +58392,13 @@ export namespace Prisma {
     connect?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
   }
 
+  export type ServiceCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<ServiceCreateWithoutBusinessInput, ServiceUncheckedCreateWithoutBusinessInput> | ServiceCreateWithoutBusinessInput[] | ServiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: ServiceCreateOrConnectWithoutBusinessInput | ServiceCreateOrConnectWithoutBusinessInput[]
+    createMany?: ServiceCreateManyBusinessInputEnvelope
+    connect?: ServiceWhereUniqueInput | ServiceWhereUniqueInput[]
+  }
+
   export type OrderCreateNestedManyWithoutBusinessInput = {
     create?: XOR<OrderCreateWithoutBusinessInput, OrderUncheckedCreateWithoutBusinessInput> | OrderCreateWithoutBusinessInput[] | OrderUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutBusinessInput | OrderCreateOrConnectWithoutBusinessInput[]
@@ -55138,6 +58515,13 @@ export namespace Prisma {
     connectOrCreate?: CollectionCreateOrConnectWithoutBusinessInput | CollectionCreateOrConnectWithoutBusinessInput[]
     createMany?: CollectionCreateManyBusinessInputEnvelope
     connect?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
+  }
+
+  export type ServiceUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<ServiceCreateWithoutBusinessInput, ServiceUncheckedCreateWithoutBusinessInput> | ServiceCreateWithoutBusinessInput[] | ServiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: ServiceCreateOrConnectWithoutBusinessInput | ServiceCreateOrConnectWithoutBusinessInput[]
+    createMany?: ServiceCreateManyBusinessInputEnvelope
+    connect?: ServiceWhereUniqueInput | ServiceWhereUniqueInput[]
   }
 
   export type OrderUncheckedCreateNestedManyWithoutBusinessInput = {
@@ -55282,6 +58666,20 @@ export namespace Prisma {
     update?: CollectionUpdateWithWhereUniqueWithoutBusinessInput | CollectionUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: CollectionUpdateManyWithWhereWithoutBusinessInput | CollectionUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: CollectionScalarWhereInput | CollectionScalarWhereInput[]
+  }
+
+  export type ServiceUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<ServiceCreateWithoutBusinessInput, ServiceUncheckedCreateWithoutBusinessInput> | ServiceCreateWithoutBusinessInput[] | ServiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: ServiceCreateOrConnectWithoutBusinessInput | ServiceCreateOrConnectWithoutBusinessInput[]
+    upsert?: ServiceUpsertWithWhereUniqueWithoutBusinessInput | ServiceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: ServiceCreateManyBusinessInputEnvelope
+    set?: ServiceWhereUniqueInput | ServiceWhereUniqueInput[]
+    disconnect?: ServiceWhereUniqueInput | ServiceWhereUniqueInput[]
+    delete?: ServiceWhereUniqueInput | ServiceWhereUniqueInput[]
+    connect?: ServiceWhereUniqueInput | ServiceWhereUniqueInput[]
+    update?: ServiceUpdateWithWhereUniqueWithoutBusinessInput | ServiceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: ServiceUpdateManyWithWhereWithoutBusinessInput | ServiceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: ServiceScalarWhereInput | ServiceScalarWhereInput[]
   }
 
   export type OrderUpdateManyWithoutBusinessNestedInput = {
@@ -55516,6 +58914,20 @@ export namespace Prisma {
     update?: CollectionUpdateWithWhereUniqueWithoutBusinessInput | CollectionUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: CollectionUpdateManyWithWhereWithoutBusinessInput | CollectionUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: CollectionScalarWhereInput | CollectionScalarWhereInput[]
+  }
+
+  export type ServiceUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<ServiceCreateWithoutBusinessInput, ServiceUncheckedCreateWithoutBusinessInput> | ServiceCreateWithoutBusinessInput[] | ServiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: ServiceCreateOrConnectWithoutBusinessInput | ServiceCreateOrConnectWithoutBusinessInput[]
+    upsert?: ServiceUpsertWithWhereUniqueWithoutBusinessInput | ServiceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: ServiceCreateManyBusinessInputEnvelope
+    set?: ServiceWhereUniqueInput | ServiceWhereUniqueInput[]
+    disconnect?: ServiceWhereUniqueInput | ServiceWhereUniqueInput[]
+    delete?: ServiceWhereUniqueInput | ServiceWhereUniqueInput[]
+    connect?: ServiceWhereUniqueInput | ServiceWhereUniqueInput[]
+    update?: ServiceUpdateWithWhereUniqueWithoutBusinessInput | ServiceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: ServiceUpdateManyWithWhereWithoutBusinessInput | ServiceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: ServiceScalarWhereInput | ServiceScalarWhereInput[]
   }
 
   export type OrderUncheckedUpdateManyWithoutBusinessNestedInput = {
@@ -56224,6 +59636,76 @@ export namespace Prisma {
     upsert?: ProductUpsertWithoutCollectionProductsInput
     connect?: ProductWhereUniqueInput
     update?: XOR<XOR<ProductUpdateToOneWithWhereWithoutCollectionProductsInput, ProductUpdateWithoutCollectionProductsInput>, ProductUncheckedUpdateWithoutCollectionProductsInput>
+  }
+
+  export type BusinessCreateNestedOneWithoutServicesInput = {
+    create?: XOR<BusinessCreateWithoutServicesInput, BusinessUncheckedCreateWithoutServicesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutServicesInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type ServiceItemCreateNestedManyWithoutServiceInput = {
+    create?: XOR<ServiceItemCreateWithoutServiceInput, ServiceItemUncheckedCreateWithoutServiceInput> | ServiceItemCreateWithoutServiceInput[] | ServiceItemUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: ServiceItemCreateOrConnectWithoutServiceInput | ServiceItemCreateOrConnectWithoutServiceInput[]
+    createMany?: ServiceItemCreateManyServiceInputEnvelope
+    connect?: ServiceItemWhereUniqueInput | ServiceItemWhereUniqueInput[]
+  }
+
+  export type ServiceItemUncheckedCreateNestedManyWithoutServiceInput = {
+    create?: XOR<ServiceItemCreateWithoutServiceInput, ServiceItemUncheckedCreateWithoutServiceInput> | ServiceItemCreateWithoutServiceInput[] | ServiceItemUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: ServiceItemCreateOrConnectWithoutServiceInput | ServiceItemCreateOrConnectWithoutServiceInput[]
+    createMany?: ServiceItemCreateManyServiceInputEnvelope
+    connect?: ServiceItemWhereUniqueInput | ServiceItemWhereUniqueInput[]
+  }
+
+  export type BusinessUpdateOneRequiredWithoutServicesNestedInput = {
+    create?: XOR<BusinessCreateWithoutServicesInput, BusinessUncheckedCreateWithoutServicesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutServicesInput
+    upsert?: BusinessUpsertWithoutServicesInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutServicesInput, BusinessUpdateWithoutServicesInput>, BusinessUncheckedUpdateWithoutServicesInput>
+  }
+
+  export type ServiceItemUpdateManyWithoutServiceNestedInput = {
+    create?: XOR<ServiceItemCreateWithoutServiceInput, ServiceItemUncheckedCreateWithoutServiceInput> | ServiceItemCreateWithoutServiceInput[] | ServiceItemUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: ServiceItemCreateOrConnectWithoutServiceInput | ServiceItemCreateOrConnectWithoutServiceInput[]
+    upsert?: ServiceItemUpsertWithWhereUniqueWithoutServiceInput | ServiceItemUpsertWithWhereUniqueWithoutServiceInput[]
+    createMany?: ServiceItemCreateManyServiceInputEnvelope
+    set?: ServiceItemWhereUniqueInput | ServiceItemWhereUniqueInput[]
+    disconnect?: ServiceItemWhereUniqueInput | ServiceItemWhereUniqueInput[]
+    delete?: ServiceItemWhereUniqueInput | ServiceItemWhereUniqueInput[]
+    connect?: ServiceItemWhereUniqueInput | ServiceItemWhereUniqueInput[]
+    update?: ServiceItemUpdateWithWhereUniqueWithoutServiceInput | ServiceItemUpdateWithWhereUniqueWithoutServiceInput[]
+    updateMany?: ServiceItemUpdateManyWithWhereWithoutServiceInput | ServiceItemUpdateManyWithWhereWithoutServiceInput[]
+    deleteMany?: ServiceItemScalarWhereInput | ServiceItemScalarWhereInput[]
+  }
+
+  export type ServiceItemUncheckedUpdateManyWithoutServiceNestedInput = {
+    create?: XOR<ServiceItemCreateWithoutServiceInput, ServiceItemUncheckedCreateWithoutServiceInput> | ServiceItemCreateWithoutServiceInput[] | ServiceItemUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: ServiceItemCreateOrConnectWithoutServiceInput | ServiceItemCreateOrConnectWithoutServiceInput[]
+    upsert?: ServiceItemUpsertWithWhereUniqueWithoutServiceInput | ServiceItemUpsertWithWhereUniqueWithoutServiceInput[]
+    createMany?: ServiceItemCreateManyServiceInputEnvelope
+    set?: ServiceItemWhereUniqueInput | ServiceItemWhereUniqueInput[]
+    disconnect?: ServiceItemWhereUniqueInput | ServiceItemWhereUniqueInput[]
+    delete?: ServiceItemWhereUniqueInput | ServiceItemWhereUniqueInput[]
+    connect?: ServiceItemWhereUniqueInput | ServiceItemWhereUniqueInput[]
+    update?: ServiceItemUpdateWithWhereUniqueWithoutServiceInput | ServiceItemUpdateWithWhereUniqueWithoutServiceInput[]
+    updateMany?: ServiceItemUpdateManyWithWhereWithoutServiceInput | ServiceItemUpdateManyWithWhereWithoutServiceInput[]
+    deleteMany?: ServiceItemScalarWhereInput | ServiceItemScalarWhereInput[]
+  }
+
+  export type ServiceCreateNestedOneWithoutItemsInput = {
+    create?: XOR<ServiceCreateWithoutItemsInput, ServiceUncheckedCreateWithoutItemsInput>
+    connectOrCreate?: ServiceCreateOrConnectWithoutItemsInput
+    connect?: ServiceWhereUniqueInput
+  }
+
+  export type ServiceUpdateOneRequiredWithoutItemsNestedInput = {
+    create?: XOR<ServiceCreateWithoutItemsInput, ServiceUncheckedCreateWithoutItemsInput>
+    connectOrCreate?: ServiceCreateOrConnectWithoutItemsInput
+    upsert?: ServiceUpsertWithoutItemsInput
+    connect?: ServiceWhereUniqueInput
+    update?: XOR<XOR<ServiceUpdateToOneWithWhereWithoutItemsInput, ServiceUpdateWithoutItemsInput>, ServiceUncheckedUpdateWithoutItemsInput>
   }
 
   export type ProductCreateNestedOneWithoutImagesInput = {
@@ -58244,6 +61726,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -58291,6 +61774,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -58397,6 +61881,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -58444,6 +61929,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -58755,6 +62241,52 @@ export namespace Prisma {
 
   export type CollectionCreateManyBusinessInputEnvelope = {
     data: CollectionCreateManyBusinessInput | CollectionCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ServiceCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    description?: string | null
+    image?: string | null
+    serviceTemplateId?: string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: boolean
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    ogImage?: string | null
+    items?: ServiceItemCreateNestedManyWithoutServiceInput
+  }
+
+  export type ServiceUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    description?: string | null
+    image?: string | null
+    serviceTemplateId?: string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: boolean
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    ogImage?: string | null
+    items?: ServiceItemUncheckedCreateNestedManyWithoutServiceInput
+  }
+
+  export type ServiceCreateOrConnectWithoutBusinessInput = {
+    where: ServiceWhereUniqueInput
+    create: XOR<ServiceCreateWithoutBusinessInput, ServiceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type ServiceCreateManyBusinessInputEnvelope = {
+    data: ServiceCreateManyBusinessInput | ServiceCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
@@ -59513,6 +63045,43 @@ export namespace Prisma {
     businessId?: StringFilter<"Collection"> | string
   }
 
+  export type ServiceUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: ServiceWhereUniqueInput
+    update: XOR<ServiceUpdateWithoutBusinessInput, ServiceUncheckedUpdateWithoutBusinessInput>
+    create: XOR<ServiceCreateWithoutBusinessInput, ServiceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type ServiceUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: ServiceWhereUniqueInput
+    data: XOR<ServiceUpdateWithoutBusinessInput, ServiceUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type ServiceUpdateManyWithWhereWithoutBusinessInput = {
+    where: ServiceScalarWhereInput
+    data: XOR<ServiceUpdateManyMutationInput, ServiceUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type ServiceScalarWhereInput = {
+    AND?: ServiceScalarWhereInput | ServiceScalarWhereInput[]
+    OR?: ServiceScalarWhereInput[]
+    NOT?: ServiceScalarWhereInput | ServiceScalarWhereInput[]
+    id?: StringFilter<"Service"> | string
+    createdAt?: DateTimeFilter<"Service"> | Date | string
+    updatedAt?: DateTimeFilter<"Service"> | Date | string
+    name?: StringFilter<"Service"> | string
+    slug?: StringFilter<"Service"> | string
+    description?: StringNullableFilter<"Service"> | string | null
+    image?: StringNullableFilter<"Service"> | string | null
+    serviceTemplateId?: StringFilter<"Service"> | string
+    customFields?: JsonNullableFilter<"Service">
+    published?: BoolFilter<"Service"> | boolean
+    sortOrder?: IntFilter<"Service"> | number
+    metaTitle?: StringNullableFilter<"Service"> | string | null
+    metaDescription?: StringNullableFilter<"Service"> | string | null
+    ogImage?: StringNullableFilter<"Service"> | string | null
+    businessId?: StringFilter<"Service"> | string
+  }
+
   export type OrderUpsertWithWhereUniqueWithoutBusinessInput = {
     where: OrderWhereUniqueInput
     update: XOR<OrderUpdateWithoutBusinessInput, OrderUncheckedUpdateWithoutBusinessInput>
@@ -60044,6 +63613,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     images?: ImageCreateNestedManyWithoutBusinessInput
@@ -60091,6 +63661,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
@@ -60154,6 +63725,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     images?: ImageUpdateManyWithoutBusinessNestedInput
@@ -60201,6 +63773,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
@@ -60284,6 +63857,7 @@ export namespace Prisma {
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -60331,6 +63905,7 @@ export namespace Prisma {
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -60667,6 +64242,7 @@ export namespace Prisma {
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -60714,6 +64290,7 @@ export namespace Prisma {
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -61219,6 +64796,7 @@ export namespace Prisma {
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -61266,6 +64844,7 @@ export namespace Prisma {
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -61351,6 +64930,7 @@ export namespace Prisma {
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -61398,6 +64978,7 @@ export namespace Prisma {
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -61699,6 +65280,380 @@ export namespace Prisma {
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
+  export type BusinessCreateWithoutServicesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutServicesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutServicesInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutServicesInput, BusinessUncheckedCreateWithoutServicesInput>
+  }
+
+  export type ServiceItemCreateWithoutServiceInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    description?: string | null
+    image?: string | null
+    priceLabel?: string | null
+    durationLabel?: string | null
+    bookingEmbedSrc?: string | null
+    bookingEmbedHeight?: number | null
+    published?: boolean
+    sortOrder?: number
+    businessId: string
+  }
+
+  export type ServiceItemUncheckedCreateWithoutServiceInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    description?: string | null
+    image?: string | null
+    priceLabel?: string | null
+    durationLabel?: string | null
+    bookingEmbedSrc?: string | null
+    bookingEmbedHeight?: number | null
+    published?: boolean
+    sortOrder?: number
+    businessId: string
+  }
+
+  export type ServiceItemCreateOrConnectWithoutServiceInput = {
+    where: ServiceItemWhereUniqueInput
+    create: XOR<ServiceItemCreateWithoutServiceInput, ServiceItemUncheckedCreateWithoutServiceInput>
+  }
+
+  export type ServiceItemCreateManyServiceInputEnvelope = {
+    data: ServiceItemCreateManyServiceInput | ServiceItemCreateManyServiceInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BusinessUpsertWithoutServicesInput = {
+    update: XOR<BusinessUpdateWithoutServicesInput, BusinessUncheckedUpdateWithoutServicesInput>
+    create: XOR<BusinessCreateWithoutServicesInput, BusinessUncheckedCreateWithoutServicesInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutServicesInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutServicesInput, BusinessUncheckedUpdateWithoutServicesInput>
+  }
+
+  export type BusinessUpdateWithoutServicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutServicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type ServiceItemUpsertWithWhereUniqueWithoutServiceInput = {
+    where: ServiceItemWhereUniqueInput
+    update: XOR<ServiceItemUpdateWithoutServiceInput, ServiceItemUncheckedUpdateWithoutServiceInput>
+    create: XOR<ServiceItemCreateWithoutServiceInput, ServiceItemUncheckedCreateWithoutServiceInput>
+  }
+
+  export type ServiceItemUpdateWithWhereUniqueWithoutServiceInput = {
+    where: ServiceItemWhereUniqueInput
+    data: XOR<ServiceItemUpdateWithoutServiceInput, ServiceItemUncheckedUpdateWithoutServiceInput>
+  }
+
+  export type ServiceItemUpdateManyWithWhereWithoutServiceInput = {
+    where: ServiceItemScalarWhereInput
+    data: XOR<ServiceItemUpdateManyMutationInput, ServiceItemUncheckedUpdateManyWithoutServiceInput>
+  }
+
+  export type ServiceItemScalarWhereInput = {
+    AND?: ServiceItemScalarWhereInput | ServiceItemScalarWhereInput[]
+    OR?: ServiceItemScalarWhereInput[]
+    NOT?: ServiceItemScalarWhereInput | ServiceItemScalarWhereInput[]
+    id?: StringFilter<"ServiceItem"> | string
+    createdAt?: DateTimeFilter<"ServiceItem"> | Date | string
+    updatedAt?: DateTimeFilter<"ServiceItem"> | Date | string
+    name?: StringFilter<"ServiceItem"> | string
+    description?: StringNullableFilter<"ServiceItem"> | string | null
+    image?: StringNullableFilter<"ServiceItem"> | string | null
+    priceLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    durationLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
+    bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
+    published?: BoolFilter<"ServiceItem"> | boolean
+    sortOrder?: IntFilter<"ServiceItem"> | number
+    serviceId?: StringFilter<"ServiceItem"> | string
+    businessId?: StringFilter<"ServiceItem"> | string
+  }
+
+  export type ServiceCreateWithoutItemsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    description?: string | null
+    image?: string | null
+    serviceTemplateId?: string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: boolean
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    ogImage?: string | null
+    business: BusinessCreateNestedOneWithoutServicesInput
+  }
+
+  export type ServiceUncheckedCreateWithoutItemsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    description?: string | null
+    image?: string | null
+    serviceTemplateId?: string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: boolean
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    ogImage?: string | null
+    businessId: string
+  }
+
+  export type ServiceCreateOrConnectWithoutItemsInput = {
+    where: ServiceWhereUniqueInput
+    create: XOR<ServiceCreateWithoutItemsInput, ServiceUncheckedCreateWithoutItemsInput>
+  }
+
+  export type ServiceUpsertWithoutItemsInput = {
+    update: XOR<ServiceUpdateWithoutItemsInput, ServiceUncheckedUpdateWithoutItemsInput>
+    create: XOR<ServiceCreateWithoutItemsInput, ServiceUncheckedCreateWithoutItemsInput>
+    where?: ServiceWhereInput
+  }
+
+  export type ServiceUpdateToOneWithWhereWithoutItemsInput = {
+    where?: ServiceWhereInput
+    data: XOR<ServiceUpdateWithoutItemsInput, ServiceUncheckedUpdateWithoutItemsInput>
+  }
+
+  export type ServiceUpdateWithoutItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceTemplateId?: StringFieldUpdateOperationsInput | string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutServicesNestedInput
+  }
+
+  export type ServiceUncheckedUpdateWithoutItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceTemplateId?: StringFieldUpdateOperationsInput | string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
   export type ProductCreateWithoutImagesInput = {
     id?: string
     createdAt?: Date | string
@@ -61819,6 +65774,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -61866,6 +65822,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -62024,6 +65981,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -62071,6 +66029,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -62155,6 +66114,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
     images?: ImageCreateNestedManyWithoutBusinessInput
@@ -62202,6 +66162,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
     images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
@@ -62570,6 +66531,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
     images?: ImageUpdateManyWithoutBusinessNestedInput
@@ -62617,6 +66579,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
     images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
@@ -62959,6 +66922,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
     images?: ImageCreateNestedManyWithoutBusinessInput
@@ -63006,6 +66970,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
     images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
@@ -63362,6 +67327,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
     images?: ImageUpdateManyWithoutBusinessNestedInput
@@ -63409,6 +67375,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
     images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
@@ -64256,6 +68223,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -64303,6 +68271,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -64444,6 +68413,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -64491,6 +68461,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -64719,6 +68690,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -64766,6 +68738,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -65122,6 +69095,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -65169,6 +69143,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -65338,6 +69313,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -65385,6 +69361,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -65582,6 +69559,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -65629,6 +69607,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -65708,6 +69687,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -65755,6 +69735,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -65818,6 +69799,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -65865,6 +69847,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -65912,6 +69895,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -65959,6 +69943,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -66022,6 +70007,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -66069,6 +70055,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -66116,6 +70103,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -66163,6 +70151,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -66226,6 +70215,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -66273,6 +70263,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -66320,6 +70311,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -66367,6 +70359,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -66462,6 +70455,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -66509,6 +70503,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -66671,6 +70666,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -66718,6 +70714,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -66828,6 +70825,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -66875,6 +70873,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -66975,6 +70974,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -67022,6 +71022,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -67132,6 +71133,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -67179,6 +71181,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -67881,6 +71884,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
@@ -67928,6 +71932,7 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
@@ -68028,6 +72033,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
@@ -68075,6 +72081,7 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
@@ -68516,6 +72523,23 @@ export namespace Prisma {
     ogImage?: string | null
   }
 
+  export type ServiceCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    description?: string | null
+    image?: string | null
+    serviceTemplateId?: string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: boolean
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    ogImage?: string | null
+  }
+
   export type OrderCreateManyBusinessInput = {
     id?: string
     createdAt?: Date | string
@@ -68899,6 +72923,59 @@ export namespace Prisma {
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ServiceUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceTemplateId?: StringFieldUpdateOperationsInput | string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: ServiceItemUpdateManyWithoutServiceNestedInput
+  }
+
+  export type ServiceUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceTemplateId?: StringFieldUpdateOperationsInput | string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: ServiceItemUncheckedUpdateManyWithoutServiceNestedInput
+  }
+
+  export type ServiceUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceTemplateId?: StringFieldUpdateOperationsInput | string
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -70040,6 +74117,70 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     productId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ServiceItemCreateManyServiceInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    description?: string | null
+    image?: string | null
+    priceLabel?: string | null
+    durationLabel?: string | null
+    bookingEmbedSrc?: string | null
+    bookingEmbedHeight?: number | null
+    published?: boolean
+    sortOrder?: number
+    businessId: string
+  }
+
+  export type ServiceItemUpdateWithoutServiceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ServiceItemUncheckedUpdateWithoutServiceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ServiceItemUncheckedUpdateManyWithoutServiceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type OrderCreateManyCustomerInput = {

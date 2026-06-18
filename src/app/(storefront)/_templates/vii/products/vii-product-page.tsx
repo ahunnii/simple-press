@@ -223,7 +223,7 @@ export function ViiProductPage({ product, business }: DefaultProductPageTemplate
                         display: "inline-flex",
                         alignItems: "center",
                         borderRadius: "var(--radius)",
-                        background: "var(--vii-copper)",
+                        background: "var(--vii-copper-deep)",
                         color: "var(--vii-paper)",
                         padding: "2px 8px",
                         fontFamily: "var(--font-sans)",

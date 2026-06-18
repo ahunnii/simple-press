@@ -202,7 +202,7 @@ export function ViiContactForm({ heading }: Props) {
             style={{
               fontFamily: "var(--font-sans)",
               letterSpacing: "0.2em",
-              background: "var(--vii-copper)",
+              background: "var(--vii-copper-deep)",
               color: "var(--vii-paper)",
               borderRadius: "var(--radius)",
             }}

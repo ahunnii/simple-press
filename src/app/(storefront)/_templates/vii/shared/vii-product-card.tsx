@@ -118,7 +118,7 @@ export function ViiProductCard({ product, index }: Props) {
 
         {/* Add-to-cart bar — slides up on hover/focus, hidden at rest */}
         {!productStatus.disableCart && (
-          <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full transition-transform duration-300 group-focus-within:translate-y-0 group-hover:translate-y-0">
+          <div className="vii-product-addbar absolute inset-x-0 bottom-0 z-10 translate-y-full transition-transform duration-300 group-focus-within:translate-y-0 group-hover:translate-y-0">
             <button
               type="button"
               onClick={handleAddToCart}
@@ -127,7 +127,7 @@ export function ViiProductCard({ product, index }: Props) {
               style={{
                 fontFamily: "var(--font-sans)",
                 fontWeight: 500,
-                background: "var(--vii-copper)",
+                background: "var(--vii-copper-deep)",
                 color: "var(--vii-paper)",
               }}
             >

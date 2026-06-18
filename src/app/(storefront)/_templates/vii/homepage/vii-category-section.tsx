@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
 type Props = {
@@ -110,15 +111,19 @@ export function ViiCategorySection({ overline, heading, cards }: Props) {
                 ) : null}
 
                 {/* Gradient + title overlay */}
-                <div
-                  aria-hidden="true"
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      "linear-gradient(to top, rgba(30,53,64,0.7) 0%, rgba(30,53,64,0.55) 100%)",
-                  }}
-                />
+
+                {title && (
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background:
+                        "linear-gradient(to top, rgba(30,53,64,0.7) 0%, rgba(30,53,64,0.55) 100%)",
+                    }}
+                  />
+                )}
+
                 <span
                   style={{
                     position: "absolute",

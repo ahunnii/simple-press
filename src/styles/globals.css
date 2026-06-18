@@ -3104,7 +3104,8 @@
   --vii-paper: #fbf8f1;       /* cards / surfaces */
   --vii-navy: #1e3540;        /* foreground text + dark sections */
   --vii-slate: #384f65;       /* secondary dark */
-  --vii-copper: #b35e2f;      /* accent: italic display words + CTAs (on light bg) */
+  --vii-copper: #b35e2f;      /* accent: italic display words on light bg (large text only) */
+  --vii-copper-deep: #a85525; /* darker copper for small text on copper button fills (AA: ~4.9:1 on paper) */
   --vii-copper-light: #d98a5b;/* lightened copper for accents on dark/navy bg (AA contrast) */
   --vii-clay: #a47a60;
   --vii-tan: #c1aa91;
@@ -3123,8 +3124,10 @@
   outline-offset: 2px;
 }
 
-/* Scroll-reveal utility — toggled by useViiReveal hook */
-.vii .vii-reveal {
+/* Scroll-reveal utility — armed only once useViiReveal adds `.vii-js` to the
+   scope root. Without JS the `.vii-js` class is never set, so .vii-reveal
+   content stays fully visible (progressive enhancement — no blank sections). */
+.vii-js .vii-reveal {
   opacity: 0;
   transform: translateY(24px);
   transition:
@@ -3132,9 +3135,17 @@
     transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.vii .vii-reveal.is-visible {
+.vii-js .vii-reveal.is-visible {
   opacity: 1;
   transform: none;
+}
+
+/* Product-card add-to-bag bar: revealed on hover/focus on fine pointers, but
+   touch devices can't hover — show it persistently there so it stays reachable. */
+@media (hover: none) {
+  .vii .vii-product-addbar {
+    transform: translateY(0);
+  }
 }
 
 /* Marquee keyframe — used by homepage marquee band */

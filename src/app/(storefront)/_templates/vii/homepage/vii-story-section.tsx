@@ -114,7 +114,6 @@ export function ViiStorySection({ heading, headingAccent, intro, cards }: Props)
               aria-atomic="true"
               tabIndex={0}
               onKeyDown={handleKeyDown}
-              style={{ outline: "none" }}
             >
               <div
                 style={{
@@ -232,8 +231,8 @@ export function ViiStorySection({ heading, headingAccent, intro, cards }: Props)
                   aria-label="Previous story card"
                   disabled={total <= 1}
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: 44,
+                    height: 44,
                     borderRadius: "50%",
                     border: "1px solid rgba(193,170,145,0.35)",
                     background: "transparent",
@@ -257,8 +256,8 @@ export function ViiStorySection({ heading, headingAccent, intro, cards }: Props)
                   aria-label="Next story card"
                   disabled={total <= 1}
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: 44,
+                    height: 44,
                     borderRadius: "50%",
                     border: "1px solid rgba(193,170,145,0.35)",
                     background: "transparent",

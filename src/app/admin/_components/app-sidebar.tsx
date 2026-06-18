@@ -17,6 +17,7 @@ import {
   IconPackages,
   IconSettings,
   IconShoppingCart,
+  IconSparkles,
   IconStar,
   IconTerminal,
   IconUsers,
@@ -82,6 +83,12 @@ const getNavData = (session: Session | null) => {
       url: "/admin/collections",
       icon: IconFolder,
       featureKey: "collections",
+    },
+    {
+      title: "Services",
+      url: "/admin/services",
+      icon: IconSparkles,
+      featureKey: "services",
     },
     {
       title: "Site content",

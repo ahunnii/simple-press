@@ -257,7 +257,7 @@ export function ViiVariantSelector({ product, setSelectedVariantId }: Props) {
                 justifyContent: "center",
                 gap: 8,
                 borderRadius: "var(--radius)",
-                background: "var(--vii-copper)",
+                background: "var(--vii-copper-deep)",
                 color: "var(--vii-paper)",
                 fontFamily: "var(--font-sans)",
                 fontSize: 11,

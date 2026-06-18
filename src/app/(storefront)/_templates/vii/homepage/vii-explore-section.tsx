@@ -236,7 +236,7 @@ export function ViiExploreSection({
                     style={{
                       display: "inline-block",
                       padding: "12px 28px",
-                      background: "var(--vii-copper)",
+                      background: "var(--vii-copper-deep)",
                       color: "var(--vii-paper)",
                       fontFamily: "var(--font-vii-sans, sans-serif)",
                       fontSize: 11,

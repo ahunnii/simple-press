@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { Menu, Phone, ShoppingBag, User, X } from "lucide-react";
+import { ChevronDown, Menu, Phone, ShoppingBag, User, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
@@ -16,7 +16,13 @@ import { useCart } from "~/providers/cart-context";
 import { resolveFields } from "../index";
 import { ViiAnnouncementBar } from "./vii-announcement-bar";
 
-type NavLink = { label: string; href: string };
+type NavChild = { label: string; href: string; external?: boolean };
+type NavLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+  children?: NavChild[];
+};
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
@@ -25,11 +31,14 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [expandedMobile, setExpandedMobile] = useState<Set<number>>(new Set());
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const mobileDialogRef = useRef<HTMLDivElement>(null);
   const wasOpenRef = useRef(false);
   const mobileMenuId = useId();
+  const mobileSubmenuId = useId();
   const reduced = useReducedMotion();
 
   // ── Scroll behavior: transparent → solid; announcement bar hides on scroll ──
@@ -43,7 +52,19 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
   // ── Close on route change ──────────────────────────────────────────────────
   useEffect(() => {
     setMobileOpen(false);
+    setOpenDropdown(null);
+    setExpandedMobile(new Set());
   }, [pathname]);
+
+  // ── Escape key closes any open desktop dropdown ───────────────────────────
+  useEffect(() => {
+    if (openDropdown === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenDropdown(null);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [openDropdown]);
 
   // ── Escape key closes the mobile menu ─────────────────────────────────────
   useEffect(() => {
@@ -148,8 +169,6 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
     | NavLink[]
     | undefined;
   const links = customNav ?? DEFAULT_NAV_LINKS;
-  const leftLinks = links.slice(0, Math.ceil(links.length / 2));
-  const rightLinks = links.slice(Math.ceil(links.length / 2));
 
   // ── Resolve global + contact fields ────────────────────────────────────────
   const customFields = business?.siteContent?.customFields as
@@ -187,7 +206,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
   // ── Wordmark/logo ──────────────────────────────────────────────────────────
   const renderWordmark = (dark: boolean) =>
     logoUrl ? (
-      <div className="relative h-10 w-24">
+      <div className="relative h-15 w-36">
         <Image
           src={logoUrl}
           alt={businessName}
@@ -209,7 +228,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
           transition: `color 0.4s ${ease}`,
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
+          alignItems: "flex-start",
         }}
       >
         <em>{businessName}</em>
@@ -255,6 +274,258 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
 
   const iconColor = scrolled ? "var(--vii-ink-soft)" : "rgba(251,248,241,0.85)";
 
+  // ── Dropdown helpers ────────────────────────────────────────────────────────
+  const dropdownKey = (side: "left" | "right", index: number) =>
+    `${side}-${index}`;
+
+  const toggleMobileExpanded = (i: number) =>
+    setExpandedMobile((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
+      return next;
+    });
+
+  const isParentActive = (link: NavLink) =>
+    isActive(link.href) || !!link.children?.some((c) => isActive(c.href));
+
+  // ── Desktop nav link (handles flat links + dropdowns) ───────────────────────
+  const renderDesktopNavLink = (
+    link: NavLink,
+    index: number,
+    side: "left" | "right",
+  ) => {
+    if (link.children?.length) {
+      const key = dropdownKey(side, index);
+      const isOpen = openDropdown === key;
+      const parentActive = isParentActive(link);
+
+      return (
+        <div
+          key={link.href + link.label}
+          className="relative"
+          onMouseEnter={() => setOpenDropdown(key)}
+          onMouseLeave={() => setOpenDropdown(null)}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+              setOpenDropdown(null);
+            }
+          }}
+        >
+          <button
+            type="button"
+            aria-haspopup="true"
+            aria-expanded={isOpen}
+            onClick={() => setOpenDropdown(isOpen ? null : key)}
+            style={{
+              ...navLinkStyle(parentActive),
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              background: "transparent",
+              border: "none",
+              borderBottom: parentActive
+                ? "1px solid currentColor"
+                : "1px solid transparent",
+              cursor: "pointer",
+            }}
+          >
+            {link.label}
+            <ChevronDown
+              className="h-3 w-3"
+              aria-hidden="true"
+              style={{
+                transition: reduced ? "none" : `transform 0.2s ${ease}`,
+                transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+              }}
+            />
+          </button>
+
+          {isOpen ? (
+            <div
+              className="absolute top-full left-0 z-10"
+              style={{ paddingTop: "10px" }}
+            >
+              <div
+                style={{
+                  minWidth: "200px",
+                  background: "var(--vii-paper)",
+                  border: "1px solid rgba(30,53,64,0.1)",
+                  borderRadius: "var(--radius)",
+                  boxShadow: "0 12px 32px rgba(30,53,64,0.12)",
+                  padding: "6px 0",
+                }}
+              >
+                {link.children.map((child) => {
+                  const childActive = isActive(child.href);
+                  return (
+                    <Link
+                      key={child.href + child.label}
+                      href={child.href}
+                      target={child.external ? "_blank" : undefined}
+                      rel={child.external ? "noopener noreferrer" : undefined}
+                      aria-current={childActive ? "page" : undefined}
+                      onClick={() => setOpenDropdown(null)}
+                      style={{
+                        display: "block",
+                        padding: "10px 18px",
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "11px",
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        fontWeight: childActive ? 600 : 400,
+                        color: childActive
+                          ? "var(--vii-copper)"
+                          : "var(--vii-navy)",
+                        textDecoration: "none",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {child.label}
+                      {child.external ? (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      ) : null}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+
+    const active = isActive(link.href);
+    return (
+      <Link
+        key={link.href + link.label}
+        href={link.href}
+        target={link.external ? "_blank" : undefined}
+        rel={link.external ? "noopener noreferrer" : undefined}
+        aria-current={active ? "page" : undefined}
+        style={navLinkStyle(active)}
+      >
+        {link.label}
+        {link.external ? (
+          <span className="sr-only"> (opens in new tab)</span>
+        ) : null}
+      </Link>
+    );
+  };
+
+  // ── Mobile nav link (handles flat links + accordion submenus) ───────────────
+  const mobileLinkStyle = (active: boolean): React.CSSProperties => ({
+    display: "inline-block",
+    padding: "20px 0",
+    fontFamily: "var(--font-sans)",
+    fontSize: "16px",
+    letterSpacing: "0.22em",
+    textTransform: "uppercase",
+    fontWeight: active ? 600 : 300,
+    color: "var(--vii-navy)",
+    textDecoration: "none",
+    borderBottom: active
+      ? "1px solid var(--vii-copper)"
+      : "1px solid transparent",
+  });
+
+  const renderMobileNavLink = (link: NavLink, i: number) => {
+    if (link.children?.length) {
+      const submenuId = `${mobileSubmenuId}-${i}`;
+      const expanded = expandedMobile.has(i);
+      const parentActive = isParentActive(link);
+
+      return (
+        <li key={link.href + link.label}>
+          <button
+            type="button"
+            onClick={() => toggleMobileExpanded(i)}
+            aria-expanded={expanded}
+            aria-controls={submenuId}
+            style={{
+              ...mobileLinkStyle(parentActive),
+              display: "flex",
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: "transparent",
+              border: "none",
+              borderBottom: parentActive
+                ? "1px solid var(--vii-copper)"
+                : "1px solid transparent",
+              cursor: "pointer",
+            }}
+          >
+            {link.label}
+            <ChevronDown
+              className="h-5 w-5 shrink-0"
+              aria-hidden="true"
+              style={{
+                transition: reduced ? "none" : `transform 0.2s ${ease}`,
+                transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+              }}
+            />
+          </button>
+          {expanded ? (
+            <ul id={submenuId} className="flex flex-col pb-2 pl-4">
+              {link.children.map((child) => {
+                const childActive = isActive(child.href);
+                return (
+                  <li key={child.href + child.label}>
+                    <Link
+                      href={child.href}
+                      target={child.external ? "_blank" : undefined}
+                      rel={child.external ? "noopener noreferrer" : undefined}
+                      onClick={() => setMobileOpen(false)}
+                      aria-current={childActive ? "page" : undefined}
+                      style={{
+                        display: "inline-block",
+                        padding: "14px 0",
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "13px",
+                        letterSpacing: "0.18em",
+                        textTransform: "uppercase",
+                        fontWeight: childActive ? 600 : 300,
+                        color: childActive
+                          ? "var(--vii-copper)"
+                          : "var(--vii-navy)",
+                        textDecoration: "none",
+                      }}
+                    >
+                      {child.label}
+                      {child.external ? (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+        </li>
+      );
+    }
+
+    const active = isActive(link.href);
+    return (
+      <li key={link.href + link.label}>
+        <Link
+          href={link.href}
+          target={link.external ? "_blank" : undefined}
+          rel={link.external ? "noopener noreferrer" : undefined}
+          onClick={() => setMobileOpen(false)}
+          aria-current={active ? "page" : undefined}
+          style={mobileLinkStyle(active)}
+        >
+          {link.label}
+          {link.external ? (
+            <span className="sr-only"> (opens in new tab)</span>
+          ) : null}
+        </Link>
+      </li>
+    );
+  };
+
   return (
     <>
       <header className="fixed top-0 right-0 left-0 z-50 w-full">
@@ -293,12 +564,9 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
             />
           )}
 
-          <div
-            className="relative mx-auto grid w-full max-w-[1440px] items-center gap-6 px-6 py-4 sm:px-8"
-            style={{ gridTemplateColumns: "1fr auto 1fr" }}
-          >
-            {/* ── Left cell: hamburger (mobile) + left nav (desktop) ── */}
-            <div className="flex items-center justify-start gap-7">
+          <div className="relative mx-auto flex w-full max-w-[1440px] items-center justify-between gap-6 px-6 py-4 sm:px-8">
+            {/* ── Left: hamburger (mobile) + wordmark ── */}
+            <div className="flex items-center gap-3">
               <button
                 ref={hamburgerRef}
                 type="button"
@@ -319,49 +587,24 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                 <Menu className="h-5 w-5" aria-hidden="true" />
               </button>
 
-              <nav
-                className="hidden items-center gap-7 md:flex"
-                aria-label="Primary navigation"
+              <Link
+                href="/"
+                aria-label={`${businessName} — Home`}
+                style={{ flexShrink: 0 }}
               >
-                {leftLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    aria-current={isActive(link.href) ? "page" : undefined}
-                    style={navLinkStyle(isActive(link.href))}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </nav>
+                {renderWordmark(scrolled)}
+              </Link>
             </div>
 
-            {/* ── Center cell: wordmark ── */}
-            <Link
-              href="/"
-              aria-label={`${businessName} — Home`}
-              className="justify-self-center"
-              style={{ flexShrink: 0 }}
-            >
-              {renderWordmark(scrolled)}
-            </Link>
-
-            {/* ── Right cell: right nav + account + cart + Book CTA ── */}
+            {/* ── Right: primary nav + account + cart + Book CTA ── */}
             <div className="flex items-center justify-end gap-5">
               <nav
-                className="hidden items-center gap-7 md:flex"
-                aria-label="Secondary navigation"
+                className="mr-2 hidden items-center gap-7 md:flex"
+                aria-label="Primary navigation"
               >
-                {rightLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    aria-current={isActive(link.href) ? "page" : undefined}
-                    style={navLinkStyle(isActive(link.href))}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                {links.map((link, index) =>
+                  renderDesktopNavLink(link, index, "left"),
+                )}
               </nav>
 
               <div className="hidden md:block">
@@ -430,7 +673,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                     aria-hidden="true"
                     className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
                     style={{
-                      background: "var(--vii-copper)",
+                      background: "var(--vii-copper-deep)",
                       color: "var(--vii-paper)",
                       minWidth: "16px",
                       transition: reduced ? "none" : `transform 0.2s ${ease}`,
@@ -452,7 +695,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                   textTransform: "uppercase",
                   fontWeight: 500,
                   padding: "9px 20px",
-                  background: "var(--vii-copper)",
+                  background: "var(--vii-copper-deep)",
                   color: "var(--vii-paper)",
                   textDecoration: "none",
                   borderRadius: "var(--radius)",
@@ -523,7 +766,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                 textTransform: "uppercase",
                 fontWeight: 500,
                 padding: "14px",
-                background: "var(--vii-copper)",
+                background: "var(--vii-copper-deep)",
                 color: "var(--vii-paper)",
                 textDecoration: "none",
                 borderRadius: "var(--radius)",
@@ -539,31 +782,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
             aria-label="Mobile navigation"
           >
             <ul className="flex flex-col">
-              {links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    aria-current={isActive(link.href) ? "page" : undefined}
-                    style={{
-                      display: "inline-block",
-                      padding: "20px 0",
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "16px",
-                      letterSpacing: "0.22em",
-                      textTransform: "uppercase",
-                      fontWeight: isActive(link.href) ? 600 : 300,
-                      color: "var(--vii-navy)",
-                      textDecoration: "none",
-                      borderBottom: isActive(link.href)
-                        ? "1px solid var(--vii-copper)"
-                        : "1px solid transparent",
-                    }}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {links.map((link, i) => renderMobileNavLink(link, i))}
             </ul>
           </nav>
 
@@ -602,7 +821,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                   textTransform: "uppercase",
                   fontWeight: 500,
                   padding: "12px 22px",
-                  background: "var(--vii-copper)",
+                  background: "var(--vii-copper-deep)",
                   color: "var(--vii-paper)",
                   textDecoration: "none",
                   borderRadius: "var(--radius)",

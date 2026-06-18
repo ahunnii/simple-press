@@ -11,6 +11,8 @@ type Props = {
   body: string;
   phone: string;
   email: string;
+  buttonLabel?: string;
+  buttonHref?: string;
 };
 
 export function ViiContactCtaSection({
@@ -20,6 +22,8 @@ export function ViiContactCtaSection({
   body,
   phone,
   email,
+  buttonLabel,
+  buttonHref,
 }: Props) {
   const { ref, visible } = useViiReveal(0.08);
 
@@ -30,11 +34,11 @@ export function ViiContactCtaSection({
         position: "relative",
         overflow: "hidden",
         background: "var(--vii-navy)",
-        padding: "clamp(80px, 14vw, 160px) clamp(24px, 8vw, 120px)",
+        padding: "clamp(64px, 9vw, 104px) clamp(24px, 8vw, 120px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        minHeight: "clamp(420px, 50vw, 600px)",
+        minHeight: "clamp(300px, 32vw, 420px)",
       }}
     >
       {/* Background image */}
@@ -118,6 +122,29 @@ export function ViiContactCtaSection({
           >
             {body}
           </p>
+        )}
+
+        {/* Primary action button */}
+        {buttonLabel?.trim() && buttonHref?.trim() && (
+          <div style={{ marginBottom: 28 }}>
+            <a
+              href={buttonHref}
+              style={{
+                display: "inline-block",
+                fontFamily: "var(--font-vii-sans, sans-serif)",
+                fontSize: 13,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--vii-paper)",
+                background: "var(--vii-copper-deep)",
+                padding: "16px 36px",
+                borderRadius: "var(--radius, 0.2rem)",
+                textDecoration: "none",
+              }}
+            >
+              {buttonLabel}
+            </a>
+          </div>
         )}
 
         {/* Contact info */}

@@ -140,6 +140,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     hidesNav: ["blog"],
   },
+  services: {
+    key: "services",
+    label: "Services",
+    description: "Offer bookable services with external booking widgets",
+    category: "content",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    hidesNav: ["services"],
+  },
 
   // ─── CUSTOMERS ──────────────────────────────────────────────────────────────
   customerAccounts: {
