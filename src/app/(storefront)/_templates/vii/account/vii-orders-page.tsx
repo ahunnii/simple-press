@@ -21,28 +21,28 @@ function statusStyles(status: string): {
   switch (status) {
     case "open":
       // glacier tint on cream — navy text passes AA
-      return { background: "rgba(159,200,208,0.22)", color: "var(--vii-navy)" };
+      return { background: "color-mix(in srgb, var(--vii-glacier) 22%, transparent)", color: "var(--vii-navy)" };
     case "completed":
       // subtle copper-light tint on paper — navy text
       return {
-        background: "rgba(168,85,37,0.12)",
+        background: "color-mix(in srgb, var(--vii-copper-deep) 12%, transparent)",
         color: "var(--vii-copper-deep)",
       };
     case "cancelled":
       // muted clay tint — ink-soft text
       return {
-        background: "rgba(164,122,96,0.15)",
+        background: "color-mix(in srgb, var(--vii-clay) 15%, transparent)",
         color: "var(--vii-ink-soft)",
       };
     case "refunded":
       // light tan wash — ink-soft text
       return {
-        background: "rgba(193,170,145,0.25)",
+        background: "color-mix(in srgb, var(--vii-tan) 25%, transparent)",
         color: "var(--vii-ink-soft)",
       };
     default:
       // pending — tan tint / navy
-      return { background: "rgba(193,170,145,0.35)", color: "var(--vii-navy)" };
+      return { background: "color-mix(in srgb, var(--vii-tan) 35%, transparent)", color: "var(--vii-navy)" };
   }
 }
 
@@ -124,7 +124,7 @@ export function ViiOrdersPage({ orders }: OrdersPageTemplateProps) {
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   padding: "14px 32px",
-                  borderRadius: "0.15rem",
+                  borderRadius: "var(--radius)",
                   textDecoration: "none",
                 }}
               >
@@ -140,7 +140,7 @@ export function ViiOrdersPage({ orders }: OrdersPageTemplateProps) {
                   style={{
                     background: "var(--vii-paper)",
                     border: "1px solid var(--vii-hairline-strong)",
-                    borderRadius: "0.2rem",
+                    borderRadius: "var(--radius)",
                     padding: 24,
                   }}
                 >

@@ -75,7 +75,7 @@ export function ViiStorySection({
           <h2
             id="story-heading"
             style={{
-              fontFamily: "var(--font-vii-serif, serif)",
+              fontFamily: "var(--font-serif)",
               fontWeight: 400,
               fontSize: "clamp(32px, 4.5vw, 60px)",
               lineHeight: 1.1,
@@ -97,7 +97,7 @@ export function ViiStorySection({
           {intro && (
             <p
               style={{
-                fontFamily: "var(--font-vii-sans, sans-serif)",
+                fontFamily: "var(--font-sans)",
                 fontSize: "clamp(14px, 1.3vw, 16px)",
                 lineHeight: 1.7,
                 color: "var(--vii-tan)",
@@ -126,7 +126,7 @@ export function ViiStorySection({
                   position: "relative",
                   width: "100%",
                   aspectRatio: "3/4",
-                  borderRadius: "0.15rem",
+                  borderRadius: "var(--radius)",
                   overflow: "hidden",
                   background: "var(--vii-slate)",
                   transition: reducedMotion ? "none" : "opacity 0.4s ease",
@@ -181,12 +181,12 @@ export function ViiStorySection({
                             right: 0,
                             padding: "32px 24px 24px",
                             background:
-                              "linear-gradient(to top, rgba(30,53,64,0.85) 0%, transparent 100%)",
+                              "linear-gradient(to top, color-mix(in srgb, var(--vii-navy) 85%, transparent) 0%, transparent 100%)",
                           }}
                         >
                           <p
                             style={{
-                              fontFamily: "var(--font-vii-serif, serif)",
+                              fontFamily: "var(--font-serif)",
                               fontSize: "clamp(16px, 2vw, 22px)",
                               fontWeight: 400,
                               color: "var(--vii-paper)",
@@ -218,7 +218,7 @@ export function ViiStorySection({
                 aria-live="polite"
                 aria-atomic="true"
                 style={{
-                  fontFamily: "var(--font-vii-sans, sans-serif)",
+                  fontFamily: "var(--font-sans)",
                   fontSize: 13,
                   color: "var(--vii-tan)",
                   letterSpacing: "0.1em",
@@ -238,7 +238,7 @@ export function ViiStorySection({
                     width: 44,
                     height: 44,
                     borderRadius: "50%",
-                    border: "1px solid rgba(193,170,145,0.35)",
+                    border: "1px solid color-mix(in srgb, var(--vii-tan) 35%, transparent)",
                     background: "transparent",
                     color: "var(--vii-tan)",
                     cursor: total <= 1 ? "default" : "pointer",
@@ -263,7 +263,7 @@ export function ViiStorySection({
                     width: 44,
                     height: 44,
                     borderRadius: "50%",
-                    border: "1px solid rgba(193,170,145,0.35)",
+                    border: "1px solid color-mix(in srgb, var(--vii-tan) 35%, transparent)",
                     background: "transparent",
                     color: "var(--vii-tan)",
                     cursor: total <= 1 ? "default" : "pointer",

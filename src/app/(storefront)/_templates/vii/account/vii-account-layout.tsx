@@ -219,7 +219,7 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
                         display: "flex",
                         alignItems: "center",
                         gap: 12,
-                        borderRadius: "0.2rem",
+                        borderRadius: "var(--radius)",
                         padding: "10px 14px",
                         fontFamily: "var(--font-sans)",
                         fontSize: 14,

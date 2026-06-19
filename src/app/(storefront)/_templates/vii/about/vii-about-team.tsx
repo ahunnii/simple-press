@@ -40,7 +40,7 @@ function MemberCard({
         style={{
           position: "relative",
           aspectRatio: "3/4",
-          borderRadius: "0.2rem",
+          borderRadius: "var(--radius)",
           overflow: "hidden",
           background: "var(--vii-tan)",
           marginBottom: 20,

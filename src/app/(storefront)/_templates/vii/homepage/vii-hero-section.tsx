@@ -74,7 +74,7 @@ export function ViiHeroSection({
       style={{
         position: "relative",
         width: "100%",
-        minHeight: "100vh",
+        minHeight: "100dvh",
         display: "flex",
         alignItems: "flex-end",
         overflow: "hidden",
@@ -116,8 +116,8 @@ export function ViiHeroSection({
               width: 44,
               height: 44,
               borderRadius: "50%",
-              background: "rgba(251,248,241,0.18)",
-              border: "1px solid rgba(251,248,241,0.4)",
+              background: "color-mix(in srgb, var(--vii-paper) 18%, transparent)",
+              border: "1px solid color-mix(in srgb, var(--vii-paper) 40%, transparent)",
               color: "var(--vii-paper)",
               cursor: "pointer",
               display: "inline-flex",
@@ -163,7 +163,7 @@ export function ViiHeroSection({
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(to top, rgba(30,53,64,0.82) 0%, rgba(30,53,64,0.25) 60%, rgba(30,53,64,0.1) 100%)",
+            "linear-gradient(to top, color-mix(in srgb, var(--vii-navy) 82%, transparent) 0%, color-mix(in srgb, var(--vii-navy) 25%, transparent) 60%, color-mix(in srgb, var(--vii-navy) 10%, transparent) 100%)",
           zIndex: 1,
         }}
       />
@@ -182,7 +182,7 @@ export function ViiHeroSection({
           <p
             style={{
               ...revealStyle(0),
-              fontFamily: "var(--font-vii-sans, sans-serif)",
+              fontFamily: "var(--font-sans)",
               fontSize: 11,
               letterSpacing: "0.22em",
               textTransform: "uppercase",
@@ -199,7 +199,7 @@ export function ViiHeroSection({
           <h1
             style={{
               ...revealStyle(0.15),
-              fontFamily: "var(--font-vii-sans, sans-serif)",
+              fontFamily: "var(--font-sans)",
               fontSize: "clamp(18px, 2.4vw, 28px)",
               lineHeight: 1.55,
               color: "var(--vii-paper)",
@@ -222,13 +222,13 @@ export function ViiHeroSection({
                 padding: "14px 32px",
                 background: "var(--vii-copper-deep)",
                 color: "var(--vii-paper)",
-                fontFamily: "var(--font-vii-sans, sans-serif)",
+                fontFamily: "var(--font-sans)",
                 fontSize: 12,
                 fontWeight: 500,
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 textDecoration: "none",
-                borderRadius: "0.15rem",
+                borderRadius: "var(--radius)",
                 transition: "background 0.3s ease, opacity 0.3s ease",
               }}
               className="vii-cta-btn"

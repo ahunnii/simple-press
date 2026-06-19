@@ -3265,6 +3265,18 @@
   }
 }
 
+/* Collection banner — wide cinematic crop on desktop, taller on small screens
+   so a 21:6 strip doesn't collapse to an unreadable sliver on mobile. */
+.vii .vii-collection-banner {
+  aspect-ratio: 21 / 6;
+}
+
+@media (max-width: 640px) {
+  .vii .vii-collection-banner {
+    aspect-ratio: 16 / 9;
+  }
+}
+
 /* Blog prose body — editorial styling for TiptapRenderer output in .vii-prose */
 .vii .vii-prose h2 {
   font-family: var(--font-serif);
@@ -3400,7 +3412,7 @@
   )::placeholder,
 .vii .vii-contact-form textarea::placeholder {
   color: var(--vii-ink-soft);
-  opacity: 0.55;
+  opacity: 1;
 }
 
 .vii

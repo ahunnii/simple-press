@@ -84,7 +84,7 @@ function RitualHero({
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(30,53,64,0.55)",
+          background: "color-mix(in srgb, var(--vii-navy) 55%, transparent)",
           zIndex: 1,
         }}
       />
@@ -272,7 +272,7 @@ function RitualStep({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-ritual-step${isReversed ? "is-reversed" : ""}${visible ? " is-visible" : ""}`}
+      className={`vii-reveal vii-ritual-step${isReversed ? " is-reversed" : ""}${visible ? " is-visible" : ""}`}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
@@ -320,7 +320,7 @@ function RitualStep({
             fontStyle: "italic",
             fontSize: "clamp(80px, 14vw, 160px)",
             lineHeight: 1,
-            color: "rgba(193,170,145,0.22)",
+            color: "color-mix(in srgb, var(--vii-tan) 22%, transparent)",
             pointerEvents: "none",
             userSelect: "none",
           }}
@@ -361,7 +361,7 @@ function RitualStep({
                   color: "var(--vii-ink-soft)",
                   padding: "3px 10px",
                   border: "1px solid var(--vii-tan)",
-                  borderRadius: "0.15rem",
+                  borderRadius: "var(--radius)",
                 }}
               >
                 {item.durationLabel}
@@ -374,10 +374,10 @@ function RitualStep({
                   fontSize: 10,
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
-                  color: "var(--vii-copper)",
+                  color: "var(--vii-navy)",
                   padding: "3px 10px",
                   border: "1px solid var(--vii-copper)",
-                  borderRadius: "0.15rem",
+                  borderRadius: "var(--radius)",
                 }}
               >
                 {item.priceLabel}
@@ -425,44 +425,49 @@ function RitualStep({
           />
         </div>
       </div>
-
-      <style>{`
-        .vii-ritual-book button,
-        .vii-ritual-book a {
-          display: inline-block;
-          padding: 13px 32px;
-          background: transparent;
-          color: var(--vii-navy) !important;
-          font-family: var(--font-sans);
-          font-size: 11px;
-          font-weight: 500;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-          text-decoration: none;
-          border-radius: 0.15rem;
-          border: 1.5px solid var(--vii-navy);
-          cursor: pointer;
-          transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
-        .vii-ritual-book button:hover,
-        .vii-ritual-book a:hover {
-          background: var(--vii-navy);
-          color: var(--vii-paper) !important;
-        }
-        .vii-ritual-book button:disabled {
-          border-color: var(--vii-tan);
-          color: var(--vii-tan) !important;
-          cursor: not-allowed;
-        }
-        @media (max-width: 768px) {
-          .vii-ritual-step {
-            grid-template-columns: 1fr !important;
-          }
-          .vii-ritual-media { order: 1 !important; min-height: 260px; }
-          .vii-ritual-text { order: 2 !important; }
-        }
-      `}</style>
     </div>
+  );
+}
+
+/** Hoisted once per page (not per step) — book-button styling + mobile stacking. */
+function RitualStepStyles() {
+  return (
+    <style>{`
+      .vii-ritual-book button,
+      .vii-ritual-book a {
+        display: inline-block;
+        padding: 13px 32px;
+        background: transparent;
+        color: var(--vii-navy) !important;
+        font-family: var(--font-sans);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        text-decoration: none;
+        border-radius: var(--radius);
+        border: 1.5px solid var(--vii-navy);
+        cursor: pointer;
+        transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      .vii-ritual-book button:hover,
+      .vii-ritual-book a:hover {
+        background: var(--vii-navy);
+        color: var(--vii-paper) !important;
+      }
+      .vii-ritual-book button:disabled {
+        border-color: var(--vii-tan);
+        color: var(--vii-tan) !important;
+        cursor: not-allowed;
+      }
+      @media (max-width: 768px) {
+        .vii-ritual-step {
+          grid-template-columns: 1fr !important;
+        }
+        .vii-ritual-media { order: 1 !important; min-height: 260px; }
+        .vii-ritual-text { order: 2 !important; }
+      }
+    `}</style>
   );
 }
 
@@ -523,6 +528,7 @@ export function ViiRitualServicePage({
       {/* 3. Ritual steps */}
       {publishedItems.length > 0 && (
         <section aria-label="Treatment rituals">
+          <RitualStepStyles />
           {publishedItems.map((item, i) => (
             <RitualStep
               key={item.id}

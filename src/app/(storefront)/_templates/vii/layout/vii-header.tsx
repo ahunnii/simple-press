@@ -247,7 +247,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
               letterSpacing: "0.32em",
               fontWeight: 400,
               textTransform: "uppercase",
-              color: dark ? "var(--vii-ink-soft)" : "rgba(251,248,241,0.7)",
+              color: dark ? "var(--vii-ink-soft)" : "color-mix(in srgb, var(--vii-paper) 70%, transparent)",
               marginTop: "4px",
               transition: `color 0.4s ${ease}`,
             }}
@@ -259,6 +259,9 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
     );
 
   const navLinkStyle = (active: boolean): React.CSSProperties => ({
+    display: "inline-flex",
+    alignItems: "center",
+    lineHeight: 1,
     fontFamily: "var(--font-sans)",
     fontSize: "12px",
     letterSpacing: "0.14em",
@@ -271,14 +274,14 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
         : "var(--vii-ink-soft)"
       : active
         ? "var(--vii-paper)"
-        : "rgba(251,248,241,0.85)",
+        : "color-mix(in srgb, var(--vii-paper) 85%, transparent)",
     transition: `color 0.4s ${ease}`,
     borderBottom: active ? "1px solid currentColor" : "1px solid transparent",
     paddingBottom: "2px",
     whiteSpace: "nowrap",
   });
 
-  const iconColor = solid ? "var(--vii-ink-soft)" : "rgba(251,248,241,0.85)";
+  const iconColor = solid ? "var(--vii-ink-soft)" : "color-mix(in srgb, var(--vii-paper) 85%, transparent)";
 
   // ── Dropdown helpers ────────────────────────────────────────────────────────
   const dropdownKey = (side: "left" | "right", index: number) =>
@@ -309,7 +312,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
       return (
         <div
           key={link.href + link.label}
-          className="relative"
+          className="relative flex items-center"
           onMouseEnter={() => setOpenDropdown(key)}
           onMouseLeave={() => setOpenDropdown(null)}
           onBlur={(e) => {
@@ -356,9 +359,9 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                 style={{
                   minWidth: "200px",
                   background: "var(--vii-paper)",
-                  border: "1px solid rgba(30,53,64,0.1)",
+                  border: "1px solid color-mix(in srgb, var(--vii-navy) 10%, transparent)",
                   borderRadius: "var(--radius)",
-                  boxShadow: "0 12px 32px rgba(30,53,64,0.12)",
+                  boxShadow: "0 12px 32px color-mix(in srgb, var(--vii-navy) 12%, transparent)",
                   padding: "6px 0",
                 }}
               >
@@ -551,7 +554,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
             position: "relative",
             background: solid ? "var(--vii-paper)" : "transparent",
             borderBottom: solid
-              ? "1px solid rgba(30,53,64,0.1)"
+              ? "1px solid color-mix(in srgb, var(--vii-navy) 10%, transparent)"
               : "1px solid transparent",
             transition: `background 0.5s ${ease}, border-color 0.5s ${ease}`,
           }}
@@ -565,7 +568,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                 inset: 0,
                 pointerEvents: "none",
                 background:
-                  "linear-gradient(to bottom, rgba(30,53,64,0.5) 0%, rgba(30,53,64,0) 100%)",
+                  "linear-gradient(to bottom, color-mix(in srgb, var(--vii-navy) 50%, transparent) 0%, color-mix(in srgb, var(--vii-navy) 0%, transparent) 100%)",
               }}
             />
           )}
@@ -644,6 +647,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                   <Link
                     href="/auth/sign-in"
                     aria-label="Sign in to your account"
+                    className="-m-2 flex items-center justify-center p-2"
                     style={{
                       color: iconColor,
                       transition: `color 0.4s ${ease}`,
@@ -666,7 +670,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                     ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
                     : "View cart"
                 }
-                className="relative"
+                className="relative -m-2 flex items-center justify-center p-2"
                 style={{ color: iconColor, transition: `color 0.4s ${ease}` }}
               >
                 <ShoppingBag
@@ -677,7 +681,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                 {itemCount > 0 && (
                   <span
                     aria-hidden="true"
-                    className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
+                    className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
                     style={{
                       background: "var(--vii-copper-deep)",
                       color: "var(--vii-paper)",
@@ -747,7 +751,9 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                 border: "none",
                 cursor: "pointer",
                 color: "var(--vii-navy)",
-                padding: "8px",
+                minWidth: 44,
+                minHeight: 44,
+                marginRight: -4,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -795,7 +801,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
           {/* Bottom: phone + Book CTA + account */}
           <div
             className="shrink-0 px-6 py-6"
-            style={{ borderTop: "1px solid rgba(30,53,64,0.1)" }}
+            style={{ borderTop: "1px solid color-mix(in srgb, var(--vii-navy) 10%, transparent)" }}
           >
             <div className="flex items-center justify-between gap-4">
               {phone ? (
@@ -850,7 +856,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                 fontWeight: 400,
                 padding: "14px",
                 background: "transparent",
-                border: "1px solid rgba(30,53,64,0.2)",
+                border: "1px solid color-mix(in srgb, var(--vii-navy) 20%, transparent)",
                 color: "var(--vii-navy)",
                 textDecoration: "none",
                 borderRadius: "var(--radius)",

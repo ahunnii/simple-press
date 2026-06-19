@@ -30,7 +30,7 @@ export function ViiInstagramStrip({ handle, images }: Props) {
         {handle && (
           <p
             style={{
-              fontFamily: "var(--font-vii-sans, sans-serif)",
+              fontFamily: "var(--font-sans)",
               fontSize: 12,
               letterSpacing: "0.18em",
               textTransform: "uppercase",

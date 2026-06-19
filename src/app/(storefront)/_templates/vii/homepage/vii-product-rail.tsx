@@ -87,7 +87,7 @@ export function ViiProductRail({
             aria-hidden="true"
             style={{
               height: 1,
-              background: "rgba(30,53,64,0.2)",
+              background: "color-mix(in srgb, var(--vii-navy) 20%, transparent)",
               marginTop: "clamp(16px, 2vw, 22px)",
             }}
           />

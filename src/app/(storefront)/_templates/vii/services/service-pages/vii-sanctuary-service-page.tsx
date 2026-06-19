@@ -12,8 +12,9 @@
  *    duration/price chips, description, and a copper "Book" CTA.
  * 5. Closing contact CTA section (reuses ViiContactCtaSection).
  */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { Pause, Play } from "lucide-react";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
@@ -43,22 +44,49 @@ function SanctuaryHero({
 }) {
   const [videoPaused, setVideoPaused] = useState(false);
   const [shown, setShown] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  // entrance reveal on mount
-  useState(() => {
+  // Entrance reveal on mount — skipped entirely when the user prefers reduced
+  // motion (mirrors useViiReveal's behaviour for the rest of the template).
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setReduceMotion(true);
+      setShown(true);
+      return;
+    }
     const t = setTimeout(() => setShown(true), 60);
     return () => clearTimeout(t);
-  });
+  }, []);
 
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
   const ease = "cubic-bezier(0.16, 1, 0.3, 1)";
 
-  const revealStyle = (delay: number): React.CSSProperties => ({
-    opacity: shown ? 1 : 0,
-    transform: shown ? "translateY(0)" : "translateY(20px)",
-    transition: `opacity 0.95s ${ease} ${delay}s, transform 0.95s ${ease} ${delay}s`,
-  });
+  const toggleVideo = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) {
+      void v.play();
+      setVideoPaused(false);
+    } else {
+      v.pause();
+      setVideoPaused(true);
+    }
+  };
+
+  // entrance reveal styles — no animation under reduced-motion
+  const revealStyle = (delay: number): React.CSSProperties =>
+    reduceMotion
+      ? {}
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(20px)",
+          transition: `opacity 0.95s ${ease} ${delay}s, transform 0.95s ${ease} ${delay}s`,
+        };
 
   return (
     <section
@@ -76,7 +104,8 @@ function SanctuaryHero({
       {/* Background media */}
       {hasVideo ? (
         <video
-          autoPlay={!videoPaused}
+          ref={videoRef}
+          autoPlay={!reduceMotion}
           muted
           loop
           playsInline
@@ -88,7 +117,6 @@ function SanctuaryHero({
             height: "100%",
             objectFit: "cover",
           }}
-          onClick={() => setVideoPaused((p) => !p)}
         >
           <source src={heroVideo} type="video/mp4" />
         </video>
@@ -120,7 +148,7 @@ function SanctuaryHero({
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(to top, rgba(30,53,64,0.9) 0%, rgba(30,53,64,0.4) 50%, rgba(30,53,64,0.15) 100%)",
+            "linear-gradient(to top, color-mix(in srgb, var(--vii-navy) 90%, transparent) 0%, color-mix(in srgb, var(--vii-navy) 40%, transparent) 50%, color-mix(in srgb, var(--vii-navy) 15%, transparent) 100%)",
           zIndex: 1,
         }}
       />
@@ -170,7 +198,7 @@ function SanctuaryHero({
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontStyle: "italic",
-            fontSize: "clamp(48px, 8vw, 108px)",
+            fontSize: "clamp(48px, 8vw, 96px)",
             lineHeight: 0.98,
             color: "var(--vii-paper)",
             margin: 0,
@@ -197,6 +225,42 @@ function SanctuaryHero({
           </p>
         )}
       </div>
+
+      {/* Accessible pause/play control for the autoplaying background video
+          (WCAG 2.2.2 — Pause, Stop, Hide). */}
+      {hasVideo && (
+        <button
+          type="button"
+          onClick={toggleVideo}
+          aria-label={
+            videoPaused ? "Play background video" : "Pause background video"
+          }
+          className="vii-sanctuary-video-toggle"
+          style={{
+            position: "absolute",
+            bottom: "clamp(20px, 4vh, 40px)",
+            right: "clamp(20px, 4vw, 40px)",
+            zIndex: 3,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            border: "1px solid color-mix(in srgb, var(--vii-paper) 50%, transparent)",
+            background: "color-mix(in srgb, var(--vii-navy) 55%, transparent)",
+            color: "var(--vii-paper)",
+            cursor: "pointer",
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          {videoPaused ? (
+            <Play size={16} aria-hidden="true" />
+          ) : (
+            <Pause size={16} aria-hidden="true" />
+          )}
+        </button>
+      )}
     </section>
   );
 }
@@ -388,7 +452,7 @@ function TreatmentCard({
       style={{
         transitionDelay: `${index * 0.07}s`,
         background: "var(--vii-paper)",
-        borderRadius: "0.2rem",
+        borderRadius: "var(--radius)",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
@@ -459,7 +523,7 @@ function TreatmentCard({
                   color: "var(--vii-ink-soft)",
                   padding: "3px 10px",
                   border: "1px solid var(--vii-tan)",
-                  borderRadius: "0.15rem",
+                  borderRadius: "var(--radius)",
                 }}
               >
                 {item.durationLabel}
@@ -472,10 +536,10 @@ function TreatmentCard({
                   fontSize: 10,
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
-                  color: "var(--vii-copper)",
+                  color: "var(--vii-navy)",
                   padding: "3px 10px",
                   border: "1px solid var(--vii-copper)",
-                  borderRadius: "0.15rem",
+                  borderRadius: "var(--radius)",
                 }}
               >
                 {item.priceLabel}
@@ -522,10 +586,6 @@ function TreatmentCard({
           />
         </div>
       </div>
-
-      <style>{`
-        .vii-sanctuary-card-img:hover { transform: scale(1.04); }
-      `}</style>
     </article>
   );
 }
@@ -551,35 +611,6 @@ function ViiBookButton({
         embedHeight={embedHeight}
         embedsEnabled={embedsEnabled}
       />
-      <style>{`
-        .vii-book-btn-wrap button,
-        .vii-book-btn-wrap a {
-          display: inline-block;
-          padding: 12px 28px;
-          background: var(--vii-copper);
-          color: var(--vii-paper) !important;
-          font-family: var(--font-sans);
-          font-size: 11px;
-          font-weight: 500;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-          text-decoration: none;
-          border-radius: 0.15rem;
-          border: none;
-          cursor: pointer;
-          transition: background 0.3s ease, opacity 0.3s ease;
-          width: 100%;
-          text-align: center;
-          justify-content: center;
-        }
-        .vii-book-btn-wrap button:hover,
-        .vii-book-btn-wrap a:hover { background: var(--vii-slate); }
-        .vii-book-btn-wrap button:disabled {
-          background: var(--vii-tan);
-          cursor: not-allowed;
-          opacity: 0.7;
-        }
-      `}</style>
     </div>
   );
 }
@@ -758,6 +789,34 @@ function TreatmentMenu({
       </div>
 
       <style>{`
+        .vii-sanctuary-card-img:hover { transform: scale(1.04); }
+        .vii-book-btn-wrap button,
+        .vii-book-btn-wrap a {
+          display: inline-block;
+          padding: 14px 28px;
+          background: var(--vii-copper-deep);
+          color: var(--vii-paper) !important;
+          font-family: var(--font-sans);
+          font-size: 11px;
+          font-weight: 500;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          text-decoration: none;
+          border-radius: var(--radius);
+          border: none;
+          cursor: pointer;
+          transition: background 0.3s ease, opacity 0.3s ease;
+          width: 100%;
+          text-align: center;
+          justify-content: center;
+        }
+        .vii-book-btn-wrap button:hover,
+        .vii-book-btn-wrap a:hover { background: var(--vii-slate); }
+        .vii-book-btn-wrap button:disabled {
+          background: var(--vii-tan);
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
         @media (max-width: 900px) {
           .vii-sanctuary-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }

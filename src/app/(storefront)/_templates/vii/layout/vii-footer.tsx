@@ -6,6 +6,8 @@ import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api } from "~/trpc/server";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
+import { TikTokIcon } from "~/components/icons/tiktok-icon";
+import { TwitterIcon } from "~/components/icons/twitter-icon";
 
 import { resolveFields } from "../index";
 
@@ -137,7 +139,10 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             )}
 
             {/* Social icons */}
-            {(socialLinks?.instagram ?? socialLinks?.facebook) && (
+            {(socialLinks?.instagram ??
+              socialLinks?.facebook ??
+              socialLinks?.twitter ??
+              socialLinks?.tiktok) && (
               <div className="flex gap-4">
                 {socialLinks?.instagram && (
                   <a
@@ -157,6 +162,26 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                     aria-label="Facebook"
                   >
                     <FacebookIcon className="h-4 w-4" />
+                  </a>
+                )}
+                {socialLinks?.twitter && (
+                  <a
+                    href={socialLinks.twitter}
+                    className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)" }}
+                    aria-label="X (Twitter)"
+                  >
+                    <TwitterIcon className="h-4 w-4" />
+                  </a>
+                )}
+                {socialLinks?.tiktok && (
+                  <a
+                    href={socialLinks.tiktok}
+                    className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)" }}
+                    aria-label="TikTok"
+                  >
+                    <TikTokIcon className="h-4 w-4" />
                   </a>
                 )}
               </div>
@@ -254,7 +279,15 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                         {email}
                       </a>
                     )}
-                    {phone && <span className="block">{phone}</span>}
+                    {phone && (
+                      <a
+                        href={`tel:${phone.replace(/\s/g, "")}`}
+                        className="block transition-opacity hover:opacity-80"
+                        style={{ color: "inherit" }}
+                      >
+                        {phone}
+                      </a>
+                    )}
                   </div>
                 </div>
               )}
@@ -268,7 +301,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
         className="mx-auto flex flex-col gap-3 px-8 py-5 sm:flex-row sm:items-center sm:justify-between"
         style={{
           maxWidth: "1320px",
-          borderTop: "1px solid rgba(30,53,64,0.12)",
+          borderTop: "1px solid color-mix(in srgb, var(--vii-navy) 12%, transparent)",
         }}
       >
         <span

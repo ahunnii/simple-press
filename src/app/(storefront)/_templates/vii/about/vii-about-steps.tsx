@@ -50,7 +50,7 @@ function StepRow({
         style={{
           position: "relative",
           aspectRatio: "4/3",
-          borderRadius: "0.2rem",
+          borderRadius: "var(--radius)",
           overflow: "hidden",
           background: "var(--vii-tan)",
         }}

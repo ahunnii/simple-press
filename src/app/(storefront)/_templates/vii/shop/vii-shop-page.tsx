@@ -35,9 +35,9 @@ export async function ViiShopPage({
         aria-labelledby="vii-shop-heading"
         style={{
           background: "var(--vii-cream)",
-          // Top value clears the fixed header (announcement bar + nav ≈ 106px)
+          // Clear the fixed header (≈106px) plus generous editorial breathing room.
           padding:
-            "clamp(124px, 13vw, 150px) clamp(24px, 6vw, 96px) clamp(40px, 5vw, 64px)",
+            "calc(var(--vii-header-offset) + clamp(40px, 6vw, 72px)) clamp(24px, 6vw, 96px) clamp(40px, 5vw, 64px)",
         }}
       >
         <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>

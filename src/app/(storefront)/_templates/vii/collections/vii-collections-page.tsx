@@ -3,6 +3,8 @@ import Link from "next/link";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
 
+import { ViiOverline } from "../shared/vii-overline";
+
 export function ViiCollectionsPage({
   collections,
 }: DefaultCollectionsPageTemplateProps) {
@@ -15,31 +17,21 @@ export function ViiCollectionsPage({
         aria-labelledby="vii-collections-heading"
         style={{
           background: "var(--vii-cream)",
-          // Top value clears the fixed header (announcement bar + nav ≈ 106px)
+          // Clear the fixed header (≈106px) plus generous editorial breathing room.
           padding:
-            "clamp(124px, 13vw, 150px) clamp(24px, 6vw, 96px) clamp(40px, 5vw, 64px)",
+            "calc(var(--vii-header-offset) + clamp(40px, 6vw, 72px)) clamp(24px, 6vw, 96px) clamp(40px, 5vw, 64px)",
         }}
       >
         <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 11,
-              letterSpacing: "0.24em",
-              textTransform: "uppercase",
-              fontWeight: 500,
-              color: "var(--vii-ink-soft)",
-              margin: "0 0 14px",
-            }}
-          >
+          <ViiOverline align="center" style={{ marginBottom: 14 }}>
             Shop by collection
-          </p>
+          </ViiOverline>
           <h1
             id="vii-collections-heading"
             style={{
               fontFamily: "var(--font-serif)",
               fontWeight: 400,
-              fontSize: "clamp(36px, 5.5vw, 64px)",
+              fontSize: "clamp(2rem, 5vw, 3.5rem)",
               lineHeight: 1.05,
               color: "var(--vii-navy)",
               margin: 0,
@@ -126,7 +118,11 @@ export function ViiCollectionsPage({
                     />
                   </div>
                   <div
-                    style={{ display: "flex", flexDirection: "column", gap: 6 }}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
+                    }}
                   >
                     <h2
                       className="transition-opacity group-hover:opacity-70"

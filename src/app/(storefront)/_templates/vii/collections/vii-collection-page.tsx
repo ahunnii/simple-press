@@ -25,9 +25,9 @@ export function ViiCollectionPage({
         aria-labelledby="vii-collection-heading"
         style={{
           background: "var(--vii-cream)",
-          // Top value clears the fixed header (announcement bar + nav ≈ 106px)
+          // Clear the fixed header (≈106px) plus generous editorial breathing room.
           padding:
-            "clamp(124px, 13vw, 150px) clamp(24px, 6vw, 96px) clamp(32px, 4vw, 56px)",
+            "calc(var(--vii-header-offset) + clamp(40px, 6vw, 72px)) clamp(24px, 6vw, 96px) clamp(32px, 4vw, 56px)",
         }}
       >
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
@@ -46,13 +46,30 @@ export function ViiCollectionPage({
               color: "var(--vii-ink-soft)",
             }}
           >
-            <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+            <Link
+              href="/"
+              style={{
+                color: "inherit",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                paddingBlock: 8,
+                marginBlock: -8,
+              }}
+            >
               Home
             </Link>
             <span aria-hidden="true">/</span>
             <Link
               href="/collections"
-              style={{ color: "inherit", textDecoration: "none" }}
+              style={{
+                color: "inherit",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                paddingBlock: 8,
+                marginBlock: -8,
+              }}
             >
               Collections
             </Link>
@@ -67,7 +84,7 @@ export function ViiCollectionPage({
             style={{
               fontFamily: "var(--font-serif)",
               fontWeight: 400,
-              fontSize: "clamp(36px, 5.5vw, 64px)",
+              fontSize: "clamp(2rem, 5vw, 3.5rem)",
               lineHeight: 1.05,
               color: "var(--vii-navy)",
               margin: 0,
@@ -105,9 +122,9 @@ export function ViiCollectionPage({
           {/* Banner image */}
           {collection.imageUrl && (
             <div
+              className="vii-collection-banner"
               style={{
                 position: "relative",
-                aspectRatio: "21 / 6",
                 overflow: "hidden",
                 borderRadius: "var(--radius)",
                 background: "var(--vii-paper)",
@@ -129,7 +146,7 @@ export function ViiCollectionPage({
 
       {/* Products */}
       <section
-        aria-label={`${collection.name} products`}
+        aria-labelledby="vii-collection-products-heading"
         style={{
           background: "var(--vii-paper)",
           padding:
@@ -137,6 +154,9 @@ export function ViiCollectionPage({
         }}
       >
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <h2 id="vii-collection-products-heading" className="sr-only">
+            {collection.name} products
+          </h2>
           {products.length === 0 ? (
             <div
               style={{
