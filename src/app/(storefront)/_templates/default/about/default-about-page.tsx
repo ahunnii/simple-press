@@ -3,8 +3,8 @@ import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { getRichTextFieldValue, isContentEmpty } from "~/lib/template-fields";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { getRichTextFieldValue, isContentEmpty } from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
@@ -71,7 +71,10 @@ export async function DefaultAboutPage({
   return (
     <PageTransition>
       {/* ── Page hero ────────────────────────────────────────────────────── */}
-      <section {...sectionGroupAttr("about", "hero")} className="border-b border-[#e8e8e8] px-6 pt-20 pb-0 lg:px-8">
+      <section
+        {...sectionGroupAttr("about", "hero")}
+        className="border-b border-[#e8e8e8] px-6 pt-20 pb-0 lg:px-8"
+      >
         <div className="mx-auto max-w-[1440px]">
           {f["default.about.eyebrow"] && (
             <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
@@ -101,7 +104,10 @@ export async function DefaultAboutPage({
       </section>
 
       {/* ── Maker bio ────────────────────────────────────────────────────── */}
-      <section {...sectionGroupAttr("about", "bio")} className="px-6 py-24 lg:px-8">
+      <section
+        {...sectionGroupAttr("about", "bio")}
+        className="px-6 py-24 lg:px-8"
+      >
         <div className="mx-auto max-w-[1440px]">
           <div className="grid grid-cols-1 gap-14 lg:grid-cols-[320px_1fr] lg:items-start">
             {/* Portrait */}
@@ -164,7 +170,10 @@ export async function DefaultAboutPage({
 
       {/* ── Pull quote ───────────────────────────────────────────────────── */}
       {f["default.about.pull-quote"] && (
-        <section {...sectionGroupAttr("about", "pillars")} className="border-t border-[#e8e8e8] px-6 py-24 lg:px-8">
+        <section
+          {...sectionGroupAttr("about", "pillars")}
+          className="border-t border-[#e8e8e8] px-6 py-24 lg:px-8"
+        >
           <div className="mx-auto max-w-[1440px]">
             <p className="max-w-[800px] font-serif text-[clamp(22px,2.8vw,36px)] leading-[1.28] tracking-[-0.015em] text-balance">
               &ldquo;{f["default.about.pull-quote"]}&rdquo;
@@ -174,7 +183,10 @@ export async function DefaultAboutPage({
       )}
 
       {/* ── Three pillars ────────────────────────────────────────────────── */}
-      <section {...sectionGroupAttr("about", "pillars")} className="border-t border-[#e8e8e8] px-6 py-24 lg:px-8">
+      <section
+        {...sectionGroupAttr("about", "pillars")}
+        className="border-t border-[#e8e8e8] px-6 py-24 lg:px-8"
+      >
         <div className="mx-auto max-w-[1440px]">
           <div className="mb-12 flex flex-col gap-2">
             <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
@@ -203,7 +215,10 @@ export async function DefaultAboutPage({
       </section>
 
       {/* ── Bottom CTA ───────────────────────────────────────────────────── */}
-      <section {...sectionGroupAttr("about", "cta")} className="bg-[#efece8] px-6 py-24 text-center lg:px-8">
+      <section
+        {...sectionGroupAttr("about", "cta")}
+        className="bg-[#efece8] px-6 py-24 text-center lg:px-8"
+      >
         <div className="mx-auto max-w-[640px]">
           {f["default.about.cta-eyebrow"] && (
             <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">

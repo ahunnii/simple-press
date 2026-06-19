@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { env } from "~/env";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+
 export const externalRouter = createTRPCRouter({
   /**
    * Verify Artisan Token
@@ -50,5 +51,4 @@ export const externalRouter = createTRPCRouter({
         success: true as const,
       };
     }),
-
 });

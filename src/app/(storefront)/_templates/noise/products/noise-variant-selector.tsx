@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
-
-
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -16,11 +15,30 @@ type Props = {
 
 export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
   const { addItem } = useCart();
+  const { setVariantImageUrl } = useVariantImage();
+
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+
+  useEffect(() => {
+    setVariantImageUrl(selectedVariant?.imageUrl ?? null);
+  }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  const BACKORDER_MAX = 100;
+  const isBackordered =
+    product.trackInventory &&
+    !!product.allowBackorders &&
+    (selectedVariant?.inventoryQty ?? 0) === 0;
+  const effectiveMax = !product.trackInventory
+    ? BACKORDER_MAX
+    : (selectedVariant?.inventoryQty ?? 0) > 0
+      ? (selectedVariant?.inventoryQty ?? 0)
+      : product.allowBackorders
+        ? BACKORDER_MAX
+        : 0;
 
   const handleAddToCart = () => {
     if (!selectedVariant) return;
@@ -31,11 +49,9 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
         productName: product.name,
         variantName: selectedVariant.name,
         price: selectedVariant.price ?? product.price,
-        imageUrl: product.images[0]?.url ?? null,
+        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
         sku: selectedVariant.sku,
-        maxInventory: product.trackInventory
-          ? selectedVariant.inventoryQty
-          : undefined,
+        maxInventory: effectiveMax,
       },
       quantity,
     );
@@ -92,7 +108,9 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
 
       {selectedVariant && product.trackInventory && (
         <p className="text-muted-foreground font-sans text-xs">
-          {selectedVariant.inventoryQty ?? 0} in stock
+          {isBackordered
+            ? "Backordered — ships when available"
+            : `${selectedVariant.inventoryQty ?? 0} in stock`}
         </p>
       )}
 
@@ -121,13 +139,8 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
               variant="ghost"
               size="icon"
               className="size-10 rounded-none"
-              onClick={() =>
-                setQuantity(
-                  product.trackInventory
-                    ? Math.min(selectedVariant.inventoryQty, quantity + 1)
-                    : quantity + 1,
-                )
-              }
+              onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+              disabled={quantity >= effectiveMax}
               aria-label="Increase quantity"
             >
               <Plus className="size-3.5" aria-hidden="true" />
@@ -140,7 +153,7 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
           const isUnavailable =
             !selectedVariant ||
             (product.trackInventory &&
-              (selectedVariant?.inventoryQty ?? 0) === 0 &&
+              selectedVariant.inventoryQty === 0 &&
               !product.allowBackorders);
           return (
             <Button

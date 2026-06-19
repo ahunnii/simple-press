@@ -5,8 +5,6 @@ import Link from "next/link";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
-import { useReducedMotion } from "~/hooks/use-reduced-motion";
-
 import type { ShippingConfig } from "~/lib/shipping-utils";
 import { formatPrice } from "~/lib/prices";
 import {
@@ -14,6 +12,7 @@ import {
   getFreeShippingProgress,
   SHIPPING_TYPES,
 } from "~/lib/shipping-utils";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import {
   Sheet,
   SheetContent,
@@ -89,7 +88,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
             />
             <div>
               <p
-                className="font-serif italic leading-none"
+                className="font-serif leading-none italic"
                 style={{ fontSize: "24px", letterSpacing: "-0.01em" }}
               >
                 Your bag is empty.
@@ -104,7 +103,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
             <Link
               href="/shop"
               onClick={() => setIsOpen(false)}
-              className="font-mono text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-70 mt-2"
+              className="mt-2 font-mono text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-70"
               style={{
                 borderBottom: "1px solid var(--vn-ink)",
                 paddingBottom: "4px",
@@ -155,9 +154,9 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                     </div>
 
                     {/* Info */}
-                    <div className="flex flex-col gap-1.5 min-w-0">
+                    <div className="flex min-w-0 flex-col gap-1.5">
                       <p
-                        className="font-sans leading-[1.2] truncate"
+                        className="truncate font-sans leading-[1.2]"
                         style={{ fontSize: "13px", fontWeight: 500 }}
                       >
                         {item.productName}
@@ -172,13 +171,13 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                       )}
 
                       {/* Qty stepper + Remove */}
-                      <div className="flex items-center gap-2 mt-1.5">
+                      <div className="mt-1.5 flex items-center gap-2">
                         <div
                           className="flex items-center border"
                           style={{ borderColor: "var(--vn-rule)" }}
                         >
                           <button
-                            className="flex items-center justify-center transition-colors hover:bg-foreground hover:text-background disabled:opacity-30"
+                            className="hover:bg-foreground hover:text-background flex items-center justify-center transition-colors disabled:opacity-30"
                             style={{ width: "36px", height: "36px" }}
                             onClick={() =>
                               updateQuantity(
@@ -193,7 +192,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                             <Minus className="h-2.5 w-2.5" />
                           </button>
                           <span
-                            className="font-mono text-[12px] text-center"
+                            className="text-center font-mono text-[12px]"
                             style={{ width: "28px" }}
                             aria-live="polite"
                             aria-atomic="true"
@@ -201,7 +200,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                             {item.quantity}
                           </span>
                           <button
-                            className="flex items-center justify-center transition-colors hover:bg-foreground hover:text-background"
+                            className="hover:bg-foreground hover:text-background flex items-center justify-center transition-colors"
                             style={{ width: "36px", height: "36px" }}
                             onClick={() =>
                               updateQuantity(
@@ -219,8 +218,11 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                           onClick={() =>
                             removeItem(item.productId, item.variantId)
                           }
-                          className="font-mono text-[10px] tracking-[0.1em] uppercase transition-opacity hover:opacity-50 ml-1"
-                          style={{ color: "var(--vn-steel-mist)", textDecoration: "underline" }}
+                          className="ml-1 font-mono text-[10px] tracking-[0.1em] uppercase transition-opacity hover:opacity-50"
+                          style={{
+                            color: "var(--vn-steel-mist)",
+                            textDecoration: "underline",
+                          }}
                           aria-label={`Remove ${item.productName}`}
                         >
                           Remove
@@ -230,7 +232,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
 
                     {/* Line total */}
                     <span
-                      className="font-sans flex-shrink-0"
+                      className="flex-shrink-0 font-sans"
                       style={{ fontSize: "13px", fontWeight: 500 }}
                     >
                       {formatPrice(item.price * item.quantity)}
@@ -242,7 +244,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
 
             {/* ── Footer — subtotal + checkout + note ── */}
             <div
-              className="flex-none border-t px-6 py-5 flex flex-col gap-3"
+              className="flex flex-none flex-col gap-3 border-t px-6 py-5"
               style={{ borderColor: "var(--vn-rule)" }}
             >
               {/* Free shipping bar */}
@@ -250,7 +252,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
                 <div className="mb-1">
                   <div
                     aria-hidden="true"
-                    className="h-px w-full relative mb-1.5"
+                    className="relative mb-1.5 h-px w-full"
                     style={{ background: "var(--vn-rule)" }}
                   >
                     <div
@@ -272,7 +274,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
               )}
 
               {/* Subtotal row */}
-              <div className="flex justify-between items-baseline">
+              <div className="flex items-baseline justify-between">
                 <span
                   className="font-mono text-[10px] tracking-[0.18em] uppercase"
                   style={{ color: "var(--vn-ink-soft)" }}
@@ -291,7 +293,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
               <Link
                 href="/checkout"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center justify-between w-full px-5 py-4 font-mono text-[11px] tracking-[0.28em] uppercase transition-opacity hover:opacity-80"
+                className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.28em] uppercase transition-opacity hover:opacity-80"
                 style={{ background: "var(--vn-ink)", color: "#fff" }}
               >
                 <span>Checkout</span>
@@ -300,7 +302,7 @@ export function NoiseCartDrawer({ shippingConfig }: NoiseCartDrawerProps) {
 
               {/* Tax note */}
               <p
-                className="font-sans text-[11px] text-center"
+                className="text-center font-sans text-[11px]"
                 style={{ color: "var(--vn-steel-mist)" }}
               >
                 Shipping &amp; taxes calculated at checkout.

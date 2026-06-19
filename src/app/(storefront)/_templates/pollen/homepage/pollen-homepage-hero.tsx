@@ -114,10 +114,7 @@ export function PollenHero({
             {descriptionText}
           </motion.p>
 
-          <motion.div
-            variants={itemVariant}
-            transition={itemTransition}
-          >
+          <motion.div variants={itemVariant} transition={itemTransition}>
             <Link
               href={buttonLink ?? "#!"}
               className={buttonVariants({

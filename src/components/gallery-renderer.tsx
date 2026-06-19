@@ -186,7 +186,7 @@ export function GalleryRenderer({
         <Dialog open={true} onOpenChange={closeLightbox}>
           <DialogContent className="max-w-7xl p-0">
             <DialogTitle className="sr-only">
-              {`Image ${lightboxIndex + 1} of ${gallery.images.length}${currentImage.altText ?? currentImage.caption ?? gallery.name ? `: ${currentImage.altText ?? currentImage.caption ?? gallery.name}` : ""}`}
+              {`Image ${lightboxIndex + 1} of ${gallery.images.length}${(currentImage.altText ?? currentImage.caption ?? gallery.name) ? `: ${currentImage.altText ?? currentImage.caption ?? gallery.name}` : ""}`}
             </DialogTitle>
             <div className="relative">
               <img
@@ -289,9 +289,7 @@ function GridLayout({ gallery, onImageClick }: LayoutProps) {
               )}
             </button>
           ) : (
-            <div
-              className={`relative overflow-hidden rounded-lg ${ratio}`}
-            >
+            <div className={`relative overflow-hidden rounded-lg ${ratio}`}>
               <img
                 src={image.url}
                 alt={image.altText ?? ""}

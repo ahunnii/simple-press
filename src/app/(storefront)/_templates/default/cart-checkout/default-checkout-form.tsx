@@ -3,13 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, Loader2, Tag } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
-import {
-  calculateShipping,
-  shippingConfigFromBusiness,
-} from "~/lib/shipping-utils";
+import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -23,9 +21,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { useCart } from "~/providers/cart-context";
-
-import { DiscountDiscountInput } from "./default-discount-input";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 const formatPrice = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -37,139 +33,24 @@ type CheckoutFormProps = {
 };
 
 export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
-  const { items, removeItem, total } = useCart();
-  const shippingConfig = shippingConfigFromBusiness(business);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const f = useCheckoutForm(business);
+
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-
-  const [addressLine1, setAddressLine1] = useState("");
-  const [addressLine2, setAddressLine2] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [country, setCountry] = useState<"US" | "CA">("US");
-
-  const [deliveryMethod, setDeliveryMethod] = useState<"ship" | "pickup">(
-    "ship",
-  );
-
-  const [appliedDiscount, setAppliedDiscount] = useState<{
-    id: string;
-    code: string;
-    discountAmount: number;
-  } | null>(null);
-
   const primaryColor = business.siteContent?.primaryColor ?? "#2563eb";
 
-  const subtotal = total;
-  const discountAmount = appliedDiscount?.discountAmount ?? 0;
-  const shipping =
-    deliveryMethod === "pickup"
-      ? 0
-      : calculateShipping(subtotal, shippingConfig);
-  const finalTotal = subtotal - discountAmount + shipping;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const onSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
-    setIsProcessing(true);
-
-    try {
-      if (!email || !name || !phone.trim()) {
-        throw new Error("Please fill in all required contact fields");
-      }
-
-      if (
-        deliveryMethod === "ship" &&
-        (!addressLine1.trim() ||
-          !city.trim() ||
-          !state.trim() ||
-          !postalCode.trim())
-      ) {
-        throw new Error("Please fill in all required shipping fields");
-      }
-
-      if (items.length === 0) {
-        throw new Error("Your cart is empty");
-      }
-
-      const response = await fetch("/api/stripe/create-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items,
-          deliveryMethod,
-          customerInfo: {
-            email,
-            name,
-            phone: phone.trim(),
-            shippingAddress:
-              deliveryMethod === "ship"
-                ? {
-                    line1: addressLine1.trim(),
-                    line2: addressLine2.trim() || null,
-                    city: city.trim(),
-                    state: state.trim(),
-                    postalCode: postalCode.trim(),
-                    country,
-                    phone: phone.trim(),
-                  }
-                : null,
-          },
-          discountCodeId: appliedDiscount?.id ?? null,
-          discountAmount: appliedDiscount?.discountAmount ?? 0,
-        }),
-      });
-
-      const data = (await response.json()) as {
-        error?: string;
-        unavailableItems?: string[];
-        unavailableItemIds?: { productId: string; variantId: string | null }[];
-        sessionUrl?: string;
-        sessionId?: string;
-      };
-
-      if (!response.ok) {
-        if (data.unavailableItemIds && data.unavailableItemIds.length > 0) {
-          for (const row of data.unavailableItemIds) {
-            removeItem(row.productId, row.variantId);
-          }
-        }
-        if (data.unavailableItems && data.unavailableItems.length > 0) {
-          const removedMsg =
-            data.unavailableItemIds && data.unavailableItemIds.length > 0
-              ? `The following items were out of stock or no longer available and have been removed from your cart: ${data.unavailableItems.join(", ")}.`
-              : `${data.error ?? "Some items are unavailable."} Remove or update: ${data.unavailableItems.join(", ")}`;
-          setError(removedMsg);
-        } else {
-          setError(data.error ?? "Failed to create checkout session");
-        }
-        setIsProcessing(false);
-        return;
-      }
-
-      const sessionUrl = data.sessionUrl;
-      if (!sessionUrl) {
-        setError("Failed to create checkout session");
-        setIsProcessing(false);
-        return;
-      }
-
-      window.location.href = sessionUrl;
-    } catch (err: unknown) {
-      setError((err as Error).message ?? "Failed to create checkout session");
-      setIsProcessing(false);
-    }
+    await f.handleSubmit(e);
   };
 
-  if (items.length === 0) {
+  if (f.items.length === 0) {
     return (
       <div className="py-16 text-center">
         <p className="mb-4 text-[#6b6b6b]">Your cart is empty</p>
@@ -181,7 +62,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={onSubmit}>
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Customer Information */}
         <div className="space-y-6 lg:col-span-2">
@@ -189,72 +70,91 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
           <Card>
             <CardContent className="space-y-4 pt-6">
               <fieldset className="space-y-4 border-0 p-0">
-              <legend className="text-xl font-semibold leading-none tracking-tight pb-2">
-                Contact Information
-              </legend>
-              <p className="text-sm text-[#6b6b6b]">
-                Fields marked with <span aria-hidden="true">*</span> are required.
-              </p>
-              <div>
-                <Label htmlFor="email">Email <span aria-hidden="true">*</span></Label>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  aria-required="true"
-                  aria-invalid={submitAttempted && !email ? true : undefined}
-                />
-              </div>
-              <div>
-                <Label htmlFor="name">Full Name <span aria-hidden="true">*</span></Label>
-                <Input
-                  id="name"
-                  type="text"
-                  autoComplete="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
-                  required
-                  aria-required="true"
-                  aria-invalid={submitAttempted && !name.trim() ? true : undefined}
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">Phone <span aria-hidden="true">*</span></Label>
-                <PhoneInput
-                  id="phone"
-                  autoComplete="tel"
-                  value={phone}
-                  onChange={(val) => setPhone(val)}
-                  placeholder="+1 555 123 4567"
-                  required
-                  aria-required="true"
-                  aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
-                />
-              </div>
+                <legend className="pb-2 text-xl leading-none font-semibold tracking-tight">
+                  Contact Information
+                </legend>
+                <p className="text-sm text-[#6b6b6b]">
+                  Fields marked with <span aria-hidden="true">*</span> are
+                  required.
+                </p>
+                <div>
+                  <Label htmlFor="email">
+                    Email <span aria-hidden="true">*</span>
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    value={f.email}
+                    onChange={(e) => f.setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    aria-required="true"
+                    aria-invalid={
+                      submitAttempted && !f.email ? true : undefined
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="name">
+                    Full Name <span aria-hidden="true">*</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    autoComplete="name"
+                    value={f.name}
+                    onChange={(e) => f.setName(e.target.value)}
+                    placeholder="John Doe"
+                    required
+                    aria-required="true"
+                    aria-invalid={
+                      submitAttempted && !f.name.trim() ? true : undefined
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">
+                    Phone <span aria-hidden="true">*</span>
+                  </Label>
+                  <PhoneInput
+                    id="phone"
+                    autoComplete="tel"
+                    value={f.phone}
+                    onChange={(val) => f.setPhone(val)}
+                    placeholder="+1 555 123 4567"
+                    required
+                    aria-required="true"
+                    aria-invalid={
+                      submitAttempted && !f.phone.trim() ? true : undefined
+                    }
+                  />
+                </div>
               </fieldset>
             </CardContent>
           </Card>
 
           {/* Delivery Method */}
-          {shippingConfig.offersInStorePickup && (
+          {f.shippingConfig.offersInStorePickup && (
             <Card>
               <CardHeader>
                 <CardTitle>Delivery</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div role="group" aria-label="Delivery method" className="flex flex-wrap gap-2">
+                <div
+                  role="group"
+                  aria-label="Delivery method"
+                  className="flex flex-wrap gap-2"
+                >
                   <Button
                     type="button"
-                    variant={deliveryMethod === "ship" ? "default" : "outline"}
-                    aria-pressed={deliveryMethod === "ship"}
-                    onClick={() => setDeliveryMethod("ship")}
+                    variant={
+                      f.deliveryMethod === "ship" ? "default" : "outline"
+                    }
+                    aria-pressed={f.deliveryMethod === "ship"}
+                    onClick={() => f.setDeliveryMethod("ship")}
                     style={
-                      deliveryMethod === "ship"
+                      f.deliveryMethod === "ship"
                         ? { backgroundColor: primaryColor }
                         : undefined
                     }
@@ -264,12 +164,12 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   <Button
                     type="button"
                     variant={
-                      deliveryMethod === "pickup" ? "default" : "outline"
+                      f.deliveryMethod === "pickup" ? "default" : "outline"
                     }
-                    aria-pressed={deliveryMethod === "pickup"}
-                    onClick={() => setDeliveryMethod("pickup")}
+                    aria-pressed={f.deliveryMethod === "pickup"}
+                    onClick={() => f.setDeliveryMethod("pickup")}
                     style={
-                      deliveryMethod === "pickup"
+                      f.deliveryMethod === "pickup"
                         ? { backgroundColor: primaryColor }
                         : undefined
                     }
@@ -278,7 +178,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   </Button>
                 </div>
                 <p className="text-sm text-[#6b6b6b]">
-                  {deliveryMethod === "pickup"
+                  {f.deliveryMethod === "pickup"
                     ? "No shipping charge. You'll pick up your order at the store."
                     : "Shipping cost is based on your store's shipping settings."}
                 </p>
@@ -287,29 +187,36 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
           )}
 
           {/* Shipping Address */}
-          {deliveryMethod === "ship" && (
+          {f.deliveryMethod === "ship" && (
             <Card>
               <CardContent className="space-y-4 pt-6">
                 <fieldset className="space-y-4 border-0 p-0">
-                  <legend className="text-xl font-semibold leading-none tracking-tight pb-2">
+                  <legend className="pb-2 text-xl leading-none font-semibold tracking-tight">
                     Shipping Address
                   </legend>
                   <p className="text-sm text-[#6b6b6b]">
-                    This is sent to Stripe Checkout prefilled so you can confirm
-                    or edit your name, phone, and address before paying.
+                    {f.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                      ? "We price shipping from this address. Make changes here before continuing to payment."
+                      : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
                   </p>
                   <div>
-                    <Label htmlFor="address-line1">Address line 1 <span aria-hidden="true">*</span></Label>
+                    <Label htmlFor="address-line1">
+                      Address line 1 <span aria-hidden="true">*</span>
+                    </Label>
                     <Input
                       id="address-line1"
                       type="text"
                       autoComplete="shipping address-line1"
-                      value={addressLine1}
-                      onChange={(e) => setAddressLine1(e.target.value)}
+                      value={f.addressLine1}
+                      onChange={(e) => f.setAddressLine1(e.target.value)}
                       placeholder="Street address, P.O. box"
-                      required={deliveryMethod === "ship"}
+                      required={f.deliveryMethod === "ship"}
                       aria-required="true"
-                      aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                      aria-invalid={
+                        submitAttempted && !f.addressLine1.trim()
+                          ? true
+                          : undefined
+                      }
                     />
                   </div>
                   <div>
@@ -318,61 +225,91 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                       id="address-line2"
                       type="text"
                       autoComplete="shipping address-line2"
-                      value={addressLine2}
-                      onChange={(e) => setAddressLine2(e.target.value)}
+                      value={f.addressLine2}
+                      onChange={(e) => f.setAddressLine2(e.target.value)}
                       placeholder="Apartment, suite, etc."
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <Label htmlFor="city">City <span aria-hidden="true">*</span></Label>
+                      <Label htmlFor="city">
+                        City <span aria-hidden="true">*</span>
+                      </Label>
                       <Input
                         id="city"
                         type="text"
                         autoComplete="shipping address-level2"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        required={deliveryMethod === "ship"}
+                        value={f.city}
+                        onChange={(e) => f.setCity(e.target.value)}
+                        required={f.deliveryMethod === "ship"}
                         aria-required="true"
-                        aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                        aria-invalid={
+                          submitAttempted && !f.city.trim() ? true : undefined
+                        }
                       />
                     </div>
                     <div>
-                      <Label htmlFor="state">State / Province <span aria-hidden="true">*</span></Label>
-                      <Input
-                        id="state"
-                        type="text"
-                        autoComplete="shipping address-level1"
-                        value={state}
-                        onChange={(e) => setState(e.target.value)}
-                        placeholder="e.g. CA or ON"
-                        required={deliveryMethod === "ship"}
-                        aria-required="true"
-                        aria-invalid={submitAttempted && !state.trim() ? true : undefined}
-                      />
+                      <Label htmlFor="state" id="state-label">
+                        State / Province <span aria-hidden="true">*</span>
+                      </Label>
+                      <Select
+                        value={f.state}
+                        onValueChange={(v) => f.setState(v)}
+                      >
+                        <SelectTrigger
+                          id="state"
+                          aria-labelledby="state-label"
+                          aria-required="true"
+                          aria-invalid={
+                            submitAttempted && !f.state ? true : undefined
+                          }
+                          className="w-full"
+                        >
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getRegionOptions(f.country).map((opt) => (
+                            <SelectItem key={opt.code} value={opt.code}>
+                              {opt.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <Label htmlFor="postal">ZIP / Postal code <span aria-hidden="true">*</span></Label>
+                      <Label htmlFor="postal">
+                        ZIP / Postal code <span aria-hidden="true">*</span>
+                      </Label>
                       <Input
                         id="postal"
                         type="text"
                         autoComplete="shipping postal-code"
-                        value={postalCode}
-                        onChange={(e) => setPostalCode(e.target.value)}
-                        required={deliveryMethod === "ship"}
+                        value={f.postalCode}
+                        onChange={(e) => f.setPostalCode(e.target.value)}
+                        required={f.deliveryMethod === "ship"}
                         aria-required="true"
-                        aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                        aria-invalid={
+                          submitAttempted && !f.postalCode.trim()
+                            ? true
+                            : undefined
+                        }
                       />
                     </div>
                     <div>
-                      <Label htmlFor="country" id="country-label">Country <span aria-hidden="true">*</span></Label>
+                      <Label htmlFor="country" id="country-label">
+                        Country <span aria-hidden="true">*</span>
+                      </Label>
                       <Select
-                        value={country}
-                        onValueChange={(v) => setCountry(v as "US" | "CA")}
+                        value={f.country}
+                        onValueChange={(v) => f.setCountry(v as "US" | "CA")}
                       >
-                        <SelectTrigger id="country" aria-labelledby="country-label" className="w-full">
+                        <SelectTrigger
+                          id="country"
+                          aria-labelledby="country-label"
+                          className="w-full"
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -397,7 +334,7 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
             <CardContent className="space-y-4">
               {/* Items */}
               <div className="max-h-64 space-y-3 overflow-y-auto">
-                {items.map((item) => (
+                {f.items.map((item) => (
                   <div
                     key={`${item.productId}-${item.variantId}`}
                     className="flex gap-3"
@@ -412,7 +349,10 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-[#6b6b6b]" aria-hidden="true">
+                        <div
+                          className="flex h-full w-full items-center justify-center text-xs text-[#6b6b6b]"
+                          aria-hidden="true"
+                        >
                           No img
                         </div>
                       )}
@@ -437,39 +377,119 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 ))}
               </div>
 
-              {/* Discount Code Input */}
-              <div className="pt-4">
-                <DiscountDiscountInput
-                  businessId={business.id}
-                  cartTotal={subtotal}
-                  onDiscountApplied={setAppliedDiscount}
-                />
+              {/* Discount Code Input — inline */}
+              <div className="space-y-3 pt-4">
+                <label htmlFor="discount-code" className="sr-only">
+                  Discount code
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Tag
+                      className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+                      aria-hidden="true"
+                    />
+                    <Input
+                      id="discount-code"
+                      type="text"
+                      placeholder="Discount code"
+                      value={f.discountCodeInput}
+                      onChange={(e) => {
+                        f.setDiscountCodeInput(e.target.value.toUpperCase());
+                        f.setDiscountFieldError(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          f.handleApplyDiscount();
+                        }
+                      }}
+                      aria-invalid={!!f.discountFieldError}
+                      aria-describedby={
+                        f.discountFieldError ? "discount-code-error" : undefined
+                      }
+                      autoComplete="off"
+                      className="pl-10"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={f.handleApplyDiscount}
+                    disabled={
+                      f.isValidatingDiscount || !f.discountCodeInput.trim()
+                    }
+                    variant="outline"
+                    aria-label={
+                      f.isValidatingDiscount
+                        ? "Applying discount code"
+                        : "Apply discount code"
+                    }
+                  >
+                    {f.isValidatingDiscount ? (
+                      <Loader2
+                        className="h-4 w-4 animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      "Apply"
+                    )}
+                  </Button>
+                </div>
+                {f.discountFieldError && (
+                  <Alert variant="destructive">
+                    <AlertDescription
+                      id="discount-code-error"
+                      className="text-sm"
+                    >
+                      {f.discountFieldError}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {f.discountCodeLabel && f.discountAmount > 0 && (
+                  <p
+                    role="status"
+                    className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-900"
+                  >
+                    Discount Applied: {f.discountCodeLabel} — you saved{" "}
+                    {formatPrice(f.discountAmount)}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2 border-t pt-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-[#6b6b6b]">Subtotal</span>
-                  <span>{formatPrice(subtotal)}</span>
+                  <span>{formatPrice(f.subtotal)}</span>
                 </div>
-                {appliedDiscount && (
+                {f.discountAmount > 0 && f.discountCodeLabel && (
                   <div className="flex justify-between text-sm text-green-700">
-                    <span>Discount ({appliedDiscount.code})</span>
-                    <span>-{formatPrice(discountAmount)}</span>
+                    <span>Discount ({f.discountCodeLabel})</span>
+                    <span>-{formatPrice(f.discountAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
                   <span className="text-[#6b6b6b]">Shipping</span>
                   <span>
-                    {deliveryMethod === "pickup"
-                      ? "In-store pickup (free)"
-                      : shipping === 0
-                        ? "Free"
-                        : formatPrice(shipping)}
+                    {f.deliveryMethod === "pickup" ? (
+                      "In-store pickup (free)"
+                    ) : shippingCalculating ? (
+                      <span
+                        className="inline-flex items-center gap-1.5 text-[#6b6b6b]"
+                        aria-live="polite"
+                      >
+                        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                        Calculating…
+                      </span>
+                    ) : f.shippingPending ? (
+                      "Calculated at checkout"
+                    ) : f.shipping === 0 ? (
+                      "Free"
+                    ) : (
+                      formatPrice(f.shipping)
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between border-t pt-2 font-bold">
                   <span>Estimated total</span>
-                  <span>{formatPrice(finalTotal)}</span>
+                  <span>{formatPrice(f.finalTotal)}</span>
                 </div>
                 <p className="text-muted-foreground text-xs">
                   Tax and final total are confirmed on Stripe Checkout.
@@ -477,25 +497,36 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
               </div>
 
               <div role="alert" aria-live="assertive" aria-atomic="true">
-                {error && (
+                {f.error && (
                   <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
+                    <AlertDescription>{f.error}</AlertDescription>
                   </Alert>
                 )}
               </div>
 
               <Button
                 type="submit"
-                disabled={isProcessing}
-                aria-busy={isProcessing}
+                disabled={f.isProcessing || shippingCalculating}
+                aria-busy={f.isProcessing || shippingCalculating}
                 className="w-full text-white"
                 size="lg"
                 style={{ backgroundColor: primaryColor }}
               >
-                {isProcessing ? (
+                {f.isProcessing ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />
+                    <Loader2
+                      className="mr-2 h-5 w-5 animate-spin"
+                      aria-hidden="true"
+                    />
                     Processing...
+                  </>
+                ) : shippingCalculating ? (
+                  <>
+                    <Loader2
+                      className="mr-2 h-5 w-5 animate-spin"
+                      aria-hidden="true"
+                    />
+                    Calculating shipping…
                   </>
                 ) : (
                   <>

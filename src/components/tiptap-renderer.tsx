@@ -165,9 +165,7 @@ function isGalleryNode(
   );
 }
 
-function isEmbedNode(
-  node: ContentNode,
-): node is ContentNode & {
+function isEmbedNode(node: ContentNode): node is ContentNode & {
   attrs: { src?: string; height?: number | string; title?: string };
 } {
   return node.type === "embed" && node.attrs != null && "src" in node.attrs;

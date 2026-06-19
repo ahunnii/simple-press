@@ -8,7 +8,9 @@ type NoiseAnnouncementBarProps = {
   businessId: string;
 };
 
-export function NoiseAnnouncementBar({ businessId: _ }: NoiseAnnouncementBarProps) {
+export function NoiseAnnouncementBar({
+  businessId: _,
+}: NoiseAnnouncementBarProps) {
   const { data, isLoading } = api.discount.getActiveBanner.useQuery(undefined, {
     staleTime: 60_000,
   });
@@ -36,17 +38,16 @@ export function NoiseAnnouncementBar({ businessId: _ }: NoiseAnnouncementBarProp
       {isExternal ? (
         <a
           href={href}
-          className="font-mono text-[10px] tracking-[0.18em] uppercase ml-4 underline underline-offset-2 hover:opacity-70 transition-opacity"
+          className="ml-4 font-mono text-[10px] tracking-[0.18em] uppercase underline underline-offset-2 transition-opacity hover:opacity-70"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Shop →
-          <span className="sr-only">(opens in new tab)</span>
+          Shop →<span className="sr-only">(opens in new tab)</span>
         </a>
       ) : (
         <Link
           href={href}
-          className="font-mono text-[10px] tracking-[0.18em] uppercase ml-4 underline underline-offset-2 hover:opacity-70 transition-opacity"
+          className="ml-4 font-mono text-[10px] tracking-[0.18em] uppercase underline underline-offset-2 transition-opacity hover:opacity-70"
         >
           Shop →
         </Link>

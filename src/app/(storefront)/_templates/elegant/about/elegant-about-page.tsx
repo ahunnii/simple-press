@@ -93,7 +93,10 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
       {/* ── Hero ── */}
-      <section {...sectionGroupAttr("about", "hero")} style={{ padding: "48px 40px 40px" }}>
+      <section
+        {...sectionGroupAttr("about", "hero")}
+        style={{ padding: "48px 40px 40px" }}
+      >
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
           <div style={fadeStyle(shown, 0)}>
             <span
@@ -148,7 +151,10 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
 
       {/* ── Full-width image ── */}
       {hasHeroImage && (
-        <section {...sectionGroupAttr("about", "hero")} style={{ padding: "0 40px" }}>
+        <section
+          {...sectionGroupAttr("about", "hero")}
+          style={{ padding: "0 40px" }}
+        >
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
             <div
               style={{
@@ -207,8 +213,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
               </span>
               <h2
                 style={{
-                  fontFamily:
-                    "var(--font-serif, 'Cormorant Garamond', serif)",
+                  fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
                   fontWeight: 400,
                   fontSize: "clamp(36px, 4.5vw, 56px)",
                   lineHeight: 1.08,
@@ -253,7 +258,10 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 }}
               >
                 Come say hello
-                <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
+                <ArrowRight
+                  aria-hidden={true}
+                  style={{ width: 14, height: 14 }}
+                />
               </Link>
             </div>
 
@@ -280,12 +288,15 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
             </div>
           </div>
         </div>
-
       </section>
 
       {/* ── Mission / Vision ── */}
       {(mission || vision) && (
-        <section ref={values.ref} {...sectionGroupAttr("about", "values")} style={{ padding: "80px 40px" }}>
+        <section
+          ref={values.ref}
+          {...sectionGroupAttr("about", "values")}
+          style={{ padding: "80px 40px" }}
+        >
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
             <div
               style={{

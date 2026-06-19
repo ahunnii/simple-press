@@ -48,7 +48,12 @@ export const baseInventoryUnitRouter = createTRPCRouter({
         name: z.string().min(1),
         description: z.string().optional(),
         inventoryQty: z.number().int().min(0).default(0),
-        lowInventoryThreshold: z.number().int().positive().nullable().optional(),
+        lowInventoryThreshold: z
+          .number()
+          .int()
+          .positive()
+          .nullable()
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -71,7 +76,12 @@ export const baseInventoryUnitRouter = createTRPCRouter({
         id: z.string(),
         name: z.string().min(1).optional(),
         description: z.string().nullable().optional(),
-        lowInventoryThreshold: z.number().int().positive().nullable().optional(),
+        lowInventoryThreshold: z
+          .number()
+          .int()
+          .positive()
+          .nullable()
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -111,7 +121,11 @@ export const baseInventoryUnitRouter = createTRPCRouter({
         // as out of stock until the admin manually restocks them.
         await tx.product.updateMany({
           where: { baseInventoryUnitId: input.id },
-          data: { trackInventory: true, inventoryQty: 0, baseUnitsConsumed: null },
+          data: {
+            trackInventory: true,
+            inventoryQty: 0,
+            baseUnitsConsumed: null,
+          },
         });
         await tx.baseInventoryUnit.delete({ where: { id: input.id } });
       });

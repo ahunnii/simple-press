@@ -3,11 +3,11 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -166,7 +166,10 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
               <StaggerItem key={i}>
                 <Card className="border-border/60 bg-card h-full">
                   <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
-                    <div className="bg-primary/10 flex size-14 items-center justify-center rounded-full" aria-hidden="true">
+                    <div
+                      className="bg-primary/10 flex size-14 items-center justify-center rounded-full"
+                      aria-hidden="true"
+                    >
                       <value.icon className="text-primary size-7" />
                     </div>
                     <h3 className="text-card-foreground font-heading text-lg font-semibold">
@@ -238,7 +241,10 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 key={i}
                 className="flex flex-col items-center gap-3 text-center"
               >
-                <div className="bg-primary/10 flex size-12 items-center justify-center rounded-full" aria-hidden="true">
+                <div
+                  className="bg-primary/10 flex size-12 items-center justify-center rounded-full"
+                  aria-hidden="true"
+                >
                   <item.icon className="text-primary size-6" />
                 </div>
                 <h3 className="text-foreground font-heading text-lg font-semibold">
@@ -283,7 +289,10 @@ export function BambooAboutPage({ business }: DefaultAboutPageTemplateProps) {
             >
               {nationwideList?.map((item, i) => (
                 <StaggerItem key={i} className="flex items-start gap-4">
-                  <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-lg" aria-hidden="true">
+                  <div
+                    className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-lg"
+                    aria-hidden="true"
+                  >
                     <item.icon className="text-primary size-5" />
                   </div>
                   <div>

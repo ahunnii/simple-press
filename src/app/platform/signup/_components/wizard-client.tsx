@@ -68,10 +68,7 @@ export function WizardClient({
 }: WizardClientProps) {
   const isArtisan = Boolean(artisanPrefill && aftoken);
 
-  const steps = useMemo(
-    () => (isArtisan ? STEPS_ARTISAN : STEPS),
-    [isArtisan],
-  );
+  const steps = useMemo(() => (isArtisan ? STEPS_ARTISAN : STEPS), [isArtisan]);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Partial<SignupFormData>>(() => ({

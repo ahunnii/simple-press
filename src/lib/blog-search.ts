@@ -50,7 +50,26 @@ export function buildBlogSearchBlob(page: BlogSearchablePage): string {
   return parts.join("\n").toLowerCase();
 }
 
-export function blobIncludesQuery(blob: string, queryTrimmedLower: string): boolean {
+/**
+ * Derive a short plain-text excerpt from Tiptap JSON content. Used as a
+ * fallback when a post has no author-written excerpt, so cards and post intros
+ * aren't left bare. Returns "" on empty/malformed content.
+ */
+export function deriveExcerpt(content: unknown, maxLen = 200): string {
+  try {
+    const text = extractTiptapLikeText(content).replace(/\s+/g, " ").trim();
+    if (!text) return "";
+    if (text.length <= maxLen) return text;
+    return text.slice(0, maxLen).replace(/\s+\S*$/, "") + "…";
+  } catch {
+    return "";
+  }
+}
+
+export function blobIncludesQuery(
+  blob: string,
+  queryTrimmedLower: string,
+): boolean {
   if (queryTrimmedLower.length === 0) return true;
   return blob.includes(queryTrimmedLower);
 }

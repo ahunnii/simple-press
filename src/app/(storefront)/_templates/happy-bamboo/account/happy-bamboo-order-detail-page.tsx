@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
+import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 import { Card, CardContent } from "~/components/ui/card";
 import { FadeIn, PageTransition } from "~/components/page-animations";
-
-import type { OrderDetailPageTemplateProps } from "../../types";
 
 function statusClass(status: string) {
   switch (status) {
@@ -190,7 +189,7 @@ export function HappyBambooOrderDetailPage({
                     <h2 className="font-heading text-foreground mb-4 font-semibold">
                       Shipping Address
                     </h2>
-                    <address className="text-muted-foreground not-italic text-sm leading-relaxed">
+                    <address className="text-muted-foreground text-sm leading-relaxed not-italic">
                       {addr.firstName && addr.lastName && (
                         <p className="text-foreground font-medium">
                           {addr.firstName} {addr.lastName}

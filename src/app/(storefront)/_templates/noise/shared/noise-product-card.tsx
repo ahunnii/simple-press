@@ -139,7 +139,7 @@ export function NoiseProductCard({ product, index }: Props) {
         {/* Add-to-cart bar — slides up on hover. z-10 keeps it above the
             stretched card link (::after) so it stays independently clickable. */}
         {!productStatus.disableCart && (
-          <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full transition-transform duration-300 group-hover:translate-y-0 group-focus-within:translate-y-0">
+          <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full transition-transform duration-300 group-focus-within:translate-y-0 group-hover:translate-y-0">
             <button
               type="button"
               onClick={handleAddToCart}
@@ -203,7 +203,6 @@ export function NoiseProductCard({ product, index }: Props) {
             {additional?.productTagline ??
               (product.sku ? `SKU · ${product.sku}` : " ")}
           </span>
-
         </div>
       </div>
       {/* S-2: live region for add-to-cart announcements */}

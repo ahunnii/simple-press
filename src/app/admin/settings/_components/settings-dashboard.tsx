@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, Home, Package, Shield, Wrench } from "lucide-react";
+import {
+  FileText,
+  Home,
+  Package,
+  PowerOff,
+  Shield,
+  Wrench,
+} from "lucide-react";
 
 import {
   Card,
@@ -129,6 +136,31 @@ export function SettingsDashboard() {
             <CardContent>
               <p className="mb-3 text-sm text-gray-600">
                 Enable or disable features for your business
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Storefront Availability */}
+        <Link href="/admin/settings/availability">
+          <Card className="h-full cursor-pointer transition-all hover:border-red-500 hover:shadow-lg">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-red-100 p-3">
+                  <PowerOff className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <CardTitle>Storefront Availability</CardTitle>
+                  <CardDescription>
+                    Maintenance mode and coming soon
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">
+                Temporarily take your storefront offline for maintenance or
+                launch preparation
               </p>
             </CardContent>
           </Card>

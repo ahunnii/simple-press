@@ -65,7 +65,10 @@ export async function PollenAboutPage({
       </section>
 
       {/* Owner Section — Bamboo-style two-column image + blurb */}
-      <section className="bg-white py-20" {...sectionGroupAttr("about", "owner")}>
+      <section
+        className="bg-white py-20"
+        {...sectionGroupAttr("about", "owner")}
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <FadeIn direction="right" className="flex-1">

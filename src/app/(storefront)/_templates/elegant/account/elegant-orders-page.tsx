@@ -1,22 +1,25 @@
 import Link from "next/link";
 import { ArrowRight, Package } from "lucide-react";
 
+import type { OrdersPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
-import type { OrdersPageTemplateProps } from "../../types";
 import { ElegantAccountLayout } from "./elegant-account-layout";
 
 const STATUS_STYLES: Record<string, { color: string; label: string }> = {
-  open:      { color: "var(--el-sage, #4a5240)",         label: "Open" },
-  completed: { color: "var(--el-sage-soft, #8a9474)",    label: "Completed" },
-  cancelled: { color: "var(--el-ink-soft, #6b6659)",     label: "Cancelled" },
-  refunded:  { color: "var(--el-ink-mute, #9a9485)",     label: "Refunded" },
-  fulfilled: { color: "var(--el-sage, #4a5240)",         label: "Fulfilled" },
+  open: { color: "var(--el-sage, #4a5240)", label: "Open" },
+  completed: { color: "var(--el-sage-soft, #8a9474)", label: "Completed" },
+  cancelled: { color: "var(--el-ink-soft, #6b6659)", label: "Cancelled" },
+  refunded: { color: "var(--el-ink-mute, #9a9485)", label: "Refunded" },
+  fulfilled: { color: "var(--el-sage, #4a5240)", label: "Fulfilled" },
 };
 
 function StatusChip({ status }: { status: string }) {
-  const s = STATUS_STYLES[status] ?? { color: "var(--el-ink-soft, #6b6659)", label: status };
+  const s = STATUS_STYLES[status] ?? {
+    color: "var(--el-ink-soft, #6b6659)",
+    label: status,
+  };
   return (
     <span
       style={{
@@ -143,8 +146,7 @@ export function ElegantOrdersPage({ orders }: OrdersPageTemplateProps) {
                       fontFamily: "var(--font-sans, sans-serif)",
                     }}
                   >
-                    {formatDate(order.createdAt)} ·{" "}
-                    {order.items.length}{" "}
+                    {formatDate(order.createdAt)} · {order.items.length}{" "}
                     {order.items.length === 1 ? "item" : "items"}
                   </div>
                 </div>
@@ -175,12 +177,16 @@ export function ElegantOrdersPage({ orders }: OrdersPageTemplateProps) {
                 style={{
                   marginTop: 16,
                   paddingTop: 14,
-                  borderTop:
-                    "1px solid var(--el-line-2, rgba(28,26,23,0.06))",
+                  borderTop: "1px solid var(--el-line-2, rgba(28,26,23,0.06))",
                 }}
               >
                 <div
-                  style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 6,
+                    marginBottom: 14,
+                  }}
                 >
                   {order.items.slice(0, 3).map((item) => (
                     <span
@@ -192,8 +198,7 @@ export function ElegantOrdersPage({ orders }: OrdersPageTemplateProps) {
                         textTransform: "uppercase",
                         color: "var(--el-ink-soft, #6b6659)",
                         padding: "4px 10px",
-                        border:
-                          "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                        border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
                         borderRadius: 999,
                       }}
                     >
@@ -211,8 +216,7 @@ export function ElegantOrdersPage({ orders }: OrdersPageTemplateProps) {
                         textTransform: "uppercase",
                         color: "var(--el-ink-soft, #6b6659)",
                         padding: "4px 10px",
-                        border:
-                          "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                        border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
                         borderRadius: 999,
                       }}
                     >
@@ -236,7 +240,10 @@ export function ElegantOrdersPage({ orders }: OrdersPageTemplateProps) {
                   }}
                 >
                   View details
-                  <ArrowRight aria-hidden={true} style={{ width: 12, height: 12 }} />
+                  <ArrowRight
+                    aria-hidden={true}
+                    style={{ width: 12, height: 12 }}
+                  />
                 </Link>
               </div>
             </div>

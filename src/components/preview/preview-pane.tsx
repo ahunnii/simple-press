@@ -1,20 +1,21 @@
 "use client";
 
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
-import { ExternalLink, Monitor, RefreshCw, Smartphone, Tablet } from "lucide-react";
+  ExternalLink,
+  Monitor,
+  RefreshCw,
+  Smartphone,
+  Tablet,
+} from "lucide-react";
 
 import {
   postToIframe,
   PREVIEW_SOURCE,
   useIframeMessages,
 } from "~/lib/preview/use-preview-bridge";
-import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
 
 export type PreviewPaneHandle = {
   /** Reload the storefront iframe to pick up the latest preview draft. */
@@ -71,7 +72,9 @@ export const PreviewPane = forwardRef<PreviewPaneHandle, Props>(
     const src = `${path}?__preview=1`;
 
     // Queue a focus-group message to flush once iframe reports ready.
-    const pendingFocusRef = useRef<{ page: string; group: string } | null>(null);
+    const pendingFocusRef = useRef<{ page: string; group: string } | null>(
+      null,
+    );
 
     // Listen for messages from the iframe.
     useIframeMessages((msg) => {
@@ -95,26 +98,30 @@ export const PreviewPane = forwardRef<PreviewPaneHandle, Props>(
     });
 
     // Expose imperative API to the parent editor.
-    useImperativeHandle(ref, () => ({
-      refresh() {
-        setIsReady(false);
-        if (iframeRef.current) {
-          iframeRef.current.src = src;
-        }
-      },
-      focusGroup(page: string, group: string) {
-        if (isReady) {
-          postToIframe(iframeRef, {
-            source: PREVIEW_SOURCE,
-            type: "sp:focus-group",
-            page,
-            group,
-          });
-        } else {
-          pendingFocusRef.current = { page, group };
-        }
-      },
-    }), [src, isReady]);
+    useImperativeHandle(
+      ref,
+      () => ({
+        refresh() {
+          setIsReady(false);
+          if (iframeRef.current) {
+            iframeRef.current.src = src;
+          }
+        },
+        focusGroup(page: string, group: string) {
+          if (isReady) {
+            postToIframe(iframeRef, {
+              source: PREVIEW_SOURCE,
+              type: "sp:focus-group",
+              page,
+              group,
+            });
+          } else {
+            pendingFocusRef.current = { page, group };
+          }
+        },
+      }),
+      [src, isReady],
+    );
 
     // When the iframe loads, mark as ready (catches hard reloads).
     const handleLoad = () => setIsReady(true);
@@ -142,7 +149,7 @@ export const PreviewPane = forwardRef<PreviewPaneHandle, Props>(
     return (
       <div className="flex h-full flex-col gap-2">
         {/* Toolbar */}
-        <div className="flex items-center justify-between gap-2 rounded-lg border bg-muted/40 px-3 py-1.5">
+        <div className="bg-muted/40 flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5">
           {/* Device toggles — left side */}
           <div className="flex items-center gap-1">
             <Button
@@ -201,7 +208,7 @@ export const PreviewPane = forwardRef<PreviewPaneHandle, Props>(
         </div>
 
         {/* Iframe wrapper — device-constrained, centered */}
-        <div className="relative flex flex-1 justify-center overflow-hidden rounded-lg border bg-muted/20">
+        <div className="bg-muted/20 relative flex flex-1 justify-center overflow-hidden rounded-lg border">
           <div
             className="relative h-full transition-[width] duration-300"
             style={{ width: DEVICE_WIDTHS[device] }}

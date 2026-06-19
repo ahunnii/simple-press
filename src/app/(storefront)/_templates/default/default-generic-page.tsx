@@ -27,6 +27,32 @@ function formatUpdated(date: Date) {
 
 type Heading = { id: string; text: string; level: 2 | 3 };
 
+/**
+ * Walks the Tiptap JSON to detect whether the page has any h2/h3 headings —
+ * mirroring what {@link Toc} looks for in the rendered DOM. Used to decide
+ * whether to render the two-column TOC grid: when there are no headings, the
+ * grid would otherwise auto-place the lone article column into the narrow
+ * 200px track, squeezing all content (galleries, text) into a thin strip.
+ */
+function hasTocHeadings(content: unknown): boolean {
+  const walk = (node: unknown): boolean => {
+    if (node == null || typeof node !== "object") return false;
+    const n = node as {
+      type?: string;
+      attrs?: { level?: number };
+      content?: unknown;
+    };
+    if (
+      n.type === "heading" &&
+      (n.attrs?.level === 2 || n.attrs?.level === 3)
+    ) {
+      return true;
+    }
+    return Array.isArray(n.content) && n.content.some(walk);
+  };
+  return walk(content);
+}
+
 function Toc({
   contentRef,
 }: {
@@ -111,6 +137,25 @@ function Toc({
 export function DefaultGenericPage({ page }: { page: Page }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const eyebrow = EYEBROW[page.type] ?? "";
+  const showToc = hasTocHeadings(page.content);
+
+  // Article body — identical regardless of whether the TOC sidebar is shown.
+  const articleBody = (
+    <div className="w-full">
+      <p className="mb-8 text-[12px] font-medium tracking-[0.1em] text-[#6b6b6b] uppercase">
+        Last updated · {formatUpdated(page.updatedAt)}
+      </p>
+
+      <div ref={contentRef}>
+        <TiptapRenderer
+          content={page.content as TiptapJSON}
+          className="prose prose-lg prose-headings:font-serif prose-headings:font-medium prose-headings:tracking-tight prose-headings:text-[#0a0a0a] prose-h2:text-[28px] prose-h2:mt-12 prose-h2:mb-4 prose-h3:text-[20px] prose-h3:mt-8 prose-h3:mb-3 prose-p:text-[15px] prose-p:leading-[1.75] prose-p:text-[#6b6b6b] prose-a:text-[#0a0a0a] prose-a:underline hover:prose-a:no-underline prose-strong:text-[#0a0a0a] prose-strong:font-medium prose-li:text-[15px] prose-li:leading-[1.75] prose-li:text-[#6b6b6b] prose-blockquote:border-[#e8e8e8] prose-blockquote:text-[#6b6b6b] prose-hr:border-[#e8e8e8] prose-table:text-sm prose-th:text-[11px] prose-th:font-medium prose-th:tracking-[0.1em] prose-th:uppercase prose-th:text-[#6b6b6b] w-full max-w-[1440px]"
+        />
+      </div>
+
+      <PlatformPolicyNotice slug={page.slug} />
+    </div>
+  );
 
   return (
     <div>
@@ -135,27 +180,20 @@ export function DefaultGenericPage({ page }: { page: Page }) {
 
       {/* ── Content ────────────────────────────────────────────────────── */}
       <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-[1440px]">
-          <div className="grid grid-cols-1 gap-16 lg:grid-cols-[200px_1fr]">
-            {/* TOC sidebar */}
-            <Toc contentRef={contentRef} />
+        <div className="mx-auto w-full max-w-[1440px]">
+          {showToc ? (
+            <div className="grid grid-cols-1 gap-16 lg:grid-cols-[200px_1fr]">
+              {/* TOC sidebar */}
+              <Toc contentRef={contentRef} />
 
-            {/* Article body */}
-            <div className="min-w-0">
-              <p className="mb-8 text-[12px] font-medium tracking-[0.1em] text-[#6b6b6b] uppercase">
-                Last updated · {formatUpdated(page.updatedAt)}
-              </p>
-
-              <div ref={contentRef}>
-                <TiptapRenderer
-                  content={page.content as TiptapJSON}
-                  className="prose prose-lg prose-headings:font-serif prose-headings:font-medium prose-headings:tracking-tight prose-headings:text-[#0a0a0a] prose-h2:text-[28px] prose-h2:mt-12 prose-h2:mb-4 prose-h3:text-[20px] prose-h3:mt-8 prose-h3:mb-3 prose-p:text-[15px] prose-p:leading-[1.75] prose-p:text-[#6b6b6b] prose-a:text-[#0a0a0a] prose-a:underline hover:prose-a:no-underline prose-strong:text-[#0a0a0a] prose-strong:font-medium prose-li:text-[15px] prose-li:leading-[1.75] prose-li:text-[#6b6b6b] prose-blockquote:border-[#e8e8e8] prose-blockquote:text-[#6b6b6b] prose-hr:border-[#e8e8e8] prose-table:text-sm prose-th:text-[11px] prose-th:font-medium prose-th:tracking-[0.1em] prose-th:uppercase prose-th:text-[#6b6b6b] max-w-none"
-                />
-              </div>
-
-              <PlatformPolicyNotice slug={page.slug} />
+              {/* Article body */}
+              {articleBody}
             </div>
-          </div>
+          ) : (
+            // No headings → no TOC. Render full-width so galleries and other
+            // content aren't collapsed into the narrow grid track.
+            articleBody
+          )}
         </div>
       </section>
     </div>

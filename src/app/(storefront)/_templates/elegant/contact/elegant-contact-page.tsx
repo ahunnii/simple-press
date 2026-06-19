@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
@@ -10,7 +11,9 @@ import { ElegantContactForm } from "./elegant-contact-form";
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 
-export function ElegantContactPage({ business }: DefaultContactPageTemplateProps) {
+export function ElegantContactPage({
+  business,
+}: DefaultContactPageTemplateProps) {
   const [shown, setShown] = useState(false);
   const reducedMotion = useReducedMotion();
 
@@ -33,9 +36,11 @@ export function ElegantContactPage({ business }: DefaultContactPageTemplateProps
     "elegant.contact.form-title",
   ]);
 
-  const displayEmail = f["elegant.contact.email"] ?? business.supportEmail ?? "";
+  const displayEmail =
+    f["elegant.contact.email"] ?? business.supportEmail ?? "";
   const displayPhone = f["elegant.contact.phone"] ?? business.phoneNumber ?? "";
-  const displayAddress = f["elegant.contact.address"] ?? business.businessAddress ?? "";
+  const displayAddress =
+    f["elegant.contact.address"] ?? business.businessAddress ?? "";
 
   const maskStyle = (delay: number): React.CSSProperties =>
     reducedMotion
@@ -56,14 +61,27 @@ export function ElegantContactPage({ business }: DefaultContactPageTemplateProps
         };
 
   const contactItems = [
-    displayEmail ? { label: "Email", value: displayEmail, href: `mailto:${displayEmail}` } : null,
-    displayPhone ? { label: "Phone", value: displayPhone, href: `tel:${displayPhone.replace(/\D/g, "")}` } : null,
-    displayAddress ? { label: "Address", value: displayAddress, href: null } : null,
+    displayEmail
+      ? { label: "Email", value: displayEmail, href: `mailto:${displayEmail}` }
+      : null,
+    displayPhone
+      ? {
+          label: "Phone",
+          value: displayPhone,
+          href: `tel:${displayPhone.replace(/\D/g, "")}`,
+        }
+      : null,
+    displayAddress
+      ? { label: "Address", value: displayAddress, href: null }
+      : null,
   ].filter(Boolean) as { label: string; value: string; href: string | null }[];
 
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
-      <section {...sectionGroupAttr("contact", "hero")} style={{ padding: "48px 40px 80px" }}>
+      <section
+        {...sectionGroupAttr("contact", "hero")}
+        style={{ padding: "48px 40px 80px" }}
+      >
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
           <div
             className="el-contact-grid"
@@ -91,8 +109,7 @@ export function ElegantContactPage({ business }: DefaultContactPageTemplateProps
 
               <h1
                 style={{
-                  fontFamily:
-                    "var(--font-serif, 'Cormorant Garamond', serif)",
+                  fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
                   fontWeight: 400,
                   fontSize: "clamp(48px, 7vw, 96px)",
                   lineHeight: 0.95,
@@ -135,7 +152,11 @@ export function ElegantContactPage({ business }: DefaultContactPageTemplateProps
               {contactItems.length > 0 && (
                 <div style={fadeStyle(0.3)}>
                   <div
-                    style={{ display: "flex", flexDirection: "column", gap: 20 }}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 20,
+                    }}
                   >
                     {contactItems.map(({ label, value, href }) => (
                       <div key={label}>
@@ -199,8 +220,7 @@ export function ElegantContactPage({ business }: DefaultContactPageTemplateProps
             >
               <h2
                 style={{
-                  fontFamily:
-                    "var(--font-serif, 'Cormorant Garamond', serif)",
+                  fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
                   fontWeight: 400,
                   fontSize: 28,
                   letterSpacing: "-0.01em",
@@ -214,7 +234,6 @@ export function ElegantContactPage({ business }: DefaultContactPageTemplateProps
             </div>
           </div>
         </div>
-
       </section>
     </div>
   );

@@ -148,14 +148,13 @@ function DateTimeFormFieldInner({
   const dateOnly = value
     ? new Date(value.getFullYear(), value.getMonth(), value.getDate())
     : undefined;
-  const timeStr =
-    !includeTime
+  const timeStr = !includeTime
+    ? defaultTime
+    : value === undefined
       ? defaultTime
-      : value === undefined
-        ? defaultTime
-        : timeOptional && isMidnight(value)
-          ? ""
-          : toTimeString(value);
+      : timeOptional && isMidnight(value)
+        ? ""
+        : toTimeString(value);
 
   const updateDateTime = (newDate: Date | undefined, newTime: string) => {
     if (!newDate) {

@@ -100,7 +100,9 @@ export function PoolAdjustInventory({ pool, open, onOpenChange }: Props) {
                   <FormControl>
                     <Input type="number" min={0} {...field} />
                   </FormControl>
-                  <FormDescription>Set the absolute pool quantity.</FormDescription>
+                  <FormDescription>
+                    Set the absolute pool quantity.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -112,7 +114,10 @@ export function PoolAdjustInventory({ pool, open, onOpenChange }: Props) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Reason</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue />

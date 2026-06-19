@@ -7,11 +7,12 @@ import Link from "next/link";
 import type { RouterOutputs } from "~/trpc/react";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
-import { useCart } from "~/providers/cart-context";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import { useCart } from "~/providers/cart-context";
 
-type _HomepageProduct =
-  NonNullable<RouterOutputs["business"]["getHomepage"]>["products"][number];
+type _HomepageProduct = NonNullable<
+  RouterOutputs["business"]["getHomepage"]
+>["products"][number];
 
 // Minimal shape the card actually uses — compatible with homepage, shop, and related queries
 type CardProduct = Pick<
@@ -331,7 +332,6 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
           )}
         </div>
       </div>
-
     </article>
   );
 }

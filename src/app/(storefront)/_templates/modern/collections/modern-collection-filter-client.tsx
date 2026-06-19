@@ -125,10 +125,7 @@ export function ModernCollectionFilterClient({ products }: Props) {
               </button>
             )}
             {/* S-8: role="status" for live result count */}
-            <span
-              role="status"
-              className="text-muted-foreground text-sm"
-            >
+            <span role="status" className="text-muted-foreground text-sm">
               {filtered.length} {filtered.length === 1 ? "product" : "products"}
             </span>
           </div>
@@ -155,12 +152,8 @@ export function ModernCollectionFilterClient({ products }: Props) {
               )}
             </button>
             {/* S-8: role="status" for live result count */}
-            <span
-              role="status"
-              className="text-muted-foreground text-sm"
-            >
-              {filtered.length}{" "}
-              {filtered.length === 1 ? "product" : "products"}
+            <span role="status" className="text-muted-foreground text-sm">
+              {filtered.length} {filtered.length === 1 ? "product" : "products"}
             </span>
           </div>
 

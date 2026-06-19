@@ -1,8 +1,8 @@
 "use client";
 
+import type { AccountPreferencesPageProps } from "../../types";
 import { PreferencesContent } from "~/app/(storefront)/_components/account/address-components";
 
-import type { AccountPreferencesPageProps } from "../../types";
 import { ElegantAccountLayout } from "./elegant-account-layout";
 
 export function ElegantPreferencesPage({

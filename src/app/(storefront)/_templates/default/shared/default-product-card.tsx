@@ -37,7 +37,7 @@ export function DefaultProductCard({ product }: Props) {
   return (
     <Link href={`/shop/${product.slug}`} className="group block">
       {/* Image */}
-      <div className="relative mb-4 aspect-3/4 overflow-hidden bg-[#f6f6f6] rounded-[var(--radius)]">
+      <div className="relative mb-4 aspect-3/4 overflow-hidden rounded-[var(--radius)] bg-[#f6f6f6]">
         {productImage ? (
           <Image
             src={productImage}
@@ -54,7 +54,7 @@ export function DefaultProductCard({ product }: Props) {
 
         {/* Sale badge */}
         {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
-          <div className="absolute top-3 left-3 bg-[#0a0a0a] text-white text-[10px] font-medium tracking-[0.14em] uppercase px-2 py-1 rounded-[2px]">
+          <div className="absolute top-3 left-3 rounded-[2px] bg-[#0a0a0a] px-2 py-1 text-[10px] font-medium tracking-[0.14em] text-white uppercase">
             {computeSavingsLabel(
               productStatus.displayPrice,
               productStatus.displayCompareAtPrice,
@@ -64,7 +64,7 @@ export function DefaultProductCard({ product }: Props) {
 
         {/* Out of stock badge */}
         {productStatus.isOutOfStock && (
-          <div className="absolute top-3 left-3 bg-[#0a0a0a] text-white text-[10px] font-medium tracking-[0.14em] uppercase px-2 py-1 rounded-[2px]">
+          <div className="absolute top-3 left-3 rounded-[2px] bg-[#0a0a0a] px-2 py-1 text-[10px] font-medium tracking-[0.14em] text-white uppercase">
             Sold Out
           </div>
         )}
@@ -72,15 +72,13 @@ export function DefaultProductCard({ product }: Props) {
 
       {/* Info */}
       <div className="flex flex-col gap-0.5">
-        <h3 className="font-serif text-[15px] font-medium tracking-[-0.005em] line-clamp-1 group-hover:opacity-70 transition-opacity">
+        <h3 className="line-clamp-1 font-serif text-[15px] font-medium tracking-[-0.005em] transition-opacity group-hover:opacity-70">
           {product.name}
         </h3>
         <div className="flex items-center gap-2">
           <p className="text-[14px] text-[#6b6b6b]">
             {formatPrice(productStatus.displayPrice)}
-            {productStatus.variablePricing && (
-              <span className="ml-0.5">+</span>
-            )}
+            {productStatus.variablePricing && <span className="ml-0.5">+</span>}
           </p>
           {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
             <p className="text-[13px] text-[#6b6b6b] line-through">

@@ -125,7 +125,8 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
   embeds: {
     key: "embeds",
     label: "Embeds",
-    description: "Embed external content (booking widgets, videos, social posts) into pages and rich text",
+    description:
+      "Embed external content (booking widgets, videos, social posts) into pages and rich text",
     category: "content",
     enabledByDefault: false,
     ownerCanToggle: true,
@@ -138,6 +139,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
     hidesNav: ["blog"],
+  },
+  services: {
+    key: "services",
+    label: "Services",
+    description: "Offer bookable services with external booking widgets",
+    category: "content",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    hidesNav: ["services"],
   },
 
   // ─── CUSTOMERS ──────────────────────────────────────────────────────────────
@@ -152,6 +162,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
   },
 
   // ─── MARKETING ──────────────────────────────────────────────────────────────
+  analytics: {
+    key: "analytics",
+    label: "Analytics",
+    description: "View visitor, page, and event analytics for your storefront",
+    category: "marketing",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    hidesNav: ["analytics"],
+  },
   testimonials: {
     key: "testimonials",
     label: "Testimonials",

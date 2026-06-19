@@ -270,8 +270,11 @@ export function NoiseShopClient({ products, collections = [] }: Props) {
           aria-expanded={mobileFiltersOpen}
           aria-controls="noise-mobile-filters"
           aria-label={(() => {
-            const activeCount = (inStockOnly ? 1 : 0) + (priceMax !== null ? 1 : 0);
-            return activeCount > 0 ? `Filters, ${activeCount} active` : "Filters";
+            const activeCount =
+              (inStockOnly ? 1 : 0) + (priceMax !== null ? 1 : 0);
+            return activeCount > 0
+              ? `Filters, ${activeCount} active`
+              : "Filters";
           })()}
         >
           {mobileFiltersOpen ? (
@@ -312,7 +315,9 @@ export function NoiseShopClient({ products, collections = [] }: Props) {
         }}
       >
         {/* ── Filters sidebar ── */}
-        <aside className="pt-1" aria-label="Product filters">{filterPanel}</aside>
+        <aside className="pt-1" aria-label="Product filters">
+          {filterPanel}
+        </aside>
 
         {/* ── Product grid ── */}
         {productGrid}

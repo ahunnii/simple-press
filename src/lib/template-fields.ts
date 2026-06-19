@@ -3,12 +3,8 @@ import type { LucideIcon } from "lucide-react";
 import { Leaf } from "lucide-react";
 import { z } from "zod";
 
-import {
-  DEFAULT_EMBED_HEIGHT,
-  sanitizeEmbedSrc,
-} from "~/lib/embed";
-
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { DEFAULT_EMBED_HEIGHT, sanitizeEmbedSrc } from "~/lib/embed";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import {
   bambooData,
@@ -46,6 +42,7 @@ import {
   sledgeData,
   sledgeFieldGroups,
 } from "~/app/(storefront)/_templates/sledge";
+import { viiData, viiFieldGroups } from "~/app/(storefront)/_templates/vii";
 
 export type TemplatePage =
   | "homepage"
@@ -309,7 +306,11 @@ export function parseTemplateImageListRows(
 }
 
 /** Validated value for a template field of type `"iframe"`. */
-export type TemplateIframeValue = { src: string; height: number; title: string };
+export type TemplateIframeValue = {
+  src: string;
+  height: number;
+  title: string;
+};
 
 /**
  * Parses a raw `customFields` value for an iframe field.
@@ -331,11 +332,7 @@ export function parseTemplateIframeValue(
     return null;
   }
 
-  if (
-    parsed == null ||
-    typeof parsed !== "object" ||
-    Array.isArray(parsed)
-  ) {
+  if (parsed == null || typeof parsed !== "object" || Array.isArray(parsed)) {
     return null;
   }
 
@@ -374,6 +371,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...noiseFieldGroups,
   ...sledgeFieldGroups,
   ...elegantFieldGroups,
+  ...viiFieldGroups,
   ...defaultTemplateFieldGroups,
 };
 
@@ -426,6 +424,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...noiseData,
   ...sledgeData,
   ...elegantData,
+  ...viiData,
   ...defaultTemplateData,
 };
 
@@ -558,7 +557,7 @@ export const PAGE_METADATA = {
 export { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 export function isContentEmpty(content: TiptapJSON): boolean {
-  if (content === null) {
+  if (content === null || content === undefined) {
     return true;
   }
 

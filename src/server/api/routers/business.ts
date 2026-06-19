@@ -4,8 +4,14 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import {
+  getPlatformMaintenance,
+  resolveStorefrontMaintenance,
+} from "~/lib/maintenance";
+import { dollarsToCents } from "~/lib/prices";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { stripeClient } from "~/lib/stripe/client";
+import { zoneWeightFormSchema } from "~/lib/validators/shipping";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
@@ -38,6 +44,14 @@ export const businessRouter = createTRPCRouter({
         shippingFlatRate: true,
         freeShippingThreshold: true,
         offersInStorePickup: true,
+        originState: true,
+        shippingWeightTiers: true,
+        shippingFallbackRate: true,
+        shippingDefaultItemWeightLb: true,
+        zones: {
+          include: { rates: true },
+          orderBy: { sortOrder: "asc" as const },
+        },
         siteContent: {
           select: {
             logoUrl: true,
@@ -112,6 +126,17 @@ export const businessRouter = createTRPCRouter({
         shippingFlatRate: true,
         freeShippingThreshold: true,
         offersInStorePickup: true,
+        originState: true,
+        shippingWeightTiers: true,
+        shippingFallbackRate: true,
+        shippingDefaultItemWeightLb: true,
+        zones: {
+          include: { rates: true },
+          orderBy: { sortOrder: "asc" as const },
+        },
+        maintenanceMode: true,
+        maintenanceVariant: true,
+        maintenanceMessage: true,
         products: {
           where: { published: true },
           include: {
@@ -148,15 +173,33 @@ export const businessRouter = createTRPCRouter({
       }
     }
     // Never ship the raw draft field to clients.
-    const { stripeAccountId, ...rest } = businessData;
+    const {
+      stripeAccountId,
+      maintenanceMode,
+      maintenanceVariant,
+      maintenanceMessage,
+      ...rest
+    } = businessData;
     const { siteContent, ...restWithoutSiteContent } = rest;
     const sanitizedSiteContent = siteContent
       ? (({ previewCustomFields: _drop, ...safe }) => safe)(siteContent)
       : siteContent;
+
+    const platform = await getPlatformMaintenance();
+    const maintenance = resolveStorefrontMaintenance({
+      platform,
+      business: {
+        maintenanceMode,
+        maintenanceVariant,
+        maintenanceMessage: maintenanceMessage ?? null,
+      },
+    });
+
     return {
       ...restWithoutSiteContent,
       siteContent: sanitizedSiteContent,
       isStripeConnected: !!stripeAccountId,
+      maintenance,
     };
   }),
 
@@ -610,6 +653,44 @@ export const businessRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  updateMaintenanceMode: ownerAdminProcedure
+    .input(
+      z.object({
+        maintenanceMode: z.boolean(),
+        maintenanceVariant: z.enum(["maintenance", "coming_soon"]),
+        maintenanceMessage: z.string().max(500).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.business.update({
+        where: { id: ctx.businessId },
+        data: {
+          maintenanceMode: input.maintenanceMode,
+          maintenanceVariant: input.maintenanceVariant,
+          maintenanceMessage: input.maintenanceMessage ?? null,
+        },
+      });
+      return { success: true };
+    }),
+
+  getMaintenanceSettings: ownerAdminProcedure.query(async ({ ctx }) => {
+    const business = await ctx.db.business.findUnique({
+      where: { id: ctx.businessId },
+      select: {
+        maintenanceMode: true,
+        maintenanceVariant: true,
+        maintenanceMessage: true,
+      },
+    });
+    if (!business) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+    return business;
+  }),
+
   getWith: ownerAdminProcedure
     .input(
       z.object({
@@ -635,6 +716,12 @@ export const businessRouter = createTRPCRouter({
               pages: { where: { type: "blog" }, orderBy: { sortOrder: "asc" } },
             }
           : {}),
+        // Always include shipping zones so the shipping-settings editor can
+        // hydrate a saved zone_weight config. Small relation; cheap to fetch.
+        zones: {
+          include: { rates: true },
+          orderBy: { sortOrder: "asc" },
+        },
       };
 
       const business = await ctx.db.business.findFirst({
@@ -659,20 +746,13 @@ export const businessRouter = createTRPCRouter({
         ownerEmail: z.string(),
         supportEmail: z.string().optional(),
         businessAddress: z.string().optional(),
-        taxId: z.string().optional(),
         phoneNumber: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const {
-        name,
-        ownerEmail,
-        supportEmail,
-        businessAddress,
-        taxId,
-        phoneNumber,
-      } = input;
+      const { name, ownerEmail, supportEmail, businessAddress, phoneNumber } =
+        input;
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
@@ -681,7 +761,6 @@ export const businessRouter = createTRPCRouter({
           ownerEmail,
           supportEmail,
           businessAddress,
-          taxId,
           phoneNumber,
         },
       });
@@ -783,5 +862,83 @@ export const businessRouter = createTRPCRouter({
         include: { siteContent: true },
       });
       return updatedBusiness;
+    }),
+
+  /**
+   * Transactionally save the zone+weight shipping configuration for the business.
+   * Replaces all existing ShippingZone / ShippingRate rows for this business.
+   * Input uses dollar strings (form ergonomics); this mutation converts to cents.
+   */
+  saveZoneWeightShipping: ownerAdminProcedure
+    .input(zoneWeightFormSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const {
+        originState,
+        weightTiers,
+        zones,
+        fallbackRateDollars,
+        freeShippingThresholdDollars,
+        defaultItemWeightLb,
+      } = input;
+
+      // Convert dollar strings → cents.
+      const fallbackRateCents = dollarsToCents(fallbackRateDollars);
+      const thresholdRaw = freeShippingThresholdDollars?.trim() ?? "";
+      const freeShippingThresholdCents =
+        thresholdRaw !== "" ? dollarsToCents(thresholdRaw) : null;
+
+      await ctx.db.$transaction(async (tx) => {
+        // Update Business fields.
+        await tx.business.update({
+          where: { id: businessId },
+          data: {
+            shippingType: "zone_weight",
+            originState,
+            shippingWeightTiers: weightTiers,
+            shippingFallbackRate: fallbackRateCents,
+            shippingDefaultItemWeightLb: defaultItemWeightLb,
+            freeShippingThreshold: freeShippingThresholdCents,
+          },
+        });
+
+        // Delete all existing ShippingZone rows (ShippingRate cascades via FK).
+        await tx.shippingZone.deleteMany({
+          where: { businessId },
+        });
+
+        // Re-create zones and their rate cells.
+        for (let zoneIdx = 0; zoneIdx < zones.length; zoneIdx++) {
+          const zone = zones[zoneIdx];
+          if (!zone) continue;
+
+          const createdZone = await tx.shippingZone.create({
+            data: {
+              businessId,
+              name: zone.name,
+              states: zone.states,
+              sortOrder: zoneIdx,
+            },
+            select: { id: true },
+          });
+
+          // Build ShippingRate rows from the rateDollars Record<string, string>.
+          const ratesToCreate = Object.entries(zone.rateDollars).map(
+            ([tierKey, dollarStr]) => ({
+              zoneId: createdZone.id,
+              tierIndex: Number(tierKey),
+              priceCents: dollarsToCents(dollarStr),
+            }),
+          );
+
+          if (ratesToCreate.length > 0) {
+            await tx.shippingRate.createMany({
+              data: ratesToCreate,
+            });
+          }
+        }
+      });
+
+      return { message: "Shipping settings updated successfully" };
     }),
 });

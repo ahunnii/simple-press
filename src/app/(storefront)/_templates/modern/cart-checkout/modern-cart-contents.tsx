@@ -27,7 +27,10 @@ export function ModernCartContents({ business }: Props) {
   if (items.length === 0) {
     return (
       <div className="py-20 text-center">
-        <ShoppingBag aria-hidden="true" className="text-muted-foreground/40 mx-auto h-12 w-12" />
+        <ShoppingBag
+          aria-hidden="true"
+          className="text-muted-foreground/40 mx-auto h-12 w-12"
+        />
         <h2 className="text-foreground mt-4 font-serif text-2xl">
           Your cart is empty
         </h2>
@@ -51,7 +54,10 @@ export function ModernCartContents({ business }: Props) {
       <div className="lg:col-span-2">
         <div className="flex flex-col">
           {items.map((item) => (
-            <ModernCartItem key={`${item.productId}-${item.variantId ?? "base"}`} item={item} />
+            <ModernCartItem
+              key={`${item.productId}-${item.variantId ?? "base"}`}
+              item={item}
+            />
           ))}
         </div>
       </div>

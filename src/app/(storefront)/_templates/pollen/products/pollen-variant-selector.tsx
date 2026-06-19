@@ -1,25 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
   setSelectedVariantId: (variantId: string | null) => void;
 };
 
-export function PollenVariantSelector({ product, setSelectedVariantId }: Props) {
+export function PollenVariantSelector({
+  product,
+  setSelectedVariantId,
+}: Props) {
   const { addItem } = useCart();
+  const { setVariantImageUrl } = useVariantImage();
+
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+
+  useEffect(() => {
+    setVariantImageUrl(selectedVariant?.imageUrl ?? null);
+  }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  const BACKORDER_MAX = 100;
+  const isBackordered =
+    product.trackInventory &&
+    !!product.allowBackorders &&
+    (selectedVariant?.inventoryQty ?? 0) === 0;
+  const effectiveMax = !product.trackInventory
+    ? BACKORDER_MAX
+    : (selectedVariant?.inventoryQty ?? 0) > 0
+      ? (selectedVariant?.inventoryQty ?? 0)
+      : product.allowBackorders
+        ? BACKORDER_MAX
+        : 0;
 
   const handleAddToCart = () => {
     if (!selectedVariant) return;
@@ -31,9 +54,9 @@ export function PollenVariantSelector({ product, setSelectedVariantId }: Props) 
         productName: product.name,
         variantName: selectedVariant.name,
         price: selectedVariant.price ?? product.price,
-        imageUrl: product.images[0]?.url ?? null,
+        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
         sku: selectedVariant.sku,
-        maxInventory: selectedVariant.inventoryQty,
+        maxInventory: effectiveMax,
       },
       quantity,
     );
@@ -51,7 +74,7 @@ export function PollenVariantSelector({ product, setSelectedVariantId }: Props) 
       </span>
 
       <div className="mb-6">
-        <Label className="mb-3 block text-sm font-semibold uppercase tracking-wide text-[#2a351f]">
+        <Label className="mb-3 block text-sm font-semibold tracking-wide text-[#2a351f] uppercase">
           Select Variant
         </Label>
         <div className="flex flex-wrap gap-2">
@@ -86,9 +109,11 @@ export function PollenVariantSelector({ product, setSelectedVariantId }: Props) 
       </div>
 
       {/* S-4: aria-live on the availability line */}
-      {selectedVariant && (
+      {selectedVariant && product.trackInventory && (
         <p className="text-sm text-[#4c566a]" aria-live="polite">
-          {selectedVariant.inventoryQty} available
+          {isBackordered
+            ? "Backordered — ships when available"
+            : `${selectedVariant.inventoryQty} available`}
         </p>
       )}
 
@@ -121,9 +146,8 @@ export function PollenVariantSelector({ product, setSelectedVariantId }: Props) 
               variant="ghost"
               size="icon"
               className="size-10 text-[#2a351f] hover:bg-[#2a351f]/5"
-              onClick={() =>
-                setQuantity(Math.min(selectedVariant.inventoryQty, quantity + 1))
-              }
+              onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
+              disabled={quantity >= effectiveMax}
               aria-label="Increase quantity"
             >
               <Plus className="size-4" aria-hidden="true" />
@@ -134,7 +158,12 @@ export function PollenVariantSelector({ product, setSelectedVariantId }: Props) 
         <Button
           type="button"
           onClick={handleAddToCart}
-          disabled={!selectedVariant || selectedVariant.inventoryQty === 0}
+          disabled={
+            !selectedVariant ||
+            (product.trackInventory &&
+              selectedVariant.inventoryQty === 0 &&
+              !product.allowBackorders)
+          }
           className="flex-1 bg-[#215935] text-white hover:bg-[#1a4729] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isAdded ? (

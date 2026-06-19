@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { useCart } from "~/providers/cart-context";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -16,11 +17,30 @@ export function DefaultVariantSelector({
   setSelectedVariantId,
 }: Props) {
   const { addItem } = useCart();
+  const { setVariantImageUrl } = useVariantImage();
+
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+
+  useEffect(() => {
+    setVariantImageUrl(selectedVariant?.imageUrl ?? null);
+  }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  const BACKORDER_MAX = 100;
+  const isBackordered =
+    product.trackInventory &&
+    !!product.allowBackorders &&
+    (selectedVariant?.inventoryQty ?? 0) === 0;
+  const effectiveMax = !product.trackInventory
+    ? BACKORDER_MAX
+    : (selectedVariant?.inventoryQty ?? 0) > 0
+      ? (selectedVariant?.inventoryQty ?? 0)
+      : product.allowBackorders
+        ? BACKORDER_MAX
+        : 0;
 
   const addToCartDisabled =
     !selectedVariant ||
@@ -39,11 +59,9 @@ export function DefaultVariantSelector({
         productName: product.name,
         variantName: selectedVariant.name,
         price: selectedVariant.price ?? product.price,
-        imageUrl: product.images[0]?.url ?? null,
+        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
         sku: selectedVariant.sku,
-        maxInventory: product.trackInventory
-          ? selectedVariant.inventoryQty
-          : undefined,
+        maxInventory: effectiveMax,
       },
       quantity,
     );
@@ -63,15 +81,23 @@ export function DefaultVariantSelector({
       {/* Variant pills */}
       <div className="flex flex-col gap-2.5">
         {/* aria-live="polite" announces the selected variant name to screen readers (N-4) */}
-        <span id="variant-label" aria-live="polite" className="text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+        <span
+          id="variant-label"
+          aria-live="polite"
+          className="text-[11px] font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+        >
           Select option
           {selectedVariant && (
-            <span className="ml-2 font-normal normal-case tracking-normal text-[#0a0a0a]">
+            <span className="ml-2 font-normal tracking-normal text-[#0a0a0a] normal-case">
               — {selectedVariant.name}
             </span>
           )}
         </span>
-        <div role="group" aria-labelledby="variant-label" className="flex flex-wrap gap-2">
+        <div
+          role="group"
+          aria-labelledby="variant-label"
+          className="flex flex-wrap gap-2"
+        >
           {product.variants.map((variant) => {
             const outOfStock =
               product.trackInventory &&
@@ -95,7 +121,7 @@ export function DefaultVariantSelector({
                 aria-disabled={outOfStock || undefined}
                 aria-pressed={isSelected}
                 aria-label={`${variant.name}${outOfStock ? ", sold out" : isBackorder ? ", pre-order" : ""}`}
-                className={`inline-grid h-10 min-w-12 place-items-center rounded-[var(--radius)] border px-3.5 text-sm transition-colors ${outOfStock ? "opacity-40 cursor-not-allowed" : ""} ${
+                className={`inline-grid h-10 min-w-12 place-items-center rounded-[var(--radius)] border px-3.5 text-sm transition-colors ${outOfStock ? "cursor-not-allowed opacity-40" : ""} ${
                   isSelected
                     ? "border-[#0a0a0a] bg-[#0a0a0a] text-white"
                     : "border-[#e8e8e8] hover:border-[#0a0a0a]"
@@ -103,7 +129,10 @@ export function DefaultVariantSelector({
               >
                 {variant.name}
                 {isBackorder && !isSelected && (
-                  <span className="ml-1 text-[10px] text-[#6b6b6b]" aria-hidden="true">
+                  <span
+                    className="ml-1 text-[10px] text-[#6b6b6b]"
+                    aria-hidden="true"
+                  >
                     (pre-order)
                   </span>
                 )}
@@ -128,7 +157,7 @@ export function DefaultVariantSelector({
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 disabled={quantity <= 1}
                 aria-label="Decrease quantity"
-                className="flex h-full flex-1 items-center justify-center text-lg font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30 rounded-l-[var(--radius)]"
+                className="flex h-full flex-1 items-center justify-center rounded-l-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30"
               >
                 <span aria-hidden="true">−</span>
               </button>
@@ -142,19 +171,11 @@ export function DefaultVariantSelector({
               <button
                 type="button"
                 onClick={() =>
-                  setQuantity(
-                    product.trackInventory
-                      ? Math.min(selectedVariant.inventoryQty, quantity + 1)
-                      : quantity + 1,
-                  )
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
                 }
-                disabled={
-                  product.trackInventory &&
-                  !product.allowBackorders &&
-                  quantity >= selectedVariant.inventoryQty
-                }
+                disabled={quantity >= effectiveMax}
                 aria-label="Increase quantity"
-                className="flex h-full flex-1 items-center justify-center text-lg font-light transition-colors hover:bg-[#f6f6f6] rounded-r-[var(--radius)]"
+                className="flex h-full flex-1 items-center justify-center rounded-r-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6]"
               >
                 <span aria-hidden="true">+</span>
               </button>
@@ -165,7 +186,7 @@ export function DefaultVariantSelector({
               type="button"
               onClick={handleAddToCart}
               aria-disabled={addToCartDisabled || undefined}
-              className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a] active:translate-y-px ${addToCartDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a] active:translate-y-px ${addToCartDisabled ? "cursor-not-allowed opacity-50" : ""}`}
             >
               {isAdded ? (
                 <>
@@ -179,18 +200,15 @@ export function DefaultVariantSelector({
           </div>
 
           {/* Stock hint */}
-          {product.trackInventory && selectedVariant.inventoryQty > 0 && (
+          {product.trackInventory && (
             <p className="text-xs text-[#6b6b6b]">
-              {selectedVariant.inventoryQty} available
+              {isBackordered
+                ? "Pre-order — ships when available"
+                : selectedVariant.inventoryQty > 0
+                  ? `${selectedVariant.inventoryQty} available`
+                  : null}
             </p>
           )}
-          {product.trackInventory &&
-            selectedVariant.inventoryQty === 0 &&
-            product.allowBackorders && (
-              <p className="text-xs text-[#6b6b6b]">
-                Pre-order — ships when available
-              </p>
-            )}
         </div>
       )}
     </div>

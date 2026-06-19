@@ -1,12 +1,11 @@
 "use client";
 
+import type { DragEndEvent } from "@dnd-kit/core";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { DragEndEvent } from "@dnd-kit/core";
 import {
   closestCenter,
   DndContext,
@@ -24,14 +23,26 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ArrowLeft, ExternalLink, GripVertical, PlusCircle, Save, Search, Trash2, TriangleAlert, Upload, X } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  ArrowLeft,
+  ExternalLink,
+  GripVertical,
+  PlusCircle,
+  Save,
+  Search,
+  Trash2,
+  TriangleAlert,
+  Upload,
+  X,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { CollectionFormData } from "~/lib/validators/collections";
 import type { RouterOutputs } from "~/trpc/react";
-import { cn } from "~/lib/utils";
 import { generateCollectionSlug } from "~/lib/slug";
+import { cn } from "~/lib/utils";
 import { collectionFormSchema } from "~/lib/validators/collections";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
@@ -56,10 +67,10 @@ import {
 } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Form, FormField } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Switch } from "~/components/ui/switch";
-import { Input } from "~/components/ui/input";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
@@ -100,7 +111,7 @@ function SortableProductRow({
       <button
         type="button"
         aria-label="Drag to reorder"
-        className="flex h-9 w-9 cursor-move items-center justify-center text-gray-400 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        className="focus-visible:ring-ring flex h-9 w-9 cursor-move items-center justify-center text-gray-400 hover:text-gray-600 focus-visible:ring-1 focus-visible:outline-none"
         {...attributes}
         {...listeners}
       >
@@ -114,14 +125,16 @@ function SortableProductRow({
           className="rounded object-cover"
         />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="truncate font-medium text-sm">{product.name}</p>
-        <p className="text-xs text-gray-500">${(product.price / 100).toFixed(2)}</p>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{product.name}</p>
+        <p className="text-xs text-gray-500">
+          ${(product.price / 100).toFixed(2)}
+        </p>
       </div>
       <button
         type="button"
         aria-label={`Remove ${product.name}`}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        className="focus-visible:ring-ring flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:ring-1 focus-visible:outline-none"
         onClick={onRemove}
       >
         <X className="h-4 w-4" />
@@ -304,8 +317,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
         setOgImageRemoved(false);
         // Clear the image file inputs so the same file can be re-selected
         if (imageFileInputRef.current) imageFileInputRef.current.value = "";
-        if (ogImageFileInputRef.current)
-          ogImageFileInputRef.current.value = "";
+        if (ogImageFileInputRef.current) ogImageFileInputRef.current.value = "";
         toast.success("Collection created — add another");
         router.push("/admin/collections/new");
       } else {
@@ -491,7 +503,12 @@ export function CollectionForm({ collection, allProducts }: Props) {
 
             <div className="toolbar-actions">
               {collection?.id && collection.published && (
-                <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="hidden sm:inline-flex"
+                >
                   <a
                     href={`/collections/${collection.slug}`}
                     target="_blank"
@@ -636,7 +653,8 @@ export function CollectionForm({ collection, allProducts }: Props) {
                               <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                               <div className="space-y-0.5">
                                 <p className="font-medium">
-                                  Heads up — this will change the collection&apos;s URL.
+                                  Heads up — this will change the
+                                  collection&apos;s URL.
                                 </p>
                                 <p className="text-amber-700">
                                   Saving will change the public URL from{" "}
@@ -647,9 +665,9 @@ export function CollectionForm({ collection, allProducts }: Props) {
                                   <span className="font-mono">
                                     /collections/{previewSlug}
                                   </span>
-                                  . Anyone with the old link (including bookmarks
-                                  and search engines) will get a 404. We don&apos;t
-                                  set up a redirect automatically.
+                                  . Anyone with the old link (including
+                                  bookmarks and search engines) will get a 404.
+                                  We don&apos;t set up a redirect automatically.
                                 </p>
                               </div>
                             </div>
@@ -740,7 +758,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
                       description="Comma-separated keywords"
                     />
                     <div className="space-y-2">
-                      <p className="text-sm font-medium leading-none">
+                      <p className="text-sm leading-none font-medium">
                         Open Graph Image
                       </p>
                       <p className="text-muted-foreground text-sm">
@@ -789,7 +807,9 @@ export function CollectionForm({ collection, allProducts }: Props) {
                         // filter out removed.
                         const toggleProduct = (productId: string) => {
                           if (ids.includes(productId)) {
-                            field.onChange(ids.filter((id) => id !== productId));
+                            field.onChange(
+                              ids.filter((id) => id !== productId),
+                            );
                           } else {
                             field.onChange([...ids, productId]);
                           }
@@ -818,8 +838,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
                         const selectedProducts = ids
                           .map((id) => productMap.get(id))
                           .filter(
-                            (p): p is NonNullable<typeof p> =>
-                              p !== undefined,
+                            (p): p is NonNullable<typeof p> => p !== undefined,
                           );
 
                         return (
@@ -827,7 +846,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
                             {/* Sortable ordered list of selected products */}
                             {ids.length > 0 && (
                               <div className="mb-4">
-                                <p className="mb-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                <p className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                                   Selected — drag to reorder
                                 </p>
                                 <DndContext

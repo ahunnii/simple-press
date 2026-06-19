@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { CARRIERS } from "~/data/fulfillment-constants";
 import { formatDistanceToNow } from "date-fns";
 import { Edit2, Loader2, Package, Plus, Truck } from "lucide-react";
@@ -9,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";

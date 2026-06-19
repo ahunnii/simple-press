@@ -2,9 +2,12 @@ import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { DbClient } from "~/server/db";
+import { deleteStoredObjects } from "~/lib/s3/delete";
 import {
   productCreateSchema,
   productImageSchema,
+  productListFiltersSchema,
   productUpdateSchema,
 } from "~/lib/validators/product";
 import {
@@ -14,6 +17,32 @@ import {
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+
+/**
+ * Deletes the given S3 objects, but only those whose URL is no longer referenced
+ * by any Image row or any Product.ogImage. Call AFTER the owning rows are removed.
+ * Best-effort (deleteStoredObjects never throws).
+ */
+async function deleteUnreferencedImageObjects(db: DbClient, urls: string[]) {
+  const unique = [...new Set(urls.filter((u): u is string => !!u))];
+  if (unique.length === 0) return;
+  const [imageRefs, ogRefs] = await Promise.all([
+    db.image.findMany({
+      where: { url: { in: unique } },
+      select: { url: true },
+    }),
+    db.product.findMany({
+      where: { ogImage: { in: unique } },
+      select: { ogImage: true },
+    }),
+  ]);
+  const referenced = new Set<string>([
+    ...imageRefs.map((i) => i.url),
+    ...ogRefs.map((p) => p.ogImage).filter((u): u is string => !!u),
+  ]);
+  const toDelete = unique.filter((u) => !referenced.has(u));
+  if (toDelete.length > 0) await deleteStoredObjects(toDelete);
+}
 
 export const productRouter = createTRPCRouter({
   getFeatured: publicProcedure
@@ -126,6 +155,77 @@ export const productRouter = createTRPCRouter({
       return products;
     }),
 
+  secureList: ownerAdminProcedure
+    .use(featureGate("products"))
+    .input(productListFiltersSchema)
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const where: Prisma.ProductWhereInput = { businessId };
+
+      // Status filter
+      if (input?.status === "published") {
+        where.published = true;
+      } else if (input?.status === "draft") {
+        where.published = false;
+      }
+
+      // Search filter — match name, slug, product sku, or any variant sku
+      const searchQuery = input?.search?.trim();
+      if (searchQuery) {
+        where.OR = [
+          { name: { contains: searchQuery, mode: "insensitive" } },
+          { slug: { contains: searchQuery, mode: "insensitive" } },
+          { sku: { contains: searchQuery, mode: "insensitive" } },
+          {
+            variants: {
+              some: { sku: { contains: searchQuery, mode: "insensitive" } },
+            },
+          },
+        ];
+      }
+
+      // Sort
+      type ProductOrderBy = Prisma.ProductOrderByWithRelationInput;
+      const orderByMap: Record<string, ProductOrderBy> = {
+        newest: { createdAt: "desc" },
+        oldest: { createdAt: "asc" },
+        "name-asc": { name: "asc" },
+        "name-desc": { name: "desc" },
+        "price-asc": { price: "asc" },
+        "price-desc": { price: "desc" },
+      };
+      const orderBy: ProductOrderBy =
+        (input?.sort ? orderByMap[input.sort] : undefined) ??
+        orderByMap.newest!;
+
+      // Pagination — page size tuned for large catalogs (≈300 products → 6 pages)
+      const pageSize = 50;
+      const page = input?.page ?? 1;
+      const skip = (page - 1) * pageSize;
+
+      const include = {
+        images: { orderBy: { sortOrder: "asc" } as const, take: 1 },
+        variants: { select: { price: true, compareAtPrice: true } },
+        _count: { select: { variants: true } },
+      };
+
+      const [products, totalCount] = await ctx.db.$transaction([
+        ctx.db.product.findMany({
+          where,
+          include,
+          orderBy,
+          skip,
+          take: pageSize,
+        }),
+        ctx.db.product.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      return { products, totalCount, page, pageSize, totalPages };
+    }),
+
   secureGetAll: ownerAdminProcedure
     .use(featureGate("products"))
     .query(async ({ ctx }) => {
@@ -162,6 +262,8 @@ export const productRouter = createTRPCRouter({
         metaDescription,
         metaKeywords,
         ogImage,
+        weight,
+        weightUnit,
       } = input;
 
       const { businessId } = ctx;
@@ -205,6 +307,8 @@ export const productRouter = createTRPCRouter({
           metaDescription: metaDescription ?? null,
           metaKeywords: metaKeywords ?? null,
           ogImage: ogImage ?? null,
+          weight: weight ?? null,
+          weightUnit: weightUnit ?? "lb",
           businessId,
           variants: {
             create: variants.map((v) => ({
@@ -214,6 +318,7 @@ export const productRouter = createTRPCRouter({
               compareAtPrice: v.compareAtPrice ?? null,
               inventoryQty: v.inventoryQty,
               options: v.options,
+              imageUrl: v.imageUrl ?? null,
             })),
           },
         },
@@ -250,6 +355,8 @@ export const productRouter = createTRPCRouter({
         metaDescription,
         metaKeywords,
         ogImage,
+        weight,
+        weightUnit,
       } = input;
 
       // Check if slug is already taken for this business
@@ -314,6 +421,8 @@ export const productRouter = createTRPCRouter({
           metaDescription: metaDescription ?? null,
           metaKeywords: metaKeywords ?? null,
           ogImage: ogImage ?? null,
+          weight: weight ?? null,
+          weightUnit: weightUnit ?? "lb",
           // Reset alert flags when inventory is manually increased above threshold/zero
           ...(inventoryIncreased && inventoryQty > 0
             ? { outOfStockAlertSent: false }
@@ -368,6 +477,7 @@ export const productRouter = createTRPCRouter({
                   compareAtPrice: v.compareAtPrice ?? null,
                   inventoryQty: v.inventoryQty,
                   options: v.options,
+                  imageUrl: v.imageUrl ?? null,
                 },
               });
               // Write history if qty changed
@@ -397,6 +507,7 @@ export const productRouter = createTRPCRouter({
                   compareAtPrice: v.compareAtPrice ?? null,
                   inventoryQty: v.inventoryQty,
                   options: v.options,
+                  imageUrl: v.imageUrl ?? null,
                 },
               });
               // Write history for new variant with initial stock
@@ -430,13 +541,91 @@ export const productRouter = createTRPCRouter({
     .input(z.string())
     .mutation(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
-      const product = await ctx.db.product.delete({
+
+      // Fetch image URLs before the cascade removes the rows
+      const product = await ctx.db.product.findUnique({
+        where: { id, businessId },
+        select: {
+          id: true,
+          ogImage: true,
+          images: { select: { url: true } },
+        },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+
+      await ctx.db.product.delete({
         where: { id, businessId },
       });
+
+      // Clean up S3 objects — reference-counted, best-effort, after the DB delete
+      const urlsToDelete = [
+        ...product.images.map((img) => img.url),
+        product.ogImage,
+      ].filter((u): u is string => !!u);
+
+      await deleteUnreferencedImageObjects(ctx.db, urlsToDelete);
 
       return {
         message: "Product deleted successfully!",
         productId: product.id,
+      };
+    }),
+
+  bulkSetPublished: ownerAdminProcedure
+    .use(featureGate("products"))
+    .input(
+      z.object({ ids: z.array(z.string()).min(1), published: z.boolean() }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const result = await ctx.db.product.updateMany({
+        where: { id: { in: input.ids }, businessId },
+        data: { published: input.published },
+      });
+
+      return {
+        count: result.count,
+        message: `${result.count} product(s) updated`,
+      };
+    }),
+
+  bulkDelete: ownerAdminProcedure
+    .use(featureGate("products"))
+    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // Fetch image URLs before cascade removes the rows (scoped to businessId)
+      const products = await ctx.db.product.findMany({
+        where: { id: { in: input.ids }, businessId },
+        select: {
+          id: true,
+          ogImage: true,
+          images: { select: { url: true } },
+        },
+      });
+
+      const result = await ctx.db.product.deleteMany({
+        where: { id: { in: input.ids }, businessId },
+      });
+
+      // Clean up S3 objects — reference-counted, best-effort, after the DB delete
+      const urlsToDelete = products
+        .flatMap((p) => [...p.images.map((img) => img.url), p.ogImage])
+        .filter((u): u is string => !!u);
+
+      await deleteUnreferencedImageObjects(ctx.db, urlsToDelete);
+
+      return {
+        count: result.count,
+        message: `${result.count} product(s) deleted`,
       };
     }),
 
@@ -472,11 +661,18 @@ export const productRouter = createTRPCRouter({
 
       // Delete removed images
       const toDelete = [...existingIds].filter((id) => !newIds.has(id));
+      const removedUrls = product.images
+        .filter((img) => toDelete.includes(img.id))
+        .map((img) => img.url);
+
       await ctx.db.image.deleteMany({
         where: {
           id: { in: toDelete },
         },
       });
+
+      // Clean up S3 objects — reference-counted, best-effort, after the DB delete
+      await deleteUnreferencedImageObjects(ctx.db, removedUrls);
 
       // Update or create images
       await Promise.all(
@@ -511,6 +707,124 @@ export const productRouter = createTRPCRouter({
       };
     }),
 
+  duplicate: ownerAdminProcedure
+    .use(featureGate("products"))
+    .input(z.string())
+    .mutation(async ({ ctx, input: id }) => {
+      const { businessId } = ctx;
+
+      // 1. Fetch source product (scoped to businessId)
+      const source = await ctx.db.product.findUnique({
+        where: { id, businessId },
+        include: {
+          variants: true,
+          images: true,
+          collectionProducts: { select: { collectionId: true } },
+        },
+      });
+
+      if (!source) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+
+      // 2. Compute a unique slug for this business
+      const baseSlug = `${source.slug}-copy`;
+      const candidateSlugs = [
+        baseSlug,
+        ...Array.from({ length: 49 }, (_, i) => `${baseSlug}-${i + 2}`),
+      ];
+
+      const existingSlugs = await ctx.db.product.findMany({
+        where: { businessId, slug: { in: candidateSlugs } },
+        select: { slug: true },
+      });
+      const takenSlugs = new Set(existingSlugs.map((p) => p.slug));
+      const newSlug = candidateSlugs.find((s) => !takenSlugs.has(s));
+
+      if (!newSlug) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Could not generate a unique slug for the duplicated product",
+        });
+      }
+
+      // 3. Create the duplicate in a transaction (shared S3 image URLs — reference-counted deletion handles safety)
+      const newProduct = await ctx.db.$transaction(async (tx) => {
+        return tx.product.create({
+          data: {
+            name: `${source.name} (Copy)`,
+            slug: newSlug,
+            excerpt: source.excerpt,
+            description: source.description,
+            price: source.price,
+            compareAtPrice: source.compareAtPrice,
+            cost: source.cost,
+            sku: source.sku,
+            barcode: source.barcode,
+            trackInventory: source.trackInventory,
+            inventoryQty: source.inventoryQty,
+            allowBackorders: source.allowBackorders,
+            lowInventoryThreshold: source.lowInventoryThreshold,
+            baseInventoryUnitId: source.baseInventoryUnitId,
+            baseUnitsConsumed: source.baseUnitsConsumed,
+            weight: source.weight,
+            weightUnit: source.weightUnit,
+            metaTitle: source.metaTitle,
+            metaDescription: source.metaDescription,
+            metaKeywords: source.metaKeywords,
+            ogImage: source.ogImage,
+            additionalFields: source.additionalFields
+              ? (JSON.parse(
+                  JSON.stringify(source.additionalFields),
+                ) as Prisma.InputJsonValue)
+              : undefined,
+            businessId,
+            // Reset transient/computed fields
+            published: false,
+            featured: false,
+            reservedQty: 0,
+            lowInventoryAlertSent: false,
+            outOfStockAlertSent: false,
+            sortOrder: 0,
+            variants: {
+              create: source.variants.map((v) => ({
+                name: v.name,
+                sku: v.sku,
+                barcode: v.barcode,
+                price: v.price,
+                compareAtPrice: v.compareAtPrice,
+                inventoryQty: v.inventoryQty,
+                options: JSON.parse(
+                  JSON.stringify(v.options),
+                ) as Prisma.InputJsonValue,
+                imageUrl: v.imageUrl,
+                reservedQty: 0,
+              })),
+            },
+            images: {
+              create: source.images.map((img) => ({
+                url: img.url,
+                altText: img.altText,
+                sortOrder: img.sortOrder,
+                businessId: img.businessId,
+              })),
+            },
+            collectionProducts: {
+              create: source.collectionProducts.map((cp) => ({
+                collectionId: cp.collectionId,
+              })),
+            },
+          },
+        });
+      });
+
+      return { productId: newProduct.id, message: "Product duplicated" };
+    }),
+
   getProductImportHistory: ownerAdminProcedure
     .use(featureGate("products"))
     .query(async ({ ctx }) => {
@@ -520,5 +834,176 @@ export const productRouter = createTRPCRouter({
         orderBy: { createdAt: "desc" },
       });
       return importHistory;
+    }),
+
+  /**
+   * Public query — batch-checks cart item availability and current pricing.
+   * Used by CartRevalidator to sync the localStorage cart against live DB state.
+   * Returns one status object per requested item (aligned to input order).
+   * Missing/deleted products come back as `available: false`.
+   */
+  getCartItemsStatus: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("products"))
+    .input(
+      z.object({
+        items: z
+          .array(
+            z.object({
+              productId: z.string(),
+              variantId: z.string().nullable(),
+            }),
+          )
+          .max(100),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const { items } = input;
+
+      if (items.length === 0) return [];
+
+      const productIds = [...new Set(items.map((i) => i.productId))];
+
+      // Single batched query — no N+1
+      const products = await ctx.db.product.findMany({
+        where: { id: { in: productIds }, businessId },
+        include: {
+          variants: {
+            select: {
+              id: true,
+              price: true,
+              compareAtPrice: true,
+              inventoryQty: true,
+              reservedQty: true,
+            },
+          },
+          baseInventoryUnit: {
+            select: { inventoryQty: true, allowBackorders: true },
+          },
+        },
+      });
+
+      const productMap = new Map(products.map((p) => [p.id, p]));
+
+      return items.map((item) => {
+        const product = productMap.get(item.productId);
+
+        // Product not found or not published
+        if (!product?.published) {
+          return {
+            productId: item.productId,
+            variantId: item.variantId,
+            available: false,
+            price: 0,
+            compareAtPrice: null,
+            maxQuantity: null,
+          };
+        }
+
+        // comingSoon blocks availability even when in stock
+        const additionalFields = product.additionalFields as Record<
+          string,
+          unknown
+        > | null;
+        if (additionalFields?.comingSoon === true) {
+          return {
+            productId: item.productId,
+            variantId: item.variantId,
+            available: false,
+            price: 0,
+            compareAtPrice: null,
+            maxQuantity: null,
+          };
+        }
+
+        if (item.variantId !== null) {
+          // Variant item
+          const variant = product.variants.find((v) => v.id === item.variantId);
+          if (!variant) {
+            return {
+              productId: item.productId,
+              variantId: item.variantId,
+              available: false,
+              price: 0,
+              compareAtPrice: null,
+              maxQuantity: null,
+            };
+          }
+
+          // Variant price: use variant price if set & non-zero, else fall back to product price
+          const price =
+            variant.price !== null && variant.price > 0
+              ? variant.price
+              : product.price;
+          const compareAtPrice =
+            variant.compareAtPrice ?? product.compareAtPrice ?? null;
+
+          // Stock: variants use product-level trackInventory / allowBackorders
+          let available = true;
+          let maxQuantity: number | null = null;
+
+          if (product.trackInventory && !product.allowBackorders) {
+            const stock = variant.inventoryQty - variant.reservedQty;
+            if (stock <= 0) {
+              available = false;
+            }
+            maxQuantity = Math.max(0, stock);
+          }
+
+          return {
+            productId: item.productId,
+            variantId: item.variantId,
+            available,
+            price,
+            compareAtPrice,
+            maxQuantity,
+          };
+        } else {
+          // No-variant (base) item
+          // Pool-backed products: delegate stock check to the pool
+          if (product.baseInventoryUnit) {
+            const pool = product.baseInventoryUnit;
+            let available = true;
+            let maxQuantity: number | null = null;
+
+            if (!pool.allowBackorders) {
+              const stock = pool.inventoryQty - 0; // reservedQty not included in select; treat pool stock conservatively
+              available = stock > 0;
+              maxQuantity = Math.max(0, stock);
+            }
+
+            return {
+              productId: item.productId,
+              variantId: null,
+              available,
+              price: product.price,
+              compareAtPrice: product.compareAtPrice ?? null,
+              maxQuantity,
+            };
+          }
+
+          // Standard no-variant product
+          let available = true;
+          let maxQuantity: number | null = null;
+
+          if (product.trackInventory && !product.allowBackorders) {
+            const stock = product.inventoryQty - product.reservedQty;
+            if (stock <= 0) {
+              available = false;
+            }
+            maxQuantity = Math.max(0, stock);
+          }
+
+          return {
+            productId: item.productId,
+            variantId: null,
+            available,
+            price: product.price,
+            compareAtPrice: product.compareAtPrice ?? null,
+            maxQuantity,
+          };
+        }
+      });
     }),
 });

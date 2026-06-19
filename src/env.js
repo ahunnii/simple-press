@@ -37,6 +37,30 @@ export const env = createEnv({
     SIMPLEPRESS_HASH_SECRET: z.string(),
     ARTISANAL_FUTURES_API_URL: z.string().url(),
     REDIS_URL: z.string().url().optional(),
+
+    // PII field-level encryption key for prisma-field-encryption.
+    // Format: k1.aesgcm256.<44-char base64> (AES-GCM-256).
+    PRISMA_FIELD_ENCRYPTION_KEY: z.string().min(50),
+
+    // Preview/staging deployment flag. When "true", outbound email is
+    // neutralized and a noindex header is emitted (see middleware + resend.ts).
+    IS_PREVIEW_ENV: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((s) => s === "true"),
+    // Optional: when set on a preview env, all outbound email is rerouted to
+    // this single inbox instead of being dropped.
+    EMAIL_REDIRECT_TO: z.string().email().optional(),
+
+    // Umami platform service account credentials (server-only, never exposed to client).
+    // The password may be provided either as plain text (UMAMI_API_PASSWORD) or
+    // base64-encoded (UMAMI_API_PASSWORD_B64). Prefer the base64 form in hosting
+    // platforms that mangle special characters (e.g. Coolify strips quotes, and
+    // dotenv-expand interprets `$`). Base64 contains no characters any env layer
+    // will alter. The client uses the base64 value when present.
+    UMAMI_API_USERNAME: z.string(),
+    UMAMI_API_PASSWORD: z.string().optional(),
+    UMAMI_API_PASSWORD_B64: z.string().optional(),
   },
 
   /**
@@ -108,6 +132,12 @@ export const env = createEnv({
     SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,
     ARTISANAL_FUTURES_API_URL: process.env.ARTISANAL_FUTURES_API_URL,
     REDIS_URL: process.env.REDIS_URL,
+    PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
+    IS_PREVIEW_ENV: process.env.IS_PREVIEW_ENV,
+    EMAIL_REDIRECT_TO: process.env.EMAIL_REDIRECT_TO,
+    UMAMI_API_USERNAME: process.env.UMAMI_API_USERNAME,
+    UMAMI_API_PASSWORD: process.env.UMAMI_API_PASSWORD,
+    UMAMI_API_PASSWORD_B64: process.env.UMAMI_API_PASSWORD_B64,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

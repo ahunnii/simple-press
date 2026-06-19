@@ -21,7 +21,11 @@ export function DefaultCartBadge() {
   return (
     <Link
       href="/cart"
-      aria-label={itemCount > 0 ? `Cart, ${itemCount} item${itemCount !== 1 ? "s" : ""}` : "Cart"}
+      aria-label={
+        itemCount > 0
+          ? `Cart, ${itemCount} item${itemCount !== 1 ? "s" : ""}`
+          : "Cart"
+      }
       className="relative"
     >
       <ShoppingCart className="h-6 w-6" aria-hidden="true" />

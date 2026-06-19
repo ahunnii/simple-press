@@ -36,7 +36,10 @@ export function BambooContactPage({
 
   return (
     <PageTransition>
-      <section {...sectionGroupAttr("contact", "info")} className="bg-secondary">
+      <section
+        {...sectionGroupAttr("contact", "info")}
+        className="bg-secondary"
+      >
         <div className="mx-auto flex max-w-7xl flex-col-reverse items-center gap-8 px-4 py-16 md:flex-row md:py-24 lg:px-8">
           <FadeIn
             direction="right"
@@ -63,7 +66,10 @@ export function BambooContactPage({
               <div className="flex flex-col gap-6">
                 {contactInfo.map((info) => (
                   <div key={info.label} className="flex items-start gap-4">
-                    <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-full" aria-hidden="true">
+                    <div
+                      className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-full"
+                      aria-hidden="true"
+                    >
                       <info.icon className="text-primary size-5" />
                     </div>
                     <div>

@@ -37,7 +37,9 @@ export function SledgeAnnouncementBar({
         {/* Side obs #2: was style={{ color: "rgba(255,255,255,0.55)" }} */}
         <span className="text-white/55"> · Code: </span>
         {/* Side obs #2: was style={{ color: "var(--sl-coral)" }} */}
-        <span className="font-semibold text-[var(--sl-coral)]">{data.code}</span>
+        <span className="font-semibold text-[var(--sl-coral)]">
+          {data.code}
+        </span>
         {isExternal ? (
           <a
             href={href}

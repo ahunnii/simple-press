@@ -14,8 +14,15 @@ type Props = {
 
 export function PollenCartItem({ item }: Props) {
   const { updateQuantity, removeItem } = useCart();
-  const { productId, variantId, productName, variantName, price, quantity, imageUrl } =
-    item;
+  const {
+    productId,
+    variantId,
+    productName,
+    variantName,
+    price,
+    quantity,
+    imageUrl,
+  } = item;
 
   return (
     <div className="flex gap-4 rounded-md border border-[#2a351f]/10 bg-white p-4">

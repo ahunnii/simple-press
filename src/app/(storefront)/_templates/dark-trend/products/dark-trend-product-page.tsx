@@ -8,9 +8,11 @@ import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { computeSavingsLabel } from "~/lib/prices";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { Spotlight } from "~/components/ui/spotlight-new";
+import { TrackView } from "~/components/analytics/track-view";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
 
 import { DarkTrendProductCard } from "../shared/dark-trend-product-card";
@@ -45,6 +47,10 @@ export function DarkTrendProductPage({
 
   return (
     <div className="relative min-h-screen overflow-x-hidden pt-16 pb-20">
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       <Spotlight />
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         {/* Back Link */}
@@ -67,7 +73,7 @@ export function DarkTrendProductPage({
           <div className="flex flex-col">
             {/* Header */}
             <div className="mb-8">
-              <span className="mb-2 block text-sm font-semibold tracking-[0.2em] uppercase text-purple-400">
+              <span className="mb-2 block text-sm font-semibold tracking-[0.2em] text-purple-400 uppercase">
                 {additionalFields?.productTagline?.trim() !== ""
                   ? additionalFields?.productTagline
                   : "Product"}
@@ -112,7 +118,10 @@ export function DarkTrendProductPage({
                     key={`${badge.label}-${i}`}
                     className="flex items-center gap-2 text-sm text-white/60"
                   >
-                    <badge.Icon className="h-4 w-4 text-purple-400" aria-hidden="true" />
+                    <badge.Icon
+                      className="h-4 w-4 text-purple-400"
+                      aria-hidden="true"
+                    />
                     <span>{badge.label}</span>
                   </div>
                 ))}

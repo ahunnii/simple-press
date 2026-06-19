@@ -20,10 +20,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 
 type Props = {
-  order: Pick<
-    Order,
-    "id" | "paymentStatus" | "fulfillmentStatus" | "status"
-  >;
+  order: Pick<Order, "id" | "paymentStatus" | "fulfillmentStatus" | "status">;
 };
 
 const PAYMENT_STATUSES = [

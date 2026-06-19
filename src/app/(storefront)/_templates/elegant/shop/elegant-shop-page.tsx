@@ -12,7 +12,9 @@ const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
 
 type SortKey = "featured" | "name" | "price-asc" | "price-desc";
 
-export function ElegantShopPage({ business }: DefaultProductsPageTemplateProps) {
+export function ElegantShopPage({
+  business,
+}: DefaultProductsPageTemplateProps) {
   const [shown, setShown] = useState(false);
   const [gridVisible, setGridVisible] = useState(false);
   const [sort, setSort] = useState<SortKey>("featured");
@@ -93,21 +95,33 @@ export function ElegantShopPage({ business }: DefaultProductsPageTemplateProps) 
           >
             {/* Two separate mask-reveal lines, matching the design exactly */}
             <span style={{ display: "block", overflow: "hidden" }}>
-              <span style={reducedMotion ? { display: "block" } : {
-                display: "block",
-                transform: shown ? "translateY(0)" : "translateY(110%)",
-                transition: `transform 1.1s ${easeOut} 0.08s`,
-              }}>
+              <span
+                style={
+                  reducedMotion
+                    ? { display: "block" }
+                    : {
+                        display: "block",
+                        transform: shown ? "translateY(0)" : "translateY(110%)",
+                        transition: `transform 1.1s ${easeOut} 0.08s`,
+                      }
+                }
+              >
                 Everything,
               </span>
             </span>
             <span style={{ display: "block", overflow: "hidden" }}>
-              <em style={reducedMotion ? { display: "block", fontStyle: "italic" } : {
-                display: "block",
-                fontStyle: "italic",
-                transform: shown ? "translateY(0)" : "translateY(110%)",
-                transition: `transform 1.1s ${easeOut} 0.2s`,
-              }}>
+              <em
+                style={
+                  reducedMotion
+                    ? { display: "block", fontStyle: "italic" }
+                    : {
+                        display: "block",
+                        fontStyle: "italic",
+                        transform: shown ? "translateY(0)" : "translateY(110%)",
+                        transition: `transform 1.1s ${easeOut} 0.2s`,
+                      }
+                }
+              >
                 quietly considered.
               </em>
             </span>
@@ -240,7 +254,12 @@ export function ElegantShopPage({ business }: DefaultProductsPageTemplateProps) 
               >
                 Nothing here yet.
               </p>
-              <p style={{ fontFamily: "var(--font-sans, sans-serif)", fontSize: 15 }}>
+              <p
+                style={{
+                  fontFamily: "var(--font-sans, sans-serif)",
+                  fontSize: 15,
+                }}
+              >
                 Products will appear here once added.
               </p>
             </div>

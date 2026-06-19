@@ -4,6 +4,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import {
+  IconChartBar,
   IconCreditCard,
   IconDashboard,
   IconDiscount,
@@ -16,6 +17,7 @@ import {
   IconPackages,
   IconSettings,
   IconShoppingCart,
+  IconSparkles,
   IconStar,
   IconTerminal,
   IconUsers,
@@ -83,6 +85,12 @@ const getNavData = (session: Session | null) => {
       featureKey: "collections",
     },
     {
+      title: "Services",
+      url: "/admin/services",
+      icon: IconSparkles,
+      featureKey: "services",
+    },
+    {
       title: "Site content",
       url: "/admin/content",
       icon: IconLanguage,
@@ -110,6 +118,12 @@ const getNavData = (session: Session | null) => {
       url: "/admin/reviews",
       icon: IconStar,
       featureKey: "reviews",
+    },
+    {
+      title: "Analytics",
+      url: "/admin/analytics",
+      icon: IconChartBar,
+      featureKey: "analytics",
     },
   ];
 

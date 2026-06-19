@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { getEffectivePrice } from "~/lib/prices";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { getEffectivePrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";

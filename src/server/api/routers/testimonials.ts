@@ -11,6 +11,7 @@ import {
   getClientIpFromHeaders,
   testimonialSubmitLimiter,
 } from "~/lib/rate-limit";
+import { normalizeEmail } from "~/lib/utils";
 
 import {
   createTRPCRouter,
@@ -124,33 +125,30 @@ export const testimonialRouter = createTRPCRouter({
 
   // ─── CUSTOMER SUBMITTED ───────────────────────────────────────────────────
 
-  canSubmit: protectedProcedure
-    .query(async ({ ctx }) => {
-      const business = await checkBusiness();
-      if (!business) return { canSubmit: false, reason: "Business not found" };
+  canSubmit: protectedProcedure.query(async ({ ctx }) => {
+    const business = await checkBusiness();
+    if (!business) return { canSubmit: false, reason: "Business not found" };
 
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-        select: { email: true },
-      });
+    const user = await ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      select: { email: true },
+    });
 
-      if (!user) return { canSubmit: false, reason: "User not found" };
+    if (!user) return { canSubmit: false, reason: "User not found" };
 
-      const existing = await ctx.db.testimonial.findFirst({
-        where: {
-          businessId: business.id,
-          customerEmail: user.email,
-          source: "customer",
-        },
-      });
+    const existing = await ctx.db.testimonial.findFirst({
+      where: {
+        businessId: business.id,
+        customerEmail: user.email,
+        source: "customer",
+      },
+    });
 
-      return {
-        canSubmit: !existing,
-        reason: existing
-          ? "You have already submitted a testimonial"
-          : undefined,
-      };
-    }),
+    return {
+      canSubmit: !existing,
+      reason: existing ? "You have already submitted a testimonial" : undefined,
+    };
+  }),
 
   submit: protectedProcedure
     .use(featureGate("testimonials"))
@@ -174,7 +172,10 @@ export const testimonialRouter = createTRPCRouter({
 
       const business = await checkBusiness();
       if (!business)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
 
       const isValid = await verifyHCaptcha(input.captchaToken);
       if (!isValid) {
@@ -210,13 +211,17 @@ export const testimonialRouter = createTRPCRouter({
         });
       }
 
+      const normalizedUserEmail = normalizeEmail(user.email);
       const customer = await ctx.db.customer.upsert({
         where: {
-          businessId_email: { businessId: business.id, email: user.email },
+          businessId_email: {
+            businessId: business.id,
+            email: normalizedUserEmail,
+          },
         },
         create: {
           businessId: business.id,
-          email: user.email,
+          email: normalizedUserEmail,
           firstName: user.name?.split(" ")[0],
           lastName: user.name?.split(" ").slice(1).join(" "),
         },
@@ -235,7 +240,7 @@ export const testimonialRouter = createTRPCRouter({
           source: "customer",
           businessId: business.id,
           customerId: customer.id,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           customerName: user.name ?? "Anonymous",
           text: input.text,
           photoUrls: input.photoUrls,
@@ -318,16 +323,17 @@ export const testimonialRouter = createTRPCRouter({
         });
       }
 
+      const normalizedInviteEmail = normalizeEmail(invite.email);
       const customer = await ctx.db.customer.upsert({
         where: {
           businessId_email: {
             businessId: invite.businessId,
-            email: invite.email,
+            email: normalizedInviteEmail,
           },
         },
         create: {
           businessId: invite.businessId,
-          email: invite.email,
+          email: normalizedInviteEmail,
           firstName: input.name.split(" ")[0],
           lastName: input.name.split(" ").slice(1).join(" "),
         },
@@ -346,7 +352,7 @@ export const testimonialRouter = createTRPCRouter({
           source: "customer",
           businessId: invite.businessId,
           customerId: customer.id,
-          customerEmail: invite.email,
+          customerEmail: normalizedInviteEmail,
           customerName: input.name ?? "Anonymous",
           text: input.text,
           photoUrls: input.photoUrls,
@@ -508,7 +514,9 @@ export const testimonialRouter = createTRPCRouter({
 
   bulkApprove: ownerAdminProcedure
     .use(featureGate("testimonials"))
-    .input(z.object({ ids: z.array(z.string()).min(1), isApproved: z.boolean() }))
+    .input(
+      z.object({ ids: z.array(z.string()).min(1), isApproved: z.boolean() }),
+    )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
       return ctx.db.testimonial.updateMany({

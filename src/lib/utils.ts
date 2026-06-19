@@ -133,3 +133,12 @@ export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength - 3) + "...";
 }
+
+/**
+ * Normalize an email address: trim whitespace and lowercase.
+ * Use this on every write and lookup of Customer.email so that
+ * "Jane@x.com" and "jane@x.com" always resolve to the same row.
+ */
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}

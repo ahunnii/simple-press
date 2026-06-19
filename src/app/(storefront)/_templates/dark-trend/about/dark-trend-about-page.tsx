@@ -41,7 +41,10 @@ export function DarkTrendAboutPage({
   return (
     <DarkTrendGeneralLayout title="About Us">
       {/* Features Section */}
-      <section className="mb-32 py-20" {...sectionGroupAttr("about", "features")}>
+      <section
+        className="mb-32 py-20"
+        {...sectionGroupAttr("about", "features")}
+      >
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           {/* N-2: decorative owner-configurable image → alt="" */}
           <div className="relative aspect-square overflow-hidden rounded-sm bg-linear-to-br from-purple-600 to-blue-500">

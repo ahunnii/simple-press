@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { CheckCircle, Package } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
+import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 
 type Business = {
@@ -72,7 +73,11 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-2xl text-center" role="status" aria-live="polite">
+      <div
+        className="mx-auto max-w-2xl text-center"
+        role="status"
+        aria-live="polite"
+      >
         <p className="text-gray-600">Loading order details...</p>
       </div>
     );
@@ -91,12 +96,23 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
 
   return (
     <div className="mx-auto max-w-2xl">
+      {/* Fire purchase analytics event once — idempotent via sessionStorage */}
+      {orderDetails && (
+        <TrackPurchase
+          sessionId={sessionId}
+          amountCents={orderDetails.amount_total}
+        />
+      )}
       <div className="mb-8 text-center">
         <div
           className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full"
           style={{ backgroundColor: `${primaryColor}20` }}
         >
-          <CheckCircle className="h-10 w-10" style={{ color: primaryColor }} aria-hidden="true" />
+          <CheckCircle
+            className="h-10 w-10"
+            style={{ color: primaryColor }}
+            aria-hidden="true"
+          />
         </div>
         <h1 className="mb-2 text-3xl font-bold text-gray-900">
           Order Confirmed!
@@ -108,7 +124,10 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
 
       <div className="mb-6 rounded-lg bg-gray-50 p-6">
         <div className="mb-4 flex items-start gap-4">
-          <Package className="h-6 w-6 shrink-0 text-gray-400" aria-hidden="true" />
+          <Package
+            className="h-6 w-6 shrink-0 text-gray-400"
+            aria-hidden="true"
+          />
           <div>
             <h2 className="mb-1 font-semibold text-gray-900">
               What happens next?

@@ -73,7 +73,9 @@ export function ElegantContactForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-5"
       >
-        <span className="sr-only">Fields marked with an asterisk (*) are required.</span>
+        <span className="sr-only">
+          Fields marked with an asterisk (*) are required.
+        </span>
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>

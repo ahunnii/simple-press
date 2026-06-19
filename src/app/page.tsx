@@ -1,9 +1,10 @@
-import { api, HydrateClient } from "~/trpc/server";
-import { JsonLd } from "~/components/json-ld";
 import {
   buildOrganizationSchema,
   buildWebSiteSchema,
 } from "~/lib/structured-data";
+import { api, HydrateClient } from "~/trpc/server";
+import { JsonLd } from "~/components/json-ld";
+import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { PreviewOverlay } from "~/components/preview/preview-overlay";
 
 import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
@@ -25,6 +26,8 @@ import { PollenHomepage } from "./(storefront)/_templates/pollen/homepage/pollen
 import { PollenLayout } from "./(storefront)/_templates/pollen/layout/pollen-layout";
 import { SledgeHomepage } from "./(storefront)/_templates/sledge/homepage/sledge-homepage";
 import { SledgeLayout } from "./(storefront)/_templates/sledge/layout/sledge-layout";
+import { ViiHomepage } from "./(storefront)/_templates/vii/homepage/vii-homepage";
+import { ViiLayout } from "./(storefront)/_templates/vii/layout/vii-layout";
 
 // Next 15: searchParams is a Promise.
 type Props = {
@@ -42,6 +45,16 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
     return <PlatformLandingPageComponent />;
   }
 
+  if (business.maintenance?.active) {
+    return (
+      <MaintenanceScreen
+        variant={business.maintenance.variant}
+        message={business.maintenance.message}
+        businessName={business.name}
+      />
+    );
+  }
+
   const TemplateComponent =
     {
       "dark-trend": DarkTrendHomepage,
@@ -53,6 +66,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       "happy-bamboo": HappyBambooHomepage,
       noise: NoiseHomepage,
       sledge: SledgeHomepage,
+      vii: ViiHomepage,
     }[business.templateId] ?? DefaultHomePage;
 
   const TemplateLayout =
@@ -66,15 +80,13 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       "happy-bamboo": HappyBambooLayout,
       noise: NoiseLayout,
       sledge: SledgeLayout,
+      vii: ViiLayout,
     }[business.templateId] ?? DefaultLayout;
 
   return (
     <HydrateClient>
       <JsonLd
-        data={[
-          buildOrganizationSchema(business),
-          buildWebSiteSchema(business),
-        ]}
+        data={[buildOrganizationSchema(business), buildWebSiteSchema(business)]}
       />
       <TemplateLayout business={business}>
         <TemplateComponent business={business} />

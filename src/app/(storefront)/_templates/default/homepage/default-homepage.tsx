@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultHomepageTemplateProps } from "../../types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
 import { DefaultParallaxHero } from "./default-parallax-hero";
@@ -78,7 +78,11 @@ export async function DefaultHomePage({
     rail2Id
       ? api.collections.getProductsByCollectionId(rail2Id)
       : Promise.resolve(null),
-    api.collections.getAllPublic().catch(() => [] as Awaited<ReturnType<typeof api.collections.getAllPublic>>),
+    api.collections
+      .getAllPublic()
+      .catch(
+        () => [] as Awaited<ReturnType<typeof api.collections.getAllPublic>>,
+      ),
   ]);
 
   const railOneProducts = rail1Data?.products ?? products.slice(0, 4);
@@ -101,14 +105,15 @@ export async function DefaultHomePage({
   return (
     <HydrateClient>
       <PageTransition>
-
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <DefaultParallaxHero
           imageUrl={f["default.homepage.hero-image"] ?? "/placeholder.svg"}
           title={business.name}
           eyebrow={f["default.homepage.hero-eyebrow"]}
           description={f["default.homepage.hero-description"]}
-          primaryText={f["default.homepage.hero-button-text"] ?? "Shop the catalog"}
+          primaryText={
+            f["default.homepage.hero-button-text"] ?? "Shop the catalog"
+          }
           primaryHref={f["default.homepage.hero-button-link"] ?? "/shop"}
           secondaryText={f["default.homepage.hero-button-2-text"]}
           secondaryHref={f["default.homepage.hero-button-2-link"]}
@@ -117,12 +122,15 @@ export async function DefaultHomePage({
 
         {/* ── Collections ──────────────────────────────────────────────── */}
         {topCollections.length > 0 && (
-          <section className="px-6 py-24 lg:px-8" {...sectionGroupAttr("homepage", "collections")}>
+          <section
+            className="px-6 py-24 lg:px-8"
+            {...sectionGroupAttr("homepage", "collections")}
+          >
             <div className="mx-auto max-w-[1440px]">
               <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex flex-col gap-2">
                   {f["default.homepage.collections-eyebrow"] && (
-                    <p className="text-[#6b6b6b] text-xs font-medium tracking-[0.14em] uppercase">
+                    <p className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
                       {f["default.homepage.collections-eyebrow"]}
                     </p>
                   )}
@@ -131,10 +139,14 @@ export async function DefaultHomePage({
                   </h2>
                 </div>
                 <Link
-                  href={f["default.homepage.collections-cta-link"] ?? "/collections"}
-                  className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
+                  href={
+                    f["default.homepage.collections-cta-link"] ?? "/collections"
+                  }
+                  className="inline-flex shrink-0 items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
                 >
-                  {f["default.homepage.collections-cta-text"] ?? "View everything"} <span aria-hidden="true">→</span>
+                  {f["default.homepage.collections-cta-text"] ??
+                    "View everything"}{" "}
+                  <span aria-hidden="true">→</span>
                 </Link>
               </div>
 
@@ -147,7 +159,11 @@ export async function DefaultHomePage({
                   >
                     <div
                       className={`relative mb-4 aspect-3/4 overflow-hidden rounded-[var(--radius)] ${
-                        i === 1 ? "bg-[#efece8]" : i === 2 ? "bg-[#1a1a1a]" : "bg-[#f6f6f6]"
+                        i === 1
+                          ? "bg-[#efece8]"
+                          : i === 2
+                            ? "bg-[#1a1a1a]"
+                            : "bg-[#f6f6f6]"
                       }`}
                     >
                       {col.imageUrl ? (
@@ -159,14 +175,14 @@ export async function DefaultHomePage({
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-xs tracking-[0.16em] uppercase text-[#6b6b6b] font-medium">
+                          <span className="text-xs font-medium tracking-[0.16em] text-[#6b6b6b] uppercase">
                             {col.name}
                           </span>
                         </div>
                       )}
                     </div>
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-serif text-[15px] font-medium tracking-[-0.005em] group-hover:opacity-70 transition-opacity">
+                      <span className="font-serif text-[15px] font-medium tracking-[-0.005em] transition-opacity group-hover:opacity-70">
                         {col.name}
                       </span>
                       <span className="text-[14px] text-[#6b6b6b]">
@@ -185,7 +201,8 @@ export async function DefaultHomePage({
           eyebrow={f["default.homepage.rail-one-eyebrow"] ?? "Featured"}
           title={
             rail1Data?.collection.name ??
-            (f["default.homepage.rail-one-title"] ?? "This week's picks.")
+            f["default.homepage.rail-one-title"] ??
+            "This week's picks."
           }
           description={rail1Data?.collection.description ?? undefined}
           ctaText={f["default.homepage.rail-one-button-text"] ?? "All products"}
@@ -196,7 +213,10 @@ export async function DefaultHomePage({
 
         {/* ── Story strip ───────────────────────────────────────────────── */}
         {(storyHeading ?? storyDescription) && (
-          <section className="bg-[#efece8] px-6 py-24 lg:px-8" {...sectionGroupAttr("homepage", "story")}>
+          <section
+            className="bg-[#efece8] px-6 py-24 lg:px-8"
+            {...sectionGroupAttr("homepage", "story")}
+          >
             <div className="mx-auto max-w-[1440px]">
               <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center">
                 {/* Image */}
@@ -212,25 +232,26 @@ export async function DefaultHomePage({
                 {/* Text */}
                 <div className="flex flex-col gap-6 lg:max-w-[480px]">
                   {f["default.homepage.cta-eyebrow"] && (
-                    <span className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+                    <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
                       {f["default.homepage.cta-eyebrow"]}
                     </span>
                   )}
                   {storyHeading && (
-                    <h2 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl text-balance">
+                    <h2 className="font-serif text-3xl font-semibold tracking-tight text-balance md:text-4xl">
                       {storyHeading}
                     </h2>
                   )}
                   {storyDescription && (
-                    <p className="text-[15px] text-[#6b6b6b] leading-relaxed">
+                    <p className="text-[15px] leading-relaxed text-[#6b6b6b]">
                       {storyDescription}
                     </p>
                   )}
                   <Link
                     href={f["default.homepage.cta-button-link"] ?? "/about"}
-                    className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 self-start"
+                    className="inline-flex items-center gap-2 self-start border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
                   >
-                    {f["default.homepage.cta-button-text"] ?? "Read more"} <span aria-hidden="true">→</span>
+                    {f["default.homepage.cta-button-text"] ?? "Read more"}{" "}
+                    <span aria-hidden="true">→</span>
                   </Link>
                 </div>
               </div>
@@ -241,13 +262,18 @@ export async function DefaultHomePage({
         {/* ── Rail 2 — Customer favorites ───────────────────────────────── */}
         {railTwoProducts.length > 0 && (
           <DefaultProductRail
-            eyebrow={f["default.homepage.rail-two-eyebrow"] ?? "Customer favorites"}
+            eyebrow={
+              f["default.homepage.rail-two-eyebrow"] ?? "Customer favorites"
+            }
             title={
               rail2Data?.collection.name ??
-              (f["default.homepage.rail-two-title"] ?? "What people keep reaching for.")
+              f["default.homepage.rail-two-title"] ??
+              "What people keep reaching for."
             }
             description={rail2Data?.collection.description ?? undefined}
-            ctaText={f["default.homepage.rail-two-button-text"] ?? "Shop bestsellers"}
+            ctaText={
+              f["default.homepage.rail-two-button-text"] ?? "Shop bestsellers"
+            }
             ctaHref={railTwoCtaHref}
             products={railTwoProducts}
             sectionAttrs={sectionGroupAttr("homepage", "rails")}
@@ -256,7 +282,11 @@ export async function DefaultHomePage({
 
         {/* ── Testimonial preview ───────────────────────────────────────── */}
         {f["default.homepage.testimonial-quote"] && (
-          <section aria-label="Customer testimonial" className="px-6 py-24 lg:px-8" {...sectionGroupAttr("homepage", "testimonial")}>
+          <section
+            aria-label="Customer testimonial"
+            className="px-6 py-24 lg:px-8"
+            {...sectionGroupAttr("homepage", "testimonial")}
+          >
             <div className="mx-auto max-w-[880px] text-center">
               <p className="text-[clamp(22px,2.8vw,34px)] leading-[1.28] tracking-[-0.015em] text-balance">
                 &ldquo;{f["default.homepage.testimonial-quote"]}&rdquo;
@@ -269,10 +299,14 @@ export async function DefaultHomePage({
               {f["default.homepage.testimonial-cta-text"] && (
                 <div className="mt-8">
                   <Link
-                    href={f["default.homepage.testimonial-cta-link"] ?? "/testimonials"}
-                    className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3"
+                    href={
+                      f["default.homepage.testimonial-cta-link"] ??
+                      "/testimonials"
+                    }
+                    className="inline-flex items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
                   >
-                    {f["default.homepage.testimonial-cta-text"]} <span aria-hidden="true">→</span>
+                    {f["default.homepage.testimonial-cta-text"]}{" "}
+                    <span aria-hidden="true">→</span>
                   </Link>
                 </div>
               )}
@@ -281,34 +315,48 @@ export async function DefaultHomePage({
         )}
 
         {/* ── Promise strip ─────────────────────────────────────────────── */}
-        <div className="border-t border-b border-[#e8e8e8]" {...sectionGroupAttr("homepage", "promise")}>
-          <div className="mx-auto max-w-[1440px] grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-[#e8e8e8]">
+        <div
+          className="border-t border-b border-[#e8e8e8]"
+          {...sectionGroupAttr("homepage", "promise")}
+        >
+          <div className="mx-auto grid max-w-[1440px] grid-cols-2 divide-x divide-y divide-[#e8e8e8] lg:grid-cols-4 lg:divide-y-0">
             {[
               {
                 title: f["default.homepage.promise-1-title"] ?? "Free shipping",
-                desc: f["default.homepage.promise-1-desc"] ?? "On orders over $75 within the US.",
+                desc:
+                  f["default.homepage.promise-1-desc"] ??
+                  "On orders over $75 within the US.",
               },
               {
                 title: f["default.homepage.promise-2-title"] ?? "Easy returns",
-                desc: f["default.homepage.promise-2-desc"] ?? "30 days, no questions asked.",
+                desc:
+                  f["default.homepage.promise-2-desc"] ??
+                  "30 days, no questions asked.",
               },
               {
                 title: f["default.homepage.promise-3-title"] ?? "Handmade",
-                desc: f["default.homepage.promise-3-desc"] ?? "Every item made with care.",
+                desc:
+                  f["default.homepage.promise-3-desc"] ??
+                  "Every item made with care.",
               },
               {
-                title: f["default.homepage.promise-4-title"] ?? "Personal service",
-                desc: f["default.homepage.promise-4-desc"] ?? "You'll always reach a real person.",
+                title:
+                  f["default.homepage.promise-4-title"] ?? "Personal service",
+                desc:
+                  f["default.homepage.promise-4-desc"] ??
+                  "You'll always reach a real person.",
               },
             ].map((item) => (
-              <div key={item.title} className="flex flex-col gap-1.5 px-6 py-8 lg:px-8">
+              <div
+                key={item.title}
+                className="flex flex-col gap-1.5 px-6 py-8 lg:px-8"
+              >
                 <h3 className="text-sm font-medium">{item.title}</h3>
                 <p className="text-[13px] text-[#6b6b6b]">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
-
       </PageTransition>
     </HydrateClient>
   );

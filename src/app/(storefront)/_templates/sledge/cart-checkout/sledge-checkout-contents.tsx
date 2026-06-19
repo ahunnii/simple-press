@@ -58,7 +58,9 @@ export function SledgeCheckoutContents({ business }: Props) {
         }
       />
 
-      <section className={cn(SLEDGE_PAGE_CONTAINER, SLEDGE_PAGE_CONTENT_PADDING)}>
+      <section
+        className={cn(SLEDGE_PAGE_CONTAINER, SLEDGE_PAGE_CONTENT_PADDING)}
+      >
         <FadeIn delay={0.08}>
           <SledgeCheckoutForm business={business} />
         </FadeIn>

@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { DefaultCheckoutPageTemplateProps } from "~/app/(storefront)/_templates/types";
-import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
+import {
+  calculateShipping,
+  shippingConfigFromBusiness,
+  SHIPPING_TYPES,
+} from "~/lib/shipping-utils";
+import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
 import { useCart } from "~/providers/cart-context";
+import { api } from "~/trpc/react";
 
 import { useDiscountCode } from "./use-discount-code";
 
@@ -43,6 +49,7 @@ type UseCheckoutFormReturn = {
   discountFieldError: string | null;
   setDiscountFieldError: (v: string | null) => void;
   handleApplyDiscount: () => void;
+  clearDiscount: () => void;
   isValidatingDiscount: boolean;
   // Submit
   isProcessing: boolean;
@@ -51,13 +58,24 @@ type UseCheckoutFormReturn = {
   // Helpers
   shippingConfig: ReturnType<typeof shippingConfigFromBusiness>;
   items: ReturnType<typeof useCart>["items"];
+  // Computed totals
+  subtotal: number;
+  shipping: number;
+  finalTotal: number;
+  // Zone+weight quote state (only populated when shippingType === "zone_weight")
+  isQuotingShipping: boolean;
+  shippingPending: boolean;
 };
+
+// Debounce delay (ms) for the zone+weight shipping quote.
+const QUOTE_DEBOUNCE_MS = 500;
 
 export function useCheckoutForm(
   business: CheckoutFormBusiness,
 ): UseCheckoutFormReturn {
-  const { items, removeItem } = useCart();
+  const { items, removeItem, subtotal } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
+  const isZoneWeight = business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,13 +89,125 @@ export function useCheckoutForm(
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [country, setCountry] = useState<"US" | "CA">("US");
+  const [country, setCountryRaw] = useState<"US" | "CA">("US");
+
+  const setCountry = (v: "US" | "CA") => {
+    setCountryRaw(v);
+    setState("");
+  };
 
   const [deliveryMethod, setDeliveryMethod] = useState<"ship" | "pickup">(
     "ship",
   );
 
   const discount = useDiscountCode();
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Zone+weight shipping quote (debounced server call)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  // Stable quote input that updates only after the debounce delay.
+  const [debouncedQuoteInput, setDebouncedQuoteInput] = useState<{
+    items: { productId: string; variantId: string | null; quantity: number }[];
+    destinationState: string;
+    destinationCountry: string;
+    deliveryMethod: "ship" | "pickup";
+  } | null>(null);
+
+  // Whether the debounce timer is pending (input changed but not yet sent).
+  const [quoteInputPending, setQuoteInputPending] = useState(false);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Build the serialisable quote key from current state.
+  const quoteItems = items.map((i) => ({
+    productId: i.productId,
+    variantId: i.variantId,
+    quantity: i.quantity,
+  }));
+  // Stable string key so the debounce effect re-runs only on real cart changes.
+  const quoteItemsKey = JSON.stringify(quoteItems);
+
+  // Debounce the quote input whenever cart/address/method changes (zone_weight only).
+  useEffect(() => {
+    if (!isZoneWeight) return;
+
+    setQuoteInputPending(true);
+
+    if (debounceTimerRef.current !== null) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedQuoteInput({
+        items: quoteItems,
+        destinationState: state,
+        destinationCountry: country,
+        deliveryMethod,
+      });
+      setQuoteInputPending(false);
+    }, QUOTE_DEBOUNCE_MS);
+
+    return () => {
+      if (debounceTimerRef.current !== null) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+    // quoteItems is captured via the stable quoteItemsKey below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isZoneWeight, quoteItemsKey, state, country, deliveryMethod]);
+
+  // Only fire the tRPC query when we have a destination state and items.
+  const quoteEnabled =
+    isZoneWeight &&
+    !quoteInputPending &&
+    debouncedQuoteInput !== null &&
+    debouncedQuoteInput.items.length > 0 &&
+    (debouncedQuoteInput.deliveryMethod === "pickup" ||
+      debouncedQuoteInput.destinationState.trim().length > 0);
+
+  const quoteQuery = api.shipping.quote.useQuery(
+    debouncedQuoteInput ?? {
+      items: [{ productId: "", variantId: null, quantity: 1 }],
+      destinationState: "",
+      destinationCountry: "US",
+      deliveryMethod: "ship",
+    },
+    {
+      enabled: quoteEnabled,
+      // Keep the previous value while re-fetching so the UI doesn't flicker.
+      placeholderData: (prev) => prev,
+    },
+  );
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Unified shipping value
+  // ──────────────────────────────────────────────────────────────────────────
+
+  let shipping: number;
+  let isQuotingShipping: boolean;
+  let shippingPending: boolean;
+
+  if (isZoneWeight) {
+    // Before the user has entered a state (and before any quote resolves),
+    // use 0 as a placeholder so finalTotal renders. The UI should show
+    // "Calculated at checkout" in place of the shipping dollar amount
+    // when shippingPending is true or isQuotingShipping is true.
+    shipping = quoteQuery.data?.shippingCents ?? 0;
+    isQuotingShipping = quoteQuery.isFetching;
+    shippingPending =
+      quoteInputPending ||
+      (deliveryMethod === "ship" && state.trim().length === 0) ||
+      quoteQuery.isFetching;
+  } else {
+    shipping =
+      deliveryMethod === "pickup"
+        ? 0
+        : calculateShipping(subtotal, shippingConfig);
+    isQuotingShipping = false;
+    shippingPending = false;
+  }
+
+  const finalTotal = subtotal - discount.discountAmount + shipping;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +232,11 @@ export function useCheckoutForm(
       if (items.length === 0) {
         throw new Error("Your cart is empty");
       }
+
+      // Track begin-checkout with cart value in dollars (2 decimal places)
+      track(ANALYTICS_EVENTS.BEGIN_CHECKOUT, {
+        value: Math.round(finalTotal) / 100,
+      });
 
       const response = await fetch("/api/stripe/create-session", {
         method: "POST",
@@ -200,11 +335,17 @@ export function useCheckoutForm(
     discountFieldError: discount.discountFieldError,
     setDiscountFieldError: discount.setDiscountFieldError,
     handleApplyDiscount: discount.handleApplyDiscount,
+    clearDiscount: discount.clearDiscount,
     isValidatingDiscount: discount.isValidating,
     isProcessing,
     error,
     handleSubmit,
     shippingConfig,
     items,
+    subtotal,
+    shipping,
+    finalTotal,
+    isQuotingShipping,
+    shippingPending,
   };
 }

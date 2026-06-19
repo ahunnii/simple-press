@@ -3,17 +3,38 @@ import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
+import type { ReservationEntry } from "~/lib/inventory/reservation";
 import { env } from "~/env";
+import { computeSubtotalCents } from "~/lib/checkout/pricing";
+import {
+  checkCartAvailability,
+  computePoolDemand,
+} from "~/lib/checkout/validate-cart";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import {
+  releaseReservation,
+  reserveInventory,
+} from "~/lib/inventory/reservation";
+import { getPlatformMaintenance } from "~/lib/maintenance";
 import { checkoutLimiter, getClientIp } from "~/lib/rate-limit";
+import { buildZoneWeightConfig } from "~/lib/shipping-config";
 import {
   calculateShipping,
+  calculateZoneWeightShipping,
+  normalizeWeightToLb,
   shippingConfigFromBusiness,
+  SHIPPING_TYPES,
 } from "~/lib/shipping-utils";
 import { stripeClient } from "~/lib/stripe/client";
 import { checkoutSessionSchema } from "~/lib/validators/checkout";
 import { db } from "~/server/db";
+
+// Thrown inside the reservation transaction to force a rollback when stock
+// can't be held; caught by the POST handler to return a 400. Throwing (rather
+// than returning) is required so Prisma rolls back any partial reservedQty
+// increments made earlier in the reserve loop.
+class OutOfStockError extends Error {}
 
 // Helper function to create a one-time Stripe coupon for the discount
 async function createStripeCoupon(
@@ -75,6 +96,47 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Maintenance guard: reject checkout while platform or store is in maintenance.
+    const platformMaintenance = await getPlatformMaintenance();
+    if (platformMaintenance.active || business.maintenanceMode) {
+      return NextResponse.json(
+        {
+          error:
+            "This store is temporarily unavailable. Please try again later.",
+        },
+        { status: 503 },
+      );
+    }
+
+    // Lazy sweeper: release any stale reservations for this business before
+    // running availability checks so they don't inflate reservedQty.
+    try {
+      const stale = await db.inventoryReservation.findMany({
+        where: {
+          businessId: business.id,
+          status: "active",
+          expiresAt: { lt: new Date() },
+        },
+        take: 50,
+      });
+      for (const stalRes of stale) {
+        await db.$transaction(async (tx) => {
+          const entries = stalRes.items as ReservationEntry[];
+          await releaseReservation(tx, { items: entries });
+          await tx.inventoryReservation.update({
+            where: { id: stalRes.id },
+            data: { status: "released" },
+          });
+        });
+      }
+    } catch (sweeperErr) {
+      // Non-fatal — availability check will be slightly conservative at worst
+      console.warn(
+        "[create-session] Stale reservation sweeper error:",
+        sweeperErr,
+      );
+    }
+
     // Validate cart: all items must exist, be published, and be in stock
     // (schema guarantees items is a non-empty array with valid quantities)
     const itemList = items;
@@ -101,6 +163,7 @@ export async function POST(req: NextRequest) {
               id: true,
               price: true,
               inventoryQty: true,
+              reservedQty: true,
               name: true,
               productId: true,
               product: {
@@ -111,6 +174,8 @@ export async function POST(req: NextRequest) {
                   allowBackorders: true,
                   price: true,
                   additionalFields: true,
+                  weight: true,
+                  weightUnit: true,
                   images: {
                     select: { url: true },
                     orderBy: { sortOrder: "asc" },
@@ -134,9 +199,12 @@ export async function POST(req: NextRequest) {
           trackInventory: true,
           allowBackorders: true,
           inventoryQty: true,
+          reservedQty: true,
           additionalFields: true,
           baseInventoryUnitId: true,
           baseUnitsConsumed: true,
+          weight: true,
+          weightUnit: true,
           _count: { select: { variants: true } },
           images: {
             select: { url: true },
@@ -151,127 +219,30 @@ export async function POST(req: NextRequest) {
     const productMap = new Map(productsNoVariant.map((p) => [p.id, p]));
 
     // Aggregate base units demanded per pool across the whole cart
-    const poolDemand = new Map<string, number>();
-    for (const item of itemList) {
-      if (!item.variantId) {
-        const p = productMap.get(item.productId);
-        if (p?.baseInventoryUnitId) {
-          const cur = poolDemand.get(p.baseInventoryUnitId) ?? 0;
-          poolDemand.set(
-            p.baseInventoryUnitId,
-            cur + (p.baseUnitsConsumed ?? 1) * (Number(item.quantity) || 1),
-          );
-        }
-      }
-    }
+    const poolDemand = computePoolDemand(itemList, productMap);
 
     const poolIds = [...poolDemand.keys()];
     const pools =
       poolIds.length > 0
         ? await db.baseInventoryUnit.findMany({
             where: { id: { in: poolIds }, businessId: business.id },
-            select: { id: true, inventoryQty: true, allowBackorders: true },
+            select: {
+              id: true,
+              inventoryQty: true,
+              reservedQty: true,
+              allowBackorders: true,
+            },
           })
         : [];
     const poolMap = new Map(pools.map((p) => [p.id, p]));
 
-    const unavailableItems: string[] = [];
-    const unavailableItemIds: {
-      productId: string;
-      variantId: string | null;
-    }[] = [];
-    const unavailableIdKeySet = new Set<string>();
-
-    const pushUnavailable = (
-      name: string,
-      productId: string,
-      variantId: string | null,
-    ) => {
-      unavailableItems.push(name);
-      const key = `${productId}-${variantId ?? "base"}`;
-      if (!unavailableIdKeySet.has(key)) {
-        unavailableIdKeySet.add(key);
-        unavailableItemIds.push({ productId, variantId });
-      }
-    };
-
-    for (const item of itemList) {
-      const name = item.variantName
-        ? `${item.productName} (${item.variantName})`
-        : item.productName;
-      const qty = Number(item.quantity) || 1;
-
-      if (item.variantId) {
-        const variant = variantMap.get(item.variantId);
-        if (!variant?.product.published) {
-          pushUnavailable(name, item.productId, item.variantId);
-          continue;
-        }
-        const variantProductFields = variant.product.additionalFields as Record<
-          string,
-          unknown
-        > | null;
-        if (variantProductFields?.comingSoon === true) {
-          pushUnavailable(name, item.productId, item.variantId);
-          continue;
-        }
-        if (
-          variant.product.trackInventory &&
-          !variant.product.allowBackorders &&
-          variant.inventoryQty < qty
-        ) {
-          pushUnavailable(name, item.productId, item.variantId);
-          continue;
-        }
-      } else {
-        const product = productMap.get(item.productId);
-        if (!product?.published) {
-          pushUnavailable(name, item.productId, null);
-          continue;
-        }
-        if (product._count.variants > 0) {
-          pushUnavailable(name, item.productId, null);
-          continue;
-        }
-        const productFields = product.additionalFields as Record<
-          string,
-          unknown
-        > | null;
-        if (productFields?.comingSoon === true) {
-          pushUnavailable(name, item.productId, null);
-          continue;
-        }
-        // Pool inventory check — pool demand is validated in aggregate after the loop
-        if (!product.baseInventoryUnitId) {
-          if (
-            product.trackInventory &&
-            !product.allowBackorders &&
-            product.inventoryQty < qty
-          ) {
-            pushUnavailable(name, item.productId, null);
-          }
-        }
-      }
-    }
-
-    // Aggregate pool check: compare total pool demand vs available qty
-    for (const [poolId, demand] of poolDemand) {
-      const pool = poolMap.get(poolId);
-      if (!pool || (!pool.allowBackorders && pool.inventoryQty < demand)) {
-        // Mark all items drawing from this pool as unavailable
-        for (const item of itemList) {
-          if (!item.variantId) {
-            const p = productMap.get(item.productId);
-            if (p?.baseInventoryUnitId === poolId) {
-              const n = item.variantName
-                ? `${item.productName} (${item.variantName})`
-                : item.productName;
-              pushUnavailable(n, item.productId, null);
-            }
-          }
-        }
-      }
-    }
+    const { unavailableItems, unavailableItemIds } = checkCartAvailability({
+      items: itemList,
+      variantMap,
+      productMap,
+      poolDemand,
+      poolMap,
+    });
 
     if (unavailableItems.length > 0) {
       const uniqueNames = [...new Set(unavailableItems)];
@@ -318,12 +289,11 @@ export async function POST(req: NextRequest) {
 
     // Always use server-fetched prices for subtotal — never trust client-supplied amounts.
     // This ensures discounts and free-shipping thresholds are computed against real prices.
-    const subtotalCents = itemList.reduce((sum, item) => {
-      const serverPrice = item.variantId
-        ? (variantMap.get(item.variantId)?.price ?? 0)
-        : (productMap.get(item.productId)?.price ?? 0);
-      return sum + serverPrice * item.quantity;
-    }, 0);
+    const subtotalCents = computeSubtotalCents(
+      itemList,
+      variantMap,
+      productMap,
+    );
 
     const rawDiscountId =
       typeof discountCodeId === "string" && discountCodeId.trim() !== ""
@@ -364,11 +334,58 @@ export async function POST(req: NextRequest) {
       offersInStorePickup: business.offersInStorePickup,
     });
 
+    // Compute total cart weight in pounds for zone+weight shipping.
+    // Variants use the parent product's weight. Products with no weight set
+    // fall back to business.shippingDefaultItemWeightLb (default 0).
+    const defaultItemWeightLb = business.shippingDefaultItemWeightLb ?? 0;
+    let totalWeightLb = 0;
+    for (const item of itemList) {
+      let weightLb: number;
+      if (item.variantId) {
+        const variant = variantMap.get(item.variantId);
+        const pw = variant?.product.weight ?? null;
+        const pu = variant?.product.weightUnit ?? null;
+        weightLb =
+          pw != null ? normalizeWeightToLb(pw, pu) : defaultItemWeightLb;
+      } else {
+        const product = productMap.get(item.productId);
+        const pw = product?.weight ?? null;
+        const pu = product?.weightUnit ?? null;
+        weightLb =
+          pw != null ? normalizeWeightToLb(pw, pu) : defaultItemWeightLb;
+      }
+      totalWeightLb += weightLb * item.quantity;
+    }
+
     let shippingCents = 0;
     let shippingDisplayName = "Shipping";
     if (deliveryMethod === "pickup") {
       shippingCents = 0;
       shippingDisplayName = "In-Store Pickup";
+    } else if (business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT) {
+      // Load zones with rates for this business (not included in getBusinessByDomain).
+      const businessZones = await db.shippingZone.findMany({
+        where: { businessId: business.id },
+        include: { rates: true },
+        orderBy: { sortOrder: "asc" },
+      });
+      const zoneWeightConfig = buildZoneWeightConfig({
+        shippingWeightTiers: business.shippingWeightTiers,
+        shippingFallbackRate: business.shippingFallbackRate,
+        freeShippingThreshold: business.freeShippingThreshold,
+        shippingDefaultItemWeightLb: business.shippingDefaultItemWeightLb,
+        zones: businessZones,
+      });
+      const sa = customerInfo.shippingAddress;
+      shippingCents = calculateZoneWeightShipping({
+        destinationState: sa?.state ?? "",
+        destinationCountry: sa?.country ?? "",
+        totalWeightLb,
+        subtotalCents,
+        config: zoneWeightConfig,
+      });
+      shippingDisplayName =
+        shippingCents === 0 ? "Free shipping" : "Standard shipping";
     } else {
       shippingCents = calculateShipping(subtotalCents, shippingConfig);
       shippingDisplayName =
@@ -482,8 +499,21 @@ export async function POST(req: NextRequest) {
       stripeCustomerId = customer.id;
     }
 
+    // Zone+weight rates are priced from the address entered in our form. Stripe
+    // Checkout can't recompute shipping when the shopper edits the address, so we
+    // LOCK the destination (no `shipping_address_collection`) for zone_weight ship
+    // orders — otherwise a shopper could pick a cheap state here, then switch to a
+    // far one on Stripe and pay the cheaper fixed rate. Address-independent modes
+    // (free/flat) keep Stripe's editable address.
+    const lockShippingAddress =
+      deliveryMethod === "ship" &&
+      business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT &&
+      hasFullShipping &&
+      !!sa;
+
     // Shipping: `shipping_options` sets the amount Stripe charges (Connect webhook reads `amount_shipping`).
-    // Address collection only when shipping to customer (not in-store pickup).
+    // Address collection only when shipping to customer (not in-store pickup), and
+    // never for locked zone_weight orders (the address is bound to the PaymentIntent below).
     // Phone: `phone_number_collection` prefills when Customer.phone is set.
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "payment",
@@ -493,9 +523,12 @@ export async function POST(req: NextRequest) {
       ...(stripeCustomerId
         ? {
             customer: stripeCustomerId,
-            customer_update: {
-              shipping: "auto",
-            },
+            // Only sync shipping from Stripe-collected address when we actually
+            // collect one. Stripe rejects `customer_update[shipping]: "auto"`
+            // without `shipping_address_collection`.
+            ...(lockShippingAddress
+              ? {}
+              : { customer_update: { shipping: "auto" as const } }),
           }
         : { customer_email: customerInfo.email }),
       shipping_options: [
@@ -510,10 +543,31 @@ export async function POST(req: NextRequest) {
           },
         },
       ],
-      ...(deliveryMethod === "ship"
+      ...(deliveryMethod === "ship" && !lockShippingAddress
         ? {
             shipping_address_collection: {
               allowed_countries: ["US", "CA"],
+            },
+          }
+        : {}),
+      // Locked zone_weight order: bind the priced destination to the PaymentIntent
+      // so the webhook records it and Stripe Tax (if enabled) uses it. The shopper
+      // cannot change it on Stripe, so the charged rate always matches the address.
+      ...(lockShippingAddress && sa
+        ? {
+            payment_intent_data: {
+              shipping: {
+                name: customerInfo.name,
+                phone: contactPhone,
+                address: {
+                  line1: sa.line1.trim(),
+                  ...(sa.line2?.trim() ? { line2: sa.line2.trim() } : {}),
+                  city: sa.city.trim(),
+                  state: sa.state.trim(),
+                  postal_code: sa.postalCode.trim(),
+                  country: sa.country,
+                },
+              },
             },
           }
         : {}),
@@ -561,10 +615,157 @@ export async function POST(req: NextRequest) {
       sessionParams.automatic_tax = { enabled: true };
     }
 
+    // Build reservation entries for tracked, non-backorder items only.
+    // Pool items reserve against the pool; variant items against the variant;
+    // plain product items (no pool, no variant) against the product.
+    const reservationEntries: ReservationEntry[] = [];
+    for (const item of itemList) {
+      const qty = Number(item.quantity) || 1;
+      if (item.variantId) {
+        const variant = variantMap.get(item.variantId);
+        if (
+          variant?.product.trackInventory &&
+          !variant.product.allowBackorders
+        ) {
+          reservationEntries.push({ variantId: item.variantId, qty });
+        }
+      } else {
+        const product = productMap.get(item.productId);
+        if (product) {
+          if (product.baseInventoryUnitId) {
+            // Pool: aggregate by pool id (one entry per pool, summed demand)
+            const existing = reservationEntries.find(
+              (e) => e.baseInventoryUnitId === product.baseInventoryUnitId,
+            );
+            const pool = poolMap.get(product.baseInventoryUnitId);
+            if (pool && !pool.allowBackorders) {
+              const baseUnits = (product.baseUnitsConsumed ?? 1) * qty;
+              if (existing) {
+                existing.qty += baseUnits;
+              } else {
+                reservationEntries.push({
+                  baseInventoryUnitId: product.baseInventoryUnitId,
+                  qty: baseUnits,
+                });
+              }
+            }
+          } else if (product.trackInventory && !product.allowBackorders) {
+            reservationEntries.push({ productId: item.productId, qty });
+          }
+        }
+      }
+    }
+
+    // Reserve inventory and create an InventoryReservation record before
+    // creating the Stripe session. If the reserve fails (race), treat it as
+    // out-of-stock.
+    const RESERVATION_SECONDS = 30 * 60; // 30 minutes
+    let reservationId: string | null = null;
+
+    if (reservationEntries.length > 0) {
+      try {
+        // Throwing OutOfStockError on a failed reserve forces Prisma to roll
+        // back the whole transaction, including any reservedQty increments made
+        // for earlier entries in the loop (a `return` would COMMIT those and
+        // leak an unreleasable hold).
+        reservationId = await db.$transaction(async (tx) => {
+          const result = await reserveInventory(tx, {
+            entries: reservationEntries,
+            businessId: business.id,
+          });
+          if (!result.ok) throw new OutOfStockError();
+
+          const res = await tx.inventoryReservation.create({
+            data: {
+              businessId: business.id,
+              status: "active",
+              expiresAt: new Date(Date.now() + RESERVATION_SECONDS * 1000),
+              items: reservationEntries,
+            },
+            select: { id: true },
+          });
+          return res.id;
+        });
+      } catch (reserveErr) {
+        if (reserveErr instanceof OutOfStockError) {
+          return NextResponse.json(
+            {
+              error:
+                "Some items in your cart are out of stock or no longer available. Please update your cart and try again.",
+              unavailableItems: itemList.map((i) =>
+                i.variantName
+                  ? `${i.productName} (${i.variantName})`
+                  : i.productName,
+              ),
+              unavailableItemIds: itemList.map((i) => ({
+                productId: i.productId,
+                variantId: i.variantId ?? null,
+              })),
+            },
+            { status: 400 },
+          );
+        }
+        throw reserveErr;
+      }
+    }
+
+    // Add reservation id to session metadata so the webhook can locate the reservation.
+    if (reservationId) {
+      sessionParams.metadata = {
+        ...sessionParams.metadata,
+        reservationId,
+      };
+    }
+
+    // Align Stripe session expiry with our reservation window.
+    sessionParams.expires_at =
+      Math.floor(Date.now() / 1000) + RESERVATION_SECONDS;
+
     // Create Stripe Checkout session
-    const session = await stripeClient.checkout.sessions.create(sessionParams, {
-      stripeAccount: business.stripeAccountId, // Connect to store's Stripe account
-    });
+    let session: Awaited<
+      ReturnType<typeof stripeClient.checkout.sessions.create>
+    >;
+    try {
+      session = await stripeClient.checkout.sessions.create(sessionParams, {
+        stripeAccount: business.stripeAccountId, // Connect to store's Stripe account
+      });
+    } catch (stripeErr) {
+      // If Stripe session creation fails, release the reservation so stock isn't stuck.
+      if (reservationId) {
+        const idToRelease = reservationId;
+        try {
+          await db.$transaction(async (tx) => {
+            await releaseReservation(tx, { items: reservationEntries });
+            await tx.inventoryReservation.update({
+              where: { id: idToRelease },
+              data: { status: "released" },
+            });
+          });
+        } catch (releaseErr) {
+          console.error(
+            "[create-session] Failed to release reservation after Stripe error:",
+            releaseErr,
+          );
+        }
+      }
+      throw stripeErr;
+    }
+
+    // Attach the Stripe session id to the reservation record now that we have it.
+    if (reservationId) {
+      try {
+        await db.inventoryReservation.update({
+          where: { id: reservationId },
+          data: { stripeSessionId: session.id },
+        });
+      } catch (attachErr) {
+        // Non-fatal — webhook will fall back to metadata.reservationId
+        console.warn(
+          "[create-session] Failed to attach stripeSessionId to reservation:",
+          attachErr,
+        );
+      }
+    }
 
     const response = NextResponse.json({
       sessionUrl: session.url,

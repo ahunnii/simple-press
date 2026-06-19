@@ -128,7 +128,8 @@ const globalBrandingData: TemplateField[] = [
   {
     key: "noise.global.footer-tagline",
     label: "Footer Tagline",
-    description: "Short brand statement shown in the footer beneath your wordmark.",
+    description:
+      "Short brand statement shown in the footer beneath your wordmark.",
     type: "textarea",
     page: "global",
     group: "global.branding",
@@ -248,7 +249,8 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.branding",
     title: "Global Branding",
-    description: "Location tag, footer tagline, and shop CTA used throughout the template",
+    description:
+      "Location tag, footer tagline, and shop CTA used throughout the template",
     icon: "🏷️",
     columns: 2,
   },
@@ -276,7 +278,8 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.page",
     title: "Testimonials Page",
-    description: "Overline, intro, CTA section, and empty state for the testimonials page",
+    description:
+      "Overline, intro, CTA section, and empty state for the testimonials page",
     icon: "💬",
     columns: 2,
   },

@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -19,6 +20,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 import { HappyBambooOrderSummary } from "./happy-bamboo-order-summary";
 
@@ -62,7 +64,19 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
     handleSubmit,
     shippingConfig,
     items,
+    shipping,
+    shippingPending,
   } = useCheckoutForm(business);
+
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    deliveryMethod === "ship" && state.trim().length > 0 && shippingPending;
+
+  // Zone+weight stores lock the address on Stripe (it's used to price shipping),
+  // so it can't be edited at payment — the copy must reflect that.
+  const isZoneWeightShipping =
+    shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -86,7 +100,10 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmitWithAttempt} className="flex flex-col gap-8 lg:flex-row">
+    <form
+      onSubmit={handleSubmitWithAttempt}
+      className="flex flex-col gap-8 lg:flex-row"
+    >
       <div className="flex-1 space-y-8">
         <fieldset className="flex flex-col gap-4">
           <legend className="text-foreground font-heading pb-4 text-lg font-semibold">
@@ -97,7 +114,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
           </p>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">Email <span aria-hidden="true">*</span></Label>
+              <Label htmlFor="email">
+                Email <span aria-hidden="true">*</span>
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -110,7 +129,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="name">Full Name <span aria-hidden="true">*</span></Label>
+              <Label htmlFor="name">
+                Full Name <span aria-hidden="true">*</span>
+              </Label>
               <Input
                 id="name"
                 type="text"
@@ -119,11 +140,15 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="John Doe"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !name.trim() ? true : undefined
+                }
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="phone">Phone <span aria-hidden="true">*</span></Label>
+              <Label htmlFor="phone">
+                Phone <span aria-hidden="true">*</span>
+              </Label>
               <PhoneInput
                 id="phone"
                 autoComplete="tel"
@@ -132,7 +157,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="+1 555 123 4567"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !phone.trim() ? true : undefined
+                }
               />
             </div>
           </div>
@@ -173,7 +200,10 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
             >
               {isValidatingDiscount ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                  <Loader2
+                    className="mr-2 size-4 animate-spin"
+                    aria-hidden="true"
+                  />
                   Checking…
                 </>
               ) : (
@@ -248,12 +278,15 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
               Shipping Address
             </legend>
             <p className="text-muted-foreground text-sm">
-              This is sent to Stripe Checkout prefilled so you can confirm or
-              edit your name, phone, and address before paying.
+              {isZoneWeightShipping
+                ? "We price shipping from this address. Make changes here before continuing to payment."
+                : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="address-line1">Address line 1 <span aria-hidden="true">*</span></Label>
+                <Label htmlFor="address-line1">
+                  Address line 1 <span aria-hidden="true">*</span>
+                </Label>
                 <Input
                   id="address-line1"
                   type="text"
@@ -263,7 +296,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                   placeholder="Street address, P.O. box"
                   required={deliveryMethod === "ship"}
                   aria-required="true"
-                  aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !addressLine1.trim() ? true : undefined
+                  }
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -279,7 +314,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="city">City <span aria-hidden="true">*</span></Label>
+                  <Label htmlFor="city">
+                    City <span aria-hidden="true">*</span>
+                  </Label>
                   <Input
                     id="city"
                     type="text"
@@ -288,28 +325,47 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                     onChange={(e) => setCity(e.target.value)}
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !city.trim() ? true : undefined
+                    }
                     placeholder="e.g. San Francisco"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="state">State / Province <span aria-hidden="true">*</span></Label>
-                  <Input
-                    id="state"
-                    type="text"
-                    autoComplete="shipping address-level1"
+                  <Label htmlFor="state" id="state-label">
+                    State / Province <span aria-hidden="true">*</span>
+                  </Label>
+                  <Select
                     value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    placeholder="e.g. CA or ON"
-                    required={deliveryMethod === "ship"}
-                    aria-required="true"
-                    aria-invalid={submitAttempted && !state.trim() ? true : undefined}
-                  />
+                    onValueChange={(v) => setState(v)}
+                    required
+                  >
+                    <SelectTrigger
+                      id="state"
+                      aria-labelledby="state-label"
+                      aria-required="true"
+                      aria-invalid={
+                        submitAttempted && !state ? true : undefined
+                      }
+                      className="w-full"
+                    >
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getRegionOptions(country).map((opt) => (
+                        <SelectItem key={opt.code} value={opt.code}>
+                          {opt.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="postal">ZIP / Postal code <span aria-hidden="true">*</span></Label>
+                  <Label htmlFor="postal">
+                    ZIP / Postal code <span aria-hidden="true">*</span>
+                  </Label>
                   <Input
                     id="postal"
                     type="text"
@@ -319,17 +375,25 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                     onChange={(e) => setPostalCode(e.target.value)}
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !postalCode.trim() ? true : undefined
+                    }
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="country" id="country-label">Country <span aria-hidden="true">*</span></Label>
+                  <Label htmlFor="country" id="country-label">
+                    Country <span aria-hidden="true">*</span>
+                  </Label>
                   <Select
                     value={country}
                     onValueChange={(v) => setCountry(v as "US" | "CA")}
                     required
                   >
-                    <SelectTrigger id="country" aria-labelledby="country-label" className="w-full">
+                    <SelectTrigger
+                      id="country"
+                      aria-labelledby="country-label"
+                      className="w-full"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -347,9 +411,11 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
       <div className="w-full shrink-0 lg:w-80">
         <div className="sticky top-20 space-y-4">
           <HappyBambooOrderSummary
-            shippingConfig={shippingConfig}
             deliveryMethod={deliveryMethod}
             discountAmount={discountAmount}
+            shipping={shipping}
+            shippingPending={shippingPending}
+            shippingCalculating={shippingCalculating}
           />
 
           <div role="alert" aria-live="assertive" aria-atomic="true">
@@ -362,16 +428,27 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
 
           <Button
             type="submit"
-            disabled={isProcessing}
-            aria-busy={isProcessing}
+            disabled={isProcessing || shippingCalculating}
+            aria-busy={isProcessing || shippingCalculating}
             className="w-full text-white"
             size="lg"
             style={{ backgroundColor: primaryColor }}
           >
             {isProcessing ? (
               <>
-                <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                <Loader2
+                  className="mr-2 size-4 animate-spin"
+                  aria-hidden="true"
+                />
                 Processing...
+              </>
+            ) : shippingCalculating ? (
+              <>
+                <Loader2
+                  className="mr-2 size-4 animate-spin"
+                  aria-hidden="true"
+                />
+                Calculating shipping…
               </>
             ) : (
               "Continue to Payment"

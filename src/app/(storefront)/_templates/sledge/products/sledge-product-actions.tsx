@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -22,15 +21,8 @@ export function SledgeProductActions({
     quantity,
     setSelectedVariantId,
     additionalFields,
+    justAdded,
   } = useProduct(product);
-
-  const [isAdded, setIsAdded] = useState(false);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   const stockQty = product.trackInventory ? (product.inventoryQty ?? 0) : null;
   const showStockCount = stockQty !== null && stockQty > 0 && inStock;
@@ -61,7 +53,7 @@ export function SledgeProductActions({
     <div className="flex flex-col gap-3">
       {/* S-2: sr-only live region to announce add-to-cart */}
       <span className="sr-only" role="status">
-        {isAdded ? `${product.name} added to cart` : ""}
+        {justAdded ? `${product.name} added to cart` : ""}
       </span>
 
       {showStockCount && (
@@ -81,7 +73,11 @@ export function SledgeProductActions({
       {inStock && canAddMore && (
         <div className="flex items-stretch gap-3">
           {/* S-3: group wrapper with accessible label */}
-          <div role="group" aria-label="Quantity" className="flex items-center rounded-sm border border-[var(--sl-ink)]">
+          <div
+            role="group"
+            aria-label="Quantity"
+            className="flex items-center rounded-sm border border-[var(--sl-ink)]"
+          >
             <button
               type="button"
               className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70"
@@ -92,7 +88,10 @@ export function SledgeProductActions({
               <Minus className="size-3.5" />
             </button>
             {/* S-3: announce quantity changes */}
-            <span aria-live="polite" className="min-w-[40px] text-center font-sans text-sm font-medium">
+            <span
+              aria-live="polite"
+              className="min-w-[40px] text-center font-sans text-sm font-medium"
+            >
               {quantity}
             </span>
             <button
@@ -107,13 +106,13 @@ export function SledgeProductActions({
 
           <button
             type="button"
-            onClick={addToCart}
+            onClick={handleAddToCart}
             className={cn(
               "sl-btn flex-1",
-              isAdded && "bg-[var(--sl-green)] text-[var(--sl-ink)]",
+              justAdded && "bg-[var(--sl-green)] text-[var(--sl-ink)]",
             )}
           >
-            {isAdded ? (
+            {justAdded ? (
               <>
                 <Check className="size-4" />
                 Added!
@@ -136,7 +135,9 @@ export function SledgeProductActions({
         <button
           type="button"
           aria-disabled="true"
-          onClick={() => {/* no-op: item is sold out */}}
+          onClick={() => {
+            /* no-op: item is sold out */
+          }}
           className="w-full cursor-not-allowed rounded-sm border border-[var(--sl-border-input)] py-3 font-sans text-xs tracking-[0.16em] text-[var(--sl-ink-soft)] uppercase"
         >
           Sold Out

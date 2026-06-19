@@ -48,9 +48,9 @@ export default function AccessibilityStatementPage() {
           <code>aria-modal=&quot;true&quot;</code>, and a descriptive{" "}
           <code>aria-label</code>. Focus moves to the close button when the
           dialog opens and returns to the enlarge trigger on close, Tab is
-          trapped within the dialog, and the open/zoom animation is skipped under{" "}
-          <code>prefers-reduced-motion</code>. (This gallery is shared, so the
-          fix also benefits the Pollen, Bamboo, and Dark Trend templates.){" "}
+          trapped within the dialog, and the open/zoom animation is skipped
+          under <code>prefers-reduced-motion</code>. (This gallery is shared, so
+          the fix also benefits the Pollen, Bamboo, and Dark Trend templates.){" "}
           <em>WCAG 2.1.2, 2.4.3, 4.1.2, 2.3.3.</em>
         </li>
         <li>
@@ -69,8 +69,7 @@ export default function AccessibilityStatementPage() {
           product-page Out of Stock button, and the product-card add-to-cart
           button now use <code>aria-disabled=&quot;true&quot;</code> with an{" "}
           <code>onClick</code> guard instead of the HTML <code>disabled</code>{" "}
-          attribute, keeping them keyboard-discoverable.{" "}
-          <em>WCAG 4.1.2.</em>
+          attribute, keeping them keyboard-discoverable. <em>WCAG 4.1.2.</em>
         </li>
         <li>
           <strong>Add-to-cart confirmation not announced</strong> — A
@@ -110,9 +109,9 @@ export default function AccessibilityStatementPage() {
         </li>
         <li>
           <strong>Contact form success not announced or focused</strong> — The
-          submission success card now carries <code>role=&quot;status&quot;</code>{" "}
-          and focus moves to its confirmation heading on success.{" "}
-          <em>WCAG 2.4.3, 4.1.3.</em>
+          submission success card now carries{" "}
+          <code>role=&quot;status&quot;</code> and focus moves to its
+          confirmation heading on success. <em>WCAG 2.4.3, 4.1.3.</em>
         </li>
         <li>
           <strong>
@@ -138,21 +137,26 @@ export default function AccessibilityStatementPage() {
           <strong>Cart drawer — labels, quantity, and motion</strong> — Remove
           buttons and quantity steppers now include the product name in their{" "}
           <code>aria-label</code>, the quantity display carries{" "}
-          <code>aria-live=&quot;polite&quot; aria-atomic=&quot;true&quot;</code>,
-          and the item enter/exit animation is collapsed under{" "}
-          <code>prefers-reduced-motion</code>. <em>WCAG 4.1.2, 4.1.3, 2.3.3.</em>
+          <code>aria-live=&quot;polite&quot; aria-atomic=&quot;true&quot;</code>
+          , and the item enter/exit animation is collapsed under{" "}
+          <code>prefers-reduced-motion</code>.{" "}
+          <em>WCAG 4.1.2, 4.1.3, 2.3.3.</em>
         </li>
         <li>
-          <strong>Footer &ldquo;Quick Links&rdquo; used invalid list markup</strong>{" "}
+          <strong>
+            Footer &ldquo;Quick Links&rdquo; used invalid list markup
+          </strong>{" "}
           — The list wrapped <code>&lt;a&gt;</code> elements directly in a{" "}
-          <code>&lt;ul&gt;</code> with no <code>&lt;li&gt;</code> items; each link
-          is now wrapped in an <code>&lt;li&gt;</code>. <em>WCAG 1.3.1.</em>
+          <code>&lt;ul&gt;</code> with no <code>&lt;li&gt;</code> items; each
+          link is now wrapped in an <code>&lt;li&gt;</code>.{" "}
+          <em>WCAG 1.3.1.</em>
         </li>
         <li>
           <strong>Decorative icons announced by screen readers</strong> —
-          Decorative icons across the template (leaf logo, arrows, search, quote,
-          calendar, tag, status icons, footer social SVGs, cart icons) now carry{" "}
-          <code>aria-hidden=&quot;true&quot;</code>. <em>WCAG 1.1.1.</em>
+          Decorative icons across the template (leaf logo, arrows, search,
+          quote, calendar, tag, status icons, footer social SVGs, cart icons)
+          now carry <code>aria-hidden=&quot;true&quot;</code>.{" "}
+          <em>WCAG 1.1.1.</em>
         </li>
         <li>
           <strong>Hero background image alt text</strong> — The decorative hero
@@ -188,11 +192,10 @@ export default function AccessibilityStatementPage() {
         </li>
         <li>
           <strong>
-            Out-of-stock and add-to-cart buttons removed from keyboard tab
-            order
+            Out-of-stock and add-to-cart buttons removed from keyboard tab order
           </strong>{" "}
-          — The product-page Out of Stock button, out-of-stock variant
-          options, and the variant add-to-cart button now use{" "}
+          — The product-page Out of Stock button, out-of-stock variant options,
+          and the variant add-to-cart button now use{" "}
           <code>aria-disabled=&quot;true&quot;</code> with an{" "}
           <code>onClick</code> guard instead of the HTML <code>disabled</code>{" "}
           attribute, keeping them keyboard-discoverable. <em>WCAG 4.1.2.</em>
@@ -202,8 +205,8 @@ export default function AccessibilityStatementPage() {
             Content pages rendered rich text with inverted (light-on-light)
             typography
           </strong>{" "}
-          — Generic and policy pages applied a dark-background typography
-          preset on Bamboo&apos;s near-white background, leaving list markers,
+          — Generic and policy pages applied a dark-background typography preset
+          on Bamboo&apos;s near-white background, leaving list markers,
           blockquotes, and table text close to white-on-white. The preset has
           been replaced with explicit light-background colors.{" "}
           <em>WCAG 1.4.3.</em>
@@ -213,17 +216,17 @@ export default function AccessibilityStatementPage() {
             Product gallery thumbnails — selected image conveyed by styling
             alone
           </strong>{" "}
-          — Thumbnail buttons now carry <code>aria-pressed</code> reflecting
-          the selected image, and the main-image crossfade is skipped under{" "}
+          — Thumbnail buttons now carry <code>aria-pressed</code> reflecting the
+          selected image, and the main-image crossfade is skipped under{" "}
           <code>prefers-reduced-motion</code>. (This gallery is shared, so the
-          fix also benefits the Happy Bamboo, Pollen, and Dark Trend
-          templates.) <em>WCAG 1.4.1, 4.1.2, 2.3.3.</em>
+          fix also benefits the Happy Bamboo, Pollen, and Dark Trend templates.){" "}
+          <em>WCAG 1.4.1, 4.1.2, 2.3.3.</em>
         </li>
         <li>
           <strong>Desktop navigation dropdown focus management</strong> — The
           dropdown trigger now carries <code>aria-controls</code>, Escape
-          returns focus to the trigger instead of dropping it to the page
-          body, and the menu closes when keyboard focus leaves it.{" "}
+          returns focus to the trigger instead of dropping it to the page body,
+          and the menu closes when keyboard focus leaves it.{" "}
           <em>WCAG 2.4.3, 4.1.2.</em>
         </li>
         <li>
@@ -239,8 +242,8 @@ export default function AccessibilityStatementPage() {
           details load. <em>WCAG 2.4.3, 4.1.3.</em>
         </li>
         <li>
-          <strong>Discount confirmation not announced</strong> — The
-          &ldquo;Code applied&rdquo; message in checkout now carries{" "}
+          <strong>Discount confirmation not announced</strong> — The &ldquo;Code
+          applied&rdquo; message in checkout now carries{" "}
           <code>role=&quot;status&quot;</code> (the error path already used{" "}
           <code>role=&quot;alert&quot;</code>). <em>WCAG 4.1.3.</em>
         </li>
@@ -256,10 +259,10 @@ export default function AccessibilityStatementPage() {
           are required. <em>WCAG 3.3.2.</em>
         </li>
         <li>
-          <strong>Star rating not exposed as an image</strong> — The
-          testimonial star container&apos;s label now uses{" "}
-          <code>role=&quot;img&quot;</code> so its &ldquo;5 out of 5
-          stars&rdquo; label is reliably announced. <em>WCAG 1.1.1.</em>
+          <strong>Star rating not exposed as an image</strong> — The testimonial
+          star container&apos;s label now uses <code>role=&quot;img&quot;</code>{" "}
+          so its &ldquo;5 out of 5 stars&rdquo; label is reliably announced.{" "}
+          <em>WCAG 1.1.1.</em>
         </li>
         <li>
           <strong>Heading levels skipped</strong> — Cart item titles, the blog
@@ -269,26 +272,28 @@ export default function AccessibilityStatementPage() {
           <em>WCAG 1.3.1.</em>
         </li>
         <li>
-          <strong>External navigation links open new tabs without warning</strong>{" "}
-          — Owner-configured external links in the header and mobile
-          navigation now include a visually-hidden &ldquo;(opens in new
-          tab)&rdquo; notice. <em>WCAG 3.2.2.</em>
+          <strong>
+            External navigation links open new tabs without warning
+          </strong>{" "}
+          — Owner-configured external links in the header and mobile navigation
+          now include a visually-hidden &ldquo;(opens in new tab)&rdquo; notice.{" "}
+          <em>WCAG 3.2.2.</em>
         </li>
         <li>
-          <strong>Remaining decorative icons announced</strong> — A second
-          pass added <code>aria-hidden=&quot;true&quot;</code> to decorative
-          arrow, cart, check, loader, and package icons missed in the May
-          remediation. <em>WCAG 1.1.1.</em>
+          <strong>Remaining decorative icons announced</strong> — A second pass
+          added <code>aria-hidden=&quot;true&quot;</code> to decorative arrow,
+          cart, check, loader, and package icons missed in the May remediation.{" "}
+          <em>WCAG 1.1.1.</em>
         </li>
         <li>
           <strong>
             Redundant <code>aria-label</code>s on non-interactive text removed
           </strong>{" "}
           — Quantity displays and order status badges carried{" "}
-          <code>aria-label</code>s that assistive technology does not expose
-          on plain text elements; the visible text itself is announced, so the
-          redundant labels were removed (live-region announcements were
-          kept). <em>WCAG 4.1.2 (refinement of a May 2026 item).</em>
+          <code>aria-label</code>s that assistive technology does not expose on
+          plain text elements; the visible text itself is announced, so the
+          redundant labels were removed (live-region announcements were kept).{" "}
+          <em>WCAG 4.1.2 (refinement of a May 2026 item).</em>
         </li>
       </ul>
 
@@ -428,9 +433,9 @@ export default function AccessibilityStatementPage() {
           <em>WCAG 2.2.2, 2.3.3.</em>
         </li>
         <li>
-          <strong>JavaScript-driven animations ignored reduced motion</strong>{" "}
-          — Framer-Motion animations (mobile menu, lightbox, hero entrance,
-          cart drawer items, cart badge) now render instantly under{" "}
+          <strong>JavaScript-driven animations ignored reduced motion</strong> —
+          Framer-Motion animations (mobile menu, lightbox, hero entrance, cart
+          drawer items, cart badge) now render instantly under{" "}
           <code>prefers-reduced-motion</code>, complementing the existing
           CSS-level rule. <em>WCAG 2.3.3.</em>
         </li>
@@ -442,26 +447,24 @@ export default function AccessibilityStatementPage() {
           counts. <em>WCAG 4.1.3.</em>
         </li>
         <li>
-          <strong>
-            Sold-out controls removed from the keyboard tab order
-          </strong>{" "}
-          — Sold-out and out-of-stock buttons now use{" "}
-          <code>aria-disabled</code> instead of <code>disabled</code>, so
-          keyboard and screen-reader users can discover why an item cannot be
-          purchased. <em>WCAG 2.1.1, 4.1.2.</em>
+          <strong>Sold-out controls removed from the keyboard tab order</strong>{" "}
+          — Sold-out and out-of-stock buttons now use <code>aria-disabled</code>{" "}
+          instead of <code>disabled</code>, so keyboard and screen-reader users
+          can discover why an item cannot be purchased.{" "}
+          <em>WCAG 2.1.1, 4.1.2.</em>
         </li>
         <li>
           <strong>Checkout form semantics</strong> — Section headings inside
-          fieldsets are now real <code>&lt;legend&gt;</code>s; the discount
-          code error is programmatically associated with its input and
-          announced (<code>aria-invalid</code>, <code>role=&quot;alert&quot;</code>);
+          fieldsets are now real <code>&lt;legend&gt;</code>s; the discount code
+          error is programmatically associated with its input and announced (
+          <code>aria-invalid</code>, <code>role=&quot;alert&quot;</code>);
           delivery-method toggles expose <code>aria-pressed</code>; and a
           visible note explains the required-field asterisk.{" "}
           <em>WCAG 1.3.1, 3.3.1, 3.3.2, 4.1.2.</em>
         </li>
         <li>
-          <strong>Success states were silent</strong> — The contact form
-          success panel and the order confirmation now receive focus and carry{" "}
+          <strong>Success states were silent</strong> — The contact form success
+          panel and the order confirmation now receive focus and carry{" "}
           <code>role=&quot;status&quot;</code> so the outcome is announced.{" "}
           <em>WCAG 2.4.3, 4.1.3.</em>
         </li>
@@ -474,11 +477,11 @@ export default function AccessibilityStatementPage() {
         <li>
           <strong>Structural polish</strong> — Breadcrumbs are now a{" "}
           <code>&lt;nav&gt;</code> landmark with <code>aria-current</code>;
-          gallery thumbnails expose <code>aria-pressed</code>; star ratings
-          have text alternatives; heading levels no longer skip; decorative
-          glyphs are hidden from assistive technology; links opening new tabs
-          warn screen-reader users; and the header cart button name includes
-          the item count. <em>WCAG 1.1.1, 1.3.1, 2.4.8, 4.1.2.</em>
+          gallery thumbnails expose <code>aria-pressed</code>; star ratings have
+          text alternatives; heading levels no longer skip; decorative glyphs
+          are hidden from assistive technology; links opening new tabs warn
+          screen-reader users; and the header cart button name includes the item
+          count. <em>WCAG 1.1.1, 1.3.1, 2.4.8, 4.1.2.</em>
         </li>
         <li>
           <strong>Small touch targets</strong> — Quantity steppers, carousel
@@ -498,10 +501,10 @@ export default function AccessibilityStatementPage() {
           <strong>Brand palette failed contrast across the template</strong> —
           White-on-coral buttons measured 2.85:1 and coral headings on green
           sections measured 1.59:1. An AA-compliant coral token (5.46:1 on
-          white, 4.78:1 on cream, 3:1+ on green) now backs all buttons,
-          headings on colored sections, small coral text, links in article
-          content, the focus indicator, and order-status badges; dark chrome
-          (header/footer) keeps the original coral, where it passes.{" "}
+          white, 4.78:1 on cream, 3:1+ on green) now backs all buttons, headings
+          on colored sections, small coral text, links in article content, the
+          focus indicator, and order-status badges; dark chrome (header/footer)
+          keeps the original coral, where it passes.{" "}
           <em>WCAG 1.4.3, 1.4.11.</em>
         </li>
         <li>
@@ -514,51 +517,44 @@ export default function AccessibilityStatementPage() {
           <em>WCAG 1.3.1, 2.1.2, 2.4.3, 4.1.2.</em>
         </li>
         <li>
-          <strong>Mobile navigation dialog — no focus management</strong> —
-          The full-screen mobile menu now moves focus to its close button on
-          open, traps Tab, returns focus to the menu button on close, and
-          marks the page content behind it <code>inert</code>; the menu button
-          carries <code>aria-controls</code>.{" "}
-          <em>WCAG 1.3.2, 2.1.2, 2.4.3.</em>
+          <strong>Mobile navigation dialog — no focus management</strong> — The
+          full-screen mobile menu now moves focus to its close button on open,
+          traps Tab, returns focus to the menu button on close, and marks the
+          page content behind it <code>inert</code>; the menu button carries{" "}
+          <code>aria-controls</code>. <em>WCAG 1.3.2, 2.1.2, 2.4.3.</em>
         </li>
         <li>
-          <strong>
-            Product-card actions were invisible to keyboard users
-          </strong>{" "}
+          <strong>Product-card actions were invisible to keyboard users</strong>{" "}
           — &ldquo;Add to cart&rdquo; and &ldquo;View collection&rdquo;
           affordances revealed only on hover now also reveal on keyboard focus
           via <code>:focus-within</code>. <em>WCAG 2.4.7.</em>
         </li>
         <li>
-          <strong>Product information tabs lacked tab semantics</strong> —
-          The Description / Additional Information switcher is now a full
-          ARIA tabs widget with arrow-key navigation, roving tab order, and
-          linked tab panels. <em>WCAG 1.3.1, 2.1.1, 4.1.2.</em>
+          <strong>Product information tabs lacked tab semantics</strong> — The
+          Description / Additional Information switcher is now a full ARIA tabs
+          widget with arrow-key navigation, roving tab order, and linked tab
+          panels. <em>WCAG 1.3.1, 2.1.1, 4.1.2.</em>
         </li>
         <li>
-          <strong>Cart and quantity updates were not announced</strong> —
-          Added &ldquo;added to cart&rdquo; live announcements on the product
-          page, variant selector, and product-card quick-add; quantity
-          steppers are grouped, labelled, and announce changes; filter and
-          blog-search result counts announce via live regions.{" "}
-          <em>WCAG 4.1.2, 4.1.3.</em>
+          <strong>Cart and quantity updates were not announced</strong> — Added
+          &ldquo;added to cart&rdquo; live announcements on the product page,
+          variant selector, and product-card quick-add; quantity steppers are
+          grouped, labelled, and announce changes; filter and blog-search result
+          counts announce via live regions. <em>WCAG 4.1.2, 4.1.3.</em>
         </li>
         <li>
-          <strong>
-            Sold-out controls removed from the keyboard tab order
-          </strong>{" "}
-          — Sold-out and out-of-stock buttons now use{" "}
-          <code>aria-disabled</code> instead of <code>disabled</code> so
-          keyboard and screen-reader users can discover why an item cannot be
-          purchased. <em>WCAG 2.1.1, 4.1.2.</em>
+          <strong>Sold-out controls removed from the keyboard tab order</strong>{" "}
+          — Sold-out and out-of-stock buttons now use <code>aria-disabled</code>{" "}
+          instead of <code>disabled</code> so keyboard and screen-reader users
+          can discover why an item cannot be purchased.{" "}
+          <em>WCAG 2.1.1, 4.1.2.</em>
         </li>
         <li>
           <strong>Checkout form semantics</strong> — Section headings inside
-          fieldsets are now real <code>&lt;legend&gt;</code>s; the discount
-          code error is associated with its input and announced; delivery
-          method toggles expose <code>aria-pressed</code>; and a visible note
-          explains the required-field asterisk.{" "}
-          <em>WCAG 1.3.1, 3.3.1, 3.3.2, 4.1.2.</em>
+          fieldsets are now real <code>&lt;legend&gt;</code>s; the discount code
+          error is associated with its input and announced; delivery method
+          toggles expose <code>aria-pressed</code>; and a visible note explains
+          the required-field asterisk. <em>WCAG 1.3.1, 3.3.1, 3.3.2, 4.1.2.</em>
         </li>
         <li>
           <strong>Success and loading states were silent</strong> — The
@@ -567,20 +563,20 @@ export default function AccessibilityStatementPage() {
           <code>role=&quot;status&quot;</code>. <em>WCAG 2.4.3, 4.1.3.</em>
         </li>
         <li>
-          <strong>JavaScript-driven animations ignored reduced motion</strong>{" "}
-          — Framer-Motion animations (mobile menu, lightbox, cart badge) now
+          <strong>JavaScript-driven animations ignored reduced motion</strong> —
+          Framer-Motion animations (mobile menu, lightbox, cart badge) now
           render instantly under <code>prefers-reduced-motion</code>,
           complementing the existing CSS-level rule. <em>WCAG 2.3.3.</em>
         </li>
         <li>
-          <strong>Structural polish</strong> — Added a homepage and contact
-          page <code>&lt;h1&gt;</code> and corrected skipped heading levels;
-          cart and order pseudo-tables gained screen-reader column labels;
-          account navigation exposes <code>aria-current</code>; the cart
-          button name includes the item count; links opening new tabs warn
-          screen-reader users; decorative glyphs and placeholders are hidden
-          from assistive technology; and carousel dots grew to a 24&nbsp;px
-          hit area. <em>WCAG 1.1.1, 1.3.1, 2.4.6, 2.5.8, 4.1.2.</em>
+          <strong>Structural polish</strong> — Added a homepage and contact page{" "}
+          <code>&lt;h1&gt;</code> and corrected skipped heading levels; cart and
+          order pseudo-tables gained screen-reader column labels; account
+          navigation exposes <code>aria-current</code>; the cart button name
+          includes the item count; links opening new tabs warn screen-reader
+          users; decorative glyphs and placeholders are hidden from assistive
+          technology; and carousel dots grew to a 24&nbsp;px hit area.{" "}
+          <em>WCAG 1.1.1, 1.3.1, 2.4.6, 2.5.8, 4.1.2.</em>
         </li>
       </ul>
 
@@ -598,8 +594,8 @@ export default function AccessibilityStatementPage() {
           order) while visually hidden. It now renders only while open, is
           exposed as a modal dialog, moves focus to its close button on open,
           traps Tab, closes on Escape, marks the page behind it{" "}
-          <code>inert</code>, and returns focus to the menu button on close;
-          the menu button carries <code>aria-expanded</code> and{" "}
+          <code>inert</code>, and returns focus to the menu button on close; the
+          menu button carries <code>aria-expanded</code> and{" "}
           <code>aria-controls</code>.{" "}
           <em>WCAG 1.3.2, 2.1.1, 2.1.2, 2.4.3, 4.1.2.</em>
         </li>
@@ -607,13 +603,12 @@ export default function AccessibilityStatementPage() {
           <strong>Brand accent failed contrast on light backgrounds</strong> —
           The mid-green accent measured 3.99:1 as button background and link
           text, and a light-green eyebrow on the blog measured 1.75:1. Primary
-          buttons, links, active navigation states, and eyebrow labels on
-          light backgrounds now use the template&apos;s AA-compliant deep
-          greens (8.25:1 and 4.99:1); the accent remains on dark surfaces and
-          non-text details, where it passes. Sub-AA detail text (discount
-          amounts, shipment timestamps, contact-card values, amber stock
-          notes, placeholders) was darkened to meet 4.5:1.{" "}
-          <em>WCAG 1.4.3, 1.4.11.</em>
+          buttons, links, active navigation states, and eyebrow labels on light
+          backgrounds now use the template&apos;s AA-compliant deep greens
+          (8.25:1 and 4.99:1); the accent remains on dark surfaces and non-text
+          details, where it passes. Sub-AA detail text (discount amounts,
+          shipment timestamps, contact-card values, amber stock notes,
+          placeholders) was darkened to meet 4.5:1. <em>WCAG 1.4.3, 1.4.11.</em>
         </li>
         <li>
           <strong>Skip link and landmark structure</strong> — Added a
@@ -622,21 +617,19 @@ export default function AccessibilityStatementPage() {
           their own landmarks around it. <em>WCAG 1.3.1, 2.4.1.</em>
         </li>
         <li>
-          <strong>Cart and quantity updates were not announced</strong> —
-          Added &ldquo;added to cart&rdquo; live announcements on the product
-          page and variant selector; quantity steppers are grouped, named per
-          product, and announce changes; shop filter results, blog search
-          counts, and pagination announce via live regions.{" "}
-          <em>WCAG 4.1.2, 4.1.3.</em>
+          <strong>Cart and quantity updates were not announced</strong> — Added
+          &ldquo;added to cart&rdquo; live announcements on the product page and
+          variant selector; quantity steppers are grouped, named per product,
+          and announce changes; shop filter results, blog search counts, and
+          pagination announce via live regions. <em>WCAG 4.1.2, 4.1.3.</em>
         </li>
         <li>
-          <strong>Variant and out-of-stock controls</strong> — Variant
-          buttons expose <code>aria-pressed</code>; out-of-stock variants and
-          the &ldquo;Out of Stock&rdquo; button use{" "}
-          <code>aria-disabled</code> instead of <code>disabled</code> so
-          keyboard and screen-reader users can discover why an item cannot be
-          purchased; remaining-stock counts announce on selection.{" "}
-          <em>WCAG 2.1.1, 4.1.2.</em>
+          <strong>Variant and out-of-stock controls</strong> — Variant buttons
+          expose <code>aria-pressed</code>; out-of-stock variants and the
+          &ldquo;Out of Stock&rdquo; button use <code>aria-disabled</code>{" "}
+          instead of <code>disabled</code> so keyboard and screen-reader users
+          can discover why an item cannot be purchased; remaining-stock counts
+          announce on selection. <em>WCAG 2.1.1, 4.1.2.</em>
         </li>
         <li>
           <strong>Shop controls were unlabeled</strong> — The product search
@@ -644,42 +637,39 @@ export default function AccessibilityStatementPage() {
           labelled navigation landmark. <em>WCAG 1.3.1, 4.1.2.</em>
         </li>
         <li>
-          <strong>Checkout form semantics</strong> — Section titles are now
-          real headings; the discount-code field has an accessible name and
-          its error is associated with the input and announced; delivery
-          method toggles expose <code>aria-pressed</code>; a visible note
-          explains the required-field asterisk.{" "}
-          <em>WCAG 1.3.1, 3.3.1, 3.3.2, 4.1.2.</em>
+          <strong>Checkout form semantics</strong> — Section titles are now real
+          headings; the discount-code field has an accessible name and its error
+          is associated with the input and announced; delivery method toggles
+          expose <code>aria-pressed</code>; a visible note explains the
+          required-field asterisk. <em>WCAG 1.3.1, 3.3.1, 3.3.2, 4.1.2.</em>
         </li>
         <li>
           <strong>Product cards nested a button inside a link</strong> — The
-          decorative &ldquo;View Product&rdquo; button inside each
-          product-card link is no longer a second interactive element.{" "}
-          <em>WCAG 4.1.2.</em>
+          decorative &ldquo;View Product&rdquo; button inside each product-card
+          link is no longer a second interactive element. <em>WCAG 4.1.2.</em>
         </li>
         <li>
           <strong>Reduced motion and focus visibility</strong> — Template
           animations (mobile menu, homepage hero) now render instantly under{" "}
-          <code>prefers-reduced-motion</code>, backed by a new template-wide
-          CSS rule; a new two-tone focus indicator is visible on both light
-          and dark surfaces. <em>WCAG 2.3.3, 2.4.7, 1.4.11.</em>
+          <code>prefers-reduced-motion</code>, backed by a new template-wide CSS
+          rule; a new two-tone focus indicator is visible on both light and dark
+          surfaces. <em>WCAG 2.3.3, 2.4.7, 1.4.11.</em>
         </li>
         <li>
-          <strong>Article and policy content</strong> — Links inside blog
-          posts and policy pages are now underlined rather than
-          distinguished by color alone, and inline code meets contrast
-          requirements. <em>WCAG 1.4.1, 1.4.3.</em>
+          <strong>Article and policy content</strong> — Links inside blog posts
+          and policy pages are now underlined rather than distinguished by color
+          alone, and inline code meets contrast requirements.{" "}
+          <em>WCAG 1.4.1, 1.4.3.</em>
         </li>
         <li>
           <strong>Structural polish</strong> — Decorative and duplicate image
-          alt text emptied; decorative icons hidden from assistive
-          technology; <code>aria-current</code> on active navigation; links
-          opening new tabs warn screen-reader users; repeated
-          &ldquo;View Details&rdquo; links name their order; image overlays
-          strengthened so text over owner-supplied photos keeps contrast;
-          footer social links grew to a 44&nbsp;px hit area; empty-state
-          messages are real headings; loading states carry{" "}
-          <code>role=&quot;status&quot;</code>.{" "}
+          alt text emptied; decorative icons hidden from assistive technology;{" "}
+          <code>aria-current</code> on active navigation; links opening new tabs
+          warn screen-reader users; repeated &ldquo;View Details&rdquo; links
+          name their order; image overlays strengthened so text over
+          owner-supplied photos keeps contrast; footer social links grew to a
+          44&nbsp;px hit area; empty-state messages are real headings; loading
+          states carry <code>role=&quot;status&quot;</code>.{" "}
           <em>WCAG 1.1.1, 1.3.1, 1.4.3, 2.4.6, 2.5.8, 4.1.2, 4.1.3.</em>
         </li>
       </ul>
@@ -702,9 +692,9 @@ export default function AccessibilityStatementPage() {
           </strong>{" "}
           — The mobile menu collapsed visually but its links stayed in the Tab
           order. The closed menu is now <code>inert</code>, the menu button
-          carries <code>aria-expanded</code> and <code>aria-controls</code>{" "}
-          with a state-reflecting name, and Escape closes the menu and returns
-          focus to the button. The mobile menu also now shows the store&apos;s
+          carries <code>aria-expanded</code> and <code>aria-controls</code> with
+          a state-reflecting name, and Escape closes the menu and returns focus
+          to the button. The mobile menu also now shows the store&apos;s
           configured navigation instead of a fixed default.{" "}
           <em>WCAG 2.1.1, 2.4.3, 4.1.2.</em>
         </li>
@@ -712,15 +702,15 @@ export default function AccessibilityStatementPage() {
           <strong>Cart page controls were unlabeled</strong> — The cart&apos;s
           quantity steppers, quantity input, and remove buttons had no
           accessible names. All are now named per product, steppers grew to a
-          40&nbsp;px hit area, and quantity changes and removals announce via
-          a live region. <em>WCAG 1.1.1, 2.5.8, 3.3.2, 4.1.2, 4.1.3.</em>
+          40&nbsp;px hit area, and quantity changes and removals announce via a
+          live region. <em>WCAG 1.1.1, 2.5.8, 3.3.2, 4.1.2, 4.1.3.</em>
         </li>
         <li>
           <strong>Image galleries were not keyboard operable</strong> — Images
           in the shared gallery component (all layouts) opened a lightbox on
-          click only; they are now real buttons with descriptive names, and
-          the lightbox&apos;s previous/next/close controls are named and the
-          dialog title announces position (&ldquo;Image 3 of 8&rdquo;).{" "}
+          click only; they are now real buttons with descriptive names, and the
+          lightbox&apos;s previous/next/close controls are named and the dialog
+          title announces position (&ldquo;Image 3 of 8&rdquo;).{" "}
           <em>WCAG 2.1.1, 4.1.2.</em>
         </li>
         <li>
@@ -735,8 +725,7 @@ export default function AccessibilityStatementPage() {
           on the violet brand color measured ≈4.2:1; the primary button color
           was darkened to ≈5.7:1. Low-contrast grey and translucent text
           (product counts, empty states, account navigation, dates) and small
-          purple accents were brightened to meet 4.5:1.{" "}
-          <em>WCAG 1.4.3.</em>
+          purple accents were brightened to meet 4.5:1. <em>WCAG 1.4.3.</em>
         </li>
         <li>
           <strong>Variant and out-of-stock controls</strong> — Variant buttons
@@ -744,45 +733,44 @@ export default function AccessibilityStatementPage() {
           &ldquo;Out of Stock&rdquo; button use <code>aria-disabled</code>{" "}
           instead of <code>disabled</code> so keyboard and screen-reader users
           can discover why an item cannot be purchased; remaining-stock counts
-          are associated with the quantity controls; &ldquo;added to
-          cart&rdquo; confirmations announce via live regions.{" "}
+          are associated with the quantity controls; &ldquo;added to cart&rdquo;
+          confirmations announce via live regions.{" "}
           <em>WCAG 2.1.1, 4.1.2, 4.1.3.</em>
         </li>
         <li>
           <strong>Product detail accordion</strong> — Description and
-          additional-information toggles now expose{" "}
-          <code>aria-expanded</code> and <code>aria-controls</code> with
-          labelled panel regions. <em>WCAG 4.1.2.</em>
+          additional-information toggles now expose <code>aria-expanded</code>{" "}
+          and <code>aria-controls</code> with labelled panel regions.{" "}
+          <em>WCAG 4.1.2.</em>
         </li>
         <li>
           <strong>Checkout and discount form semantics</strong> — Delivery
           method toggles expose <code>aria-pressed</code>; the discount-code
           field and its remove button have accessible names and the applied
-          state announces; a visible note explains the required-field
-          asterisk; checkout errors receive focus when shown.{" "}
+          state announces; a visible note explains the required-field asterisk;
+          checkout errors receive focus when shown.{" "}
           <em>WCAG 3.3.1, 3.3.2, 4.1.2, 4.1.3.</em>
         </li>
         <li>
           <strong>Product cards nested a button inside a link</strong> — The
           hover-revealed &ldquo;View Product&rdquo; button inside each
-          product-card link was focusable while invisible; it is now
-          decorative and also reveals on keyboard focus.{" "}
-          <em>WCAG 2.4.7, 4.1.2.</em>
+          product-card link was focusable while invisible; it is now decorative
+          and also reveals on keyboard focus. <em>WCAG 2.4.7, 4.1.2.</em>
         </li>
         <li>
           <strong>Focus visibility</strong> — A template-wide white focus
-          outline now appears on the dark theme; the blog search field no
-          longer suppresses its focus indicator. <em>WCAG 2.4.7.</em>
+          outline now appears on the dark theme; the blog search field no longer
+          suppresses its focus indicator. <em>WCAG 2.4.7.</em>
         </li>
         <li>
           <strong>Structural polish</strong> — Decorative image alt text
           emptied; decorative icons hidden from assistive technology;{" "}
-          <code>aria-current</code> on active navigation; links opening new
-          tabs warn screen-reader users; repeated &ldquo;View Details&rdquo;
-          links name their order; order-confirmation and contact-form success
-          states receive focus and announce; blog search result counts
-          announce; heading levels corrected; the footer logo links home; the
-          menu button grew to a 44&nbsp;px hit area.{" "}
+          <code>aria-current</code> on active navigation; links opening new tabs
+          warn screen-reader users; repeated &ldquo;View Details&rdquo; links
+          name their order; order-confirmation and contact-form success states
+          receive focus and announce; blog search result counts announce;
+          heading levels corrected; the footer logo links home; the menu button
+          grew to a 44&nbsp;px hit area.{" "}
           <em>WCAG 1.1.1, 1.3.1, 2.4.6, 2.5.8, 4.1.2, 4.1.3.</em>
         </li>
       </ul>
@@ -803,20 +791,19 @@ export default function AccessibilityStatementPage() {
           <strong>Mobile navigation drawer focus management</strong> — The
           drawer presented as a modal dialog but its links stayed
           keyboard-focusable while closed and focus was never trapped or
-          restored. The closed drawer is now <code>inert</code>; on open,
-          focus moves to the Close button and Tab cycles within the drawer; on
-          close (button, backdrop, Escape, or link), focus returns to the menu
-          button, which now carries <code>aria-controls</code> alongside{" "}
+          restored. The closed drawer is now <code>inert</code>; on open, focus
+          moves to the Close button and Tab cycles within the drawer; on close
+          (button, backdrop, Escape, or link), focus returns to the menu button,
+          which now carries <code>aria-controls</code> alongside{" "}
           <code>aria-expanded</code>. <em>WCAG 2.1.2, 2.4.3, 4.1.2.</em>
         </li>
         <li>
           <strong>Variant and out-of-stock controls</strong> — Variant buttons
-          expose <code>aria-pressed</code> (selection was previously conveyed
-          by color alone); out-of-stock variants and the &ldquo;Out of
-          Stock&rdquo; button use <code>aria-disabled</code> instead of{" "}
-          <code>disabled</code> so keyboard and screen-reader users can
-          discover why an item cannot be purchased.{" "}
-          <em>WCAG 1.4.1, 2.1.1, 4.1.2.</em>
+          expose <code>aria-pressed</code> (selection was previously conveyed by
+          color alone); out-of-stock variants and the &ldquo;Out of Stock&rdquo;
+          button use <code>aria-disabled</code> instead of <code>disabled</code>{" "}
+          so keyboard and screen-reader users can discover why an item cannot be
+          purchased. <em>WCAG 1.4.1, 2.1.1, 4.1.2.</em>
         </li>
         <li>
           <strong>Add-to-cart confirmations were silent</strong> — Adding an
@@ -827,27 +814,27 @@ export default function AccessibilityStatementPage() {
           <em>WCAG 4.1.3.</em>
         </li>
         <li>
-          <strong>Focus visibility</strong> — Product-image thumbnails, the
-          shop and collection sort controls, the blog search field, and
-          checkout inputs suppressed or weakened their focus indicators; all
-          now show a clearly visible focus ring. <em>WCAG 2.4.7.</em>
+          <strong>Focus visibility</strong> — Product-image thumbnails, the shop
+          and collection sort controls, the blog search field, and checkout
+          inputs suppressed or weakened their focus indicators; all now show a
+          clearly visible focus ring. <em>WCAG 2.4.7.</em>
         </li>
         <li>
           <strong>Checkout form semantics</strong> — The discount-code field
           gained a label and its error/success messages announce and are
           associated with the field; delivery-method toggles expose{" "}
-          <code>aria-pressed</code>; name and email fields identify their
-          input purpose via <code>autocomplete</code>; a visible note explains
-          the required-field asterisk.{" "}
+          <code>aria-pressed</code>; name and email fields identify their input
+          purpose via <code>autocomplete</code>; a visible note explains the
+          required-field asterisk.{" "}
           <em>WCAG 1.3.5, 3.3.1, 3.3.2, 4.1.2, 4.1.3.</em>
         </li>
         <li>
-          <strong>Shop and collection filters</strong> — Sort and
-          maximum-price controls relied on tooltips instead of labels; they
-          now have programmatic labels, the price slider announces its value
-          as a price, the mobile &ldquo;Filters &amp; Sort&rdquo; toggle
-          exposes <code>aria-expanded</code>, and result counts announce as
-          filters change. <em>WCAG 1.3.1, 4.1.2, 4.1.3.</em>
+          <strong>Shop and collection filters</strong> — Sort and maximum-price
+          controls relied on tooltips instead of labels; they now have
+          programmatic labels, the price slider announces its value as a price,
+          the mobile &ldquo;Filters &amp; Sort&rdquo; toggle exposes{" "}
+          <code>aria-expanded</code>, and result counts announce as filters
+          change. <em>WCAG 1.3.1, 4.1.2, 4.1.3.</em>
         </li>
         <li>
           <strong>Color contrast</strong> — Account navigation links, discount
@@ -858,20 +845,19 @@ export default function AccessibilityStatementPage() {
         <li>
           <strong>Cart controls named per product</strong> — Quantity steppers
           repeated identical names across items; each is now named for its
-          product, quantity values announce changes, and the −/value/+
-          clusters are grouped and labelled. <em>WCAG 1.3.1, 4.1.3.</em>
+          product, quantity values announce changes, and the −/value/+ clusters
+          are grouped and labelled. <em>WCAG 1.3.1, 4.1.3.</em>
         </li>
         <li>
-          <strong>Structural polish</strong> — Decorative image alt text
-          emptied (duplicate announcements removed); decorative icons hidden
-          from assistive technology; <code>aria-current</code> on account
-          navigation; links opening new tabs warn screen-reader users;
-          repeated &ldquo;View Details&rdquo; and &ldquo;Add to cart&rdquo;
-          controls name their order or product; contact-form success receives
-          focus and announces; loading states announce; heading levels
-          corrected; quick-view buttons became real links; testimonials use
-          quote semantics; hover zoom and drawer transitions honor{" "}
-          <code>prefers-reduced-motion</code>.{" "}
+          <strong>Structural polish</strong> — Decorative image alt text emptied
+          (duplicate announcements removed); decorative icons hidden from
+          assistive technology; <code>aria-current</code> on account navigation;
+          links opening new tabs warn screen-reader users; repeated &ldquo;View
+          Details&rdquo; and &ldquo;Add to cart&rdquo; controls name their order
+          or product; contact-form success receives focus and announces; loading
+          states announce; heading levels corrected; quick-view buttons became
+          real links; testimonials use quote semantics; hover zoom and drawer
+          transitions honor <code>prefers-reduced-motion</code>.{" "}
           <em>WCAG 1.1.1, 1.3.1, 2.3.3, 2.4.4, 2.4.6, 4.1.2, 4.1.3.</em>
         </li>
       </ul>
@@ -1209,15 +1195,13 @@ export default function AccessibilityStatementPage() {
       </ul>
 
       <h3>Elegant Template — June 2026</h3>
-      <p>
-        A follow-up audit closed the remaining gaps from the May 2026 pass:
-      </p>
+      <p>A follow-up audit closed the remaining gaps from the May 2026 pass:</p>
       <ul>
         <li>
           <strong>Closed cart drawer remained keyboard-focusable</strong> — The
-          cart drawer slides off-screen when closed but previously stayed in
-          the tab order, letting keyboard users land on invisible controls. It
-          is now marked <code>inert</code> and{" "}
+          cart drawer slides off-screen when closed but previously stayed in the
+          tab order, letting keyboard users land on invisible controls. It is
+          now marked <code>inert</code> and{" "}
           <code>aria-hidden=&quot;true&quot;</code> while closed.{" "}
           <em>WCAG 2.4.3, 1.3.2.</em>
         </li>
@@ -1284,8 +1268,9 @@ export default function AccessibilityStatementPage() {
         </li>
         <li>
           <strong>Variant selector — group and live-region gaps</strong> — The
-          variant chip group is now a labeled <code>role=&quot;group&quot;</code>{" "}
-          and its quantity display announces changes. <em>WCAG 1.3.1, 4.1.3.</em>
+          variant chip group is now a labeled{" "}
+          <code>role=&quot;group&quot;</code> and its quantity display announces
+          changes. <em>WCAG 1.3.1, 4.1.3.</em>
         </li>
         <li>
           <strong>Minor fixes</strong> — Remaining decorative icons marked{" "}
@@ -1305,7 +1290,9 @@ export default function AccessibilityStatementPage() {
       </p>
       <ul>
         <li>
-          <strong>Gallery thumbnails — no focus indicator or selected state</strong>{" "}
+          <strong>
+            Gallery thumbnails — no focus indicator or selected state
+          </strong>{" "}
           — Product image thumbnails suppressed the template&apos;s focus
           outline and exposed the selected image only visually. The suppression
           was removed so the scoped focus indicator applies, and thumbnails now
@@ -1320,12 +1307,12 @@ export default function AccessibilityStatementPage() {
           <em>WCAG 2.4.7, 1.4.11.</em>
         </li>
         <li>
-          <strong>Sold-out variant options hidden from keyboard users</strong>{" "}
-          — Sold-out variant pills (and the variant add-to-cart button) used
-          the native <code>disabled</code> attribute, removing them from the
-          tab order. They now use <code>aria-disabled=&quot;true&quot;</code>{" "}
-          so they remain discoverable while still inoperable, matching the rest
-          of the template. <em>WCAG 2.1.1.</em>
+          <strong>Sold-out variant options hidden from keyboard users</strong> —
+          Sold-out variant pills (and the variant add-to-cart button) used the
+          native <code>disabled</code> attribute, removing them from the tab
+          order. They now use <code>aria-disabled=&quot;true&quot;</code> so
+          they remain discoverable while still inoperable, matching the rest of
+          the template. <em>WCAG 2.1.1.</em>
         </li>
         <li>
           <strong>Low-contrast text and icons</strong> — The strikethrough
@@ -1345,34 +1332,35 @@ export default function AccessibilityStatementPage() {
           via a polite live region. <em>WCAG 4.1.3, 2.4.3.</em>
         </li>
         <li>
-          <strong>Form fields — input purpose and required-field marking</strong>{" "}
+          <strong>
+            Form fields — input purpose and required-field marking
+          </strong>{" "}
           — Checkout email and name fields gained <code>autocomplete</code>{" "}
           attributes; required-field asterisks are now explained in text and
           hidden from screen readers (requiredness is conveyed by the native{" "}
           <code>required</code> attribute). <em>WCAG 1.3.5, 3.3.2.</em>
         </li>
         <li>
-          <strong>Keyboard navigation refinements</strong> — Closing the
-          desktop navigation dropdown with Escape now returns focus to its
-          trigger (which also gained <code>aria-controls</code>), and opening
-          the mobile menu moves focus correctly even when the first navigation
-          item is an expandable group. <em>WCAG 2.4.3, 4.1.2.</em>
+          <strong>Keyboard navigation refinements</strong> — Closing the desktop
+          navigation dropdown with Escape now returns focus to its trigger
+          (which also gained <code>aria-controls</code>), and opening the mobile
+          menu moves focus correctly even when the first navigation item is an
+          expandable group. <em>WCAG 2.4.3, 4.1.2.</em>
         </li>
         <li>
-          <strong>Structural fixes</strong> — A nested{" "}
-          <code>&lt;main&gt;</code> landmark on the order-success page was
-          removed; heading-level skips on the homepage, shop filters, and
-          contact page were corrected; the image gallery&apos;s crossfade and
-          lightbox animations now honor{" "}
+          <strong>Structural fixes</strong> — A nested <code>&lt;main&gt;</code>{" "}
+          landmark on the order-success page was removed; heading-level skips on
+          the homepage, shop filters, and contact page were corrected; the image
+          gallery&apos;s crossfade and lightbox animations now honor{" "}
           <code>prefers-reduced-motion</code>. <em>WCAG 1.3.1, 2.3.3.</em>
         </li>
         <li>
           <strong>Minor fixes</strong> — Remaining decorative icons marked{" "}
-          <code>aria-hidden</code>; links that open new tabs now say so in
-          their accessible names; suppressed focus styles on the blog search
-          and shop sort controls were removed; the hero eyebrow text and search
-          placeholder contrast were raised. <em>WCAG 1.1.1, 3.2.2, 2.4.7,
-          1.4.3.</em>
+          <code>aria-hidden</code>; links that open new tabs now say so in their
+          accessible names; suppressed focus styles on the blog search and shop
+          sort controls were removed; the hero eyebrow text and search
+          placeholder contrast were raised.{" "}
+          <em>WCAG 1.1.1, 3.2.2, 2.4.7, 1.4.3.</em>
         </li>
       </ul>
 
@@ -1790,13 +1778,13 @@ export default function AccessibilityStatementPage() {
         </li>
       </ul>
       <p>
-        This statement was prepared based on internal self-assessments
-        conducted in May and June 2026, covering the Elegant, Default, Bamboo,
-        Noise, Happy Bamboo, Sledge, Pollen, Dark Trend, and Modern storefront
+        This statement was prepared based on internal self-assessments conducted
+        in May and June 2026, covering the Elegant, Default, Bamboo, Noise,
+        Happy Bamboo, Sledge, Pollen, Dark Trend, and Modern storefront
         templates (including full follow-up audits of Bamboo and Noise in June
         2026). All critical and serious issues identified across these nine
-        templates have been resolved. It
-        reflects the current state of the platform and its storefront templates.
+        templates have been resolved. It reflects the current state of the
+        platform and its storefront templates.
       </p>
 
       <hr />

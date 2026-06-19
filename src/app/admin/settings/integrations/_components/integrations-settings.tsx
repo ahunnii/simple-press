@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { env } from "~/env";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 
@@ -54,9 +53,7 @@ export function IntegrationsSettings({ business }: Props) {
           />
 
           {/* Umami Analytics */}
-          {!!env.NEXT_PUBLIC_ENABLE_UMAMI && (
-            <UmamiSettings business={business} />
-          )}
+          <UmamiSettings business={business} />
         </div>
       </div>
     </>

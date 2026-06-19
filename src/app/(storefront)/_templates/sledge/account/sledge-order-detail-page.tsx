@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 import type { OrderDetailPageTemplateProps } from "../../types";
-import { cn } from "~/lib/utils";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { cn } from "~/lib/utils";
 import { PageTransition } from "~/components/page-animations";
 
 import { SledgeAccountLayout } from "./sledge-account-layout";
@@ -110,8 +110,8 @@ export function SledgeOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                     </div>
                     {/* M-4: sr-only labels for qty and total cells */}
                     <span className="sl-eyebrow font-sans text-xs">
-                      <span className="sr-only">Quantity: </span>
-                      ×{item.quantity}
+                      <span className="sr-only">Quantity: </span>×
+                      {item.quantity}
                     </span>
                     <span className="font-sans text-sm text-[var(--sl-ink)]">
                       <span className="sr-only">Line total: </span>

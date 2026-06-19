@@ -105,7 +105,10 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                     transition: "border-color 0.3s, color 0.3s",
                   }}
                 >
-                  <Instagram aria-hidden={true} style={{ width: 15, height: 15 }} />
+                  <Instagram
+                    aria-hidden={true}
+                    style={{ width: 15, height: 15 }}
+                  />
                 </a>
               )}
               {socialLinks?.facebook && (
@@ -125,7 +128,10 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                     color: "rgba(255,255,255,0.7)",
                   }}
                 >
-                  <Facebook aria-hidden={true} style={{ width: 15, height: 15 }} />
+                  <Facebook
+                    aria-hidden={true}
+                    style={{ width: 15, height: 15 }}
+                  />
                 </a>
               )}
               {socialLinks?.twitter && (
@@ -145,7 +151,10 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                     color: "rgba(255,255,255,0.7)",
                   }}
                 >
-                  <Twitter aria-hidden={true} style={{ width: 15, height: 15 }} />
+                  <Twitter
+                    aria-hidden={true}
+                    style={{ width: 15, height: 15 }}
+                  />
                 </a>
               )}
             </div>
@@ -161,65 +170,68 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
               gridColumn: "span 3",
             }}
           >
-          {/* Shop column */}
-          <FooterColumn title="Shop" links={navLinks} />
+            {/* Shop column */}
+            <FooterColumn title="Shop" links={navLinks} />
 
-          {/* Brand links column */}
-          <FooterColumn title={business?.name ?? "Brand"} links={BRAND_LINKS} />
+            {/* Brand links column */}
+            <FooterColumn
+              title={business?.name ?? "Brand"}
+              links={BRAND_LINKS}
+            />
 
-          {/* Policies / Contact column */}
-          <div>
-            <FooterColHeading>Info</FooterColHeading>
-            <ul role="list" style={{ listStyle: "none" }}>
-              {policies.map((policy) => (
-                <li key={policy.id} style={{ marginBottom: 10 }}>
-                  <Link
-                    href={policy.slug}
-                    style={{
-                      fontSize: 14,
-                      opacity: 0.8,
-                      color: "var(--el-paper, #fbf8f2)",
-                      textDecoration: "none",
-                      fontFamily: "var(--font-sans, sans-serif)",
-                      transition: "opacity 0.3s",
-                    }}
-                  >
-                    {policy.title}
-                  </Link>
-                </li>
-              ))}
-              {email && (
-                <li style={{ marginBottom: 10 }}>
-                  <a
-                    href={`mailto:${email}`}
-                    style={{
-                      fontSize: 14,
-                      opacity: 0.8,
-                      color: "var(--el-paper, #fbf8f2)",
-                      textDecoration: "none",
-                    }}
-                  >
-                    {email}
-                  </a>
-                </li>
-              )}
-              {phone && (
-                <li>
-                  <a
-                    href={`tel:${phone.replace(/\D/g, "")}`}
-                    style={{
-                      fontSize: 14,
-                      opacity: 0.8,
-                      color: "var(--el-paper, #fbf8f2)",
-                      textDecoration: "none",
-                    }}
-                  >
-                    {phone}
-                  </a>
-                </li>
-              )}
-            </ul>
-          </div>
+            {/* Policies / Contact column */}
+            <div>
+              <FooterColHeading>Info</FooterColHeading>
+              <ul role="list" style={{ listStyle: "none" }}>
+                {policies.map((policy) => (
+                  <li key={policy.id} style={{ marginBottom: 10 }}>
+                    <Link
+                      href={policy.slug}
+                      style={{
+                        fontSize: 14,
+                        opacity: 0.8,
+                        color: "var(--el-paper, #fbf8f2)",
+                        textDecoration: "none",
+                        fontFamily: "var(--font-sans, sans-serif)",
+                        transition: "opacity 0.3s",
+                      }}
+                    >
+                      {policy.title}
+                    </Link>
+                  </li>
+                ))}
+                {email && (
+                  <li style={{ marginBottom: 10 }}>
+                    <a
+                      href={`mailto:${email}`}
+                      style={{
+                        fontSize: 14,
+                        opacity: 0.8,
+                        color: "var(--el-paper, #fbf8f2)",
+                        textDecoration: "none",
+                      }}
+                    >
+                      {email}
+                    </a>
+                  </li>
+                )}
+                {phone && (
+                  <li>
+                    <a
+                      href={`tel:${phone.replace(/\D/g, "")}`}
+                      style={{
+                        fontSize: 14,
+                        opacity: 0.8,
+                        color: "var(--el-paper, #fbf8f2)",
+                        textDecoration: "none",
+                      }}
+                    >
+                      {phone}
+                    </a>
+                  </li>
+                )}
+              </ul>
+            </div>
           </nav>
         </div>
 
@@ -237,11 +249,12 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
             textTransform: "uppercase",
           }}
         >
-          <span>© {new Date().getFullYear()} {business?.name}</span>
+          <span>
+            © {new Date().getFullYear()} {business?.name}
+          </span>
           <span>Made with care</span>
         </div>
       </div>
-
     </footer>
   );
 }

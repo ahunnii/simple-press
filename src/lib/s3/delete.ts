@@ -46,7 +46,9 @@ async function deleteOneObject(url: string): Promise<void> {
     return;
   }
 
-  const bucketUrl = s3Client.buildBucketUrl(env.NEXT_PUBLIC_STORAGE_BUCKET_NAME);
+  const bucketUrl = s3Client.buildBucketUrl(
+    env.NEXT_PUBLIC_STORAGE_BUCKET_NAME,
+  );
   const objectUrl = `${bucketUrl}/${key}`;
 
   const res = await s3Client.s3.fetch(objectUrl, { method: "DELETE" });

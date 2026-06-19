@@ -1,12 +1,16 @@
 // app/api/webhooks/stripe/route.ts
 import type { NextRequest } from "next/server";
 import type Stripe from "stripe";
-import { Prisma } from "generated/prisma";
 import { NextResponse } from "next/server";
+import { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 
+import type { PoolDeductionResult } from "~/lib/inventory";
+import type { ReservationEntry } from "~/lib/inventory/reservation";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import { getBusinessUrl } from "~/lib/business-url";
+import { createOrderFromCheckout } from "~/lib/checkout/create-order";
+import { resolveCheckoutShipping } from "~/lib/checkout/shipping";
 import {
   sendBackorderAlert,
   sendLowInventoryAlert,
@@ -16,8 +20,10 @@ import {
   sendPoolLowInventoryAlert,
   sendPoolOutOfStockAlert,
 } from "~/lib/email/templates";
-import { deductPoolInventory, type PoolDeductionResult } from "~/lib/inventory";
+import { deductPoolInventory } from "~/lib/inventory";
+import { releaseReservation } from "~/lib/inventory/reservation";
 import { stripeClient } from "~/lib/stripe/client";
+import { normalizeEmail } from "~/lib/utils";
 import { db } from "~/server/db";
 
 type NotificationCandidate = {
@@ -30,89 +36,6 @@ type NotificationCandidate = {
   allowBackorders: boolean;
   lowInventoryThreshold: number | null;
 };
-
-/** Prefer shipping collected on Checkout; fall back to PI shipping or session metadata (storefront pre-filled address). */
-function resolveCheckoutShipping(fullSession: Stripe.Checkout.Session): {
-  addressLine1: string | null;
-  addressLine2: string | null;
-  city: string;
-  province: string;
-  zip: string;
-  country: string;
-  phone: string | null;
-  nameForAddress: string | null;
-} {
-  const collected = fullSession.collected_information?.shipping_details;
-  if (collected?.address?.line1) {
-    const a = collected.address;
-    return {
-      addressLine1: a.line1 ?? null,
-      addressLine2: a.line2 ?? null,
-      city: a.city ?? "",
-      province: a.state ?? "",
-      zip: a.postal_code ?? "",
-      country: a.country ?? "",
-      phone: fullSession.customer_details?.phone ?? null,
-      nameForAddress:
-        collected.name ?? fullSession.customer_details?.name ?? null,
-    };
-  }
-
-  const cd = fullSession.customer_details?.address;
-  if (cd?.line1) {
-    return {
-      addressLine1: cd.line1 ?? null,
-      addressLine2: cd.line2 ?? null,
-      city: cd.city ?? "",
-      province: cd.state ?? "",
-      zip: cd.postal_code ?? "",
-      country: cd.country ?? "",
-      phone: fullSession.customer_details?.phone ?? null,
-      nameForAddress: fullSession.customer_details?.name ?? null,
-    };
-  }
-
-  const pi = fullSession.payment_intent;
-  if (typeof pi === "object" && pi?.shipping?.address?.line1) {
-    const a = pi.shipping.address;
-    return {
-      addressLine1: a.line1 ?? null,
-      addressLine2: a.line2 ?? null,
-      city: a.city ?? "",
-      province: a.state ?? "",
-      zip: a.postal_code ?? "",
-      country: a.country ?? "",
-      phone: pi.shipping.phone ?? null,
-      nameForAddress: pi.shipping.name ?? null,
-    };
-  }
-
-  const m = fullSession.metadata;
-  if (m?.shippingLine1) {
-    return {
-      addressLine1: m.shippingLine1,
-      addressLine2: m.shippingLine2 ?? null,
-      city: m.shippingCity ?? "",
-      province: m.shippingState ?? "",
-      zip: m.shippingPostalCode ?? "",
-      country: m.shippingCountry ?? "",
-      phone: m.shippingPhone ?? null,
-      nameForAddress:
-        m.customerName ?? fullSession.customer_details?.name ?? null,
-    };
-  }
-
-  return {
-    addressLine1: null,
-    addressLine2: null,
-    city: "",
-    province: "",
-    zip: "",
-    country: "",
-    phone: null,
-    nameForAddress: null,
-  };
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -237,10 +160,11 @@ export async function POST(req: NextRequest) {
 
         // Get or create customer
         let customer = null;
-        const customerEmail =
+        const customerEmail = normalizeEmail(
           session.customer_email ??
-          session.customer_details?.email ??
-          "unknown@example.com";
+            session.customer_details?.email ??
+            "unknown@example.com",
+        );
 
         if (customerEmail === "unknown@example.com") {
           Sentry.withScope((scope) => {
@@ -349,114 +273,20 @@ export async function POST(req: NextRequest) {
           verifiedDiscountCodeId = dc?.id ?? null;
         }
 
-        // Generate order number and create order. Retry up to 3 times on a
-        // unique-constraint conflict for orderNumber — two concurrent webhook
-        // deliveries for different sessions can race and produce the same number.
-        const getNextOrderNumber = async () => {
-          const lastOrder = await db.order.findFirst({
-            where: { businessId: business.id },
-            orderBy: { orderNumber: "desc" },
-            select: { orderNumber: true },
-          });
-          return (lastOrder?.orderNumber ?? 0) + 1;
-        };
+        const order = await createOrderFromCheckout(db, {
+          business,
+          customer,
+          shippingAddressId,
+          customerEmail,
+          session,
+          fullSession,
+          verifiedDiscountCodeId,
+          discountAmount,
+        });
 
-        let orderNumber = await getNextOrderNumber();
-
-        // Wrap in a retry loop: two concurrent webhook deliveries for different
-        // sessions can race and produce the same orderNumber. On P2002, re-query
-        // and retry (max 3 attempts). The create is not inside an inventory
-        // transaction, so a rolled-back create has no side effects to undo.
-        const order = await (async () => {
-          for (let attempt = 0; attempt < 3; attempt++) {
-            try {
-              return await db.order.create({
-                data: {
-                  businessId: business.id,
-                  orderNumber,
-                  customerId: customer?.id ?? null,
-                  shippingAddressId,
-
-                  customerEmail,
-                  customerName: session.customer_details?.name ?? "Unknown",
-
-                  // Amounts in cents
-                  subtotal: session.amount_subtotal ?? 0,
-                  tax: fullSession.total_details?.amount_tax ?? 0,
-                  shipping: fullSession.total_details?.amount_shipping ?? 0,
-                  discount: discountAmount,
-                  total: session.amount_total ?? 0,
-
-                  // currency: session.currency ?? "usd",
-                  status: "open",
-                  paymentStatus: session.payment_status ?? "paid",
-                  fulfillmentStatus: "unfulfilled",
-
-                  // Stripe reference
-                  stripeSessionId: session.id,
-                  stripePaymentIntentId:
-                    typeof session.payment_intent === "string"
-                      ? session.payment_intent
-                      : null,
-
-                  ...(verifiedDiscountCodeId
-                    ? { discountCodeId: verifiedDiscountCodeId }
-                    : {}),
-
-                  // Order items
-                  items: {
-                    create:
-                      fullSession.line_items?.data.map((item) => {
-                        const product = item.price?.product;
-                        const metadata =
-                          product &&
-                          typeof product === "object" &&
-                          !("deleted" in product && product.deleted) &&
-                          "metadata" in product
-                            ? (product as { metadata: Record<string, string> })
-                                .metadata
-                            : {};
-
-                        const productId = metadata.productId?.trim() ?? null;
-                        const productVariantId =
-                          metadata.productVariantId?.trim() ?? null;
-                        const variantName = metadata.variantName?.trim() ?? null;
-                        const sku = metadata.sku?.trim() ?? null;
-
-                        return {
-                          productName: item.description ?? "Unknown Product",
-                          variantName,
-                          sku,
-                          productId,
-                          productVariantId,
-                          quantity: item.quantity ?? 1,
-                          price: item.price?.unit_amount ?? 0,
-                          total: item.amount_total,
-                        };
-                      }) ?? [],
-                  },
-                },
-                include: { items: true },
-              });
-            } catch (createErr: unknown) {
-              const isOrderNumberConflict =
-                createErr instanceof Prisma.PrismaClientKnownRequestError &&
-                createErr.code === "P2002" &&
-                (createErr.meta?.target as string[] | undefined)?.some(
-                  (f) =>
-                    f === "orderNumber" ||
-                    f === "Order_businessId_orderNumber_key",
-                );
-              if (attempt < 2 && isOrderNumberConflict) {
-                orderNumber = await getNextOrderNumber();
-                continue;
-              }
-              throw createErr;
-            }
-          }
-          // unreachable — loop always returns or throws
-          throw new Error("[Webhook] Order creation retry exhausted");
-        })();
+        // orderNumber is used by the inventory-deduction block below for log
+        // notes and InventoryHistory records.
+        const orderNumber = order.orderNumber;
 
         console.log(
           `[Webhook] Order created: ${order.id} for business ${business.id}`,
@@ -601,7 +431,8 @@ export async function POST(req: NextRequest) {
                     newQty,
                     previousQty,
                     allowBackorders: variant.product.allowBackorders,
-                    lowInventoryThreshold: variant.product.lowInventoryThreshold,
+                    lowInventoryThreshold:
+                      variant.product.lowInventoryThreshold,
                   });
                 } else {
                   const result = await tx.productVariant.updateMany({
@@ -654,7 +485,8 @@ export async function POST(req: NextRequest) {
                     newQty,
                     previousQty,
                     allowBackorders: variant.product.allowBackorders,
-                    lowInventoryThreshold: variant.product.lowInventoryThreshold,
+                    lowInventoryThreshold:
+                      variant.product.lowInventoryThreshold,
                   });
                 }
               }
@@ -794,6 +626,42 @@ export async function POST(req: NextRequest) {
               });
               if (result) poolNotificationCandidates.push(result);
             }
+
+            // Release the inventory reservation now that physical inventory has
+            // been deducted. Look up by stripeSessionId first, fall back to
+            // metadata.reservationId. Guard so a missing/already-consumed
+            // reservation never breaks order creation.
+            try {
+              const reservationId = session.metadata?.reservationId;
+              const reservation = await tx.inventoryReservation.findFirst({
+                where: {
+                  OR: [
+                    { stripeSessionId: session.id },
+                    ...(reservationId ? [{ id: reservationId }] : []),
+                  ],
+                  status: "active",
+                },
+              });
+              if (reservation) {
+                const entries = reservation.items as ReservationEntry[];
+                await releaseReservation(tx, { items: entries });
+                await tx.inventoryReservation.update({
+                  where: { id: reservation.id },
+                  data: { status: "consumed" },
+                });
+              }
+            } catch (reservationErr) {
+              console.error(
+                "[Webhook] Failed to release reservation on checkout.session.completed:",
+                reservationErr,
+              );
+              Sentry.withScope((scope) => {
+                scope.setTag("webhook.step", "reservation-release-completed");
+                scope.setTag("businessId", businessId);
+                Sentry.captureException(reservationErr);
+              });
+              // Non-fatal — inventory deduction and order creation still succeed
+            }
           });
 
           console.log(`[Webhook] Inventory deducted for order ${order.id}`);
@@ -835,14 +703,27 @@ export async function POST(req: NextRequest) {
                 // Atomic flag set — count > 0 means we won the race and should send the email
                 const flagged = await db.product.updateMany({
                   where: { id: productId, outOfStockAlertSent: false },
-                  data: { outOfStockAlertSent: true, lowInventoryAlertSent: true },
+                  data: {
+                    outOfStockAlertSent: true,
+                    lowInventoryAlertSent: true,
+                  },
                 });
                 if (flagged.count > 0) {
                   alertedProductIds.add(productId);
                   if (allowBackorders) {
-                    await sendBackorderAlert({ productName, variantName, adminProductUrl, business });
+                    await sendBackorderAlert({
+                      productName,
+                      variantName,
+                      adminProductUrl,
+                      business,
+                    });
                   } else {
-                    await sendOutOfStockAlert({ productName, variantName, adminProductUrl, business });
+                    await sendOutOfStockAlert({
+                      productName,
+                      variantName,
+                      adminProductUrl,
+                      business,
+                    });
                   }
                 }
               } else if (
@@ -867,9 +748,14 @@ export async function POST(req: NextRequest) {
                 }
               }
             }
-            console.log(`[Webhook] Inventory notifications processed for order ${order.id}`);
+            console.log(
+              `[Webhook] Inventory notifications processed for order ${order.id}`,
+            );
           } catch (notifyError) {
-            console.error("[Webhook] Failed to send inventory notification:", notifyError);
+            console.error(
+              "[Webhook] Failed to send inventory notification:",
+              notifyError,
+            );
             Sentry.withScope((scope) => {
               scope.setTag("webhook.step", "inventory-notification");
               scope.setTag("businessId", businessId);
@@ -880,61 +766,66 @@ export async function POST(req: NextRequest) {
 
         // Send pool inventory alert notifications
         if (poolNotificationCandidates.length > 0) {
-            try {
-              const businessUrl = getBusinessUrl(business);
-              const alertedPoolIds = new Set<string>();
-              for (const candidate of poolNotificationCandidates) {
-                if (candidate.wasOversell) continue;
-                if (alertedPoolIds.has(candidate.poolId)) continue;
+          try {
+            const businessUrl = getBusinessUrl(business);
+            const alertedPoolIds = new Set<string>();
+            for (const candidate of poolNotificationCandidates) {
+              if (candidate.wasOversell) continue;
+              if (alertedPoolIds.has(candidate.poolId)) continue;
 
-                const adminInventoryUrl = `${businessUrl}/admin/inventory`;
+              const adminInventoryUrl = `${businessUrl}/admin/inventory`;
 
-                if (candidate.newQty <= 0) {
-                  const flagged = await db.baseInventoryUnit.updateMany({
-                    where: { id: candidate.poolId, outOfStockAlertSent: false },
-                    data: {
-                      outOfStockAlertSent: true,
-                      lowInventoryAlertSent: true,
-                    },
+              if (candidate.newQty <= 0) {
+                const flagged = await db.baseInventoryUnit.updateMany({
+                  where: { id: candidate.poolId, outOfStockAlertSent: false },
+                  data: {
+                    outOfStockAlertSent: true,
+                    lowInventoryAlertSent: true,
+                  },
+                });
+                if (flagged.count > 0) {
+                  alertedPoolIds.add(candidate.poolId);
+                  await sendPoolOutOfStockAlert({
+                    poolName: candidate.poolName,
+                    adminUrl: adminInventoryUrl,
+                    business,
                   });
-                  if (flagged.count > 0) {
-                    alertedPoolIds.add(candidate.poolId);
-                    await sendPoolOutOfStockAlert({
-                      poolName: candidate.poolName,
-                      adminUrl: adminInventoryUrl,
-                      business,
-                    });
-                  }
-                } else if (
-                  candidate.lowInventoryThreshold !== null &&
-                  candidate.newQty <= candidate.lowInventoryThreshold &&
-                  candidate.previousQty > candidate.lowInventoryThreshold
-                ) {
-                  const flagged = await db.baseInventoryUnit.updateMany({
-                    where: { id: candidate.poolId, lowInventoryAlertSent: false },
-                    data: { lowInventoryAlertSent: true },
+                }
+              } else if (
+                candidate.lowInventoryThreshold !== null &&
+                candidate.newQty <= candidate.lowInventoryThreshold &&
+                candidate.previousQty > candidate.lowInventoryThreshold
+              ) {
+                const flagged = await db.baseInventoryUnit.updateMany({
+                  where: { id: candidate.poolId, lowInventoryAlertSent: false },
+                  data: { lowInventoryAlertSent: true },
+                });
+                if (flagged.count > 0) {
+                  alertedPoolIds.add(candidate.poolId);
+                  await sendPoolLowInventoryAlert({
+                    poolName: candidate.poolName,
+                    currentQty: candidate.newQty,
+                    threshold: candidate.lowInventoryThreshold,
+                    adminUrl: adminInventoryUrl,
+                    business,
                   });
-                  if (flagged.count > 0) {
-                    alertedPoolIds.add(candidate.poolId);
-                    await sendPoolLowInventoryAlert({
-                      poolName: candidate.poolName,
-                      currentQty: candidate.newQty,
-                      threshold: candidate.lowInventoryThreshold,
-                      adminUrl: adminInventoryUrl,
-                      business,
-                    });
-                  }
                 }
               }
-              console.log(`[Webhook] Pool notifications processed for order ${order.id}`);
-            } catch (poolNotifyError) {
-              console.error("[Webhook] Failed to send pool inventory notification:", poolNotifyError);
-              Sentry.withScope((scope) => {
-                scope.setTag("webhook.step", "pool-inventory-notification");
-                scope.setTag("businessId", businessId);
-                Sentry.captureException(poolNotifyError);
-              });
             }
+            console.log(
+              `[Webhook] Pool notifications processed for order ${order.id}`,
+            );
+          } catch (poolNotifyError) {
+            console.error(
+              "[Webhook] Failed to send pool inventory notification:",
+              poolNotifyError,
+            );
+            Sentry.withScope((scope) => {
+              scope.setTag("webhook.step", "pool-inventory-notification");
+              scope.setTag("businessId", businessId);
+              Sentry.captureException(poolNotifyError);
+            });
+          }
         }
 
         // Send order confirmation email (skip if customer email is unknown)
@@ -942,69 +833,70 @@ export async function POST(req: NextRequest) {
           console.warn(
             `[Webhook] Skipping order confirmation email for order #${order.orderNumber} — no customer email`,
           );
-        } else try {
-          // Fetch shipping address for email if available
-          let shippingAddressForEmail = undefined;
-          if (shippingAddressId) {
-            const addr = await db.shippingAddress.findUnique({
-              where: { id: shippingAddressId },
-            });
-            if (addr) {
-              shippingAddressForEmail = {
-                name: `${addr.firstName} ${addr.lastName}`.trim(),
-                line1: addr.address1,
-                line2: addr.address2 ?? null,
-                city: addr.city,
-                state: addr.province ?? "",
-                postalCode: addr.zip,
-                country: addr.country,
-              };
+        } else
+          try {
+            // Fetch shipping address for email if available
+            let shippingAddressForEmail = undefined;
+            if (shippingAddressId) {
+              const addr = await db.shippingAddress.findUnique({
+                where: { id: shippingAddressId },
+              });
+              if (addr) {
+                shippingAddressForEmail = {
+                  name: `${addr.firstName} ${addr.lastName}`.trim(),
+                  line1: addr.address1,
+                  line2: addr.address2 ?? null,
+                  city: addr.city,
+                  state: addr.province ?? "",
+                  postalCode: addr.zip,
+                  country: addr.country,
+                };
+              }
             }
+
+            await sendOrderConfirmation({
+              to: order.customerEmail,
+              orderNumber: order.orderNumber,
+              customerName: order.customerName ?? "Guest",
+              items: order.items.map((item) => ({
+                productName: item.productName,
+                variantName: item.variantName,
+                quantity: item.quantity,
+                price: item.price,
+                total: item.total,
+              })),
+              subtotal: order.subtotal,
+              shipping: order.shipping,
+              tax: order.tax,
+              discount: order.discount,
+              total: order.total,
+              shippingAddress: shippingAddressForEmail,
+              business: {
+                name: business.name,
+                ownerEmail: business.ownerEmail,
+                siteContent: business.siteContent,
+                subdomain: business.subdomain,
+                customDomain: business.customDomain,
+                domainStatus: business.domainStatus,
+              },
+              idempotencyKey: `order-confirmation-${session.id}`,
+            });
+
+            console.log(
+              `[Webhook] Order confirmation email sent for order ${order.id}`,
+            );
+          } catch (emailError) {
+            console.error(
+              "[Webhook] Failed to send order confirmation email:",
+              emailError,
+            );
+            Sentry.withScope((scope) => {
+              scope.setTag("webhook.step", "order-confirmation-email");
+              scope.setTag("businessId", businessId);
+              Sentry.captureException(emailError);
+            });
+            // Don't fail the webhook if email fails
           }
-
-          await sendOrderConfirmation({
-            to: order.customerEmail,
-            orderNumber: order.orderNumber,
-            customerName: order.customerName ?? "Guest",
-            items: order.items.map((item) => ({
-              productName: item.productName,
-              variantName: item.variantName,
-              quantity: item.quantity,
-              price: item.price,
-              total: item.total,
-            })),
-            subtotal: order.subtotal,
-            shipping: order.shipping,
-            tax: order.tax,
-            discount: order.discount,
-            total: order.total,
-            shippingAddress: shippingAddressForEmail,
-            business: {
-              name: business.name,
-              ownerEmail: business.ownerEmail,
-              siteContent: business.siteContent,
-              subdomain: business.subdomain,
-              customDomain: business.customDomain,
-              domainStatus: business.domainStatus,
-            },
-            idempotencyKey: `order-confirmation-${session.id}`,
-          });
-
-          console.log(
-            `[Webhook] Order confirmation email sent for order ${order.id}`,
-          );
-        } catch (emailError) {
-          console.error(
-            "[Webhook] Failed to send order confirmation email:",
-            emailError,
-          );
-          Sentry.withScope((scope) => {
-            scope.setTag("webhook.step", "order-confirmation-email");
-            scope.setTag("businessId", businessId);
-            Sentry.captureException(emailError);
-          });
-          // Don't fail the webhook if email fails
-        }
 
         try {
           await sendNewOrderNotification({
@@ -1082,6 +974,46 @@ export async function POST(req: NextRequest) {
           { status: 500 },
         );
       }
+    }
+
+    // Handle checkout.session.expired — release the inventory reservation so
+    // held stock is returned to available. Idempotent: no-op if already released.
+    if (event.type === "checkout.session.expired") {
+      const expiredSession = event.data.object;
+      try {
+        const reservationId = expiredSession.metadata?.reservationId;
+        const reservation = await db.inventoryReservation.findFirst({
+          where: {
+            OR: [
+              { stripeSessionId: expiredSession.id },
+              ...(reservationId ? [{ id: reservationId }] : []),
+            ],
+            status: "active",
+          },
+        });
+        if (reservation) {
+          await db.$transaction(async (tx) => {
+            const entries = reservation.items as ReservationEntry[];
+            await releaseReservation(tx, { items: entries });
+            await tx.inventoryReservation.update({
+              where: { id: reservation.id },
+              data: { status: "released" },
+            });
+          });
+          console.log(
+            `[Webhook] Released reservation ${reservation.id} on session expiry ${expiredSession.id}`,
+          );
+        }
+      } catch (expiredErr) {
+        console.error(
+          "[Webhook] Failed to release reservation on checkout.session.expired:",
+          expiredErr,
+        );
+        Sentry.captureException(expiredErr, {
+          tags: { "webhook.step": "reservation-release-expired" },
+        });
+      }
+      return NextResponse.json({ received: true });
     }
 
     // Handle account.updated (Connect account status changes)

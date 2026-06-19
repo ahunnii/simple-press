@@ -19,7 +19,12 @@ function useScrollReveal() {
     const el = ref.current;
     if (!el) return;
     const io = new IntersectionObserver(
-      ([entry]) => { if (entry?.isIntersecting) { setVisible(true); io.disconnect(); } },
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
       { threshold: 0.08 },
     );
     io.observe(el);
@@ -75,19 +80,22 @@ export function ElegantCollectionPage({
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
           {/* Back link */}
           <div style={fadeStyle(0)}>
-            <Link href="/collections" style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              fontFamily: "var(--font-mono, ui-monospace)",
-              fontSize: 11,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--el-ink-soft, #6b6659)",
-              textDecoration: "none",
-              marginBottom: 32,
-              transition: `color 0.3s ${ease}`,
-            }}>
+            <Link
+              href="/collections"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 11,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+                textDecoration: "none",
+                marginBottom: 32,
+                transition: `color 0.3s ${ease}`,
+              }}
+            >
               <ArrowLeft aria-hidden={true} style={{ width: 13, height: 13 }} />
               All collections
             </Link>
@@ -96,92 +104,126 @@ export function ElegantCollectionPage({
           {/* Editorial hero: text left / image right */}
           <div
             className="el-collection-hero"
-            style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 56, alignItems: "center" }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1.1fr 1fr",
+              gap: 56,
+              alignItems: "center",
+            }}
           >
             <div>
               <div style={fadeStyle(0.05)}>
-                <span style={{
-                  fontFamily: "var(--font-mono, ui-monospace)",
-                  fontSize: 11,
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                  color: "var(--el-ink-soft, #6b6659)",
-                }}>
-                  Collection · {products.length} {products.length === 1 ? "item" : "items"}
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono, ui-monospace)",
+                    fontSize: 11,
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                    color: "var(--el-ink-soft, #6b6659)",
+                  }}
+                >
+                  Collection · {products.length}{" "}
+                  {products.length === 1 ? "item" : "items"}
                 </span>
               </div>
 
-              <h1 style={{
-                fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-                fontWeight: 400,
-                fontSize: "clamp(48px, 7vw, 96px)",
-                lineHeight: 0.95,
-                letterSpacing: "-0.01em",
-                marginTop: 14,
-                color: "var(--el-ink, #1c1a17)",
-              }}>
+              <h1
+                style={{
+                  fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                  fontWeight: 400,
+                  fontSize: "clamp(48px, 7vw, 96px)",
+                  lineHeight: 0.95,
+                  letterSpacing: "-0.01em",
+                  marginTop: 14,
+                  color: "var(--el-ink, #1c1a17)",
+                }}
+              >
                 {collection.name.split(" ").map((word, i, arr) =>
                   i === arr.length - 1 ? (
-                    <span key={i} style={{ display: "block", overflow: "hidden" }}>
-                      <em style={{ ...maskStyle(0.08 + i * 0.1), fontStyle: "italic" }}>{word}</em>
+                    <span
+                      key={i}
+                      style={{ display: "block", overflow: "hidden" }}
+                    >
+                      <em
+                        style={{
+                          ...maskStyle(0.08 + i * 0.1),
+                          fontStyle: "italic",
+                        }}
+                      >
+                        {word}
+                      </em>
                     </span>
                   ) : (
-                    <span key={i} style={{ display: "block", overflow: "hidden" }}>
+                    <span
+                      key={i}
+                      style={{ display: "block", overflow: "hidden" }}
+                    >
                       <span style={maskStyle(0.08 + i * 0.1)}>{word} </span>
                     </span>
-                  )
+                  ),
                 )}
               </h1>
 
               {collection.description && (
                 <div style={fadeStyle(0.28)}>
-                  <p style={{
-                    marginTop: 22,
-                    fontSize: 18,
-                    color: "var(--el-ink-soft, #6b6659)",
-                    lineHeight: 1.65,
-                    maxWidth: 480,
-                    fontFamily: "var(--font-sans, sans-serif)",
-                  }}>
+                  <p
+                    style={{
+                      marginTop: 22,
+                      fontSize: 18,
+                      color: "var(--el-ink-soft, #6b6659)",
+                      lineHeight: 1.65,
+                      maxWidth: 480,
+                      fontFamily: "var(--font-sans, sans-serif)",
+                    }}
+                  >
                     {collection.description}
                   </p>
                 </div>
               )}
 
               <div style={fadeStyle(0.38)}>
-                <Link href="/shop" style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 10,
-                  marginTop: 32,
-                  padding: "14px 26px",
-                  borderRadius: 999,
-                  fontSize: 13,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  fontWeight: 500,
-                  background: "transparent",
-                  color: "var(--el-ink, #1c1a17)",
-                  border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
-                  textDecoration: "none",
-                  fontFamily: "var(--font-sans, sans-serif)",
-                  transition: `background 0.4s ${ease}, color 0.4s ${ease}`,
-                }} className="el-btn-ghost">
+                <Link
+                  href="/shop"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 10,
+                    marginTop: 32,
+                    padding: "14px 26px",
+                    borderRadius: 999,
+                    fontSize: 13,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    fontWeight: 500,
+                    background: "transparent",
+                    color: "var(--el-ink, #1c1a17)",
+                    border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                    textDecoration: "none",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    transition: `background 0.4s ${ease}, color 0.4s ${ease}`,
+                  }}
+                  className="el-btn-ghost"
+                >
                   Continue browsing
-                  <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
+                  <ArrowRight
+                    aria-hidden={true}
+                    style={{ width: 14, height: 14 }}
+                  />
                 </Link>
               </div>
             </div>
 
             {/* Hero image */}
-            <div style={{
-              ...fadeStyle(0.2),
-              position: "relative",
-              aspectRatio: "4/5",
-              borderRadius: 8,
-              overflow: "hidden",
-              background: "var(--el-cream-2, #ebe6dc)",
-            }}>
+            <div
+              style={{
+                ...fadeStyle(0.2),
+                position: "relative",
+                aspectRatio: "4/5",
+                borderRadius: 8,
+                overflow: "hidden",
+                background: "var(--el-cream-2, #ebe6dc)",
+              }}
+            >
               {collection.imageUrl && (
                 <Image
                   src={collection.imageUrl}
@@ -195,71 +237,89 @@ export function ElegantCollectionPage({
             </div>
           </div>
         </div>
-
       </section>
 
       {/* ── Products ── */}
       <section ref={productsReveal.ref} style={{ padding: "60px 40px 80px" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
-          <div style={{
-            ...(reducedMotion ? {} : {
-              opacity: productsReveal.visible ? 1 : 0,
-              transform: productsReveal.visible ? "translateY(0)" : "translateY(24px)",
-              transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
-            }),
-            marginBottom: 40,
-          }}>
-            <span style={{
-              fontFamily: "var(--font-mono, ui-monospace)",
-              fontSize: 11,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "var(--el-ink-soft, #6b6659)",
-              display: "block",
-              marginBottom: 14,
-            }}>
+          <div
+            style={{
+              ...(reducedMotion
+                ? {}
+                : {
+                    opacity: productsReveal.visible ? 1 : 0,
+                    transform: productsReveal.visible
+                      ? "translateY(0)"
+                      : "translateY(24px)",
+                    transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+                  }),
+              marginBottom: 40,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 11,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--el-ink-soft, #6b6659)",
+                display: "block",
+                marginBottom: 14,
+              }}
+            >
               What&apos;s inside
             </span>
-            <h2 style={{
-              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-              fontWeight: 400,
-              fontSize: "clamp(32px, 4vw, 52px)",
-              lineHeight: 1.05,
-              color: "var(--el-ink, #1c1a17)",
-            }}>
-              The <em style={{ fontStyle: "italic" }}>{products.length} pieces</em>.
+            <h2
+              style={{
+                fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                fontWeight: 400,
+                fontSize: "clamp(32px, 4vw, 52px)",
+                lineHeight: 1.05,
+                color: "var(--el-ink, #1c1a17)",
+              }}
+            >
+              The{" "}
+              <em style={{ fontStyle: "italic" }}>{products.length} pieces</em>.
             </h2>
           </div>
 
           {products.length === 0 ? (
             <div style={{ padding: "60px 0", textAlign: "center" }}>
-              <p style={{
-                fontFamily: "var(--font-serif, serif)",
-                fontSize: 28,
-                color: "var(--el-ink, #1c1a17)",
-                marginBottom: 10,
-              }}>
+              <p
+                style={{
+                  fontFamily: "var(--font-serif, serif)",
+                  fontSize: 28,
+                  color: "var(--el-ink, #1c1a17)",
+                  marginBottom: 10,
+                }}
+              >
                 Nothing here yet.
               </p>
-              <Link href="/shop" style={{
-                fontFamily: "var(--font-mono, ui-monospace)",
-                fontSize: 11,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: "var(--el-ink-soft, #6b6659)",
-                textDecoration: "none",
-              }}>
+              <Link
+                href="/shop"
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                  textDecoration: "none",
+                }}
+              >
                 Browse all products →
               </Link>
             </div>
           ) : (
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-              gap: 32,
-            }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+                gap: 32,
+              }}
+            >
               {products.map((product, i) => {
-                const displayPrice = product.variants[0]?.price ?? product.price;
+                const displayPrice =
+                  product.variants[0]?.price ?? product.price;
                 const image = product.images[0]?.url ?? "/placeholder.svg";
 
                 return (
@@ -269,22 +329,28 @@ export function ElegantCollectionPage({
                     style={{
                       display: "block",
                       textDecoration: "none",
-                      ...(reducedMotion ? {} : {
-                        opacity: productsReveal.visible ? 1 : 0,
-                        transform: productsReveal.visible ? "translateY(0)" : "translateY(24px)",
-                        transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
-                      }),
+                      ...(reducedMotion
+                        ? {}
+                        : {
+                            opacity: productsReveal.visible ? 1 : 0,
+                            transform: productsReveal.visible
+                              ? "translateY(0)"
+                              : "translateY(24px)",
+                            transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
+                          }),
                     }}
                     className="el-collection-product-card group"
                   >
                     {/* Image */}
-                    <div style={{
-                      position: "relative",
-                      aspectRatio: "4/5",
-                      borderRadius: 8,
-                      overflow: "hidden",
-                      background: "var(--el-cream-2, #ebe6dc)",
-                    }}>
+                    <div
+                      style={{
+                        position: "relative",
+                        aspectRatio: "4/5",
+                        borderRadius: 8,
+                        overflow: "hidden",
+                        background: "var(--el-cream-2, #ebe6dc)",
+                      }}
+                    >
                       <Image
                         src={image}
                         alt={product.name}
@@ -295,28 +361,35 @@ export function ElegantCollectionPage({
                       />
                     </div>
                     {/* Meta */}
-                    <div style={{
-                      marginTop: 14,
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "baseline",
-                      gap: 12,
-                    }}>
-                      <div style={{
-                        fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-                        fontSize: 20,
-                        fontWeight: 500,
-                        lineHeight: 1.2,
-                        color: "var(--el-ink, #1c1a17)",
-                      }}>
+                    <div
+                      style={{
+                        marginTop: 14,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "baseline",
+                        gap: 12,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontFamily:
+                            "var(--font-serif, 'Cormorant Garamond', serif)",
+                          fontSize: 20,
+                          fontWeight: 500,
+                          lineHeight: 1.2,
+                          color: "var(--el-ink, #1c1a17)",
+                        }}
+                      >
                         {product.name}
                       </div>
-                      <div style={{
-                        fontSize: 14,
-                        fontWeight: 500,
-                        whiteSpace: "nowrap",
-                        color: "var(--el-ink, #1c1a17)",
-                      }}>
+                      <div
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 500,
+                          whiteSpace: "nowrap",
+                          color: "var(--el-ink, #1c1a17)",
+                        }}
+                      >
                         {formatPrice(displayPrice)}
                       </div>
                     </div>
@@ -326,51 +399,65 @@ export function ElegantCollectionPage({
             </div>
           )}
         </div>
-
       </section>
 
       {/* ── Other collections ── */}
       {others.length > 0 && (
         <section
           ref={othersReveal.ref}
-          style={{ padding: "80px 40px", background: "var(--el-paper, #fbf8f2)" }}
+          style={{
+            padding: "80px 40px",
+            background: "var(--el-paper, #fbf8f2)",
+          }}
         >
           <div style={{ maxWidth: 1360, margin: "0 auto" }}>
-            <div style={{
-              ...(reducedMotion ? {} : {
-                opacity: othersReveal.visible ? 1 : 0,
-                transform: othersReveal.visible ? "translateY(0)" : "translateY(24px)",
-                transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
-              }),
-              marginBottom: 40,
-            }}>
-              <span style={{
-                fontFamily: "var(--font-mono, ui-monospace)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--el-ink-soft, #6b6659)",
-                display: "block",
-                marginBottom: 14,
-              }}>
+            <div
+              style={{
+                ...(reducedMotion
+                  ? {}
+                  : {
+                      opacity: othersReveal.visible ? 1 : 0,
+                      transform: othersReveal.visible
+                        ? "translateY(0)"
+                        : "translateY(24px)",
+                      transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+                    }),
+                marginBottom: 40,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                  display: "block",
+                  marginBottom: 14,
+                }}
+              >
                 Other edits
               </span>
-              <h3 style={{
-                fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-                fontWeight: 400,
-                fontSize: "clamp(28px, 3.4vw, 40px)",
-                lineHeight: 1.05,
-                color: "var(--el-ink, #1c1a17)",
-              }}>
+              <h3
+                style={{
+                  fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                  fontWeight: 400,
+                  fontSize: "clamp(28px, 3.4vw, 40px)",
+                  lineHeight: 1.05,
+                  color: "var(--el-ink, #1c1a17)",
+                }}
+              >
                 Or try one of <em style={{ fontStyle: "italic" }}>these</em>.
               </h3>
             </div>
 
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-              gap: 24,
-            }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+                gap: 24,
+              }}
+            >
               {others.map((col, i) => (
                 <Link
                   key={col.id}
@@ -378,21 +465,27 @@ export function ElegantCollectionPage({
                   style={{
                     display: "block",
                     textDecoration: "none",
-                    ...(reducedMotion ? {} : {
-                      opacity: othersReveal.visible ? 1 : 0,
-                      transform: othersReveal.visible ? "translateY(0)" : "translateY(24px)",
-                      transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
-                    }),
+                    ...(reducedMotion
+                      ? {}
+                      : {
+                          opacity: othersReveal.visible ? 1 : 0,
+                          transform: othersReveal.visible
+                            ? "translateY(0)"
+                            : "translateY(24px)",
+                          transition: `opacity 0.7s ${easeOut} ${i * 80}ms, transform 0.7s ${easeOut} ${i * 80}ms`,
+                        }),
                   }}
                   className="el-other-col group"
                 >
-                  <div style={{
-                    position: "relative",
-                    aspectRatio: "4/5",
-                    borderRadius: 8,
-                    overflow: "hidden",
-                    background: "var(--el-cream-2, #ebe6dc)",
-                  }}>
+                  <div
+                    style={{
+                      position: "relative",
+                      aspectRatio: "4/5",
+                      borderRadius: 8,
+                      overflow: "hidden",
+                      background: "var(--el-cream-2, #ebe6dc)",
+                    }}
+                  >
                     {col.imageUrl && (
                       <Image
                         src={col.imageUrl}
@@ -404,30 +497,44 @@ export function ElegantCollectionPage({
                       />
                     )}
                     {/* Dark gradient overlay — deepened to 0.8 floor for WCAG 1.4.3 */}
-                    <div style={{
-                      position: "absolute", inset: 0,
-                      background: "linear-gradient(180deg, transparent 50%, rgba(28,26,23,0.8) 100%)",
-                    }} />
-                    <div style={{
-                      position: "absolute", left: 20, right: 20, bottom: 20,
-                      color: "var(--el-paper, #fbf8f2)",
-                    }}>
-                      <div style={{
-                        fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-                        fontSize: 26,
-                        fontWeight: 400,
-                      }}>
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background:
+                          "linear-gradient(180deg, transparent 50%, rgba(28,26,23,0.8) 100%)",
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: 20,
+                        right: 20,
+                        bottom: 20,
+                        color: "var(--el-paper, #fbf8f2)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontFamily:
+                            "var(--font-serif, 'Cormorant Garamond', serif)",
+                          fontSize: 26,
+                          fontWeight: 400,
+                        }}
+                      >
                         {col.name}
                       </div>
-                      <div style={{
-                        fontFamily: "var(--font-mono, ui-monospace)",
-                        fontSize: 10,
-                        letterSpacing: "0.16em",
-                        textTransform: "uppercase",
-                        marginTop: 4,
-                        opacity: 0.9,
-                        color: "var(--el-paper, #fbf8f2)",
-                      }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--font-mono, ui-monospace)",
+                          fontSize: 10,
+                          letterSpacing: "0.16em",
+                          textTransform: "uppercase",
+                          marginTop: 4,
+                          opacity: 0.9,
+                          color: "var(--el-paper, #fbf8f2)",
+                        }}
+                      >
                         {col._count.collectionProducts} items
                       </div>
                     </div>
@@ -436,7 +543,6 @@ export function ElegantCollectionPage({
               ))}
             </div>
           </div>
-
         </section>
       )}
     </div>

@@ -148,6 +148,8 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
+
 export type CartItem = {
   productId: string;
   productSlug?: string | null;
@@ -160,6 +162,15 @@ export type CartItem = {
   imageUrl: string | null;
   sku: string | null;
   maxInventory?: number; // Optional: for validation
+};
+
+type CartItemSnapshot = {
+  productId: string;
+  variantId: string | null;
+  available: boolean;
+  price: number;
+  compareAtPrice: number | null;
+  maxQuantity: number | null;
 };
 
 type CartContextType = {
@@ -184,6 +195,16 @@ type CartContextType = {
   setIsOpen: (open: boolean) => void;
 
   subtotal: number;
+
+  /**
+   * Reconcile the cart against a fresh snapshot from the server.
+   * - Removes items that are unavailable or absent from the snapshot.
+   * - Updates price, compareAtPrice, maxInventory for available items.
+   * - Clamps quantity down to maxQuantity when finite.
+   * - Shows at most one toast (removal takes priority over price change).
+   * - No-ops if nothing changed (reference-stable setItems call avoided).
+   */
+  reconcile: (snapshots: CartItemSnapshot[]) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -305,6 +326,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         else toast.success(toastMsg);
       }
       if (openCart) setIsOpen(true);
+
+      // Fire analytics event when item was successfully added or quantity updated
+      if (!toastIsError && toastMsg !== null) {
+        track(ANALYTICS_EVENTS.ADD_TO_CART, {
+          productId: newItem.productId,
+          name: newItem.productName,
+        });
+      }
     },
     [],
   );
@@ -422,6 +451,89 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     toast.success("Cart cleared");
   }, []);
 
+  // Reconcile cart against a fresh server snapshot — additive (no CartItem shape change)
+  const reconcile = useCallback((snapshots: CartItemSnapshot[]) => {
+    const snapshotMap = new Map(
+      snapshots.map((s) => [`${s.productId}-${s.variantId ?? ""}`, s]),
+    );
+
+    let itemsRemoved = false;
+    let priceChanged = false;
+
+    setItems((currentItems) => {
+      itemsRemoved = false;
+      priceChanged = false;
+
+      const next: CartItem[] = [];
+
+      for (const item of currentItems) {
+        const key = `${item.productId}-${item.variantId ?? ""}`;
+        const snap = snapshotMap.get(key);
+
+        // Remove items with no snapshot or explicitly unavailable
+        if (!snap?.available) {
+          itemsRemoved = true;
+          continue;
+        }
+
+        // Detect price change
+        const newPrice = snap.price;
+        const newCompare = snap.compareAtPrice;
+        const newMaxInv = snap.maxQuantity ?? undefined;
+
+        if (
+          newPrice !== item.price ||
+          newCompare !== (item.compareAtPrice ?? null)
+        ) {
+          priceChanged = true;
+        }
+
+        // Clamp quantity to maxQuantity if finite
+        const clampedQty =
+          snap.maxQuantity !== null
+            ? Math.min(item.quantity, snap.maxQuantity)
+            : item.quantity;
+
+        next.push({
+          ...item,
+          price: newPrice,
+          compareAtPrice: newCompare,
+          maxInventory: newMaxInv,
+          quantity: clampedQty,
+        });
+      }
+
+      // Reference-stable guard: if nothing changed, return the same array
+      if (
+        !itemsRemoved &&
+        !priceChanged &&
+        next.length === currentItems.length
+      ) {
+        // Check quantities weren't clamped either
+        const unchanged = next.every(
+          (n, i) => n.quantity === currentItems[i]?.quantity,
+        );
+        if (unchanged) return currentItems;
+      }
+
+      return next;
+    });
+
+    // Show at most one toast after state update (read flags set above)
+    // Using a microtask so we read the final flag values after setItems callback
+    Promise.resolve()
+      .then(() => {
+        if (itemsRemoved) {
+          toast(
+            "Some items in your cart are no longer available and were removed.",
+          );
+        } else if (priceChanged) {
+          toast("Some prices in your cart were updated.");
+        }
+      })
+      .catch(() => undefined);
+  }, []);
+
   // Calculate total
   const total = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -453,6 +565,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         isOpen,
         setIsOpen,
         subtotal,
+        reconcile,
       }}
     >
       {children}

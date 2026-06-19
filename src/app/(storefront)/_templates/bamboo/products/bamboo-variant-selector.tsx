@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -18,11 +19,30 @@ export function BambooVariantSelector({
   setSelectedVariantId,
 }: Props) {
   const { addItem } = useCart();
+  const { setVariantImageUrl } = useVariantImage();
+
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants[0] ?? null,
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+
+  useEffect(() => {
+    setVariantImageUrl(selectedVariant?.imageUrl ?? null);
+  }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  const BACKORDER_MAX = 100;
+  const isBackordered =
+    product.trackInventory &&
+    !!product.allowBackorders &&
+    (selectedVariant?.inventoryQty ?? 0) === 0;
+  const effectiveMax = !product.trackInventory
+    ? BACKORDER_MAX
+    : (selectedVariant?.inventoryQty ?? 0) > 0
+      ? (selectedVariant?.inventoryQty ?? 0)
+      : product.allowBackorders
+        ? BACKORDER_MAX
+        : 0;
 
   const handleAddToCart = () => {
     if (!selectedVariant) return;
@@ -34,9 +54,9 @@ export function BambooVariantSelector({
         productName: product.name,
         variantName: selectedVariant.name,
         price: selectedVariant.price ?? product.price,
-        imageUrl: product.images[0]?.url ?? null,
+        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
         sku: selectedVariant.sku,
-        maxInventory: selectedVariant.inventoryQty,
+        maxInventory: effectiveMax,
       },
       quantity, // ← Add specified quantity
     );
@@ -55,9 +75,20 @@ export function BambooVariantSelector({
         <Label className="mb-3 block text-sm font-medium" id="variant-label">
           Select Variant
         </Label>
-        <div className="flex flex-wrap gap-3" role="group" aria-labelledby="variant-label">
+        <div
+          className="flex flex-wrap gap-3"
+          role="group"
+          aria-labelledby="variant-label"
+        >
           {product.variants.map((variant) => {
-            const isOutOfStock = variant.inventoryQty === 0;
+            const isOutOfStock =
+              product.trackInventory &&
+              variant.inventoryQty === 0 &&
+              !product.allowBackorders;
+            const isBackorderVariant =
+              product.trackInventory &&
+              variant.inventoryQty === 0 &&
+              !!product.allowBackorders;
             return (
               <Button
                 key={variant.id}
@@ -79,6 +110,7 @@ export function BambooVariantSelector({
               >
                 {variant.name}
                 {isOutOfStock && " (Out of Stock)"}
+                {isBackorderVariant && " (Pre-order)"}
               </Button>
             );
           })}
@@ -113,18 +145,19 @@ export function BambooVariantSelector({
                 size="icon"
                 className="size-11"
                 onClick={() =>
-                  setQuantity(
-                    Math.min(selectedVariant.inventoryQty, quantity + 1),
-                  )
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
                 }
+                disabled={quantity >= effectiveMax}
                 aria-label="Increase quantity"
               >
                 <Plus className="size-4" aria-hidden="true" />
               </Button>
             </div>{" "}
-            {selectedVariant && (
+            {selectedVariant && product.trackInventory && (
               <span className="text-sm">
-                {selectedVariant?.inventoryQty ?? 0} available
+                {isBackordered
+                  ? "Backordered — ships when available"
+                  : `${selectedVariant?.inventoryQty ?? 0} available`}
               </span>
             )}
           </div>
@@ -132,7 +165,11 @@ export function BambooVariantSelector({
 
         {/* Add to Cart */}
         {(() => {
-          const isUnavailable = !selectedVariant || selectedVariant.inventoryQty === 0;
+          const isUnavailable =
+            !selectedVariant ||
+            (product.trackInventory &&
+              selectedVariant.inventoryQty === 0 &&
+              !product.allowBackorders);
           return (
             <Button
               type="button"

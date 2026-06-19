@@ -5,9 +5,9 @@ import Link from "next/link";
 import { Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
-import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import type { ShippingConfig } from "~/lib/shipping-utils";
 import { formatPrice } from "~/lib/prices";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { Button } from "~/components/ui/button";
 import {
   Sheet,

@@ -12,8 +12,18 @@ export const PREVIEW_SOURCE = "simplepress-preview";
 export type PreviewMessage =
   | { source: typeof PREVIEW_SOURCE; type: "sp:ready" }
   | { source: typeof PREVIEW_SOURCE; type: "sp:refresh" }
-  | { source: typeof PREVIEW_SOURCE; type: "sp:edit-group"; page: string; group: string }
-  | { source: typeof PREVIEW_SOURCE; type: "sp:focus-group"; page: string; group: string };
+  | {
+      source: typeof PREVIEW_SOURCE;
+      type: "sp:edit-group";
+      page: string;
+      group: string;
+    }
+  | {
+      source: typeof PREVIEW_SOURCE;
+      type: "sp:focus-group";
+      page: string;
+      group: string;
+    };
 
 // ---------------------------------------------------------------------------
 // Helpers

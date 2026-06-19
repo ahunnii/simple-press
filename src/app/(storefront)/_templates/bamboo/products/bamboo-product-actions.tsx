@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -24,15 +23,8 @@ export function BambooProductActions({
     quantity,
     setSelectedVariantId,
     additionalFields,
+    justAdded,
   } = useProduct(product);
-
-  const [isAdded, setIsAdded] = useState(false);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   return (
     <>
@@ -95,10 +87,10 @@ export function BambooProductActions({
                 </div>
                 <Button
                   size="lg"
-                  onClick={addToCart}
+                  onClick={handleAddToCart}
                   className="flex-1 gap-2 sm:flex-none"
                 >
-                  {isAdded ? (
+                  {justAdded ? (
                     <>
                       <Check className="h-4 w-4" aria-hidden="true" />
                       Added to Cart
@@ -111,12 +103,8 @@ export function BambooProductActions({
                   )}
                 </Button>
                 {/* S-1: live region announces add-to-cart confirmation */}
-                <div
-                  aria-live="polite"
-                  aria-atomic="true"
-                  className="sr-only"
-                >
-                  {isAdded ? `${product.name} added to cart` : ""}
+                <div aria-live="polite" aria-atomic="true" className="sr-only">
+                  {justAdded ? `${product.name} added to cart` : ""}
                 </div>
               </div>
               {product.trackInventory &&

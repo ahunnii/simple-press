@@ -89,7 +89,10 @@ export function DarkTrendBlogPage({ pages, customFields }: Props) {
         {/* S-10: removed ring-0 suppression; wrapper gets focus-within border change */}
         <div className="mx-auto flex max-w-md items-center gap-3 border-b border-white/20 pb-2 focus-within:border-white">
           {/* N-1: decorative icon */}
-          <Search aria-hidden="true" className="h-4 w-4 shrink-0 text-white/50" />
+          <Search
+            aria-hidden="true"
+            className="h-4 w-4 shrink-0 text-white/50"
+          />
           <Input
             type="search"
             placeholder="Search posts..."

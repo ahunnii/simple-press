@@ -1,5 +1,5 @@
-import { api } from "~/trpc/server";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
 import { ElegantCTABanner } from "./elegant-cta-banner";

@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { Package } from "lucide-react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Package } from "lucide-react";
 
+import type { OrdersPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
-import type { OrdersPageTemplateProps } from "../../types";
 import { ModernAccountLayout } from "./modern-account-layout";
 
 function statusClass(status: string) {
@@ -98,7 +97,10 @@ export function ModernOrdersPage({ orders }: OrdersPageTemplateProps) {
                   className="text-accent mt-4 inline-flex items-center gap-1 text-sm font-medium hover:underline"
                 >
                   View Details
-                  <span className="sr-only"> for order #{order.orderNumber}</span>
+                  <span className="sr-only">
+                    {" "}
+                    for order #{order.orderNumber}
+                  </span>
                   <ArrowRight className="h-3 w-3" aria-hidden="true" />
                 </Link>
               </div>

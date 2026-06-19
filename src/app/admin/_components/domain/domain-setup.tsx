@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, ExternalLink, Globe, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Check, Copy, ExternalLink, Globe, Loader2 } from "lucide-react";
 
 import { env } from "~/env";
 import { isValidDomain } from "~/lib/utils";
@@ -223,12 +223,7 @@ function DNSInstructions({ vpsIp }: { vpsIp: string }) {
 
       <div className="space-y-2">
         <DNSRecord type="A" name="@" value={vpsIp} onCopy={copyToClipboard} />
-        <DNSRecord
-          type="A"
-          name="www"
-          value={vpsIp}
-          onCopy={copyToClipboard}
-        />
+        <DNSRecord type="A" name="www" value={vpsIp} onCopy={copyToClipboard} />
       </div>
 
       <p className="mt-3 text-xs text-gray-500">

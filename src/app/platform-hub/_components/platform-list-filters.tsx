@@ -12,7 +12,10 @@ type Props = {
   placeholder?: string;
 };
 
-export function PlatformListFilters({ total, placeholder = "Search..." }: Props) {
+export function PlatformListFilters({
+  total,
+  placeholder = "Search...",
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

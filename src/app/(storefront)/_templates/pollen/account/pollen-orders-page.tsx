@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { Package } from "lucide-react";
 
+import type { OrdersPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
-import { FadeIn, StaggerContainer, StaggerItem } from "~/components/page-animations";
+import {
+  FadeIn,
+  StaggerContainer,
+  StaggerItem,
+} from "~/components/page-animations";
 
-import type { OrdersPageTemplateProps } from "../../types";
 import { PollenAccountLayout } from "./pollen-account-layout";
 
 function statusClass(status: string) {
@@ -83,8 +87,9 @@ export function PollenOrdersPage({ orders }: OrdersPageTemplateProps) {
                         className="rounded-full bg-gray-100 px-3 py-1 text-xs text-[#4b5563]"
                       >
                         {item.productName}
-                        {item.variantName ? ` — ${item.variantName}` : ""} ×{" "}
-                        {item.quantity}
+                        {item.variantName
+                          ? ` — ${item.variantName}`
+                          : ""} × {item.quantity}
                       </span>
                     ))}
                     {order.items.length > 3 && (
@@ -97,7 +102,12 @@ export function PollenOrdersPage({ orders }: OrdersPageTemplateProps) {
                     href={`/account/orders/${order.id}`}
                     className="mt-4 inline-block text-sm font-semibold text-[#215935] hover:underline"
                   >
-                    View Details<span className="sr-only"> for order #{order.orderNumber}</span> →
+                    View Details
+                    <span className="sr-only">
+                      {" "}
+                      for order #{order.orderNumber}
+                    </span>{" "}
+                    →
                   </Link>
                 </div>
               </div>

@@ -3,15 +3,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useUploadFile } from "@better-upload/client";
+import { useUploadFile, useUploadFiles } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Trash2, Upload, X, Search } from "lucide-react";
+import { ArrowLeft, Save, Search, Trash2, Upload, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
+import { getStoredPath } from "~/lib/uploads";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import { productFormSchema } from "~/lib/validators/product";
 import { api } from "~/trpc/react";
@@ -27,6 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -35,6 +37,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -43,8 +46,10 @@ import {
   FormItem,
   FormLabel,
 } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { NumberInput } from "~/components/ui/number-input";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -54,10 +59,6 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { Badge } from "~/components/ui/badge";
-import { Input } from "~/components/ui/input";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { Checkbox } from "~/components/ui/checkbox";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
@@ -108,7 +109,10 @@ function OgImageUploader({
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!file) { setObjectUrl(null); return; }
+    if (!file) {
+      setObjectUrl(null);
+      return;
+    }
     const url = URL.createObjectURL(file);
     setObjectUrl(url);
     return () => URL.revokeObjectURL(url);
@@ -119,7 +123,11 @@ function OgImageUploader({
   return (
     <div className="space-y-2">
       <input
-        ref={(el) => { (fileInputRef as React.MutableRefObject<HTMLInputElement | null>).current = el; }}
+        ref={(el) => {
+          (
+            fileInputRef as React.MutableRefObject<HTMLInputElement | null>
+          ).current = el;
+        }}
         type="file"
         accept="image/*"
         className="hidden"
@@ -133,10 +141,16 @@ function OgImageUploader({
       {previewUrl && (
         <div className="bg-muted flex items-center gap-3 rounded-lg border p-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={previewUrl} alt="OG image preview" className="h-16 w-16 shrink-0 rounded-md object-cover" />
+          <img
+            src={previewUrl}
+            alt="OG image preview"
+            className="h-16 w-16 shrink-0 rounded-md object-cover"
+          />
           <div className="min-w-0 flex-1">
             <p className="text-muted-foreground text-xs">
-              {file ? "New image selected. Upload on submit." : "Existing image."}
+              {file
+                ? "New image selected. Upload on submit."
+                : "Existing image."}
             </p>
           </div>
           <Button
@@ -207,7 +221,7 @@ function SocialPreviewCard({
         </div>
       )}
       <div className="border-t p-3">
-        <p className="text-xs uppercase tracking-wide text-gray-400">
+        <p className="text-xs tracking-wide text-gray-400 uppercase">
           yourstore.com
         </p>
         <p className="truncate text-sm font-medium text-gray-900">{title}</p>
@@ -221,12 +235,20 @@ function SocialPreviewCard({
   );
 }
 
-export function ProductForm({ product, galleriesEnabled, collectionsEnabled, allCollections = [], pools = [] }: Props) {
+export function ProductForm({
+  product,
+  galleriesEnabled,
+  collectionsEnabled,
+  allCollections = [],
+  pools = [],
+}: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
+  const createAnotherRef = useRef(false);
   const utils = api.useUtils();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [variantManagerKey, setVariantManagerKey] = useState(0);
 
   // Images state (kept separate as they're uploaded independently via Better Upload)
   const [images, setImages] = useState<FormProductImage[]>([]);
@@ -238,9 +260,12 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
   const [ogImageRemoved, setOgImageRemoved] = useState(false);
 
   // Collections state
-  const initialCollectionIds = product?.collectionProducts?.map((cp) => cp.collectionId) ?? [];
-  const [collectionIds, setCollectionIds] = useState<string[]>(initialCollectionIds);
-  const [baselineCollectionIds, setBaselineCollectionIds] = useState<string[]>(initialCollectionIds);
+  const initialCollectionIds =
+    product?.collectionProducts?.map((cp) => cp.collectionId) ?? [];
+  const [collectionIds, setCollectionIds] =
+    useState<string[]>(initialCollectionIds);
+  const [baselineCollectionIds, setBaselineCollectionIds] =
+    useState<string[]>(initialCollectionIds);
   const [collectionSearch, setCollectionSearch] = useState("");
 
   // Variants state (kept separate due to complex nested structure and VariantManager component)
@@ -282,6 +307,8 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
       metaDescription: product?.metaDescription ?? "",
       metaKeywords: product?.metaKeywords ?? "",
       ogImage: product?.ogImage ?? undefined,
+      weight: product?.weight ?? undefined,
+      weightUnit: (product?.weightUnit as "lb" | "kg" | undefined) ?? "lb",
     },
   });
 
@@ -330,6 +357,14 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
     route: "image",
     onError: (error) => {
       toast.error(error.message ?? "OG image upload failed.");
+    },
+  });
+
+  const galleryUploader = useUploadFiles({
+    api: "/api/upload",
+    route: "images",
+    onError: (error) => {
+      toast.error(error.message ?? "Image upload failed.");
     },
   });
 
@@ -406,6 +441,9 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
   });
 
   const onSubmit = async (data: ProductFormSchema) => {
+    const createAnother = createAnotherRef.current;
+    createAnotherRef.current = false;
+
     // Convert price to cents
     const priceInCents = Math.round(data.price * 100);
     const compareAtPriceInCents = data.compareAtPrice
@@ -418,7 +456,8 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
       try {
         const response = await ogImageUploader.upload(ogImageFile);
         const fileLocation =
-          (response.file.objectInfo.metadata?.pathname as string | undefined) ?? "";
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          "";
         resolvedOgImage = fileLocation || null;
       } catch {
         toast.error("Failed to upload Open Graph image.");
@@ -430,9 +469,47 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
       resolvedOgImage = data.ogImage ?? null;
     }
 
+    // Resolve gallery images: upload any pending (blob:) images before saving.
+    const pendingImages = images.filter((img) => img.file);
+    let resolvedImages = images.map((img, idx) => ({
+      id: img.id,
+      url: img.url,
+      altText: img.altText,
+      sortOrder: idx,
+    }));
+    if (pendingImages.length > 0) {
+      let galleryResult;
+      try {
+        galleryResult = await galleryUploader.upload(
+          pendingImages.map((p) => p.file!),
+        );
+      } catch {
+        toast.error("Failed to upload images.");
+        return;
+      }
+      if (galleryResult.failedFiles.length > 0) {
+        toast.error("Some images failed to upload.");
+        return;
+      }
+      const fileToUrl = new Map<File, string>();
+      for (const f of galleryResult.files) {
+        fileToUrl.set(f.raw, getStoredPath(f));
+      }
+      resolvedImages = images.map((img, idx) => ({
+        id: img.id,
+        url: img.file ? (fileToUrl.get(img.file) ?? "") : img.url,
+        altText: img.altText,
+        sortOrder: idx,
+      }));
+      if (resolvedImages.some((i) => !i.url)) {
+        toast.error("Failed to resolve uploaded images.");
+        return;
+      }
+    }
+
     if (product) {
       // Update existing product
-      imagesToSyncRef.current = images;
+      imagesToSyncRef.current = resolvedImages;
 
       await updateProductMutation.mutateAsync({
         id: product.id,
@@ -456,6 +533,7 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
           compareAtPrice: v.compareAtPrice ?? undefined,
           inventoryQty: v.inventoryQty,
           options: v.options,
+          imageUrl: v.imageUrl ?? null,
         })),
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,
@@ -467,6 +545,8 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
         metaDescription: data.metaDescription ?? null,
         metaKeywords: data.metaKeywords ?? null,
         ogImage: resolvedOgImage ?? null,
+        weight: data.weight ?? null,
+        weightUnit: data.weightUnit ?? "lb",
       });
 
       // New default baseline so isDirty clears (RHF only used initial defaultValues otherwise).
@@ -488,11 +568,17 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
         const selected = new Set(collectionIds);
         for (const id of selected) {
           if (!initial.has(id))
-            await utils.client.collections.addProduct.mutate({ collectionId: id, productId: product.id });
+            await utils.client.collections.addProduct.mutate({
+              collectionId: id,
+              productId: product.id,
+            });
         }
         for (const id of initial) {
           if (!selected.has(id))
-            await utils.client.collections.removeProduct.mutate({ collectionId: id, productId: product.id });
+            await utils.client.collections.removeProduct.mutate({
+              collectionId: id,
+              productId: product.id,
+            });
         }
         setBaselineCollectionIds([...collectionIds]);
       }
@@ -518,6 +604,7 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
           compareAtPrice: v.compareAtPrice ?? undefined,
           inventoryQty: v.inventoryQty,
           options: v.options,
+          imageUrl: v.imageUrl ?? null,
         })),
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,
@@ -529,12 +616,14 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
         metaDescription: data.metaDescription ?? null,
         metaKeywords: data.metaKeywords ?? null,
         ogImage: resolvedOgImage ?? null,
+        weight: data.weight ?? null,
+        weightUnit: data.weightUnit ?? "lb",
       });
 
-      if (response.productId && images.length > 0) {
+      if (response.productId && resolvedImages.length > 0) {
         await syncImagesMutation.mutateAsync({
           productId: response.productId,
-          images: images.map((image) => ({
+          images: resolvedImages.map((image) => ({
             url: image.url,
             altText: image.altText,
             sortOrder: image.sortOrder,
@@ -552,13 +641,19 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
       }
 
       if (response.productId) {
-        // toast.success("Product created!", {
-        //   action: {
-        //     label: "Create another",
-        //     onClick: () => router.push("/admin/products/new"),
-        //   },
-        // });
-        router.push(`/admin/products/${response.productId}`);
+        if (createAnother) {
+          form.reset();
+          setImages([]);
+          setVariants([]);
+          setCollectionIds([]);
+          setBaselineCollectionIds([]);
+          setOgImageFile(null);
+          setOgImageRemoved(false);
+          setVariantManagerKey((k) => k + 1);
+          window.scrollTo({ top: 0 });
+        } else {
+          router.push(`/admin/products/${response.productId}`);
+        }
       } else {
         form.reset({ ...data });
         requestAnimationFrame(() => {
@@ -572,7 +667,8 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
     updateProductMutation.isPending ||
     createProductMutation.isPending ||
     syncImagesMutation.isPending ||
-    ogImageUploader.isPending;
+    ogImageUploader.isPending ||
+    galleryUploader.isPending;
 
   const isDeleting = deleteProductMutation.isPending;
 
@@ -585,16 +681,24 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
   }, [collectionIds, baselineCollectionIds]);
 
   const isOgImageDirty = ogImageFile !== null || ogImageRemoved;
-  const isDirty = form.formState.isDirty || isImagesDirty || isCollectionsDirty || isOgImageDirty;
+  const isDirty =
+    form.formState.isDirty ||
+    isImagesDirty ||
+    isCollectionsDirty ||
+    isOgImageDirty;
 
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
 
   // SEO preview values — || is intentional so empty string falls back to the default
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-  const seoPreviewTitle = form.watch("metaTitle") || form.watch("name") || "Product Name";
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-  const seoPreviewDesc = form.watch("metaDescription") || form.watch("description") || "Your product description will appear here in search results.";
+  /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+  const seoPreviewTitle =
+    form.watch("metaTitle") || form.watch("name") || "Product Name";
+  const seoPreviewDesc =
+    form.watch("metaDescription") ||
+    form.watch("description") ||
+    "Your product description will appear here in search results.";
+  /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
 
   return (
     <>
@@ -672,12 +776,40 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                   setCollectionIds(baselineCollectionIds);
                   setOgImageFile(null);
                   setOgImageRemoved(false);
-                  if (ogImageFileInputRef.current) ogImageFileInputRef.current.value = "";
+                  if (ogImageFileInputRef.current)
+                    ogImageFileInputRef.current.value = "";
                 }}
                 className="hidden md:inline-flex"
               >
                 Reset
               </Button>
+
+              {!product && (
+                <Button
+                  type="submit"
+                  variant="outline"
+                  size="sm"
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    createAnotherRef.current = true;
+                  }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="saving-indicator" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">
+                        Save &amp; create another
+                      </span>
+                      <span className="sm:hidden">Save+</span>
+                    </>
+                  )}
+                </Button>
+              )}
 
               <Button type="submit" size="sm" disabled={isSubmitting}>
                 {isSubmitting ? (
@@ -829,6 +961,64 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                             />
                           </div>
                         )}
+                      </CardContent>
+                    </Card>
+                    {/* Shipping weight */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Shipping</CardTitle>
+                        <CardDescription>
+                          Used to calculate shipping rates when zone + weight
+                          pricing is active
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-3">
+                          <FormField
+                            control={form.control}
+                            name="weight"
+                            render={({ field }) => (
+                              <FormItem className="flex-1">
+                                <FormLabel>Weight</FormLabel>
+                                <FormControl>
+                                  <NumberInput
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
+                                    value={field.value ?? undefined}
+                                    onChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Leave blank to use the store default
+                                </FormDescription>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="weightUnit"
+                            render={({ field }) => (
+                              <FormItem className="w-24 shrink-0">
+                                <FormLabel>Unit</FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value ?? "lb"}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="lb">lb</SelectItem>
+                                    <SelectItem value="kg">kg</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                       </CardContent>
                     </Card>
                   </div>
@@ -1022,6 +1212,7 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
 
                 {/* Variants */}
                 <VariantManager
+                  key={variantManagerKey}
                   variants={variants}
                   onChange={setVariants}
                   trackInventory={form.watch("trackInventory")}
@@ -1031,6 +1222,7 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                       | Array<{ options: Record<string, string> }>
                       | undefined,
                   )}
+                  images={images}
                 />
               </TabsContent>
 
@@ -1079,7 +1271,7 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                                     <button
                                       type="button"
                                       aria-label={`Remove ${collection.name}`}
-                                      className="ml-0.5 rounded-full hover:bg-black/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                      className="focus-visible:ring-ring ml-0.5 rounded-full hover:bg-black/10 focus-visible:ring-1 focus-visible:outline-none"
                                       onClick={() =>
                                         setCollectionIds((prev) =>
                                           prev.filter(
@@ -1131,39 +1323,26 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                                 }
 
                                 return filtered.map((collection) => (
-                                  <div
+                                  <label
                                     key={collection.id}
                                     className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-gray-50"
-                                    onClick={() =>
-                                      setCollectionIds((prev) => {
-                                        const next = new Set(prev);
-                                        if (next.has(collection.id))
-                                          next.delete(collection.id);
-                                        else next.add(collection.id);
-                                        return [...next];
-                                      })
-                                    }
                                   >
-                                    <span
+                                    <Checkbox
                                       className="shrink-0"
-                                      onClick={(e) => e.stopPropagation()}
-                                      onKeyDown={(e) => e.stopPropagation()}
-                                    >
-                                      <Checkbox
-                                        checked={collectionIds.includes(
-                                          collection.id,
-                                        )}
-                                        onCheckedChange={() =>
-                                          setCollectionIds((prev) => {
-                                            const next = new Set(prev);
-                                            if (next.has(collection.id))
-                                              next.delete(collection.id);
-                                            else next.add(collection.id);
-                                            return [...next];
-                                          })
-                                        }
-                                      />
-                                    </span>
+                                      aria-label={collection.name}
+                                      checked={collectionIds.includes(
+                                        collection.id,
+                                      )}
+                                      onCheckedChange={() =>
+                                        setCollectionIds((prev) => {
+                                          const next = new Set(prev);
+                                          if (next.has(collection.id))
+                                            next.delete(collection.id);
+                                          else next.add(collection.id);
+                                          return [...next];
+                                        })
+                                      }
+                                    />
                                     <div className="flex-1">
                                       <p className="font-medium">
                                         {collection.name}
@@ -1171,13 +1350,13 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                                       <p className="text-sm text-gray-500">
                                         {collection._count.collectionProducts}{" "}
                                         product
-                                        {collection._count.collectionProducts !==
-                                        1
+                                        {collection._count
+                                          .collectionProducts !== 1
                                           ? "s"
                                           : ""}
                                       </p>
                                     </div>
-                                  </div>
+                                  </label>
                                 ));
                               })()}
                             </div>
@@ -1201,7 +1380,8 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                       <CardHeader>
                         <CardTitle>Meta Tags</CardTitle>
                         <CardDescription>
-                          Override how this product appears in search engine results
+                          Override how this product appears in search engine
+                          results
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
@@ -1209,7 +1389,9 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                           form={form}
                           name="metaTitle"
                           label="Meta Title"
-                          placeholder={form.watch("name") || "e.g., Classic White T-Shirt"}
+                          placeholder={
+                            form.watch("name") || "e.g., Classic White T-Shirt"
+                          }
                           description={`${form.watch("metaTitle")?.length ?? 0}/60 characters — leave blank to use product name`}
                           descriptionClassName="text-xs text-gray-500"
                         />
@@ -1218,7 +1400,10 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                           form={form}
                           name="metaDescription"
                           label="Meta Description"
-                          placeholder={form.watch("description") ?? "e.g., Soft, breathable cotton tee perfect for everyday wear."}
+                          placeholder={
+                            form.watch("description") ??
+                            "e.g., Soft, breathable cotton tee perfect for everyday wear."
+                          }
                           description={`${form.watch("metaDescription")?.length ?? 0}/160 characters — leave blank to use product description`}
                           descriptionClassName="text-xs text-gray-500"
                           rows={3}
@@ -1239,13 +1424,18 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                       <CardHeader>
                         <CardTitle>Open Graph Image</CardTitle>
                         <CardDescription>
-                          Shown when this product is shared on social media. Recommended: 1200×630px.
+                          Shown when this product is shared on social media.
+                          Recommended: 1200×630px.
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <OgImageUploader
                           file={ogImageFile}
-                          existingUrl={ogImageRemoved ? undefined : (product?.ogImage ?? undefined)}
+                          existingUrl={
+                            ogImageRemoved
+                              ? undefined
+                              : (product?.ogImage ?? undefined)
+                          }
                           fileInputRef={ogImageFileInputRef}
                           onFileChange={(f) => {
                             setOgImageFile(f);
@@ -1275,7 +1465,8 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                             {seoPreviewTitle}
                           </div>
                           <div className="mb-1 text-xs text-green-700">
-                            yourstore.com/products/{form.watch("slug") || "product-slug"}
+                            yourstore.com/products/
+                            {form.watch("slug") || "product-slug"}
                           </div>
                           <div className="line-clamp-2 text-sm text-gray-600">
                             {seoPreviewDesc}
@@ -1296,7 +1487,11 @@ export function ProductForm({ product, galleriesEnabled, collectionsEnabled, all
                           title={seoPreviewTitle}
                           description={seoPreviewDesc}
                           ogImageFile={ogImageFile}
-                          existingOgImage={ogImageRemoved ? undefined : (product?.ogImage ?? undefined)}
+                          existingOgImage={
+                            ogImageRemoved
+                              ? undefined
+                              : (product?.ogImage ?? undefined)
+                          }
                         />
                       </CardContent>
                     </Card>

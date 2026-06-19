@@ -80,8 +80,18 @@ export function SledgeCollectionCard({
         </div>
       </Link>
 
-      <div className={compact ? "sledge-collection-meta-compact" : "sledge-collection-meta"}>
-        <h3 className={compact ? "sledge-collection-name-compact" : "sledge-collection-name"}>
+      <div
+        className={
+          compact ? "sledge-collection-meta-compact" : "sledge-collection-meta"
+        }
+      >
+        <h3
+          className={
+            compact
+              ? "sledge-collection-name-compact"
+              : "sledge-collection-name"
+          }
+        >
           <Link
             href={`/collections/${slug}`}
             className="font-serif transition-opacity hover:opacity-60"
@@ -96,7 +106,9 @@ export function SledgeCollectionCard({
           </p>
         )}
 
-        <span aria-hidden="true" className="sledge-collection-cta">View collection →</span>
+        <span aria-hidden="true" className="sledge-collection-cta">
+          View collection →
+        </span>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import type { DragEndEvent } from "@dnd-kit/core";
-import { useUploadFiles } from "@better-upload/client";
+import { useEffect, useRef } from "react";
 import {
   closestCenter,
   DndContext,
@@ -19,7 +19,6 @@ import {
 import { Upload } from "lucide-react";
 
 import type { FormProductImage } from "../_validators/schema";
-import { getStoredPath } from "~/lib/uploads";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 
@@ -36,25 +35,19 @@ export function ImageUploader({
   onImagesChange,
   maxImages = 10,
 }: Props) {
-  const uploadFiles = useUploadFiles({
-    api: "/api/upload",
-    route: "images",
-    onUploadComplete: (data) => {
-      const newImages: FormProductImage[] = data.files.map((file, i) => ({
-        url: getStoredPath(file),
-        altText: null,
-        sortOrder: images.length + i,
-      }));
-      if (newImages.length > 0) {
-        onImagesChange([...images, ...newImages]);
-      }
-    },
-    onError: () => {
-      alert("Failed to upload image");
-    },
-  });
+  // Track all blob: URLs we've created so we can revoke them on unmount.
+  const pendingObjectUrlsRef = useRef<Set<string>>(new Set());
 
-  const isUploading = uploadFiles.isPending;
+  // On unmount, revoke any remaining pending blob: URLs.
+  useEffect(() => {
+    const tracked = pendingObjectUrlsRef.current;
+    return () => {
+      for (const url of tracked) {
+        URL.revokeObjectURL(url);
+      }
+      tracked.clear();
+    };
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -83,23 +76,37 @@ export function ImageUploader({
     return valid.slice(0, Math.max(0, remaining));
   };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const addPendingFiles = (files: File[]) => {
+    const pending: FormProductImage[] = files.map((file, i) => {
+      const url = URL.createObjectURL(file);
+      pendingObjectUrlsRef.current.add(url);
+      return {
+        url,
+        altText: null,
+        sortOrder: images.length + i,
+        file,
+      };
+    });
+    onImagesChange([...images, ...pending]);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files?.length) return;
     const valid = getValidImageFiles(files);
     if (valid.length === 0) return;
     e.target.value = "";
-    await uploadFiles.upload(valid);
+    addPendingFiles(valid);
   };
 
-  const handleDrop = async (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.currentTarget.setAttribute("data-drag", "false");
     const files = e.dataTransfer.files;
     if (!files?.length) return;
     const valid = getValidImageFiles(files);
     if (valid.length === 0) return;
-    await uploadFiles.upload(valid);
+    addPendingFiles(valid);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -133,10 +140,16 @@ export function ImageUploader({
   };
 
   const removeImage = (index: number) => {
+    const img = images[index];
+    // Revoke blob: URL if this is a pending (not-yet-uploaded) image.
+    if (img?.file) {
+      URL.revokeObjectURL(img.url);
+      pendingObjectUrlsRef.current.delete(img.url);
+    }
     const updated = images.filter((_, i) => i !== index);
     // Re-index sort orders
-    const reindexed = updated.map((img, idx) => ({
-      ...img,
+    const reindexed = updated.map((item, idx) => ({
+      ...item,
       sortOrder: idx,
     }));
     onImagesChange(reindexed);
@@ -170,23 +183,15 @@ export function ImageUploader({
                 multiple
                 onChange={handleFileSelect}
                 className="hidden"
-                disabled={isUploading}
                 title="Upload images"
               />
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => document.getElementById("image-upload")?.click()}
-                disabled={isUploading}
               >
-                {isUploading ? (
-                  <>Uploading...</>
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload images
-                  </>
-                )}
+                <Upload className="mr-2 h-4 w-4" />
+                Add images
               </Button>
             </div>
           )}
@@ -233,7 +238,6 @@ export function ImageUploader({
               type="button"
               variant="outline"
               onClick={() => document.getElementById("image-upload")?.click()}
-              disabled={isUploading}
             >
               Select images
             </Button>
@@ -256,6 +260,11 @@ export function ImageUploader({
 
         <p className="text-xs text-gray-500">
           Tip: Drag images to reorder. First image is the primary image.
+          {images.some((img) => img.file) && (
+            <span className="ml-1 text-amber-600">
+              Pending images upload when you save.
+            </span>
+          )}
         </p>
       </div>
     </Card>

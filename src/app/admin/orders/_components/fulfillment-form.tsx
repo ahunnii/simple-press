@@ -69,7 +69,13 @@ export function FulfillmentForm({ orderId, customerEmail }: Props) {
     if (!data.hasTracking) {
       markFulfilled.mutate({
         orderId,
-        shipments: [{ carrier: undefined, trackingNumber: undefined, trackingUrl: undefined }],
+        shipments: [
+          {
+            carrier: undefined,
+            trackingNumber: undefined,
+            trackingUrl: undefined,
+          },
+        ],
       });
       return;
     }

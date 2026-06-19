@@ -199,7 +199,10 @@ const createExtensions = ({
   ResetMarksOnEnter,
   CodeBlockLowlight,
   Placeholder.configure({ placeholder: () => placeholder }),
-  Gallery.configure({ businessId, galleriesEnabled: galleriesEnabled !== false }),
+  Gallery.configure({
+    businessId,
+    galleriesEnabled: galleriesEnabled !== false,
+  }),
   Embed.configure({ embedsEnabled: embedsEnabled !== false }),
   TableKit.configure({}),
 ];

@@ -6,11 +6,11 @@ import Link from "next/link";
 import { ArrowRight, Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { DEFAULT_ELEGANT_ABOUT_FEATURES } from "..";
@@ -85,8 +85,7 @@ export function ElegantFeatureSection({
   };
 
   const hasVideo = !!aboutVideo?.trim();
-  const hasImage =
-    !!aboutImage?.trim() && aboutImage !== "/placeholder.svg";
+  const hasImage = !!aboutImage?.trim() && aboutImage !== "/placeholder.svg";
 
   const featureCards = parseTemplateIconListRows(
     getListFieldValue(
@@ -175,9 +174,17 @@ export function ElegantFeatureSection({
                   }}
                   className="el-video-toggle"
                 >
-                  {videoPaused
-                    ? <Play aria-hidden={true} style={{ width: 13, height: 13 }} />
-                    : <Pause aria-hidden={true} style={{ width: 13, height: 13 }} />}
+                  {videoPaused ? (
+                    <Play
+                      aria-hidden={true}
+                      style={{ width: 13, height: 13 }}
+                    />
+                  ) : (
+                    <Pause
+                      aria-hidden={true}
+                      style={{ width: 13, height: 13 }}
+                    />
+                  )}
                 </button>
               </>
             ) : hasImage ? (
@@ -332,13 +339,15 @@ export function ElegantFeatureSection({
                 className="el-btn-ghost"
               >
                 Read our story
-                <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
+                <ArrowRight
+                  aria-hidden={true}
+                  style={{ width: 14, height: 14 }}
+                />
               </Link>
             </div>
           </div>
         </div>
       </div>
-
     </section>
   );
 }

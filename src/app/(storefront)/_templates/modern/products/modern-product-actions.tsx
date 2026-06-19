@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -24,15 +23,8 @@ export function ModernProductActions({ product }: Props) {
     quantity,
     setSelectedVariantId,
     additionalFields,
+    justAdded,
   } = useProduct(product);
-
-  const [isAdded, setIsAdded] = useState(false);
-
-  const addToCart = () => {
-    handleAddToCart();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   return (
     <div className="mt-8">
@@ -108,11 +100,11 @@ export function ModernProductActions({ product }: Props) {
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <button
                   type="button"
-                  onClick={addToCart}
+                  onClick={handleAddToCart}
                   disabled={!canAddMore}
                   className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
-                  {isAdded ? (
+                  {justAdded ? (
                     <>
                       <Check className="h-4 w-4" aria-hidden="true" />
                       Added to Cart
@@ -125,12 +117,8 @@ export function ModernProductActions({ product }: Props) {
                   )}
                 </button>
               </div>
-              <span
-                className="sr-only"
-                aria-live="polite"
-                aria-atomic="true"
-              >
-                {isAdded ? `${product.name} added to cart` : ""}
+              <span className="sr-only" aria-live="polite" aria-atomic="true">
+                {justAdded ? `${product.name} added to cart` : ""}
               </span>
               {product.trackInventory &&
                 product.allowBackorders &&

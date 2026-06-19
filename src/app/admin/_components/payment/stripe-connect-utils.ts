@@ -1,4 +1,4 @@
-import { getCallbackUrl } from "~/lib/domain";
+import { getCallbackUrl } from "~/lib/domain-utils";
 
 type SignedStateResponse = {
   signedState?: string;

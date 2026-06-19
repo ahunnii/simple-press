@@ -82,11 +82,13 @@ export function ElegantCTABanner({
             alignItems: "center",
             padding: "60px 64px",
             background: hasBg ? undefined : "var(--el-ink, #1c1a17)",
-            ...(reducedMotion ? {} : {
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(24px)",
-              transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
-            }),
+            ...(reducedMotion
+              ? {}
+              : {
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? "translateY(0)" : "translateY(24px)",
+                  transition: `opacity 0.9s ${easeOut}, transform 0.9s ${easeOut}`,
+                }),
           }}
         >
           {hasBg && (

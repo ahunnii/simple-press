@@ -34,10 +34,7 @@ export function HappyBambooFeaturedProducts({
   sectionAttrs,
 }: Props) {
   return (
-    <section
-      className="mx-auto max-w-7xl px-4 py-20 lg:px-8"
-      {...sectionAttrs}
-    >
+    <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8" {...sectionAttrs}>
       <FadeIn direction="up">
         <div className="mb-12 space-y-6 text-center">
           <span className="text-primary text-sm font-semibold tracking-wider uppercase">

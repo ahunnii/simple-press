@@ -1,12 +1,11 @@
-import type { Prisma, PrismaClient } from "generated/prisma";
+import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { DbClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
-import {
-  getClientIpFromHeaders,
-  reviewVoteLimiter,
-} from "~/lib/rate-limit";
+import { getClientIpFromHeaders, reviewVoteLimiter } from "~/lib/rate-limit";
+import { normalizeEmail } from "~/lib/utils";
 
 import {
   createTRPCRouter,
@@ -18,7 +17,7 @@ import {
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 async function assertBusinessOwner(
-  db: PrismaClient,
+  db: DbClient,
   userId: string,
   businessId: string,
 ) {
@@ -37,7 +36,7 @@ async function assertBusinessOwner(
 }
 
 async function getReviewAndAssertOwner(
-  db: PrismaClient,
+  db: DbClient,
   userId: string,
   reviewId: string,
 ) {
@@ -52,7 +51,7 @@ async function getReviewAndAssertOwner(
   return review;
 }
 
-async function updateProductStats(db: PrismaClient, productId: string) {
+async function updateProductStats(db: DbClient, productId: string) {
   const reviews = await db.productReview.findMany({
     where: { productId, isApproved: true, isHidden: false },
     select: { rating: true },
@@ -68,7 +67,7 @@ async function updateProductStats(db: PrismaClient, productId: string) {
   });
 }
 
-async function updateVoteCounts(db: PrismaClient, reviewId: string) {
+async function updateVoteCounts(db: DbClient, reviewId: string) {
   const votes = await db.reviewVote.findMany({
     where: { reviewId },
     select: { isHelpful: true },
@@ -199,10 +198,7 @@ export const reviewRouter = createTRPCRouter({
         where: {
           reviewId: input.reviewId,
           review: { product: { businessId: business.id } },
-          OR: [
-            ...(userId ? [{ userId }] : []),
-            { ipAddress: ip },
-          ],
+          OR: [...(userId ? [{ userId }] : []), { ipAddress: ip }],
         },
       });
 
@@ -316,10 +312,11 @@ export const reviewRouter = createTRPCRouter({
           message: "Product not found",
         });
 
+      const normalizedUserEmail = normalizeEmail(user.email);
       const order = await ctx.db.order.findFirst({
         where: {
           businessId: product.businessId,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           items: { some: { productId: input.productId } },
         },
         select: { id: true },
@@ -329,12 +326,12 @@ export const reviewRouter = createTRPCRouter({
         where: {
           businessId_email: {
             businessId: product.businessId,
-            email: user.email,
+            email: normalizedUserEmail,
           },
         },
         create: {
           businessId: product.businessId,
-          email: user.email,
+          email: normalizedUserEmail,
           firstName: user.name?.split(" ")[0],
           lastName: user.name?.split(" ").slice(1).join(" "),
         },
@@ -346,7 +343,7 @@ export const reviewRouter = createTRPCRouter({
           source: "customer",
           productId: input.productId,
           customerId: customer.id,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           customerName: user.name ?? user.email,
           rating: input.rating,
           title: input.title,

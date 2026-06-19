@@ -4,7 +4,11 @@ import { useCallback, useState } from "react";
 import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { FadeIn, StaggerContainer, StaggerItem } from "~/components/page-animations";
+import {
+  FadeIn,
+  StaggerContainer,
+  StaggerItem,
+} from "~/components/page-animations";
 
 import {
   PollenTestimonialCard,

@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
-import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
 import { authLimiter, getClientIp } from "~/lib/rate-limit";
@@ -19,23 +19,34 @@ async function notifyArtisanalFutures(
   customDomain: string | null,
 ): Promise<void> {
   const storeUrl =
-    customDomain ??
-    `https://${subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+    customDomain ?? `https://${subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
   try {
     const res = await fetch(`${env.ARTISANAL_FUTURES_API_URL}/simplepress`, {
       method: "POST",
-      body: JSON.stringify({ artisanToken: aftoken, subdomain, customDomain: storeUrl }),
+      body: JSON.stringify({
+        artisanToken: aftoken,
+        subdomain,
+        customDomain: storeUrl,
+      }),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${env.SIMPLEPRESS_HASH_SECRET}`,
       },
     });
     if (!res.ok) {
-      console.warn("[Onboarding] AF token update returned non-OK status", res.status);
+      console.warn(
+        "[Onboarding] AF token update returned non-OK status",
+        res.status,
+      );
     }
   } catch (err) {
-    Sentry.captureException(err, { tags: { route: "onboarding", step: "af-token-update" } });
-    console.error("[Onboarding] Failed to notify Artisanal Futures (non-blocking)", err);
+    Sentry.captureException(err, {
+      tags: { route: "onboarding", step: "af-token-update" },
+    });
+    console.error(
+      "[Onboarding] Failed to notify Artisanal Futures (non-blocking)",
+      err,
+    );
   }
 }
 
@@ -195,7 +206,11 @@ export async function POST(req: NextRequest) {
 
     // Notify Artisanal Futures that this token was consumed (non-blocking).
     if (aftoken) {
-      void notifyArtisanalFutures(aftoken, business.subdomain, business.customDomain);
+      void notifyArtisanalFutures(
+        aftoken,
+        business.subdomain,
+        business.customDomain,
+      );
     }
 
     // Redirect to signup completion page with token

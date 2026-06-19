@@ -29,6 +29,7 @@ export const variantSchema = z.object({
   compareAtPrice: z.coerce.number().nonnegative().optional(),
   inventoryQty: z.coerce.number().int().nonnegative(),
   options: z.record(z.string(), z.string()),
+  imageUrl: z.string().url().optional().nullable(),
 });
 
 export const productFormSchema = z.object({
@@ -51,6 +52,8 @@ export const productFormSchema = z.object({
   metaDescription: z.string().max(160).optional().nullable(),
   metaKeywords: z.string().optional().nullable(),
   ogImage: z.string().url().optional().nullable(),
+  weight: z.coerce.number().nonnegative().optional().nullable(),
+  weightUnit: z.enum(["lb", "kg"]).optional(),
 });
 
 export const productCreateSchema = productFormSchema
@@ -59,6 +62,8 @@ export const productCreateSchema = productFormSchema
   })
   .extend({
     variants: z.array(variantSchema),
+    weight: z.number().nonnegative().nullable().optional(),
+    weightUnit: z.enum(["lb", "kg"]).optional(),
   });
 
 export const productUpdateSchema = productFormSchema
@@ -68,6 +73,27 @@ export const productUpdateSchema = productFormSchema
   .extend({
     id: z.string(),
     variants: z.array(variantSchema),
+    weight: z.number().nonnegative().nullable().optional(),
+    weightUnit: z.enum(["lb", "kg"]).optional(),
   });
 
+export const productListFiltersSchema = z
+  .object({
+    search: z.string().optional(),
+    status: z.enum(["all", "published", "draft"]).optional(),
+    sort: z
+      .enum([
+        "newest",
+        "oldest",
+        "name-asc",
+        "name-desc",
+        "price-asc",
+        "price-desc",
+      ])
+      .optional(),
+    page: z.number().int().positive().optional(),
+  })
+  .optional();
+
 export type ProductFormSchema = z.infer<typeof productFormSchema>;
+export type ProductListFiltersSchema = z.infer<typeof productListFiltersSchema>;

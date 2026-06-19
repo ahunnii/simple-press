@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
+import { TrackView } from "~/components/analytics/track-view";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 import { ModernProductCard } from "../shared/modern-product-card";
 import { ModernProductActions } from "./modern-product-actions";
@@ -27,6 +30,16 @@ export function ModernProductPage({
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+  const { variantImageUrl } = useVariantImage();
+  // Jump to the variant's image when the selected variant changes.
+  // Depend only on variantImageUrl so manual thumbnail clicks are not overridden.
+  useEffect(() => {
+    if (!variantImageUrl) return;
+    const idx = product.images.findIndex((img) => img.url === variantImageUrl);
+    if (idx >= 0) setSelectedImageIndex(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variantImageUrl]);
+
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
   });
@@ -41,6 +54,10 @@ export function ModernProductPage({
 
   return (
     <div className="bg-background">
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       {/* Breadcrumb */}
       <div className="border-border border-b">
         <div className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
@@ -87,7 +104,7 @@ export function ModernProductPage({
                     type="button"
                     onClick={() => setSelectedImageIndex(index)}
                     aria-pressed={selectedImageIndex === index}
-                    className={`bg-muted relative aspect-square w-16 overflow-hidden rounded-sm transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                    className={`bg-muted focus-visible:ring-ring relative aspect-square w-16 overflow-hidden rounded-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-2 ${
                       selectedImageIndex === index
                         ? "ring-foreground ring-1 ring-offset-1"
                         : "opacity-60 hover:opacity-100"

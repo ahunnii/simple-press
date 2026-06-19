@@ -26,8 +26,8 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
-import { PoolDialog } from "./pool-dialog";
 import { PoolAdjustInventory } from "./pool-adjust-inventory";
+import { PoolDialog } from "./pool-dialog";
 
 type Pool = RouterOutputs["baseInventoryUnit"]["list"][number];
 
@@ -69,7 +69,11 @@ export function PoolsTable({ pools }: Props) {
           <p className="mt-1 text-sm text-gray-400">
             Create your first base unit to start tracking shared inventory.
           </p>
-          <Button className="mt-4" size="sm" onClick={() => setCreateOpen(true)}>
+          <Button
+            className="mt-4"
+            size="sm"
+            onClick={() => setCreateOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Create Base Unit
           </Button>
@@ -101,9 +105,13 @@ export function PoolsTable({ pools }: Props) {
                 {pools.map((pool) => (
                   <tr key={pool.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{pool.name}</div>
+                      <div className="font-medium text-gray-900">
+                        {pool.name}
+                      </div>
                       {pool.description && (
-                        <div className="text-sm text-gray-500">{pool.description}</div>
+                        <div className="text-sm text-gray-500">
+                          {pool.description}
+                        </div>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -113,7 +121,8 @@ export function PoolsTable({ pools }: Props) {
                             pool.inventoryQty === 0
                               ? "font-semibold text-red-600"
                               : pool.lowInventoryThreshold !== null &&
-                                  pool.inventoryQty <= pool.lowInventoryThreshold
+                                  pool.inventoryQty <=
+                                    pool.lowInventoryThreshold
                                 ? "font-semibold text-amber-600"
                                 : "text-gray-900"
                           }
@@ -139,7 +148,11 @@ export function PoolsTable({ pools }: Props) {
                     <td className="px-6 py-4 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -169,14 +182,13 @@ export function PoolsTable({ pools }: Props) {
         </Card>
       )}
 
-      <PoolDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-      />
+      <PoolDialog open={createOpen} onOpenChange={setCreateOpen} />
 
       <PoolDialog
         open={!!editPool}
-        onOpenChange={(open) => { if (!open) setEditPool(null); }}
+        onOpenChange={(open) => {
+          if (!open) setEditPool(null);
+        }}
         pool={editPool ?? undefined}
       />
 
@@ -184,14 +196,23 @@ export function PoolsTable({ pools }: Props) {
         <PoolAdjustInventory
           pool={adjustPool}
           open={!!adjustPool}
-          onOpenChange={(open) => { if (!open) setAdjustPool(null); }}
+          onOpenChange={(open) => {
+            if (!open) setAdjustPool(null);
+          }}
         />
       )}
 
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
+      <AlertDialog
+        open={!!deleteId}
+        onOpenChange={(open) => {
+          if (!open) setDeleteId(null);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete &ldquo;{deleteName}&rdquo;?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete &ldquo;{deleteName}&rdquo;?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently delete the pool. Linked products will be
               detached and set to out of stock — you&apos;ll need to restock

@@ -1,16 +1,15 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
-import { FadeIn } from "~/components/page-animations";
 import { cn } from "~/lib/utils";
+import { FadeIn } from "~/components/page-animations";
 
 /** Shared prose styles for CMS / blog body content */
 export const SLEDGE_PROSE =
   "prose max-w-none prose-headings:font-heading prose-headings:uppercase prose-headings:tracking-[0.04em] prose-headings:text-[var(--sl-coral-aa)] prose-h2:text-[1.75rem] prose-h2:leading-snug prose-h2:mt-12 prose-h2:mb-5 prose-h3:text-[1.25rem] prose-h3:leading-snug prose-h3:mt-10 prose-h3:mb-4 prose-p:font-sans prose-p:text-[15px] prose-p:leading-[1.85] prose-p:text-[var(--sl-ink-soft)] prose-p:mt-0 prose-p:mb-6 prose-strong:font-semibold prose-strong:text-[var(--sl-ink)] prose-a:text-[var(--sl-coral-aa)] prose-a:underline prose-a:underline-offset-4 hover:prose-a:opacity-70 prose-li:font-sans prose-li:text-[15px] prose-li:leading-[1.85] prose-li:text-[var(--sl-ink-soft)] prose-ul:my-4 prose-ol:my-4 prose-blockquote:border-l-4 prose-blockquote:border-[var(--sl-coral)] prose-blockquote:pl-6 prose-blockquote:font-sans prose-blockquote:italic prose-blockquote:text-[var(--sl-ink-soft)] prose-hr:border-[#e8e8e8] prose-hr:my-10";
 
 export const SLEDGE_PAGE_CONTAINER = "mx-auto w-full max-w-7xl px-7";
-export const SLEDGE_PAGE_HEADER_PADDING =
-  "pt-16 pb-10 md:pt-20 md:pb-12";
+export const SLEDGE_PAGE_HEADER_PADDING = "pt-16 pb-10 md:pt-20 md:pb-12";
 export const SLEDGE_PAGE_CONTENT_PADDING = "pb-16 md:pb-20";
 
 type SledgePageHeaderProps = {
@@ -112,10 +111,7 @@ export function SledgePageSection({
 
   return (
     <section
-      className={cn(
-        !noBottomPadding && SLEDGE_PAGE_CONTENT_PADDING,
-        className,
-      )}
+      className={cn(!noBottomPadding && SLEDGE_PAGE_CONTENT_PADDING, className)}
       {...sectionAttrs}
     >
       {animate ? <FadeIn>{inner}</FadeIn> : inner}

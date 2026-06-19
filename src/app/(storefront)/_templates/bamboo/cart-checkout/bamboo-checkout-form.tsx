@@ -7,9 +7,8 @@ import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
-import { calculateShipping } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
-import { useCart } from "~/providers/cart-context";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -22,25 +21,36 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
 };
 
 export function CheckoutForm({ business }: CheckoutFormProps) {
-  const { subtotal } = useCart();
   const {
-    email, setEmail,
-    name, setName,
-    phone, setPhone,
-    addressLine1, setAddressLine1,
-    addressLine2, setAddressLine2,
-    city, setCity,
-    state, setState,
-    postalCode, setPostalCode,
-    country, setCountry,
-    deliveryMethod, setDeliveryMethod,
-    discountCodeInput, setDiscountCodeInput,
+    email,
+    setEmail,
+    name,
+    setName,
+    phone,
+    setPhone,
+    addressLine1,
+    setAddressLine1,
+    addressLine2,
+    setAddressLine2,
+    city,
+    setCity,
+    state,
+    setState,
+    postalCode,
+    setPostalCode,
+    country,
+    setCountry,
+    deliveryMethod,
+    setDeliveryMethod,
+    discountCodeInput,
+    setDiscountCodeInput,
     discountAmount,
     discountCodeLabel,
     discountFieldError,
@@ -51,7 +61,16 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
     handleSubmit,
     shippingConfig,
     items,
+    subtotal,
+    shipping,
+    shippingPending,
+    finalTotal,
   } = useCheckoutForm(business);
+
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    deliveryMethod === "ship" && state.trim().length > 0 && shippingPending;
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -65,12 +84,6 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
   // the submit button; falls back to the CSS --primary token when absent.
   const primaryColor = business.siteContent?.primaryColor ?? undefined;
 
-  const shipping =
-    deliveryMethod === "pickup"
-      ? 0
-      : calculateShipping(subtotal, shippingConfig);
-  const finalTotal = subtotal - discountAmount + shipping;
-
   if (items.length === 0) {
     return (
       <div className="py-16 text-center">
@@ -83,7 +96,10 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
   }
 
   return (
-    <form onSubmit={wrappedHandleSubmit} className="flex flex-col gap-8 lg:flex-row">
+    <form
+      onSubmit={wrappedHandleSubmit}
+      className="flex flex-col gap-8 lg:flex-row"
+    >
       <div className="flex-1 space-y-8">
         {/* M-7: required field explanation */}
         <p className="text-muted-foreground text-sm">
@@ -119,7 +135,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="John Doe"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !name.trim() ? true : undefined
+                }
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -132,7 +150,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="+1 555 123 4567"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !phone.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !phone.trim() ? true : undefined
+                }
               />
             </div>
           </div>
@@ -155,20 +175,23 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="SAVE20"
                 autoComplete="off"
                 aria-invalid={!!discountFieldError}
-                aria-describedby={discountFieldError ? "discount-error" : undefined}
+                aria-describedby={
+                  discountFieldError ? "discount-error" : undefined
+                }
               />
             </div>
             <Button
               type="button"
               variant="outline"
               onClick={handleApplyDiscount}
-              disabled={
-                isValidatingDiscount || items.length === 0
-              }
+              disabled={isValidatingDiscount || items.length === 0}
             >
               {isValidatingDiscount ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                  <Loader2
+                    className="mr-2 size-4 animate-spin"
+                    aria-hidden="true"
+                  />
                   Checking…
                 </>
               ) : (
@@ -177,7 +200,13 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
             </Button>
           </div>
           {discountFieldError && (
-            <p id="discount-error" className="text-destructive text-sm" role="alert">{discountFieldError}</p>
+            <p
+              id="discount-error"
+              className="text-destructive text-sm"
+              role="alert"
+            >
+              {discountFieldError}
+            </p>
           )}
           {discountCodeLabel && discountAmount > 0 && (
             <p className="text-sm text-green-700" role="status">
@@ -237,8 +266,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               Shipping Address
             </legend>
             <p className="text-muted-foreground text-sm">
-              This is sent to Stripe Checkout prefilled so you can confirm or
-              edit your name, phone, and address before paying.
+              {shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                ? "We price shipping from this address. Make changes here before continuing to payment."
+                : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
@@ -252,7 +282,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                   placeholder="Street address, P.O. box"
                   required={deliveryMethod === "ship"}
                   aria-required="true"
-                  aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !addressLine1.trim() ? true : undefined
+                  }
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -277,22 +309,39 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                     onChange={(e) => setCity(e.target.value)}
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !city.trim() ? true : undefined
+                    }
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="state">State / Province *</Label>
-                  <Input
-                    id="state"
-                    type="text"
-                    autoComplete="shipping address-level1"
+                  <Label id="state-label" htmlFor="state">
+                    State / Province *
+                  </Label>
+                  <Select
                     value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    placeholder="e.g. CA or ON"
-                    required={deliveryMethod === "ship"}
-                    aria-required="true"
-                    aria-invalid={submitAttempted && !state.trim() ? true : undefined}
-                  />
+                    onValueChange={(v) => setState(v)}
+                    required
+                  >
+                    <SelectTrigger
+                      id="state"
+                      className="w-full"
+                      aria-labelledby="state-label"
+                      aria-required="true"
+                      aria-invalid={
+                        submitAttempted && !state ? true : undefined
+                      }
+                    >
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getRegionOptions(country).map((opt) => (
+                        <SelectItem key={opt.code} value={opt.code}>
+                          {opt.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -306,17 +355,25 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                     onChange={(e) => setPostalCode(e.target.value)}
                     required={deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                    aria-invalid={
+                      submitAttempted && !postalCode.trim() ? true : undefined
+                    }
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label id="country-label" htmlFor="country">Country *</Label>
+                  <Label id="country-label" htmlFor="country">
+                    Country *
+                  </Label>
                   <Select
                     value={country}
                     onValueChange={(v) => setCountry(v as "US" | "CA")}
                     required
                   >
-                    <SelectTrigger id="country" className="w-full" aria-labelledby="country-label">
+                    <SelectTrigger
+                      id="country"
+                      className="w-full"
+                      aria-labelledby="country-label"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -393,11 +450,23 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
                 <span>
-                  {deliveryMethod === "pickup"
-                    ? "In-store pickup (free)"
-                    : shipping === 0
-                      ? "Free"
-                      : formatPrice(shipping)}
+                  {deliveryMethod === "pickup" ? (
+                    "In-store pickup (free)"
+                  ) : shippingCalculating ? (
+                    <span
+                      className="text-muted-foreground inline-flex items-center gap-1.5"
+                      aria-live="polite"
+                    >
+                      <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                      Calculating…
+                    </span>
+                  ) : shippingPending ? (
+                    "Calculated at checkout"
+                  ) : shipping === 0 ? (
+                    "Free"
+                  ) : (
+                    formatPrice(shipping)
+                  )}
                 </span>
               </div>
               <div className="flex justify-between border-t pt-2 font-bold">
@@ -419,16 +488,29 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
 
             <Button
               type="submit"
-              disabled={isProcessing}
-              aria-busy={isProcessing}
+              disabled={isProcessing || shippingCalculating}
+              aria-busy={isProcessing || shippingCalculating}
               className="w-full"
               size="lg"
-              style={primaryColor ? { backgroundColor: primaryColor } : undefined}
+              style={
+                primaryColor ? { backgroundColor: primaryColor } : undefined
+              }
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                  <Loader2
+                    className="mr-2 size-4 animate-spin"
+                    aria-hidden="true"
+                  />
                   Processing...
+                </>
+              ) : shippingCalculating ? (
+                <>
+                  <Loader2
+                    className="mr-2 size-4 animate-spin"
+                    aria-hidden="true"
+                  />
+                  Calculating shipping…
                 </>
               ) : (
                 "Continue to Payment"

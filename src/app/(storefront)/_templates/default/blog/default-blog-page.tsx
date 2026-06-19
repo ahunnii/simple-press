@@ -81,7 +81,10 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
   return (
     <div>
       {/* Page hero */}
-      <section {...sectionGroupAttr("blog", "header")} className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
+      <section
+        {...sectionGroupAttr("blog", "header")}
+        className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8"
+      >
         <div className="mx-auto max-w-[1440px]">
           <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
             Journal
@@ -127,7 +130,9 @@ export function DefaultBlogPage({ pages, customFields }: Props) {
               </div>
               {/* Live region: announces filtered result count to screen readers */}
               <p className="sr-only" aria-live="polite" aria-atomic="true">
-                {query.trim() ? `${filtered.length} post${filtered.length === 1 ? "" : "s"} found` : ""}
+                {query.trim()
+                  ? `${filtered.length} post${filtered.length === 1 ? "" : "s"} found`
+                  : ""}
               </p>
 
               {query.trim() ? (

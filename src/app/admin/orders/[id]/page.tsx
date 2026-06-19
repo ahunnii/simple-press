@@ -106,9 +106,7 @@ export default async function OrderDetailPage({ params }: Props) {
               Fulfillment: {order.fulfillmentStatus}
             </Badge>
 
-            {order.hasOversell && (
-              <Badge variant="destructive">Oversold</Badge>
-            )}
+            {order.hasOversell && <Badge variant="destructive">Oversold</Badge>}
           </div>
         </div>
 
@@ -229,9 +227,7 @@ export default async function OrderDetailPage({ params }: Props) {
                         <span className="font-medium">
                           {item.productName ?? "Unknown product"}
                         </span>
-                        {item.variantName && (
-                          <span> — {item.variantName}</span>
-                        )}
+                        {item.variantName && <span> — {item.variantName}</span>}
                         <span className="ml-1 text-xs opacity-80">
                           ({item.previousQty} in stock at time of purchase)
                         </span>

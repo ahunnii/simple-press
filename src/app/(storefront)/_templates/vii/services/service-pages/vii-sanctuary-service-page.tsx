@@ -1,0 +1,770 @@
+"use client";
+
+/**
+ * vii-sanctuary — Immersive editorial hero + treatment menu
+ *
+ * Layout:
+ * 1. Full-viewport hero (video or image) with the service name arching over a
+ *    dark navy scrim.
+ * 2. Centred intro block — overline, split heading + italic accent, richtext body.
+ * 3. Benefits strip (icon-list row across a dark-navy band).
+ * 4. Treatment menu — a 3-col card grid in cream. Each card: image, name,
+ *    duration/price chips, description, and a copper "Book" CTA.
+ * 5. Closing contact CTA section (reuses ViiContactCtaSection).
+ */
+import { useState } from "react";
+import Image from "next/image";
+
+import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { parseTemplateListRows } from "~/lib/template-fields";
+import { PageTransition } from "~/components/page-animations";
+import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
+
+import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
+import { useViiReveal } from "../../hooks/use-vii-reveal";
+import { resolveSanctuaryFields } from "./fields";
+
+// ─── Sub-components ────────────────────────────────────────────────────────────
+
+function SanctuaryHero({
+  heroVideo,
+  heroImage,
+  serviceName,
+  serviceDescription,
+  overline,
+}: {
+  heroVideo?: string;
+  heroImage?: string;
+  serviceName: string;
+  serviceDescription?: string | null;
+  overline: string;
+}) {
+  const [videoPaused, setVideoPaused] = useState(false);
+  const [shown, setShown] = useState(false);
+
+  // entrance reveal on mount
+  useState(() => {
+    const t = setTimeout(() => setShown(true), 60);
+    return () => clearTimeout(t);
+  });
+
+  const hasVideo = !!heroVideo?.trim();
+  const hasImage = !!heroImage?.trim();
+  const ease = "cubic-bezier(0.16, 1, 0.3, 1)";
+
+  const revealStyle = (delay: number): React.CSSProperties => ({
+    opacity: shown ? 1 : 0,
+    transform: shown ? "translateY(0)" : "translateY(20px)",
+    transition: `opacity 0.95s ${ease} ${delay}s, transform 0.95s ${ease} ${delay}s`,
+  });
+
+  return (
+    <section
+      aria-label={serviceName}
+      style={{
+        position: "relative",
+        width: "100%",
+        minHeight: "clamp(520px, 90vh, 900px)",
+        display: "flex",
+        alignItems: "flex-end",
+        overflow: "hidden",
+        background: "var(--vii-navy)",
+      }}
+    >
+      {/* Background media */}
+      {hasVideo ? (
+        <video
+          autoPlay={!videoPaused}
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+          onClick={() => setVideoPaused((p) => !p)}
+        >
+          <source src={heroVideo} type="video/mp4" />
+        </video>
+      ) : hasImage ? (
+        <Image
+          src={heroImage!}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectFit: "cover" }}
+        />
+      ) : (
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(160deg, var(--vii-navy) 0%, var(--vii-slate) 100%)",
+          }}
+        />
+      )}
+
+      {/* Layered scrim — stronger at the bottom where text sits */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(to top, rgba(30,53,64,0.9) 0%, rgba(30,53,64,0.4) 50%, rgba(30,53,64,0.15) 100%)",
+          zIndex: 1,
+        }}
+      />
+
+      {/* Horizontal rule accent near bottom */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          bottom: "clamp(120px, 20vh, 200px)",
+          left: "clamp(24px, 6vw, 96px)",
+          width: 48,
+          height: 1,
+          background: "var(--vii-copper-light)",
+          zIndex: 2,
+        }}
+      />
+
+      {/* Content */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          padding: "0 clamp(24px, 6vw, 96px) clamp(56px, 9vh, 100px)",
+          maxWidth: 860,
+        }}
+      >
+        {overline && (
+          <p
+            style={{
+              ...revealStyle(0),
+              fontFamily: "var(--font-sans)",
+              fontSize: 10,
+              letterSpacing: "0.26em",
+              textTransform: "uppercase",
+              color: "var(--vii-copper-light)",
+              marginBottom: 18,
+            }}
+          >
+            {overline}
+          </p>
+        )}
+
+        <h1
+          style={{
+            ...revealStyle(0.12),
+            fontFamily: "var(--font-serif)",
+            fontWeight: 400,
+            fontStyle: "italic",
+            fontSize: "clamp(48px, 8vw, 108px)",
+            lineHeight: 0.98,
+            color: "var(--vii-paper)",
+            margin: 0,
+            marginBottom: serviceDescription ? 24 : 0,
+          }}
+        >
+          {serviceName}
+        </h1>
+
+        {serviceDescription && (
+          <p
+            style={{
+              ...revealStyle(0.25),
+              fontFamily: "var(--font-sans)",
+              fontSize: "clamp(14px, 1.4vw, 17px)",
+              lineHeight: 1.75,
+              color: "var(--vii-paper)",
+              opacity: 0.8,
+              maxWidth: 560,
+              margin: 0,
+            }}
+          >
+            {serviceDescription}
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function SanctuaryIntro({
+  overline,
+  heading,
+  headingAccent,
+  bodyJson,
+  bodyFallback,
+}: {
+  overline: string;
+  heading: string;
+  headingAccent: string;
+  bodyJson: TiptapJSON | null;
+  bodyFallback: string;
+}) {
+  const { ref: headRef, visible: headVisible } = useViiReveal(0.1);
+  const { ref: bodyRef, visible: bodyVisible } = useViiReveal(0.1);
+
+  if (!heading && !headingAccent && !bodyJson && !bodyFallback) return null;
+
+  return (
+    <section
+      aria-labelledby="sanctuary-intro-heading"
+      style={{
+        background: "var(--vii-cream)",
+        padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
+      }}
+    >
+      <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
+        <div
+          ref={headRef}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+        >
+          {overline && (
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 10,
+                letterSpacing: "0.26em",
+                textTransform: "uppercase",
+                color: "var(--vii-ink-soft)",
+                marginBottom: 16,
+              }}
+            >
+              {overline}
+            </p>
+          )}
+
+          {(heading || headingAccent) && (
+            <h2
+              id="sanctuary-intro-heading"
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontWeight: 400,
+                fontSize: "clamp(36px, 5.5vw, 72px)",
+                lineHeight: 1.05,
+                color: "var(--vii-navy)",
+                margin: 0,
+              }}
+            >
+              {heading}{" "}
+              {headingAccent && (
+                <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+                  {headingAccent}
+                </em>
+              )}
+            </h2>
+          )}
+        </div>
+
+        {(bodyJson ?? bodyFallback) && (
+          <div
+            ref={bodyRef}
+            className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
+            style={{ marginTop: 32 }}
+          >
+            {bodyJson ? (
+              <div
+                className="prose prose-neutral max-w-none"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "clamp(15px, 1.4vw, 17px)",
+                  lineHeight: 1.8,
+                  color: "var(--vii-ink-soft)",
+                }}
+              >
+                <TiptapRenderer content={bodyJson} />
+              </div>
+            ) : (
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "clamp(15px, 1.4vw, 17px)",
+                  lineHeight: 1.8,
+                  color: "var(--vii-ink-soft)",
+                  margin: 0,
+                }}
+              >
+                {bodyFallback}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function BenefitsStrip({ benefits }: { benefits: string[] }) {
+  const { ref, visible } = useViiReveal(0.08);
+  if (benefits.length === 0) return null;
+
+  return (
+    <section
+      aria-label="Service highlights"
+      style={{
+        background: "var(--vii-navy)",
+        padding: "clamp(36px, 5vw, 56px) clamp(24px, 6vw, 96px)",
+      }}
+    >
+      <div
+        ref={ref}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        style={{
+          maxWidth: 1100,
+          margin: "0 auto",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "clamp(20px, 3vw, 40px)",
+          justifyContent: "center",
+        }}
+      >
+        {benefits.map((label, i) => (
+          <div
+            key={i}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            {/* Copper dot */}
+            <span
+              aria-hidden="true"
+              style={{
+                display: "inline-block",
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "var(--vii-copper-light)",
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 12,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: "var(--vii-tan)",
+              }}
+            >
+              {label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function TreatmentCard({
+  item,
+  embedsEnabled,
+  index,
+}: {
+  item: ServiceTemplateProps["items"][number];
+  embedsEnabled: boolean;
+  index: number;
+}) {
+  const { ref, visible } = useViiReveal(0.1);
+
+  return (
+    <article
+      ref={ref}
+      className={`vii-reveal${visible ? " is-visible" : ""}`}
+      style={{
+        transitionDelay: `${index * 0.07}s`,
+        background: "var(--vii-paper)",
+        borderRadius: "0.2rem",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* Image */}
+      <div
+        style={{
+          position: "relative",
+          aspectRatio: "3/2",
+          background: "var(--vii-tan)",
+          overflow: "hidden",
+          flexShrink: 0,
+        }}
+      >
+        {item.image ? (
+          <Image
+            src={item.image}
+            alt={item.name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            style={{
+              objectFit: "cover",
+              transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+            className="vii-sanctuary-card-img"
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(135deg, var(--vii-clay) 0%, var(--vii-tan) 100%)",
+            }}
+          />
+        )}
+      </div>
+
+      {/* Body */}
+      <div
+        style={{
+          padding: "clamp(20px, 3vw, 28px)",
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          gap: 0,
+        }}
+      >
+        {/* Duration + price chips */}
+        {(item.durationLabel ?? item.priceLabel) && (
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              marginBottom: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            {item.durationLabel && (
+              <span
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 10,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "var(--vii-ink-soft)",
+                  padding: "3px 10px",
+                  border: "1px solid var(--vii-tan)",
+                  borderRadius: "0.15rem",
+                }}
+              >
+                {item.durationLabel}
+              </span>
+            )}
+            {item.priceLabel && (
+              <span
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 10,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "var(--vii-copper)",
+                  padding: "3px 10px",
+                  border: "1px solid var(--vii-copper)",
+                  borderRadius: "0.15rem",
+                }}
+              >
+                {item.priceLabel}
+              </span>
+            )}
+          </div>
+        )}
+
+        <h3
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontWeight: 400,
+            fontSize: "clamp(18px, 2vw, 22px)",
+            lineHeight: 1.2,
+            color: "var(--vii-navy)",
+            margin: "0 0 10px",
+          }}
+        >
+          {item.name}
+        </h3>
+
+        {item.description && (
+          <p
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "clamp(13px, 1.2vw, 15px)",
+              lineHeight: 1.75,
+              color: "var(--vii-ink-soft)",
+              margin: "0 0 20px",
+              flex: 1,
+            }}
+          >
+            {item.description}
+          </p>
+        )}
+
+        {/* Book CTA — styled to match vii's copper button aesthetic */}
+        <div style={{ marginTop: "auto" }}>
+          <ViiBookButton
+            itemName={item.name}
+            embedSrc={item.bookingEmbedSrc ?? undefined}
+            embedHeight={item.bookingEmbedHeight ?? undefined}
+            embedsEnabled={embedsEnabled}
+          />
+        </div>
+      </div>
+
+      <style>{`
+        .vii-sanctuary-card-img:hover { transform: scale(1.04); }
+      `}</style>
+    </article>
+  );
+}
+
+/** Wraps ServiceBookingDialog with vii's copper button styling. */
+function ViiBookButton({
+  itemName,
+  embedSrc,
+  embedHeight,
+  embedsEnabled,
+}: {
+  itemName: string;
+  embedSrc?: string;
+  embedHeight?: number | null;
+  embedsEnabled: boolean;
+}) {
+  return (
+    <div className="vii-book-btn-wrap">
+      <ServiceBookingDialog
+        triggerLabel="Book This Treatment"
+        itemName={itemName}
+        embedSrc={embedSrc}
+        embedHeight={embedHeight}
+        embedsEnabled={embedsEnabled}
+      />
+      <style>{`
+        .vii-book-btn-wrap button,
+        .vii-book-btn-wrap a {
+          display: inline-block;
+          padding: 12px 28px;
+          background: var(--vii-copper);
+          color: var(--vii-paper) !important;
+          font-family: var(--font-sans);
+          font-size: 11px;
+          font-weight: 500;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          text-decoration: none;
+          border-radius: 0.15rem;
+          border: none;
+          cursor: pointer;
+          transition: background 0.3s ease, opacity 0.3s ease;
+          width: 100%;
+          text-align: center;
+          justify-content: center;
+        }
+        .vii-book-btn-wrap button:hover,
+        .vii-book-btn-wrap a:hover { background: var(--vii-slate); }
+        .vii-book-btn-wrap button:disabled {
+          background: var(--vii-tan);
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── Main component ────────────────────────────────────────────────────────────
+
+export function ViiSanctuaryServicePage({
+  service,
+  items,
+  embedsEnabled,
+}: ServiceTemplateProps) {
+  const f = resolveSanctuaryFields(service.customFields, [
+    "vii-sanctuary.hero-video",
+    "vii-sanctuary.hero-image",
+    "vii-sanctuary.hero-overline",
+    "vii-sanctuary.intro-overline",
+    "vii-sanctuary.intro-heading",
+    "vii-sanctuary.intro-heading-accent",
+    "vii-sanctuary.intro-body",
+    "vii-sanctuary.menu-heading",
+    "vii-sanctuary.cta-image",
+    "vii-sanctuary.cta-heading",
+    "vii-sanctuary.cta-subheading",
+    "vii-sanctuary.cta-body",
+    "vii-sanctuary.cta-phone",
+    "vii-sanctuary.cta-email",
+  ]);
+
+  // Parse richtext body
+  let introBodyJson: TiptapJSON | null = null;
+  const introBodyRaw = f["vii-sanctuary.intro-body"];
+  if (introBodyRaw) {
+    try {
+      introBodyJson = JSON.parse(introBodyRaw) as TiptapJSON;
+    } catch {
+      // will fall back to plain text
+    }
+  }
+
+  // Parse benefits list
+  const benefitRows = parseTemplateListRows(
+    (service.customFields as Record<string, unknown> | null | undefined)?.[
+      "vii-sanctuary.benefits"
+    ],
+  );
+  const benefits = benefitRows
+    .map((r) => (typeof r.label === "string" ? r.label : ""))
+    .filter(Boolean);
+
+  const publishedItems = items.filter((it) => it.published !== false);
+
+  return (
+    <PageTransition>
+      {/* 1. Hero */}
+      <SanctuaryHero
+        heroVideo={f["vii-sanctuary.hero-video"] ?? undefined}
+        heroImage={f["vii-sanctuary.hero-image"] ?? undefined}
+        serviceName={service.name}
+        serviceDescription={service.description}
+        overline={f["vii-sanctuary.hero-overline"] ?? ""}
+      />
+
+      {/* 2. Intro */}
+      <SanctuaryIntro
+        overline={f["vii-sanctuary.intro-overline"] ?? ""}
+        heading={f["vii-sanctuary.intro-heading"] ?? ""}
+        headingAccent={f["vii-sanctuary.intro-heading-accent"] ?? ""}
+        bodyJson={introBodyJson}
+        bodyFallback={introBodyJson ? "" : (introBodyRaw ?? "")}
+      />
+
+      {/* 3. Benefits strip */}
+      <BenefitsStrip benefits={benefits} />
+
+      {/* 4. Treatment menu */}
+      {publishedItems.length > 0 && (
+        <TreatmentMenu
+          items={publishedItems}
+          embedsEnabled={embedsEnabled}
+          menuHeading={f["vii-sanctuary.menu-heading"] ?? ""}
+        />
+      )}
+
+      {/* 5. Closing CTA */}
+      <ViiContactCtaSection
+        contactImage={f["vii-sanctuary.cta-image"] ?? undefined}
+        heading={f["vii-sanctuary.cta-heading"] ?? ""}
+        subheading={f["vii-sanctuary.cta-subheading"] ?? ""}
+        body={f["vii-sanctuary.cta-body"] ?? ""}
+        phone={f["vii-sanctuary.cta-phone"] ?? ""}
+        email={f["vii-sanctuary.cta-email"] ?? ""}
+      />
+    </PageTransition>
+  );
+}
+
+function TreatmentMenu({
+  items,
+  embedsEnabled,
+  menuHeading,
+}: {
+  items: ServiceTemplateProps["items"];
+  embedsEnabled: boolean;
+  menuHeading: string;
+}) {
+  const { ref: headRef, visible: headVisible } = useViiReveal(0.08);
+
+  return (
+    <section
+      aria-labelledby="sanctuary-menu-heading"
+      style={{
+        background: "var(--vii-cream)",
+        padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
+      }}
+    >
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        {/* Section heading */}
+        <div
+          ref={headRef}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          style={{ marginBottom: "clamp(40px, 6vw, 64px)" }}
+        >
+          <p
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: 10,
+              letterSpacing: "0.26em",
+              textTransform: "uppercase",
+              color: "var(--vii-ink-soft)",
+              marginBottom: 12,
+            }}
+          >
+            Our Services
+          </p>
+          <h2
+            id="sanctuary-menu-heading"
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontWeight: 400,
+              fontSize: "clamp(30px, 4.5vw, 56px)",
+              lineHeight: 1.08,
+              color: "var(--vii-navy)",
+              margin: 0,
+            }}
+          >
+            {menuHeading || (
+              <>
+                The{" "}
+                <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+                  treatment
+                </em>{" "}
+                menu
+              </>
+            )}
+          </h2>
+        </div>
+
+        {/* 3-column grid */}
+        <div
+          className="vii-sanctuary-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "clamp(16px, 2.5vw, 28px)",
+          }}
+        >
+          {items.map((item, i) => (
+            <TreatmentCard
+              key={item.id}
+              item={item}
+              embedsEnabled={embedsEnabled}
+              index={i}
+            />
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .vii-sanctuary-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+        @media (max-width: 560px) {
+          .vii-sanctuary-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+    </section>
+  );
+}

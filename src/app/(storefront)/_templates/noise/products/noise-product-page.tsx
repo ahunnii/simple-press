@@ -6,13 +6,14 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
-import { useReducedMotion } from "~/hooks/use-reduced-motion";
-
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import { TrackView } from "~/components/analytics/track-view";
 import {
   FadeIn,
   PageTransition,
@@ -20,6 +21,7 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 import { NoiseProductCard } from "../shared/noise-product-card";
 import { NoiseProductActions } from "./noise-product-actions";
@@ -35,6 +37,16 @@ export function NoiseProductPage({
   const [activeImg, setActiveImg] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const lightboxCloseRef = useRef<HTMLButtonElement>(null);
+
+  const { variantImageUrl } = useVariantImage();
+  // Jump to the variant's image when the selected variant changes.
+  // Depend only on variantImageUrl so manual thumbnail clicks are not overridden.
+  useEffect(() => {
+    if (!variantImageUrl) return;
+    const idx = product.images.findIndex((img) => img.url === variantImageUrl);
+    if (idx >= 0) setActiveImg(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variantImageUrl]);
   const enlargeTriggerRef = useRef<HTMLButtonElement>(null);
   const reduce = useReducedMotion();
 
@@ -92,6 +104,10 @@ export function NoiseProductPage({
 
   return (
     <PageTransition>
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       {/* ── Breadcrumb ── */}
       <div
         className="flex items-center justify-between px-7 py-3.5"
@@ -114,7 +130,9 @@ export function NoiseProductPage({
                 Home
               </Link>
             </li>
-            <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>/</li>
+            <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>
+              /
+            </li>
             <li>
               <Link
                 href="/shop"
@@ -126,7 +144,9 @@ export function NoiseProductPage({
             </li>
             {firstCollection && (
               <>
-                <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>/</li>
+                <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>
+                  /
+                </li>
                 <li>
                   <Link
                     href={`/collections/${firstCollection.slug}`}
@@ -138,7 +158,9 @@ export function NoiseProductPage({
                 </li>
               </>
             )}
-            <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>/</li>
+            <li aria-hidden="true" style={{ color: "var(--vn-rule)" }}>
+              /
+            </li>
             <li>
               <span
                 className="max-w-[30ch] truncate"
@@ -175,7 +197,11 @@ export function NoiseProductPage({
           }}
         >
           {/* ── Col 1: Vertical thumbnail strip ── */}
-          <div className="hidden flex-col gap-2.5 md:flex">
+          <div
+            role="group"
+            aria-label="Product image thumbnails"
+            className="hidden flex-col gap-2.5 md:flex"
+          >
             {images.slice(0, 4).map((img, i) => (
               <button
                 key={img.id}
@@ -276,6 +302,44 @@ export function NoiseProductPage({
             )}
           </div>
 
+          {/* Mobile: horizontal thumbnail strip (between image and details) */}
+          {images.length > 1 && (
+            <div
+              role="group"
+              aria-label="Product image thumbnails"
+              className="grid grid-cols-4 gap-2 md:hidden"
+            >
+              {images.slice(0, 4).map((img, i) => (
+                <button
+                  key={img.id}
+                  onClick={() => setActiveImg(i)}
+                  aria-label={`View image ${i + 1}`}
+                  aria-pressed={activeImg === i}
+                  className="relative overflow-hidden transition-all"
+                  style={{
+                    aspectRatio: "4 / 5",
+                    background: "var(--vn-steel)",
+                    border:
+                      activeImg === i
+                        ? "1px solid var(--vn-ink)"
+                        : "1px solid var(--vn-rule)",
+                    outline:
+                      activeImg === i ? "2px solid var(--vn-bone)" : "none",
+                    outlineOffset: "-4px",
+                  }}
+                >
+                  <Image
+                    src={img.url}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="25vw"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* ── Col 3: Detail panel ── */}
           <FadeIn
             delay={0.12}
@@ -324,40 +388,6 @@ export function NoiseProductPage({
             <NoiseProductActions product={product} business={business} />
           </FadeIn>
         </div>
-
-        {/* Mobile: horizontal thumbnail strip (below main image) */}
-        {images.length > 1 && (
-          <div
-            className="mx-auto mt-4 grid grid-cols-4 gap-2 md:hidden"
-            style={{ maxWidth: "1280px" }}
-          >
-            {images.slice(0, 4).map((img, i) => (
-              <button
-                key={img.id}
-                onClick={() => setActiveImg(i)}
-                aria-label={`View image ${i + 1}`}
-                aria-pressed={activeImg === i}
-                className="relative overflow-hidden"
-                style={{
-                  aspectRatio: "4 / 5",
-                  background: "var(--vn-steel)",
-                  border:
-                    activeImg === i
-                      ? "1px solid var(--vn-ink)"
-                      : "1px solid var(--vn-rule)",
-                }}
-              >
-                <Image
-                  src={img.url}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="25vw"
-                />
-              </button>
-            ))}
-          </div>
-        )}
       </section>
 
       {/* ── Description tabs / accordion ── */}

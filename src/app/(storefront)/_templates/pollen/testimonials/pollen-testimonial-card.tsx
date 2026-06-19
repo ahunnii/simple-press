@@ -27,7 +27,9 @@ export function PollenTestimonialCard({
 }: PollenTestimonialCardProps) {
   return (
     <div className="rounded-2xl bg-[#3d4d2f]/80 p-8 backdrop-blur-sm">
-      <p className="font-serif text-4xl text-white/30" aria-hidden="true">&ldquo;</p>
+      <p className="font-serif text-4xl text-white/30" aria-hidden="true">
+        &ldquo;
+      </p>
       <p className="mt-2 mb-6 leading-relaxed text-white">{testimonial.text}</p>
       <p className="font-semibold text-white">{testimonial.customerName}</p>
       {testimonial.photoUrls && testimonial.photoUrls.length > 0 && (

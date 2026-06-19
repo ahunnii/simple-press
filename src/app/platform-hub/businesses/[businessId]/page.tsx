@@ -58,53 +58,53 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
             <CardContent>
               <dl className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Business ID
                   </dt>
                   <dd className="mt-1 font-mono text-xs">{business.id}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">Slug</dt>
+                  <dt className="text-muted-foreground font-medium">Slug</dt>
                   <dd className="mt-1">{business.slug}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Subdomain
                   </dt>
                   <dd className="mt-1">{business.subdomain}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Custom Domain
                   </dt>
                   <dd className="mt-1">{business.customDomain ?? "None"}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Domain Status
                   </dt>
                   <dd className="mt-1">{business.domainStatus}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Template
                   </dt>
                   <dd className="mt-1">{business.templateId}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Owner Email
                   </dt>
                   <dd className="mt-1">{business.ownerEmail}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Support Email
                   </dt>
                   <dd className="mt-1">{business.supportEmail ?? "None"}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Onboarding Complete
                   </dt>
                   <dd className="mt-1">
@@ -112,7 +112,7 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Created At
                   </dt>
                   <dd className="mt-1">
@@ -137,7 +137,7 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
             </CardHeader>
             <CardContent>
               {business.memberships.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   This business has no team members yet.
                 </p>
               ) : (

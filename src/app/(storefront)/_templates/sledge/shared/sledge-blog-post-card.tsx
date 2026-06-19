@@ -39,7 +39,10 @@ export function SledgeBlogPostCard({
           <SledgeBlogImagePlaceholder label={placeholderLabel} />
         )}
         {/* N-2: aria-hidden — the card's link name (post title) already provides context */}
-        <span aria-hidden="true" className="absolute top-2.5 left-2.5 rounded-sm bg-[var(--sl-cream)] px-2 py-1 font-sans text-[9px] tracking-[0.16em] text-[var(--sl-coral-aa)] uppercase">
+        <span
+          aria-hidden="true"
+          className="absolute top-2.5 left-2.5 rounded-sm bg-[var(--sl-cream)] px-2 py-1 font-sans text-[9px] tracking-[0.16em] text-[var(--sl-coral-aa)] uppercase"
+        >
           Blog
         </span>
       </div>
@@ -59,7 +62,10 @@ export function SledgeBlogPostCard({
       ) : null}
 
       {/* N-2: aria-hidden — the card's wrapping link already conveys destination */}
-      <span aria-hidden="true" className="mt-3 inline-block font-sans text-xs tracking-[0.14em] text-[var(--sl-coral-aa)] uppercase transition-opacity group-hover:opacity-60">
+      <span
+        aria-hidden="true"
+        className="mt-3 inline-block font-sans text-xs tracking-[0.14em] text-[var(--sl-coral-aa)] uppercase transition-opacity group-hover:opacity-60"
+      >
         Read →
       </span>
     </Link>

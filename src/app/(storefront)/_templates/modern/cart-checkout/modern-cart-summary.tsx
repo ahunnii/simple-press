@@ -20,7 +20,13 @@ type Props = {
 
 export function ModernCartSummary({ shippingConfig }: Props) {
   const { subtotal } = useCart();
-  const shipping = calculateShipping(subtotal, shippingConfig);
+  // Zone+weight rates depend on the destination address, which isn't known in
+  // the cart — defer to checkout rather than showing a misleading "Free".
+  const isZoneWeight =
+    shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
+  const shipping = isZoneWeight
+    ? 0
+    : calculateShipping(subtotal, shippingConfig);
   const estimatedOrderTotal = subtotal + shipping;
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
   const progress = getFreeShippingProgress(subtotal, shippingConfig);
@@ -44,7 +50,11 @@ export function ModernCartSummary({ shippingConfig }: Props) {
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Shipping</span>
             <span className="text-foreground">
-              {shipping === 0 ? "Free" : formatPrice(shipping)}
+              {isZoneWeight
+                ? "Calculated at checkout"
+                : shipping === 0
+                  ? "Free"
+                  : formatPrice(shipping)}
             </span>
           </div>
           {showProgress && untilFree !== null && (

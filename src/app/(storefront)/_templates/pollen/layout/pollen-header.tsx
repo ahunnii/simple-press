@@ -92,11 +92,7 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
   // --- Inert background elements while mobile overlay is open ---
   useEffect(() => {
     if (!mobileMenuOpen) return;
-    const selectors = [
-      "main#main-content",
-      "footer",
-      "header.pollen-header",
-    ];
+    const selectors = ["main#main-content", "footer", "header.pollen-header"];
     const els = selectors.flatMap((s) =>
       Array.from(document.querySelectorAll<HTMLElement>(s)),
     );

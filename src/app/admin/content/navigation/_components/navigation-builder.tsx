@@ -3,7 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ChevronDown, GripVertical, Plus, Save, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  GripVertical,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "~/lib/utils";
@@ -130,7 +137,9 @@ export function NavigationBuilder({ business, siteContent }: Props) {
   const deleteChildItem = (parentIndex: number, childIndex: number) => {
     const updated = [...navItems];
     const parent = { ...updated[parentIndex]! };
-    parent.children = (parent.children ?? []).filter((_, i) => i !== childIndex);
+    parent.children = (parent.children ?? []).filter(
+      (_, i) => i !== childIndex,
+    );
     updated[parentIndex] = parent;
     setNavItems(updated);
   };
@@ -150,7 +159,11 @@ export function NavigationBuilder({ business, siteContent }: Props) {
       (item.children?.length ?? 0) === (original?.children?.length ?? 0) &&
       (item.children ?? []).every((child, ci) => {
         const oc = original?.children?.[ci];
-        return child.label === oc?.label && child.href === oc?.href && child.external === oc?.external;
+        return (
+          child.label === oc?.label &&
+          child.href === oc?.href &&
+          child.external === oc?.external
+        );
       });
     return (
       item.label === original?.label &&
@@ -310,7 +323,7 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                             {/* Sub-items */}
                             {(item.children?.length ?? 0) > 0 && (
                               <div className="border-t pt-3">
-                                <p className="mb-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                <p className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                                   Sub-items
                                 </p>
                                 <div className="space-y-3">
@@ -319,13 +332,20 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                                       key={ci}
                                       className="flex items-start gap-3 rounded-md border border-gray-100 bg-gray-50 p-3"
                                     >
-                                      <div className="flex-1 grid grid-cols-2 gap-2">
+                                      <div className="grid flex-1 grid-cols-2 gap-2">
                                         <div>
-                                          <Label className="text-xs">Label</Label>
+                                          <Label className="text-xs">
+                                            Label
+                                          </Label>
                                           <Input
                                             value={child.label}
                                             onChange={(e) =>
-                                              updateChildItem(index, ci, "label", e.target.value)
+                                              updateChildItem(
+                                                index,
+                                                ci,
+                                                "label",
+                                                e.target.value,
+                                              )
                                             }
                                             placeholder="Sub-page"
                                             className="mt-1 h-8 text-sm"
@@ -336,7 +356,12 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                                           <Input
                                             value={child.href}
                                             onChange={(e) =>
-                                              updateChildItem(index, ci, "href", e.target.value)
+                                              updateChildItem(
+                                                index,
+                                                ci,
+                                                "href",
+                                                e.target.value,
+                                              )
                                             }
                                             placeholder="/sub-page"
                                             className="mt-1 h-8 text-sm"
@@ -344,8 +369,10 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                                         </div>
                                       </div>
                                       <button
-                                        onClick={() => deleteChildItem(index, ci)}
-                                        className="mt-5 text-gray-400 hover:text-red-500 transition-colors"
+                                        onClick={() =>
+                                          deleteChildItem(index, ci)
+                                        }
+                                        className="mt-5 text-gray-400 transition-colors hover:text-red-500"
                                         title="Remove sub-item"
                                       >
                                         <Trash2 className="h-3.5 w-3.5" />

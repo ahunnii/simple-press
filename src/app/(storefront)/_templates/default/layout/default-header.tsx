@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,7 +15,12 @@ import { authClient } from "~/server/better-auth/client";
 import { DefaultCartBadge } from "../cart-checkout/default-cart-badge";
 
 type NavChild = { label: string; href: string; external?: boolean };
-type NavLink = { label: string; href: string; external?: boolean; children?: NavChild[] };
+type NavLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+  children?: NavChild[];
+};
 
 const NAV_LINKS: NavLink[] = [
   { href: "/shop", label: "Shop" },
@@ -49,7 +54,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
         } else {
           const nav = document.getElementById("mobile-nav");
           const first = nav?.querySelector<HTMLElement>(
-            'a[href], button:not([disabled])',
+            "a[href], button:not([disabled])",
           );
           first?.focus();
         }
@@ -171,11 +176,13 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
       <header className="sticky top-0 z-50 w-full border-b border-[#e8e8e8] bg-white/96 backdrop-blur-md">
         {/* ── 3-column grid: always left | brand | right ── */}
         <div className="mx-auto grid h-[72px] max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6">
-
           {/* Left — hamburger (mobile) or nav links (desktop) */}
           <div className="flex items-center">
             {/* Desktop nav */}
-            <nav className="hidden items-center gap-7 md:flex" aria-label="Primary navigation">
+            <nav
+              className="hidden items-center gap-7 md:flex"
+              aria-label="Primary navigation"
+            >
               {links.map((link, i) =>
                 link.children?.length ? (
                   <div
@@ -196,8 +203,10 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                         setOpenDropdown(openDropdown === i ? null : i)
                       }
                       className={cn(
-                        linkClass(link.children.some((c) => pathname === c.href)),
-                        "flex cursor-pointer items-center gap-1 bg-transparent border-none p-0",
+                        linkClass(
+                          link.children.some((c) => pathname === c.href),
+                        ),
+                        "flex cursor-pointer items-center gap-1 border-none bg-transparent p-0",
                       )}
                     >
                       {link.label}
@@ -211,25 +220,39 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                     </button>
 
                     {openDropdown === i && (
-                      <div id={`desktop-dropdown-${i}`} className="absolute left-0 top-full z-10 pt-2">
+                      <div
+                        id={`desktop-dropdown-${i}`}
+                        className="absolute top-full left-0 z-10 pt-2"
+                      >
                         <div className="min-w-[160px] overflow-hidden rounded-(--radius) border border-[#e8e8e8] bg-white shadow-sm">
                           {link.children.map((child) => (
                             <Link
                               key={child.href}
                               href={child.href}
                               target={child.external ? "_blank" : undefined}
-                              rel={child.external ? "noopener noreferrer" : undefined}
-                              aria-current={pathname === child.href ? "page" : undefined}
+                              rel={
+                                child.external
+                                  ? "noopener noreferrer"
+                                  : undefined
+                              }
+                              aria-current={
+                                pathname === child.href ? "page" : undefined
+                              }
                               onClick={() => setOpenDropdown(null)}
                               className={cn(
                                 "block px-4 py-2.5 text-sm transition-colors",
                                 pathname === child.href
-                                  ? "text-[#0a0a0a] bg-[#f6f6f6]"
-                                  : "text-[#6b6b6b] hover:text-[#0a0a0a] hover:bg-[#f6f6f6]",
+                                  ? "bg-[#f6f6f6] text-[#0a0a0a]"
+                                  : "text-[#6b6b6b] hover:bg-[#f6f6f6] hover:text-[#0a0a0a]",
                               )}
                             >
                               {child.label}
-                              {child.external && <span className="sr-only"> (opens in new tab)</span>}
+                              {child.external && (
+                                <span className="sr-only">
+                                  {" "}
+                                  (opens in new tab)
+                                </span>
+                              )}
                             </Link>
                           ))}
                         </div>
@@ -246,7 +269,9 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                     className={linkClass(pathname === link.href)}
                   >
                     {link.label}
-                    {link.external && <span className="sr-only"> (opens in new tab)</span>}
+                    {link.external && (
+                      <span className="sr-only"> (opens in new tab)</span>
+                    )}
                   </Link>
                 ),
               )}
@@ -342,21 +367,36 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                           {link.children.map((child, ci) => (
                             <li key={child.href}>
                               <Link
-                                ref={i === 0 && ci === 0 ? firstNavLinkRef : undefined}
+                                ref={
+                                  i === 0 && ci === 0
+                                    ? firstNavLinkRef
+                                    : undefined
+                                }
                                 href={child.href}
                                 target={child.external ? "_blank" : undefined}
-                                rel={child.external ? "noopener noreferrer" : undefined}
+                                rel={
+                                  child.external
+                                    ? "noopener noreferrer"
+                                    : undefined
+                                }
                                 onClick={() => setMobileOpen(false)}
-                                aria-current={pathname === child.href ? "page" : undefined}
+                                aria-current={
+                                  pathname === child.href ? "page" : undefined
+                                }
                                 className={cn(
                                   "flex items-center py-2.5 pl-4 text-sm transition-colors",
                                   pathname === child.href
-                                    ? "text-[#0a0a0a] font-medium"
+                                    ? "font-medium text-[#0a0a0a]"
                                     : "text-[#6b6b6b]",
                                 )}
                               >
                                 {child.label}
-                                {child.external && <span className="sr-only"> (opens in new tab)</span>}
+                                {child.external && (
+                                  <span className="sr-only">
+                                    {" "}
+                                    (opens in new tab)
+                                  </span>
+                                )}
                               </Link>
                             </li>
                           ))}
@@ -379,7 +419,9 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                       )}
                     >
                       {link.label}
-                      {link.external && <span className="sr-only"> (opens in new tab)</span>}
+                      {link.external && (
+                        <span className="sr-only"> (opens in new tab)</span>
+                      )}
                     </Link>
                   )}
                 </li>

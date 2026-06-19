@@ -50,7 +50,6 @@ export function GeneralSettings({ business }: Props) {
       phoneNumber: business.phoneNumber ?? "",
       supportEmail: business.supportEmail ?? "",
       businessAddress: business.businessAddress ?? "",
-      taxId: business.taxId ?? "",
       slug: business.slug ?? "",
     },
   });
@@ -65,7 +64,6 @@ export function GeneralSettings({ business }: Props) {
         ownerEmail: data.business.ownerEmail,
         supportEmail: data.business.supportEmail ?? "",
         businessAddress: data.business.businessAddress ?? "",
-        taxId: data.business.taxId ?? "",
         phoneNumber: data.business.phoneNumber ?? "",
         slug: data.business.slug,
       });
@@ -86,7 +84,6 @@ export function GeneralSettings({ business }: Props) {
       ownerEmail: data.ownerEmail,
       supportEmail: data.supportEmail ?? undefined,
       businessAddress: data.businessAddress ?? undefined,
-      taxId: data.taxId ?? undefined,
       phoneNumber: data.phoneNumber ?? undefined,
     });
   };
@@ -98,7 +95,6 @@ export function GeneralSettings({ business }: Props) {
         ownerEmail: business.ownerEmail,
         supportEmail: business.supportEmail ?? undefined,
         businessAddress: business.businessAddress ?? undefined,
-        taxId: business.taxId ?? undefined,
         phoneNumber: business.phoneNumber ?? undefined,
       },
     );

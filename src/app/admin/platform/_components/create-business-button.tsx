@@ -35,6 +35,7 @@ const TEMPLATES = [
   { id: "pollen", label: "Pollen" },
   { id: "dark-trend", label: "Dark Trend" },
   { id: "noise", label: "Noise" },
+  { id: "vii", label: "Skinbar VII" },
 ];
 
 export function CreateBusinessButton() {
@@ -135,7 +136,7 @@ export function CreateBusinessButton() {
                 onChange={(e) => handleSubdomainChange(e.target.value)}
                 required
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Lowercase letters, numbers, and hyphens only. Min 3 characters.
               </p>
             </div>

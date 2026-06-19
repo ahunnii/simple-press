@@ -238,7 +238,10 @@ export async function PollenServicesPage({ business }: Props) {
                     rel="noopener noreferrer"
                     className="flex h-full items-center gap-3 rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
                   >
-                    <ExternalLink className="h-5 w-5 shrink-0 text-[#5e8b4a]" aria-hidden="true" />
+                    <ExternalLink
+                      className="h-5 w-5 shrink-0 text-[#5e8b4a]"
+                      aria-hidden="true"
+                    />
                     <span className="font-medium text-[#374151]">
                       {resource.name}
                     </span>

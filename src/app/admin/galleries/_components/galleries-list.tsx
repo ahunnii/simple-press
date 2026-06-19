@@ -4,7 +4,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Copy, Images, MoreVertical, Pencil, Search, Trash2 } from "lucide-react";
+import {
+  Copy,
+  Images,
+  MoreVertical,
+  Pencil,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -52,7 +59,13 @@ type Props = {
 
 const PAGE_SIZE = 12;
 
-type LayoutFilter = "all" | "grid" | "masonry" | "carousel" | "collage" | "justified";
+type LayoutFilter =
+  | "all"
+  | "grid"
+  | "masonry"
+  | "carousel"
+  | "collage"
+  | "justified";
 
 // A2: layout glyph map — always paired with text so rendered aria-hidden
 const LAYOUT_ICONS: Record<string, string> = {
@@ -121,8 +134,7 @@ export function GalleriesList({ galleries }: Props) {
       search.trim() === "" ||
       g.name.toLowerCase().includes(search.trim().toLowerCase());
 
-    const matchesLayout =
-      layoutFilter === "all" || g.layout === layoutFilter;
+    const matchesLayout = layoutFilter === "all" || g.layout === layoutFilter;
 
     return matchesSearch && matchesLayout;
   });
@@ -222,8 +234,7 @@ export function GalleriesList({ galleries }: Props) {
           {isFiltering && (
             <div className="flex items-center">
               <span className="text-muted-foreground text-sm">
-                {filtered.length}{" "}
-                {filtered.length === 1 ? "result" : "results"}
+                {filtered.length} {filtered.length === 1 ? "result" : "results"}
               </span>
             </div>
           )}
@@ -277,7 +288,9 @@ export function GalleriesList({ galleries }: Props) {
                       <div className="mt-2 flex items-center gap-2">
                         {/* A2: decorative glyph is aria-hidden */}
                         <Badge variant="outline" className="text-xs">
-                          <span aria-hidden="true">{getLayoutIcon(gallery.layout)}</span>{" "}
+                          <span aria-hidden="true">
+                            {getLayoutIcon(gallery.layout)}
+                          </span>{" "}
                           {gallery.layout}
                         </Badge>
                         <Badge variant="secondary" className="text-xs">
@@ -290,7 +303,9 @@ export function GalleriesList({ galleries }: Props) {
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm">
                           <MoreVertical className="h-4 w-4" />
-                          <span className="sr-only">Actions for {gallery.name}</span>
+                          <span className="sr-only">
+                            Actions for {gallery.name}
+                          </span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -302,7 +317,9 @@ export function GalleriesList({ galleries }: Props) {
                         </DropdownMenuItem>
                         {/* U2: Duplicate action */}
                         <DropdownMenuItem
-                          onClick={() => duplicateMutation.mutate({ id: gallery.id })}
+                          onClick={() =>
+                            duplicateMutation.mutate({ id: gallery.id })
+                          }
                           disabled={duplicateMutation.isPending}
                         >
                           <Copy className="mr-2 h-4 w-4" />
@@ -346,7 +363,9 @@ export function GalleriesList({ galleries }: Props) {
                   </PaginationItem>
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages, p + 1))
+                      }
                       aria-disabled={safePage >= totalPages}
                       className={
                         safePage >= totalPages

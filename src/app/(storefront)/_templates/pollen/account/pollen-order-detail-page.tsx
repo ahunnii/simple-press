@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
+import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 import { FadeIn } from "~/components/page-animations";
 
-import type { OrderDetailPageTemplateProps } from "../../types";
 import { PollenAccountLayout } from "./pollen-account-layout";
 
 function statusClass(status: string) {
@@ -23,9 +23,7 @@ function statusClass(status: string) {
   }
 }
 
-export function PollenOrderDetailPage({
-  order,
-}: OrderDetailPageTemplateProps) {
+export function PollenOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
   const addr = order.shippingAddress;
 
   return (
@@ -133,7 +131,10 @@ export function PollenOrderDetailPage({
                         >
                           Track shipment
                           <span className="sr-only">(opens in new tab)</span>
-                          <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                          <ExternalLink
+                            className="h-3 w-3"
+                            aria-hidden="true"
+                          />
                         </a>
                       )}
                       <p className="mt-1 text-xs text-[#6b7280]">
@@ -154,7 +155,7 @@ export function PollenOrderDetailPage({
                 <h2 className="mb-4 font-bold text-[#374151]">
                   Shipping Address
                 </h2>
-                <address className="not-italic text-sm leading-relaxed text-[#4b5563]">
+                <address className="text-sm leading-relaxed text-[#4b5563] not-italic">
                   {addr.firstName && addr.lastName && (
                     <p className="font-medium text-[#374151]">
                       {addr.firstName} {addr.lastName}
@@ -187,7 +188,7 @@ export function PollenOrderDetailPage({
                 )}
                 <div>
                   <dt className="text-[#6b7280]">Payment</dt>
-                  <dd className="capitalize text-[#374151]">
+                  <dd className="text-[#374151] capitalize">
                     {order.paymentStatus}
                   </dd>
                 </div>

@@ -86,7 +86,9 @@ export function TestimonialsList({
   const [pendingHideId, setPendingHideId] = useState<string | null>(null);
 
   // ── Filter / search / sort state ───────────────────────────────────────────
-  const [sourceFilter, setSourceFilter] = useState<"all" | "customer" | "owner">("all");
+  const [sourceFilter, setSourceFilter] = useState<
+    "all" | "customer" | "owner"
+  >("all");
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("newest");
 
@@ -244,11 +246,7 @@ export function TestimonialsList({
   const applyFilters = (list: Testimonial[]) =>
     list
       .filter(matchesSearch)
-      .filter(
-        (t) =>
-          sourceFilter === "all" ||
-          t.source === sourceFilter,
-      )
+      .filter((t) => sourceFilter === "all" || t.source === sourceFilter)
       .sort(sortFn);
 
   // Paginate a filtered list
@@ -299,7 +297,9 @@ export function TestimonialsList({
           ? expiredInvites
           : (invites ?? []);
 
-  const getInviteStatus = (invite: Invite): "completed" | "pending" | "expired" =>
+  const getInviteStatus = (
+    invite: Invite,
+  ): "completed" | "pending" | "expired" =>
     invite.used
       ? "completed"
       : new Date(invite.expiresAt) <= now
@@ -445,9 +445,7 @@ export function TestimonialsList({
             size="sm"
             variant="outline"
             disabled={bulkPending}
-            onClick={() =>
-              bulkHideMutation.mutate({ ids, isHidden: true })
-            }
+            onClick={() => bulkHideMutation.mutate({ ids, isHidden: true })}
           >
             {bulkHideMutation.isPending ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
@@ -460,9 +458,7 @@ export function TestimonialsList({
             size="sm"
             variant="outline"
             disabled={bulkPending}
-            onClick={() =>
-              bulkHideMutation.mutate({ ids, isHidden: false })
-            }
+            onClick={() => bulkHideMutation.mutate({ ids, isHidden: false })}
           >
             {bulkHideMutation.isPending ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
@@ -589,7 +585,9 @@ export function TestimonialsList({
               </div>
 
               {testimonial.title && (
-                <p className="mb-1 text-sm font-semibold">{testimonial.title}</p>
+                <p className="mb-1 text-sm font-semibold">
+                  {testimonial.title}
+                </p>
               )}
 
               <p className="mb-3 line-clamp-3 text-sm text-gray-700">
@@ -657,9 +655,7 @@ export function TestimonialsList({
                 {testimonial.photoUrls && testimonial.photoUrls.length > 0 && (
                   <>
                     <DropdownMenuItem
-                      onClick={() =>
-                        setManagingImagesTestimonial(testimonial)
-                      }
+                      onClick={() => setManagingImagesTestimonial(testimonial)}
                     >
                       <ImageIcon className="mr-2 h-4 w-4" />
                       Manage images
@@ -941,9 +937,7 @@ export function TestimonialsList({
               <TabsTrigger value="published">
                 Published ({published.length})
               </TabsTrigger>
-              <TabsTrigger value="hidden">
-                Hidden ({hidden.length})
-              </TabsTrigger>
+              <TabsTrigger value="hidden">Hidden ({hidden.length})</TabsTrigger>
               <TabsTrigger value="all">All ({all.length})</TabsTrigger>
             </TabsList>
 
@@ -993,11 +987,9 @@ export function TestimonialsList({
               </TabsTrigger>
             </TabsList>
             <div className="space-y-4">
-              {filteredInvites.length === 0 ? (
-                emptyState(inviteEmptyMessage)
-              ) : (
-                filteredInvites.map(renderInvite)
-              )}
+              {filteredInvites.length === 0
+                ? emptyState(inviteEmptyMessage)
+                : filteredInvites.map(renderInvite)}
             </div>
           </Tabs>
         </TabsContent>
@@ -1035,7 +1027,8 @@ export function TestimonialsList({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Testimonial?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this testimonial and cannot be undone.
+              This will permanently delete this testimonial and cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -7,7 +7,9 @@ type LimiterOpts = { points: number; duration: number; keyPrefix: string };
 
 // Lazily initialize limiters on first use so that Redis connections are
 // never attempted during Next.js static generation / build time.
-function makeLazy(opts: LimiterOpts): { consume: (key: string) => Promise<void> } {
+function makeLazy(opts: LimiterOpts): {
+  consume: (key: string) => Promise<void>;
+} {
   let redisInstance: RateLimiterAbstract | null = null;
   let memoryInstance: RateLimiterAbstract | null = null;
 

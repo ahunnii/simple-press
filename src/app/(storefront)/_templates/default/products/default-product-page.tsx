@@ -11,8 +11,10 @@ import {
   isContentEmpty,
   parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
+import { TrackView } from "~/components/analytics/track-view";
 import { PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-page/product-gallery-vertical-sticky";
@@ -92,6 +94,10 @@ export function DefaultProductPage({
 
   return (
     <PageTransition>
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       <div className="mx-auto max-w-[1440px] px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav

@@ -66,7 +66,10 @@ export function ModernContactPage({
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-16 lg:grid-cols-5">
             {/* Contact Details */}
-            <div className="lg:col-span-2" {...sectionGroupAttr("contact", "info")}>
+            <div
+              className="lg:col-span-2"
+              {...sectionGroupAttr("contact", "info")}
+            >
               <h2 className="text-foreground font-serif text-2xl md:text-3xl">
                 {f["modern.contact.info-title"]}
               </h2>
@@ -78,7 +81,10 @@ export function ModernContactPage({
                 {!!displayEmail && (
                   <div className="flex items-start gap-4">
                     <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <Mail className="text-primary h-4 w-4" aria-hidden="true" />
+                      <Mail
+                        className="text-primary h-4 w-4"
+                        aria-hidden="true"
+                      />
                     </div>
                     <div>
                       <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
@@ -94,7 +100,10 @@ export function ModernContactPage({
                 {!!displayPhone && (
                   <div className="flex items-start gap-4">
                     <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <Phone className="text-primary h-4 w-4" aria-hidden="true" />
+                      <Phone
+                        className="text-primary h-4 w-4"
+                        aria-hidden="true"
+                      />
                     </div>
                     <div>
                       <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
@@ -110,7 +119,10 @@ export function ModernContactPage({
                 {!!displayAddress && (
                   <div className="flex items-start gap-4">
                     <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-                      <MapPin className="text-primary h-4 w-4" aria-hidden="true" />
+                      <MapPin
+                        className="text-primary h-4 w-4"
+                        aria-hidden="true"
+                      />
                     </div>
                     <div>
                       <h3 className="text-foreground text-sm font-semibold tracking-widest uppercase">
@@ -126,7 +138,10 @@ export function ModernContactPage({
             </div>
 
             {/* Form */}
-            <div className="lg:col-span-3" {...sectionGroupAttr("contact", "form")}>
+            <div
+              className="lg:col-span-3"
+              {...sectionGroupAttr("contact", "form")}
+            >
               <div className="border-border bg-card rounded-sm border p-8 md:p-10">
                 <h2 className="text-foreground font-serif text-2xl md:text-3xl">
                   {f["modern.contact.form-title"]}

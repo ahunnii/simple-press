@@ -25,7 +25,13 @@ type Props = {
 
 export function NoiseCartSummary({ shippingConfig }: Props) {
   const { subtotal, itemCount, setIsOpen } = useCart();
-  const shipping = calculateShipping(subtotal, shippingConfig);
+  // Zone+weight rates depend on the destination address, which isn't known in
+  // the cart — defer to checkout rather than showing a misleading "Free".
+  const isZoneWeight =
+    shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
+  const shipping = isZoneWeight
+    ? 0
+    : calculateShipping(subtotal, shippingConfig);
   const estimatedTotal = subtotal + shipping;
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
   const progress = getFreeShippingProgress(subtotal, shippingConfig);
@@ -41,18 +47,21 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
       style={{ background: "var(--vn-paper)" }}
     >
       {/* Heading */}
-      <div className="px-6 pt-6 pb-4 border-b border-foreground/15">
+      <div className="border-foreground/15 border-b px-6 pt-6 pb-4">
         <h3
-          className="font-serif italic leading-none tracking-tight"
-          style={{ fontSize: "clamp(22px, 5vw, 28px)", letterSpacing: "-0.02em" }}
+          className="font-serif leading-none tracking-tight italic"
+          style={{
+            fontSize: "clamp(22px, 5vw, 28px)",
+            letterSpacing: "-0.02em",
+          }}
         >
           Total transmission.
         </h3>
       </div>
 
       {/* Line items */}
-      <div className="px-6 py-5 flex flex-col gap-3 border-b border-foreground/15">
-        <div className="flex justify-between items-baseline">
+      <div className="border-foreground/15 flex flex-col gap-3 border-b px-6 py-5">
+        <div className="flex items-baseline justify-between">
           <span
             className="font-mono text-[10.5px] tracking-[0.14em] uppercase"
             style={{ color: "var(--vn-steel)" }}
@@ -63,7 +72,7 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
             {formatPrice(subtotal)}
           </span>
         </div>
-        <div className="flex justify-between items-baseline">
+        <div className="flex items-baseline justify-between">
           <span
             className="font-mono text-[10.5px] tracking-[0.14em] uppercase"
             style={{ color: "var(--vn-steel)" }}
@@ -77,7 +86,7 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
             Free
           </span>
         </div>
-        <div className="flex justify-between items-baseline">
+        <div className="flex items-baseline justify-between">
           <span
             className="font-mono text-[10.5px] tracking-[0.14em] uppercase"
             style={{ color: "var(--vn-steel)" }}
@@ -85,7 +94,9 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
             Est. shipping
           </span>
           <span className="font-mono text-[12px] tracking-[0.06em]">
-            {shipping === 0 ? (
+            {isZoneWeight ? (
+              <span style={{ color: "var(--vn-steel-mist)" }}>Calculated at checkout</span>
+            ) : shipping === 0 ? (
               <span style={{ color: "var(--vn-steel-mist)" }}>Free</span>
             ) : (
               formatPrice(shipping)
@@ -96,8 +107,8 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
 
       {/* Free shipping progress bar */}
       {showFreeBar && untilFree !== null && progress !== null && (
-        <div className="px-6 py-4 border-b border-foreground/15">
-          <div className="flex justify-between mb-2">
+        <div className="border-foreground/15 border-b px-6 py-4">
+          <div className="mb-2 flex justify-between">
             <span
               className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
               style={{ color: "var(--vn-steel)" }}
@@ -117,7 +128,7 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
           {/* Progress bar — ink fill on bone bg */}
           <div
             aria-hidden="true"
-            className="h-px w-full relative"
+            className="relative h-px w-full"
             style={{ background: "var(--vn-rule)" }}
           >
             <div
@@ -140,7 +151,7 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
 
       {/* Grand total */}
       <div
-        className="px-6 pt-4 pb-5 flex justify-between items-baseline border-b-2 border-foreground"
+        className="border-foreground flex items-baseline justify-between border-b-2 px-6 pt-4 pb-5"
         style={{ background: "var(--vn-bone)" }}
       >
         <span
@@ -150,19 +161,22 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
           Grand total
         </span>
         <div
-          className="font-serif italic leading-none"
-          style={{ fontSize: "clamp(36px, 8vw, 48px)", letterSpacing: "-0.03em" }}
+          className="font-serif leading-none italic"
+          style={{
+            fontSize: "clamp(36px, 8vw, 48px)",
+            letterSpacing: "-0.03em",
+          }}
         >
           {formatPrice(estimatedTotal)}
         </div>
       </div>
 
       {/* Checkout button */}
-      <div className="px-6 py-5 border-b border-foreground/15">
+      <div className="border-foreground/15 border-b px-6 py-5">
         <Link
           href="/checkout"
           onClick={() => setIsOpen(false)}
-          className="flex items-center justify-between w-full px-5 py-4 font-mono text-[11px] tracking-[0.24em] uppercase transition-all hover:opacity-80"
+          className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.24em] uppercase transition-all hover:opacity-80"
           style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
         >
           <span>Proceed to checkout</span>
@@ -171,12 +185,15 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
       </div>
 
       {/* Payment method pills */}
-      <div className="px-6 py-4 border-b border-foreground/15 flex flex-wrap gap-2">
+      <div className="border-foreground/15 flex flex-wrap gap-2 border-b px-6 py-4">
         {["Visa", "Mastercard", "Amex", "Apple Pay", "PayPal"].map((m) => (
           <span
             key={m}
-            className="font-mono text-[9px] tracking-[0.16em] uppercase px-2 py-1 border"
-            style={{ borderColor: "var(--vn-rule)", color: "var(--vn-steel-mist)" }}
+            className="border px-2 py-1 font-mono text-[9px] tracking-[0.16em] uppercase"
+            style={{
+              borderColor: "var(--vn-rule)",
+              color: "var(--vn-steel-mist)",
+            }}
           >
             {m}
           </span>
@@ -184,12 +201,12 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
       </div>
 
       {/* Reassurance notes */}
-      <div className="px-6 py-5 grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-3 px-6 py-5">
         {REASSURANCE.map((note) => (
-          <div key={note.icon} className="flex gap-2.5 items-start">
+          <div key={note.icon} className="flex items-start gap-2.5">
             <span
               aria-hidden="true"
-              className="flex-shrink-0 flex items-center justify-center border font-serif italic"
+              className="flex flex-shrink-0 items-center justify-center border font-serif italic"
               style={{
                 width: "22px",
                 height: "22px",
@@ -201,7 +218,7 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
               {note.icon}
             </span>
             <p
-              className="font-mono text-[9.5px] tracking-[0.14em] uppercase leading-relaxed"
+              className="font-mono text-[9.5px] leading-relaxed tracking-[0.14em] uppercase"
               style={{ color: "var(--vn-ink-soft)" }}
             >
               {note.text}

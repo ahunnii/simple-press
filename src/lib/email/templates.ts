@@ -535,6 +535,11 @@ export async function sendTestimonialInviteEmail({
     to,
     replyTo: ownerEmail,
     subject: `Share your experience with ${businessName}`,
-    react: TestimonialInviteEmail({ businessName, inviteUrl, logoUrl, ownerEmail }),
+    react: TestimonialInviteEmail({
+      businessName,
+      inviteUrl,
+      logoUrl,
+      ownerEmail,
+    }),
   });
 }

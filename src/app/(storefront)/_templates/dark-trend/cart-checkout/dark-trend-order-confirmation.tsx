@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { CheckCircle, Package } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
+import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 
 type Props = {
@@ -80,7 +81,9 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
     return (
       <div className="mx-auto max-w-2xl text-center">
         {/* M-4: loading state announced via role="status" */}
-        <p role="status" className="text-white/70">Loading order details...</p>
+        <p role="status" className="text-white/70">
+          Loading order details...
+        </p>
       </div>
     );
   }
@@ -101,11 +104,21 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
 
   return (
     <div className="mx-auto max-w-3xl">
+      {/* Fire purchase analytics event once — idempotent via sessionStorage */}
+      {orderDetails && (
+        <TrackPurchase
+          sessionId={sessionId}
+          amountCents={orderDetails.amount_total}
+        />
+      )}
       {/* Success Header */}
       <div className="mb-12 text-center">
         <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20">
           {/* N-1: decorative icon */}
-          <CheckCircle aria-hidden="true" className="h-12 w-12 text-green-400" />
+          <CheckCircle
+            aria-hidden="true"
+            className="h-12 w-12 text-green-400"
+          />
         </div>
         {/* M-4: tabIndex={-1} + ref so focus lands here after redirect */}
         <h1
@@ -124,7 +137,10 @@ export function DarkTrendOrderConfirmation({ business }: Props) {
       <div className="mb-8 rounded-sm bg-zinc-900/30 p-8">
         <div className="mb-6 flex items-start gap-4">
           {/* N-1: decorative icon */}
-          <Package aria-hidden="true" className="h-6 w-6 shrink-0 text-purple-400" />
+          <Package
+            aria-hidden="true"
+            className="h-6 w-6 shrink-0 text-purple-400"
+          />
           <div className="flex-1">
             <h2 className="mb-3 text-xl font-semibold text-white">
               What happens next?

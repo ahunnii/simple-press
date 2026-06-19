@@ -43,7 +43,9 @@ export default async function PlatformDashboardPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardDescription>Total Businesses</CardDescription>
-              <CardTitle className="text-3xl">{stats.totalBusinesses}</CardTitle>
+              <CardTitle className="text-3xl">
+                {stats.totalBusinesses}
+              </CardTitle>
               {stats.newBusinesses30d > 0 && (
                 <p className="text-muted-foreground text-xs">
                   +{stats.newBusinesses30d} this month
@@ -55,7 +57,9 @@ export default async function PlatformDashboardPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardDescription>Active Businesses</CardDescription>
-              <CardTitle className="text-3xl">{stats.activeBusinesses}</CardTitle>
+              <CardTitle className="text-3xl">
+                {stats.activeBusinesses}
+              </CardTitle>
               <p className="text-muted-foreground text-xs">
                 of {stats.totalBusinesses} total
               </p>

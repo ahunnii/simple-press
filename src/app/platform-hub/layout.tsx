@@ -1,8 +1,8 @@
-import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 import { IconTerminal } from "@tabler/icons-react";
-import { Building2, Globe, LayoutDashboard, Users } from "lucide-react";
+import { Building2, Globe, LayoutDashboard, Users, Wrench } from "lucide-react";
 
 import { env } from "~/env";
 import { getSession } from "~/server/better-auth/server";
@@ -25,6 +25,7 @@ const navItems = [
   { title: "Users", url: "/users", icon: Users },
   { title: "Businesses", url: "/businesses", icon: Building2 },
   { title: "Domains", url: "/domains", icon: Globe },
+  { title: "Maintenance", url: "/maintenance", icon: Wrench },
 ];
 
 export default async function PlatformHubLayout({
@@ -76,7 +77,9 @@ export default async function PlatformHubLayout({
                       <IconTerminal className="size-8" />
                       simple_press
                     </span>
-                    <span className="text-sm text-gray-500">Platform Admin</span>
+                    <span className="text-sm text-gray-500">
+                      Platform Admin
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

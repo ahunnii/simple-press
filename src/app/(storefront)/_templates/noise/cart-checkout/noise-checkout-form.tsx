@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -18,6 +19,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 import { NoiseOrderSummary } from "./noise-order-summary";
 
@@ -27,13 +29,14 @@ type CheckoutFormProps = {
 
 /* Shared label style */
 const LBL = "font-mono text-[9.5px] tracking-[0.22em] uppercase";
-const INP = "rounded-none border-border font-sans text-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-foreground";
+const INP =
+  "rounded-none border-border font-sans text-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-foreground";
 
 /* Section heading separator — renders as a <legend> for fieldset grouping */
 function SectionHead({ children }: { children: React.ReactNode }) {
   return (
     <legend
-      className="flex w-full items-center gap-4 border-b pb-3 mb-5 float-none"
+      className="float-none mb-5 flex w-full items-center gap-4 border-b pb-3"
       style={{ borderColor: "var(--vn-ink)" }}
     >
       <span
@@ -48,17 +51,28 @@ function SectionHead({ children }: { children: React.ReactNode }) {
 
 export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
   const {
-    email, setEmail,
-    name, setName,
-    phone, setPhone,
-    addressLine1, setAddressLine1,
-    addressLine2, setAddressLine2,
-    city, setCity,
-    state, setState,
-    postalCode, setPostalCode,
-    country, setCountry,
-    deliveryMethod, setDeliveryMethod,
-    discountCodeInput, setDiscountCodeInput,
+    email,
+    setEmail,
+    name,
+    setName,
+    phone,
+    setPhone,
+    addressLine1,
+    setAddressLine1,
+    addressLine2,
+    setAddressLine2,
+    city,
+    setCity,
+    state,
+    setState,
+    postalCode,
+    setPostalCode,
+    country,
+    setCountry,
+    deliveryMethod,
+    setDeliveryMethod,
+    discountCodeInput,
+    setDiscountCodeInput,
     discountAmount,
     discountCodeLabel,
     discountFieldError,
@@ -70,7 +84,14 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
     handleSubmit,
     shippingConfig,
     items,
+    shipping,
+    shippingPending,
   } = useCheckoutForm(business);
+
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    deliveryMethod === "ship" && state.trim().length > 0 && shippingPending;
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -82,17 +103,14 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
 
   if (items.length === 0) {
     return (
-      <div className="py-20 text-center flex flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-6 py-20 text-center">
         <p
-          className="font-serif italic text-2xl"
+          className="font-serif text-2xl italic"
           style={{ color: "var(--vn-steel-mist)" }}
         >
           Nothing to checkout.
         </p>
-        <Link
-          href="/shop"
-          className="vn-stamp vn-stamp-solid text-[10px]"
-        >
+        <Link href="/shop" className="vn-stamp vn-stamp-solid text-[10px]">
           Shop the Collection →
         </Link>
       </div>
@@ -105,7 +123,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
       className="vn-contact-form flex flex-col gap-0 lg:flex-row lg:gap-12"
     >
       {/* Left — fields */}
-      <div className="flex-1 flex flex-col gap-10">
+      <div className="flex flex-1 flex-col gap-10">
         <p
           className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
           style={{ color: "var(--vn-steel-mist)" }}
@@ -118,7 +136,11 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
           <SectionHead>Contact information</SectionHead>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email" className={LBL} style={{ color: "var(--vn-steel)" }}>
+              <Label
+                htmlFor="email"
+                className={LBL}
+                style={{ color: "var(--vn-steel)" }}
+              >
                 Email *
               </Label>
               <Input
@@ -134,7 +156,11 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="name" className={LBL} style={{ color: "var(--vn-steel)" }}>
+              <Label
+                htmlFor="name"
+                className={LBL}
+                style={{ color: "var(--vn-steel)" }}
+              >
                 Full Name *
               </Label>
               <Input
@@ -145,13 +171,19 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="First & last"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !name.trim() ? true : undefined
+                }
                 className={INP}
               />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="phone" className={LBL} style={{ color: "var(--vn-steel)" }}>
+            <Label
+              htmlFor="phone"
+              className={LBL}
+              style={{ color: "var(--vn-steel)" }}
+            >
               Phone *
             </Label>
             <PhoneInput
@@ -172,7 +204,11 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
           <SectionHead>Discount code</SectionHead>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
             <div className="flex flex-1 flex-col gap-1.5">
-              <Label htmlFor="discount-code" className={LBL} style={{ color: "var(--vn-steel)" }}>
+              <Label
+                htmlFor="discount-code"
+                className={LBL}
+                style={{ color: "var(--vn-steel)" }}
+              >
                 Code
               </Label>
               <Input
@@ -186,7 +222,9 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="VND-SUMMER-26"
                 autoComplete="off"
                 aria-invalid={!!discountFieldError}
-                aria-describedby={discountFieldError ? "discount-code-error" : undefined}
+                aria-describedby={
+                  discountFieldError ? "discount-code-error" : undefined
+                }
                 className={cn(INP, "font-mono tracking-[0.1em]")}
               />
             </div>
@@ -194,13 +232,18 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
               type="button"
               onClick={handleApplyDiscount}
               disabled={isValidatingDiscount || items.length === 0}
-              className="vn-stamp text-[10px] flex items-center gap-2 disabled:opacity-40 transition-all hover:bg-foreground hover:text-background flex-shrink-0"
+              className="vn-stamp hover:bg-foreground hover:text-background flex flex-shrink-0 items-center gap-2 text-[10px] transition-all disabled:opacity-40"
               style={{ padding: "10px 16px" }}
             >
               {isValidatingDiscount ? (
-                <><Loader2 className="size-3.5 animate-spin" />Checking…</>
+                <>
+                  <Loader2 className="size-3.5 animate-spin" />
+                  Checking…
+                </>
+              ) : discountAmount > 0 ? (
+                "Applied ✓"
               ) : (
-                discountAmount > 0 ? "Applied ✓" : "Apply"
+                "Apply"
               )}
             </button>
           </div>
@@ -208,7 +251,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
             <p
               id="discount-code-error"
               role="alert"
-              className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-destructive"
+              className="text-destructive font-mono text-[9.5px] tracking-[0.14em] uppercase"
             >
               {discountFieldError}
             </p>
@@ -216,9 +259,10 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
           {discountCodeLabel && discountAmount > 0 && (
             <p
               role="status"
-              className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-green-600"
+              className="font-mono text-[9.5px] tracking-[0.14em] text-green-600 uppercase"
             >
-              Code <span className="font-semibold">{discountCodeLabel}</span> applied.
+              Code <span className="font-semibold">{discountCodeLabel}</span>{" "}
+              applied.
             </p>
           )}
         </fieldset>
@@ -237,7 +281,11 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   className="vn-stamp text-[10px] transition-all"
                   style={
                     deliveryMethod === method
-                      ? { background: "var(--vn-ink)", color: "var(--vn-bone)", borderColor: "var(--vn-ink)" }
+                      ? {
+                          background: "var(--vn-ink)",
+                          color: "var(--vn-bone)",
+                          borderColor: "var(--vn-ink)",
+                        }
                       : {}
                   }
                 >
@@ -261,14 +309,20 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
           <fieldset className="flex flex-col gap-5">
             <SectionHead>Shipping address</SectionHead>
             <p
-              className="font-mono text-[9.5px] tracking-[0.14em] uppercase -mt-2"
+              className="-mt-2 font-mono text-[9.5px] tracking-[0.14em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
-              Pre-filled at Stripe — you can confirm or edit before paying.
+              {shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                ? "We price shipping from this address. Make changes here before continuing to payment."
+                : "Pre-filled at Stripe — you can confirm or edit before paying."}
             </p>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="address-line1" className={LBL} style={{ color: "var(--vn-steel)" }}>
+              <Label
+                htmlFor="address-line1"
+                className={LBL}
+                style={{ color: "var(--vn-steel)" }}
+              >
                 Street address *
               </Label>
               <Input
@@ -280,13 +334,19 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="Street address, P.O. box"
                 required={deliveryMethod === "ship"}
                 aria-required="true"
-                aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !addressLine1.trim() ? true : undefined
+                }
                 className={INP}
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="address-line2" className={LBL} style={{ color: "var(--vn-steel)" }}>
+              <Label
+                htmlFor="address-line2"
+                className={LBL}
+                style={{ color: "var(--vn-steel)" }}
+              >
                 Apt / Suite / Floor
               </Label>
               <Input
@@ -302,7 +362,11 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
 
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="city" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                <Label
+                  htmlFor="city"
+                  className={LBL}
+                  style={{ color: "var(--vn-steel)" }}
+                >
                   City *
                 </Label>
                 <Input
@@ -314,32 +378,55 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   required={deliveryMethod === "ship"}
                   placeholder="e.g. Detroit"
                   aria-required="true"
-                  aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !city.trim() ? true : undefined
+                  }
                   className={INP}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="state" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                <Label
+                  id="state-label"
+                  htmlFor="state"
+                  className={LBL}
+                  style={{ color: "var(--vn-steel)" }}
+                >
                   State / Province *
                 </Label>
-                <Input
-                  id="state"
-                  type="text"
-                  autoComplete="shipping address-level1"
+                <Select
                   value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  placeholder="e.g. MI"
-                  required={deliveryMethod === "ship"}
-                  aria-required="true"
-                  aria-invalid={submitAttempted && !state.trim() ? true : undefined}
-                  className={INP}
-                />
+                  onValueChange={(v) => setState(v)}
+                  required
+                >
+                  <SelectTrigger
+                    id="state"
+                    className={cn("w-full", INP)}
+                    aria-labelledby="state-label"
+                    aria-required="true"
+                    aria-invalid={
+                      submitAttempted && !state ? true : undefined
+                    }
+                  >
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getRegionOptions(country).map((opt) => (
+                      <SelectItem key={opt.code} value={opt.code}>
+                        {opt.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="postal" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                <Label
+                  htmlFor="postal"
+                  className={LBL}
+                  style={{ color: "var(--vn-steel)" }}
+                >
                   ZIP / Postal code *
                 </Label>
                 <Input
@@ -351,12 +438,19 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   onChange={(e) => setPostalCode(e.target.value)}
                   required={deliveryMethod === "ship"}
                   aria-required="true"
-                  aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !postalCode.trim() ? true : undefined
+                  }
                   className={INP}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label id="country-label" htmlFor="country" className={LBL} style={{ color: "var(--vn-steel)" }}>
+                <Label
+                  id="country-label"
+                  htmlFor="country"
+                  className={LBL}
+                  style={{ color: "var(--vn-steel)" }}
+                >
                   Country *
                 </Label>
                 <Select
@@ -364,7 +458,11 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   onValueChange={(v) => setCountry(v as "US" | "CA")}
                   required
                 >
-                  <SelectTrigger id="country" className={cn("w-full", INP)} aria-labelledby="country-label">
+                  <SelectTrigger
+                    id="country"
+                    className={cn("w-full", INP)}
+                    aria-labelledby="country-label"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -379,12 +477,14 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
       </div>
 
       {/* Right — order summary + submit */}
-      <div className="w-full shrink-0 mt-10 lg:mt-0 lg:w-[360px]">
+      <div className="mt-10 w-full shrink-0 lg:mt-0 lg:w-[360px]">
         <div className="sticky top-28 flex flex-col gap-5">
           <NoiseOrderSummary
-            shippingConfig={shippingConfig}
             deliveryMethod={deliveryMethod}
             discountAmount={discountAmount}
+            shipping={shipping}
+            shippingPending={shippingPending}
+            shippingCalculating={shippingCalculating}
           />
 
           <div role="alert" aria-live="assertive" aria-atomic="true">
@@ -400,14 +500,20 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
           {/* Submit */}
           <button
             type="submit"
-            disabled={isProcessing}
-            aria-busy={isProcessing}
-            className="flex items-center justify-between w-full px-5 py-4 font-mono text-[11px] tracking-[0.24em] uppercase transition-all disabled:opacity-50"
+            disabled={isProcessing || shippingCalculating}
+            aria-busy={isProcessing || shippingCalculating}
+            className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.24em] uppercase transition-all disabled:opacity-50"
             style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
           >
             <span className="flex items-center gap-2">
-              {isProcessing && <Loader2 className="size-3.5 animate-spin" />}
-              {isProcessing ? "Processing…" : "Continue to payment"}
+              {(isProcessing || shippingCalculating) && (
+                <Loader2 className="size-3.5 animate-spin" />
+              )}
+              {isProcessing
+                ? "Processing…"
+                : shippingCalculating
+                  ? "Calculating shipping…"
+                  : "Continue to payment"}
             </span>
             <span>→</span>
           </button>
@@ -419,10 +525,10 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
               { ic: "✦", text: "Ships within five working days" },
               { ic: "↺", text: "14-day exchange on stock pieces" },
             ].map((note) => (
-              <div key={note.ic} className="flex gap-2.5 items-start">
+              <div key={note.ic} className="flex items-start gap-2.5">
                 <span
                   aria-hidden="true"
-                  className="flex-shrink-0 flex items-center justify-center border font-serif italic"
+                  className="flex flex-shrink-0 items-center justify-center border font-serif italic"
                   style={{
                     width: "22px",
                     height: "22px",
@@ -433,7 +539,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   {note.ic}
                 </span>
                 <p
-                  className="font-mono text-[9.5px] tracking-[0.14em] uppercase leading-relaxed"
+                  className="font-mono text-[9.5px] leading-relaxed tracking-[0.14em] uppercase"
                   style={{ color: "var(--vn-steel-mist)" }}
                 >
                   {note.text}

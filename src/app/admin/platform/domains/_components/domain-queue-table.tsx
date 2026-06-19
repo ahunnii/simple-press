@@ -21,8 +21,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 
-type DomainQueueEntry =
-  RouterOutputs["platform"]["listDomainQueue"][number];
+type DomainQueueEntry = RouterOutputs["platform"]["listDomainQueue"][number];
 
 type Props = {
   entries: DomainQueueEntry[];
@@ -107,22 +106,22 @@ export function DomainQueueTable({ entries }: Props) {
         <table className="w-full">
           <thead className="border-b bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 Business
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 Custom Domain
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 Queue Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 Domain Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 Requested
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 Actions
               </th>
             </tr>
@@ -140,8 +139,7 @@ export function DomainQueueTable({ entries }: Props) {
                     </div>
                     <div className="text-sm text-gray-500">{b?.ownerEmail}</div>
                     <div className="mt-0.5 font-mono text-xs text-gray-400">
-                      {b?.subdomain}.
-                      {process.env.NEXT_PUBLIC_PLATFORM_DOMAIN}
+                      {b?.subdomain}.{process.env.NEXT_PUBLIC_PLATFORM_DOMAIN}
                     </div>
                   </td>
                   <td className="px-6 py-4">

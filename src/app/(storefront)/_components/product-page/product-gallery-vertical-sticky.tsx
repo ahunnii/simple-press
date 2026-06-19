@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { cn } from "~/lib/utils";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 type StyleProps = {
   containerClassName?: string;
@@ -34,6 +35,16 @@ export function ProductGalleryVertical({
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const hasMultipleImages = images.length > 1;
+
+  const { variantImageUrl } = useVariantImage();
+  // Jump to the variant's image when the selected variant changes.
+  // Depend only on variantImageUrl so manual thumbnail clicks are not overridden.
+  useEffect(() => {
+    if (!variantImageUrl) return;
+    const idx = images.findIndex((img) => img.url === variantImageUrl);
+    if (idx >= 0) setSelectedImage(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variantImageUrl]);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const enlargeBtnRef = useRef<HTMLButtonElement>(null);
   const shouldReduce = useReducedMotion();
@@ -65,7 +76,6 @@ export function ProductGalleryVertical({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-   
   }, [enableLightbox, lightboxOpen]);
 
   return (

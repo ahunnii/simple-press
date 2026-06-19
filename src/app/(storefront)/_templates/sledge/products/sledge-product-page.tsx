@@ -9,17 +9,20 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { Product } from "~/types";
+import { parseCardAdditionalFields } from "~/lib/products";
 import {
   getListFieldValue,
   isContentEmpty,
   parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
-import { parseCardAdditionalFields } from "~/lib/products";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
+import { TrackView } from "~/components/analytics/track-view";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 import { resolveFields } from "..";
 import {
@@ -84,6 +87,16 @@ export function SledgeProductPage({
   const [activeTab, setActiveTab] = useState<"description" | "additional">(
     "description",
   );
+
+  const { variantImageUrl } = useVariantImage();
+  // Jump to the variant's image when the selected variant changes.
+  // Depend only on variantImageUrl so manual thumbnail clicks are not overridden.
+  useEffect(() => {
+    if (!variantImageUrl) return;
+    const idx = product.images.findIndex((img) => img.url === variantImageUrl);
+    if (idx >= 0) setActiveImg(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variantImageUrl]);
 
   // Lightbox focus management
   const lightboxCloseRef = useRef<HTMLButtonElement>(null);
@@ -171,6 +184,10 @@ export function SledgeProductPage({
 
   return (
     <PageTransition>
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       {/* Breadcrumb */}
       <nav
         className={cn(SLEDGE_PAGE_CONTAINER, "pt-8 pb-2")}
@@ -219,7 +236,10 @@ export function SledgeProductPage({
                 />
               ) : (
                 <div className="sledge-card-placeholder absolute inset-0 flex items-center justify-center">
-                  <span aria-hidden="true" className="sledge-card-placeholder-num select-none">
+                  <span
+                    aria-hidden="true"
+                    className="sledge-card-placeholder-num select-none"
+                  >
                     ★
                   </span>
                 </div>
@@ -318,7 +338,10 @@ export function SledgeProductPage({
                     key={badge.label}
                     className="inline-flex items-center gap-1.5 rounded-sm border border-[var(--sl-border)] bg-[var(--sl-cream)] px-2.5 py-1 font-sans text-[10px] tracking-[0.12em] text-[var(--sl-ink)] uppercase"
                   >
-                    <badge.Icon aria-hidden="true" className="size-3 text-[var(--sl-coral)]" />
+                    <badge.Icon
+                      aria-hidden="true"
+                      className="size-3 text-[var(--sl-coral)]"
+                    />
                     {badge.label}
                   </span>
                 ))}
@@ -349,10 +372,7 @@ export function SledgeProductPage({
             {hasSidebarAccordions ? (
               <div className="mt-2">
                 {f["sledge.global.product-care-instructions"] ? (
-                  <ProductAccordion
-                    title="Care Instructions"
-                    defaultOpen
-                  >
+                  <ProductAccordion title="Care Instructions" defaultOpen>
                     {f["sledge.global.product-care-instructions"]}
                   </ProductAccordion>
                 ) : null}
@@ -373,7 +393,7 @@ export function SledgeProductPage({
           const tabs = (["description", "additional"] as const).filter(
             (tab) => tab === "description" || hasAdditionalTab,
           );
-          const tabLabels: Record<typeof tabs[number], string> = {
+          const tabLabels: Record<(typeof tabs)[number], string> = {
             description: "Description",
             additional: "Additional Information",
           };
@@ -394,9 +414,7 @@ export function SledgeProductPage({
             const nextTab = tabs[next];
             if (nextTab) {
               setActiveTab(nextTab);
-              document
-                .getElementById(`sledge-tab-${nextTab}`)
-                ?.focus();
+              document.getElementById(`sledge-tab-${nextTab}`)?.focus();
             }
           };
 
@@ -519,9 +537,17 @@ export function SledgeProductPage({
             onClick={closeLightbox}
           >
             <motion.div
-              initial={prefersReducedMotion ? { scale: 1, opacity: 1 } : { scale: 0.92, opacity: 0 }}
+              initial={
+                prefersReducedMotion
+                  ? { scale: 1, opacity: 1 }
+                  : { scale: 0.92, opacity: 0 }
+              }
               animate={{ scale: 1, opacity: 1 }}
-              exit={prefersReducedMotion ? { scale: 1, opacity: 1 } : { scale: 0.92, opacity: 0 }}
+              exit={
+                prefersReducedMotion
+                  ? { scale: 1, opacity: 1 }
+                  : { scale: 0.92, opacity: 0 }
+              }
               transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
               className="relative max-h-[90vh] max-w-[90vw]"
               onClick={(e) => e.stopPropagation()}

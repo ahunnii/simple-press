@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 
 import { env } from "~/env";
 
-import { resend } from "./resend";
+import { sendResendEmail } from "./resend";
 
 type SendEmailOptions = {
   to: string | string[];
@@ -47,8 +47,8 @@ export async function sendEmail({
     };
 
     const { data, error } = idempotencyKey
-      ? await resend.emails.send(payload, { idempotencyKey })
-      : await resend.emails.send(payload);
+      ? await sendResendEmail(payload, { idempotencyKey })
+      : await sendResendEmail(payload);
 
     if (error) {
       console.error("[Email] Send error:", error);

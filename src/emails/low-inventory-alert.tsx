@@ -21,7 +21,9 @@ export default function LowInventoryAlertEmail({
   businessName,
   businessLogoUrl,
 }: LowInventoryAlertEmailProps) {
-  const displayName = variantName ? `${productName} — ${variantName}` : productName;
+  const displayName = variantName
+    ? `${productName} — ${variantName}`
+    : productName;
 
   return (
     <EmailLayout
@@ -32,17 +34,21 @@ export default function LowInventoryAlertEmail({
       <Text style={heading}>Low inventory alert</Text>
       <Text style={paragraph}>
         <strong>{displayName}</strong> is running low. You have{" "}
-        <strong>{currentQty}</strong> unit{currentQty !== 1 ? "s" : ""} remaining
-        (threshold: {threshold}).
+        <strong>{currentQty}</strong> unit{currentQty !== 1 ? "s" : ""}{" "}
+        remaining (threshold: {threshold}).
       </Text>
 
       <Section style={infoBox}>
         <Text style={infoLabel}>Product</Text>
         <Text style={infoValue}>{displayName}</Text>
         <Text style={infoLabel}>Current stock</Text>
-        <Text style={infoValue}>{currentQty} unit{currentQty !== 1 ? "s" : ""}</Text>
+        <Text style={infoValue}>
+          {currentQty} unit{currentQty !== 1 ? "s" : ""}
+        </Text>
         <Text style={infoLabel}>Alert threshold</Text>
-        <Text style={infoValue}>{threshold} unit{threshold !== 1 ? "s" : ""}</Text>
+        <Text style={infoValue}>
+          {threshold} unit{threshold !== 1 ? "s" : ""}
+        </Text>
       </Section>
 
       <Section style={buttonSection}>

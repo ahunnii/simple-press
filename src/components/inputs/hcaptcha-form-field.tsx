@@ -59,7 +59,9 @@ export const HCaptchaField = forwardRef<HCaptchaHandle, HCaptchaFieldProps>(
     }
 
     const labelId = fieldId ? `${fieldId}-label` : undefined;
-    const resolvedErrorId = error ? (errorId ?? (fieldId ? `${fieldId}-error` : undefined)) : undefined;
+    const resolvedErrorId = error
+      ? (errorId ?? (fieldId ? `${fieldId}-error` : undefined))
+      : undefined;
 
     return (
       <div
@@ -72,7 +74,11 @@ export const HCaptchaField = forwardRef<HCaptchaHandle, HCaptchaFieldProps>(
         {label && (
           <Label id={labelId}>
             {label}
-            {required && <span className="ml-1 text-red-500" aria-hidden="true">*</span>}
+            {required && (
+              <span className="ml-1 text-red-500" aria-hidden="true">
+                *
+              </span>
+            )}
           </Label>
         )}
         <HCaptcha

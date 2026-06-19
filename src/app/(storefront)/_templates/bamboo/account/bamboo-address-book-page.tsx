@@ -1,9 +1,9 @@
 "use client";
 
+import type { AccountAddressBookPageProps } from "../../types";
 import { PageTransition } from "~/components/page-animations";
 import { AddressBookContent } from "~/app/(storefront)/_components/account/address-components";
 
-import type { AccountAddressBookPageProps } from "../../types";
 import { BambooAccountLayout } from "./bamboo-account-layout";
 
 export function BambooAddressBookPage({

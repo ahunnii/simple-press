@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import { PlatformHeader } from "~/app/_components/platform-specific/platform-header";
 
 const POLICY_LINKS = [

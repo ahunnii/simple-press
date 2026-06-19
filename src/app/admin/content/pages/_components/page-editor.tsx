@@ -79,7 +79,11 @@ type PageEditorProps = {
   embedsEnabled?: boolean;
 };
 
-export function PageEditor({ page, galleriesEnabled, embedsEnabled }: PageEditorProps) {
+export function PageEditor({
+  page,
+  galleriesEnabled,
+  embedsEnabled,
+}: PageEditorProps) {
   const router = useRouter();
   const utils = api.useUtils();
   const formRef = useRef<HTMLFormElement>(null);

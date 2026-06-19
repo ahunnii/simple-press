@@ -32,9 +32,12 @@ export function SendInviteDialog() {
   const [maxPhotos, setMaxPhotos] = useState(3);
 
   // Get customers for dropdown
-  const { data: customers } = api.customer.list.useQuery({}, {
-    enabled: open,
-  });
+  const { data: customers } = api.customer.list.useQuery(
+    {},
+    {
+      enabled: open,
+    },
+  );
 
   const sendInviteMutation = api.testimonial.sendInvite.useMutation({
     onSuccess: () => {

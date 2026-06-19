@@ -12,6 +12,13 @@ import { env } from "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
+  // Keep Prisma (and the field-encryption extension, which does a bare
+  // `require("@prisma/client")`) as server-only externals. Without this, Next
+  // tries to bundle `@prisma/client`, hits its browser entry, and fails to
+  // resolve `.prisma/client/index-browser` (this project generates the client
+  // to the custom `generated/prisma` path, so the default location is absent).
+  serverExternalPackages: ["@prisma/client", "prisma-field-encryption"],
+
   images: {
     remotePatterns: [
       {

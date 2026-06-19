@@ -210,7 +210,10 @@ export function ElegantHero({
               className="el-btn-primary"
             >
               {heroButtonText ?? "Shop Now"}
-              <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
+              <ArrowRight
+                aria-hidden={true}
+                style={{ width: 14, height: 14 }}
+              />
             </Link>
             <Link
               href="/about"
@@ -300,9 +303,17 @@ export function ElegantHero({
                   }}
                   className="el-video-toggle"
                 >
-                  {videoPaused
-                    ? <Play aria-hidden={true} style={{ width: 13, height: 13 }} />
-                    : <Pause aria-hidden={true} style={{ width: 13, height: 13 }} />}
+                  {videoPaused ? (
+                    <Play
+                      aria-hidden={true}
+                      style={{ width: 13, height: 13 }}
+                    />
+                  ) : (
+                    <Pause
+                      aria-hidden={true}
+                      style={{ width: 13, height: 13 }}
+                    />
+                  )}
                 </button>
               </>
             ) : hasImage ? (
@@ -350,7 +361,6 @@ export function ElegantHero({
           </div>
         </div>
       </div>
-
     </section>
   );
 }

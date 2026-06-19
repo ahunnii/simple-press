@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
-import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
+import { formatPrice } from "~/lib/prices";
 import {
   getAmountUntilFreeShipping,
   getFreeShippingProgress,
   SHIPPING_TYPES,
+  shippingConfigFromBusiness,
 } from "~/lib/shipping-utils";
-import { formatPrice } from "~/lib/prices";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { useCart } from "~/providers/cart-context";
 
@@ -42,25 +42,31 @@ export function NoiseCartContents({ business }: Props) {
     return (
       <PageTransition>
         <section
-          className="flex flex-col items-center justify-center px-7 py-32 text-center border-b-2 border-foreground"
+          className="border-foreground flex flex-col items-center justify-center border-b-2 px-7 py-32 text-center"
           style={{ background: "var(--vn-paper)" }}
         >
           <FadeIn direction="up" className="flex flex-col items-center gap-6">
             <div
-              className="flex items-center justify-center border-2 border-foreground"
+              className="border-foreground flex items-center justify-center border-2"
               style={{ width: "72px", height: "72px" }}
             >
-              <ShoppingBag className="size-7" style={{ color: "var(--vn-steel-mist)" }} />
+              <ShoppingBag
+                className="size-7"
+                style={{ color: "var(--vn-steel-mist)" }}
+              />
             </div>
             <div>
               <h1
-                className="font-serif italic leading-none"
-                style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", letterSpacing: "-0.02em" }}
+                className="font-serif leading-none italic"
+                style={{
+                  fontSize: "clamp(2.5rem, 5vw, 4rem)",
+                  letterSpacing: "-0.02em",
+                }}
               >
                 The bag is empty.
               </h1>
               <p
-                className="mt-3 font-sans text-sm max-w-xs mx-auto"
+                className="mx-auto mt-3 max-w-xs font-sans text-sm"
                 style={{ color: "var(--vn-steel-mist)" }}
               >
                 Browse the collection and add pieces you love.
@@ -68,7 +74,7 @@ export function NoiseCartContents({ business }: Props) {
             </div>
             <Link
               href="/shop"
-              className="vn-stamp vn-stamp-solid text-[10.5px] mt-2"
+              className="vn-stamp vn-stamp-solid mt-2 text-[10.5px]"
             >
               Shop the Collection →
             </Link>
@@ -82,46 +88,62 @@ export function NoiseCartContents({ business }: Props) {
     <PageTransition>
       {/* ── Centered page header ── */}
       <section
-        className="border-b border-foreground/15 px-6 pt-16 pb-12 text-center"
+        className="border-foreground/15 border-b px-6 pt-16 pb-12 text-center"
         style={{ background: "var(--vn-paper)" }}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "880px" }}>
           <p
-            className="font-mono text-[10px] tracking-[0.28em] uppercase mb-4"
+            className="mb-4 font-mono text-[10px] tracking-[0.28em] uppercase"
             style={{ color: "var(--vn-steel-mist)" }}
           >
             Your Bag
           </p>
           <h1
-            className="font-serif italic leading-none tracking-tight"
-            style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)", letterSpacing: "-0.025em" }}
+            className="font-serif leading-none tracking-tight italic"
+            style={{
+              fontSize: "clamp(2.5rem, 6vw, 4rem)",
+              letterSpacing: "-0.025em",
+            }}
           >
             {items.length} {items.length === 1 ? "piece" : "pieces"} ready.
           </h1>
 
           {/* Free shipping progress */}
-          {hasFreeBar && untilFree !== null && progress !== null && untilFree > 0 && (
-            <div className="mt-8 mx-auto" style={{ maxWidth: "480px" }}>
-              <div className="flex justify-between mb-2">
-                <span className="font-mono text-[9.5px] tracking-[0.14em] uppercase" style={{ color: "var(--vn-steel-mist)" }}>
-                  {formatPrice(untilFree)} to free shipping
-                </span>
-                <span className="font-mono text-[9.5px] tracking-[0.14em] uppercase" style={{ color: "var(--vn-steel-mist)" }}>
-                  {Math.round(progress * 100)}%
-                </span>
-              </div>
-              <div aria-hidden="true" className="h-px w-full relative" style={{ background: "var(--vn-rule)" }}>
+          {hasFreeBar &&
+            untilFree !== null &&
+            progress !== null &&
+            untilFree > 0 && (
+              <div className="mx-auto mt-8" style={{ maxWidth: "480px" }}>
+                <div className="mb-2 flex justify-between">
+                  <span
+                    className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
+                    style={{ color: "var(--vn-steel-mist)" }}
+                  >
+                    {formatPrice(untilFree)} to free shipping
+                  </span>
+                  <span
+                    className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
+                    style={{ color: "var(--vn-steel-mist)" }}
+                  >
+                    {Math.round(progress * 100)}%
+                  </span>
+                </div>
                 <div
-                  className="absolute inset-y-0 left-0 transition-all"
-                  style={{
-                    width: `${Math.min(100, Math.round(progress * 100))}%`,
-                    background: "var(--vn-ink)",
-                    height: "1px",
-                  }}
-                />
+                  aria-hidden="true"
+                  className="relative h-px w-full"
+                  style={{ background: "var(--vn-rule)" }}
+                >
+                  <div
+                    className="absolute inset-y-0 left-0 transition-all"
+                    style={{
+                      width: `${Math.min(100, Math.round(progress * 100))}%`,
+                      background: "var(--vn-ink)",
+                      height: "1px",
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </FadeIn>
       </section>
 
@@ -131,10 +153,10 @@ export function NoiseCartContents({ business }: Props) {
         style={{ background: "var(--vn-paper)" }}
       >
         {/* Items column */}
-        <div className="border-r border-foreground/15 px-7 py-8">
+        <div className="border-foreground/15 border-r px-7 py-8">
           {/* Table header — hidden on mobile, shown on sm+ */}
           <div
-            className="hidden sm:grid items-center border-b-2 border-foreground pb-3 mb-0 gap-4"
+            className="border-foreground mb-0 hidden items-center gap-4 border-b-2 pb-3 sm:grid"
             style={{
               gridTemplateColumns: "80px 1fr auto auto auto auto",
             }}
@@ -147,19 +169,19 @@ export function NoiseCartContents({ business }: Props) {
               Garment
             </span>
             <span
-              className="font-mono text-[9.5px] tracking-[0.22em] uppercase text-right"
+              className="text-right font-mono text-[9.5px] tracking-[0.22em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
               Unit
             </span>
             <span
-              className="font-mono text-[9.5px] tracking-[0.22em] uppercase text-center"
+              className="text-center font-mono text-[9.5px] tracking-[0.22em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
               Qty
             </span>
             <span
-              className="font-mono text-[9.5px] tracking-[0.22em] uppercase text-right"
+              className="text-right font-mono text-[9.5px] tracking-[0.22em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
               Total
@@ -169,14 +191,18 @@ export function NoiseCartContents({ business }: Props) {
 
           {/* Items */}
           {items.map((item, i) => (
-            <NoiseCartItem key={`${item.productId}-${item.variantId ?? "base"}`} item={item} index={i} />
+            <NoiseCartItem
+              key={`${item.productId}-${item.variantId ?? "base"}`}
+              item={item}
+              index={i}
+            />
           ))}
 
           {/* Continue shopping */}
           <div className="mt-6 flex items-center justify-between">
             <Link
               href="/shop"
-              className="font-mono text-[10px] tracking-[0.22em] uppercase flex items-center gap-3 transition-opacity hover:opacity-60"
+              className="flex items-center gap-3 font-mono text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-60"
               style={{ color: "var(--vn-steel)" }}
             >
               ← Continue Shopping

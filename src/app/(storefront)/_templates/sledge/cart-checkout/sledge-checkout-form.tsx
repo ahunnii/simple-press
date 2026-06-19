@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -17,6 +18,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 import { SledgeOrderSummary } from "./sledge-order-summary";
 
@@ -32,7 +34,7 @@ const INP =
 // M-5: use <legend> inside fieldset so AT announces field group name
 function SectionHead({ children }: { children: React.ReactNode }) {
   return (
-    <legend className="sl-rail-heading mb-5 w-full border-b border-[var(--sl-border)] pb-3 font-heading text-[var(--sl-orange)] uppercase">
+    <legend className="sl-rail-heading font-heading mb-5 w-full border-b border-[var(--sl-border)] pb-3 text-[var(--sl-orange)] uppercase">
       {children}
     </legend>
   );
@@ -73,7 +75,14 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
     handleSubmit,
     shippingConfig,
     items,
+    shipping,
+    shippingPending,
   } = useCheckoutForm(business);
+
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    deliveryMethod === "ship" && state.trim().length > 0 && shippingPending;
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -124,7 +133,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="First & last"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !name.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !name.trim() ? true : undefined
+                }
                 className={INP}
               />
             </div>
@@ -165,7 +176,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="SUMMER-2026"
                 autoComplete="off"
                 aria-invalid={!!discountFieldError}
-                aria-describedby={discountFieldError ? "discount-error" : undefined}
+                aria-describedby={
+                  discountFieldError ? "discount-error" : undefined
+                }
                 className={cn(INP, "tracking-[0.1em] uppercase")}
               />
             </div>
@@ -192,13 +205,16 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
             <p
               id="discount-error"
               role="alert"
-              className="font-sans text-xs tracking-[0.12em] text-destructive uppercase"
+              className="text-destructive font-sans text-xs tracking-[0.12em] uppercase"
             >
               {discountFieldError}
             </p>
           ) : null}
           {discountCodeLabel && discountAmount > 0 ? (
-            <p role="status" className="font-sans text-xs tracking-[0.12em] text-green-700 uppercase">
+            <p
+              role="status"
+              className="font-sans text-xs tracking-[0.12em] text-green-700 uppercase"
+            >
               Code <span className="font-semibold">{discountCodeLabel}</span>{" "}
               applied.
             </p>
@@ -239,7 +255,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
           <fieldset className="flex flex-col gap-5">
             <SectionHead>Shipping Address</SectionHead>
             <p className="-mt-2 font-sans text-xs tracking-[0.12em] text-[var(--sl-ink-soft)] uppercase">
-              Pre-filled at Stripe — you can confirm or edit before paying.
+              {shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                ? "We price shipping from this address. Make changes here before continuing to payment."
+                : "Pre-filled at Stripe — you can confirm or edit before paying."}
             </p>
 
             <div className="flex flex-col gap-1.5">
@@ -255,7 +273,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 placeholder="Street address, P.O. box"
                 required={deliveryMethod === "ship"}
                 aria-required="true"
-                aria-invalid={submitAttempted && !addressLine1.trim() ? true : undefined}
+                aria-invalid={
+                  submitAttempted && !addressLine1.trim() ? true : undefined
+                }
                 className={INP}
               />
             </div>
@@ -289,26 +309,40 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   required={deliveryMethod === "ship"}
                   placeholder="e.g. Detroit"
                   aria-required="true"
-                  aria-invalid={submitAttempted && !city.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !city.trim() ? true : undefined
+                  }
                   className={INP}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="state" className={LBL}>
+                <Label id="state-label" htmlFor="state" className={LBL}>
                   State / Province *
                 </Label>
-                <Input
-                  id="state"
-                  type="text"
-                  autoComplete="shipping address-level1"
+                <Select
                   value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  placeholder="e.g. MI"
-                  required={deliveryMethod === "ship"}
-                  aria-required="true"
-                  aria-invalid={submitAttempted && !state.trim() ? true : undefined}
-                  className={INP}
-                />
+                  onValueChange={(v) => setState(v)}
+                  required
+                >
+                  <SelectTrigger
+                    id="state"
+                    className={cn("w-full", INP)}
+                    aria-labelledby="state-label"
+                    aria-required="true"
+                    aria-invalid={
+                      submitAttempted && !state ? true : undefined
+                    }
+                  >
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getRegionOptions(country).map((opt) => (
+                      <SelectItem key={opt.code} value={opt.code}>
+                        {opt.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -326,7 +360,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   onChange={(e) => setPostalCode(e.target.value)}
                   required={deliveryMethod === "ship"}
                   aria-required="true"
-                  aria-invalid={submitAttempted && !postalCode.trim() ? true : undefined}
+                  aria-invalid={
+                    submitAttempted && !postalCode.trim() ? true : undefined
+                  }
                   className={INP}
                 />
               </div>
@@ -339,7 +375,11 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   onValueChange={(v) => setCountry(v as "US" | "CA")}
                   required
                 >
-                  <SelectTrigger id="country" className={cn("w-full", INP)} aria-labelledby="country-label">
+                  <SelectTrigger
+                    id="country"
+                    className={cn("w-full", INP)}
+                    aria-labelledby="country-label"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -356,9 +396,11 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
       <aside className="min-w-0">
         <div className="flex flex-col gap-5 lg:sticky lg:top-28">
           <SledgeOrderSummary
-            shippingConfig={shippingConfig}
             deliveryMethod={deliveryMethod}
             discountAmount={discountAmount}
+            shipping={shipping}
+            shippingPending={shippingPending}
+            shippingCalculating={shippingCalculating}
           />
 
           <div role="alert" aria-live="assertive" aria-atomic="true">
@@ -373,13 +415,19 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
 
           <button
             type="submit"
-            disabled={isProcessing}
-            aria-busy={isProcessing}
+            disabled={isProcessing || shippingCalculating}
+            aria-busy={isProcessing || shippingCalculating}
             className="sl-btn flex w-full items-center justify-between disabled:opacity-50"
           >
             <span className="flex items-center gap-2">
-              {isProcessing ? <Loader2 className="size-3.5 animate-spin" /> : null}
-              {isProcessing ? "Processing…" : "Continue to Payment"}
+              {isProcessing || shippingCalculating ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : null}
+              {isProcessing
+                ? "Processing…"
+                : shippingCalculating
+                  ? "Calculating shipping…"
+                  : "Continue to Payment"}
             </span>
             <span>→</span>
           </button>

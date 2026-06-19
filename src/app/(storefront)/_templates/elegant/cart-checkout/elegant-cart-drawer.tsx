@@ -29,7 +29,9 @@ export function ElegantCartDrawer() {
   // Lock body scroll when open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   // Mark background content as inert when drawer is open so screen readers
@@ -73,8 +75,8 @@ export function ElegantCartDrawer() {
     if (!el) return;
     const focusable = Array.from(
       el.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      )
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
     );
     if (focusable.length === 0) return;
     const first = focusable[0]!;
@@ -136,27 +138,33 @@ export function ElegantCartDrawer() {
         }}
       >
         {/* Header */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "22px 28px",
-          borderBottom: "1px solid var(--el-line, rgba(28,26,23,0.12))",
-          flexShrink: 0,
-        }}>
-          <h2 style={{
-            fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-            fontSize: 22,
-            fontWeight: 500,
-            color: "var(--el-ink, #1c1a17)",
-          }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "22px 28px",
+            borderBottom: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+            flexShrink: 0,
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+              fontSize: 22,
+              fontWeight: 500,
+              color: "var(--el-ink, #1c1a17)",
+            }}
+          >
             Your bag{" "}
-            <span style={{
-              fontFamily: "var(--font-mono, ui-monospace)",
-              fontSize: 13,
-              letterSpacing: "0.1em",
-              color: "var(--el-ink-soft, #6b6659)",
-            }}>
+            <span
+              style={{
+                fontFamily: "var(--font-mono, ui-monospace)",
+                fontSize: 13,
+                letterSpacing: "0.1em",
+                color: "var(--el-ink-soft, #6b6659)",
+              }}
+            >
               ({itemCount})
             </span>
           </h2>
@@ -166,7 +174,8 @@ export function ElegantCartDrawer() {
             onClick={() => setIsOpen(false)}
             aria-label="Close bag"
             style={{
-              width: 36, height: 36,
+              width: 36,
+              height: 36,
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
@@ -186,37 +195,53 @@ export function ElegantCartDrawer() {
         {/* Body */}
         <div style={{ flex: 1, overflowY: "auto", padding: "8px 28px" }}>
           {items.length === 0 ? (
-            <div style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 18,
-              padding: "60px 0",
-              textAlign: "center",
-            }}>
-              <ShoppingBag aria-hidden={true} style={{ width: 32, height: 32, color: "var(--el-ink-soft, #6b6659)" }} strokeWidth={1} />
-              <span style={{
-                fontFamily: "var(--font-mono, ui-monospace)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--el-ink-soft, #6b6659)",
-              }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 18,
+                padding: "60px 0",
+                textAlign: "center",
+              }}
+            >
+              <ShoppingBag
+                aria-hidden={true}
+                style={{
+                  width: 32,
+                  height: 32,
+                  color: "var(--el-ink-soft, #6b6659)",
+                }}
+                strokeWidth={1}
+              />
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                }}
+              >
                 Empty bag
               </span>
-              <p style={{
-                fontFamily: "var(--font-serif, serif)",
-                fontSize: 26,
-                color: "var(--el-ink, #1c1a17)",
-              }}>
+              <p
+                style={{
+                  fontFamily: "var(--font-serif, serif)",
+                  fontSize: 26,
+                  color: "var(--el-ink, #1c1a17)",
+                }}
+              >
                 Nothing here yet.
               </p>
-              <p style={{
-                fontSize: 15,
-                color: "var(--el-ink-soft, #6b6659)",
-                maxWidth: 240,
-                fontFamily: "var(--font-sans, sans-serif)",
-              }}>
+              <p
+                style={{
+                  fontSize: 15,
+                  color: "var(--el-ink-soft, #6b6659)",
+                  maxWidth: 240,
+                  fontFamily: "var(--font-sans, sans-serif)",
+                }}
+              >
                 Find something to take home.
               </p>
               <button
@@ -240,7 +265,10 @@ export function ElegantCartDrawer() {
                 }}
               >
                 Browse shop
-                <ArrowRight aria-hidden={true} style={{ width: 13, height: 13 }} />
+                <ArrowRight
+                  aria-hidden={true}
+                  style={{ width: 13, height: 13 }}
+                />
               </button>
             </div>
           ) : (
@@ -251,19 +279,22 @@ export function ElegantCartDrawer() {
                   display: "flex",
                   gap: 16,
                   padding: "18px 0",
-                  borderBottom: "1px solid var(--el-line-2, rgba(28,26,23,0.06))",
+                  borderBottom:
+                    "1px solid var(--el-line-2, rgba(28,26,23,0.06))",
                 }}
               >
                 {/* Thumb */}
-                <div style={{
-                  width: 80,
-                  aspectRatio: "4/5",
-                  borderRadius: 6,
-                  flexShrink: 0,
-                  position: "relative",
-                  overflow: "hidden",
-                  background: "var(--el-cream-2, #ebe6dc)",
-                }}>
+                <div
+                  style={{
+                    width: 80,
+                    aspectRatio: "4/5",
+                    borderRadius: 6,
+                    flexShrink: 0,
+                    position: "relative",
+                    overflow: "hidden",
+                    background: "var(--el-cream-2, #ebe6dc)",
+                  }}
+                >
                   {item.imageUrl && (
                     <Image
                       src={item.imageUrl}
@@ -276,45 +307,66 @@ export function ElegantCartDrawer() {
                 </div>
 
                 {/* Info */}
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                  <div style={{
-                    fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-                    fontSize: 17,
-                    fontWeight: 500,
-                    color: "var(--el-ink, #1c1a17)",
-                    lineHeight: 1.2,
-                  }}>
+                <div
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 4,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily:
+                        "var(--font-serif, 'Cormorant Garamond', serif)",
+                      fontSize: 17,
+                      fontWeight: 500,
+                      color: "var(--el-ink, #1c1a17)",
+                      lineHeight: 1.2,
+                    }}
+                  >
                     {item.productName}
                   </div>
                   {item.variantName && (
-                    <div style={{
-                      fontFamily: "var(--font-mono, ui-monospace)",
-                      fontSize: 10,
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                      color: "var(--el-ink-soft, #6b6659)",
-                    }}>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-mono, ui-monospace)",
+                        fontSize: 10,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "var(--el-ink-soft, #6b6659)",
+                      }}
+                    >
                       {item.variantName}
                     </div>
                   )}
                   {/* Qty stepper */}
-                  <div style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 12,
-                    border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
-                    borderRadius: 999,
-                    padding: "2px 4px",
-                    marginTop: 6,
-                    fontSize: 13,
-                    width: "fit-content",
-                  }}>
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 12,
+                      border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                      borderRadius: 999,
+                      padding: "2px 4px",
+                      marginTop: 6,
+                      fontSize: 13,
+                      width: "fit-content",
+                    }}
+                  >
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item.productId, item.variantId, item.quantity - 1)}
+                      onClick={() =>
+                        updateQuantity(
+                          item.productId,
+                          item.variantId,
+                          item.quantity - 1,
+                        )
+                      }
                       aria-label={`Decrease quantity of ${item.productName}`}
                       style={{
-                        width: 24, height: 24,
+                        width: 24,
+                        height: 24,
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -326,7 +378,10 @@ export function ElegantCartDrawer() {
                       }}
                       className="el-qty-sm"
                     >
-                      <Minus aria-hidden={true} style={{ width: 11, height: 11 }} />
+                      <Minus
+                        aria-hidden={true}
+                        style={{ width: 11, height: 11 }}
+                      />
                     </button>
                     <span
                       aria-live="polite"
@@ -337,10 +392,17 @@ export function ElegantCartDrawer() {
                     </span>
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item.productId, item.variantId, item.quantity + 1)}
+                      onClick={() =>
+                        updateQuantity(
+                          item.productId,
+                          item.variantId,
+                          item.quantity + 1,
+                        )
+                      }
                       aria-label={`Increase quantity of ${item.productName}`}
                       style={{
-                        width: 24, height: 24,
+                        width: 24,
+                        height: 24,
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -352,18 +414,23 @@ export function ElegantCartDrawer() {
                       }}
                       className="el-qty-sm"
                     >
-                      <Plus aria-hidden={true} style={{ width: 11, height: 11 }} />
+                      <Plus
+                        aria-hidden={true}
+                        style={{ width: 11, height: 11 }}
+                      />
                     </button>
                   </div>
                 </div>
 
                 {/* Price + remove */}
-                <div style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-end",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <button
                     type="button"
                     onClick={() => removeItem(item.productId, item.variantId)}
@@ -381,11 +448,14 @@ export function ElegantCartDrawer() {
                   >
                     Remove
                   </button>
-                  <span style={{
-                    fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-                    fontSize: 18,
-                    color: "var(--el-ink, #1c1a17)",
-                  }}>
+                  <span
+                    style={{
+                      fontFamily:
+                        "var(--font-serif, 'Cormorant Garamond', serif)",
+                      fontSize: 18,
+                      color: "var(--el-ink, #1c1a17)",
+                    }}
+                  >
                     {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
@@ -396,41 +466,51 @@ export function ElegantCartDrawer() {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div style={{
-            padding: "22px 28px",
-            borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
-            flexShrink: 0,
-          }}>
+          <div
+            style={{
+              padding: "22px 28px",
+              borderTop: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+              flexShrink: 0,
+            }}
+          >
             {/* Subtotal row */}
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 14,
-            }}>
-              <span style={{
-                fontFamily: "var(--font-mono, ui-monospace)",
-                fontSize: 12,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "var(--el-ink-soft, #6b6659)",
-              }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 14,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 12,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                }}
+              >
                 Subtotal
               </span>
-              <span style={{
-                fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
-                fontSize: 22,
-                color: "var(--el-ink, #1c1a17)",
-              }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                  fontSize: 22,
+                  color: "var(--el-ink, #1c1a17)",
+                }}
+              >
                 {formatPrice(subtotal)}
               </span>
             </div>
-            <p style={{
-              fontSize: 12,
-              color: "var(--el-ink-soft, #6b6659)",
-              marginBottom: 14,
-              fontFamily: "var(--font-sans, sans-serif)",
-            }}>
+            <p
+              style={{
+                fontSize: 12,
+                color: "var(--el-ink-soft, #6b6659)",
+                marginBottom: 14,
+                fontFamily: "var(--font-sans, sans-serif)",
+              }}
+            >
               Shipping and taxes calculated at checkout.
             </p>
             <Link
@@ -456,7 +536,10 @@ export function ElegantCartDrawer() {
               className="el-drawer-checkout"
             >
               Checkout
-              <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
+              <ArrowRight
+                aria-hidden={true}
+                style={{ width: 14, height: 14 }}
+              />
             </Link>
             <Link
               href="/cart"
@@ -479,7 +562,6 @@ export function ElegantCartDrawer() {
           </div>
         )}
       </div>
-
     </>
   );
 }

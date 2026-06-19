@@ -1,7 +1,7 @@
 "use client";
 
-import { MoreHorizontal, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { MoreHorizontal, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
@@ -149,7 +149,8 @@ export function OrderMoreOptions({ order }: Props) {
                 >
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Resend Shipped Email
-                  {shipmentsWithTracking.length > 1 && ` (Package ${index + 1})`}
+                  {shipmentsWithTracking.length > 1 &&
+                    ` (Package ${index + 1})`}
                 </DropdownMenuItem>
               ))}
 

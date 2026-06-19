@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
+import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
-import type { OrderDetailPageTemplateProps } from "../../types";
 import { ModernAccountLayout } from "./modern-account-layout";
 
 function statusClass(status: string) {
@@ -148,7 +148,7 @@ export function ModernOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
               <h2 className="text-foreground mb-4 font-serif text-lg">
                 Shipping Address
               </h2>
-              <address className="text-muted-foreground not-italic text-sm leading-relaxed">
+              <address className="text-muted-foreground text-sm leading-relaxed not-italic">
                 {addr.firstName && addr.lastName && (
                   <p className="text-foreground font-medium">
                     {addr.firstName} {addr.lastName}

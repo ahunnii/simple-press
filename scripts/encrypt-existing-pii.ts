@@ -1,0 +1,277 @@
+/**
+ * encrypt-existing-pii.ts
+ *
+ * One-time data migration: encrypts all existing plaintext PII values in
+ * Customer.phone, ShippingAddress.{company,address1,address2,city,province,zip,phone},
+ * and Order.customerPhone by writing each row's current values back through
+ * the Prisma client (which has the fieldEncryptionExtension active).
+ *
+ * The extension is idempotent: values that are already encrypted ciphertext
+ * (starting with "k1.") are passed through unchanged on write, so re-running
+ * this script after a successful apply will update 0 rows.
+ *
+ * Idempotency detection: We use $queryRaw to read the raw column value directly
+ * from Postgres (bypassing the extension's decryption). Any row whose stored
+ * value already starts with "k1." is already encrypted and is skipped to avoid
+ * unnecessary round-trips. Rows with NULL in every in-scope field are also skipped.
+ *
+ * Usage:
+ *   pnpm tsx scripts/encrypt-existing-pii.ts          # dry-run (safe, read-only)
+ *   pnpm tsx scripts/encrypt-existing-pii.ts --apply  # write changes
+ *   APPLY=1 pnpm tsx scripts/encrypt-existing-pii.ts  # same as --apply
+ */
+
+import { fieldEncryptionExtension } from "prisma-field-encryption";
+
+import { Prisma, PrismaClient } from "../generated/prisma";
+
+// ---------------------------------------------------------------------------
+// Bootstrap: we need the encryption key before env validation runs, so we
+// load it directly from process.env after dotenv (tsx/ts-node loads .env
+// automatically via the dotenv integration). The key is required at runtime.
+// ---------------------------------------------------------------------------
+
+const encryptionKey = process.env.PRISMA_FIELD_ENCRYPTION_KEY;
+if (!encryptionKey) {
+  console.error("ERROR: PRISMA_FIELD_ENCRYPTION_KEY is not set. Aborting.");
+  process.exit(1);
+}
+
+const base = new PrismaClient({ log: ["error"] });
+const db = base.$extends(
+  fieldEncryptionExtension({
+    encryptionKey,
+    // Required: pass DMMF from the custom generated client path so the
+    // extension doesn't attempt to import from @prisma/client/default.
+    dmmf: Prisma.dmmf,
+  }),
+);
+
+const DRY_RUN =
+  !process.argv.includes("--apply") && process.env["APPLY"] !== "1";
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns true if the raw string value is already encrypted ciphertext.
+ * prisma-field-encryption stores values as "v1.aesgcm256.<nonce>.<ciphertext>".
+ * (The key name prefix is "k1." but stored ciphertext uses "v1." as its
+ * version tag.)
+ */
+function isEncrypted(value: string | null): boolean {
+  return value !== null && value.startsWith("v1.");
+}
+
+// ---------------------------------------------------------------------------
+// Per-model encryption routines
+// ---------------------------------------------------------------------------
+
+async function encryptCustomers(): Promise<{
+  scanned: number;
+  updated: number;
+  skipped: number;
+}> {
+  // Fetch raw phone values directly (bypasses extension decryption).
+  const rows = await base.$queryRaw<{ id: string; phone: string | null }[]>`
+    SELECT id, phone FROM "Customer"
+  `;
+
+  let updated = 0;
+  let skipped = 0;
+
+  for (const row of rows) {
+    // Skip if phone is null (nothing to encrypt) or already encrypted.
+    if (row.phone === null || isEncrypted(row.phone)) {
+      skipped++;
+      continue;
+    }
+
+    console.log(`  [Customer] id=${row.id} — phone needs encryption`);
+
+    if (!DRY_RUN) {
+      // Read the decrypted value via the ORM (extension decrypts on read).
+      const customer = await db.customer.findUnique({
+        where: { id: row.id },
+        select: { phone: true },
+      });
+      await db.customer.update({
+        where: { id: row.id },
+        data: { phone: customer?.phone ?? null },
+      });
+    }
+    updated++;
+  }
+
+  return { scanned: rows.length, updated, skipped };
+}
+
+async function encryptShippingAddresses(): Promise<{
+  scanned: number;
+  updated: number;
+  skipped: number;
+}> {
+  // Fetch raw encrypted-field values directly.
+  const rows = await base.$queryRaw<
+    {
+      id: string;
+      company: string | null;
+      address1: string;
+      address2: string | null;
+      city: string;
+      province: string | null;
+      zip: string;
+      phone: string | null;
+    }[]
+  >`
+    SELECT id, company, address1, address2, city, province, zip, phone
+    FROM "ShippingAddress"
+  `;
+
+  let updated = 0;
+  let skipped = 0;
+
+  for (const row of rows) {
+    // Skip if all in-scope fields are either null or already encrypted.
+    const fieldsToCheck = [
+      row.company,
+      row.address1,
+      row.address2,
+      row.city,
+      row.province,
+      row.zip,
+      row.phone,
+    ].filter((v) => v !== null) as string[];
+
+    if (fieldsToCheck.length === 0 || fieldsToCheck.every(isEncrypted)) {
+      skipped++;
+      continue;
+    }
+
+    console.log(`  [ShippingAddress] id=${row.id} — needs encryption`);
+
+    if (!DRY_RUN) {
+      // Read via ORM (extension decrypts) so we pass plaintext back in.
+      const addr = await db.shippingAddress.findUnique({
+        where: { id: row.id },
+        select: {
+          company: true,
+          address1: true,
+          address2: true,
+          city: true,
+          province: true,
+          zip: true,
+          phone: true,
+        },
+      });
+      if (!addr) {
+        console.warn(`  [ShippingAddress] id=${row.id} — not found, skipping`);
+        skipped++;
+        continue;
+      }
+      await db.shippingAddress.update({
+        where: { id: row.id },
+        data: {
+          company: addr.company,
+          address1: addr.address1,
+          address2: addr.address2,
+          city: addr.city,
+          province: addr.province,
+          zip: addr.zip,
+          phone: addr.phone,
+        },
+      });
+    }
+    updated++;
+  }
+
+  return { scanned: rows.length, updated, skipped };
+}
+
+async function encryptOrders(): Promise<{
+  scanned: number;
+  updated: number;
+  skipped: number;
+}> {
+  const rows = await base.$queryRaw<
+    { id: string; customer_phone: string | null }[]
+  >`
+    SELECT id, "customerPhone" AS customer_phone FROM "Order"
+  `;
+
+  let updated = 0;
+  let skipped = 0;
+
+  for (const row of rows) {
+    if (row.customer_phone === null || isEncrypted(row.customer_phone)) {
+      skipped++;
+      continue;
+    }
+
+    console.log(`  [Order] id=${row.id} — customerPhone needs encryption`);
+
+    if (!DRY_RUN) {
+      const order = await db.order.findUnique({
+        where: { id: row.id },
+        select: { customerPhone: true },
+      });
+      await db.order.update({
+        where: { id: row.id },
+        data: { customerPhone: order?.customerPhone ?? null },
+      });
+    }
+    updated++;
+  }
+
+  return { scanned: rows.length, updated, skipped };
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+async function main() {
+  if (DRY_RUN) {
+    console.log("=== DRY RUN (pass --apply to write changes) ===\n");
+  } else {
+    console.log("=== APPLY MODE — writing changes ===\n");
+  }
+
+  console.log("--- Customer.phone ---");
+  const customerStats = await encryptCustomers();
+
+  console.log("\n--- ShippingAddress encrypted fields ---");
+  const addressStats = await encryptShippingAddresses();
+
+  console.log("\n--- Order.customerPhone ---");
+  const orderStats = await encryptOrders();
+
+  console.log("\n=== Summary ===");
+  console.log(
+    `Customer       — scanned: ${customerStats.scanned}, updated: ${customerStats.updated}, skipped (null/already encrypted): ${customerStats.skipped}`,
+  );
+  console.log(
+    `ShippingAddress— scanned: ${addressStats.scanned}, updated: ${addressStats.updated}, skipped (null/already encrypted): ${addressStats.skipped}`,
+  );
+  console.log(
+    `Order          — scanned: ${orderStats.scanned}, updated: ${orderStats.updated}, skipped (null/already encrypted): ${orderStats.skipped}`,
+  );
+
+  const totalUpdated =
+    customerStats.updated + addressStats.updated + orderStats.updated;
+
+  if (DRY_RUN) {
+    console.log(
+      `\n[DRY RUN] ${totalUpdated} row(s) would be updated. Re-run with --apply to apply.\n`,
+    );
+  } else {
+    console.log(`\n[APPLY] ${totalUpdated} row(s) updated successfully.\n`);
+  }
+}
+
+main()
+  .catch((err) => {
+    console.error("Script failed:", err);
+    process.exit(1);
+  })
+  .finally(() => base.$disconnect());

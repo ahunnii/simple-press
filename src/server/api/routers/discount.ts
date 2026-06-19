@@ -3,10 +3,7 @@ import { z } from "zod";
 
 import { deactivateExpiredDiscountCodes } from "~/lib/deactivate-expired-discounts";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
-import {
-  discountLimiter,
-  getClientIpFromHeaders,
-} from "~/lib/rate-limit";
+import { discountLimiter, getClientIpFromHeaders } from "~/lib/rate-limit";
 import { discountFormSchema } from "~/lib/validators/discounts";
 import {
   createTRPCRouter,
@@ -185,7 +182,9 @@ export const discountRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        await discountLimiter.consume(`${getClientIpFromHeaders(ctx.headers)}:${ctx.businessId}`);
+        await discountLimiter.consume(
+          `${getClientIpFromHeaders(ctx.headers)}:${ctx.businessId}`,
+        );
       } catch {
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",

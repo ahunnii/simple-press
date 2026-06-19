@@ -38,6 +38,10 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Sledge",
     subdomains: ["judysledge"],
   },
+  vii: {
+    label: "Skinbar VII",
+    subdomains: ["skinbarvii"],
+  },
 };
 
 // List all subdomains associated with commercial templates

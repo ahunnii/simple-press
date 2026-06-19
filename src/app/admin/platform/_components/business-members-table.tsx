@@ -72,7 +72,7 @@ export function BusinessMembersTable({ memberships }: Props) {
                 >
                   {membership.user.name}
                 </Link>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-muted-foreground text-sm">
                   {membership.user.email}
                 </div>
               </TableCell>
@@ -88,7 +88,11 @@ export function BusinessMembersTable({ memberships }: Props) {
                 </Badge>
               </TableCell>
               <TableCell>
-                <Badge variant={membership.role === "OWNER" ? "default" : "secondary"}>
+                <Badge
+                  variant={
+                    membership.role === "OWNER" ? "default" : "secondary"
+                  }
+                >
                   {membership.role}
                 </Badge>
               </TableCell>

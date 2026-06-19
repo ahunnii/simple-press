@@ -17,24 +17,33 @@ export function DefaultBlogPostPage({
       {/* Page header */}
       <section className="border-b border-[#e8e8e8] px-6 pt-20 pb-14 lg:px-8">
         <div className="mx-auto max-w-[760px]">
-          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
-            <Link href="/" className="hover:text-[#0a0a0a] transition-colors">
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-5 flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+          >
+            <Link href="/" className="transition-colors hover:text-[#0a0a0a]">
               Home
             </Link>
             <span aria-hidden="true">/</span>
-            <Link href="/blog" className="hover:text-[#0a0a0a] transition-colors">
+            <Link
+              href="/blog"
+              className="transition-colors hover:text-[#0a0a0a]"
+            >
               Journal
             </Link>
             <span aria-hidden="true">/</span>
-            <span aria-current="page" className="normal-case tracking-normal text-[#0a0a0a] truncate max-w-[200px]">
+            <span
+              aria-current="page"
+              className="max-w-[200px] truncate tracking-normal text-[#0a0a0a] normal-case"
+            >
               {page.title}
             </span>
           </nav>
 
-          <p className="text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+          <p className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
             {formatDate(page.createdAt)}
           </p>
-          <h1 className="font-serif mt-3 text-[clamp(32px,4vw,56px)] font-semibold leading-[1.08] tracking-[-0.025em] text-balance">
+          <h1 className="mt-3 font-serif text-[clamp(32px,4vw,56px)] leading-[1.08] font-semibold tracking-[-0.025em] text-balance">
             {page.title}
           </h1>
           {page.excerpt && (
@@ -68,17 +77,17 @@ export function DefaultBlogPostPage({
         <div className="mx-auto max-w-[760px]">
           <TiptapRenderer
             content={page.content as TiptapJSON}
-            className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:font-medium prose-headings:tracking-tight prose-p:text-[#6b6b6b] prose-p:leading-[1.75] prose-a:text-[#0a0a0a] prose-a:underline hover:prose-a:no-underline prose-blockquote:border-[#e8e8e8] prose-blockquote:text-[#6b6b6b]"
+            className="prose prose-lg prose-headings:font-serif prose-headings:font-medium prose-headings:tracking-tight prose-p:text-[#6b6b6b] prose-p:leading-[1.75] prose-a:text-[#0a0a0a] prose-a:underline hover:prose-a:no-underline prose-blockquote:border-[#e8e8e8] prose-blockquote:text-[#6b6b6b] max-w-none"
           />
         </div>
       </article>
 
       {/* Back link + related posts */}
-      <div className="border-t border-[#e8e8e8] px-6 pb-24 pt-16 lg:px-8">
+      <div className="border-t border-[#e8e8e8] px-6 pt-16 pb-24 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="mb-1.5 text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+              <p className="mb-1.5 text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
                 Continue reading
               </p>
               <h2 className="font-serif text-3xl font-medium tracking-tight">
@@ -87,18 +96,22 @@ export function DefaultBlogPostPage({
             </div>
             <Link
               href="/blog"
-              className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 shrink-0"
+              className="inline-flex shrink-0 items-center gap-2 border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
             >
               All posts <span aria-hidden="true">→</span>
             </Link>
           </div>
 
           {others.length === 0 ? (
-            <p className="text-[#6b6b6b] text-sm">No other posts yet.</p>
+            <p className="text-sm text-[#6b6b6b]">No other posts yet.</p>
           ) : (
             <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
               {others.map((post) => (
-                <Link key={post.slug} href={`/blog/${post.slug}`} className="group block">
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className="group block"
+                >
                   <div className="relative mb-4 aspect-4/3 overflow-hidden rounded-[var(--radius)] bg-[#f6f6f6]">
                     <Image
                       src={post.image ?? "/placeholder.svg"}
@@ -108,10 +121,10 @@ export function DefaultBlogPostPage({
                       sizes="(max-width: 640px) 100vw, 432px"
                     />
                   </div>
-                  <p className="mb-2 text-xs font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+                  <p className="mb-2 text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
                     {formatDate(post.createdAt)}
                   </p>
-                  <h3 className="font-serif text-[18px] font-medium leading-snug tracking-[-0.01em] group-hover:opacity-70 transition-opacity">
+                  <h3 className="font-serif text-[18px] leading-snug font-medium tracking-[-0.01em] transition-opacity group-hover:opacity-70">
                     {post.title}
                   </h3>
                 </Link>

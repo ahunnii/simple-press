@@ -1,30 +1,36 @@
 "use client";
 
 import Image from "next/image";
+import { Loader2 } from "lucide-react";
 
-import type { ShippingConfig } from "~/lib/shipping-utils";
-import { cn } from "~/lib/utils";
 import { formatPrice } from "~/lib/prices";
-import { calculateShipping } from "~/lib/shipping-utils";
+import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
 
 type OrderSummaryProps = {
-  shippingConfig: ShippingConfig;
   deliveryMethod: "ship" | "pickup";
   discountAmount: number;
+  // Authoritative shipping cost from the checkout hook (a live zone+weight
+  // quote when applicable). The summary must not recompute it.
+  shipping: number;
+  // True before a destination is known (show "Calculated at checkout").
+  shippingPending?: boolean;
+  // True while a live rate is actively loading for a known destination.
+  shippingCalculating?: boolean;
 };
 
 export function SledgeOrderSummary({
-  shippingConfig,
   deliveryMethod,
   discountAmount,
+  shipping,
+  shippingPending,
+  shippingCalculating,
 }: OrderSummaryProps) {
   const { items, subtotal } = useCart();
 
-  const shipping =
-    deliveryMethod === "pickup" ? 0 : calculateShipping(subtotal, shippingConfig);
+  const effectiveShipping = deliveryMethod === "pickup" ? 0 : shipping;
   const afterDiscount = subtotal - discountAmount;
-  const estimatedTotal = afterDiscount + shipping;
+  const estimatedTotal = afterDiscount + effectiveShipping;
 
   return (
     <div className="sl-card-shadow overflow-hidden rounded-sm bg-white">
@@ -93,7 +99,7 @@ export function SledgeOrderSummary({
         {/* C-3: green-600 → green-700 for sufficient contrast */}
         {discountAmount > 0 ? (
           <div className="flex items-baseline justify-between gap-4">
-            <span className="font-sans text-xs tracking-[0.14em] uppercase text-green-700">
+            <span className="font-sans text-xs tracking-[0.14em] text-green-700 uppercase">
               Discount
             </span>
             <span className="font-sans text-sm tracking-[0.04em] text-green-700">
@@ -109,16 +115,31 @@ export function SledgeOrderSummary({
           <span
             className={cn(
               "font-sans text-sm tracking-[0.04em]",
-              shipping === 0
+              deliveryMethod === "pickup" ||
+                shipping === 0 ||
+                shippingPending ||
+                shippingCalculating
                 ? "text-[var(--sl-ink-soft)]"
                 : "text-[var(--sl-ink)]",
             )}
           >
-            {deliveryMethod === "pickup"
-              ? "Studio pickup"
-              : shipping === 0
-                ? "Free"
-                : formatPrice(shipping)}
+            {deliveryMethod === "pickup" ? (
+              "In-store pickup (free)"
+            ) : shippingCalculating ? (
+              <span
+                className="inline-flex items-center gap-1.5"
+                aria-live="polite"
+              >
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                Calculating…
+              </span>
+            ) : shippingPending ? (
+              "Calculated at checkout"
+            ) : shipping === 0 ? (
+              "Free"
+            ) : (
+              formatPrice(shipping)
+            )}
           </span>
         </div>
       </div>

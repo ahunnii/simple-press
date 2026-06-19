@@ -154,14 +154,18 @@ model Business {
   supportEmail    String?
   phoneNumber     String?
   businessAddress String?
-  taxId           String? // For tax purposes
-  
+
   // Integrations
   stripeAccountId      String? @unique
   stripeAutoTaxEnabled Boolean @default(false)
 
   // Testimonials
   testimonialsAutoApprove Boolean @default(false) // when true, customer submissions are auto-approved
+
+  // Storefront availability (owner-controlled, storefront only)
+  maintenanceMode    Boolean @default(false)
+  maintenanceVariant String  @default("maintenance") // "maintenance" | "coming_soon"
+  maintenanceMessage String?
 
   // Analytics
   umamiWebsiteId String? // Each business gets their own website ID
@@ -175,21 +179,29 @@ model Business {
   featureFlags Json @default("{}") // Record<string, boolean>
 
   // Shipping (storefront + Stripe)
-  shippingType          String  @default("free") // free | flat_rate | flat_rate_with_threshold
+  shippingType          String  @default("free") // free | flat_rate | flat_rate_with_threshold | zone_weight
   shippingFlatRate      Int? // cents; used by flat_rate and flat_rate_with_threshold
-  freeShippingThreshold Int? // cents; subtotal at which shipping becomes free
+  freeShippingThreshold Int? // cents; subtotal at which shipping becomes free (all modes)
   offersInStorePickup   Boolean @default(false)
+
+  // Zone + weight shipping fields
+  originState                String? // 2-letter US state code for shipping origin
+  shippingWeightTiers        Json?   // WeightTier[]: [{ label, minLb, maxLb }] (last tier maxLb: null = no cap)
+  shippingFallbackRate       Int?    // cents; used when destination state matches no zone
+  shippingDefaultItemWeightLb Float? @default(0) // assumed weight (lb) for products with no weight set
 
   // Relationships
   products    Product[]
   collections Collection[]
+  services    Service[]
   orders      Order[]
   customers   Customer[]
   siteContent SiteContent?
   images      Image[]
   discountCodes DiscountCode[]
   inventoryHistory InventoryHistory[]
-  baseInventoryUnits BaseInventoryUnit[]
+  baseInventoryUnits    BaseInventoryUnit[]
+  inventoryReservations InventoryReservation[]
   pages         Page[]
   productImports ProductImport[]
   galleries     Gallery[]
@@ -197,6 +209,7 @@ model Business {
   testimonialInvites   TestimonialInvite[]
    platformInvites PlatformInvite[]
    memberships   BusinessMembership[]
+  zones         ShippingZone[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -278,6 +291,7 @@ model Product {
   barcode                String?
   trackInventory         Boolean @default(false)
   inventoryQty           Int     @default(0)
+  reservedQty            Int     @default(0)
   allowBackorders        Boolean @default(false)
   lowInventoryThreshold  Int?
   lowInventoryAlertSent  Boolean @default(false)
@@ -344,7 +358,8 @@ model ProductVariant {
   
   // Inventory
   inventoryQty Int @default(0)
-  
+  reservedQty  Int @default(0)
+
   // Options (stored as JSON for flexibility)
   options Json // { size: "Small", color: "Red" }
   
@@ -404,6 +419,71 @@ model CollectionProduct {
   @@index([productId])
 }
 
+model Service {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  slug        String
+  description String?
+  image       String?
+
+  // Which per-service page template renders this service's detail page
+  serviceTemplateId String @default("service-one")
+
+  // { key: value } — service-page template fields
+  customFields Json?
+
+  published Boolean @default(false)
+  sortOrder  Int     @default(0)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  ogImage         String?
+
+  // Multi-tenancy
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  items ServiceItem[]
+
+  @@unique([businessId, slug])
+  @@index([businessId, published])
+}
+
+model ServiceItem {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  description String?
+  image       String?
+
+  // Display-only pricing / duration (not e-commerce)
+  priceLabel    String?
+  durationLabel String?
+
+  // External booking iframe (sanitized HTTPS URL only)
+  bookingEmbedSrc    String?
+  bookingEmbedHeight Int?
+
+  published Boolean @default(false)
+  sortOrder  Int     @default(0)
+
+  // Parent service
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  // Denormalized for scoping queries without joining Service
+  businessId String
+
+  @@index([serviceId])
+  @@index([businessId])
+}
+
 model Image {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -433,15 +513,19 @@ model Customer {
   email     String
   firstName String?
   lastName  String?
-  phone     String?
+  phone     String? /// @encrypted
   
   // Marketing
   acceptsMarketing Boolean @default(false)
   
   // Stats
-  totalSpent      Float @default(0)
+  totalSpent      Int @default(0)
   orderCount      Int     @default(0)
-  
+
+  // GDPR/CCPA data-subject rights
+  deletionRequestedAt DateTime?
+  anonymizedAt        DateTime?
+
   // Link to authenticated user (if they've signed in)
   userId String?
   user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -468,14 +552,14 @@ model ShippingAddress {
 
   firstName   String
   lastName    String
-  company     String?
-  address1    String
-  address2    String?
-  city        String
-  province    String? // State/Province
+  company     String? /// @encrypted
+  address1    String  /// @encrypted
+  address2    String? /// @encrypted
+  city        String  /// @encrypted
+  province    String? /// @encrypted State/Province
   country     String
-  zip         String
-  phone       String?
+  zip         String  /// @encrypted
+  phone       String? /// @encrypted
   
   isDefault   Boolean @default(false)
   
@@ -518,7 +602,7 @@ model Order {
   customerName  String? // For simpler storage (combines first+last)
   customerFirstName String?
   customerLastName  String?
-  customerPhone     String?
+  customerPhone     String? /// @encrypted
 
   // Payment
   paymentMethod String @default("card") // card | cash | check | manual
@@ -721,6 +805,7 @@ model BaseInventoryUnit {
   description String? @db.Text
 
   inventoryQty          Int     @default(0)
+  reservedQty           Int     @default(0)
   lowInventoryThreshold Int?
   lowInventoryAlertSent Boolean @default(false)
   outOfStockAlertSent   Boolean @default(false)
@@ -733,6 +818,34 @@ model BaseInventoryUnit {
   inventoryHistory InventoryHistory[]
 
   @@index([businessId])
+}
+
+// ============================================
+// INVENTORY RESERVATIONS
+// ============================================
+
+model InventoryReservation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  stripeSessionId String? @unique
+
+  // active | consumed | released
+  status String @default("active")
+
+  expiresAt DateTime
+
+  // Array of { variantId?, productId?, baseInventoryUnitId?, qty }
+  items Json
+
+  @@index([businessId])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([stripeSessionId])
 }
 
 model Page {
@@ -1025,4 +1138,48 @@ model PlatformInvite {
   @@index([email])
   @@index([code])
   @@index([businessId])
+}
+
+// ============================================
+// PLATFORM CONFIGURATION
+// ============================================
+
+model PlatformConfig {
+  id                 String   @id @default("singleton")
+  maintenanceMode    Boolean  @default(false)
+  maintenanceMessage String?
+  updatedAt          DateTime @updatedAt
+}
+
+// ============================================
+// ZONE + WEIGHT SHIPPING
+// ============================================
+
+model ShippingZone {
+  id        String   @id @default(cuid())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  name      String   // e.g. "Zone 1 – Origin Region"
+  states    String[] // US 2-letter state codes in this zone
+  sortOrder Int      @default(0)
+
+  rates ShippingRate[]
+
+  @@unique([businessId, name])
+  @@index([businessId])
+}
+
+model ShippingRate {
+  id String @id @default(cuid())
+
+  zoneId String
+  zone   ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  tierIndex  Int // position in Business.shippingWeightTiers (0-based)
+  priceCents Int // shipping price in cents for this zone + tier combination
+
+  @@unique([zoneId, tierIndex])
+  @@index([zoneId])
 }

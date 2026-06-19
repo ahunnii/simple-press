@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
+
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
@@ -67,9 +68,7 @@ export function ElegantNewsletter() {
         }}
       >
         <div style={revealStyle(0)}>
-          <span className="el-newsletter-eyebrow">
-            Letters from the studio
-          </span>
+          <span className="el-newsletter-eyebrow">Letters from the studio</span>
         </div>
 
         <div style={revealStyle(0.1)}>
@@ -163,7 +162,10 @@ export function ElegantNewsletter() {
                 }}
               >
                 Subscribe
-                <ArrowRight aria-hidden={true} style={{ width: 14, height: 14 }} />
+                <ArrowRight
+                  aria-hidden={true}
+                  style={{ width: 14, height: 14 }}
+                />
               </button>
             </form>
           )}

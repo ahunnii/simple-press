@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Package } from "lucide-react";
 
+import type { OrdersPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 import { Button } from "~/components/ui/button";
 
-import type { OrdersPageTemplateProps } from "../../types";
 import { DarkTrendAccountLayout } from "./dark-trend-account-layout";
 
 function statusClass(status: string) {

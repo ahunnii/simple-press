@@ -126,6 +126,10 @@ export default function PrivacyPolicyPage() {
         <li>browser and device information;</li>
         <li>referrer data;</li>
         <li>session behavior;</li>
+        <li>
+          on-site interactions, such as products viewed or added to cart and
+          engagement with embedded content;
+        </li>
         <li>technical performance metrics.</li>
       </ul>
       <p>

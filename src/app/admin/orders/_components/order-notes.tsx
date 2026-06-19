@@ -66,7 +66,7 @@ export function OrderNotes({ orderId, internalNote, customerNote }: Props) {
               variant="ghost"
               size="sm"
               onClick={() => setIsEditing(true)}
-              className="h-7 gap-1.5 text-xs text-muted-foreground"
+              className="text-muted-foreground h-7 gap-1.5 text-xs"
             >
               <Pencil className="h-3 w-3" />
               Edit
@@ -77,9 +77,11 @@ export function OrderNotes({ orderId, internalNote, customerNote }: Props) {
       <CardContent className="space-y-4">
         {/* Internal note — always shown, editable */}
         <div>
-          <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-gray-500">
+          <p className="mb-1.5 text-xs font-medium tracking-wide text-gray-500 uppercase">
             Internal Note
-            <span className="ml-1 normal-case text-gray-400">(not visible to customer)</span>
+            <span className="ml-1 text-gray-400 normal-case">
+              (not visible to customer)
+            </span>
           </p>
 
           {isEditing ? (
@@ -114,11 +116,11 @@ export function OrderNotes({ orderId, internalNote, customerNote }: Props) {
             </div>
           ) : (
             <p
-              className="min-h-8 cursor-text whitespace-pre-wrap text-sm text-gray-900"
+              className="min-h-8 cursor-text text-sm whitespace-pre-wrap text-gray-900"
               onClick={() => setIsEditing(true)}
             >
               {internalNote ?? (
-                <span className="italic text-gray-400">No internal note</span>
+                <span className="text-gray-400 italic">No internal note</span>
               )}
             </p>
           )}
@@ -127,10 +129,10 @@ export function OrderNotes({ orderId, internalNote, customerNote }: Props) {
         {/* Customer note — read-only, only shown if present */}
         {customerNote && (
           <div className="border-t pt-4">
-            <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-gray-500">
+            <p className="mb-1.5 text-xs font-medium tracking-wide text-gray-500 uppercase">
               Customer Note
             </p>
-            <p className="whitespace-pre-wrap text-sm text-gray-900">
+            <p className="text-sm whitespace-pre-wrap text-gray-900">
               {customerNote}
             </p>
           </div>

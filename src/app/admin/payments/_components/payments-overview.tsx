@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, CheckCircle, CreditCard, ExternalLink } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle,
+  CreditCard,
+  ExternalLink,
+} from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
@@ -141,10 +146,9 @@ export function PaymentsOverview({ data }: { data: Data }) {
           <AlertDescription className="mt-1 space-y-2">
             <p>
               Your store has reached a threshold that may require identity
-              verification under the{" "}
-              <strong>INFORM Consumers Act</strong> (200+ transactions or $5,000+
-              in annual sales). Please complete your Stripe account verification
-              to remain compliant.
+              verification under the <strong>INFORM Consumers Act</strong> (200+
+              transactions or $5,000+ in annual sales). Please complete your
+              Stripe account verification to remain compliant.
             </p>
             <Button size="sm" variant="outline" asChild>
               <a
@@ -203,7 +207,11 @@ export function PaymentsOverview({ data }: { data: Data }) {
             <div className="h-2 overflow-hidden rounded-full bg-gray-100">
               <div
                 className={`h-full rounded-full transition-all ${
-                  transactionPct >= 100 ? "bg-red-500" : transactionPct >= 80 ? "bg-amber-500" : "bg-green-500"
+                  transactionPct >= 100
+                    ? "bg-red-500"
+                    : transactionPct >= 80
+                      ? "bg-amber-500"
+                      : "bg-green-500"
                 }`}
                 style={{ width: `${transactionPct}%` }}
               />
@@ -220,14 +228,18 @@ export function PaymentsOverview({ data }: { data: Data }) {
             <div className="h-2 overflow-hidden rounded-full bg-gray-100">
               <div
                 className={`h-full rounded-full transition-all ${
-                  revenuePct >= 100 ? "bg-red-500" : revenuePct >= 80 ? "bg-amber-500" : "bg-green-500"
+                  revenuePct >= 100
+                    ? "bg-red-500"
+                    : revenuePct >= 80
+                      ? "bg-amber-500"
+                      : "bg-green-500"
                 }`}
                 style={{ width: `${revenuePct}%` }}
               />
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Figures reflect the current calendar year (paid orders only).
             Thresholds trigger when either condition is met.{" "}
             <a
@@ -255,7 +267,7 @@ export function PaymentsOverview({ data }: { data: Data }) {
         </CardHeader>
         <CardContent>
           {!isStripeConnected ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Connect your Stripe account in{" "}
               <Link
                 href="/admin/settings/integrations"
@@ -268,7 +280,7 @@ export function PaymentsOverview({ data }: { data: Data }) {
           ) : stripeBalance ? (
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-lg border p-4">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Available to Pay Out
                 </p>
                 <p className="mt-1 text-2xl font-semibold">
@@ -276,12 +288,12 @@ export function PaymentsOverview({ data }: { data: Data }) {
                 </p>
               </div>
               <div className="rounded-lg border p-4">
-                <p className="text-sm text-muted-foreground">Pending</p>
+                <p className="text-muted-foreground text-sm">Pending</p>
                 <p className="mt-1 text-2xl font-semibold">
                   {formatCurrency(pendingTotal, primaryCurrency)}
                 </p>
               </div>
-              <p className="text-xs text-muted-foreground sm:col-span-2">
+              <p className="text-muted-foreground text-xs sm:col-span-2">
                 Funds are typically paid out to your bank account within 2–7
                 business days based on your payout schedule.{" "}
                 <a
@@ -295,7 +307,7 @@ export function PaymentsOverview({ data }: { data: Data }) {
               </p>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Balance data temporarily unavailable.
             </p>
           )}
@@ -306,17 +318,15 @@ export function PaymentsOverview({ data }: { data: Data }) {
       <Card>
         <CardHeader>
           <CardTitle>Recent Payouts</CardTitle>
-          <CardDescription>
-            Last 5 payouts to your bank account
-          </CardDescription>
+          <CardDescription>Last 5 payouts to your bank account</CardDescription>
         </CardHeader>
         <CardContent>
           {!isStripeConnected ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Connect your Stripe account to view payouts.
             </p>
           ) : !recentPayouts || recentPayouts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No payouts yet.</p>
+            <p className="text-muted-foreground text-sm">No payouts yet.</p>
           ) : (
             <Table>
               <TableHeader>
@@ -336,13 +346,14 @@ export function PaymentsOverview({ data }: { data: Data }) {
                       <PayoutStatusBadge status={payout.status} />
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {new Date(
-                        payout.arrival_date * 1000,
-                      ).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
+                      {new Date(payout.arrival_date * 1000).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        },
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

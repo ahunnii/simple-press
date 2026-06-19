@@ -45,7 +45,10 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
             <div className="mx-auto mt-8 max-w-md">
               <InputGroup>
                 <InputGroupAddon>
-                  <Search className="text-muted-foreground h-4 w-4" aria-hidden="true" />
+                  <Search
+                    className="text-muted-foreground h-4 w-4"
+                    aria-hidden="true"
+                  />
                 </InputGroupAddon>
                 <InputGroupInput
                   type="search"
@@ -56,10 +59,7 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
                 />
               </InputGroup>
               {query.trim() !== "" && (
-                <p
-                  role="status"
-                  className="text-muted-foreground mt-2 text-sm"
-                >
+                <p role="status" className="text-muted-foreground mt-2 text-sm">
                   {filtered.length === 0
                     ? "No articles found. Try a different keyword."
                     : `${filtered.length} article${filtered.length !== 1 ? "s" : ""} found`}
@@ -177,7 +177,10 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
                         </p>
                         <div className="text-muted-foreground flex items-center gap-4 text-xs">
                           <span className="flex items-center gap-1.5">
-                            <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+                            <CalendarDays
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
                             {/* {formatDate(post.createdAt)} */}
                           </span>
                         </div>
@@ -190,7 +193,10 @@ export function HappyBambooBlogClient({ pages }: DefaultBlogPageTemplateProps) {
           ) : (
             <FadeIn>
               <div className="text-muted-foreground flex flex-col items-center py-16 text-center">
-                <Search className="mb-4 h-10 w-10 opacity-30" aria-hidden="true" />
+                <Search
+                  className="mb-4 h-10 w-10 opacity-30"
+                  aria-hidden="true"
+                />
                 <p className="text-lg font-medium">
                   No articles matched &ldquo;{query}&rdquo;
                 </p>

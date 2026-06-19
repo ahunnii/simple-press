@@ -72,7 +72,7 @@ export function DarkTrendProductCard({ product }: Props) {
           {/* Decorative hover overlay — the whole card is a link; this span is aria-hidden */}
           <div
             aria-hidden="true"
-            className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+            className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100"
           >
             <span className="bg-primary text-primary-foreground font-heading flex w-full items-center justify-center rounded-md px-4 py-2 text-sm tracking-wider">
               VIEW PRODUCT

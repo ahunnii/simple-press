@@ -24,7 +24,13 @@ type Props = {
 
 export function SledgeCartSummary({ shippingConfig }: Props) {
   const { subtotal, itemCount } = useCart();
-  const shipping = calculateShipping(subtotal, shippingConfig);
+  // Zone+weight rates depend on the destination address, which isn't known in
+  // the cart — defer to checkout rather than showing a misleading "Free".
+  const isZoneWeight =
+    shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
+  const shipping = isZoneWeight
+    ? 0
+    : calculateShipping(subtotal, shippingConfig);
   const estimatedTotal = subtotal + shipping;
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
   const progress = getFreeShippingProgress(subtotal, shippingConfig);
@@ -56,7 +62,9 @@ export function SledgeCartSummary({ shippingConfig }: Props) {
             Est. shipping
           </span>
           <span className="font-sans text-sm tracking-[0.04em] text-[var(--sl-ink)]">
-            {shipping === 0 ? (
+            {isZoneWeight ? (
+              <span className="text-[var(--sl-ink-soft)]">Calculated at checkout</span>
+            ) : shipping === 0 ? (
               <span className="text-[var(--sl-ink-soft)]">Free</span>
             ) : (
               formatPrice(shipping)

@@ -84,7 +84,11 @@ const formatActions: InsertElement[] = [
     label: "Table",
     icon: <Table className="size-5" />,
     action: (editor) =>
-      editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
+      editor
+        .chain()
+        .focus()
+        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .run(),
     isActive: (editor) => editor.isActive("table"),
     canExecute: (editor) => !editor.isActive("table"),
     shortcuts: [],

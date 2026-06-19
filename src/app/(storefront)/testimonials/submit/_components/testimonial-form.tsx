@@ -212,9 +212,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                   aria-required="true"
                   aria-invalid={textError ? "true" : undefined}
                   aria-describedby={
-                    textError
-                      ? "text-error text-char-count"
-                      : "text-char-count"
+                    textError ? "text-error text-char-count" : "text-char-count"
                   }
                 />
                 {textError && (
@@ -368,7 +366,8 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                   )}
                 </Button>
                 <p className="mt-2 text-center text-xs text-gray-500">
-                  Your testimonial will be reviewed before it appears on the site
+                  Your testimonial will be reviewed before it appears on the
+                  site
                 </p>
               </div>
             </CardContent>

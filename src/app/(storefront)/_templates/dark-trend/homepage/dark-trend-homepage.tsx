@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { formatPrice } from "~/lib/prices";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { formatPrice } from "~/lib/prices";
 import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
@@ -204,7 +204,12 @@ export async function DarkTrendHomepage() {
                       asChild
                       className="mt-2 inline-flex items-center rounded-md bg-violet-600 px-6 py-2.5 text-center text-sm font-bold text-white transition-opacity hover:bg-violet-700"
                     >
-                      <Link href={`/shop/${firstProduct.slug}`} aria-label={`Shop ${firstProduct.name}`}>Shop Now</Link>
+                      <Link
+                        href={`/shop/${firstProduct.slug}`}
+                        aria-label={`Shop ${firstProduct.name}`}
+                      >
+                        Shop Now
+                      </Link>
                     </Button>
                   </div>
                 </>

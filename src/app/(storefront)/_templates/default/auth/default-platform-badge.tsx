@@ -25,7 +25,10 @@ export function DefaultPlatformBadge({ businessName, view }: Props) {
   if (view === "sign-up") {
     return (
       <div className="bg-muted/60 border-muted-foreground/20 flex gap-3 rounded-lg border p-3">
-        <Info className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+        <Info
+          className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0"
+          aria-hidden="true"
+        />
         <div className="text-muted-foreground space-y-1 text-sm">
           <p>
             You&apos;re creating a{" "}

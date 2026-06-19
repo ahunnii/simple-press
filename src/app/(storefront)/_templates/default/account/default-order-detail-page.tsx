@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
+import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
-import type { OrderDetailPageTemplateProps } from "../../types";
 import { DefaultAccountLayout } from "./default-account-layout";
 
 function StatusBadge({ status }: { status: string }) {
@@ -34,7 +34,7 @@ function Section({
 }) {
   return (
     <div className="rounded-[var(--radius)] border border-[#e8e8e8] p-6">
-      <h2 className="mb-4 text-[11px] font-medium tracking-[0.14em] uppercase text-[#6b6b6b]">
+      <h2 className="mb-4 text-[11px] font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
         {title}
       </h2>
       {children}
@@ -58,10 +58,8 @@ export function DefaultOrderDetailPage({
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-
         {/* Left — items + totals + tracking */}
         <div className="flex flex-col gap-5 lg:col-span-2">
-
           {/* Items */}
           <Section title="Items">
             {order.items.length > 0 ? (
@@ -130,7 +128,10 @@ export function DefaultOrderDetailPage({
             <Section title="Tracking">
               <div className="flex flex-col gap-4">
                 {order.shipments.map((shipment) => (
-                  <div key={shipment.id} className="flex flex-col gap-1 text-sm">
+                  <div
+                    key={shipment.id}
+                    className="flex flex-col gap-1 text-sm"
+                  >
                     {shipment.carrier && (
                       <p className="font-medium">{shipment.carrier}</p>
                     )}
@@ -144,10 +145,13 @@ export function DefaultOrderDetailPage({
                         href={shipment.trackingUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 border-b border-current pb-0.5 text-sm font-medium self-start transition-opacity hover:opacity-70"
+                        className="inline-flex items-center gap-1.5 self-start border-b border-current pb-0.5 text-sm font-medium transition-opacity hover:opacity-70"
                       >
                         Track shipment{" "}
-                        <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                        <ExternalLink
+                          className="h-3.5 w-3.5"
+                          aria-hidden="true"
+                        />
                         <span className="sr-only">(opens in new tab)</span>
                       </a>
                     )}
@@ -165,7 +169,7 @@ export function DefaultOrderDetailPage({
         <div className="flex flex-col gap-5">
           {addr && (
             <Section title="Shipping Address">
-              <address className="flex flex-col gap-0.5 text-sm not-italic leading-relaxed">
+              <address className="flex flex-col gap-0.5 text-sm leading-relaxed not-italic">
                 {addr.firstName && addr.lastName && (
                   <p className="font-medium">
                     {addr.firstName} {addr.lastName}
@@ -186,21 +190,21 @@ export function DefaultOrderDetailPage({
           <Section title="Order Info">
             <dl className="flex flex-col gap-3 text-sm">
               <div>
-                <dt className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#6b6b6b] mb-0.5">
+                <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-[#6b6b6b] uppercase">
                   Email
                 </dt>
                 <dd>{order.customerEmail}</dd>
               </div>
               {order.customerPhone && (
                 <div>
-                  <dt className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#6b6b6b] mb-0.5">
+                  <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-[#6b6b6b] uppercase">
                     Phone
                   </dt>
                   <dd>{order.customerPhone}</dd>
                 </div>
               )}
               <div>
-                <dt className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#6b6b6b] mb-0.5">
+                <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-[#6b6b6b] uppercase">
                   Payment
                 </dt>
                 <dd className="capitalize">{order.paymentStatus}</dd>
@@ -210,7 +214,7 @@ export function DefaultOrderDetailPage({
 
           <Link
             href="/account/orders"
-            className="inline-flex items-center gap-2 text-sm font-medium border-b border-current pb-0.5 transition-[gap] hover:gap-3 self-start"
+            className="inline-flex items-center gap-2 self-start border-b border-current pb-0.5 text-sm font-medium transition-[gap] hover:gap-3"
           >
             <span aria-hidden="true">←</span> Back to orders
           </Link>

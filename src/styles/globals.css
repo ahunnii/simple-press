@@ -905,7 +905,14 @@
 /* ─── Product page grid ─────────────────────────────────────────────────── */
 .noise .vn-product-grid,
 .visual-noise .vn-product-grid {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .noise .vn-product-grid,
+  .visual-noise .vn-product-grid {
+    grid-template-columns: 88px minmax(0, 1fr) minmax(0, 1fr);
+  }
 }
 
 /* ─── Hero overlay (replaces inline rgba) ───────────────────────────────── */
@@ -1324,7 +1331,8 @@
 
 /* ── Hero scroll-pulse line ── */
 .elegant .el-scroll-pulse-line {
-  animation: el-scroll-pulse 2.2s var(--el-ease, cubic-bezier(0.22, 1, 0.36, 1)) infinite;
+  animation: el-scroll-pulse 2.2s var(--el-ease, cubic-bezier(0.22, 1, 0.36, 1))
+    infinite;
 }
 
 /* ── Reduced-motion overrides ── */
@@ -2936,6 +2944,12 @@
   }
 }
 
+/* Unlayered so it overrides Tailwind's built-in .container max-widths
+   (which live in the utilities layer and otherwise win on layer order). */
+.happy-bamboo .container {
+  @apply max-w-7xl;
+}
+
 @layer admin {
   .admin-header {
     @apply mb-8 flex items-center justify-between;
@@ -3080,4 +3094,329 @@
 
 .animate-slide-up {
   animation: slide-up 0.6s ease-out;
+}
+
+/* ─── Skinbar VII — design tokens ──────────────────────────────────────────
+   Scoped to .vii so they never bleed into other templates.                 */
+
+.vii {
+  --vii-cream: #ede3ce;       /* body background */
+  --vii-paper: #fbf8f1;       /* cards / surfaces */
+  --vii-navy: #1e3540;        /* foreground text + dark sections */
+  --vii-slate: #384f65;       /* secondary dark */
+  --vii-copper: #b35e2f;      /* accent: italic display words on light bg (large text only) */
+  --vii-copper-deep: #a85525; /* darker copper for small text on copper button fills (AA: ~4.9:1 on paper) */
+  --vii-copper-light: #d98a5b;/* lightened copper for accents on dark/navy bg (AA contrast) */
+  --vii-clay: #a47a60;
+  --vii-tan: #c1aa91;
+  --vii-glacier: #9fc8d0;
+  --vii-ink-soft: #4a5560;    /* secondary text */
+  --vii-hairline: color-mix(in srgb, var(--vii-navy) 20%, transparent);
+  --vii-hairline-strong: color-mix(in srgb, var(--vii-navy) 25%, transparent);
+  /* Semantic state colors — error/success for forms (kept distinct from copper accent) */
+  --vii-error: #b91c1c;       /* AA on --vii-error-bg (~5.9:1) */
+  --vii-error-bg: #fdf2f1;    /* faint warm-red tint that reads against cream/paper */
+  --vii-error-border: #f0c9c4;
+  --vii-success: #166534;     /* AA on --vii-success-bg */
+  --vii-success-bg: #f0f7f1;
+  --vii-success-border: #c2dbc8;
+  /* Sticky offset = approx header height; centralizes the cart summary's sticky top */
+  --vii-header-offset: 106px;
+  --radius: 0.2rem;
+  --font-serif: var(--font-vii-serif), "Playfair Display", serif;
+  --font-sans: var(--font-vii-sans), "Jost", sans-serif;
+  background: var(--vii-cream);
+  color: var(--vii-navy);
+}
+
+/* Account section — bridge vii tokens onto shadcn variables so shared
+   account content (better-auth-ui cards, AddressBookContent) is on-brand.
+   Scoped to .vii-account (set on the outermost wrapper of ViiAccountLayout). */
+.vii-account {
+  --background: var(--vii-cream);
+  --foreground: var(--vii-navy);
+  --card: var(--vii-paper);
+  --card-foreground: var(--vii-navy);
+  --popover: var(--vii-paper);
+  --popover-foreground: var(--vii-navy);
+  --primary: var(--vii-copper-deep);
+  --primary-foreground: var(--vii-paper);
+  --secondary: var(--vii-tan);
+  --secondary-foreground: var(--vii-navy);
+  --muted: var(--vii-paper);
+  --muted-foreground: var(--vii-ink-soft);
+  --accent: var(--vii-tan);
+  --accent-foreground: var(--vii-navy);
+  --destructive: oklch(0.5 0.18 25);
+  --border: var(--vii-hairline-strong);
+  --input: var(--vii-hairline-strong);
+  --ring: var(--vii-copper);
+  --radius: 0.2rem;
+  font-family: var(--font-sans);
+}
+
+/* ── Account section: make shadcn / better-auth-ui cards feel vii ──
+   The color bridge above can't reach card shape, elevation, or the muted
+   footer band — those come from Tailwind utility classes baked into the
+   shadcn Card (rounded-xl, shadow-sm, bg-muted). These rules are unlayered,
+   so they win over Tailwind's @layer utilities regardless of specificity. */
+.vii-account [data-slot="card"] {
+  background: var(--vii-paper);
+  border: 1px solid var(--vii-hairline-strong);
+  border-radius: 0.2rem;
+  box-shadow: none;
+}
+
+.vii-account [data-slot="card-title"] {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--vii-navy);
+}
+
+/* Remove the two-tone footer band; keep one hairline divider on a paper card. */
+.vii-account [data-slot="card-footer"] {
+  background: transparent;
+  border-top: 1px solid var(--vii-hairline);
+}
+
+/* Form fields: calm boxed inputs on a cream fill, hairline border, copper focus. */
+.vii-account input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+.vii-account textarea,
+.vii-account [data-slot="select-trigger"] {
+  background: var(--vii-cream);
+  border: 1px solid var(--vii-hairline-strong);
+  border-radius: 0.2rem;
+  color: var(--vii-navy);
+}
+
+.vii-account input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):focus-visible,
+.vii-account textarea:focus-visible,
+.vii-account [data-slot="select-trigger"]:focus-visible {
+  border-color: var(--vii-copper);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--vii-copper);
+}
+
+/* Focus ring */
+.vii *:focus-visible {
+  outline: 2px solid var(--vii-copper);
+  outline-offset: 2px;
+}
+
+/* Display headings get balanced line breaks; long prose avoids orphans. */
+.vii h1,
+.vii h2,
+.vii h3 {
+  text-wrap: balance;
+}
+
+.vii p {
+  text-wrap: pretty;
+}
+
+/* Scroll-reveal utility — armed only once useViiReveal adds `.vii-js` to the
+   scope root. Without JS the `.vii-js` class is never set, so .vii-reveal
+   content stays fully visible (progressive enhancement — no blank sections). */
+.vii-js .vii-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vii-js .vii-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Product-card add-to-bag bar: revealed on hover/focus on fine pointers, but
+   touch devices can't hover — show it persistently there so it stays reachable. */
+@media (hover: none) {
+  .vii .vii-product-addbar {
+    transform: translateY(0);
+  }
+}
+
+/* Marquee keyframe — used by homepage marquee band */
+@keyframes vii-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Reduced-motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  .vii .vii-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .vii [style*="vii-marquee"] {
+    animation-play-state: paused !important;
+  }
+}
+
+/* Contact page — two-column layout collapses on small screens */
+@media (max-width: 860px) {
+  .vii .vii-contact-columns {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* Blog prose body — editorial styling for TiptapRenderer output in .vii-prose */
+.vii .vii-prose h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(22px, 2.8vw, 32px);
+  line-height: 1.2;
+  color: var(--vii-navy);
+  margin: 2.4em 0 0.6em;
+}
+
+.vii .vii-prose h3 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.25;
+  color: var(--vii-navy);
+  margin: 2em 0 0.5em;
+}
+
+.vii .vii-prose p,
+.vii .vii-prose li {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 1.8;
+  color: var(--vii-ink-soft);
+}
+
+.vii .vii-prose p {
+  margin: 0 0 1.4em;
+}
+
+.vii .vii-prose ul,
+.vii .vii-prose ol {
+  padding-left: 1.5em;
+  margin: 0 0 1.4em;
+}
+
+.vii .vii-prose li {
+  margin-bottom: 0.4em;
+}
+
+/* Links: navy text with a copper underline signal. Copper text on cream fails
+   AA (~4:1); navy clears it (~10:1) while copper carries the link affordance. */
+.vii .vii-prose a {
+  color: var(--vii-navy);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--vii-copper-deep);
+}
+
+.vii .vii-prose a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* strong / em */
+.vii .vii-prose strong {
+  font-weight: 600;
+  color: var(--vii-navy);
+}
+
+.vii .vii-prose em {
+  font-style: italic;
+}
+
+/* Blockquote: full hairline border (no heavy side-stripe), subtle paper bg, serif italic */
+.vii .vii-prose blockquote {
+  border: 1px solid var(--vii-hairline);
+  background: var(--vii-paper);
+  border-radius: var(--radius);
+  padding: 1.25em 1.5em;
+  margin: 1.75em 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(17px, 1.8vw, 20px);
+  line-height: 1.6;
+  color: var(--vii-navy);
+}
+
+.vii .vii-prose blockquote p {
+  color: var(--vii-navy);
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+  max-width: none;
+}
+
+/* hr — single hairline, generous vertical breathing room */
+.vii .vii-prose hr {
+  border: none;
+  border-top: 1px solid var(--vii-hairline);
+  margin: 2.5em 0;
+}
+
+/* Images and figures */
+.vii .vii-prose img,
+.vii .vii-prose figure {
+  border-radius: var(--radius);
+  max-width: 100%;
+  height: auto;
+  margin: 1.75em 0;
+}
+
+.vii .vii-prose figcaption {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--vii-ink-soft);
+  margin-top: 0.5em;
+  text-align: center;
+}
+
+/* Contact form — underline-style inputs scoped to .vii */
+.vii
+  .vii-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]),
+.vii .vii-contact-form textarea {
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1.5px solid var(--vii-tan);
+  background: transparent;
+  padding: 10px 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  outline: none;
+  width: 100%;
+  color: var(--vii-navy);
+}
+
+.vii
+  .vii-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not(
+    [type="tel"]
+  )::placeholder,
+.vii .vii-contact-form textarea::placeholder {
+  color: var(--vii-ink-soft);
+  opacity: 0.55;
+}
+
+.vii
+  .vii-contact-form
+  input:not([type="radio"]):not([type="checkbox"]):not([type="tel"]):focus,
+.vii .vii-contact-form textarea:focus {
+  border-bottom-color: var(--vii-copper);
+  box-shadow: none;
+}
+
+.vii .vii-contact-form .vii-field-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--vii-ink-soft);
+  display: block;
+  margin-bottom: 6px;
 }

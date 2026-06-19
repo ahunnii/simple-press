@@ -2,17 +2,11 @@ import { notFound } from "next/navigation";
 
 import { api, HydrateClient } from "~/trpc/server";
 import { TemplateSelectorDevTool } from "~/components/development/template-selector";
+import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { PreviewOverlay } from "~/components/preview/preview-overlay";
 
-import { BambooLayout } from "./_templates/bamboo/layout/bamboo-general-layout";
-import { DarkTrendLayout } from "./_templates/dark-trend/layout/dark-trend-layout";
-import { DefaultLayout } from "./_templates/default/layout/default-layout";
-import { ElegantLayout } from "./_templates/elegant/layout/elegant-layout";
-import { HappyBambooLayout } from "./_templates/happy-bamboo/layout/happy-bamboo-layout";
-import { ModernLayout } from "./_templates/modern/layout/modern-layout";
-import { NoiseLayout } from "./_templates/noise/layout/noise-layout";
-import { PollenLayout } from "./_templates/pollen/layout/pollen-layout";
-import { SledgeLayout } from "./_templates/sledge/layout/sledge-layout";
+import { CartRevalidator } from "./_components/cart-revalidator";
+import { getTemplate } from "./_templates/registry";
 
 type Props = {
   children: React.ReactNode;
@@ -22,24 +16,24 @@ export default async function StorefrontLayout({ children }: Props) {
   const business = await api.business.simplifiedGetWithProducts();
   if (!business) notFound();
 
-  const TemplateLayout =
-    {
-      "dark-trend": DarkTrendLayout,
-      bamboo: BambooLayout,
-      default: DefaultLayout,
-      elegant: ElegantLayout,
-      modern: ModernLayout,
-      pollen: PollenLayout,
-      "happy-bamboo": HappyBambooLayout,
-      noise: NoiseLayout,
-      sledge: SledgeLayout,
-    }[business.templateId] ?? DefaultLayout;
+  if (business.maintenance?.active) {
+    return (
+      <MaintenanceScreen
+        variant={business.maintenance.variant}
+        message={business.maintenance.message}
+        businessName={business.name}
+      />
+    );
+  }
+
+  const t = getTemplate(business.templateId);
 
   return (
     <HydrateClient>
-      <TemplateLayout business={business}>
+      <t.Layout business={business}>
         <>{children}</>
-      </TemplateLayout>
+      </t.Layout>
+      <CartRevalidator />
       <PreviewOverlay />
       <TemplateSelectorDevTool />
     </HydrateClient>

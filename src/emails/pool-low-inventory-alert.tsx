@@ -28,18 +28,22 @@ export default function PoolLowInventoryAlertEmail({
       <Text style={heading}>Base unit running low</Text>
       <Text style={paragraph}>
         Your base unit <strong>{poolName}</strong> is running low. You have{" "}
-        <strong>{currentQty}</strong> unit{currentQty !== 1 ? "s" : ""} remaining
-        (threshold: {threshold}). Products that draw from this pool may soon
-        become unavailable for purchase.
+        <strong>{currentQty}</strong> unit{currentQty !== 1 ? "s" : ""}{" "}
+        remaining (threshold: {threshold}). Products that draw from this pool
+        may soon become unavailable for purchase.
       </Text>
 
       <Section style={infoBox}>
         <Text style={infoLabel}>Base Unit</Text>
         <Text style={infoValue}>{poolName}</Text>
         <Text style={infoLabel}>Current stock</Text>
-        <Text style={infoValue}>{currentQty} unit{currentQty !== 1 ? "s" : ""}</Text>
+        <Text style={infoValue}>
+          {currentQty} unit{currentQty !== 1 ? "s" : ""}
+        </Text>
         <Text style={infoLabel}>Alert threshold</Text>
-        <Text style={infoValue}>{threshold} unit{threshold !== 1 ? "s" : ""}</Text>
+        <Text style={infoValue}>
+          {threshold} unit{threshold !== 1 ? "s" : ""}
+        </Text>
       </Section>
 
       <Section style={buttonSection}>

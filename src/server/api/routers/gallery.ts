@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { generateGallerySlug } from "~/lib/slug";
 import { deleteStoredObjects } from "~/lib/s3/delete";
+import { generateGallerySlug } from "~/lib/slug";
 import {
   galleryCreateSchema,
   galleryImageCreateSchema,
@@ -191,7 +191,10 @@ export const galleryRouter = createTRPCRouter({
         where: { id: input.galleryId, businessId },
       });
       if (!gallery) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Gallery not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Gallery not found",
+        });
       }
 
       // Get current max sort order

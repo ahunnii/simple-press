@@ -1,9 +1,6 @@
-import type { PrismaClient } from "generated/prisma";
+import type { TxClient } from "~/server/db";
 
-type Tx = Omit<
-  PrismaClient,
-  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
->;
+type Tx = TxClient;
 
 export type PoolDeductionItem = {
   productId: string;
@@ -53,7 +50,8 @@ export async function deductPoolInventory(
   if (!pool) return null;
 
   const totalUnits = items.reduce(
-    (sum, item) => sum + item.quantity * (unitsConsumedMap[item.productId] ?? 1),
+    (sum, item) =>
+      sum + item.quantity * (unitsConsumedMap[item.productId] ?? 1),
     0,
   );
 
@@ -175,7 +173,8 @@ export async function restorePoolInventory(
   if (!pool) return null;
 
   const totalUnits = items.reduce(
-    (sum, item) => sum + item.quantity * (unitsConsumedMap[item.productId] ?? 1),
+    (sum, item) =>
+      sum + item.quantity * (unitsConsumedMap[item.productId] ?? 1),
     0,
   );
 

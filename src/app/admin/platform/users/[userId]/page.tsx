@@ -10,9 +10,9 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
-import { TrailHeader } from "../../../_components/trail-header";
 import { AddMembershipButton } from "../../_components/add-membership-button";
 import { UserMembershipsTable } from "../../_components/user-memberships-table";
+import { TrailHeader } from "../../../_components/trail-header";
 
 type Props = {
   params: Promise<{ userId: string }>;
@@ -44,7 +44,13 @@ export default async function UserDetailPage({ params }: Props) {
                   <CardTitle>{user.name}</CardTitle>
                   <CardDescription>{user.email}</CardDescription>
                 </div>
-                <Badge variant={user.platformRole === "PLATFORM_ADMIN" ? "default" : "secondary"}>
+                <Badge
+                  variant={
+                    user.platformRole === "PLATFORM_ADMIN"
+                      ? "default"
+                      : "secondary"
+                  }
+                >
                   {user.platformRole}
                 </Badge>
               </div>
@@ -52,19 +58,17 @@ export default async function UserDetailPage({ params }: Props) {
             <CardContent>
               <dl className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <dt className="font-medium text-muted-foreground">User ID</dt>
+                  <dt className="text-muted-foreground font-medium">User ID</dt>
                   <dd className="mt-1 font-mono text-xs">{user.id}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Email Verified
                   </dt>
-                  <dd className="mt-1">
-                    {user.emailVerified ? "Yes" : "No"}
-                  </dd>
+                  <dd className="mt-1">{user.emailVerified ? "Yes" : "No"}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Created At
                   </dt>
                   <dd className="mt-1">
@@ -72,7 +76,7 @@ export default async function UserDetailPage({ params }: Props) {
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-muted-foreground">
+                  <dt className="text-muted-foreground font-medium">
                     Updated At
                   </dt>
                   <dd className="mt-1">
@@ -97,7 +101,7 @@ export default async function UserDetailPage({ params }: Props) {
             </CardHeader>
             <CardContent>
               {user.memberships.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   This user is not a member of any businesses yet.
                 </p>
               ) : (

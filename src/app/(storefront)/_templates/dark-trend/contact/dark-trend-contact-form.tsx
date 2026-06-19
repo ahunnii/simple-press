@@ -154,7 +154,10 @@ export function DarkTrendContactForm() {
         >
           {isSubmitting ? (
             <>
-              <Loader2 aria-hidden="true" className="mr-2 h-5 w-5 animate-spin" />
+              <Loader2
+                aria-hidden="true"
+                className="mr-2 h-5 w-5 animate-spin"
+              />
               Sending...
             </>
           ) : (

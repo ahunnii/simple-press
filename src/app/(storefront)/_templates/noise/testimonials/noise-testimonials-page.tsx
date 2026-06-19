@@ -30,16 +30,21 @@ export async function NoiseTestimonialsPage({
   ]);
   const heading =
     (f["noise.homepage-testimonials-heading"] ?? "").trim() || "Testimonials";
-  const pageOverline = f["noise.testimonials.page-overline"] ?? "From the people wearing it";
+  const pageOverline =
+    f["noise.testimonials.page-overline"] ?? "From the people wearing it";
   const pageIntro =
     f["noise.testimonials.page-intro"] ??
     "Unedited notes from our customers. We publish every review we receive — high and low.";
-  const ctaOverline = f["noise.testimonials.cta-overline"] ?? "Wearing something of ours?";
-  const ctaHeading = f["noise.testimonials.cta-heading"] ?? "Tell us how it's holding up.";
+  const ctaOverline =
+    f["noise.testimonials.cta-overline"] ?? "Wearing something of ours?";
+  const ctaHeading =
+    f["noise.testimonials.cta-heading"] ?? "Tell us how it's holding up.";
   const ctaBody =
     f["noise.testimonials.cta-body"] ??
     "We read every note that comes in. Honest feedback — the awkward kind included — is how we know what to make next.";
-  const emptyStateText = f["noise.testimonials.empty-state-text"] ?? "No voices yet. Check back soon.";
+  const emptyStateText =
+    f["noise.testimonials.empty-state-text"] ??
+    "No voices yet. Check back soon.";
   const count = testimonials.length;
 
   /* Star distribution — use testimonial rating if available, otherwise assume 5 */

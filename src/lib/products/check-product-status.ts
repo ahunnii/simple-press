@@ -85,8 +85,7 @@ export function checkProductStatus(product: ProductStatusInput): ProductStatus {
 
   // True when variants exist and not all share the same price
   const variantPrices = product.variants.map((v) => v.price ?? product.price);
-  const variablePricing =
-    hasVariants && new Set(variantPrices).size > 1;
+  const variablePricing = hasVariants && new Set(variantPrices).size > 1;
 
   const maxInventory =
     poolEffectiveMaxQty ??

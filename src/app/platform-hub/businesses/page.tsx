@@ -9,9 +9,9 @@ import {
 import { BusinessesTable } from "~/app/admin/platform/_components/businesses-table";
 import { CreateBusinessButton } from "~/app/admin/platform/_components/create-business-button";
 
-import { PlatformTrailHeader } from "../_components/platform-trail-header";
 import { PlatformListFilters } from "../_components/platform-list-filters";
 import { PlatformListPagination } from "../_components/platform-list-pagination";
+import { PlatformTrailHeader } from "../_components/platform-trail-header";
 
 const PAGE_SIZE = 25;
 

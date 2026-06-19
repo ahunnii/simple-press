@@ -1,0 +1,858 @@
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
+
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+const homepageHeroData: TemplateField[] = [
+  {
+    key: "vii.homepage.hero-video",
+    label: "Hero Background Video",
+    description:
+      "Optional full-viewport video for the hero. When set, plays instead of the background image. Use .mp4 or .webm.",
+    type: "video",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.hero-image",
+    label: "Hero Background Image",
+    description:
+      "Full-viewport background image for the hero. Used when no video is set. Use a high-quality landscape photo.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.hero-overline",
+    label: "Hero Overline",
+    description: "Small italic label above the main body copy.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Awaken a new sense of spirit",
+  },
+  {
+    key: "vii.homepage.hero-heading",
+    label: "Hero Body Copy",
+    description: "The main paragraph text overlaid on the hero image or video.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Reconnect and reinvigorate your senses in a place of incredible natural beauty, with personalized wellness experiences, and award-winning hospitality.",
+  },
+  {
+    key: "vii.homepage.hero-cta-text",
+    label: "Hero CTA Button Text",
+    description: "Text for the primary call-to-action button in the hero.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Book Now",
+  },
+  {
+    key: "vii.homepage.hero-cta-link",
+    label: "Hero CTA Button Link",
+    description: "URL the hero CTA button points to.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "/contact",
+  },
+];
+
+// ─── Categories ───────────────────────────────────────────────────────────────
+
+const homepageCategoriesData: TemplateField[] = [
+  {
+    key: "vii.homepage.categories-overline",
+    label: "Categories Overline",
+    description: "Small caps label above the categories heading.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.categories",
+    gridColumn: "col-span-1",
+    defaultValue: "What we offer",
+  },
+  {
+    key: "vii.homepage.categories-heading",
+    label: "Categories Heading",
+    description: "Section heading for the categories grid.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.categories",
+    gridColumn: "col-span-1",
+    defaultValue: "Explore our services",
+  },
+  {
+    key: "vii.homepage.categories-cards",
+    label: "Category Cards",
+    description:
+      "Category tiles, each with an image, title, and link. Up to 6 cards.",
+    type: "list",
+    page: "homepage",
+    group: "homepage.categories",
+    gridColumn: "col-span-full",
+    maxItems: 6,
+    itemSchema: [
+      {
+        key: "image",
+        label: "Image",
+        type: "image",
+        placeholder: "Upload a category image",
+      },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        placeholder: "e.g. Facials",
+      },
+      {
+        key: "link",
+        label: "Link",
+        type: "text",
+        placeholder: "e.g. /shop or /facials",
+      },
+    ],
+  },
+];
+
+// ─── Video Feature ──────────────────────────────────────────────────────────
+
+const homepageVideoData: TemplateField[] = [
+  {
+    key: "vii.homepage.video-overline",
+    label: "Video Section Overline",
+    description: "Small caps label above the video section heading.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.video",
+    gridColumn: "col-span-1",
+    defaultValue: "Our philosophy",
+  },
+  {
+    key: "vii.homepage.video-heading",
+    label: "Video Section Heading",
+    description:
+      "The plain part of the two-part video section heading (e.g. 'Wellness, the').",
+    type: "text",
+    page: "homepage",
+    group: "homepage.video",
+    gridColumn: "col-span-1",
+    defaultValue: "Wellness, the",
+  },
+  {
+    key: "vii.homepage.video-heading-accent",
+    label: "Video Heading Accent Word",
+    description:
+      "The italic accent word completing the heading (e.g. 'Detroit way').",
+    type: "text",
+    page: "homepage",
+    group: "homepage.video",
+    gridColumn: "col-span-1",
+    defaultValue: "Detroit way",
+  },
+  {
+    key: "vii.homepage.video-body",
+    label: "Video Section Body",
+    description: "Short paragraph beside the video.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.video",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Step inside our studio and see how we blend clinical skincare with genuine warmth. Every treatment is tailored to you — because feeling good in your skin should never feel ordinary.",
+  },
+  {
+    key: "vii.homepage.video-file",
+    label: "Feature Video",
+    description:
+      "Video that plays when the viewer presses play. Use .mp4 or .webm.",
+    type: "video",
+    page: "homepage",
+    group: "homepage.video",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.video-poster",
+    label: "Video Poster Image",
+    description:
+      "Image shown before the video plays (and as a fallback when no video is set).",
+    type: "image",
+    page: "homepage",
+    group: "homepage.video",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.video-cta-text",
+    label: "Video CTA Text",
+    description: "Optional link text below the video section body.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.video",
+    gridColumn: "col-span-1",
+    defaultValue: "About us",
+  },
+  {
+    key: "vii.homepage.video-cta-link",
+    label: "Video CTA Link",
+    description: "URL the video section link points to.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.video",
+    gridColumn: "col-span-1",
+    defaultValue: "/about",
+  },
+];
+
+// ─── Image Band ───────────────────────────────────────────────────────────────
+
+const homepageBandData: TemplateField[] = [
+  {
+    key: "vii.homepage.band-image",
+    label: "Full-Width Band Image",
+    description:
+      "Optional full-bleed visual break between the video and story sections. Falls back to a thin navy divider when left blank.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.band",
+    gridColumn: "col-span-full",
+  },
+];
+
+// ─── Inside the Studio (Story) ────────────────────────────────────────────────
+
+const homepageStoryData: TemplateField[] = [
+  {
+    key: "vii.homepage.story-heading",
+    label: "Studio Section Heading",
+    description: "The plain part of the two-part studio section heading.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.story",
+    gridColumn: "col-span-1",
+    defaultValue: "Inside the",
+  },
+  {
+    key: "vii.homepage.story-heading-accent",
+    label: "Studio Heading Accent Word",
+    description: "The italic copper accent word completing the studio heading.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.story",
+    gridColumn: "col-span-1",
+    defaultValue: "studio",
+  },
+  {
+    key: "vii.homepage.story-intro",
+    label: "Studio Intro Text",
+    description: "Short calming line about the Detroit space.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.story",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "A calm, considered space in the heart of Detroit — designed for focus, presence, and skin that glows.",
+  },
+  {
+    key: "vii.homepage.story-cards",
+    label: "Studio Photos",
+    description: "Photos shown in the studio image carousel. Up to 6 cards.",
+    type: "list",
+    page: "homepage",
+    group: "homepage.story",
+    gridColumn: "col-span-full",
+    maxItems: 6,
+    itemSchema: [
+      {
+        key: "image",
+        label: "Image",
+        type: "image",
+        placeholder: "Upload a studio photo",
+      },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        placeholder: "e.g. The treatment room",
+      },
+    ],
+  },
+];
+
+// ─── Product Rail ─────────────────────────────────────────────────────────────
+
+const homepageProductRailData: TemplateField[] = [
+  {
+    key: "vii.homepage.product-rail-overline",
+    label: "Product Rail Overline",
+    description: "Small caps label above the product rail heading.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.productRail",
+    gridColumn: "col-span-1",
+    defaultValue: "Some of our bestsellers",
+  },
+  {
+    key: "vii.homepage.product-rail-heading",
+    label: "Product Rail Heading",
+    description: "Section heading for the featured product rail.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.productRail",
+    gridColumn: "col-span-1",
+    defaultValue: "Shop our favorites",
+  },
+  {
+    key: "vii.homepage.product-rail-collection",
+    label: "Product Rail Collection",
+    description:
+      "Pick a collection to feature. Defaults to your latest products when left empty.",
+    type: "collection",
+    page: "homepage",
+    group: "homepage.productRail",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.product-rail-cta-text",
+    label: "Product Rail CTA Text",
+    description: "Text for the 'view all' link below the product rail.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.productRail",
+    gridColumn: "col-span-1",
+    defaultValue: "Shop All",
+  },
+  {
+    key: "vii.homepage.product-rail-cta-link",
+    label: "Product Rail CTA Link",
+    description: "URL for the product rail 'view all' link.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.productRail",
+    gridColumn: "col-span-1",
+    defaultValue: "/shop",
+  },
+];
+
+// ─── Testimonial Quote ────────────────────────────────────────────────────────
+
+const homepageTestimonialData: TemplateField[] = [
+  {
+    key: "vii.homepage.testimonial-image",
+    label: "Testimonial Background Image",
+    description:
+      "Optional background image blended behind the testimonial quote.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.testimonial",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.testimonial-quote",
+    label: "Testimonial Quote (manual override)",
+    description:
+      "Leave blank to automatically show your most recent approved testimonial.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.testimonial",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.testimonial-author",
+    label: "Testimonial Author (manual override)",
+    description:
+      "Author name shown beneath the quote. Only used when a manual quote is set above.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.testimonial",
+    gridColumn: "col-span-1",
+  },
+];
+
+// ─── Brands We Carry ──────────────────────────────────────────────────────────
+
+const homepageBrandsData: TemplateField[] = [
+  {
+    key: "vii.homepage.brands-overline",
+    label: "Brands Overline",
+    description: "Small caps label above the brands logos.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.brands",
+    gridColumn: "col-span-1",
+    defaultValue: "Brands We Carry",
+  },
+  {
+    key: "vii.homepage.brands-heading",
+    label: "Brands Heading",
+    description:
+      "Optional heading for the brands section. Leave blank to show only the logos.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.brands",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "vii.homepage.brands-logos",
+    label: "Brand Logos",
+    description:
+      "Logos of the brands you carry, each with an optional link. Up to 12 items.",
+    type: "list",
+    page: "homepage",
+    group: "homepage.brands",
+    gridColumn: "col-span-full",
+    maxItems: 12,
+    itemSchema: [
+      {
+        key: "image",
+        label: "Logo",
+        type: "image",
+        placeholder: "Upload a brand logo",
+      },
+      {
+        key: "name",
+        label: "Brand Name",
+        type: "text",
+        placeholder: "e.g. Dermalogica",
+      },
+      {
+        key: "link",
+        label: "Link (optional)",
+        type: "text",
+        placeholder: "e.g. https://dermalogica.com",
+      },
+    ],
+  },
+];
+
+// ─── Blog / Journal ───────────────────────────────────────────────────────────
+
+const homepageBlogData: TemplateField[] = [
+  {
+    key: "vii.homepage.blog-heading",
+    label: "Blog Section Heading",
+    description:
+      "The plain part of the two-part blog heading (e.g. 'A playground of').",
+    type: "text",
+    page: "homepage",
+    group: "homepage.blog",
+    gridColumn: "col-span-1",
+    defaultValue: "A playground of",
+  },
+  {
+    key: "vii.homepage.blog-heading-accent",
+    label: "Blog Heading Accent Word",
+    description:
+      "The italic copper accent word completing the blog heading (e.g. 'wellbeing').",
+    type: "text",
+    page: "homepage",
+    group: "homepage.blog",
+    gridColumn: "col-span-1",
+    defaultValue: "wellbeing",
+  },
+  {
+    key: "vii.homepage.blog-intro",
+    label: "Blog Intro Text",
+    description:
+      "Short paragraph introducing the journal section beneath the heading.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.blog",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Stories, rituals, and inspiration from our studio. Explore our journal for skincare guidance and a look at life at Skinbar VII.",
+  },
+  {
+    key: "vii.homepage.blog-cta-text",
+    label: "Blog CTA Text",
+    description: "Text for the link to the full blog below the post cards.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.blog",
+    gridColumn: "col-span-1",
+    defaultValue: "Read the journal",
+  },
+  {
+    key: "vii.homepage.blog-cta-link",
+    label: "Blog CTA Link",
+    description: "URL for the blog 'read more' link.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.blog",
+    gridColumn: "col-span-1",
+    defaultValue: "/blog",
+  },
+];
+
+// ─── Contact CTA ──────────────────────────────────────────────────────────────
+
+const homepageContactData: TemplateField[] = [
+  {
+    key: "vii.homepage.contact-image",
+    label: "Contact Section Background Image",
+    description: "Dark landscape image behind the contact CTA section.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.contact",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.contact-heading",
+    label: "Contact Heading",
+    description: "Large heading for the contact CTA section.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.contact",
+    gridColumn: "col-span-1",
+    defaultValue: "Get in touch",
+  },
+  {
+    key: "vii.homepage.contact-subheading",
+    label: "Contact Subheading",
+    description: "Smaller subheading below the contact heading.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.contact",
+    gridColumn: "col-span-1",
+    defaultValue: "Want to know more?",
+  },
+  {
+    key: "vii.homepage.contact-body",
+    label: "Contact Body Text",
+    description: "Short paragraph with context or an invitation to reach out.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.contact",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Our team is ready to help you plan your perfect wellness escape. Reach out to learn more about our services, packages, and availability.",
+  },
+  {
+    key: "vii.homepage.contact-phone",
+    label: "Phone Number",
+    description: "Phone number displayed in the contact section.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.contact",
+    gridColumn: "col-span-1",
+    placeholder: "e.g. +1 (313) 555-0100",
+  },
+  {
+    key: "vii.homepage.contact-email",
+    label: "Contact Email",
+    description: "Email address displayed in the contact section.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.contact",
+    gridColumn: "col-span-1",
+    placeholder: "e.g. hello@skinbarvii.com",
+  },
+];
+
+// ─── Instagram ────────────────────────────────────────────────────────────────
+
+const homepageInstagramData: TemplateField[] = [
+  {
+    key: "vii.homepage.instagram-handle",
+    label: "Instagram Handle",
+    description:
+      "Your Instagram handle shown above the gallery strip (e.g. '@skinbarvii').",
+    type: "text",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-1",
+    defaultValue: "@skinbarvii",
+  },
+  {
+    key: "vii.homepage.instagram-gallery",
+    label: "Instagram Gallery",
+    description:
+      "Photos shown in the Instagram-style gallery strip at the bottom of the homepage.",
+    type: "gallery",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.instagram-embed",
+    label: "Embed Below Instagram",
+    description:
+      "Optional embed (e.g. an Instagram feed widget, map, or video) shown directly beneath the Instagram strip. Paste an embed URL or <iframe> snippet.",
+    type: "iframe",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.instagram-feed-url",
+    label: "Instagram Embed (native)",
+    description:
+      "Paste a link to an Instagram profile, post, or reel to embed it natively below the photo strip using Instagram's official embed card. This is separate from the generic embed field above — it renders Instagram's own iframe rather than a sandboxed iframe, so interactions like liking or following work as expected.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.instagram-feed-width",
+    label: "Native Embed Width (px)",
+    description:
+      "Maximum width of the native Instagram embed card. Instagram allows 326–540px; values outside that range are clamped. Leave blank for the default (540).",
+    type: "number",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-1",
+    placeholder: "540",
+  },
+  {
+    key: "vii.homepage.instagram-feed-align",
+    label: "Center the Native Embed",
+    description:
+      "When on, the native Instagram card is centered in its section. Turn off to align it to the left.",
+    type: "boolean",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
+  {
+    key: "vii.homepage.instagram-feed-frame",
+    label: "Frame the Native Embed",
+    description:
+      "When on, wraps the native Instagram card in a bordered, rounded card with a soft shadow.",
+    type: "boolean",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
+  {
+    key: "vii.homepage.instagram-feed-bg",
+    label: "Native Embed Background",
+    description:
+      "Background color of the section behind the native Instagram embed. Leave blank to use the template's cream background.",
+    type: "color",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-1",
+  },
+];
+
+// ─── Detroit / Location ───────────────────────────────────────────────────────
+
+const homepageDetroitData: TemplateField[] = [
+  {
+    key: "vii.homepage.detroit-overline",
+    label: "Detroit Overline",
+    description: "Small label above the Detroit heading.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.detroit",
+    gridColumn: "col-span-1",
+    defaultValue: "Rooted in the city",
+  },
+  {
+    key: "vii.homepage.detroit-heading",
+    label: "Detroit Heading",
+    description: "The plain part of the two-part Detroit heading.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.detroit",
+    gridColumn: "col-span-1",
+    defaultValue: "A Detroit",
+  },
+  {
+    key: "vii.homepage.detroit-heading-accent",
+    label: "Detroit Heading Accent",
+    description: "The copper italic word completing the Detroit heading.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.detroit",
+    gridColumn: "col-span-1",
+    defaultValue: "original.",
+  },
+  {
+    key: "vii.homepage.detroit-body",
+    label: "Detroit Body",
+    description: "Short paragraph about the studio's Detroit roots.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.detroit",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Born and based in Detroit, Skinbar VII brings clinical-grade facials and honest skincare to the heart of the city — a calm studio rooted in the community it serves.",
+  },
+  {
+    key: "vii.homepage.detroit-image",
+    label: "Detroit Image",
+    description:
+      "A meaningful Detroit photo — your storefront, the neighborhood, or the city. Portrait orientation works best.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.detroit",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.detroit-details",
+    label: "Detail Tags",
+    description:
+      "Short tags shown in a row beneath the body (e.g. neighborhood, year established). Up to 4.",
+    type: "list",
+    page: "homepage",
+    group: "homepage.detroit",
+    gridColumn: "col-span-full",
+    maxItems: 4,
+    itemSchema: [
+      {
+        key: "label",
+        label: "Tag",
+        type: "text",
+        placeholder: "e.g. Livernois Avenue",
+      },
+    ],
+  },
+  {
+    key: "vii.homepage.detroit-cta-text",
+    label: "Detroit CTA Text",
+    description: "Optional link beneath the Detroit section (e.g. 'Visit us').",
+    type: "text",
+    page: "homepage",
+    group: "homepage.detroit",
+    gridColumn: "col-span-1",
+    defaultValue: "Visit the studio",
+  },
+  {
+    key: "vii.homepage.detroit-cta-link",
+    label: "Detroit CTA Link",
+    description: "URL the Detroit CTA points to (e.g. a map or contact page).",
+    type: "url",
+    page: "homepage",
+    group: "homepage.detroit",
+    gridColumn: "col-span-1",
+    defaultValue: "/contact",
+  },
+];
+
+// ─── Aggregated export ────────────────────────────────────────────────────────
+
+export const viiHomepageData: TemplateField[] = [
+  ...homepageHeroData,
+  ...homepageCategoriesData,
+  ...homepageVideoData,
+  ...homepageBandData,
+  ...homepageStoryData,
+  ...homepageProductRailData,
+  ...homepageTestimonialData,
+  ...homepageBrandsData,
+  ...homepageBlogData,
+  ...homepageDetroitData,
+  ...homepageContactData,
+  ...homepageInstagramData,
+];
+
+// ─── Field Groups ─────────────────────────────────────────────────────────────
+
+export const viiHomepageFieldGroups: TemplateFieldGroup[] = [
+  {
+    id: "homepage.hero",
+    title: "Hero Section",
+    description:
+      "Full-viewport hero with background image or video, overline copy, and booking CTA",
+    icon: "🌿",
+    columns: 2,
+  },
+  {
+    id: "homepage.categories",
+    title: "Categories Grid",
+    description:
+      "Overline, heading, and category tiles linking to your services or shop",
+    icon: "🧴",
+    columns: 2,
+  },
+  {
+    id: "homepage.video",
+    title: "Video Feature",
+    description:
+      "Split section pairing a two-part heading and body copy with a play-on-click video",
+    icon: "🎬",
+    columns: 2,
+  },
+  {
+    id: "homepage.band",
+    title: "Image Band",
+    description:
+      "Optional full-bleed visual break between the video and studio sections",
+    icon: "🖼️",
+    columns: 1,
+  },
+  {
+    id: "homepage.story",
+    title: "Inside the Studio",
+    description:
+      "Dark navy studio section with two-part heading, intro text, and a photo carousel",
+    icon: "📷",
+    columns: 2,
+  },
+  {
+    id: "homepage.productRail",
+    title: "Product Rail",
+    description:
+      "Featured product rail — pick a collection or show your latest products",
+    icon: "🛍️",
+    columns: 2,
+  },
+  {
+    id: "homepage.testimonial",
+    title: "Testimonial",
+    description:
+      "Slate quote section with an optional background image — auto-shows your latest approved review",
+    icon: "❝",
+    columns: 2,
+  },
+  {
+    id: "homepage.brands",
+    title: "Brands We Carry",
+    description: "Overline, optional heading, and a row of brand logos",
+    icon: "🏷️",
+    columns: 2,
+  },
+  {
+    id: "homepage.blog",
+    title: "Journal / Blog",
+    description:
+      "Two-part heading, intro, and a row of your latest published blog posts",
+    icon: "📖",
+    columns: 2,
+  },
+  {
+    id: "homepage.detroit",
+    title: "Detroit / Location",
+    description:
+      "Split brand-identity section pairing a Detroit photo with roots copy, detail tags, and a CTA",
+    icon: "🏙️",
+    columns: 2,
+  },
+  {
+    id: "homepage.contact",
+    title: "Contact CTA",
+    description:
+      "Dark contact section with heading, body text, phone, and email",
+    icon: "📞",
+    columns: 2,
+  },
+  {
+    id: "homepage.instagram",
+    title: "Instagram Gallery",
+    description:
+      "Handle and photo strip displayed at the bottom of the homepage",
+    icon: "📸",
+    columns: 1,
+  },
+];

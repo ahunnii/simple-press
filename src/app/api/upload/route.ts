@@ -5,26 +5,42 @@ import { RejectUpload, route } from "@better-upload/server";
 import { toRouteHandler } from "@better-upload/server/adapters/next";
 
 import { env } from "~/env";
-import { checkBusiness } from "~/lib/check-business";
+import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { s3Client } from "~/lib/s3/client";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
 
-const ALLOWED_IMAGE_EXTS = new Set([
+// Raster formats only — used for content uploads (product/collection/blog/OG
+// images, galleries, testimonials). SVG is intentionally excluded here: an SVG
+// can carry embedded scripts, so we don't accept it for content that is sourced
+// from owners (and, for testimonials, untrusted users).
+const ALLOWED_RASTER_IMAGE_EXTS = new Set([
   ".jpg",
   ".jpeg",
   ".png",
   ".gif",
   ".webp",
-  ".svg",
   ".avif",
 ]);
 
+// Logo/favicon may additionally be SVG — a common, legitimate format for these,
+// rendered only in controlled brand contexts.
+const ALLOWED_IMAGE_EXTS = new Set([...ALLOWED_RASTER_IMAGE_EXTS, ".svg"]);
+
 const ALLOWED_VIDEO_EXTS = new Set([".mp4", ".webm", ".mov", ".avi"]);
 
+/** Allows SVG — use only for logo/favicon. */
 function safeImageExt(filename: string): string {
   const ext = path.extname(filename).toLowerCase();
   if (!ALLOWED_IMAGE_EXTS.has(ext)) throw new RejectUpload("Invalid file type");
+  return ext;
+}
+
+/** Raster-only (no SVG) — use for all content/user image uploads. */
+function safeRasterImageExt(filename: string): string {
+  const ext = path.extname(filename).toLowerCase();
+  if (!ALLOWED_RASTER_IMAGE_EXTS.has(ext))
+    throw new RejectUpload("Invalid file type");
   return ext;
 }
 
@@ -38,6 +54,29 @@ function uniqueKey(businessId: string, prefix: string, ext: string): string {
   return `${businessId}/${prefix}-${crypto.randomBytes(8).toString("hex")}${ext}`;
 }
 
+async function requireBusinessManager(req: Request) {
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session) throw new RejectUpload("Not logged in!");
+  const business = await checkBusiness();
+  if (!business) throw new RejectUpload("Business not found!");
+  const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
+  if (!isPlatformAdmin) {
+    const membership = await checkBusinessMembership(
+      business.id,
+      session.user.id,
+    );
+    if (
+      !membership ||
+      (membership.role !== "OWNER" && membership.role !== "MANAGER")
+    ) {
+      throw new RejectUpload(
+        "You do not have permission to upload to this business.",
+      );
+    }
+  }
+  return { business, session };
+}
+
 const router: Router = {
   client: s3Client,
   bucketName: env.NEXT_PUBLIC_STORAGE_BUCKET_NAME,
@@ -45,17 +84,11 @@ const router: Router = {
     image: route({
       fileTypes: ["image/*"],
       multipleFiles: false,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
       onBeforeUpload: async ({ req, file }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-        const business = await checkBusiness();
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
 
-        const ext = safeImageExt(file.name);
+        const ext = safeRasterImageExt(file.name);
         const key = uniqueKey(business.id, "image", ext);
         return {
           objectInfo: {
@@ -81,14 +114,7 @@ const router: Router = {
       multipleFiles: false,
       maxFileSize: 1024 * 1024 * 20, // 20MB
       onBeforeUpload: async ({ req, file }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-        const business = await checkBusiness();
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
 
         const ext = safeVideoExt(file.name);
         const key = uniqueKey(business.id, "video", ext);
@@ -112,15 +138,9 @@ const router: Router = {
     logo: route({
       fileTypes: ["image/*"],
       multipleFiles: false,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
       onBeforeUpload: async ({ req, file }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-        const business = await checkBusiness();
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
 
         const ext = safeImageExt(file.name);
         const key = `${business.id}/logo${ext}`;
@@ -145,15 +165,10 @@ const router: Router = {
     favicon: route({
       fileTypes: ["image/*"],
       multipleFiles: false,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
       onBeforeUpload: async ({ req, file }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-        const business = await checkBusiness();
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
+
         const ext = safeImageExt(file.name);
         const key = `${business.id}/favicon${ext}`;
         return {
@@ -181,20 +196,11 @@ const router: Router = {
       maxFileSize: 1024 * 1024 * 5, // 5MB
 
       onBeforeUpload: async ({ req }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-
-        const business = await checkBusiness();
-
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
 
         return {
           generateObjectInfo: ({ file }) => {
-            const ext = safeImageExt(file.name);
+            const ext = safeRasterImageExt(file.name);
             const key = uniqueKey(business.id, "image", ext);
             return {
               key,
@@ -216,20 +222,11 @@ const router: Router = {
       maxFileSize: 1024 * 1024 * 5, // 5MB
 
       onBeforeUpload: async ({ req }) => {
-        const user = await auth.api.getSession({ headers: req.headers });
-        if (!user) {
-          throw new RejectUpload("Not logged in!");
-        }
-
-        const business = await checkBusiness();
-
-        if (!business) {
-          throw new RejectUpload("Business not found!");
-        }
+        const { business } = await requireBusinessManager(req);
 
         return {
           generateObjectInfo: ({ file }) => {
-            const ext = safeImageExt(file.name);
+            const ext = safeRasterImageExt(file.name);
             const key = uniqueKey(business.id, "gallery", ext);
             return {
               key,
@@ -278,7 +275,7 @@ const router: Router = {
 
         return {
           generateObjectInfo: ({ file }) => {
-            const ext = safeImageExt(file.name);
+            const ext = safeRasterImageExt(file.name);
             const key = `${businessId}/testimonials/${crypto.randomBytes(8).toString("hex")}${ext}`;
             const pathName = `https://${env.NEXT_PUBLIC_STORAGE_URL}/business-sites/${key}`;
             return {

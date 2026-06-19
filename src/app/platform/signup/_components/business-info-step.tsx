@@ -202,12 +202,14 @@ export function BusinessInfoStep({
                 type="text"
                 value={subdomain}
                 onChange={(e) =>
-                  setSubdomain(artisanFlow ? subdomain : slugify(e.target.value))
+                  setSubdomain(
+                    artisanFlow ? subdomain : slugify(e.target.value),
+                  )
                 }
                 placeholder="mystore"
                 required
                 readOnly={artisanFlow}
-                className={`flex-1${artisanFlow ? " bg-muted" : ""}`}
+                className={`flex-1${artisanFlow ? "bg-muted" : ""}`}
               />
               <span className="text-sm whitespace-nowrap text-gray-500">
                 .{env.NEXT_PUBLIC_PLATFORM_DOMAIN}

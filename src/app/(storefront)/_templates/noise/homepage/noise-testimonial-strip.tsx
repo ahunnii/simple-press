@@ -60,7 +60,11 @@ export function NoiseTestimonialStrip({
         {/* Only announce via live region when NOT auto-rotating (i.e. user paused, reduced motion, or navigating manually) */}
         <div
           style={{ minHeight: "160px", position: "relative" }}
-          aria-live={paused || prefersReduced || testimonials.length <= 1 ? "polite" : "off"}
+          aria-live={
+            paused || prefersReduced || testimonials.length <= 1
+              ? "polite"
+              : "off"
+          }
           aria-atomic="true"
         >
           {testimonials.map((t, j) => (
@@ -141,7 +145,9 @@ export function NoiseTestimonialStrip({
                 type="button"
                 onClick={() => setPaused((p) => !p)}
                 aria-label={
-                  paused ? "Resume testimonial rotation" : "Pause testimonial rotation"
+                  paused
+                    ? "Resume testimonial rotation"
+                    : "Pause testimonial rotation"
                 }
                 aria-pressed={paused}
                 className="inline-flex items-center justify-center transition-opacity hover:opacity-60"

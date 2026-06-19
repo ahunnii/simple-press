@@ -7,10 +7,12 @@ import { ArrowLeft } from "lucide-react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { computeSavingsLabel } from "~/lib/prices";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
+import { TrackView } from "~/components/analytics/track-view";
 import {
   FadeIn,
   PageTransition,
@@ -53,6 +55,10 @@ export function HappyBambooProductPage({
 
   return (
     <PageTransition>
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
       <section className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
         {/* Breadcrumb */}
         <FadeIn direction="none" duration={0.3}>
@@ -131,7 +137,10 @@ export function HappyBambooProductPage({
                   key={`${badge.label}-${i}`}
                   className="bg-secondary/60 flex items-center gap-2 rounded-lg px-3 py-2"
                 >
-                  <badge.Icon className="text-primary size-4" aria-hidden="true" />
+                  <badge.Icon
+                    className="text-primary size-4"
+                    aria-hidden="true"
+                  />
                   <span className="text-secondary-foreground text-xs font-medium">
                     {badge.label}
                   </span>

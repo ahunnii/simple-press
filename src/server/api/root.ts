@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
+import { analyticsRouter } from "./routers/analytics";
 import { baseInventoryUnitRouter } from "./routers/base-inventory-unit";
 import { businessRouter } from "./routers/business";
 import { collectionsRouter } from "./routers/collections";
@@ -18,6 +19,8 @@ import { orderRouter } from "./routers/order";
 import { platformRouter } from "./routers/platform";
 import { productRouter } from "./routers/product";
 import { reviewRouter } from "./routers/review";
+import { serviceRouter } from "./routers/service";
+import { shippingRouter } from "./routers/shipping";
 import { testimonialRouter } from "./routers/testimonials";
 import { uploadRouter } from "./routers/upload";
 
@@ -27,6 +30,7 @@ import { uploadRouter } from "./routers/upload";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+  analytics: analyticsRouter,
   baseInventoryUnit: baseInventoryUnitRouter,
   domain: domainRouter,
   discount: discountRouter,
@@ -46,9 +50,11 @@ export const appRouter = createTRPCRouter({
 
   features: featuresRouter,
   review: reviewRouter,
+  services: serviceRouter,
 
   platform: platformRouter,
   contact: contactRouter,
+  shipping: shippingRouter,
 
   external: externalRouter,
 

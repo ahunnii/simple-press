@@ -71,7 +71,14 @@ const Toolbar = ({
 
       <SectionFive
         editor={editor}
-        activeActions={["codeBlock", "blockquote", "horizontalRule", "gallery", "embed", "table"]}
+        activeActions={[
+          "codeBlock",
+          "blockquote",
+          "horizontalRule",
+          "gallery",
+          "embed",
+          "table",
+        ]}
         mainActionCount={0}
         galleriesEnabled={galleriesEnabled}
         embedsEnabled={embedsEnabled}
@@ -143,7 +150,11 @@ export const MainMinimalTiptapEditor = ({
         className,
       )}
     >
-      <Toolbar editor={providedEditor} galleriesEnabled={galleriesEnabled} embedsEnabled={embedsEnabled} />
+      <Toolbar
+        editor={providedEditor}
+        galleriesEnabled={galleriesEnabled}
+        embedsEnabled={embedsEnabled}
+      />
       <EditorContent
         editor={providedEditor}
         className={cn("minimal-tiptap-editor", editorContentClassName)}

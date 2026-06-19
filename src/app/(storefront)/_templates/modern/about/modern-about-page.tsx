@@ -149,7 +149,10 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* CTA */}
-      <section className="bg-primary py-20" {...sectionGroupAttr("about", "cta")}>
+      <section
+        className="bg-primary py-20"
+        {...sectionGroupAttr("about", "cta")}
+      >
         <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
           <h2 className="text-primary-foreground font-serif text-3xl md:text-4xl">
             {f["modern.about.cta-header"]}

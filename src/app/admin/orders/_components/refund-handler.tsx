@@ -130,7 +130,7 @@ function StripeRefundDialog({ order }: { order: Order }) {
               </span>
             </Label>
             <div className="relative">
-              <span className="text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 text-sm">
+              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 text-sm">
                 $
               </span>
               <Input
@@ -181,7 +181,10 @@ function StripeRefundDialog({ order }: { order: Order }) {
                 checked={restockItems}
                 onCheckedChange={(v) => setRestockItems(!!v)}
               />
-              <Label htmlFor="restock-items" className="cursor-pointer font-normal">
+              <Label
+                htmlFor="restock-items"
+                className="cursor-pointer font-normal"
+              >
                 Return items to inventory
               </Label>
             </div>
@@ -191,7 +194,10 @@ function StripeRefundDialog({ order }: { order: Order }) {
                 checked={sendEmail}
                 onCheckedChange={(v) => setSendEmail(!!v)}
               />
-              <Label htmlFor="send-refund-email" className="cursor-pointer font-normal">
+              <Label
+                htmlFor="send-refund-email"
+                className="cursor-pointer font-normal"
+              >
                 Notify customer by email
               </Label>
             </div>
@@ -227,7 +233,9 @@ function StripeRefundDialog({ order }: { order: Order }) {
             ) : (
               <>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                {isPartial ? `Refund ${formatPrice(amountCents)}` : "Issue Full Refund"}
+                {isPartial
+                  ? `Refund ${formatPrice(amountCents)}`
+                  : "Issue Full Refund"}
               </>
             )}
           </Button>
@@ -313,7 +321,10 @@ function ManualRefundDialog({ order }: { order: Order }) {
                 checked={restockItems}
                 onCheckedChange={(v) => setRestockItems(!!v)}
               />
-              <Label htmlFor="manual-restock-items" className="cursor-pointer font-normal">
+              <Label
+                htmlFor="manual-restock-items"
+                className="cursor-pointer font-normal"
+              >
                 Return items to inventory
               </Label>
             </div>
@@ -323,7 +334,10 @@ function ManualRefundDialog({ order }: { order: Order }) {
                 checked={sendEmail}
                 onCheckedChange={(v) => setSendEmail(!!v)}
               />
-              <Label htmlFor="manual-send-email" className="cursor-pointer font-normal">
+              <Label
+                htmlFor="manual-send-email"
+                className="cursor-pointer font-normal"
+              >
                 Notify customer by email
               </Label>
             </div>
