@@ -221,13 +221,25 @@ import { SledgeProductPage } from "./sledge/products/sledge-product-page";
 import { SledgeShopPage } from "./sledge/shop/sledge-shop-page";
 import { SledgeGenericPage } from "./sledge/sledge-generic-page";
 import { SledgeTestimonialsPage } from "./sledge/testimonials/sledge-testimonials-page";
+// ---------------------------------------------------------------------------
+// Vii (Skinbar VII)
+// ---------------------------------------------------------------------------
 import { ViiAboutPage } from "./vii/about/vii-about-page";
+import { ViiBlogPage } from "./vii/blog/vii-blog-page";
+import { ViiBlogPostPage } from "./vii/blog/vii-blog-post-page";
+import { ViiAccountSecurityPage } from "./vii/account/vii-account-security-page";
+import { ViiAccountSettingsPage } from "./vii/account/vii-account-settings-page";
+import { ViiAddressBookPage } from "./vii/account/vii-address-book-page";
+import { ViiOrderDetailPage } from "./vii/account/vii-order-detail-page";
+import { ViiOrdersPage } from "./vii/account/vii-orders-page";
+import { ViiPreferencesPage } from "./vii/account/vii-preferences-page";
+import { ViiCartPage } from "./vii/cart-checkout/vii-cart-page";
+import { ViiCheckoutPage } from "./vii/cart-checkout/vii-checkout-page";
+import { ViiCheckoutUnavailable } from "./vii/cart-checkout/vii-checkout-unavailable";
+import { ViiOrderSuccessPage } from "./vii/cart-checkout/vii-order-success-page";
 import { ViiCollectionPage } from "./vii/collections/vii-collection-page";
 import { ViiCollectionsPage } from "./vii/collections/vii-collections-page";
 import { ViiContactPage } from "./vii/contact/vii-contact-page";
-// ---------------------------------------------------------------------------
-// Vii (Skinbar VII) — homepage-only pass; all other slots fall back to default
-// ---------------------------------------------------------------------------
 import { ViiLayout } from "./vii/layout/vii-layout";
 import { ViiProductPage } from "./vii/products/vii-product-page";
 import { ViiShopPage } from "./vii/shop/vii-shop-page";
@@ -499,11 +511,23 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
   vii: {
     Layout: ViiLayout,
     AboutPage: ViiAboutPage,
+    BlogPage: ViiBlogPage,
+    BlogPostPage: ViiBlogPostPage,
     ContactPage: ViiContactPage,
     ShopPage: ViiShopPage,
     ProductPage: ViiProductPage,
     CollectionsPage: ViiCollectionsPage,
     CollectionPage: ViiCollectionPage,
+    CartPage: ViiCartPage,
+    CheckoutPage: ViiCheckoutPage,
+    CheckoutUnavailable: ViiCheckoutUnavailable,
+    OrderSuccessPage: ViiOrderSuccessPage,
+    AccountSettingsPage: ViiAccountSettingsPage,
+    AccountSecurityPage: ViiAccountSecurityPage,
+    AddressBookPage: ViiAddressBookPage,
+    OrderDetailPage: ViiOrderDetailPage,
+    OrdersPage: ViiOrdersPage,
+    PreferencesPage: ViiPreferencesPage,
   },
 };
 

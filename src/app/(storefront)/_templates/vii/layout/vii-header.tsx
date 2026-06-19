@@ -41,6 +41,12 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
   const mobileSubmenuId = useId();
   const reduced = useReducedMotion();
 
+  // CIVANA-style: the transparent→solid header animation is homepage-only.
+  // Every other route renders the header in its solid state from the start, so
+  // nav links stay legible over light interior pages (e.g. account, shop).
+  const isHomepage = pathname === "/";
+  const solid = scrolled || !isHomepage;
+
   // ── Scroll behavior: transparent → solid; announcement bar hides on scroll ──
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -259,7 +265,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
     textTransform: "uppercase",
     fontWeight: 400,
     textDecoration: "none",
-    color: scrolled
+    color: solid
       ? active
         ? "var(--vii-navy)"
         : "var(--vii-ink-soft)"
@@ -272,7 +278,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
     whiteSpace: "nowrap",
   });
 
-  const iconColor = scrolled ? "var(--vii-ink-soft)" : "rgba(251,248,241,0.85)";
+  const iconColor = solid ? "var(--vii-ink-soft)" : "rgba(251,248,241,0.85)";
 
   // ── Dropdown helpers ────────────────────────────────────────────────────────
   const dropdownKey = (side: "left" | "right", index: number) =>
@@ -543,15 +549,15 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
         <div
           style={{
             position: "relative",
-            background: scrolled ? "var(--vii-paper)" : "transparent",
-            borderBottom: scrolled
+            background: solid ? "var(--vii-paper)" : "transparent",
+            borderBottom: solid
               ? "1px solid rgba(30,53,64,0.1)"
               : "1px solid transparent",
             transition: `background 0.5s ${ease}, border-color 0.5s ${ease}`,
           }}
         >
           {/* Legibility scrim behind the transparent nav (over hero media) */}
-          {!scrolled && (
+          {!solid && (
             <div
               aria-hidden="true"
               style={{
@@ -576,7 +582,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                   border: "none",
                   cursor: "pointer",
                   padding: "8px 8px 8px 0",
-                  color: scrolled ? "var(--vii-navy)" : "var(--vii-paper)",
+                  color: solid ? "var(--vii-navy)" : "var(--vii-paper)",
                   transition: `color 0.4s ${ease}`,
                 }}
                 aria-label="Open menu"
@@ -592,7 +598,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                 aria-label={`${businessName} — Home`}
                 style={{ flexShrink: 0 }}
               >
-                {renderWordmark(scrolled)}
+                {renderWordmark(solid)}
               </Link>
             </div>
 

@@ -2,6 +2,13 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import { viiAboutData, viiAboutFieldGroups } from "./about";
+import { viiBlogFields, viiBlogFieldGroup } from "./blog";
+import { viiCartData, viiCartFieldGroups } from "./cart-checkout/cart-fields";
+import {
+  viiCheckoutData,
+  viiCheckoutFieldGroups,
+} from "./cart-checkout/checkout-fields";
+import { viiOrderData, viiOrderFieldGroups } from "./cart-checkout/order-fields";
 import { viiContactData, viiContactFieldGroups } from "./contact";
 import { viiHomepageData, viiHomepageFieldGroups } from "./homepage";
 import { viiShopData, viiShopFieldGroups } from "./shop";
@@ -140,7 +147,11 @@ export const viiData = {
     ...viiHomepageData,
     ...viiShopData,
     ...viiAboutData,
+    ...viiBlogFields,
     ...viiContactData,
+    ...viiCartData,
+    ...viiCheckoutData,
+    ...viiOrderData,
     ...globalBrandingData,
     ...globalProductData,
   ],
@@ -151,7 +162,11 @@ export const viiFieldGroups = {
     ...viiHomepageFieldGroups,
     ...viiShopFieldGroups,
     ...viiAboutFieldGroups,
+    viiBlogFieldGroup,
     ...viiContactFieldGroups,
+    ...viiCartFieldGroups,
+    ...viiCheckoutFieldGroups,
+    ...viiOrderFieldGroups,
     {
       id: "global.branding",
       title: "Global Branding",

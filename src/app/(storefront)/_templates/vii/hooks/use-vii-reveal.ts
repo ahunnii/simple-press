@@ -45,7 +45,9 @@ export function useViiReveal(threshold = 0.1): {
           io.disconnect();
         }
       },
-      { threshold },
+      // Slightly extend the root downward so content reveals just before it
+      // scrolls fully into view, which reads as smoother.
+      { threshold, rootMargin: "0px 0px 10% 0px" },
     );
 
     io.observe(el);
