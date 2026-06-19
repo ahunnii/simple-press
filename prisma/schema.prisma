@@ -179,10 +179,16 @@ model Business {
   featureFlags Json @default("{}") // Record<string, boolean>
 
   // Shipping (storefront + Stripe)
-  shippingType          String  @default("free") // free | flat_rate | flat_rate_with_threshold
+  shippingType          String  @default("free") // free | flat_rate | flat_rate_with_threshold | zone_weight
   shippingFlatRate      Int? // cents; used by flat_rate and flat_rate_with_threshold
-  freeShippingThreshold Int? // cents; subtotal at which shipping becomes free
+  freeShippingThreshold Int? // cents; subtotal at which shipping becomes free (all modes)
   offersInStorePickup   Boolean @default(false)
+
+  // Zone + weight shipping fields
+  originState                String? // 2-letter US state code for shipping origin
+  shippingWeightTiers        Json?   // WeightTier[]: [{ label, minLb, maxLb }] (last tier maxLb: null = no cap)
+  shippingFallbackRate       Int?    // cents; used when destination state matches no zone
+  shippingDefaultItemWeightLb Float? @default(0) // assumed weight (lb) for products with no weight set
 
   // Relationships
   products    Product[]
@@ -203,6 +209,7 @@ model Business {
   testimonialInvites   TestimonialInvite[]
    platformInvites PlatformInvite[]
    memberships   BusinessMembership[]
+  zones         ShippingZone[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -1142,4 +1149,37 @@ model PlatformConfig {
   maintenanceMode    Boolean  @default(false)
   maintenanceMessage String?
   updatedAt          DateTime @updatedAt
+}
+
+// ============================================
+// ZONE + WEIGHT SHIPPING
+// ============================================
+
+model ShippingZone {
+  id        String   @id @default(cuid())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  name      String   // e.g. "Zone 1 – Origin Region"
+  states    String[] // US 2-letter state codes in this zone
+  sortOrder Int      @default(0)
+
+  rates ShippingRate[]
+
+  @@unique([businessId, name])
+  @@index([businessId])
+}
+
+model ShippingRate {
+  id String @id @default(cuid())
+
+  zoneId String
+  zone   ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  tierIndex  Int // position in Business.shippingWeightTiers (0-based)
+  priceCents Int // shipping price in cents for this zone + tier combination
+
+  @@unique([zoneId, tierIndex])
+  @@index([zoneId])
 }

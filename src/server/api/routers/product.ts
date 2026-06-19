@@ -262,6 +262,8 @@ export const productRouter = createTRPCRouter({
         metaDescription,
         metaKeywords,
         ogImage,
+        weight,
+        weightUnit,
       } = input;
 
       const { businessId } = ctx;
@@ -305,6 +307,8 @@ export const productRouter = createTRPCRouter({
           metaDescription: metaDescription ?? null,
           metaKeywords: metaKeywords ?? null,
           ogImage: ogImage ?? null,
+          weight: weight ?? null,
+          weightUnit: weightUnit ?? "lb",
           businessId,
           variants: {
             create: variants.map((v) => ({
@@ -351,6 +355,8 @@ export const productRouter = createTRPCRouter({
         metaDescription,
         metaKeywords,
         ogImage,
+        weight,
+        weightUnit,
       } = input;
 
       // Check if slug is already taken for this business
@@ -415,6 +421,8 @@ export const productRouter = createTRPCRouter({
           metaDescription: metaDescription ?? null,
           metaKeywords: metaKeywords ?? null,
           ogImage: ogImage ?? null,
+          weight: weight ?? null,
+          weightUnit: weightUnit ?? "lb",
           // Reset alert flags when inventory is manually increased above threshold/zero
           ...(inventoryIncreased && inventoryQty > 0
             ? { outOfStockAlertSent: false }

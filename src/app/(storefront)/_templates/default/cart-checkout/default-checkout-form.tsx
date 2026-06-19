@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 const formatPrice = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -241,22 +242,32 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="state">
+                      <Label htmlFor="state" id="state-label">
                         State / Province <span aria-hidden="true">*</span>
                       </Label>
-                      <Input
-                        id="state"
-                        type="text"
-                        autoComplete="shipping address-level1"
+                      <Select
                         value={f.state}
-                        onChange={(e) => f.setState(e.target.value)}
-                        placeholder="e.g. CA or ON"
-                        required={f.deliveryMethod === "ship"}
-                        aria-required="true"
-                        aria-invalid={
-                          submitAttempted && !f.state.trim() ? true : undefined
-                        }
-                      />
+                        onValueChange={(v) => f.setState(v)}
+                      >
+                        <SelectTrigger
+                          id="state"
+                          aria-labelledby="state-label"
+                          aria-required="true"
+                          aria-invalid={
+                            submitAttempted && !f.state ? true : undefined
+                          }
+                          className="w-full"
+                        >
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getRegionOptions(f.country).map((opt) => (
+                            <SelectItem key={opt.code} value={opt.code}>
+                              {opt.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -452,9 +463,11 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                   <span>
                     {f.deliveryMethod === "pickup"
                       ? "In-store pickup (free)"
-                      : f.shipping === 0
-                        ? "Free"
-                        : formatPrice(f.shipping)}
+                      : f.shippingPending
+                        ? "Calculated at checkout"
+                        : f.shipping === 0
+                          ? "Free"
+                          : formatPrice(f.shipping)}
                   </span>
                 </div>
                 <div className="flex justify-between border-t pt-2 font-bold">

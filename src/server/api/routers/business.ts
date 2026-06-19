@@ -8,8 +8,10 @@ import {
   getPlatformMaintenance,
   resolveStorefrontMaintenance,
 } from "~/lib/maintenance";
+import { dollarsToCents } from "~/lib/prices";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { stripeClient } from "~/lib/stripe/client";
+import { zoneWeightFormSchema } from "~/lib/validators/shipping";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
@@ -42,6 +44,14 @@ export const businessRouter = createTRPCRouter({
         shippingFlatRate: true,
         freeShippingThreshold: true,
         offersInStorePickup: true,
+        originState: true,
+        shippingWeightTiers: true,
+        shippingFallbackRate: true,
+        shippingDefaultItemWeightLb: true,
+        zones: {
+          include: { rates: true },
+          orderBy: { sortOrder: "asc" as const },
+        },
         siteContent: {
           select: {
             logoUrl: true,
@@ -116,6 +126,14 @@ export const businessRouter = createTRPCRouter({
         shippingFlatRate: true,
         freeShippingThreshold: true,
         offersInStorePickup: true,
+        originState: true,
+        shippingWeightTiers: true,
+        shippingFallbackRate: true,
+        shippingDefaultItemWeightLb: true,
+        zones: {
+          include: { rates: true },
+          orderBy: { sortOrder: "asc" as const },
+        },
         maintenanceMode: true,
         maintenanceVariant: true,
         maintenanceMessage: true,
@@ -698,6 +716,12 @@ export const businessRouter = createTRPCRouter({
               pages: { where: { type: "blog" }, orderBy: { sortOrder: "asc" } },
             }
           : {}),
+        // Always include shipping zones so the shipping-settings editor can
+        // hydrate a saved zone_weight config. Small relation; cheap to fetch.
+        zones: {
+          include: { rates: true },
+          orderBy: { sortOrder: "asc" },
+        },
       };
 
       const business = await ctx.db.business.findFirst({
@@ -838,5 +862,83 @@ export const businessRouter = createTRPCRouter({
         include: { siteContent: true },
       });
       return updatedBusiness;
+    }),
+
+  /**
+   * Transactionally save the zone+weight shipping configuration for the business.
+   * Replaces all existing ShippingZone / ShippingRate rows for this business.
+   * Input uses dollar strings (form ergonomics); this mutation converts to cents.
+   */
+  saveZoneWeightShipping: ownerAdminProcedure
+    .input(zoneWeightFormSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const {
+        originState,
+        weightTiers,
+        zones,
+        fallbackRateDollars,
+        freeShippingThresholdDollars,
+        defaultItemWeightLb,
+      } = input;
+
+      // Convert dollar strings → cents.
+      const fallbackRateCents = dollarsToCents(fallbackRateDollars);
+      const thresholdRaw = freeShippingThresholdDollars?.trim() ?? "";
+      const freeShippingThresholdCents =
+        thresholdRaw !== "" ? dollarsToCents(thresholdRaw) : null;
+
+      await ctx.db.$transaction(async (tx) => {
+        // Update Business fields.
+        await tx.business.update({
+          where: { id: businessId },
+          data: {
+            shippingType: "zone_weight",
+            originState,
+            shippingWeightTiers: weightTiers,
+            shippingFallbackRate: fallbackRateCents,
+            shippingDefaultItemWeightLb: defaultItemWeightLb,
+            freeShippingThreshold: freeShippingThresholdCents,
+          },
+        });
+
+        // Delete all existing ShippingZone rows (ShippingRate cascades via FK).
+        await tx.shippingZone.deleteMany({
+          where: { businessId },
+        });
+
+        // Re-create zones and their rate cells.
+        for (let zoneIdx = 0; zoneIdx < zones.length; zoneIdx++) {
+          const zone = zones[zoneIdx];
+          if (!zone) continue;
+
+          const createdZone = await tx.shippingZone.create({
+            data: {
+              businessId,
+              name: zone.name,
+              states: zone.states,
+              sortOrder: zoneIdx,
+            },
+            select: { id: true },
+          });
+
+          // Build ShippingRate rows from the rateDollars Record<string, string>.
+          const ratesToCreate = Object.entries(zone.rateDollars).map(
+            ([tierKey, dollarStr]) => ({
+              zoneId: createdZone.id,
+              tierIndex: Number(tierKey),
+              priceCents: dollarsToCents(dollarStr),
+            }),
+          );
+
+          if (ratesToCreate.length > 0) {
+            await tx.shippingRate.createMany({
+              data: ratesToCreate,
+            });
+          }
+        }
+      });
+
+      return { message: "Shipping settings updated successfully" };
     }),
 });

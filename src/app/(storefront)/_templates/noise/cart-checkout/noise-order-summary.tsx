@@ -11,12 +11,14 @@ type OrderSummaryProps = {
   shippingConfig: ShippingConfig;
   deliveryMethod: "ship" | "pickup";
   discountAmount: number;
+  shippingPending?: boolean;
 };
 
 export function NoiseOrderSummary({
   shippingConfig,
   deliveryMethod,
   discountAmount,
+  shippingPending,
 }: OrderSummaryProps) {
   const { items, subtotal } = useCart();
 
@@ -144,14 +146,16 @@ export function NoiseOrderSummary({
           <span
             className="font-mono text-[12px] tracking-[0.06em]"
             style={{
-              color: shipping === 0 ? "var(--vn-steel-mist)" : undefined,
+              color: shipping === 0 || shippingPending ? "var(--vn-steel-mist)" : undefined,
             }}
           >
             {deliveryMethod === "pickup"
               ? "Studio pickup"
-              : shipping === 0
-                ? "Free"
-                : formatPrice(shipping)}
+              : shippingPending
+                ? "Calculated at checkout"
+                : shipping === 0
+                  ? "Free"
+                  : formatPrice(shipping)}
           </span>
         </div>
       </div>

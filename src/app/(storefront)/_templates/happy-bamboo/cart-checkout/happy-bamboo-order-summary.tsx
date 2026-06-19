@@ -12,12 +12,14 @@ type OrderSummaryProps = {
   shippingConfig: ShippingConfig;
   deliveryMethod: "ship" | "pickup";
   discountAmount: number;
+  shippingPending?: boolean;
 };
 
 export function HappyBambooOrderSummary({
   shippingConfig,
   deliveryMethod,
   discountAmount,
+  shippingPending,
 }: OrderSummaryProps) {
   const { items, subtotal } = useCart();
   const shipping =
@@ -76,9 +78,11 @@ export function HappyBambooOrderSummary({
           <span className="text-foreground">
             {deliveryMethod === "pickup"
               ? "In-store pickup (free)"
-              : shipping === 0
-                ? "Free"
-                : formatPrice(shipping)}
+              : shippingPending
+                ? "Calculated at checkout"
+                : shipping === 0
+                  ? "Free"
+                  : formatPrice(shipping)}
           </span>
         </div>
         <Separator className="my-1" />

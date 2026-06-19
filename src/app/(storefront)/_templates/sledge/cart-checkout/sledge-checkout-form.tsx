@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 import { SledgeOrderSummary } from "./sledge-order-summary";
 
@@ -73,6 +74,7 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
     handleSubmit,
     shippingConfig,
     items,
+    shippingPending,
   } = useCheckoutForm(business);
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
@@ -305,23 +307,33 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="state" className={LBL}>
+                <Label id="state-label" htmlFor="state" className={LBL}>
                   State / Province *
                 </Label>
-                <Input
-                  id="state"
-                  type="text"
-                  autoComplete="shipping address-level1"
+                <Select
                   value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  placeholder="e.g. MI"
-                  required={deliveryMethod === "ship"}
-                  aria-required="true"
-                  aria-invalid={
-                    submitAttempted && !state.trim() ? true : undefined
-                  }
-                  className={INP}
-                />
+                  onValueChange={(v) => setState(v)}
+                  required
+                >
+                  <SelectTrigger
+                    id="state"
+                    className={cn("w-full", INP)}
+                    aria-labelledby="state-label"
+                    aria-required="true"
+                    aria-invalid={
+                      submitAttempted && !state ? true : undefined
+                    }
+                  >
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getRegionOptions(country).map((opt) => (
+                      <SelectItem key={opt.code} value={opt.code}>
+                        {opt.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -378,6 +390,7 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
             shippingConfig={shippingConfig}
             deliveryMethod={deliveryMethod}
             discountAmount={discountAmount}
+            shippingPending={shippingPending}
           />
 
           <div role="alert" aria-live="assertive" aria-atomic="true">

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -418,25 +419,33 @@ export function ElegantCheckoutForm({ business }: Props) {
                   htmlFor="state"
                   error={fieldErrors.state}
                 >
-                  <Input
-                    id="state"
-                    type="text"
-                    autoComplete="shipping address-level1"
+                  <Select
                     value={f.state}
-                    onChange={(e) => {
-                      f.setState(e.target.value);
+                    onValueChange={(v) => {
+                      f.setState(v);
                       if (fieldErrors.state)
                         setFieldErrors((prev) => ({ ...prev, state: "" }));
                     }}
-                    placeholder="CA or ON"
-                    required={f.deliveryMethod === "ship"}
-                    className="el-co-input"
-                    aria-required="true"
-                    aria-invalid={fieldErrors.state ? true : undefined}
-                    aria-describedby={
-                      fieldErrors.state ? "state-error" : undefined
-                    }
-                  />
+                  >
+                    <SelectTrigger
+                      id="state"
+                      className="el-co-input w-full rounded-none border-x-0 border-t-0 px-0 shadow-none focus:ring-0"
+                      aria-required="true"
+                      aria-invalid={fieldErrors.state ? true : undefined}
+                      aria-describedby={
+                        fieldErrors.state ? "state-error" : undefined
+                      }
+                    >
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getRegionOptions(f.country).map((opt) => (
+                        <SelectItem key={opt.code} value={opt.code}>
+                          {opt.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </ElegantField>
               </div>
               <div
@@ -633,9 +642,11 @@ export function ElegantCheckoutForm({ business }: Props) {
                 value:
                   f.deliveryMethod === "pickup"
                     ? "Pickup (free)"
-                    : f.shipping === 0
-                      ? "Free"
-                      : formatPrice(f.shipping),
+                    : f.shippingPending
+                      ? "Calculated at checkout"
+                      : f.shipping === 0
+                        ? "Free"
+                        : formatPrice(f.shipping),
               },
             ].map(({ label, value, green }) => (
               <div

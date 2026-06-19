@@ -17,6 +17,7 @@ import {
 } from "~/components/ui/select";
 
 import { ViiOverline } from "../shared/vii-overline";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 const formatPrice = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -528,22 +529,48 @@ export function ViiCheckoutForm({
                       gap: 0,
                     }}
                   >
-                    <label htmlFor="checkout-state" className="vii-field-label">
+                    <label
+                      htmlFor="checkout-state"
+                      id="checkout-state-label"
+                      className="vii-field-label"
+                    >
                       State / Province <span aria-hidden="true">*</span>
                     </label>
-                    <input
-                      id="checkout-state"
-                      type="text"
-                      autoComplete="shipping address-level1"
+                    <Select
                       value={f.state}
-                      onChange={(e) => f.setState(e.target.value)}
-                      placeholder="e.g. MI or ON"
-                      required={f.deliveryMethod === "ship"}
-                      aria-required="true"
-                      aria-invalid={
-                        submitAttempted && !f.state.trim() ? true : undefined
-                      }
-                    />
+                      onValueChange={(v) => f.setState(v)}
+                    >
+                      <SelectTrigger
+                        id="checkout-state"
+                        aria-labelledby="checkout-state-label"
+                        aria-required="true"
+                        aria-invalid={
+                          submitAttempted && !f.state ? true : undefined
+                        }
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          borderBottom: "1.5px solid var(--vii-tan)",
+                          borderRadius: 0,
+                          boxShadow: "none",
+                          padding: "10px 0",
+                          fontFamily: "var(--font-sans)",
+                          fontSize: 15,
+                          color: "var(--vii-navy)",
+                          height: "auto",
+                          width: "100%",
+                        }}
+                      >
+                        <SelectValue placeholder="Select state" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getRegionOptions(f.country).map((opt) => (
+                          <SelectItem key={opt.code} value={opt.code}>
+                            {opt.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -1030,9 +1057,11 @@ export function ViiCheckoutForm({
                   >
                     {f.deliveryMethod === "pickup"
                       ? "In-store pickup (free)"
-                      : f.shipping === 0
-                        ? "Free"
-                        : formatPrice(f.shipping)}
+                      : f.shippingPending
+                        ? "Calculated at checkout"
+                        : f.shipping === 0
+                          ? "Free"
+                          : formatPrice(f.shipping)}
                   </span>
                 </div>
 

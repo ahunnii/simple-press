@@ -12,12 +12,14 @@ type OrderSummaryProps = {
   shippingConfig: ShippingConfig;
   deliveryMethod: "ship" | "pickup";
   discountAmount: number;
+  shippingPending?: boolean;
 };
 
 export function SledgeOrderSummary({
   shippingConfig,
   deliveryMethod,
   discountAmount,
+  shippingPending,
 }: OrderSummaryProps) {
   const { items, subtotal } = useCart();
 
@@ -111,16 +113,18 @@ export function SledgeOrderSummary({
           <span
             className={cn(
               "font-sans text-sm tracking-[0.04em]",
-              shipping === 0
+              shipping === 0 || shippingPending
                 ? "text-[var(--sl-ink-soft)]"
                 : "text-[var(--sl-ink)]",
             )}
           >
             {deliveryMethod === "pickup"
               ? "Studio pickup"
-              : shipping === 0
-                ? "Free"
-                : formatPrice(shipping)}
+              : shippingPending
+                ? "Calculated at checkout"
+                : shipping === 0
+                  ? "Free"
+                  : formatPrice(shipping)}
           </span>
         </div>
       </div>

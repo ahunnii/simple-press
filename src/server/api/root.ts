@@ -20,6 +20,7 @@ import { platformRouter } from "./routers/platform";
 import { productRouter } from "./routers/product";
 import { reviewRouter } from "./routers/review";
 import { serviceRouter } from "./routers/service";
+import { shippingRouter } from "./routers/shipping";
 import { testimonialRouter } from "./routers/testimonials";
 import { uploadRouter } from "./routers/upload";
 
@@ -53,6 +54,7 @@ export const appRouter = createTRPCRouter({
 
   platform: platformRouter,
   contact: contactRouter,
+  shipping: shippingRouter,
 
   external: externalRouter,
 

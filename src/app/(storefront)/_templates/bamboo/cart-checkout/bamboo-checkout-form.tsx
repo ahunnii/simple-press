@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -61,6 +62,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
     items,
     subtotal,
     shipping,
+    shippingPending,
     finalTotal,
   } = useCheckoutForm(business);
 
@@ -306,20 +308,33 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="state">State / Province *</Label>
-                  <Input
-                    id="state"
-                    type="text"
-                    autoComplete="shipping address-level1"
+                  <Label id="state-label" htmlFor="state">
+                    State / Province *
+                  </Label>
+                  <Select
                     value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    placeholder="e.g. CA or ON"
-                    required={deliveryMethod === "ship"}
-                    aria-required="true"
-                    aria-invalid={
-                      submitAttempted && !state.trim() ? true : undefined
-                    }
-                  />
+                    onValueChange={(v) => setState(v)}
+                    required
+                  >
+                    <SelectTrigger
+                      id="state"
+                      className="w-full"
+                      aria-labelledby="state-label"
+                      aria-required="true"
+                      aria-invalid={
+                        submitAttempted && !state ? true : undefined
+                      }
+                    >
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getRegionOptions(country).map((opt) => (
+                        <SelectItem key={opt.code} value={opt.code}>
+                          {opt.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -430,9 +445,11 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 <span>
                   {deliveryMethod === "pickup"
                     ? "In-store pickup (free)"
-                    : shipping === 0
-                      ? "Free"
-                      : formatPrice(shipping)}
+                    : shippingPending
+                      ? "Calculated at checkout"
+                      : shipping === 0
+                        ? "Free"
+                        : formatPrice(shipping)}
                 </span>
               </div>
               <div className="flex justify-between border-t pt-2 font-bold">

@@ -307,6 +307,8 @@ export function ProductForm({
       metaDescription: product?.metaDescription ?? "",
       metaKeywords: product?.metaKeywords ?? "",
       ogImage: product?.ogImage ?? undefined,
+      weight: product?.weight ?? undefined,
+      weightUnit: (product?.weightUnit as "lb" | "kg" | undefined) ?? "lb",
     },
   });
 
@@ -543,6 +545,8 @@ export function ProductForm({
         metaDescription: data.metaDescription ?? null,
         metaKeywords: data.metaKeywords ?? null,
         ogImage: resolvedOgImage ?? null,
+        weight: data.weight ?? null,
+        weightUnit: data.weightUnit ?? "lb",
       });
 
       // New default baseline so isDirty clears (RHF only used initial defaultValues otherwise).
@@ -612,6 +616,8 @@ export function ProductForm({
         metaDescription: data.metaDescription ?? null,
         metaKeywords: data.metaKeywords ?? null,
         ogImage: resolvedOgImage ?? null,
+        weight: data.weight ?? null,
+        weightUnit: data.weightUnit ?? "lb",
       });
 
       if (response.productId && resolvedImages.length > 0) {
@@ -955,6 +961,64 @@ export function ProductForm({
                             />
                           </div>
                         )}
+                      </CardContent>
+                    </Card>
+                    {/* Shipping weight */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Shipping</CardTitle>
+                        <CardDescription>
+                          Used to calculate shipping rates when zone + weight
+                          pricing is active
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-3">
+                          <FormField
+                            control={form.control}
+                            name="weight"
+                            render={({ field }) => (
+                              <FormItem className="flex-1">
+                                <FormLabel>Weight</FormLabel>
+                                <FormControl>
+                                  <NumberInput
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
+                                    value={field.value ?? undefined}
+                                    onChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Leave blank to use the store default
+                                </FormDescription>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="weightUnit"
+                            render={({ field }) => (
+                              <FormItem className="w-24 shrink-0">
+                                <FormLabel>Unit</FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value ?? "lb"}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="lb">lb</SelectItem>
+                                    <SelectItem value="kg">kg</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                       </CardContent>
                     </Card>
                   </div>

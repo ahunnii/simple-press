@@ -18,9 +18,13 @@ import {
 } from "~/lib/inventory/reservation";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { checkoutLimiter, getClientIp } from "~/lib/rate-limit";
+import { buildZoneWeightConfig } from "~/lib/shipping-config";
 import {
   calculateShipping,
+  calculateZoneWeightShipping,
+  normalizeWeightToLb,
   shippingConfigFromBusiness,
+  SHIPPING_TYPES,
 } from "~/lib/shipping-utils";
 import { stripeClient } from "~/lib/stripe/client";
 import { checkoutSessionSchema } from "~/lib/validators/checkout";
@@ -170,6 +174,8 @@ export async function POST(req: NextRequest) {
                   allowBackorders: true,
                   price: true,
                   additionalFields: true,
+                  weight: true,
+                  weightUnit: true,
                   images: {
                     select: { url: true },
                     orderBy: { sortOrder: "asc" },
@@ -197,6 +203,8 @@ export async function POST(req: NextRequest) {
           additionalFields: true,
           baseInventoryUnitId: true,
           baseUnitsConsumed: true,
+          weight: true,
+          weightUnit: true,
           _count: { select: { variants: true } },
           images: {
             select: { url: true },
@@ -326,11 +334,58 @@ export async function POST(req: NextRequest) {
       offersInStorePickup: business.offersInStorePickup,
     });
 
+    // Compute total cart weight in pounds for zone+weight shipping.
+    // Variants use the parent product's weight. Products with no weight set
+    // fall back to business.shippingDefaultItemWeightLb (default 0).
+    const defaultItemWeightLb = business.shippingDefaultItemWeightLb ?? 0;
+    let totalWeightLb = 0;
+    for (const item of itemList) {
+      let weightLb: number;
+      if (item.variantId) {
+        const variant = variantMap.get(item.variantId);
+        const pw = variant?.product.weight ?? null;
+        const pu = variant?.product.weightUnit ?? null;
+        weightLb =
+          pw != null ? normalizeWeightToLb(pw, pu) : defaultItemWeightLb;
+      } else {
+        const product = productMap.get(item.productId);
+        const pw = product?.weight ?? null;
+        const pu = product?.weightUnit ?? null;
+        weightLb =
+          pw != null ? normalizeWeightToLb(pw, pu) : defaultItemWeightLb;
+      }
+      totalWeightLb += weightLb * item.quantity;
+    }
+
     let shippingCents = 0;
     let shippingDisplayName = "Shipping";
     if (deliveryMethod === "pickup") {
       shippingCents = 0;
       shippingDisplayName = "In-Store Pickup";
+    } else if (business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT) {
+      // Load zones with rates for this business (not included in getBusinessByDomain).
+      const businessZones = await db.shippingZone.findMany({
+        where: { businessId: business.id },
+        include: { rates: true },
+        orderBy: { sortOrder: "asc" },
+      });
+      const zoneWeightConfig = buildZoneWeightConfig({
+        shippingWeightTiers: business.shippingWeightTiers,
+        shippingFallbackRate: business.shippingFallbackRate,
+        freeShippingThreshold: business.freeShippingThreshold,
+        shippingDefaultItemWeightLb: business.shippingDefaultItemWeightLb,
+        zones: businessZones,
+      });
+      const sa = customerInfo.shippingAddress;
+      shippingCents = calculateZoneWeightShipping({
+        destinationState: sa?.state ?? "",
+        destinationCountry: sa?.country ?? "",
+        totalWeightLb,
+        subtotalCents,
+        config: zoneWeightConfig,
+      });
+      shippingDisplayName =
+        shippingCents === 0 ? "Free shipping" : "Standard shipping";
     } else {
       shippingCents = calculateShipping(subtotalCents, shippingConfig);
       shippingDisplayName =

@@ -10,6 +10,7 @@ import { formatPrice } from "~/lib/prices";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -338,23 +339,30 @@ export function ModernCheckoutForm({ business }: Props) {
                   />
                 </div>
                 <div>
-                  <label htmlFor="state" className={labelClass}>
+                  <label htmlFor="state" id="state-label" className={labelClass}>
                     State / Province *
                   </label>
-                  <input
+                  <select
                     id="state"
-                    type="text"
-                    autoComplete="shipping address-level1"
+                    aria-labelledby="state-label"
                     required={f.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={
-                      submitAttempted && !f.state.trim() ? true : undefined
+                      submitAttempted && !f.state ? true : undefined
                     }
                     value={f.state}
                     onChange={(e) => f.setState(e.target.value)}
                     className={inputClass}
-                    placeholder="CA"
-                  />
+                  >
+                    <option value="" disabled>
+                      Select state
+                    </option>
+                    {getRegionOptions(f.country).map((opt) => (
+                      <option key={opt.code} value={opt.code}>
+                        {opt.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label htmlFor="zip" className={labelClass}>
@@ -461,9 +469,11 @@ export function ModernCheckoutForm({ business }: Props) {
                 <span className="text-foreground">
                   {f.deliveryMethod === "pickup"
                     ? "In-store pickup (free)"
-                    : f.shipping === 0
-                      ? "Free"
-                      : formatPrice(f.shipping)}
+                    : f.shippingPending
+                      ? "Calculated at checkout"
+                      : f.shipping === 0
+                        ? "Free"
+                        : formatPrice(f.shipping)}
                 </span>
               </div>
             </div>

@@ -52,6 +52,8 @@ export const productFormSchema = z.object({
   metaDescription: z.string().max(160).optional().nullable(),
   metaKeywords: z.string().optional().nullable(),
   ogImage: z.string().url().optional().nullable(),
+  weight: z.coerce.number().nonnegative().optional().nullable(),
+  weightUnit: z.enum(["lb", "kg"]).optional(),
 });
 
 export const productCreateSchema = productFormSchema
@@ -60,6 +62,8 @@ export const productCreateSchema = productFormSchema
   })
   .extend({
     variants: z.array(variantSchema),
+    weight: z.number().nonnegative().nullable().optional(),
+    weightUnit: z.enum(["lb", "kg"]).optional(),
   });
 
 export const productUpdateSchema = productFormSchema
@@ -69,6 +73,8 @@ export const productUpdateSchema = productFormSchema
   .extend({
     id: z.string(),
     variants: z.array(variantSchema),
+    weight: z.number().nonnegative().nullable().optional(),
+    weightUnit: z.enum(["lb", "kg"]).optional(),
   });
 
 export const productListFiltersSchema = z

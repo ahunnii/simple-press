@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 import { HappyBambooOrderSummary } from "./happy-bamboo-order-summary";
 
@@ -62,6 +63,7 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
     handleSubmit,
     shippingConfig,
     items,
+    shippingPending,
   } = useCheckoutForm(business);
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
@@ -317,22 +319,33 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="state">
+                  <Label htmlFor="state" id="state-label">
                     State / Province <span aria-hidden="true">*</span>
                   </Label>
-                  <Input
-                    id="state"
-                    type="text"
-                    autoComplete="shipping address-level1"
+                  <Select
                     value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    placeholder="e.g. CA or ON"
-                    required={deliveryMethod === "ship"}
-                    aria-required="true"
-                    aria-invalid={
-                      submitAttempted && !state.trim() ? true : undefined
-                    }
-                  />
+                    onValueChange={(v) => setState(v)}
+                    required
+                  >
+                    <SelectTrigger
+                      id="state"
+                      aria-labelledby="state-label"
+                      aria-required="true"
+                      aria-invalid={
+                        submitAttempted && !state ? true : undefined
+                      }
+                      className="w-full"
+                    >
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getRegionOptions(country).map((opt) => (
+                        <SelectItem key={opt.code} value={opt.code}>
+                          {opt.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -388,6 +401,7 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
             shippingConfig={shippingConfig}
             deliveryMethod={deliveryMethod}
             discountAmount={discountAmount}
+            shippingPending={shippingPending}
           />
 
           <div role="alert" aria-live="assertive" aria-atomic="true">

@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { getRegionOptions } from "~/lib/geo/regions";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -235,23 +236,36 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="state" className="text-white">
+                    <Label
+                      id="state-label"
+                      htmlFor="state"
+                      className="text-white"
+                    >
                       State / Province *
                     </Label>
-                    <Input
-                      id="state"
-                      type="text"
-                      autoComplete="shipping address-level1"
+                    <Select
                       value={f.state}
-                      onChange={(e) => f.setState(e.target.value)}
-                      placeholder="e.g. CA or ON"
-                      className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-                      required={f.deliveryMethod === "ship"}
-                      aria-required="true"
-                      aria-invalid={
-                        submitAttempted && !f.state.trim() ? true : undefined
-                      }
-                    />
+                      onValueChange={(v) => f.setState(v)}
+                    >
+                      <SelectTrigger
+                        id="state"
+                        className="w-full border-white/20 bg-zinc-900/50 text-white"
+                        aria-labelledby="state-label"
+                        aria-required="true"
+                        aria-invalid={
+                          submitAttempted && !f.state ? true : undefined
+                        }
+                      >
+                        <SelectValue placeholder="Select state" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getRegionOptions(f.country).map((opt) => (
+                          <SelectItem key={opt.code} value={opt.code}>
+                            {opt.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -477,9 +491,11 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   <span className="text-white">
                     {f.deliveryMethod === "pickup"
                       ? "In-store pickup (free)"
-                      : f.shipping === 0
-                        ? "Free"
-                        : formatPrice(f.shipping)}
+                      : f.shippingPending
+                        ? "Calculated at checkout"
+                        : f.shipping === 0
+                          ? "Free"
+                          : formatPrice(f.shipping)}
                   </span>
                 </div>
                 <div className="flex justify-between border-t border-white/20 pt-2 font-bold text-white">
