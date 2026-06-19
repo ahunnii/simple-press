@@ -30,6 +30,11 @@ type Props = {
 export function DarkTrendCheckoutForm({ business }: Props) {
   const f = useCheckoutForm(business);
 
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
   // M-11: ref to focus error alert when set
@@ -489,13 +494,23 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                 <div className="flex justify-between text-sm">
                   <span className="text-white/70">Shipping</span>
                   <span className="text-white">
-                    {f.deliveryMethod === "pickup"
-                      ? "In-store pickup (free)"
-                      : f.shippingPending
-                        ? "Calculated at checkout"
-                        : f.shipping === 0
-                          ? "Free"
-                          : formatPrice(f.shipping)}
+                    {f.deliveryMethod === "pickup" ? (
+                      "In-store pickup (free)"
+                    ) : shippingCalculating ? (
+                      <span
+                        className="inline-flex items-center gap-1.5 text-white/70"
+                        aria-live="polite"
+                      >
+                        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                        Calculating…
+                      </span>
+                    ) : f.shippingPending ? (
+                      "Calculated at checkout"
+                    ) : f.shipping === 0 ? (
+                      "Free"
+                    ) : (
+                      formatPrice(f.shipping)
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between border-t border-white/20 pt-2 font-bold text-white">
@@ -526,8 +541,8 @@ export function DarkTrendCheckoutForm({ business }: Props) {
               {/* S-11 + N-1: violet-600, aria-hidden icons */}
               <Button
                 type="submit"
-                disabled={f.isProcessing}
-                aria-busy={f.isProcessing}
+                disabled={f.isProcessing || shippingCalculating}
+                aria-busy={f.isProcessing || shippingCalculating}
                 className="w-full bg-violet-600 py-6 text-base font-semibold text-white hover:bg-violet-700"
                 size="lg"
               >
@@ -538,6 +553,14 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                       className="mr-2 h-5 w-5 animate-spin"
                     />
                     Processing...
+                  </>
+                ) : shippingCalculating ? (
+                  <>
+                    <Loader2
+                      aria-hidden="true"
+                      className="mr-2 h-5 w-5 animate-spin"
+                    />
+                    Calculating shipping…
                   </>
                 ) : (
                   <>

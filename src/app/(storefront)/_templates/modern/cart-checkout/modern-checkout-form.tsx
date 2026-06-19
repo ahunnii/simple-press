@@ -35,6 +35,11 @@ export function ModernCheckoutForm({ business }: Props) {
     f.setName(`${firstName.trim()} ${v.trim()}`.trim());
   };
 
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+
   const onSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
     await f.handleSubmit(e);
@@ -467,13 +472,23 @@ export function ModernCheckoutForm({ business }: Props) {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
                 <span className="text-foreground">
-                  {f.deliveryMethod === "pickup"
-                    ? "In-store pickup (free)"
-                    : f.shippingPending
-                      ? "Calculated at checkout"
-                      : f.shipping === 0
-                        ? "Free"
-                        : formatPrice(f.shipping)}
+                  {f.deliveryMethod === "pickup" ? (
+                    "In-store pickup (free)"
+                  ) : shippingCalculating ? (
+                    <span
+                      className="text-muted-foreground inline-flex items-center gap-1.5"
+                      aria-live="polite"
+                    >
+                      <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                      Calculating…
+                    </span>
+                  ) : f.shippingPending ? (
+                    "Calculated at checkout"
+                  ) : f.shipping === 0 ? (
+                    "Free"
+                  ) : (
+                    formatPrice(f.shipping)
+                  )}
                 </span>
               </div>
             </div>
@@ -504,14 +519,19 @@ export function ModernCheckoutForm({ business }: Props) {
           <button
             type="submit"
             form="checkout-form"
-            disabled={f.isProcessing}
-            aria-busy={f.isProcessing}
+            disabled={f.isProcessing || shippingCalculating}
+            aria-busy={f.isProcessing || shippingCalculating}
             className="bg-primary text-primary-foreground mt-8 flex w-full items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {f.isProcessing ? (
               <>
                 <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
                 Processing...
+              </>
+            ) : shippingCalculating ? (
+              <>
+                <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                Calculating shipping…
               </>
             ) : (
               <>

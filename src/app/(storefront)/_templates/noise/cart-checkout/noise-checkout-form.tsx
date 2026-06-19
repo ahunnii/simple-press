@@ -83,8 +83,14 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
     handleSubmit,
     shippingConfig,
     items,
+    shipping,
     shippingPending,
   } = useCheckoutForm(business);
+
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    deliveryMethod === "ship" && state.trim().length > 0 && shippingPending;
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -471,10 +477,11 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
       <div className="mt-10 w-full shrink-0 lg:mt-0 lg:w-[360px]">
         <div className="sticky top-28 flex flex-col gap-5">
           <NoiseOrderSummary
-            shippingConfig={shippingConfig}
             deliveryMethod={deliveryMethod}
             discountAmount={discountAmount}
+            shipping={shipping}
             shippingPending={shippingPending}
+            shippingCalculating={shippingCalculating}
           />
 
           <div role="alert" aria-live="assertive" aria-atomic="true">
@@ -490,14 +497,20 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
           {/* Submit */}
           <button
             type="submit"
-            disabled={isProcessing}
-            aria-busy={isProcessing}
+            disabled={isProcessing || shippingCalculating}
+            aria-busy={isProcessing || shippingCalculating}
             className="flex w-full items-center justify-between px-5 py-4 font-mono text-[11px] tracking-[0.24em] uppercase transition-all disabled:opacity-50"
             style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
           >
             <span className="flex items-center gap-2">
-              {isProcessing && <Loader2 className="size-3.5 animate-spin" />}
-              {isProcessing ? "Processing…" : "Continue to payment"}
+              {(isProcessing || shippingCalculating) && (
+                <Loader2 className="size-3.5 animate-spin" />
+              )}
+              {isProcessing
+                ? "Processing…"
+                : shippingCalculating
+                  ? "Calculating shipping…"
+                  : "Continue to payment"}
             </span>
             <span>→</span>
           </button>

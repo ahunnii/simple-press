@@ -34,6 +34,11 @@ type CheckoutFormProps = {
 export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
   const f = useCheckoutForm(business);
 
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
@@ -461,13 +466,23 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                 <div className="flex justify-between text-sm">
                   <span className="text-[#6b6b6b]">Shipping</span>
                   <span>
-                    {f.deliveryMethod === "pickup"
-                      ? "In-store pickup (free)"
-                      : f.shippingPending
-                        ? "Calculated at checkout"
-                        : f.shipping === 0
-                          ? "Free"
-                          : formatPrice(f.shipping)}
+                    {f.deliveryMethod === "pickup" ? (
+                      "In-store pickup (free)"
+                    ) : shippingCalculating ? (
+                      <span
+                        className="inline-flex items-center gap-1.5 text-[#6b6b6b]"
+                        aria-live="polite"
+                      >
+                        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                        Calculating…
+                      </span>
+                    ) : f.shippingPending ? (
+                      "Calculated at checkout"
+                    ) : f.shipping === 0 ? (
+                      "Free"
+                    ) : (
+                      formatPrice(f.shipping)
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between border-t pt-2 font-bold">
@@ -489,8 +504,8 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
 
               <Button
                 type="submit"
-                disabled={f.isProcessing}
-                aria-busy={f.isProcessing}
+                disabled={f.isProcessing || shippingCalculating}
+                aria-busy={f.isProcessing || shippingCalculating}
                 className="w-full text-white"
                 size="lg"
                 style={{ backgroundColor: primaryColor }}
@@ -502,6 +517,14 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                       aria-hidden="true"
                     />
                     Processing...
+                  </>
+                ) : shippingCalculating ? (
+                  <>
+                    <Loader2
+                      className="mr-2 h-5 w-5 animate-spin"
+                      aria-hidden="true"
+                    />
+                    Calculating shipping…
                   </>
                 ) : (
                   <>

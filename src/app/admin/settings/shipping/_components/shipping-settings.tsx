@@ -116,17 +116,16 @@ export function ShippingSettings({ business }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
 
   // ── Mode / flat-rate form ─────────────────────────────────────────────────
-  // Guard against zone_weight — that mode has its own zoneForm.
-  const t = business.shippingType;
-  const legacyShippingType: ShippingFormValues["shippingType"] =
-    t === "free" || t === "flat_rate" || t === "flat_rate_with_threshold"
-      ? t
-      : "free";
+  // The radio reflects the actual saved mode (including "zone_weight") so the
+  // editor re-opens on reload. The flat-rate fields are only validated/submitted
+  // for the flat_rate modes; zone_weight is handled by the separate zoneForm.
+  const initialShippingType =
+    business.shippingType as ShippingFormValues["shippingType"];
 
   const form = useForm<ShippingFormValues>({
     resolver: zodResolver(shippingFormSchema),
     defaultValues: {
-      shippingType: legacyShippingType,
+      shippingType: initialShippingType,
       shippingFlatRateDollars: centsToDollarsString(business.shippingFlatRate),
       freeShippingThresholdDollars: centsToDollarsString(
         business.freeShippingThreshold,

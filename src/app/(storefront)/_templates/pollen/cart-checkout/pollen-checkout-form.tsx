@@ -35,6 +35,11 @@ export function PollenCheckoutForm({ business }: Props) {
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+
   const onSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
     await f.handleSubmit(e);
@@ -412,13 +417,23 @@ export function PollenCheckoutForm({ business }: Props) {
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Shipping</span>
               <span className="text-gray-900">
-                {f.deliveryMethod === "pickup"
-                  ? "In-store pickup (free)"
-                  : f.shippingPending
-                    ? "Calculated at checkout"
-                    : f.shipping === 0
-                      ? "Free"
-                      : formatPrice(f.shipping)}
+                {f.deliveryMethod === "pickup" ? (
+                  "In-store pickup (free)"
+                ) : shippingCalculating ? (
+                  <span
+                    className="inline-flex items-center gap-1.5 text-gray-500"
+                    aria-live="polite"
+                  >
+                    <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                    Calculating…
+                  </span>
+                ) : f.shippingPending ? (
+                  "Calculated at checkout"
+                ) : f.shipping === 0 ? (
+                  "Free"
+                ) : (
+                  formatPrice(f.shipping)
+                )}
               </span>
             </div>
             <div className="flex justify-between border-t border-gray-200 pt-3">
@@ -444,14 +459,19 @@ export function PollenCheckoutForm({ business }: Props) {
 
           <button
             type="submit"
-            disabled={f.isProcessing}
-            aria-busy={f.isProcessing}
+            disabled={f.isProcessing || shippingCalculating}
+            aria-busy={f.isProcessing || shippingCalculating}
             className="mt-5 w-full rounded-md bg-[#215935] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#1a4729] disabled:opacity-50"
           >
             {f.isProcessing ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 Processing...
+              </span>
+            ) : shippingCalculating ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                Calculating shipping…
               </span>
             ) : (
               "Continue to Payment"

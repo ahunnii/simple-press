@@ -40,7 +40,13 @@ type Props = {
 export function PollenCartContents({ business }: Props) {
   const { items, subtotal, itemCount } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
-  const shipping = calculateShipping(subtotal, shippingConfig);
+  // Zone+weight rates depend on the destination address, which isn't known in
+  // the cart — defer to checkout rather than showing a misleading "Free".
+  const isZoneWeight =
+    shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
+  const shipping = isZoneWeight
+    ? 0
+    : calculateShipping(subtotal, shippingConfig);
   const estimatedTotal = subtotal + shipping;
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
   const progress = getFreeShippingProgress(subtotal, shippingConfig);
@@ -132,7 +138,11 @@ export function PollenCartContents({ business }: Props) {
                 <div className="flex justify-between text-sm">
                   <span className="text-[#4c566a]">Shipping</span>
                   <span className="font-medium text-[#2a351f]">
-                    {shipping === 0 ? "Free" : formatPrice(shipping)}
+                    {isZoneWeight
+                      ? "Calculated at checkout"
+                      : shipping === 0
+                        ? "Free"
+                        : formatPrice(shipping)}
                   </span>
                 </div>
                 {showProgress && untilFree !== null && (

@@ -25,7 +25,13 @@ type Props = {
 
 export function NoiseCartSummary({ shippingConfig }: Props) {
   const { subtotal, itemCount, setIsOpen } = useCart();
-  const shipping = calculateShipping(subtotal, shippingConfig);
+  // Zone+weight rates depend on the destination address, which isn't known in
+  // the cart — defer to checkout rather than showing a misleading "Free".
+  const isZoneWeight =
+    shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
+  const shipping = isZoneWeight
+    ? 0
+    : calculateShipping(subtotal, shippingConfig);
   const estimatedTotal = subtotal + shipping;
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);
   const progress = getFreeShippingProgress(subtotal, shippingConfig);
@@ -88,7 +94,9 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
             Est. shipping
           </span>
           <span className="font-mono text-[12px] tracking-[0.06em]">
-            {shipping === 0 ? (
+            {isZoneWeight ? (
+              <span style={{ color: "var(--vn-steel-mist)" }}>Calculated at checkout</span>
+            ) : shipping === 0 ? (
               <span style={{ color: "var(--vn-steel-mist)" }}>Free</span>
             ) : (
               formatPrice(shipping)

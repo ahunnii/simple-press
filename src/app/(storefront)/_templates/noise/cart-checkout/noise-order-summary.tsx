@@ -1,33 +1,35 @@
 "use client";
 
 import Image from "next/image";
+import { Loader2 } from "lucide-react";
 
-import type { ShippingConfig } from "~/lib/shipping-utils";
 import { formatPrice } from "~/lib/prices";
-import { calculateShipping } from "~/lib/shipping-utils";
 import { useCart } from "~/providers/cart-context";
 
 type OrderSummaryProps = {
-  shippingConfig: ShippingConfig;
   deliveryMethod: "ship" | "pickup";
   discountAmount: number;
+  // Authoritative shipping cost from the checkout hook (a live zone+weight
+  // quote when applicable). The summary must not recompute it.
+  shipping: number;
+  // True before a destination is known (show "Calculated at checkout").
   shippingPending?: boolean;
+  // True while a live rate is actively loading for a known destination.
+  shippingCalculating?: boolean;
 };
 
 export function NoiseOrderSummary({
-  shippingConfig,
   deliveryMethod,
   discountAmount,
+  shipping,
   shippingPending,
+  shippingCalculating,
 }: OrderSummaryProps) {
   const { items, subtotal } = useCart();
 
-  const shipping =
-    deliveryMethod === "pickup"
-      ? 0
-      : calculateShipping(subtotal, shippingConfig);
+  const effectiveShipping = deliveryMethod === "pickup" ? 0 : shipping;
   const afterDiscount = subtotal - discountAmount;
-  const estimatedTotal = afterDiscount + shipping;
+  const estimatedTotal = afterDiscount + effectiveShipping;
 
   return (
     <div
@@ -146,16 +148,32 @@ export function NoiseOrderSummary({
           <span
             className="font-mono text-[12px] tracking-[0.06em]"
             style={{
-              color: shipping === 0 || shippingPending ? "var(--vn-steel-mist)" : undefined,
+              color:
+                deliveryMethod === "pickup" ||
+                shipping === 0 ||
+                shippingPending ||
+                shippingCalculating
+                  ? "var(--vn-steel-mist)"
+                  : undefined,
             }}
           >
-            {deliveryMethod === "pickup"
-              ? "Studio pickup"
-              : shippingPending
-                ? "Calculated at checkout"
-                : shipping === 0
-                  ? "Free"
-                  : formatPrice(shipping)}
+            {deliveryMethod === "pickup" ? (
+              "In-store pickup (free)"
+            ) : shippingCalculating ? (
+              <span
+                className="inline-flex items-center gap-1.5"
+                aria-live="polite"
+              >
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                Calculating…
+              </span>
+            ) : shippingPending ? (
+              "Calculated at checkout"
+            ) : shipping === 0 ? (
+              "Free"
+            ) : (
+              formatPrice(shipping)
+            )}
           </span>
         </div>
       </div>

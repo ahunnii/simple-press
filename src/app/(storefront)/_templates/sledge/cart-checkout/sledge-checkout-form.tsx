@@ -74,8 +74,14 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
     handleSubmit,
     shippingConfig,
     items,
+    shipping,
     shippingPending,
   } = useCheckoutForm(business);
+
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    deliveryMethod === "ship" && state.trim().length > 0 && shippingPending;
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -387,10 +393,11 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
       <aside className="min-w-0">
         <div className="flex flex-col gap-5 lg:sticky lg:top-28">
           <SledgeOrderSummary
-            shippingConfig={shippingConfig}
             deliveryMethod={deliveryMethod}
             discountAmount={discountAmount}
+            shipping={shipping}
             shippingPending={shippingPending}
+            shippingCalculating={shippingCalculating}
           />
 
           <div role="alert" aria-live="assertive" aria-atomic="true">
@@ -405,15 +412,19 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
 
           <button
             type="submit"
-            disabled={isProcessing}
-            aria-busy={isProcessing}
+            disabled={isProcessing || shippingCalculating}
+            aria-busy={isProcessing || shippingCalculating}
             className="sl-btn flex w-full items-center justify-between disabled:opacity-50"
           >
             <span className="flex items-center gap-2">
-              {isProcessing ? (
+              {isProcessing || shippingCalculating ? (
                 <Loader2 className="size-3.5 animate-spin" />
               ) : null}
-              {isProcessing ? "Processing…" : "Continue to Payment"}
+              {isProcessing
+                ? "Processing…"
+                : shippingCalculating
+                  ? "Calculating shipping…"
+                  : "Continue to Payment"}
             </span>
             <span>→</span>
           </button>

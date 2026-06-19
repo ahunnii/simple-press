@@ -63,8 +63,14 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
     handleSubmit,
     shippingConfig,
     items,
+    shipping,
     shippingPending,
   } = useCheckoutForm(business);
+
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    deliveryMethod === "ship" && state.trim().length > 0 && shippingPending;
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -398,10 +404,11 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
       <div className="w-full shrink-0 lg:w-80">
         <div className="sticky top-20 space-y-4">
           <HappyBambooOrderSummary
-            shippingConfig={shippingConfig}
             deliveryMethod={deliveryMethod}
             discountAmount={discountAmount}
+            shipping={shipping}
             shippingPending={shippingPending}
+            shippingCalculating={shippingCalculating}
           />
 
           <div role="alert" aria-live="assertive" aria-atomic="true">
@@ -414,8 +421,8 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
 
           <Button
             type="submit"
-            disabled={isProcessing}
-            aria-busy={isProcessing}
+            disabled={isProcessing || shippingCalculating}
+            aria-busy={isProcessing || shippingCalculating}
             className="w-full text-white"
             size="lg"
             style={{ backgroundColor: primaryColor }}
@@ -427,6 +434,14 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                   aria-hidden="true"
                 />
                 Processing...
+              </>
+            ) : shippingCalculating ? (
+              <>
+                <Loader2
+                  className="mr-2 size-4 animate-spin"
+                  aria-hidden="true"
+                />
+                Calculating shipping…
               </>
             ) : (
               "Continue to Payment"

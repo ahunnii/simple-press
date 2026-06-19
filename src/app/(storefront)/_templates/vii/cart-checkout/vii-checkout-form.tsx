@@ -56,6 +56,11 @@ export function ViiCheckoutForm({
   const f = useCheckoutForm(business);
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+
   const onSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
     await f.handleSubmit(e);
@@ -1055,13 +1060,24 @@ export function ViiCheckoutForm({
                       color: "var(--vii-navy)",
                     }}
                   >
-                    {f.deliveryMethod === "pickup"
-                      ? "In-store pickup (free)"
-                      : f.shippingPending
-                        ? "Calculated at checkout"
-                        : f.shipping === 0
-                          ? "Free"
-                          : formatPrice(f.shipping)}
+                    {f.deliveryMethod === "pickup" ? (
+                      "In-store pickup (free)"
+                    ) : shippingCalculating ? (
+                      <span
+                        className="inline-flex items-center gap-1.5"
+                        style={{ color: "var(--vii-ink-soft)" }}
+                        aria-live="polite"
+                      >
+                        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                        Calculating…
+                      </span>
+                    ) : f.shippingPending ? (
+                      "Calculated at checkout"
+                    ) : f.shipping === 0 ? (
+                      "Free"
+                    ) : (
+                      formatPrice(f.shipping)
+                    )}
                   </span>
                 </div>
 
@@ -1134,8 +1150,8 @@ export function ViiCheckoutForm({
               {/* Submit CTA */}
               <button
                 type="submit"
-                disabled={f.isProcessing}
-                aria-busy={f.isProcessing}
+                disabled={f.isProcessing || shippingCalculating}
+                aria-busy={f.isProcessing || shippingCalculating}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -1152,9 +1168,9 @@ export function ViiCheckoutForm({
                   textTransform: "uppercase",
                   borderRadius: "var(--radius)",
                   border: "none",
-                  cursor: f.isProcessing ? "not-allowed" : "pointer",
+                  cursor: f.isProcessing || shippingCalculating ? "not-allowed" : "pointer",
                   transition: "background 0.2s ease, opacity 0.2s ease",
-                  opacity: f.isProcessing ? 0.7 : 1,
+                  opacity: f.isProcessing || shippingCalculating ? 0.7 : 1,
                 }}
               >
                 {f.isProcessing ? (
@@ -1164,6 +1180,14 @@ export function ViiCheckoutForm({
                       aria-hidden="true"
                     />
                     Processing…
+                  </>
+                ) : shippingCalculating ? (
+                  <>
+                    <Loader2
+                      className="h-4 w-4 animate-spin"
+                      aria-hidden="true"
+                    />
+                    Calculating shipping…
                   </>
                 ) : (
                   <>

@@ -31,6 +31,11 @@ export function ElegantCheckoutForm({ business }: Props) {
   const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // A live shipping rate is actively loading once a destination is entered but
+  // the amount isn't known yet — show a spinner and block submit until it lands.
+  const shippingCalculating =
+    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFieldErrors({});
@@ -626,59 +631,96 @@ export function ElegantCheckoutForm({ business }: Props) {
               marginBottom: 16,
             }}
           >
-            {[
-              { label: "Subtotal", value: formatPrice(f.subtotal) },
-              ...(f.discountAmount > 0 && f.discountCodeLabel
-                ? [
-                    {
-                      label: `Discount (${f.discountCodeLabel})`,
-                      value: `−${formatPrice(f.discountAmount)}`,
-                      green: true,
-                    },
-                  ]
-                : []),
-              {
-                label: "Shipping",
-                value:
-                  f.deliveryMethod === "pickup"
-                    ? "Pickup (free)"
-                    : f.shippingPending
-                      ? "Calculated at checkout"
-                      : f.shipping === 0
-                        ? "Free"
-                        : formatPrice(f.shipping),
-              },
-            ].map(({ label, value, green }) => (
-              <div
-                key={label}
-                style={{ display: "flex", justifyContent: "space-between" }}
+            {/* Subtotal */}
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                }}
               >
+                Subtotal
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-sans, sans-serif)",
+                  fontSize: 13,
+                  color: "var(--el-ink, #1c1a17)",
+                }}
+              >
+                {formatPrice(f.subtotal)}
+              </span>
+            </div>
+
+            {/* Discount */}
+            {f.discountAmount > 0 && f.discountCodeLabel && (
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span
                   style={{
                     fontFamily: "var(--font-mono, ui-monospace)",
                     fontSize: 11,
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
-                    color: green
-                      ? "var(--el-sage, #4a5240)"
-                      : "var(--el-ink-soft, #6b6659)",
+                    color: "var(--el-sage, #4a5240)",
                   }}
                 >
-                  {label}
+                  Discount ({f.discountCodeLabel})
                 </span>
                 <span
                   style={{
                     fontFamily: "var(--font-sans, sans-serif)",
                     fontSize: 13,
-                    color: green
-                      ? "var(--el-sage, #4a5240)"
-                      : "var(--el-ink, #1c1a17)",
+                    color: "var(--el-sage, #4a5240)",
                   }}
                 >
-                  {value}
+                  −{formatPrice(f.discountAmount)}
                 </span>
               </div>
-            ))}
+            )}
+
+            {/* Shipping */}
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                }}
+              >
+                Shipping
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-sans, sans-serif)",
+                  fontSize: 13,
+                  color: "var(--el-ink, #1c1a17)",
+                }}
+              >
+                {f.deliveryMethod === "pickup" ? (
+                  "Pickup (free)"
+                ) : shippingCalculating ? (
+                  <span
+                    className="inline-flex items-center gap-1.5"
+                    style={{ color: "var(--el-ink-soft, #6b6659)" }}
+                    aria-live="polite"
+                  >
+                    <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                    Calculating…
+                  </span>
+                ) : f.shippingPending ? (
+                  "Calculated at checkout"
+                ) : f.shipping === 0 ? (
+                  "Free"
+                ) : (
+                  formatPrice(f.shipping)
+                )}
+              </span>
+            </div>
             <div
               style={{
                 display: "flex",
@@ -721,8 +763,8 @@ export function ElegantCheckoutForm({ business }: Props) {
 
           <button
             type="submit"
-            disabled={f.isProcessing}
-            aria-busy={f.isProcessing}
+            disabled={f.isProcessing || shippingCalculating}
+            aria-busy={f.isProcessing || shippingCalculating}
             style={{
               display: "flex",
               alignItems: "center",
@@ -738,8 +780,8 @@ export function ElegantCheckoutForm({ business }: Props) {
               background: "var(--el-ink, #1c1a17)",
               color: "var(--el-paper, #fbf8f2)",
               border: "none",
-              cursor: f.isProcessing ? "not-allowed" : "pointer",
-              opacity: f.isProcessing ? 0.7 : 1,
+              cursor: f.isProcessing || shippingCalculating ? "not-allowed" : "pointer",
+              opacity: f.isProcessing || shippingCalculating ? 0.7 : 1,
               fontFamily: "var(--font-sans, sans-serif)",
               transition: `background 0.4s ${ease}`,
             }}
@@ -749,6 +791,11 @@ export function ElegantCheckoutForm({ business }: Props) {
               <>
                 <Loader2 aria-hidden={true} className="h-4 w-4 animate-spin" />
                 Processing…
+              </>
+            ) : shippingCalculating ? (
+              <>
+                <Loader2 aria-hidden={true} className="h-4 w-4 animate-spin" />
+                Calculating shipping…
               </>
             ) : (
               "Continue to payment"
