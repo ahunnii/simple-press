@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -265,8 +266,9 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
               Shipping Address
             </legend>
             <p className="text-muted-foreground text-sm">
-              This is sent to Stripe Checkout prefilled so you can confirm or
-              edit your name, phone, and address before paying.
+              {shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                ? "We price shipping from this address. Make changes here before continuing to payment."
+                : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">

@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -311,7 +312,9 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
               className="-mt-2 font-mono text-[9.5px] tracking-[0.14em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
-              Pre-filled at Stripe — you can confirm or edit before paying.
+              {shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                ? "We price shipping from this address. Make changes here before continuing to payment."
+                : "Pre-filled at Stripe — you can confirm or edit before paying."}
             </p>
 
             <div className="flex flex-col gap-1.5">

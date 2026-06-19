@@ -499,8 +499,21 @@ export async function POST(req: NextRequest) {
       stripeCustomerId = customer.id;
     }
 
+    // Zone+weight rates are priced from the address entered in our form. Stripe
+    // Checkout can't recompute shipping when the shopper edits the address, so we
+    // LOCK the destination (no `shipping_address_collection`) for zone_weight ship
+    // orders — otherwise a shopper could pick a cheap state here, then switch to a
+    // far one on Stripe and pay the cheaper fixed rate. Address-independent modes
+    // (free/flat) keep Stripe's editable address.
+    const lockShippingAddress =
+      deliveryMethod === "ship" &&
+      business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT &&
+      hasFullShipping &&
+      !!sa;
+
     // Shipping: `shipping_options` sets the amount Stripe charges (Connect webhook reads `amount_shipping`).
-    // Address collection only when shipping to customer (not in-store pickup).
+    // Address collection only when shipping to customer (not in-store pickup), and
+    // never for locked zone_weight orders (the address is bound to the PaymentIntent below).
     // Phone: `phone_number_collection` prefills when Customer.phone is set.
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "payment",
@@ -510,9 +523,12 @@ export async function POST(req: NextRequest) {
       ...(stripeCustomerId
         ? {
             customer: stripeCustomerId,
-            customer_update: {
-              shipping: "auto",
-            },
+            // Only sync shipping from Stripe-collected address when we actually
+            // collect one. Stripe rejects `customer_update[shipping]: "auto"`
+            // without `shipping_address_collection`.
+            ...(lockShippingAddress
+              ? {}
+              : { customer_update: { shipping: "auto" as const } }),
           }
         : { customer_email: customerInfo.email }),
       shipping_options: [
@@ -527,10 +543,31 @@ export async function POST(req: NextRequest) {
           },
         },
       ],
-      ...(deliveryMethod === "ship"
+      ...(deliveryMethod === "ship" && !lockShippingAddress
         ? {
             shipping_address_collection: {
               allowed_countries: ["US", "CA"],
+            },
+          }
+        : {}),
+      // Locked zone_weight order: bind the priced destination to the PaymentIntent
+      // so the webhook records it and Stripe Tax (if enabled) uses it. The shopper
+      // cannot change it on Stripe, so the charged rate always matches the address.
+      ...(lockShippingAddress && sa
+        ? {
+            payment_intent_data: {
+              shipping: {
+                name: customerInfo.name,
+                phone: contactPhone,
+                address: {
+                  line1: sa.line1.trim(),
+                  ...(sa.line2?.trim() ? { line2: sa.line2.trim() } : {}),
+                  city: sa.city.trim(),
+                  state: sa.state.trim(),
+                  postal_code: sa.postalCode.trim(),
+                  country: sa.country,
+                },
+              },
             },
           }
         : {}),

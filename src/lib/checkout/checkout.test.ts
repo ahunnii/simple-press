@@ -266,4 +266,108 @@ describe("resolveCheckoutShipping", () => {
       nameForAddress: null,
     });
   });
+
+  // Locked zone_weight flow: no Checkout-collected shipping address. The
+  // PaymentIntent shipping (the address we priced and bound) must win over the
+  // billing address in customer_details — never ship to the billing address.
+  it("prefers payment_intent shipping over the billing address", () => {
+    const session = {
+      collected_information: null,
+      customer_details: {
+        phone: "+15551234567",
+        name: "Billing Name",
+        address: {
+          line1: "999 Billing Blvd",
+          city: "Billtown",
+          state: "NY",
+          postal_code: "10001",
+          country: "US",
+        },
+      },
+      payment_intent: {
+        shipping: {
+          name: "Ada Lovelace",
+          phone: "+15559998888",
+          address: {
+            line1: "742 Evergreen Terrace",
+            line2: null,
+            city: "Springfield",
+            state: "IL",
+            postal_code: "62704",
+            country: "US",
+          },
+        },
+      },
+      metadata: {},
+    } as unknown as Stripe.Checkout.Session;
+
+    expect(resolveCheckoutShipping(session)).toMatchObject({
+      addressLine1: "742 Evergreen Terrace",
+      city: "Springfield",
+      province: "IL",
+      zip: "62704",
+      country: "US",
+      phone: "+15559998888",
+      nameForAddress: "Ada Lovelace",
+    });
+  });
+
+  it("prefers metadata shipping over the billing address when no PI shipping", () => {
+    const session = {
+      collected_information: null,
+      customer_details: {
+        phone: "+15551234567",
+        name: "Billing Name",
+        address: {
+          line1: "999 Billing Blvd",
+          city: "Billtown",
+          state: "NY",
+          postal_code: "10001",
+          country: "US",
+        },
+      },
+      payment_intent: null,
+      metadata: {
+        shippingLine1: "742 Evergreen Terrace",
+        shippingCity: "Springfield",
+        shippingState: "IL",
+        shippingPostalCode: "62704",
+        shippingCountry: "US",
+        customerName: "Homer",
+      },
+    } as unknown as Stripe.Checkout.Session;
+
+    expect(resolveCheckoutShipping(session)).toMatchObject({
+      addressLine1: "742 Evergreen Terrace",
+      province: "IL",
+      country: "US",
+      nameForAddress: "Homer",
+    });
+  });
+
+  it("falls back to the billing address only as a last resort", () => {
+    const session = {
+      collected_information: null,
+      customer_details: {
+        phone: "+15551234567",
+        name: "Billing Name",
+        address: {
+          line1: "999 Billing Blvd",
+          city: "Billtown",
+          state: "NY",
+          postal_code: "10001",
+          country: "US",
+        },
+      },
+      payment_intent: null,
+      metadata: {},
+    } as unknown as Stripe.Checkout.Session;
+
+    expect(resolveCheckoutShipping(session)).toMatchObject({
+      addressLine1: "999 Billing Blvd",
+      province: "NY",
+      country: "US",
+      nameForAddress: "Billing Name",
+    });
+  });
 });

@@ -8,6 +8,7 @@ import { CreditCard, Loader2, Tag, X } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -183,8 +184,9 @@ export function DarkTrendCheckoutForm({ business }: Props) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-white/70">
-                  This is sent to Stripe Checkout prefilled so you can confirm
-                  or edit your name, phone, and address before paying.
+                  {f.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                    ? "We price shipping from this address. Make changes here before continuing to payment."
+                    : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
                 </p>
                 <div>
                   <Label htmlFor="address-line1" className="text-white">

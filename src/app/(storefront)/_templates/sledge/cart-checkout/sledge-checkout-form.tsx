@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -254,7 +255,9 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
           <fieldset className="flex flex-col gap-5">
             <SectionHead>Shipping Address</SectionHead>
             <p className="-mt-2 font-sans text-xs tracking-[0.12em] text-[var(--sl-ink-soft)] uppercase">
-              Pre-filled at Stripe — you can confirm or edit before paying.
+              {shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                ? "We price shipping from this address. Make changes here before continuing to payment."
+                : "Pre-filled at Stripe — you can confirm or edit before paying."}
             </p>
 
             <div className="flex flex-col gap-1.5">

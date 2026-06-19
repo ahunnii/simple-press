@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import {
   Select,
@@ -218,8 +219,9 @@ export function PollenCheckoutForm({ business }: Props) {
           <section>
             <h2 className={sectionHeadingClass}>Shipping Address</h2>
             <p className="mb-4 text-sm text-gray-600">
-              This is sent to Stripe Checkout prefilled so you can confirm or
-              edit your name, phone, and address before paying.
+              {f.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                ? "We price shipping from this address. Make changes here before continuing to payment."
+                : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
             <div className="space-y-4">
               <div>

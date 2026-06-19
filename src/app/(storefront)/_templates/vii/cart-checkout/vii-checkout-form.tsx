@@ -7,6 +7,7 @@ import { CreditCard, Loader2, Tag } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import {
   Select,
@@ -448,8 +449,9 @@ export function ViiCheckoutForm({
                     marginTop: -8,
                   }}
                 >
-                  This is sent to Stripe Checkout prefilled so you can confirm
-                  or edit your address before paying.
+                  {f.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                    ? "We price shipping from this address. Make changes here before continuing to payment."
+                    : "This is sent to Stripe Checkout prefilled so you can confirm or edit your address before paying."}
                 </p>
 
                 {/* Address line 1 */}

@@ -8,6 +8,7 @@ import { ArrowRight, Loader2, ShoppingBag } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { getRegionOptions } from "~/lib/geo/regions";
@@ -285,8 +286,9 @@ export function ModernCheckoutForm({ business }: Props) {
                 Shipping Address
               </legend>
               <p className="text-muted-foreground mt-2 text-sm">
-                This is sent to Stripe Checkout prefilled so you can confirm or
-                edit before paying.
+                {f.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                  ? "We price shipping from this address. Make changes here before continuing to payment."
+                  : "This is sent to Stripe Checkout prefilled so you can confirm or edit before paying."}
               </p>
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">

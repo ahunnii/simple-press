@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -71,6 +72,11 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
   // the amount isn't known yet — show a spinner and block submit until it lands.
   const shippingCalculating =
     deliveryMethod === "ship" && state.trim().length > 0 && shippingPending;
+
+  // Zone+weight stores lock the address on Stripe (it's used to price shipping),
+  // so it can't be edited at payment — the copy must reflect that.
+  const isZoneWeightShipping =
+    shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -272,8 +278,9 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
               Shipping Address
             </legend>
             <p className="text-muted-foreground text-sm">
-              This is sent to Stripe Checkout prefilled so you can confirm or
-              edit your name, phone, and address before paying.
+              {isZoneWeightShipping
+                ? "We price shipping from this address. Make changes here before continuing to payment."
+                : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
