@@ -13,6 +13,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 import { getAllowedCountries } from "~/lib/geo/regions";
+import { CopyAddressButton } from "../_components/copy-address-button";
 import { EditShippingAddressDialog } from "../_components/edit-shipping-address-dialog";
 import { FulfillmentForm } from "../_components/fulfillment-form";
 import { OrderMoreOptions } from "../_components/order-more-options";
@@ -315,12 +316,17 @@ export default async function OrderDetailPage({ params }: Props) {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle>Shipping Address</CardTitle>
-                <EditShippingAddressDialog
-                  orderId={order.id}
-                  address={order.shippingAddress ?? null}
-                  canAdd={!!order.customerId}
-                  allowedCountries={getAllowedCountries(business?.salesCountries ?? [])}
-                />
+                <div className="flex items-center gap-2">
+                  {order.shippingAddress && (
+                    <CopyAddressButton address={order.shippingAddress} />
+                  )}
+                  <EditShippingAddressDialog
+                    orderId={order.id}
+                    address={order.shippingAddress ?? null}
+                    canAdd={!!order.customerId}
+                    allowedCountries={getAllowedCountries(business?.salesCountries ?? [])}
+                  />
+                </div>
               </CardHeader>
               <CardContent>
                 {order.shippingAddress ? (

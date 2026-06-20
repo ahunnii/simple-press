@@ -436,6 +436,38 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                     >
                       Collections
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start"
+                      onClick={() => quickAddPage("shop", "Shop")}
+                    >
+                      Shop
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start"
+                      onClick={() => quickAddPage("blog", "Blog")}
+                    >
+                      Blog
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start"
+                      onClick={() => quickAddPage("contact", "Contact")}
+                    >
+                      Contact
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start"
+                      onClick={() => quickAddPage("about", "About")}
+                    >
+                      About
+                    </Button>
                   </div>
                 </div>
 
