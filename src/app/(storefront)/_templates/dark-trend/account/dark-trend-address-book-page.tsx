@@ -6,11 +6,12 @@ import { AddressBookContent } from "~/app/(storefront)/_components/account/addre
 import { DarkTrendAccountLayout } from "./dark-trend-account-layout";
 
 export function DarkTrendAddressBookPage({
+  business,
   customer,
 }: AccountAddressBookPageProps) {
   return (
     <DarkTrendAccountLayout heading="Address Book">
-      <AddressBookContent customer={customer} />
+      <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
     </DarkTrendAccountLayout>
   );
 }

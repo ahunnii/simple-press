@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { getRegionOptions } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -487,7 +487,7 @@ export function ElegantCheckoutForm({ business }: Props) {
                 <ElegantField label="Country *" htmlFor="country">
                   <Select
                     value={f.country}
-                    onValueChange={(v) => f.setCountry(v as "US" | "CA")}
+                    onValueChange={(v) => f.setCountry(v as SupportedCountry)}
                   >
                     <SelectTrigger
                       id="country"
@@ -497,8 +497,11 @@ export function ElegantCheckoutForm({ business }: Props) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="US">United States</SelectItem>
-                      <SelectItem value="CA">Canada</SelectItem>
+                      {f.allowedCountries.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {COUNTRY_LABELS[c]}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </ElegantField>

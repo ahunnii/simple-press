@@ -48,6 +48,7 @@ export const businessRouter = createTRPCRouter({
         shippingWeightTiers: true,
         shippingFallbackRate: true,
         shippingDefaultItemWeightLb: true,
+        salesCountries: true,
         zones: {
           include: { rates: true },
           orderBy: { sortOrder: "asc" as const },
@@ -796,6 +797,7 @@ export const businessRouter = createTRPCRouter({
         shippingFlatRate: z.number().int().min(0).nullable().optional(),
         freeShippingThreshold: z.number().int().min(0).nullable().optional(),
         offersInStorePickup: z.boolean(),
+        salesCountries: z.array(z.enum(["CA", "MX"])).default([]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -805,6 +807,7 @@ export const businessRouter = createTRPCRouter({
         shippingFlatRate,
         freeShippingThreshold,
         offersInStorePickup,
+        salesCountries,
       } = input;
 
       const updatedBusiness = await ctx.db.business.update({
@@ -818,6 +821,7 @@ export const businessRouter = createTRPCRouter({
               ? (freeShippingThreshold ?? null)
               : null,
           offersInStorePickup,
+          salesCountries,
         },
       });
       return {
@@ -880,6 +884,8 @@ export const businessRouter = createTRPCRouter({
         fallbackRateDollars,
         freeShippingThresholdDollars,
         defaultItemWeightLb,
+        offersInStorePickup,
+        salesCountries,
       } = input;
 
       // Convert dollar strings → cents.
@@ -899,6 +905,8 @@ export const businessRouter = createTRPCRouter({
             shippingFallbackRate: fallbackRateCents,
             shippingDefaultItemWeightLb: defaultItemWeightLb,
             freeShippingThreshold: freeShippingThresholdCents,
+            offersInStorePickup,
+            salesCountries,
           },
         });
 

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { getRegionOptions } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 const inputClass =
   "w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-[#215935] focus:ring-2 focus:ring-[#215935]/20 focus:outline-none px-3 py-2 text-sm";
@@ -338,7 +338,7 @@ export function PollenCheckoutForm({ business }: Props) {
                   </label>
                   <Select
                     value={f.country}
-                    onValueChange={(v) => f.setCountry(v as "US" | "CA")}
+                    onValueChange={(v) => f.setCountry(v as SupportedCountry)}
                   >
                     <SelectTrigger
                       id="country"
@@ -348,8 +348,11 @@ export function PollenCheckoutForm({ business }: Props) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="US">United States</SelectItem>
-                      <SelectItem value="CA">Canada</SelectItem>
+                      {f.allowedCountries.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {COUNTRY_LABELS[c]}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

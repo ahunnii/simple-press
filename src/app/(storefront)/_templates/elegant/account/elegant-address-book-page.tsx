@@ -6,11 +6,12 @@ import { AddressBookContent } from "~/app/(storefront)/_components/account/addre
 import { ElegantAccountLayout } from "./elegant-account-layout";
 
 export function ElegantAddressBookPage({
+  business,
   customer,
 }: AccountAddressBookPageProps) {
   return (
     <ElegantAccountLayout heading="Address Book">
-      <AddressBookContent customer={customer} />
+      <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
     </ElegantAccountLayout>
   );
 }

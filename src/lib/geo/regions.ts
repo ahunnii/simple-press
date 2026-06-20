@@ -70,6 +70,58 @@ export const CA_PROVINCES: RegionOption[] = [
   { code: "YT", name: "Yukon" },
 ];
 
-export function getRegionOptions(country: "US" | "CA"): RegionOption[] {
-  return country === "US" ? US_STATES : CA_PROVINCES;
+export const MX_STATES: RegionOption[] = [
+  { code: "AGU", name: "Aguascalientes" },
+  { code: "BCN", name: "Baja California" },
+  { code: "BCS", name: "Baja California Sur" },
+  { code: "CAM", name: "Campeche" },
+  { code: "CHP", name: "Chiapas" },
+  { code: "CHH", name: "Chihuahua" },
+  { code: "CMX", name: "Ciudad de México" },
+  { code: "COA", name: "Coahuila" },
+  { code: "COL", name: "Colima" },
+  { code: "DUR", name: "Durango" },
+  { code: "GUA", name: "Guanajuato" },
+  { code: "GRO", name: "Guerrero" },
+  { code: "HID", name: "Hidalgo" },
+  { code: "JAL", name: "Jalisco" },
+  { code: "MEX", name: "México" },
+  { code: "MIC", name: "Michoacán" },
+  { code: "MOR", name: "Morelos" },
+  { code: "NAY", name: "Nayarit" },
+  { code: "NLE", name: "Nuevo León" },
+  { code: "OAX", name: "Oaxaca" },
+  { code: "PUE", name: "Puebla" },
+  { code: "QUE", name: "Querétaro" },
+  { code: "ROO", name: "Quintana Roo" },
+  { code: "SLP", name: "San Luis Potosí" },
+  { code: "SIN", name: "Sinaloa" },
+  { code: "SON", name: "Sonora" },
+  { code: "TAB", name: "Tabasco" },
+  { code: "TAM", name: "Tamaulipas" },
+  { code: "TLA", name: "Tlaxcala" },
+  { code: "VER", name: "Veracruz" },
+  { code: "YUC", name: "Yucatán" },
+  { code: "ZAC", name: "Zacatecas" },
+];
+
+export type SupportedCountry = "US" | "CA" | "MX";
+
+export const COUNTRY_LABELS: Record<SupportedCountry, string> = {
+  US: "United States",
+  CA: "Canada",
+  MX: "Mexico",
+};
+
+export function getRegionOptions(country: SupportedCountry): RegionOption[] {
+  if (country === "US") return US_STATES;
+  if (country === "CA") return CA_PROVINCES;
+  return MX_STATES;
+}
+
+export function getAllowedCountries(salesCountries: string[]): SupportedCountry[] {
+  const extras: SupportedCountry[] = [];
+  if (salesCountries.includes("CA")) extras.push("CA");
+  if (salesCountries.includes("MX")) extras.push("MX");
+  return ["US", ...extras];
 }

@@ -7,12 +7,13 @@ import { AddressBookContent } from "~/app/(storefront)/_components/account/addre
 import { SledgeAccountLayout } from "./sledge-account-layout";
 
 export function SledgeAddressBookPage({
+  business,
   customer,
 }: AccountAddressBookPageProps) {
   return (
     <PageTransition className="bg-white">
       <SledgeAccountLayout heading="Address Book">
-        <AddressBookContent customer={customer} />
+        <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
       </SledgeAccountLayout>
     </PageTransition>
   );

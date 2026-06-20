@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
 import { toast } from "sonner";
 
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -17,6 +19,13 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 type ShippingAddress = {
   firstName: string;
@@ -35,6 +44,7 @@ type Props = {
   orderId: string;
   address: ShippingAddress | null;
   canAdd?: boolean;
+  allowedCountries: SupportedCountry[];
 };
 
 const EMPTY: ShippingAddress = {
@@ -50,11 +60,14 @@ const EMPTY: ShippingAddress = {
   phone: "",
 };
 
-export function EditShippingAddressDialog({ orderId, address, canAdd }: Props) {
+export function EditShippingAddressDialog({ orderId, address, canAdd, allowedCountries }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState<ShippingAddress>(address ?? EMPTY);
+
+  const selectedCountry = (form.country || "US") as SupportedCountry;
+  const regionOptions = getRegionOptions(selectedCountry);
 
   const mutation = api.order.updateShippingAddress.useMutation({
     onSuccess: () => {
@@ -145,6 +158,27 @@ export function EditShippingAddressDialog({ orderId, address, canAdd }: Props) {
             <Input id="sa-address2" {...field("address2")} />
           </div>
 
+          <div className="space-y-1.5">
+            <Label htmlFor="sa-country">Country</Label>
+            <Select
+              value={form.country || "US"}
+              onValueChange={(val) =>
+                setForm((prev) => ({ ...prev, country: val, province: "" }))
+              }
+            >
+              <SelectTrigger id="sa-country">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {allowedCountries.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {COUNTRY_LABELS[code]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="sa-city">City</Label>
@@ -152,19 +186,29 @@ export function EditShippingAddressDialog({ orderId, address, canAdd }: Props) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="sa-province">State / Province</Label>
-              <Input id="sa-province" {...field("province")} />
+              <Select
+                value={form.province ?? ""}
+                onValueChange={(val) =>
+                  setForm((prev) => ({ ...prev, province: val }))
+                }
+              >
+                <SelectTrigger id="sa-province">
+                  <SelectValue placeholder="Select…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {regionOptions.map((opt) => (
+                    <SelectItem key={opt.code} value={opt.code}>
+                      {opt.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="sa-zip">ZIP / Postal Code</Label>
-              <Input id="sa-zip" required {...field("zip")} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="sa-country">Country</Label>
-              <Input id="sa-country" required {...field("country")} />
-            </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sa-zip">ZIP / Postal Code</Label>
+            <Input id="sa-zip" required {...field("zip")} />
           </div>
 
           <div className="space-y-1.5">

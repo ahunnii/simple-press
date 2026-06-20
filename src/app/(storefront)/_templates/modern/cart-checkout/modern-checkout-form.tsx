@@ -11,7 +11,7 @@ import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { getRegionOptions } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -398,13 +398,16 @@ export function ModernCheckoutForm({ business }: Props) {
                     id="country"
                     value={f.country}
                     onChange={(e) =>
-                      f.setCountry(e.target.value as "US" | "CA")
+                      f.setCountry(e.target.value as SupportedCountry)
                     }
                     aria-required="true"
                     className={inputClass}
                   >
-                    <option value="US">United States</option>
-                    <option value="CA">Canada</option>
+                    {f.allowedCountries.map((c) => (
+                      <option key={c} value={c}>
+                        {COUNTRY_LABELS[c]}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

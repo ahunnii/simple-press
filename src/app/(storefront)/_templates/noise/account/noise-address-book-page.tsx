@@ -7,12 +7,13 @@ import { AddressBookContent } from "~/app/(storefront)/_components/account/addre
 import { NoiseAccountLayout } from "./noise-account-layout";
 
 export function NoiseAddressBookPage({
+  business,
   customer,
 }: AccountAddressBookPageProps) {
   return (
     <PageTransition>
       <NoiseAccountLayout heading="Address Book">
-        <AddressBookContent customer={customer} />
+        <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
       </NoiseAccountLayout>
     </PageTransition>
   );

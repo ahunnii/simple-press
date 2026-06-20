@@ -18,6 +18,8 @@ import {
 } from "~/lib/inventory/reservation";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { checkoutLimiter, getClientIp } from "~/lib/rate-limit";
+import { getAllowedCountries } from "~/lib/geo/regions";
+import type { SupportedCountry } from "~/lib/geo/regions";
 import { buildZoneWeightConfig } from "~/lib/shipping-config";
 import {
   calculateShipping,
@@ -278,10 +280,29 @@ export async function POST(req: NextRequest) {
         !saPre.state.trim() ||
         typeof saPre.postalCode !== "string" ||
         !saPre.postalCode.trim() ||
-        (saPre.country !== "US" && saPre.country !== "CA")
+        !getAllowedCountries(business.salesCountries).includes(
+          saPre.country as SupportedCountry,
+        )
       ) {
         return NextResponse.json(
           { error: "Complete shipping address is required" },
+          { status: 400 },
+        );
+      }
+
+      // Extra guard for zone_weight orders: the address is locked to what was
+      // entered in our form (Stripe won't re-collect it). Reject here if the
+      // country is not in the business's allowed list so a bad actor can't
+      // POST a disallowed country that Stripe would otherwise accept.
+      if (
+        business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT &&
+        saPre?.country &&
+        !getAllowedCountries(business.salesCountries).includes(
+          saPre.country as SupportedCountry,
+        )
+      ) {
+        return NextResponse.json(
+          { error: "Shipping to this country is not available" },
           { status: 400 },
         );
       }
@@ -463,7 +484,9 @@ export async function POST(req: NextRequest) {
       sa.state.trim().length > 0 &&
       typeof sa.postalCode === "string" &&
       sa.postalCode.trim().length > 0 &&
-      (sa.country === "US" || sa.country === "CA") &&
+      getAllowedCountries(business.salesCountries).includes(
+        sa.country as SupportedCountry,
+      ) &&
       contactPhone.length > 0;
 
     let stripeCustomerId: string | undefined;
@@ -546,7 +569,10 @@ export async function POST(req: NextRequest) {
       ...(deliveryMethod === "ship" && !lockShippingAddress
         ? {
             shipping_address_collection: {
-              allowed_countries: ["US", "CA"],
+              allowed_countries:
+                getAllowedCountries(
+                  business.salesCountries,
+                ) as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection["allowed_countries"],
             },
           }
         : {}),

@@ -12,6 +12,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
+import { getAllowedCountries } from "~/lib/geo/regions";
 import { EditShippingAddressDialog } from "../_components/edit-shipping-address-dialog";
 import { FulfillmentForm } from "../_components/fulfillment-form";
 import { OrderMoreOptions } from "../_components/order-more-options";
@@ -27,7 +28,10 @@ type Props = {
 export default async function OrderDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const order = await api.order.getById(id).catch(rethrowTrpcForErrorBoundary);
+  const [order, business] = await Promise.all([
+    api.order.getById(id).catch(rethrowTrpcForErrorBoundary),
+    api.business.simplifiedGet(),
+  ]);
 
   if (!order) {
     notFound();
@@ -315,6 +319,7 @@ export default async function OrderDetailPage({ params }: Props) {
                   orderId={order.id}
                   address={order.shippingAddress ?? null}
                   canAdd={!!order.customerId}
+                  allowedCountries={getAllowedCountries(business?.salesCountries ?? [])}
                 />
               </CardHeader>
               <CardContent>

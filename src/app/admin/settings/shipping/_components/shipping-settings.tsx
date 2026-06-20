@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import type { ShippingFormValues, ZoneWeightFormValues } from "~/lib/validators/shipping";
 import type { RouterOutputs } from "~/trpc/react";
 import { centsToDollarsString, dollarsToCents } from "~/lib/prices";
+import { COUNTRY_LABELS } from "~/lib/geo/regions";
 import { cn } from "~/lib/utils";
 import { shippingFormSchema, zoneWeightFormSchema } from "~/lib/validators/shipping";
 import { api } from "~/trpc/react";
@@ -92,6 +93,8 @@ function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
         business.freeShippingThreshold ?? null,
       ),
       defaultItemWeightLb: business.shippingDefaultItemWeightLb ?? 0,
+      offersInStorePickup: business.offersInStorePickup ?? false,
+      salesCountries: (business.salesCountries ?? []) as Array<"CA" | "MX">,
     };
   }
 
@@ -103,6 +106,8 @@ function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
     fallbackRateDollars: "",
     freeShippingThresholdDollars: "",
     defaultItemWeightLb: 0,
+    offersInStorePickup: business.offersInStorePickup ?? false,
+    salesCountries: (business.salesCountries ?? []) as Array<"CA" | "MX">,
   };
 }
 
@@ -131,6 +136,7 @@ export function ShippingSettings({ business }: Props) {
         business.freeShippingThreshold,
       ),
       offersInStorePickup: business.offersInStorePickup ?? false,
+      salesCountries: (business.salesCountries ?? []) as Array<"CA" | "MX">,
     },
   });
 
@@ -158,6 +164,7 @@ export function ShippingSettings({ business }: Props) {
           data.business.freeShippingThreshold,
         ),
         offersInStorePickup: data.business.offersInStorePickup,
+        salesCountries: (data.business.salesCountries ?? []) as Array<"CA" | "MX">,
       });
       void utils.business.invalidate();
       router.refresh();
@@ -174,6 +181,9 @@ export function ShippingSettings({ business }: Props) {
       toast.dismiss();
       toast.success(data.message);
       zoneForm.reset(zoneForm.getValues());
+      // Country toggles live on the flat `form`; clear their dirty state too so
+      // the toolbar returns to "Saved" after a zone+weight save.
+      form.reset(form.getValues());
       void utils.business.invalidate();
       router.refresh();
     },
@@ -203,13 +213,21 @@ export function ShippingSettings({ business }: Props) {
       shippingFlatRate: flatCents,
       freeShippingThreshold: thresholdCents,
       offersInStorePickup: data.offersInStorePickup,
+      salesCountries: data.salesCountries,
     });
   };
 
   const handleZoneWeightSubmit = async (
     data: ZoneWeightFormValues,
   ): Promise<void> => {
-    saveZoneWeightMutation.mutate(data);
+    // The in-store pickup and "Countries you sell to" toggles are bound to the
+    // flat `form` (they are mode-independent), so read their current values from
+    // there rather than the zoneForm copy.
+    saveZoneWeightMutation.mutate({
+      ...data,
+      offersInStorePickup: form.getValues("offersInStorePickup"),
+      salesCountries: form.getValues("salesCountries"),
+    });
   };
 
   // ── Dirty / submitting state ──────────────────────────────────────────────
@@ -219,8 +237,10 @@ export function ShippingSettings({ business }: Props) {
 
   const isFlatDirty = form.formState.isDirty;
   const isZoneDirty = zoneForm.formState.isDirty;
+  // In zone_weight mode the country toggles still live on the flat `form`, so
+  // a country change must also count as dirty / be saved by the toolbar.
   const isDirty =
-    shippingType === "zone_weight" ? isZoneDirty : isFlatDirty;
+    shippingType === "zone_weight" ? isZoneDirty || isFlatDirty : isFlatDirty;
 
   useKeyboardEnter(
     shippingType === "zone_weight" ? zoneForm : form,
@@ -448,6 +468,84 @@ export function ShippingSettings({ business }: Props) {
                       </FormItem>
                     )}
                   />
+
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-base font-medium">Countries you sell to</p>
+                      <p className="text-muted-foreground text-sm">
+                        Choose which countries appear as shipping destinations at checkout.
+                      </p>
+                    </div>
+
+                    {/* USA — always enabled */}
+                    <div className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <p className="text-sm font-medium">{COUNTRY_LABELS.US}</p>
+                        <p className="text-muted-foreground text-sm">
+                          Always available as a shipping destination.
+                        </p>
+                      </div>
+                      <Switch checked disabled />
+                    </div>
+
+                    {/* Canada */}
+                    <FormField
+                      control={form.control}
+                      name="salesCountries"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-medium">
+                              {COUNTRY_LABELS.CA}
+                            </FormLabel>
+                            <p className="text-muted-foreground text-sm">
+                              Show this country as a shipping option at checkout.
+                            </p>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value.includes("CA")}
+                              onCheckedChange={(checked) => {
+                                const next = checked
+                                  ? [...field.value, "CA" as const]
+                                  : field.value.filter((c) => c !== "CA");
+                                field.onChange(next);
+                              }}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Mexico */}
+                    <FormField
+                      control={form.control}
+                      name="salesCountries"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-medium">
+                              {COUNTRY_LABELS.MX}
+                            </FormLabel>
+                            <p className="text-muted-foreground text-sm">
+                              Show this country as a shipping option at checkout.
+                            </p>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value.includes("MX")}
+                              onCheckedChange={(checked) => {
+                                const next = checked
+                                  ? [...field.value, "MX" as const]
+                                  : field.value.filter((c) => c !== "MX");
+                                field.onChange(next);
+                              }}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </form>
