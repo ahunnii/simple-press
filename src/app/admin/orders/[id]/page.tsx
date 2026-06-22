@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { AlertTriangle, ArrowLeft } from "lucide-react";
 
 import { formatDate } from "~/lib/format-date";
+import { getAllowedCountries } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { cn } from "~/lib/utils";
@@ -27,7 +28,10 @@ type Props = {
 export default async function OrderDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const order = await api.order.getById(id).catch(rethrowTrpcForErrorBoundary);
+  const [order, business] = await Promise.all([
+    api.order.getById(id).catch(rethrowTrpcForErrorBoundary),
+    api.business.simplifiedGet(),
+  ]);
 
   if (!order) {
     notFound();
@@ -315,6 +319,9 @@ export default async function OrderDetailPage({ params }: Props) {
                   orderId={order.id}
                   address={order.shippingAddress ?? null}
                   canAdd={!!order.customerId}
+                  allowedCountries={getAllowedCountries(
+                    business?.salesCountries ?? [],
+                  )}
                 />
               </CardHeader>
               <CardContent>

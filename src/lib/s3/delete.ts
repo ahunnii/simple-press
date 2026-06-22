@@ -13,20 +13,8 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-import { env } from "~/env";
 import { s3Client } from "~/lib/s3/client";
-
-/**
- * Derive the S3 object key from a stored public URL.
- *
- * Returns `null` if the URL doesn't match the expected shape.
- */
-function urlToKey(url: string): string | null {
-  const storageBase = `https://${env.NEXT_PUBLIC_STORAGE_URL}/${env.NEXT_PUBLIC_STORAGE_BUCKET_NAME}/`;
-  if (!url.startsWith(storageBase)) return null;
-  const key = url.slice(storageBase.length);
-  return key.length > 0 ? key : null;
-}
+import { publicUrlToKey, STORAGE_BUCKET } from "~/lib/s3/url";
 
 /**
  * Delete one S3 object by its public URL.
@@ -36,7 +24,7 @@ function urlToKey(url: string): string | null {
  * Sentry, and swallowed.
  */
 async function deleteOneObject(url: string): Promise<void> {
-  const key = urlToKey(url);
+  const key = publicUrlToKey(url);
   if (!key) {
     // URL doesn't match expected shape — log but don't throw
     Sentry.captureException(
@@ -46,9 +34,7 @@ async function deleteOneObject(url: string): Promise<void> {
     return;
   }
 
-  const bucketUrl = s3Client.buildBucketUrl(
-    env.NEXT_PUBLIC_STORAGE_BUCKET_NAME,
-  );
+  const bucketUrl = s3Client.buildBucketUrl(STORAGE_BUCKET);
   const objectUrl = `${bucketUrl}/${key}`;
 
   const res = await s3Client.s3.fetch(objectUrl, { method: "DELETE" });

@@ -22,6 +22,7 @@ import {
   IconMessageStar,
   IconPackage,
   IconPackages,
+  IconPhoto,
   IconReceiptTax,
   IconShoppingCart,
   IconSparkles,
@@ -181,6 +182,14 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/admin/content",
     icon: IconLanguage,
     section: "content",
+  },
+  {
+    key: "media",
+    title: "Media Library",
+    href: "/admin/media",
+    icon: IconPhoto,
+    section: "content",
+    featureKey: "media",
   },
 
   // Insights

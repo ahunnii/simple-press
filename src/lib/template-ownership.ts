@@ -44,6 +44,31 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
   },
 };
 
+const TEMPLATE_LABELS: Record<string, string> = {
+  ...Object.fromEntries(AVAILABLE_FREE_TEMPLATES.map((t) => [t.value, t.label])),
+  ...Object.fromEntries(
+    Object.entries(COMMERCIAL_TEMPLATE_OWNERSHIP).map(([value, info]) => [
+      value,
+      info.label,
+    ]),
+  ),
+};
+
+/**
+ * Human-readable label for a template id (e.g. "modern" → "Modern",
+ * "happy-bamboo" → "Happy Bamboo"). Falls back to title-casing the id for
+ * unknown/placeholder templates.
+ */
+export const getTemplateLabel = (templateId: string): string => {
+  const known = TEMPLATE_LABELS[templateId];
+  if (known) return known;
+  return templateId
+    .split(/[-_]/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+};
+
 // List all subdomains associated with commercial templates
 export const getCommercialTemplateSubdomains = (): string[] => {
   return Object.values(COMMERCIAL_TEMPLATE_OWNERSHIP).flatMap(

@@ -51,6 +51,12 @@ type Props = {
 type WeightTierRaw = { label: string; minLb: number; maxLb: number | null };
 
 function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
+  // Mode-independent settings that must persist for zone+weight businesses too.
+  const offersInStorePickup = business.offersInStorePickup ?? false;
+  const salesCountries = (business.salesCountries ?? []).filter(
+    (c): c is "CA" | "MX" => c === "CA" || c === "MX",
+  );
+
   // If the business has saved zone_weight config, hydrate from it.
   const savedTiers = business.shippingWeightTiers as WeightTierRaw[] | null | undefined;
   const savedZones = (business as unknown as {
@@ -92,6 +98,8 @@ function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
         business.freeShippingThreshold ?? null,
       ),
       defaultItemWeightLb: business.shippingDefaultItemWeightLb ?? 0,
+      offersInStorePickup,
+      salesCountries,
     };
   }
 
@@ -103,6 +111,8 @@ function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
     fallbackRateDollars: "",
     freeShippingThresholdDollars: "",
     defaultItemWeightLb: 0,
+    offersInStorePickup,
+    salesCountries,
   };
 }
 
