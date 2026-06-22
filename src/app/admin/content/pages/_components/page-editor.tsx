@@ -223,7 +223,7 @@ export function PageEditor({
         <form
           ref={formRef}
           onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          className="min-h-screen bg-gray-50"
+          className="min-h-screen bg-muted/40"
         >
           <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
             <div className="toolbar-info">
@@ -326,15 +326,15 @@ export function PageEditor({
                         <FormItem>
                           <FormLabel>
                             What is the page slug?{" "}
-                            <span className="text-red-500">*</span>
+                            <span className="text-destructive">*</span>
                           </FormLabel>
                           <div className="flex items-center gap-2">
-                            <span className="text-gray-500">/</span>
+                            <span className="text-muted-foreground">/</span>
                             <FormControl>
                               <Input {...field} placeholder="about-us" />
                             </FormControl>
                           </div>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-muted-foreground">
                             URL-friendly version (lowercase, hyphens)
                           </p>
                           <FormMessage />
@@ -382,7 +382,7 @@ export function PageEditor({
                       name="metaTitle"
                       label="Meta Title"
                       placeholder="All About a Thing"
-                      descriptionClassName="text-xs text-gray-500"
+                      descriptionClassName="text-xs text-muted-foreground"
                       description={`${form.watch("metaTitle")?.length ?? 0}/60 characters`}
                     />
 
@@ -392,7 +392,7 @@ export function PageEditor({
                       name="metaDescription"
                       label="Meta Description"
                       placeholder="All About a Thing: A detailed description of the page..."
-                      descriptionClassName="text-xs text-gray-500"
+                      descriptionClassName="text-xs text-muted-foreground"
                       description={`${form.watch("metaDescription")?.length ?? 0}/160 characters`}
                       rows={3}
                     />

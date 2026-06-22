@@ -6,6 +6,7 @@ export const shippingFormSchema = z
     shippingFlatRateDollars: z.string().optional(),
     freeShippingThresholdDollars: z.string().optional(),
     offersInStorePickup: z.boolean(),
+    salesCountries: z.array(z.enum(["CA", "MX"])),
   })
   .superRefine((data, ctx) => {
     if (
@@ -109,6 +110,14 @@ export const zoneWeightFormSchema = z
 
     /** Assumed weight (lb) for products that have no weight value set. */
     defaultItemWeightLb: z.number().nonnegative().default(0),
+
+    /**
+     * Mode-independent settings that live on the flat-rate form but must persist
+     * for zone+weight businesses too (otherwise the toolbar save would drop them).
+     */
+    offersInStorePickup: z.boolean().default(false),
+    /** Country allowlist — opt-in extras beyond US ("US" is always allowed). */
+    salesCountries: z.array(z.enum(["CA", "MX"])).default([]),
   })
   .superRefine((data, ctx) => {
     // ── Weight tiers: ascending + contiguous bounds ──────────────────────────

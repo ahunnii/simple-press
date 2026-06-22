@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { AlertTriangle, ArrowLeft } from "lucide-react";
 
 import { formatDate } from "~/lib/format-date";
+import { getAllowedCountries } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { cn } from "~/lib/utils";
@@ -27,7 +28,10 @@ type Props = {
 export default async function OrderDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const order = await api.order.getById(id).catch(rethrowTrpcForErrorBoundary);
+  const [order, business] = await Promise.all([
+    api.order.getById(id).catch(rethrowTrpcForErrorBoundary),
+    api.business.simplifiedGet(),
+  ]);
 
   if (!order) {
     notFound();
@@ -133,25 +137,25 @@ export default async function OrderDetailPage({ params }: Props) {
                         className="flex items-center justify-between border-b py-4 last:border-0"
                       >
                         <div>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-foreground">
                             {item.productName}
                           </p>
                           {item.variantName && (
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-muted-foreground">
                               {item.variantName}
                             </p>
                           )}
                           {item.sku && (
-                            <p className="mt-1 text-xs text-gray-500">
+                            <p className="mt-1 text-xs text-muted-foreground">
                               SKU: {item.sku}
                             </p>
                           )}
-                          <p className="mt-1 text-sm text-gray-600">
+                          <p className="mt-1 text-sm text-muted-foreground">
                             Qty: {item.quantity} × {formatPrice(item.price)}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-gray-900">
+                          <p className="font-semibold text-foreground">
                             {formatPrice(item.total)}
                           </p>
                         </div>
@@ -159,7 +163,7 @@ export default async function OrderDetailPage({ params }: Props) {
                     ))}
                   </div>
                 ) : (
-                  <p className="py-2 text-sm text-gray-500">
+                  <p className="py-2 text-sm text-muted-foreground">
                     No item breakdown was recorded for this order.
                   </p>
                 )}
@@ -167,18 +171,18 @@ export default async function OrderDetailPage({ params }: Props) {
                 {/* Totals */}
                 <div className="mt-6 space-y-2 border-t pt-6">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="text-gray-900">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="text-foreground">
                       {formatPrice(order.subtotal)}
                     </span>
                   </div>
 
                   {order.discount > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">
+                      <span className="text-muted-foreground">
                         Discount
                         {order.discountCode && (
-                          <span className="ml-2 rounded bg-gray-100 px-2 py-0.5 font-mono text-xs">
+                          <span className="ml-2 rounded bg-muted px-2 py-0.5 font-mono text-xs">
                             {order.discountCode.code}
                           </span>
                         )}
@@ -190,15 +194,15 @@ export default async function OrderDetailPage({ params }: Props) {
                   )}
 
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="text-gray-900">
+                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="text-foreground">
                       {formatPrice(order.shipping)}
                     </span>
                   </div>
 
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Tax</span>
-                    <span className="text-gray-900">
+                    <span className="text-muted-foreground">Tax</span>
+                    <span className="text-foreground">
                       {formatPrice(order.tax)}
                     </span>
                   </div>
@@ -268,7 +272,7 @@ export default async function OrderDetailPage({ params }: Props) {
 
                 {order.paymentStatus === "paid" &&
                   order.fulfillmentStatus !== "fulfilled" && (
-                    <p className="mt-4 text-sm text-gray-600">
+                    <p className="mt-4 text-sm text-muted-foreground">
                       Payment received. Ready to fulfill.
                     </p>
                   )}
@@ -289,18 +293,18 @@ export default async function OrderDetailPage({ params }: Props) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-600">Name</p>
+                  <p className="text-sm text-muted-foreground">Name</p>
                   <p className="font-medium">{order.customerName}</p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-600">Email</p>
+                  <p className="text-sm text-muted-foreground">Email</p>
                   <p className="font-medium">{order.customerEmail}</p>
                 </div>
 
                 {order.customerPhone && (
                   <div>
-                    <p className="text-sm text-gray-600">Phone</p>
+                    <p className="text-sm text-muted-foreground">Phone</p>
                     <p className="font-medium">{order.customerPhone}</p>
                   </div>
                 )}
@@ -315,11 +319,14 @@ export default async function OrderDetailPage({ params }: Props) {
                   orderId={order.id}
                   address={order.shippingAddress ?? null}
                   canAdd={!!order.customerId}
+                  allowedCountries={getAllowedCountries(
+                    business?.salesCountries ?? [],
+                  )}
                 />
               </CardHeader>
               <CardContent>
                 {order.shippingAddress ? (
-                  <address className="text-gray-900 not-italic">
+                  <address className="text-foreground not-italic">
                     {order.shippingAddress.firstName}{" "}
                     {order.shippingAddress.lastName}
                     <br />
@@ -337,7 +344,7 @@ export default async function OrderDetailPage({ params }: Props) {
                     {order.shippingAddress.country}
                   </address>
                 ) : (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     No shipping address on file.
                   </p>
                 )}
@@ -358,26 +365,26 @@ export default async function OrderDetailPage({ params }: Props) {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <p className="text-sm text-gray-500">Status</p>
+                  <p className="text-sm text-muted-foreground">Status</p>
                   <p className="font-medium capitalize">
                     {order.paymentStatus}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Method</p>
+                  <p className="text-sm text-muted-foreground">Method</p>
                   <p className="font-medium">
                     {paymentMethodLabel(order.paymentMethod)}
                   </p>
                 </div>
                 {order.refundReason && (
                   <div>
-                    <p className="text-sm text-gray-500">Refund Reason</p>
+                    <p className="text-sm text-muted-foreground">Refund Reason</p>
                     <p className="text-sm font-medium">{order.refundReason}</p>
                   </div>
                 )}
                 {order.stripePaymentIntentId && (
                   <div>
-                    <p className="text-sm text-gray-500">Payment ID</p>
+                    <p className="text-sm text-muted-foreground">Payment ID</p>
                     <p className="font-mono text-xs">
                       {order.stripePaymentIntentId}
                     </p>

@@ -49,7 +49,7 @@ export function ViiTestimonialQuote({
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(30,53,64,0.72)",
+          background: "color-mix(in srgb, var(--vii-navy) 72%, transparent)",
         }}
       />
 
@@ -67,7 +67,7 @@ export function ViiTestimonialQuote({
         <blockquote style={{ margin: 0, padding: 0 }}>
           <p
             style={{
-              fontFamily: "var(--font-vii-serif, serif)",
+              fontFamily: "var(--font-serif)",
               fontSize: "clamp(22px, 3.2vw, 42px)",
               fontWeight: 400,
               fontStyle: "italic",
@@ -83,7 +83,7 @@ export function ViiTestimonialQuote({
             <footer>
               <cite
                 style={{
-                  fontFamily: "var(--font-vii-sans, sans-serif)",
+                  fontFamily: "var(--font-sans)",
                   fontSize: 12,
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",

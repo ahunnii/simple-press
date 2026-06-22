@@ -119,7 +119,7 @@ export function ViiCategorySection({ overline, heading, cards }: Props) {
                       position: "absolute",
                       inset: 0,
                       background:
-                        "linear-gradient(to top, rgba(30,53,64,0.7) 0%, rgba(30,53,64,0.55) 100%)",
+                        "linear-gradient(to top, color-mix(in srgb, var(--vii-navy) 70%, transparent) 0%, color-mix(in srgb, var(--vii-navy) 55%, transparent) 100%)",
                     }}
                   />
                 )}

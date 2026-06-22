@@ -76,7 +76,7 @@ export function ViiProductCard({ product, index }: Props) {
             src={productImage}
             alt=""
             fill
-            className="object-contain p-[8%] transition-opacity duration-500 group-hover:opacity-90"
+            className="object-cover transition-opacity duration-500 group-hover:opacity-90"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (
@@ -151,7 +151,7 @@ export function ViiProductCard({ product, index }: Props) {
         >
           <Link
             href={`/shop/${product.slug}`}
-            className="transition-opacity hover:opacity-70 focus-visible:opacity-70"
+            className="transition-opacity hover:opacity-70 focus-visible:opacity-70 after:absolute after:inset-0 after:z-[1] after:content-['']"
           >
             {product.name}
           </Link>
@@ -169,9 +169,11 @@ export function ViiProductCard({ product, index }: Props) {
             <>From {formatPrice(productStatus.displayPrice)}</>
           ) : productStatus.isOnSale && productStatus.displayCompareAtPrice ? (
             <>
+              <span className="sr-only">Original price </span>
               <span className="mr-1.5 line-through">
                 {formatPrice(productStatus.displayCompareAtPrice)}
               </span>
+              <span className="sr-only">Sale price </span>
               {formatPrice(productStatus.displayPrice)}
             </>
           ) : (

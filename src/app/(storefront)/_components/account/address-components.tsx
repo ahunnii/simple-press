@@ -9,6 +9,12 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import type { AccountAddressBookPageProps } from "../../_templates/types";
+import type { SupportedCountry } from "~/lib/geo/regions";
+import {
+  COUNTRY_LABELS,
+  getAllowedCountries,
+  getRegionOptions,
+} from "~/lib/geo/regions";
 import { formatDate } from "~/lib/format-date";
 import { api } from "~/trpc/react";
 import {
@@ -33,6 +39,13 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -66,11 +79,13 @@ export function AddressSheet({
   onOpenChange,
   address,
   onSaved,
+  allowedCountries,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   address?: Address;
   onSaved: () => void;
+  allowedCountries: SupportedCountry[];
 }) {
   const utils = api.useUtils();
   const isEditing = !!address;
@@ -91,6 +106,9 @@ export function AddressSheet({
       isDefault: address?.isDefault ?? false,
     },
   });
+
+  const selectedCountry = (form.watch("country") ?? "US") as SupportedCountry;
+  const regionOptions = getRegionOptions(selectedCountry);
 
   const addMutation = api.customer.addAddress.useMutation({
     onSuccess: () => {
@@ -247,6 +265,37 @@ export function AddressSheet({
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="country"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Country</FormLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={(val) => {
+                      field.onChange(val);
+                      form.setValue("province", "");
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {allowedCountries.map((code) => (
+                        <SelectItem key={code} value={code}>
+                          {COUNTRY_LABELS[code]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -254,9 +303,23 @@ export function AddressSheet({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>State / Province</FormLabel>
-                    <FormControl>
-                      <Input placeholder="MI" {...field} />
-                    </FormControl>
+                    <Select
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select…" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {regionOptions.map((opt) => (
+                          <SelectItem key={opt.code} value={opt.code}>
+                            {opt.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -275,20 +338,6 @@ export function AddressSheet({
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Country</FormLabel>
-                  <FormControl>
-                    <Input placeholder="US" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}
@@ -456,7 +505,11 @@ export function AddressCard({
  */
 export function AddressBookContent({
   customer,
-}: Pick<AccountAddressBookPageProps, "customer">) {
+  salesCountries,
+}: Pick<AccountAddressBookPageProps, "customer"> & {
+  salesCountries: string[];
+}) {
+  const allowedCountries = getAllowedCountries(salesCountries);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | undefined>();
 
@@ -526,6 +579,7 @@ export function AddressBookContent({
         onOpenChange={setSheetOpen}
         address={editingAddress}
         onSaved={() => setSheetOpen(false)}
+        allowedCountries={allowedCountries}
       />
     </div>
   );

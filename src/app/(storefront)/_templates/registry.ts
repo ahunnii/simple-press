@@ -225,6 +225,7 @@ import { SledgeTestimonialsPage } from "./sledge/testimonials/sledge-testimonial
 // Vii (Skinbar VII)
 // ---------------------------------------------------------------------------
 import { ViiAboutPage } from "./vii/about/vii-about-page";
+import { ViiTestimonialsPage } from "./vii/testimonials/vii-testimonials-page";
 import { ViiBlogPage } from "./vii/blog/vii-blog-page";
 import { ViiBlogPostPage } from "./vii/blog/vii-blog-post-page";
 import { ViiAccountSecurityPage } from "./vii/account/vii-account-security-page";
@@ -528,6 +529,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: ViiOrderDetailPage,
     OrdersPage: ViiOrdersPage,
     PreferencesPage: ViiPreferencesPage,
+    TestimonialsPage: ViiTestimonialsPage,
   },
 };
 

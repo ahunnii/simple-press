@@ -160,7 +160,7 @@ function StripeRefundDialog({ order }: { order: Order }) {
           <div className="space-y-2">
             <Label>Reason (Optional)</Label>
             <Select value={reason} onValueChange={setReason}>
-              <SelectTrigger className="w-full bg-white">
+              <SelectTrigger className="w-full bg-card">
                 <SelectValue placeholder="Select a reason" />
               </SelectTrigger>
               <SelectContent>
@@ -292,7 +292,7 @@ function ManualRefundDialog({ order }: { order: Order }) {
 
         <div className="space-y-4 py-4">
           <div className="rounded-md border px-4 py-3 text-sm">
-            <span className="text-gray-500">Order total: </span>
+            <span className="text-muted-foreground">Order total: </span>
             <span className="font-medium">{formatPrice(order.total)}</span>
           </div>
 
@@ -300,7 +300,7 @@ function ManualRefundDialog({ order }: { order: Order }) {
           <div className="space-y-2">
             <Label>Reason (Optional)</Label>
             <Select value={reason} onValueChange={setReason}>
-              <SelectTrigger className="w-full bg-white">
+              <SelectTrigger className="w-full bg-card">
                 <SelectValue placeholder="Select a reason" />
               </SelectTrigger>
               <SelectContent>

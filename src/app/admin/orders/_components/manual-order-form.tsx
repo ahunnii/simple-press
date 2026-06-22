@@ -9,7 +9,9 @@ import { ArrowLeft, Mail, MapPin, Package, Plus, Save, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { SupportedCountry } from "~/lib/geo/regions";
 import type { ManualOrderFormSchema } from "~/lib/validators/order";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { manualOrderFormSchema } from "~/lib/validators/order";
@@ -48,9 +50,10 @@ import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
   products: (Product & { variants: ProductVariant[] })[];
+  allowedCountries: SupportedCountry[];
 };
 
-export function ManualOrderForm({ products }: Props) {
+export function ManualOrderForm({ products, allowedCountries }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const utils = api.useUtils();
@@ -93,6 +96,8 @@ export function ManualOrderForm({ products }: Props) {
 
   const shippingCost = form.watch("shipping");
   const tax = form.watch("tax");
+  const selectedCountry = (form.watch("shippingAddress.country") ?? "US") as SupportedCountry;
+  const regionOptions = getRegionOptions(selectedCountry);
 
   const addItem = () => {
     setItems([
@@ -263,7 +268,7 @@ export function ManualOrderForm({ products }: Props) {
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
         onChange={() => console.log(form.formState.errors)}
-        className="min-h-screen bg-gray-50"
+        className="min-h-screen bg-muted/40"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">
@@ -329,7 +334,7 @@ export function ManualOrderForm({ products }: Props) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <InputFormField
                       form={form}
                       name="customerName"
@@ -406,27 +411,18 @@ export function ManualOrderForm({ products }: Props) {
                       placeholder="123 Main St"
                     />
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <InputFormField
                         form={form}
                         name="shippingAddress.city"
                         label="City"
                         placeholder="New York"
-                        className="col-span-1"
-                      />
-                      <InputFormField
-                        form={form}
-                        name="shippingAddress.state"
-                        label="State"
-                        placeholder="NY"
-                        className="col-span-1"
                       />
                       <InputFormField
                         form={form}
                         name="shippingAddress.postal_code"
                         label="ZIP"
                         placeholder="10001"
-                        className="col-span-1"
                       />
                     </div>
 
@@ -438,7 +434,10 @@ export function ManualOrderForm({ products }: Props) {
                           <FormLabel>Country</FormLabel>
                           <Select
                             value={field.value ?? "US"}
-                            onValueChange={field.onChange}
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              form.setValue("shippingAddress.state", "");
+                            }}
                           >
                             <FormControl>
                               <SelectTrigger>
@@ -446,8 +445,38 @@ export function ManualOrderForm({ products }: Props) {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="US">United States</SelectItem>
-                              <SelectItem value="CA">Canada</SelectItem>
+                              {allowedCountries.map((code) => (
+                                <SelectItem key={code} value={code}>
+                                  {COUNTRY_LABELS[code]}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="shippingAddress.state"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State / Province</FormLabel>
+                          <Select
+                            value={field.value ?? ""}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select…" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {regionOptions.map((opt) => (
+                                <SelectItem key={opt.code} value={opt.code}>
+                                  {opt.name}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </FormItem>
@@ -591,7 +620,7 @@ export function ManualOrderForm({ products }: Props) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="shipping"
@@ -600,7 +629,7 @@ export function ManualOrderForm({ products }: Props) {
                           <FormLabel>Shipping</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
                                 $
                               </span>
                               <NumberInput
@@ -625,7 +654,7 @@ export function ManualOrderForm({ products }: Props) {
                           <FormLabel>Tax</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
                                 $
                               </span>
                               <NumberInput
@@ -715,7 +744,7 @@ export function ManualOrderForm({ products }: Props) {
                 <div className="flex flex-col gap-1.5">
                   <Label>Subtotal</Label>
                   <div className="relative w-48">
-                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
                       $
                     </span>
                     <NumberInput
@@ -798,7 +827,7 @@ export function ManualOrderForm({ products }: Props) {
 
                           <div className="min-w-0">
                             <Label>
-                              Quantity <span className="text-red-500">*</span>
+                              Quantity <span className="text-destructive">*</span>
                             </Label>
                             <NumberInput
                               id="quantity"

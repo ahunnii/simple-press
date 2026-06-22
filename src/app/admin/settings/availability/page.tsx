@@ -1,6 +1,7 @@
 import type { Variant } from "./_components/availability-editor";
 import { api } from "~/trpc/server";
 
+import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 import { TrailHeader } from "../../_components/trail-header";
 import { AvailabilityEditor } from "./_components/availability-editor";
 
@@ -15,6 +16,7 @@ export default async function StorefrontAvailabilityPage() {
           { label: "Storefront Availability" },
         ]}
       />
+      <HubSubNav hub="settings" />
 
       <AvailabilityEditor
         initialMaintenanceMode={settings.maintenanceMode}

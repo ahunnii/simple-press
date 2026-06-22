@@ -166,7 +166,7 @@ export function OwnerReviewDialog({
             {!isEditing && (
               <div>
                 <Label htmlFor="product">
-                  Product <span className="text-red-500">*</span>
+                  Product <span className="text-destructive">*</span>
                 </Label>
                 <Select value={productId} onValueChange={setProductId}>
                   <SelectTrigger className="mt-2">
@@ -184,10 +184,10 @@ export function OwnerReviewDialog({
             )}
 
             {/* Attribution */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="customerName">
-                  Reviewer Name <span className="text-red-500">*</span>
+                  Reviewer Name <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="customerName"
@@ -212,7 +212,7 @@ export function OwnerReviewDialog({
             </div>
 
             {/* Title & Date */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="customerTitle">Reviewer Title (Optional)</Label>
                 <Input
@@ -232,7 +232,7 @@ export function OwnerReviewDialog({
                   onChange={(e) => setReviewDate(e.target.value)}
                   className="mt-2"
                 />
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Backdate if importing
                 </p>
               </div>
@@ -241,7 +241,7 @@ export function OwnerReviewDialog({
             {/* Rating */}
             <div>
               <Label>
-                Rating <span className="text-red-500">*</span>
+                Rating <span className="text-destructive">*</span>
               </Label>
               <div className="mt-2 flex gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -257,7 +257,7 @@ export function OwnerReviewDialog({
                       className={`h-7 w-7 transition-colors ${
                         star <= (hoveredRating || rating)
                           ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
+                          : "text-muted-foreground/40"
                       }`}
                     />
                   </button>
@@ -280,7 +280,7 @@ export function OwnerReviewDialog({
             {/* Comment */}
             <div>
               <Label htmlFor="comment">
-                Review Text <span className="text-red-500">*</span>
+                Review Text <span className="text-destructive">*</span>
               </Label>
               <Textarea
                 id="comment"
@@ -298,7 +298,7 @@ export function OwnerReviewDialog({
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div>
                   <Label htmlFor="verifiedPurchase">Verified Purchase</Label>
-                  <p className="mt-0.5 text-xs text-gray-500">
+                  <p className="mt-0.5 text-xs text-muted-foreground">
                     Mark this reviewer as a verified buyer
                   </p>
                 </div>
@@ -312,7 +312,7 @@ export function OwnerReviewDialog({
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div>
                   <Label htmlFor="isApproved">Publish Immediately</Label>
-                  <p className="mt-0.5 text-xs text-gray-500">
+                  <p className="mt-0.5 text-xs text-muted-foreground">
                     Show this review on the storefront right away
                   </p>
                 </div>

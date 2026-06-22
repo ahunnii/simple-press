@@ -2,6 +2,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import { viiAboutData, viiAboutFieldGroups } from "./about";
+import { viiTestimonialsData, viiTestimonialsFieldGroups } from "./testimonials";
 import { viiBlogFields, viiBlogFieldGroup } from "./blog";
 import { viiCartData, viiCartFieldGroups } from "./cart-checkout/cart-fields";
 import {
@@ -25,7 +26,7 @@ const globalBrandingData: TemplateField[] = [
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "Stay 2 nights, get a 3rd free",
+    defaultValue: "Complimentary skin consultation with your first facial",
   },
   {
     key: "vii.global.announcement-link-text",
@@ -147,6 +148,7 @@ export const viiData = {
     ...viiHomepageData,
     ...viiShopData,
     ...viiAboutData,
+    ...viiTestimonialsData,
     ...viiBlogFields,
     ...viiContactData,
     ...viiCartData,
@@ -162,6 +164,7 @@ export const viiFieldGroups = {
     ...viiHomepageFieldGroups,
     ...viiShopFieldGroups,
     ...viiAboutFieldGroups,
+    ...viiTestimonialsFieldGroups,
     viiBlogFieldGroup,
     ...viiContactFieldGroups,
     ...viiCartFieldGroups,

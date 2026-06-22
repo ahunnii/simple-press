@@ -87,7 +87,7 @@ export function ViiDetroitSection({
                 fontFamily: "var(--font-serif)",
                 fontStyle: "italic",
                 fontSize: "clamp(28px, 4vw, 44px)",
-                color: "rgba(251,248,241,0.55)",
+                color: "color-mix(in srgb, var(--vii-paper) 55%, transparent)",
               }}
             >
               Detroit
@@ -163,7 +163,7 @@ export function ViiDetroitSection({
                 listStyle: "none",
                 margin: "28px 0 0",
                 padding: "20px 0 0",
-                borderTop: "1px solid rgba(30,53,64,0.15)",
+                borderTop: "1px solid color-mix(in srgb, var(--vii-navy) 15%, transparent)",
               }}
             >
               {details.map((detail, i) => {

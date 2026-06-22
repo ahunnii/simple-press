@@ -13,6 +13,7 @@ import { exportRouter } from "./routers/export";
 import { externalRouter } from "./routers/external";
 import { featuresRouter } from "./routers/featues";
 import { galleryRouter } from "./routers/gallery";
+import { mediaRouter } from "./routers/media";
 import { importRouter } from "./routers/import";
 import { inventoryRouter } from "./routers/inventory";
 import { orderRouter } from "./routers/order";
@@ -46,6 +47,7 @@ export const appRouter = createTRPCRouter({
 
   import: importRouter,
   gallery: galleryRouter,
+  media: mediaRouter,
   testimonial: testimonialRouter,
 
   features: featuresRouter,

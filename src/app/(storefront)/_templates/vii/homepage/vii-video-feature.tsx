@@ -211,7 +211,7 @@ export function ViiVideoFeature({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: "rgba(30,53,64,0.25)",
+                    background: "color-mix(in srgb, var(--vii-navy) 25%, transparent)",
                     border: "none",
                     cursor: "pointer",
                   }}
@@ -223,7 +223,7 @@ export function ViiVideoFeature({
                       width: 72,
                       height: 72,
                       borderRadius: "50%",
-                      background: "rgba(251,248,241,0.92)",
+                      background: "color-mix(in srgb, var(--vii-paper) 92%, transparent)",
                       color: "var(--vii-navy)",
                       display: "inline-flex",
                       alignItems: "center",
@@ -253,7 +253,7 @@ export function ViiVideoFeature({
         }
         .vii-video-play:hover,
         .vii-video-play:focus-visible {
-          background: rgba(30,53,64,0.1);
+          background: color-mix(in srgb, var(--vii-navy) 10%, transparent);
         }
       `}</style>
     </section>

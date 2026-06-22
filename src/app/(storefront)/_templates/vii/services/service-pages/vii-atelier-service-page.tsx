@@ -131,7 +131,7 @@ function AtelierMosaic({
               position: "absolute",
               inset: 0,
               background:
-                "linear-gradient(to top, rgba(30,53,64,0.88) 0%, rgba(30,53,64,0.2) 55%, rgba(30,53,64,0.15) 100%)",
+                "linear-gradient(to top, color-mix(in srgb, var(--vii-navy) 88%, transparent) 0%, color-mix(in srgb, var(--vii-navy) 20%, transparent) 55%, color-mix(in srgb, var(--vii-navy) 15%, transparent) 100%)",
               zIndex: 1,
             }}
           />
@@ -283,7 +283,7 @@ function TreatmentListRow({
   return (
     <div
       ref={ref}
-      className={`vii-reveal${visible ? " is-visible" : ""}`}
+      className={`vii-reveal vii-atelier-list-row${visible ? " is-visible" : ""}`}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1.4fr",
@@ -320,7 +320,7 @@ function TreatmentListRow({
                 color: "var(--vii-ink-soft)",
                 padding: "3px 10px",
                 border: "1px solid var(--vii-tan)",
-                borderRadius: "0.15rem",
+                borderRadius: "var(--radius)",
               }}
             >
               {item.durationLabel}
@@ -333,11 +333,11 @@ function TreatmentListRow({
                 fontSize: 10,
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: "var(--vii-copper)",
+                color: "var(--vii-navy)",
                 fontWeight: 500,
                 padding: "3px 10px",
                 border: "1px solid var(--vii-copper)",
-                borderRadius: "0.15rem",
+                borderRadius: "var(--radius)",
               }}
             >
               {item.priceLabel}
@@ -380,38 +380,47 @@ function TreatmentListRow({
           />
         </div>
       </div>
-
-      <style>{`
-        .vii-atelier-book button,
-        .vii-atelier-book a {
-          display: inline-block;
-          padding: 0;
-          background: transparent;
-          color: var(--vii-copper) !important;
-          font-family: var(--font-sans);
-          font-size: 12px;
-          font-weight: 500;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          text-decoration: none;
-          border: none;
-          cursor: pointer;
-          transition: opacity 0.2s ease;
-          box-shadow: none;
-        }
-        .vii-atelier-book button:hover,
-        .vii-atelier-book a:hover { opacity: 0.6; }
-        .vii-atelier-book button:disabled {
-          color: var(--vii-tan) !important;
-          cursor: not-allowed;
-        }
-        @media (max-width: 640px) {
-          .vii-atelier-list-row {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
+  );
+}
+
+/** Hoisted once per page (not per row) — book-link styling + mobile collapse. */
+function AtelierListStyles() {
+  return (
+    <style>{`
+      .vii-atelier-book button,
+      .vii-atelier-book a {
+        display: inline-block;
+        padding: 11px 0;
+        background: transparent;
+        color: var(--vii-navy) !important;
+        font-family: var(--font-sans);
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-decoration: underline;
+        text-decoration-color: var(--vii-copper-deep);
+        text-underline-offset: 5px;
+        text-decoration-thickness: 1px;
+        border: none;
+        cursor: pointer;
+        transition: text-decoration-thickness 0.2s ease, opacity 0.2s ease;
+        box-shadow: none;
+      }
+      .vii-atelier-book button:hover,
+      .vii-atelier-book a:hover { text-decoration-thickness: 2px; }
+      .vii-atelier-book button:disabled {
+        color: var(--vii-ink-soft) !important;
+        text-decoration: none;
+        cursor: not-allowed;
+      }
+      @media (max-width: 640px) {
+        .vii-atelier-list-row {
+          grid-template-columns: 1fr !important;
+        }
+      }
+    `}</style>
   );
 }
 
@@ -508,11 +517,12 @@ function AtelierList({
         padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
       }}
     >
+      <AtelierListStyles />
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         {/* Section header */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={`vii-reveal vii-atelier-list-row${headVisible ? " is-visible" : ""}`}
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1.4fr",

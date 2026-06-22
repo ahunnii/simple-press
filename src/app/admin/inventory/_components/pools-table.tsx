@@ -65,8 +65,8 @@ export function PoolsTable({ pools }: Props) {
 
       {pools.length === 0 ? (
         <Card className="p-8 text-center">
-          <p className="text-gray-500">No base units yet.</p>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="text-muted-foreground">No base units yet.</p>
+          <p className="mt-1 text-sm text-muted-foreground/70">
             Create your first base unit to start tracking shared inventory.
           </p>
           <Button
@@ -79,37 +79,38 @@ export function PoolsTable({ pools }: Props) {
           </Button>
         </Card>
       ) : (
-        <Card className="bg-linear-to-b from-gray-50 to-white">
+        <Card>
           <div className="overflow-x-auto">
             <table className="w-full">
+              <caption className="sr-only">Inventory base units</caption>
               <thead className="border-b">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                     Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                     Current Qty
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                     Products
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                     Threshold
                   </th>
-                  <th className="relative px-6 py-3">
+                  <th scope="col" className="relative px-6 py-3">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y">
                 {pools.map((pool) => (
-                  <tr key={pool.id} className="hover:bg-gray-50">
+                  <tr key={pool.id} className="hover:bg-muted/50">
                     <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium text-foreground">
                         {pool.name}
                       </div>
                       {pool.description && (
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-muted-foreground">
                           {pool.description}
                         </div>
                       )}
@@ -124,7 +125,7 @@ export function PoolsTable({ pools }: Props) {
                                   pool.inventoryQty <=
                                     pool.lowInventoryThreshold
                                 ? "font-semibold text-amber-600"
-                                : "text-gray-900"
+                                : "text-foreground"
                           }
                         >
                           {pool.inventoryQty}
@@ -132,17 +133,17 @@ export function PoolsTable({ pools }: Props) {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-6 px-2 text-xs"
+                          className="h-8 px-2 text-xs"
                           onClick={() => setAdjustPool(pool)}
                         >
                           Adjust
                         </Button>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-700">
+                    <td className="px-6 py-4 text-foreground">
                       {pool._count.products}
                     </td>
-                    <td className="px-6 py-4 text-gray-700">
+                    <td className="px-6 py-4 text-foreground">
                       {pool.lowInventoryThreshold ?? "—"}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -151,9 +152,10 @@ export function PoolsTable({ pools }: Props) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="h-9 w-9 p-0"
                           >
                             <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Actions for {pool.name}</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -162,7 +164,7 @@ export function PoolsTable({ pools }: Props) {
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            className="text-red-600"
+                            className="text-destructive"
                             onClick={() => {
                               setDeleteId(pool.id);
                               setDeleteName(pool.name);
@@ -220,17 +222,16 @@ export function PoolsTable({ pools }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletePool.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700"
-              onClick={() => {
-                if (deleteId) {
-                  deletePool.mutate({ id: deleteId });
-                  setDeleteId(null);
-                }
+              disabled={deletePool.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (deleteId) deletePool.mutate({ id: deleteId });
               }}
             >
-              Delete
+              {deletePool.isPending ? "Deleting…" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

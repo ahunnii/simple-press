@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
+import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 import { TrailHeader } from "../../_components/trail-header";
 import { ShippingSettings } from "./_components/shipping-settings";
 
@@ -18,6 +19,7 @@ export default async function ShippingSettingsPage() {
           { label: "Shipping" },
         ]}
       />
+      <HubSubNav hub="settings" />
 
       <ShippingSettings business={business} />
     </>

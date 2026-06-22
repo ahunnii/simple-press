@@ -190,6 +190,9 @@ model Business {
   shippingFallbackRate       Int?    // cents; used when destination state matches no zone
   shippingDefaultItemWeightLb Float? @default(0) // assumed weight (lb) for products with no weight set
 
+  // Country allowlist for sales/shipping. "US" is always implicitly allowed.
+  salesCountries String[] @default([]) // additional countries beyond US: subset of ["CA","MX"]
+
   // Relationships
   products    Product[]
   collections Collection[]

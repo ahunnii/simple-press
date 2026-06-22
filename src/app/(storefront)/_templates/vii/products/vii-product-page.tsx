@@ -146,8 +146,9 @@ export function ViiProductPage({
             flexWrap: "wrap",
             alignItems: "center",
             gap: 8,
-            // Top value clears the fixed header (announcement bar + nav ≈ 106px)
-            padding: "clamp(124px, 13vw, 150px) 0 clamp(20px, 3vw, 32px)",
+            // Clear the fixed header (≈106px) plus generous editorial breathing room.
+            padding:
+              "calc(var(--vii-header-offset) + clamp(40px, 6vw, 72px)) 0 clamp(20px, 3vw, 32px)",
             fontFamily: "var(--font-sans)",
             fontSize: 11,
             fontWeight: 500,
@@ -182,6 +183,15 @@ export function ViiProductPage({
             styleProps={{
               containerClassName:
                 "lg:sticky lg:top-[calc(72px+24px)] lg:self-start",
+              // Bridge the shared gallery onto vii tokens: paper surface + vii
+              // radius (overrides the component's bg-secondary / rounded-2xl) so
+              // the product sits on the same light field as the listing cards.
+              singleImageContainerClassName:
+                "rounded-[var(--radius)] bg-[var(--vii-paper)]",
+              unselectedButtonClassName:
+                "rounded-[var(--radius)] border-[var(--vii-hairline)] bg-[var(--vii-paper)]",
+              selectedButtonClassName:
+                "rounded-[var(--radius)] border-[var(--vii-copper)] ring-[var(--vii-copper)] bg-[var(--vii-paper)]",
             }}
           />
 
@@ -214,6 +224,9 @@ export function ViiProductPage({
                 </p>
               )}
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                {isOnSale && displayCompareAtPrice && (
+                  <span className="sr-only">Sale price </span>
+                )}
                 <span
                   style={{
                     fontFamily: "var(--font-sans)",
@@ -226,6 +239,7 @@ export function ViiProductPage({
                 </span>
                 {isOnSale && displayCompareAtPrice && (
                   <>
+                    <span className="sr-only">Original price </span>
                     <span
                       style={{
                         fontFamily: "var(--font-sans)",

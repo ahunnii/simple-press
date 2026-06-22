@@ -342,7 +342,10 @@ export function ViiBlogClient({ pages, coverImage }: Props) {
               flex: 1,
               background: "transparent",
               border: "none",
-              outline: "none",
+              // No `outline: none` — let the global `.vii *:focus-visible`
+              // copper ring provide a guaranteed keyboard focus indicator.
+              // The container's tan→copper underline remains the visual focus cue.
+              outlineOffset: 2,
               fontFamily: "var(--font-sans)",
               fontSize: 15,
               color: "var(--vii-navy)",

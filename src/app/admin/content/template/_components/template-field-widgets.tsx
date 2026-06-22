@@ -288,7 +288,7 @@ export function FieldInput({
       {field.type !== "image" &&
         field.type !== "video" &&
         field.type !== "iframe" && (
-          <p className="text-xs text-gray-500">{field.description}</p>
+          <p className="text-xs text-muted-foreground">{field.description}</p>
         )}
     </div>
   );
@@ -311,7 +311,7 @@ export function ListItemSubFieldInput({
   if (subField.type === "textarea") {
     return (
       <div className="space-y-1.5">
-        <Label htmlFor={labelId} className="text-xs text-gray-600">
+        <Label htmlFor={labelId} className="text-xs text-muted-foreground">
           {subField.label}
         </Label>
         <Textarea
@@ -328,7 +328,7 @@ export function ListItemSubFieldInput({
   if (subField.type === "image") {
     return (
       <div className="space-y-1.5">
-        <Label className="text-xs text-gray-600">{subField.label}</Label>
+        <Label className="text-xs text-muted-foreground">{subField.label}</Label>
         <TemplateImageUploadField
           value={value}
           onChange={onChange}
@@ -341,7 +341,7 @@ export function ListItemSubFieldInput({
   if (subField.type === "video") {
     return (
       <div className="space-y-1.5">
-        <Label className="text-xs text-gray-600">{subField.label}</Label>
+        <Label className="text-xs text-muted-foreground">{subField.label}</Label>
         <TemplateVideoUploadField
           value={value}
           onChange={onChange}
@@ -356,7 +356,7 @@ export function ListItemSubFieldInput({
     const Preview = getLucideTemplateIcon(selected ?? "");
     return (
       <div className="space-y-1.5">
-        <Label className="text-xs text-gray-600">{subField.label}</Label>
+        <Label className="text-xs text-muted-foreground">{subField.label}</Label>
         <div className="flex items-center gap-2">
           {Preview ? (
             <Preview className="text-muted-foreground h-5 w-5 shrink-0" />
@@ -388,7 +388,7 @@ export function ListItemSubFieldInput({
 
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={labelId} className="text-xs text-gray-600">
+      <Label htmlFor={labelId} className="text-xs text-muted-foreground">
         {subField.label}
       </Label>
       <Input
@@ -455,15 +455,15 @@ export function TemplateListFieldEditor({
   return (
     <div className="space-y-3">
       {rows.length === 0 && (
-        <p className="text-sm text-gray-500">No items yet. Add one below.</p>
+        <p className="text-sm text-muted-foreground">No items yet. Add one below.</p>
       )}
       {rows.map((row, rowIndex) => (
         <div
           key={String(row._id ?? rowIndex)}
-          className="rounded-lg border border-gray-200 bg-gray-50/80 p-4"
+          className="rounded-lg border border-border bg-muted/50 p-4"
         >
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <span className="text-sm font-medium text-gray-800">
+            <span className="text-sm font-medium text-foreground">
               Item {rowIndex + 1}
             </span>
             <div className="flex items-center gap-0.5">
@@ -632,7 +632,7 @@ export function IframeFieldEditor({
         </div>
       )}
       {isVideo && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           Video embeds display at 16:9 aspect ratio.
         </p>
       )}
@@ -646,13 +646,13 @@ export function IframeFieldEditor({
           placeholder="Booking widget, Video title, etc."
           disabled={disabled}
         />
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           Describes the embed for screen readers.
         </p>
       </div>
 
       {currentSrc && titleState && (
-        <div className="overflow-hidden rounded-md border border-gray-200">
+        <div className="overflow-hidden rounded-md border border-border">
           <EmbedFrame
             src={currentSrc}
             height={isVideo ? undefined : heightState}
@@ -661,9 +661,9 @@ export function IframeFieldEditor({
         </div>
       )}
 
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         Paste a URL (YouTube, Vimeo, booking widget, etc.) or an{" "}
-        <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-[11px]">
+        <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">
           &lt;iframe&gt;
         </code>{" "}
         embed code.
@@ -882,7 +882,7 @@ export function TemplateImageUploadField({
         >
           {isUploading ? (
             <>
-              <span className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2" />
+              <span className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2" aria-hidden="true" />
               Uploading...
             </>
           ) : (
@@ -921,7 +921,7 @@ export function TemplateImageUploadField({
           Drag and drop an image here, or click to browse
         </div>
       </div>
-      {description && <p className="text-xs text-gray-500">{description}</p>}
+      {description && <p className="text-xs text-muted-foreground">{description}</p>}
     </div>
   );
 }
@@ -1080,7 +1080,7 @@ export function TemplateVideoUploadField({
         >
           {isUploading ? (
             <>
-              <span className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2" />
+              <span className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2" aria-hidden="true" />
               Uploading...
             </>
           ) : (
@@ -1119,7 +1119,7 @@ export function TemplateVideoUploadField({
           Drag and drop a video here, or click to browse (max 50MB)
         </div>
       </div>
-      {description && <p className="text-xs text-gray-500">{description}</p>}
+      {description && <p className="text-xs text-muted-foreground">{description}</p>}
     </div>
   );
 }

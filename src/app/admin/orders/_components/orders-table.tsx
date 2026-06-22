@@ -1,5 +1,3 @@
-"use client";
-
 import type { Order, OrderItem, ShippingAddress } from "generated/prisma";
 import Link from "next/link";
 import { Eye } from "lucide-react";
@@ -53,38 +51,39 @@ export function OrdersTable({ orders }: Props) {
     <Card>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="border-b bg-gray-50">
+          <caption className="sr-only">Orders</caption>
+          <thead className="border-b bg-muted">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Order
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Customer
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Items
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Total
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Status
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-border bg-card">
             {orders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50">
+              <tr key={order.id} className="hover:bg-muted/50">
                 <td className="px-6 py-4">
                   <Link href={`/admin/orders/${order.id}`}>
                     <div>
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-foreground">
                         #{order.id.slice(0, 8)}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-muted-foreground">
                         {formatDate(order.createdAt)}
                       </div>
                     </div>
@@ -92,18 +91,18 @@ export function OrdersTable({ orders }: Props) {
                 </td>
                 <td className="px-6 py-4">
                   <div>
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-foreground">
                       {order.customerName}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-muted-foreground">
                       {order.customerEmail}
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
+                <td className="px-6 py-4 text-sm text-muted-foreground">
                   {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                 </td>
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                <td className="px-6 py-4 text-sm font-medium text-foreground">
                   {formatPrice(order.total)}
                 </td>
                 <td className="px-6 py-4">

@@ -6,7 +6,7 @@ import { AddressBookContent } from "~/app/(storefront)/_components/account/addre
 
 import { ViiAccountLayout } from "./vii-account-layout";
 
-export function ViiAddressBookPage({ customer }: AccountAddressBookPageProps) {
+export function ViiAddressBookPage({ business, customer }: AccountAddressBookPageProps) {
   return (
     <PageTransition>
       <ViiAccountLayout
@@ -17,7 +17,7 @@ export function ViiAddressBookPage({ customer }: AccountAddressBookPageProps) {
           { label: "Address Book" },
         ]}
       >
-        <AddressBookContent customer={customer} />
+        <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
       </ViiAccountLayout>
     </PageTransition>
   );

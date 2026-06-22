@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -37,6 +39,14 @@ export default async function BusinessDetailPage({ params }: Props) {
       />
       <div className="admin-container">
         <div className="space-y-6">
+          <div className="admin-header">
+            <h1 className="text-2xl font-bold">{business.name}</h1>
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/admin/media?businessId=${business.id}`}>
+                Media Library
+              </Link>
+            </Button>
+          </div>
           <Card>
             <CardHeader>
               <div className="flex items-start justify-between">

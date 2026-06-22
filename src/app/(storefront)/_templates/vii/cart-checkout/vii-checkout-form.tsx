@@ -18,7 +18,7 @@ import {
 } from "~/components/ui/select";
 
 import { ViiOverline } from "../shared/vii-overline";
-import { getRegionOptions } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 const formatPrice = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -635,7 +635,7 @@ export function ViiCheckoutForm({
                      */}
                     <Select
                       value={f.country}
-                      onValueChange={(v) => f.setCountry(v as "US" | "CA")}
+                      onValueChange={(v) => f.setCountry(v as SupportedCountry)}
                     >
                       <SelectTrigger
                         id="checkout-country"
@@ -657,8 +657,11 @@ export function ViiCheckoutForm({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="US">United States</SelectItem>
-                        <SelectItem value="CA">Canada</SelectItem>
+                        {f.allowedCountries.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {COUNTRY_LABELS[c]}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

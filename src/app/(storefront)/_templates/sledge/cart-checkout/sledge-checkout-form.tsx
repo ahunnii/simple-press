@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { getRegionOptions } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 import { SledgeOrderSummary } from "./sledge-order-summary";
 
@@ -60,6 +60,7 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
     setPostalCode,
     country,
     setCountry,
+    allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
     discountCodeInput,
@@ -372,7 +373,7 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 </Label>
                 <Select
                   value={country}
-                  onValueChange={(v) => setCountry(v as "US" | "CA")}
+                  onValueChange={(v) => setCountry(v as SupportedCountry)}
                   required
                 >
                   <SelectTrigger
@@ -383,8 +384,11 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="US">United States</SelectItem>
-                    <SelectItem value="CA">Canada</SelectItem>
+                    {allowedCountries.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {COUNTRY_LABELS[c]}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

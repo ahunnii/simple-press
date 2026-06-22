@@ -8,6 +8,8 @@ import {
   Check,
   Eye,
   EyeOff,
+  Loader2,
+  MessageSquare,
   MoreVertical,
   Pencil,
   Plus,
@@ -54,6 +56,8 @@ import { OwnerReviewDialog } from "./owner-review-dialog";
 export function ReviewsAdminList() {
   const [source, setSource] = useState<"customer" | "owner" | "all">("all");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [hidingId, setHidingId] = useState<string | null>(null);
   const [editingReview, setEditingReview] = useState<
     (ProductReview & { product: Product }) | null
   >(null);
@@ -65,28 +69,53 @@ export function ReviewsAdminList() {
   });
 
   const approveMutation = api.review.approve.useMutation({
+    onMutate: () => {
+      toast.loading("Updating review...");
+    },
     onSuccess: () => {
-      toast.success("Updated");
+      toast.dismiss();
+      toast.success("Review updated");
+      setApprovingId(null);
       void refetch();
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => {
+      toast.dismiss();
+      toast.error(e.message ?? "Failed to update review");
+      setApprovingId(null);
+    },
   });
 
   const hideMutation = api.review.toggleHidden.useMutation({
+    onMutate: () => {
+      toast.loading("Updating review...");
+    },
     onSuccess: () => {
-      toast.success("Updated");
+      toast.dismiss();
+      toast.success("Review updated");
+      setHidingId(null);
       void refetch();
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => {
+      toast.dismiss();
+      toast.error(e.message ?? "Failed to update review");
+      setHidingId(null);
+    },
   });
 
   const deleteMutation = api.review.delete.useMutation({
+    onMutate: () => {
+      toast.loading("Deleting review...");
+    },
     onSuccess: () => {
+      toast.dismiss();
       toast.success("Review deleted");
       setDeleteId(null);
       void refetch();
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => {
+      toast.dismiss();
+      toast.error(e.message ?? "Failed to delete review");
+    },
   });
 
   const all = reviews ?? [];
@@ -101,7 +130,7 @@ export function ReviewsAdminList() {
       {[1, 2, 3, 4, 5].map((s) => (
         <Star
           key={s}
-          className={`h-3.5 w-3.5 ${s <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`}
+          className={`h-3.5 w-3.5 ${s <= rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
         />
       ))}
     </div>
@@ -155,9 +184,9 @@ export function ReviewsAdminList() {
             </div>
 
             {/* Product link */}
-            <p className="mb-1 text-xs text-gray-400">
+            <p className="mb-1 text-xs text-muted-foreground">
               On:{" "}
-              <span className="font-medium text-gray-600">
+              <span className="font-medium text-foreground">
                 {review.product.name}
               </span>
             </p>
@@ -168,7 +197,7 @@ export function ReviewsAdminList() {
             )}
 
             {/* Comment */}
-            <p className="mb-3 line-clamp-3 text-sm text-gray-700">
+            <p className="mb-3 line-clamp-3 text-sm text-foreground">
               {review.comment}
             </p>
 
@@ -179,7 +208,8 @@ export function ReviewsAdminList() {
                   <img
                     key={i}
                     src={img}
-                    alt=""
+                    alt={`Review photo ${i + 1}`}
+                    loading="lazy"
                     className="h-12 w-12 rounded object-cover"
                   />
                 ))}
@@ -190,17 +220,17 @@ export function ReviewsAdminList() {
             <div className="text-sm">
               <span className="font-medium">{review.customerName}</span>
               {review.customerEmail && (
-                <span className="ml-2 text-xs text-gray-400">
+                <span className="ml-2 text-xs text-muted-foreground">
                   ({review.customerEmail})
                 </span>
               )}
               {review.customerTitle && (
-                <span className="ml-1 text-xs text-gray-500">
+                <span className="ml-1 text-xs text-muted-foreground">
                   · {review.customerTitle}
                 </span>
               )}
             </div>
-            <p className="mt-0.5 text-xs text-gray-400">
+            <p className="mt-0.5 text-xs text-muted-foreground">
               {review.source === "owner"
                 ? format(new Date(review.reviewDate), "MMM d, yyyy")
                 : formatDistanceToNow(new Date(review.createdAt), {
@@ -214,6 +244,7 @@ export function ReviewsAdminList() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="shrink-0">
                 <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Review actions</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
@@ -229,50 +260,61 @@ export function ReviewsAdminList() {
 
               {!review.isApproved && !review.isHidden && (
                 <DropdownMenuItem
-                  onClick={() =>
-                    approveMutation.mutate({ id: review.id, isApproved: true })
-                  }
+                  disabled={approvingId === review.id}
+                  onClick={() => {
+                    setApprovingId(review.id);
+                    approveMutation.mutate({ id: review.id, isApproved: true });
+                  }}
                 >
-                  <Check className="mr-2 h-4 w-4" />
+                  {approvingId === review.id ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="mr-2 h-4 w-4" />
+                  )}
                   Approve
                 </DropdownMenuItem>
               )}
               {review.isApproved && !review.isHidden && (
                 <DropdownMenuItem
-                  onClick={() =>
-                    approveMutation.mutate({ id: review.id, isApproved: false })
-                  }
+                  disabled={approvingId === review.id}
+                  onClick={() => {
+                    setApprovingId(review.id);
+                    approveMutation.mutate({ id: review.id, isApproved: false });
+                  }}
                 >
-                  <EyeOff className="mr-2 h-4 w-4" />
+                  {approvingId === review.id ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <EyeOff className="mr-2 h-4 w-4" />
+                  )}
                   Unapprove
                 </DropdownMenuItem>
               )}
 
               <DropdownMenuItem
-                onClick={() =>
+                disabled={hidingId === review.id}
+                onClick={() => {
+                  setHidingId(review.id);
                   hideMutation.mutate({
                     id: review.id,
                     isHidden: !review.isHidden,
-                  })
-                }
+                  });
+                }}
               >
-                {review.isHidden ? (
-                  <>
-                    <Eye className="mr-2 h-4 w-4" />
-                    Unhide
-                  </>
+                {hidingId === review.id ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : review.isHidden ? (
+                  <Eye className="mr-2 h-4 w-4" />
                 ) : (
-                  <>
-                    <EyeOff className="mr-2 h-4 w-4" />
-                    Hide
-                  </>
+                  <EyeOff className="mr-2 h-4 w-4" />
                 )}
+                {review.isHidden ? "Unhide" : "Hide"}
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => setDeleteId(review.id)}
-                className="text-red-600"
+                className="text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
@@ -284,10 +326,12 @@ export function ReviewsAdminList() {
     </Card>
   );
 
-  const Empty = ({ msg }: { msg: string }) => (
+  const Empty = ({ msg, sub }: { msg: string; sub?: string }) => (
     <Card>
-      <CardContent className="py-12 text-center text-sm text-gray-500">
-        {msg}
+      <CardContent className="py-12 text-center text-sm text-muted-foreground">
+        {sub && <MessageSquare className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" />}
+        <p className="font-medium text-foreground">{msg}</p>
+        {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
       </CardContent>
     </Card>
   );
@@ -299,7 +343,7 @@ export function ReviewsAdminList() {
           <h1>Product Reviews</h1>
           <p>Manage your product reviews</p>
           <div className="mt-4 flex items-center gap-3">
-            <h2 className="text-sm font-medium text-gray-600">
+            <h2 className="text-sm font-medium text-muted-foreground">
               Filter by source:
             </h2>
             <Select
@@ -422,7 +466,10 @@ export function ReviewsAdminList() {
 
         <TabsContent value="all" className="mt-4 space-y-3">
           {all.length === 0 ? (
-            <Empty msg="No reviews yet" />
+            <Empty
+              msg="No reviews yet"
+              sub="Reviews appear here once customers submit them on a product page."
+            />
           ) : (
             all.map((r) => (
               <ReviewCard
@@ -468,14 +515,24 @@ export function ReviewsAdminList() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() =>
                 deleteId && deleteMutation.mutate({ id: deleteId })
               }
-              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteMutation.isPending}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
-              Delete
+              {deleteMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -10604,6 +10604,7 @@ export namespace Prisma {
     shippingWeightTiers: number
     shippingFallbackRate: number
     shippingDefaultItemWeightLb: number
+    salesCountries: number
     _all: number
   }
 
@@ -10721,6 +10722,7 @@ export namespace Prisma {
     shippingWeightTiers?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
+    salesCountries?: true
     _all?: true
   }
 
@@ -10843,6 +10845,7 @@ export namespace Prisma {
     shippingWeightTiers: JsonValue | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
+    salesCountries: string[]
     _count: BusinessCountAggregateOutputType | null
     _avg: BusinessAvgAggregateOutputType | null
     _sum: BusinessSumAggregateOutputType | null
@@ -10897,6 +10900,7 @@ export namespace Prisma {
     shippingWeightTiers?: boolean
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
+    salesCountries?: boolean
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
     services?: boolean | Business$servicesArgs<ExtArgs>
@@ -10952,6 +10956,7 @@ export namespace Prisma {
     shippingWeightTiers?: boolean
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
+    salesCountries?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -10987,6 +10992,7 @@ export namespace Prisma {
     shippingWeightTiers?: boolean
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
+    salesCountries?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectScalar = {
@@ -11022,9 +11028,10 @@ export namespace Prisma {
     shippingWeightTiers?: boolean
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
+    salesCountries?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "originState" | "shippingWeightTiers" | "shippingFallbackRate" | "shippingDefaultItemWeightLb", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "originState" | "shippingWeightTiers" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -11106,6 +11113,7 @@ export namespace Prisma {
       shippingWeightTiers: Prisma.JsonValue | null
       shippingFallbackRate: number | null
       shippingDefaultItemWeightLb: number | null
+      salesCountries: string[]
     }, ExtArgs["result"]["business"]>
     composites: {}
   }
@@ -11580,6 +11588,7 @@ export namespace Prisma {
     readonly shippingWeightTiers: FieldRef<"Business", 'Json'>
     readonly shippingFallbackRate: FieldRef<"Business", 'Int'>
     readonly shippingDefaultItemWeightLb: FieldRef<"Business", 'Float'>
+    readonly salesCountries: FieldRef<"Business", 'String[]'>
   }
     
 
@@ -49493,7 +49502,8 @@ export namespace Prisma {
     originState: 'originState',
     shippingWeightTiers: 'shippingWeightTiers',
     shippingFallbackRate: 'shippingFallbackRate',
-    shippingDefaultItemWeightLb: 'shippingDefaultItemWeightLb'
+    shippingDefaultItemWeightLb: 'shippingDefaultItemWeightLb',
+    salesCountries: 'salesCountries'
   };
 
   export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
@@ -50669,6 +50679,7 @@ export namespace Prisma {
     shippingWeightTiers?: JsonNullableFilter<"Business">
     shippingFallbackRate?: IntNullableFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableFilter<"Business"> | number | null
+    salesCountries?: StringNullableListFilter<"Business">
     products?: ProductListRelationFilter
     collections?: CollectionListRelationFilter
     services?: ServiceListRelationFilter
@@ -50723,6 +50734,7 @@ export namespace Prisma {
     shippingWeightTiers?: SortOrderInput | SortOrder
     shippingFallbackRate?: SortOrderInput | SortOrder
     shippingDefaultItemWeightLb?: SortOrderInput | SortOrder
+    salesCountries?: SortOrder
     products?: ProductOrderByRelationAggregateInput
     collections?: CollectionOrderByRelationAggregateInput
     services?: ServiceOrderByRelationAggregateInput
@@ -50780,6 +50792,7 @@ export namespace Prisma {
     shippingWeightTiers?: JsonNullableFilter<"Business">
     shippingFallbackRate?: IntNullableFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableFilter<"Business"> | number | null
+    salesCountries?: StringNullableListFilter<"Business">
     products?: ProductListRelationFilter
     collections?: CollectionListRelationFilter
     services?: ServiceListRelationFilter
@@ -50834,6 +50847,7 @@ export namespace Prisma {
     shippingWeightTiers?: SortOrderInput | SortOrder
     shippingFallbackRate?: SortOrderInput | SortOrder
     shippingDefaultItemWeightLb?: SortOrderInput | SortOrder
+    salesCountries?: SortOrder
     _count?: BusinessCountOrderByAggregateInput
     _avg?: BusinessAvgOrderByAggregateInput
     _max?: BusinessMaxOrderByAggregateInput
@@ -50877,6 +50891,7 @@ export namespace Prisma {
     shippingWeightTiers?: JsonNullableWithAggregatesFilter<"Business">
     shippingFallbackRate?: IntNullableWithAggregatesFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableWithAggregatesFilter<"Business"> | number | null
+    salesCountries?: StringNullableListFilter<"Business">
   }
 
   export type SiteContentWhereInput = {
@@ -54396,6 +54411,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -54450,6 +54466,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -54504,6 +54521,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -54558,6 +54576,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -54612,6 +54631,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
   }
 
   export type BusinessUpdateManyMutationInput = {
@@ -54647,6 +54667,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
   }
 
   export type BusinessUncheckedUpdateManyInput = {
@@ -54682,6 +54703,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
   }
 
   export type SiteContentCreateInput = {
@@ -58617,6 +58639,14 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
   export type ProductListRelationFilter = {
     every?: ProductWhereInput
     some?: ProductWhereInput
@@ -58795,6 +58825,7 @@ export namespace Prisma {
     shippingWeightTiers?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
+    salesCountries?: SortOrder
   }
 
   export type BusinessAvgOrderByAggregateInput = {
@@ -60567,14 +60598,6 @@ export namespace Prisma {
     sortOrder?: SortOrder
   }
 
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
-  }
-
   export type TestimonialCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -61296,6 +61319,10 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAccountsInput, UserUpdateWithoutAccountsInput>, UserUncheckedUpdateWithoutAccountsInput>
   }
 
+  export type BusinessCreatesalesCountriesInput = {
+    set: string[]
+  }
+
   export type ProductCreateNestedManyWithoutBusinessInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -61578,6 +61605,11 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type BusinessUpdatesalesCountriesInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type ProductUpdateManyWithoutBusinessNestedInput = {
@@ -64767,6 +64799,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -64820,6 +64853,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -64932,6 +64966,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -64985,6 +65020,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -66727,6 +66763,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -66780,6 +66817,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -66849,6 +66887,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -66902,6 +66941,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -66992,6 +67032,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -67045,6 +67086,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -67387,6 +67429,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -67440,6 +67483,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -67951,6 +67995,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -68004,6 +68049,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -68095,6 +68141,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -68148,6 +68195,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -68485,6 +68533,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     orders?: OrderCreateNestedManyWithoutBusinessInput
@@ -68538,6 +68587,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
@@ -68649,6 +68699,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     orders?: OrderUpdateManyWithoutBusinessNestedInput
@@ -68702,6 +68753,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
@@ -68968,6 +69020,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -69021,6 +69074,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -69185,6 +69239,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -69238,6 +69293,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -69328,6 +69384,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -69381,6 +69438,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -69755,6 +69813,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -69808,6 +69867,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -70156,6 +70216,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -70209,6 +70270,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -70571,6 +70633,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -70624,6 +70687,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -71477,6 +71541,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -71530,6 +71595,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -71677,6 +71743,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -71730,6 +71797,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -71964,6 +72032,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -72017,6 +72086,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -72379,6 +72449,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -72432,6 +72503,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -72607,6 +72679,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -72660,6 +72733,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -72863,6 +72937,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -72916,6 +72991,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -73001,6 +73077,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -73054,6 +73131,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -73123,6 +73201,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -73176,6 +73255,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -73229,6 +73309,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -73282,6 +73363,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -73351,6 +73433,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -73404,6 +73487,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -73457,6 +73541,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -73510,6 +73595,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -73579,6 +73665,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -73632,6 +73719,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -73685,6 +73773,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -73738,6 +73827,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -73839,6 +73929,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -73892,6 +73983,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -74060,6 +74152,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -74113,6 +74206,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -74229,6 +74323,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -74282,6 +74377,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -74388,6 +74484,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -74441,6 +74538,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -74557,6 +74655,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -74610,6 +74709,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -75318,6 +75418,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -75371,6 +75472,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -75477,6 +75579,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -75530,6 +75633,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -75626,6 +75730,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductCreateNestedManyWithoutBusinessInput
     collections?: CollectionCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -75679,6 +75784,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
     products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
     collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -75770,6 +75876,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -75823,6 +75930,7 @@ export namespace Prisma {
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
     products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
     collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput

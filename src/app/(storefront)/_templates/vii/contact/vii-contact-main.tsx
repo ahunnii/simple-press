@@ -183,7 +183,7 @@ export function ViiContactMain({
             background: "var(--vii-paper)",
             borderRadius: "var(--radius)",
             padding: "clamp(28px, 4vw, 48px)",
-            boxShadow: "0 1px 40px rgba(30, 53, 64, 0.06)",
+            boxShadow: "0 1px 40px color-mix(in srgb, var(--vii-navy) 6%, transparent)",
           }}
         >
           <ViiContactForm heading={formHeading} />

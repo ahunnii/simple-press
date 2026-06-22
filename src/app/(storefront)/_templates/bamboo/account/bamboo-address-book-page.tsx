@@ -7,12 +7,13 @@ import { AddressBookContent } from "~/app/(storefront)/_components/account/addre
 import { BambooAccountLayout } from "./bamboo-account-layout";
 
 export function BambooAddressBookPage({
+  business,
   customer,
 }: AccountAddressBookPageProps) {
   return (
     <PageTransition>
       <BambooAccountLayout heading="Address Book">
-        <AddressBookContent customer={customer} />
+        <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
       </BambooAccountLayout>
     </PageTransition>
   );

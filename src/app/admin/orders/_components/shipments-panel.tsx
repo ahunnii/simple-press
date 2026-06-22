@@ -108,12 +108,12 @@ export function ShipmentsPanel({ orderId, shipments }: Props) {
         ) : (
           <div
             key={shipment.id}
-            className="flex items-start justify-between rounded-lg border border-gray-200 p-3"
+            className="flex items-start justify-between rounded-lg border border-border p-3"
           >
             <div className="flex items-start gap-2">
-              <Truck className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
+              <Truck className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
               <div className="space-y-0.5">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   Package {index + 1} &mdash;{" "}
                   {formatDistanceToNow(new Date(shipment.shippedAt), {
                     addSuffix: true,
@@ -132,20 +132,20 @@ export function ShipmentsPanel({ orderId, shipments }: Props) {
                     href={shipment.trackingUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
+                    className="text-sm text-primary hover:underline"
                   >
                     Track Package →
                   </a>
                 )}
                 {!shipment.trackingNumber && (
-                  <p className="text-sm text-gray-500 italic">No tracking</p>
+                  <p className="text-sm text-muted-foreground italic">No tracking</p>
                 )}
               </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 w-7 shrink-0 p-0 text-gray-400 hover:text-gray-700"
+              className="h-7 w-7 shrink-0 p-0 text-muted-foreground hover:text-foreground"
               onClick={() => setEditingId(shipment.id)}
             >
               <Edit2 className="h-3.5 w-3.5" />
@@ -182,7 +182,7 @@ export function ShipmentsPanel({ orderId, shipments }: Props) {
       )}
 
       {shipments.length === 0 && !showAddForm && (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Package className="h-4 w-4" />
           <span>No tracking information recorded.</span>
         </div>
@@ -212,7 +212,7 @@ function ShipmentForm({
   const carrierValue = form.watch("carrier");
 
   return (
-    <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+    <div className="space-y-3 rounded-lg border border-border bg-muted p-3">
       <div>
         <Label className="text-xs">Carrier</Label>
         <Select

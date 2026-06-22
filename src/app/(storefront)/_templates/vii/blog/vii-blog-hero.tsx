@@ -1,5 +1,3 @@
-"use client";
-
 import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {

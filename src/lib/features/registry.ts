@@ -149,6 +149,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     hidesNav: ["services"],
   },
+  media: {
+    key: "media",
+    label: "Media Library",
+    description: "Browse, download, and manage uploaded media files",
+    category: "content",
+    enabledByDefault: true,
+    ownerCanToggle: true,
+    hidesNav: ["media"],
+  },
 
   // ─── CUSTOMERS ──────────────────────────────────────────────────────────────
   customerAccounts: {

@@ -87,99 +87,144 @@ const POLICY_TEMPLATES = {
   privacy: {
     title: "Privacy Policy",
     slug: "privacy-policy",
-    getContent: () =>
-      markdownToTiptap(`# Privacy Policy
+    getContent: (email: string) =>
+      markdownToTiptap(`Last updated: ${new Date().toLocaleDateString()}
 
-Last updated: ${new Date().toLocaleDateString()}
+[Your Business Name] ("we," "our," or "this store") is committed to protecting your privacy. This policy explains what information we collect when you shop with us, how we use it, and the choices you have.
 
 ## Information We Collect
 
-We collect information you provide directly to us, including:
+When you browse, create an account, or place an order, we may collect:
 
-- Name and contact information
-- Payment information
-- Shipping address
-- Order history
+- Your name and email address
+- Billing and shipping address
+- Phone number (if provided)
+- Payment information (processed securely by our payment provider — see below)
+- Order details and purchase history
+- Account login credentials (if you create an account)
+- Device and browser information, pages visited, and referring URLs
 
 ## How We Use Your Information
 
 We use the information we collect to:
 
-- Process and fulfill your orders
-- Send you order confirmations and updates
-- Respond to your questions and requests
-- Send marketing communications (with your consent)
+- Process and fulfill your orders and send order confirmations
+- Communicate with you about your purchases and any questions you send us
+- Send marketing emails and promotions (only with your consent — you can opt out at any time)
+- Improve our store and understand how customers use it
+- Comply with legal obligations
 
-## Information Sharing
+## Payment Processing
 
-We do not sell your personal information. We may share your information with:
+All card payments are processed securely by Stripe. We do not see, store, or have access to your full card number, CVV, or other sensitive payment credentials. Please review Stripe's privacy policy for details on how payment data is handled.
 
-- Service providers who assist in our operations
-- Payment processors
-- Shipping carriers
+## Cookies & Analytics
 
-## Your Rights
+We use cookies and similar technologies to keep your cart active, remember your preferences, and keep you signed in. We also use privacy-friendly analytics tools to understand traffic and improve the store. You can disable cookies in your browser settings, though some features of the store may not work correctly.
 
-You have the right to:
+## How We Share Your Information
 
-- Access your personal information
-- Correct inaccurate data
-- Request deletion of your data
-- Opt-out of marketing communications
+We do not sell your personal information. We share your data only with service providers that help us operate the store, including:
+
+- Our payment processor (Stripe) to complete transactions
+- Shipping carriers to deliver your orders
+- The platform that hosts this store, as needed for technical operations
+
+All third parties are required to keep your information confidential and may only use it to perform services on our behalf.
+
+## Data Retention
+
+We retain your order history and account information for as long as your account is active or as needed to fulfill legal, tax, and accounting obligations. You may request deletion of your personal data at any time (subject to legal retention requirements).
+
+## Security
+
+We take reasonable precautions to protect your information, including encrypted connections (HTTPS) and access controls. No method of transmission over the internet is 100% secure, but we work to protect your data as best we can.
+
+## Your Privacy Rights
+
+You may request to access, correct, or delete the personal information we hold about you by contacting us at the address below. You may also opt out of marketing emails via the unsubscribe link in any email we send. Depending on where you live (for example, the EU/UK or California), you may have additional rights — [adjust this section for your region].
+
+## Children's Privacy
+
+Our store is not directed at children under the age of 13. We do not knowingly collect personal information from children. If you believe we have collected information from a child, please contact us and we will delete it promptly.
+
+## Changes to This Policy
+
+We may update this privacy policy from time to time. When we do, we will update the "Last updated" date at the top of this page. Continued use of our store after changes are posted constitutes your acceptance of the revised policy.
 
 ## Contact Us
 
-If you have questions about this Privacy Policy, please contact us at [your email].`),
+If you have questions about this policy or how we handle your data, contact us at ${email}.`),
   },
   terms: {
     title: "Terms of Service",
     slug: "terms-of-service",
-    getContent: () =>
-      markdownToTiptap(`# Terms of Service
+    getContent: (email: string) =>
+      markdownToTiptap(`Last updated: ${new Date().toLocaleDateString()}
 
-Last updated: ${new Date().toLocaleDateString()}
+Please read these Terms of Service carefully before placing an order or using our store. By purchasing from us or using this website, you agree to these terms.
 
-## Agreement to Terms
+## Agreement to These Terms
 
-By accessing our website, you agree to be bound by these Terms of Service.
+By accessing this store or placing an order, you confirm that you are at least 18 years old (or have parental consent), that you have read and understood these terms, and that you agree to be bound by them.
 
-## Use License
+## Orders & Acceptance
 
-Permission is granted to temporarily download one copy of materials for personal, non-commercial use only.
+Your order is an offer to purchase. We reserve the right to accept, decline, or cancel any order at our discretion — for example, if an item is out of stock, if we identify an error in pricing or product information, or if we are unable to verify payment. We will notify you if your order is declined or cancelled, and any charge will be refunded.
 
-## Disclaimer
+## Pricing & Availability
 
-The materials on our website are provided on an 'as is' basis. We make no warranties, expressed or implied.
+Prices and product availability are subject to change without notice. If a pricing error occurs, we will contact you before processing your order. We are not obligated to honor an incorrect price.
 
-## Limitations
+## Payment
 
-In no event shall we be liable for any damages arising out of the use or inability to use our materials.
+By completing checkout, you authorize us to charge your selected payment method for the total amount shown, including any applicable taxes and shipping fees. All payments are processed securely through our payment provider.
 
-## Account Terms
+## Shipping & Delivery
 
-- You must be 18 years or older to use this service
-- You must provide accurate and complete information
-- You are responsible for maintaining account security
+We ship to the destinations listed in our Shipping Policy. Once your order is handed off to a carrier, risk of loss and title pass to you. We are not responsible for delays caused by carriers, customs, or circumstances outside our control. See our Shipping Policy for processing times and estimated delivery windows.
 
-## Prohibited Uses
+## Returns & Refunds
 
-You may not use our site:
+Our returns and refunds process is described in full in our Returns & Refunds Policy. Please review it before purchasing, as some items may be non-returnable.
 
-- For any unlawful purpose
-- To harm minors in any way
-- To impersonate any person or entity
+## Product Descriptions
+
+We make every effort to accurately display products, including colors, dimensions, and materials. However, colors may appear differently depending on your screen, and minor variations in handmade or natural products are normal and not considered defects.
+
+## Intellectual Property
+
+All content on this store — including product photos, copy, logos, and branding — is owned by [Your Business Name] or its licensors. You may not reproduce, distribute, or use any content without our written permission.
+
+## Acceptable Use
+
+You agree not to use this store for any unlawful purpose, to submit false or fraudulent orders, to impersonate any person, or to interfere with the operation of the store or its underlying systems.
+
+## Disclaimer of Warranties
+
+Products and this website are provided "as is" without warranties of any kind, express or implied. We do not warrant that the store will be uninterrupted or error-free, or that any product will meet your specific requirements beyond what is described on the product page.
+
+## Limitation of Liability
+
+To the maximum extent permitted by law, [Your Business Name] shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of this store or any products purchased from us. Our total liability for any claim related to an order shall not exceed the amount you paid for that order.
+
+## Governing Law
+
+These terms are governed by the laws of [your state/country]. Any disputes arising under these terms shall be resolved in the courts of [your jurisdiction].
+
+## Changes to These Terms
+
+We may update these terms from time to time. The updated version will be posted with a revised "Last updated" date. Continued use of our store after changes are posted constitutes acceptance of the revised terms.
 
 ## Contact Us
 
-Questions about the Terms of Service should be sent to us at [your email].`),
+Questions about these terms? Reach us at ${email}.`),
   },
   refund: {
     title: "Returns & Refunds",
     slug: "refund-policy",
-    getContent: () =>
-      markdownToTiptap(`# Returns & Refunds
-
-Last updated: ${new Date().toLocaleDateString()}
+    getContent: (email: string) =>
+      markdownToTiptap(`Last updated: ${new Date().toLocaleDateString()}
 
 ## Our Commitment
 
@@ -187,7 +232,7 @@ Every item from [Your Business Name] is [handmade with care / carefully sourced]
 
 ## Return Window
 
-We accept returns within [X] days of delivery. To start a return, contact us at [your email] before sending anything back — we'll walk you through the process.
+We accept returns within [X] days of delivery. To start a return, contact us at ${email} before sending anything back — we'll walk you through the process.
 
 ## Eligible Items
 
@@ -229,41 +274,55 @@ Once we receive and inspect your return:
 
 ## Contact Us
 
-Questions about a return or refund? Reach us at [your email] or through our contact page.`),
+Questions about a return or refund? Reach us at ${email} or through our contact page.`),
   },
   shipping: {
     title: "Shipping Policy",
     slug: "shipping-policy",
-    getContent: () =>
-      markdownToTiptap(`# Shipping Policy
+    getContent: (email: string) =>
+      markdownToTiptap(`Last updated: ${new Date().toLocaleDateString()}
 
-Last updated: ${new Date().toLocaleDateString()}
+Thank you for your order. This policy explains how we process and ship orders, estimated delivery windows, and what to do if something goes wrong.
 
 ## Processing Time
 
-Orders are processed within 1-3 business days (Monday-Friday, excluding holidays).
+Orders are processed within 1–3 business days (Monday–Friday, excluding holidays). During busy seasons or sales, processing may take a bit longer — we'll keep you informed.
+
+## Shipping Destinations
+
+We currently ship to [List the countries/regions you ship to]. If your location is not listed at checkout, feel free to contact us and we'll do our best to help.
 
 ## Shipping Rates
 
 Shipping costs are calculated at checkout based on:
 
 - Destination
-- Weight and dimensions
+- Package weight and dimensions
 - Delivery speed selected
 
 ## Delivery Times
 
-- Standard Shipping: 5-7 business days
-- Expedited Shipping: 2-3 business days
+- Standard Shipping: 5–7 business days
+- Expedited Shipping: 2–3 business days
 - Overnight Shipping: 1 business day
+
+Delivery times are estimates and begin once your order has been handed to the carrier. We are not responsible for carrier delays.
 
 ## Order Tracking
 
-You will receive a tracking number via email once your order ships.
+Once your order ships, you will receive a confirmation email with your tracking number. You can use this to follow your package through the carrier's website.
+
+## International Orders — Customs & Duties
+
+[Buyers are responsible for any import duties, taxes, or customs fees charged by their country upon delivery. These charges are outside our control and are not included in your order total or shipping cost.]
+
+## Lost or Delayed Packages
+
+If your tracking shows your package has been delivered but you have not received it, please check with neighbors and your local post office first. If the package is confirmed lost, contact us within [X] days of the expected delivery date and we will work with the carrier to investigate and make it right.
 
 ## Contact Us
 
-Shipping questions? Contact us at [your email].`),
+Shipping questions? We're happy to help — reach us at ${email}.`),
   },
 };
 
@@ -271,6 +330,8 @@ type Props = {
   business: {
     id: string;
     name: string;
+    supportEmail: string | null;
+    ownerEmail: string;
     pages: Array<{
       id: string;
       title: string;
@@ -284,6 +345,9 @@ type Props = {
 export function PoliciesManager({ business }: Props) {
   const router = useRouter();
   const [activePolicy, setActivePolicy] = useState<string>("privacy");
+
+  const supportEmail =
+    business.supportEmail ?? business.ownerEmail ?? "[your email]";
 
   // Get existing policies
   const existingPolicies = new Map(business.pages.map((p) => [p.slug, p]));
@@ -342,7 +406,7 @@ export function PoliciesManager({ business }: Props) {
   const handleUseTemplate = (policyKey: keyof typeof POLICY_TEMPLATES) => {
     const template = POLICY_TEMPLATES[policyKey];
     const form = forms[policyKey];
-    form.setValue("content", template.getContent());
+    form.setValue("content", template.getContent(supportEmail));
 
     toast.success("Template loaded");
   };
@@ -413,7 +477,7 @@ export function PoliciesManager({ business }: Props) {
   const isDirty = allForms.some((form) => form.formState.isDirty);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted/40">
       <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
         <div className="toolbar-info">
           <Button variant="ghost" size="sm" asChild className="shrink-0">
@@ -466,12 +530,16 @@ export function PoliciesManager({ business }: Props) {
       </div>
 
       <div className="admin-container">
+        <p className="text-muted-foreground mb-4 text-sm">
+          These templates are starting points you can edit. Review and customize
+          them for your business — they are not legal advice.
+        </p>
         <Tabs
           value={activePolicy}
           onValueChange={setActivePolicy}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
             <TabsTrigger value="terms">Terms</TabsTrigger>
             <TabsTrigger value="refund">Returns</TabsTrigger>

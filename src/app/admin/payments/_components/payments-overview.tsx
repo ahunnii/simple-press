@@ -106,6 +106,8 @@ export function PaymentsOverview({ data }: { data: Data }) {
 
   return (
     <div className="admin-container space-y-6">
+      <h1 className="text-2xl font-bold">Payments</h1>
+
       {/* INFORM Act warning — shown at 75% so owners can verify before being required to */}
       {isApproachingThreshold && (
         <Alert className="border-amber-200 bg-amber-50 text-amber-900">
@@ -204,7 +206,7 @@ export function PaymentsOverview({ data }: { data: Data }) {
                 {INFORM_TRANSACTION_THRESHOLD}
               </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+            <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div
                 className={`h-full rounded-full transition-all ${
                   transactionPct >= 100
@@ -225,7 +227,7 @@ export function PaymentsOverview({ data }: { data: Data }) {
                 {formatCurrency(annualRevenueCents)} / $5,000
               </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+            <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div
                 className={`h-full rounded-full transition-all ${
                   revenuePct >= 100

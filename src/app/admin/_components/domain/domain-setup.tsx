@@ -86,7 +86,7 @@ export function DomainSetup({ business, vpsIp }: DomainSetupProps) {
           href={`https://${business.customDomain}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
+          className="flex items-center gap-1 text-sm text-primary hover:underline"
         >
           {business.customDomain}
           <ExternalLink className="h-3 w-3" />
@@ -150,7 +150,7 @@ export function DomainSetup({ business, vpsIp }: DomainSetupProps) {
             value={domain}
             onChange={(e) => setDomain(e.target.value.toLowerCase())}
           />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Or use your free subdomain: <strong>{subdomainUrl}</strong>
           </p>
         </div>
@@ -196,7 +196,7 @@ export function DomainSetup({ business, vpsIp }: DomainSetupProps) {
         href={`https://${subdomainUrl}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
+        className="flex items-center gap-1 text-sm text-primary hover:underline"
       >
         {subdomainUrl}
         <ExternalLink className="h-3 w-3" />
@@ -216,7 +216,7 @@ function DNSInstructions({ vpsIp }: { vpsIp: string }) {
   return (
     <Card className="border-blue-200 bg-blue-50 p-4">
       <h4 className="mb-3 text-sm font-medium">DNS Configuration Required</h4>
-      <p className="mb-3 text-xs text-gray-600">
+      <p className="mb-3 text-xs text-muted-foreground">
         Add these DNS records at your domain registrar (GoDaddy, Namecheap,
         etc.):
       </p>
@@ -226,7 +226,7 @@ function DNSInstructions({ vpsIp }: { vpsIp: string }) {
         <DNSRecord type="A" name="www" value={vpsIp} onCopy={copyToClipboard} />
       </div>
 
-      <p className="mt-3 text-xs text-gray-500">
+      <p className="mt-3 text-xs text-muted-foreground">
         DNS changes can take up to 24 hours to propagate.
       </p>
     </Card>
@@ -245,7 +245,7 @@ function DNSRecord({
   onCopy: (text: string) => void;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded border bg-white p-2 text-xs">
+    <div className="flex items-center gap-2 rounded border bg-card p-2 text-xs">
       <span className="w-8 font-mono font-semibold">{type}</span>
       <span className="w-12 font-mono">{name}</span>
       <span className="flex-1 font-mono">{value}</span>

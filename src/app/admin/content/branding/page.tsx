@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
 
+import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 import { TrailHeader } from "../../_components/trail-header";
 import { BrandingEditor } from "./_components/branding-editor";
 
@@ -20,6 +21,7 @@ export default async function BrandingPage() {
           { label: "Brand Identity" },
         ]}
       />
+      <HubSubNav hub="content" />
 
       <BrandingEditor business={business} siteContent={business.siteContent} />
     </>

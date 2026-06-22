@@ -173,7 +173,7 @@ export function NewGalleryForm() {
     <Form {...form}>
       <form
         onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-        className="min-h-screen bg-gray-50"
+        className="min-h-screen bg-muted/40"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">
@@ -256,7 +256,7 @@ export function NewGalleryForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Gallery Name <span className="text-red-500">*</span>
+                      Gallery Name <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -383,7 +383,7 @@ export function NewGalleryForm() {
                             <span aria-hidden="true">⊞</span>
                             <div>
                               <div className="font-medium">Grid</div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-muted-foreground">
                                 Equal-sized images in rows and columns
                               </div>
                             </div>
@@ -394,7 +394,7 @@ export function NewGalleryForm() {
                             <span aria-hidden="true">▦</span>
                             <div>
                               <div className="font-medium">Masonry</div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-muted-foreground">
                                 Pinterest-style cascading layout
                               </div>
                             </div>
@@ -405,7 +405,7 @@ export function NewGalleryForm() {
                             <span aria-hidden="true">⊏</span>
                             <div>
                               <div className="font-medium">Carousel</div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-muted-foreground">
                                 Slideshow with navigation
                               </div>
                             </div>
@@ -416,7 +416,7 @@ export function NewGalleryForm() {
                             <span aria-hidden="true">▤</span>
                             <div>
                               <div className="font-medium">Collage</div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-muted-foreground">
                                 Mixed sizes arrangement
                               </div>
                             </div>
@@ -427,7 +427,7 @@ export function NewGalleryForm() {
                             <span aria-hidden="true">▬</span>
                             <div>
                               <div className="font-medium">Justified</div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-muted-foreground">
                                 Flickr-style justified rows
                               </div>
                             </div>
@@ -549,7 +549,7 @@ export function NewGalleryForm() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <FormLabel>Show Image Captions</FormLabel>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           Display captions below or over images
                         </p>
                       </div>
@@ -603,7 +603,7 @@ export function NewGalleryForm() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <FormLabel>Enable Lightbox</FormLabel>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           Allow users to view full-size images
                         </p>
                       </div>

@@ -1,17 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Edit,
-  Eye,
-  FileText,
-  Globe,
-  Home,
-  Menu,
-  Plus,
-  Search,
-  Shield,
-} from "lucide-react";
+import { Edit, Eye, FileText, Plus } from "lucide-react";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -22,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { getHubCards } from "~/app/admin/_lib/admin-nav";
 
 type Props = {
   pages: Array<{
@@ -34,200 +25,107 @@ type Props = {
   }>;
 };
 
+// Tailwind color maps — must be static strings so the compiler includes them
+const bgMap: Record<string, string> = {
+  blue: "bg-blue-100",
+  green: "bg-green-100",
+  purple: "bg-purple-100",
+  orange: "bg-orange-100",
+  pink: "bg-pink-100",
+  indigo: "bg-indigo-100",
+};
+
+const textMap: Record<string, string> = {
+  blue: "text-blue-600",
+  green: "text-green-600",
+  purple: "text-purple-600",
+  orange: "text-orange-600",
+  pink: "text-pink-600",
+  indigo: "text-indigo-600",
+};
+
+const borderMap: Record<string, string> = {
+  blue: "hover:border-blue-500",
+  green: "hover:border-green-500",
+  purple: "hover:border-purple-500",
+  orange: "hover:border-orange-500",
+  pink: "hover:border-pink-500",
+  indigo: "hover:border-indigo-500",
+};
+
 export function ContentDashboard({ pages }: Props) {
   const regularPages = pages.filter((p) => p.type === "page");
   const policyPages = pages.filter((p) => p.type === "policy");
   const blogPages = pages.filter((p) => p.type === "blog");
   const publishedPages = pages.filter((p) => p.published);
 
+  // Dynamic descriptions for cards that show counts
+  const dynamicDescriptions: Record<string, string> = {
+    "content-pages": `${regularPages.length} pages`,
+    "content-blog": `${blogPages.length} blog posts`,
+    "content-policies": `${policyPages.length} policies`,
+  };
+
+  const contentCards = getHubCards("content");
+
   return (
     <>
       {/* Main Content Sections */}
       <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Homepage */}
-        <Link href="/admin/content/branding">
-          <Card className="h-full cursor-pointer transition-all hover:border-blue-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-blue-100 p-3">
-                  <Home className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <CardTitle>Brand Identity </CardTitle>
-                  <CardDescription>Personality of your site</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Edit your logo, template selection, socials, and more
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
+        {contentCards.map((card) => {
+          const bg = bgMap[card.color] ?? "bg-slate-100";
+          const text = textMap[card.color] ?? "text-slate-600";
+          const border = borderMap[card.color] ?? "hover:border-slate-500";
+          const Icon = card.icon;
+          const description = dynamicDescriptions[card.key] ?? card.description;
 
-        {/* Pages */}
-        <Link href="/admin/content/pages">
-          <Card className="h-full cursor-pointer transition-all hover:border-green-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-green-100 p-3">
-                    <FileText className="h-6 w-6 text-green-600" />
+          return (
+            <Link key={card.key} href={card.href}>
+              <Card
+                className={`h-full cursor-pointer transition-all hover:shadow-lg ${border}`}
+              >
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className={`rounded-lg p-3 ${bg}`}>
+                      <Icon className={`h-6 w-6 ${text}`} />
+                    </div>
+                    <div>
+                      <CardTitle>{card.title}</CardTitle>
+                      <CardDescription>{description}</CardDescription>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle>Pages</CardTitle>
-                    <CardDescription>
-                      {regularPages.length} pages
-                    </CardDescription>
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-3 text-sm text-gray-600">
-                About, Contact, FAQ, and custom pages
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Blog */}
-        <Link href="/admin/content/blog">
-          <Card className="h-full cursor-pointer transition-all hover:border-purple-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-purple-100 p-3">
-                  <FileText className="h-6 w-6 text-purple-600" />
-                </div>
-                <div>
-                  <CardTitle>Blog</CardTitle>
-                  <CardDescription>
-                    {blogPages.length} blog posts
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-3 text-sm text-gray-600">
-                Blog posts for your site
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-        {/* Policies */}
-        <Link href="/admin/content/policies">
-          <Card className="h-full cursor-pointer transition-all hover:border-purple-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-purple-100 p-3">
-                  <Shield className="h-6 w-6 text-purple-600" />
-                </div>
-                <div>
-                  <CardTitle>Policies</CardTitle>
-                  <CardDescription>
-                    {policyPages.length} policies
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-3 text-sm text-gray-600">
-                Privacy, Terms, Refunds, Shipping
-              </p>
-              {policyPages.length === 0 && (
-                <Badge variant="secondary" className="text-xs">
-                  Templates available
-                </Badge>
-              )}
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Navigation */}
-        <Link href="/admin/content/navigation">
-          <Card className="h-full cursor-pointer transition-all hover:border-orange-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-orange-100 p-3">
-                  <Menu className="h-6 w-6 text-orange-600" />
-                </div>
-                <div>
-                  <CardTitle>Navigation</CardTitle>
-                  <CardDescription>Menu structure</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Configure your site menu and links
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* SEO & Meta */}
-        <Link href="/admin/content/seo">
-          <Card className="h-full cursor-pointer transition-all hover:border-pink-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-pink-100 p-3">
-                  <Search className="h-6 w-6 text-pink-600" />
-                </div>
-                <div>
-                  <CardTitle>SEO & Meta</CardTitle>
-                  <CardDescription>Search optimization</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Meta tags, favicons, social media preview images
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Template Fields */}
-        <Link href="/admin/content/template">
-          <Card className="h-full cursor-pointer transition-all hover:border-indigo-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-indigo-100 p-3">
-                  <Globe className="h-6 w-6 text-indigo-600" />
-                </div>
-                <div>
-                  <CardTitle>Template Fields</CardTitle>
-                  <CardDescription>Custom content</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Template-specific custom fields
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
+                </CardHeader>
+                <CardContent>
+                  <p className="mb-3 text-sm text-muted-foreground">{card.body}</p>
+                  {card.key === "content-policies" && policyPages.length === 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      Templates available
+                    </Badge>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
 
       {/* Stats */}
       <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Pages
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{pages.length}</p>
-            <p className="mt-1 text-xs text-gray-500">All pages and policies</p>
+            <p className="mt-1 text-xs text-muted-foreground">All pages and policies</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Published
             </CardTitle>
           </CardHeader>
@@ -235,13 +133,13 @@ export function ContentDashboard({ pages }: Props) {
             <p className="text-3xl font-bold text-green-600">
               {publishedPages.length}
             </p>
-            <p className="mt-1 text-xs text-gray-500">Live on your site</p>
+            <p className="mt-1 text-xs text-muted-foreground">Live on your site</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Drafts
             </CardTitle>
           </CardHeader>
@@ -249,7 +147,7 @@ export function ContentDashboard({ pages }: Props) {
             <p className="text-3xl font-bold text-amber-600">
               {pages.length - publishedPages.length}
             </p>
-            <p className="mt-1 text-xs text-gray-500">Not yet published</p>
+            <p className="mt-1 text-xs text-muted-foreground">Not yet published</p>
           </CardContent>
         </Card>
       </div>
@@ -270,7 +168,7 @@ export function ContentDashboard({ pages }: Props) {
               {pages.slice(0, 5).map((page) => (
                 <div
                   key={page.id}
-                  className="flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100"
+                  className="flex items-center justify-between rounded-lg bg-muted p-3 transition-colors hover:bg-muted/70"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -286,8 +184,8 @@ export function ContentDashboard({ pages }: Props) {
                         {page.type}
                       </Badge>
                     </div>
-                    <p className="text-xs text-gray-500">/{page.slug}</p>
-                    <p className="mt-1 text-xs text-gray-400">
+                    <p className="text-xs text-muted-foreground">/{page.slug}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Updated {new Date(page.updatedAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -321,11 +219,11 @@ export function ContentDashboard({ pages }: Props) {
         <Card>
           <CardContent className="py-12">
             <div className="text-center">
-              <FileText className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-              <h3 className="mb-2 text-lg font-medium text-gray-900">
+              <FileText className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+              <h3 className="mb-2 text-lg font-medium text-foreground">
                 No pages yet
               </h3>
-              <p className="mb-6 text-gray-600">
+              <p className="mb-6 text-muted-foreground">
                 Get started by creating your first page or policy
               </p>
               <div className="flex justify-center gap-3">

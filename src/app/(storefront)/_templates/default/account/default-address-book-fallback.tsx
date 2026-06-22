@@ -6,11 +6,12 @@ import { AddressBookContent } from "~/app/(storefront)/_components/account/addre
 import { DefaultAccountLayout } from "./default-account-layout";
 
 export function DefaultAddressBookFallback({
+  business,
   customer,
 }: AccountAddressBookPageProps) {
   return (
     <DefaultAccountLayout heading="Address Book">
-      <AddressBookContent customer={customer} />
+      <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
     </DefaultAccountLayout>
   );
 }

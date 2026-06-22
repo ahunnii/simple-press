@@ -12,7 +12,7 @@ export default async function InventoryPage() {
       <div className="admin-container">
         <div className="admin-header">
           <div>
-            <h1>Base Units</h1>
+            <h1>Inventory</h1>
             <p>
               Manage shared inventory pools. Products can draw from a base unit
               — for example, a &ldquo;4-pack Roll&rdquo; pool powers your

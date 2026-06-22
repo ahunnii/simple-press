@@ -14,24 +14,24 @@ function statusStyles(status: string): {
 } {
   switch (status) {
     case "open":
-      return { background: "rgba(159,200,208,0.22)", color: "var(--vii-navy)" };
+      return { background: "color-mix(in srgb, var(--vii-glacier) 22%, transparent)", color: "var(--vii-navy)" };
     case "completed":
       return {
-        background: "rgba(168,85,37,0.12)",
+        background: "color-mix(in srgb, var(--vii-copper-deep) 12%, transparent)",
         color: "var(--vii-copper-deep)",
       };
     case "cancelled":
       return {
-        background: "rgba(164,122,96,0.15)",
+        background: "color-mix(in srgb, var(--vii-clay) 15%, transparent)",
         color: "var(--vii-ink-soft)",
       };
     case "refunded":
       return {
-        background: "rgba(193,170,145,0.25)",
+        background: "color-mix(in srgb, var(--vii-tan) 25%, transparent)",
         color: "var(--vii-ink-soft)",
       };
     default:
-      return { background: "rgba(193,170,145,0.35)", color: "var(--vii-navy)" };
+      return { background: "color-mix(in srgb, var(--vii-tan) 35%, transparent)", color: "var(--vii-navy)" };
   }
 }
 
@@ -48,7 +48,7 @@ function ViiCard({
       style={{
         background: "var(--vii-paper)",
         border: "1px solid var(--vii-hairline-strong)",
-        borderRadius: "0.2rem",
+        borderRadius: "var(--radius)",
         padding: 24,
         ...style,
       }}
@@ -260,7 +260,7 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                           style={{
                             width: 48,
                             height: 48,
-                            borderRadius: "0.2rem",
+                            borderRadius: "var(--radius)",
                             border: "1px solid var(--vii-hairline)",
                             background: "var(--vii-cream)",
                             flexShrink: 0,

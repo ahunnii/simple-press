@@ -8,13 +8,13 @@ type Props = {
 
 export function WelcomeHeader({ businessName, userName, isComplete }: Props) {
   return (
-    <div className="rounded-lg border bg-white p-8 shadow-sm">
+    <div className="rounded-lg border bg-card p-8 shadow-sm">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">
+          <h1 className="mb-2 text-3xl font-bold text-foreground">
             Welcome to {businessName}! 👋
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-muted-foreground">
             Hi {userName}, let&apos;s get your store ready to sell.
           </p>
         </div>

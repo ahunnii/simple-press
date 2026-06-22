@@ -42,7 +42,7 @@ const homepageHeroData: TemplateField[] = [
     group: "homepage.hero",
     gridColumn: "col-span-full",
     defaultValue:
-      "Reconnect and reinvigorate your senses in a place of incredible natural beauty, with personalized wellness experiences, and award-winning hospitality.",
+      "Considered skincare and restorative facials, made personal. A calm corner of Detroit devoted to your skin, your ritual, and the time you give yourself.",
   },
   {
     key: "vii.homepage.hero-cta-text",
@@ -532,7 +532,7 @@ const homepageContactData: TemplateField[] = [
     group: "homepage.contact",
     gridColumn: "col-span-full",
     defaultValue:
-      "Our team is ready to help you plan your perfect wellness escape. Reach out to learn more about our services, packages, and availability.",
+      "Our team is here to help you find the right treatment for your skin. Reach out to learn more about our facials, services, and booking.",
   },
   {
     key: "vii.homepage.contact-phone",

@@ -197,7 +197,7 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                 <Input
                   value={subdomainUrl}
                   disabled
-                  className="bg-gray-50 font-mono"
+                  className="bg-muted font-mono"
                 />
                 <Button variant="outline" size="sm" asChild>
                   <Link
@@ -209,7 +209,7 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                   </Link>
                 </Button>
               </div>
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-muted-foreground">
                 This is your permanent store URL. It cannot be changed.
               </p>
             </CardContent>
@@ -234,7 +234,7 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                     <Input
                       value={business.customDomain}
                       disabled
-                      className="bg-gray-50 font-mono"
+                      className="bg-muted font-mono"
                     />
                   </div>
 
@@ -246,7 +246,7 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                       <p className="mb-3 text-sm text-amber-800">
                         Add these DNS records to your domain registrar:
                       </p>
-                      <div className="space-y-1 rounded border bg-white p-3 font-mono text-sm">
+                      <div className="space-y-1 rounded border bg-card p-3 font-mono text-sm">
                         <div>Type: A</div>
                         <div>Name: @</div>
                         <div>Value: {vpsIp}</div>
@@ -262,7 +262,8 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                         >
                           {isVerifying ? (
                             <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                              <span className="sr-only">Loading…</span>
                               Verifying...
                             </>
                           ) : (
@@ -306,7 +307,7 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                         onChange={(e) => setCustomDomain(e.target.value)}
                         placeholder="example.com"
                       />
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p className="mt-1 text-sm text-muted-foreground">
                         Enter your domain without &quot;http://&quot; or
                         &quot;www&quot;
                       </p>
@@ -315,7 +316,8 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                     <Button type="submit" disabled={isAdding}>
                       {isAdding ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                          <span className="sr-only">Loading…</span>
                           Adding...
                         </>
                       ) : (
@@ -350,7 +352,10 @@ function RemoveDomainDialog({
       <AlertDialogTrigger asChild>
         <Button variant="outline" size="sm" disabled={isPending}>
           {isPending ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+              <span className="sr-only">Loading…</span>
+            </>
           ) : (
             <Trash2 className="mr-2 h-4 w-4" />
           )}
@@ -370,12 +375,16 @@ function RemoveDomainDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            onClick={onConfirm}
+            disabled={isPending}
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
           >
-            Remove Domain
+            {isPending ? "Removing…" : "Remove Domain"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -7,6 +7,7 @@ import { AddressBookContent } from "~/app/(storefront)/_components/account/addre
 import { HappyBambooAccountLayout } from "./happy-bamboo-account-layout";
 
 export function HappyBambooAddressBookPage({
+  business,
   customer,
 }: AccountAddressBookPageProps) {
   return (
@@ -19,7 +20,7 @@ export function HappyBambooAddressBookPage({
           { label: "Address Book" },
         ]}
       >
-        <AddressBookContent customer={customer} />
+        <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
       </HappyBambooAccountLayout>
     </PageTransition>
   );

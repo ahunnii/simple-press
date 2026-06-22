@@ -103,14 +103,14 @@ export function QuickActions({ business }: QuickActionsProps) {
             href={env.NEXT_PUBLIC_HELP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-blue-600 hover:underline"
+            className="flex items-center gap-2 text-primary hover:underline"
           >
             Documentation
             <ExternalLink className="h-3 w-3" />
           </a>
           <a
             href="mailto:support@example.com"
-            className="flex items-center gap-2 text-blue-600 hover:underline"
+            className="flex items-center gap-2 text-primary hover:underline"
           >
             Contact Support
           </a>

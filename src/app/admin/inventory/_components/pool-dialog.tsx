@@ -13,6 +13,7 @@ import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -131,6 +132,11 @@ export function PoolDialog({ open, onOpenChange, pool }: Props) {
           <DialogTitle>
             {isEdit ? "Edit Base Unit" : "New Base Unit"}
           </DialogTitle>
+          <DialogDescription>
+            {isEdit
+              ? "Update the name, description, or low-stock threshold for this shared inventory unit."
+              : "Create a shared inventory pool that products can draw from."}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

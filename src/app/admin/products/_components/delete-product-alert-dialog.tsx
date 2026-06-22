@@ -17,6 +17,7 @@ type Props = {
   deleteId: string | null;
   onDelete: () => void;
   productName: string | null;
+  isPending?: boolean;
 };
 
 export const DeleteProductAlertDialog = ({
@@ -25,6 +26,7 @@ export const DeleteProductAlertDialog = ({
   setOpen,
   onDelete,
   productName,
+  isPending,
 }: Props) => {
   if (!deleteId) {
     return null;
@@ -41,8 +43,14 @@ export const DeleteProductAlertDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onDelete}
+            disabled={isPending}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {isPending ? "Deleting…" : "Delete"}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

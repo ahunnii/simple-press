@@ -12,6 +12,11 @@ import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
 import { useCart } from "~/providers/cart-context";
 import { api } from "~/trpc/react";
 
+import {
+  type SupportedCountry,
+  getAllowedCountries, // used at runtime inside useCheckoutForm
+} from "~/lib/geo/regions";
+
 import { useDiscountCode } from "./use-discount-code";
 
 type CheckoutFormBusiness = DefaultCheckoutPageTemplateProps["business"];
@@ -35,8 +40,9 @@ type UseCheckoutFormReturn = {
   setState: (v: string) => void;
   postalCode: string;
   setPostalCode: (v: string) => void;
-  country: "US" | "CA";
-  setCountry: (v: "US" | "CA") => void;
+  country: SupportedCountry;
+  setCountry: (v: SupportedCountry) => void;
+  allowedCountries: SupportedCountry[];
   // Delivery method
   deliveryMethod: "ship" | "pickup";
   setDeliveryMethod: (v: "ship" | "pickup") => void;
@@ -89,9 +95,11 @@ export function useCheckoutForm(
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [country, setCountryRaw] = useState<"US" | "CA">("US");
+  const allowedCountries = getAllowedCountries(business.salesCountries);
 
-  const setCountry = (v: "US" | "CA") => {
+  const [country, setCountryRaw] = useState<SupportedCountry>("US");
+
+  const setCountry = (v: SupportedCountry) => {
     setCountryRaw(v);
     setState("");
   };
@@ -325,6 +333,7 @@ export function useCheckoutForm(
     setPostalCode,
     country,
     setCountry,
+    allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
     discountCodeInput: discount.discountCodeInput,

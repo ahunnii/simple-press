@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ExternalLink,
+  LayoutList,
   MoreVertical,
   Pencil,
   Plus,
@@ -27,7 +28,13 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -98,25 +105,53 @@ export function ServicesClient({ services }: Props) {
     },
   });
 
-  // Bulk delete
+  // Bulk delete — sequential so we can track per-item results
   const bulkDeleteMutation = api.services.delete.useMutation();
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const handleBulkDelete = async () => {
     const ids = [...selectedIds];
+    setIsBulkDeleting(true);
     toast.loading("Deleting services...");
-    try {
-      await Promise.all(ids.map((id) => bulkDeleteMutation.mutateAsync(id)));
-      toast.dismiss();
+
+    let succeeded = 0;
+    const failures: string[] = [];
+
+    for (const id of ids) {
+      try {
+        await bulkDeleteMutation.mutateAsync(id);
+        succeeded++;
+      } catch (err) {
+        const msg =
+          err instanceof Error ? err.message : "Unknown error";
+        failures.push(msg);
+      }
+    }
+
+    toast.dismiss();
+    setIsBulkDeleting(false);
+
+    if (failures.length === 0) {
       toast.success(
-        `${ids.length} ${ids.length === 1 ? "service" : "services"} deleted`,
+        `${succeeded} ${succeeded === 1 ? "service" : "services"} deleted`,
       );
       void utils.services.invalidate();
       router.refresh();
       setSelectedIds(new Set());
       setBulkDeleteOpen(false);
-    } catch {
-      toast.dismiss();
-      toast.error("Failed to delete some services");
+    } else if (succeeded === 0) {
+      // All failed — surface the first distinct error message
+      toast.error(failures[0] ?? "Failed to delete services");
+    } else {
+      // Partial success — tell the user exactly what happened
+      const firstError = failures[0] ?? "Unknown error";
+      toast.error(
+        `${succeeded} deleted, ${failures.length} failed: ${firstError}`,
+      );
+      void utils.services.invalidate();
+      router.refresh();
+      setSelectedIds(new Set());
+      setBulkDeleteOpen(false);
     }
   };
 
@@ -202,48 +237,52 @@ export function ServicesClient({ services }: Props) {
   const hasSelection = selectedIds.size > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-              Services
-            </h1>
-            <p className="mt-1 text-gray-600">
-              Manage your bookable services and service pages
-            </p>
-          </div>
-          <Button asChild className="w-full sm:w-auto">
-            <Link href="/admin/services/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Service
-            </Link>
-          </Button>
+    <div className="admin-container">
+      <div className="admin-header">
+        <div>
+          <h1>Services</h1>
+          <p>Manage your bookable services and service pages</p>
         </div>
+        <Button asChild>
+          <Link href="/admin/services/new">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Service
+          </Link>
+        </Button>
+      </div>
 
-        {!hasServices ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <p className="mb-4 text-gray-500">No services yet</p>
-              <Button asChild>
-                <Link href="/admin/services/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Your First Service
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
+      {!hasServices ? (
+        <Card>
+          <CardHeader className="items-center text-center">
+            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <LayoutList className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <CardTitle>No services yet</CardTitle>
+            <CardDescription>
+              Create a service page to showcase and offer bookable appointments,
+              classes, or custom work.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center pb-8">
+            <Button asChild>
+              <Link href="/admin/services/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Your First Service
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
           <>
             {/* Search + Filter bar */}
-            <div className="sticky top-0 z-20 mb-6 rounded-lg border bg-white p-4 shadow-sm">
+            <div className="sticky top-0 z-20 mb-6 rounded-lg border bg-card p-4 shadow-sm">
               <div className="flex flex-col gap-4 md:flex-row md:items-center">
                 <div className="relative flex-1">
-                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     type="text"
                     placeholder="Search services..."
+                    aria-label="Search services"
                     value={search}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     className="pl-10"
@@ -285,14 +324,14 @@ export function ServicesClient({ services }: Props) {
                     size="sm"
                     variant="outline"
                     onClick={() => setBulkDeleteOpen(true)}
-                    className="border-red-300 bg-white text-red-600 hover:bg-red-50"
+                    className="border-destructive/30 bg-card text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                     <span className="hidden sm:inline">Delete</span>
                   </Button>
                 </div>
                 <button
-                  className="ml-auto text-sm text-blue-600 underline-offset-2 hover:underline"
+                  className="ml-auto text-sm text-primary underline-offset-2 hover:underline"
                   onClick={() => setSelectedIds(new Set())}
                 >
                   Clear
@@ -302,10 +341,27 @@ export function ServicesClient({ services }: Props) {
 
             {!hasResults ? (
               <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <p className="text-gray-500">
-                    No services match your search or filter.
-                  </p>
+                <CardHeader className="items-center text-center">
+                  <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                    <Search className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <CardTitle>No services match your filters</CardTitle>
+                  <CardDescription>
+                    Try adjusting your search or status filter to find what
+                    you&apos;re looking for.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center pb-8">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSearch("");
+                      setFilter("all");
+                      setPage(1);
+                    }}
+                  >
+                    Clear filters
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
@@ -371,16 +427,17 @@ export function ServicesClient({ services }: Props) {
                             <TableCell className="whitespace-normal">
                               <div className="flex items-center gap-3">
                                 {service.image ? (
-                                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-gray-100">
+                                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                       src={service.image}
                                       alt=""
+                                      loading="lazy"
                                       className="h-full w-full object-cover"
                                     />
                                   </div>
                                 ) : (
-                                  <div className="h-10 w-10 shrink-0 rounded bg-gray-100" />
+                                  <div className="h-10 w-10 shrink-0 rounded bg-muted" />
                                 )}
                                 <div className="min-w-0">
                                   <div className="flex flex-wrap items-center gap-2">
@@ -470,7 +527,7 @@ export function ServicesClient({ services }: Props) {
                                     </Link>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    className="text-red-600 focus:text-red-600"
+                                    className="text-destructive focus:text-destructive"
                                     onClick={() => setDeleteId(service.id)}
                                   >
                                     <Trash2 className="mr-2 h-4 w-4" />
@@ -528,56 +585,61 @@ export function ServicesClient({ services }: Props) {
           </>
         )}
 
-        {/* Single Delete Dialog */}
-        <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Service?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this service? All associated
-                service items will also be deleted. This action cannot be
-                undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDelete}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+      {/* Single Delete Dialog */}
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Service?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this service? All associated
+              service items will also be deleted. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              {deleteMutation.isPending ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-        {/* Bulk Delete Dialog */}
-        <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                Delete {selectedIds.size}{" "}
-                {selectedIds.size === 1 ? "Service" : "Services"}?
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                This will permanently delete {selectedIds.size}{" "}
-                {selectedIds.size === 1 ? "service" : "services"} and all their
-                associated items. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => void handleBulkDelete()}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                Delete {selectedIds.size}{" "}
-                {selectedIds.size === 1 ? "Service" : "Services"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+      {/* Bulk Delete Dialog */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Delete {selectedIds.size}{" "}
+              {selectedIds.size === 1 ? "Service" : "Services"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete {selectedIds.size}{" "}
+              {selectedIds.size === 1 ? "service" : "services"} and all their
+              associated items. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isBulkDeleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => void handleBulkDelete()}
+              disabled={isBulkDeleting}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              {isBulkDeleting
+                ? "Deleting…"
+                : `Delete ${selectedIds.size} ${selectedIds.size === 1 ? "Service" : "Services"}`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

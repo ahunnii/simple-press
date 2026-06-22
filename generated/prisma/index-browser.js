@@ -212,7 +212,8 @@ exports.Prisma.BusinessScalarFieldEnum = {
   originState: 'originState',
   shippingWeightTiers: 'shippingWeightTiers',
   shippingFallbackRate: 'shippingFallbackRate',
-  shippingDefaultItemWeightLb: 'shippingDefaultItemWeightLb'
+  shippingDefaultItemWeightLb: 'shippingDefaultItemWeightLb',
+  salesCountries: 'salesCountries'
 };
 
 exports.Prisma.SiteContentScalarFieldEnum = {
