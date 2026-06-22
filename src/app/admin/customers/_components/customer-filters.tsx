@@ -35,17 +35,18 @@ export function CustomerFilters({ customerCount }: CustomerFiltersProps) {
   const hasFilters = !!search;
 
   return (
-    <div className="mb-6 rounded-lg border bg-white p-4">
+    <div className="mb-6 rounded-lg border bg-card p-4">
       <div className="flex flex-col gap-4 md:flex-row">
         <form onSubmit={handleSearch} className="flex flex-1 gap-2">
           <div className="relative flex-1">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
+              aria-label="Search customers"
             />
           </div>
           <Button type="submit">Search</Button>

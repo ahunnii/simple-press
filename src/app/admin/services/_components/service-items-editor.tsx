@@ -99,12 +99,12 @@ function SortableItemRow({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 rounded-lg border bg-white p-3"
+      className="flex items-center gap-3 rounded-lg border bg-card p-3"
     >
       <button
         type="button"
         aria-label="Drag to reorder"
-        className="focus-visible:ring-ring flex h-9 w-9 cursor-move items-center justify-center text-gray-400 hover:text-gray-600 focus-visible:ring-1 focus-visible:outline-none"
+        className="focus-visible:ring-ring flex h-9 w-9 cursor-move items-center justify-center text-muted-foreground hover:text-foreground focus-visible:ring-1 focus-visible:outline-none"
         {...attributes}
         {...listeners}
       >
@@ -112,12 +112,12 @@ function SortableItemRow({
       </button>
 
       {item.image ? (
-        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-gray-100">
+        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={item.image} alt="" className="h-full w-full object-cover" />
+          <img src={item.image} alt="" loading="lazy" className="h-full w-full object-cover" />
         </div>
       ) : (
-        <div className="h-10 w-10 shrink-0 rounded bg-gray-100" />
+        <div className="h-10 w-10 shrink-0 rounded bg-muted" />
       )}
 
       <div className="min-w-0 flex-1">
@@ -129,10 +129,10 @@ function SortableItemRow({
             </Badge>
           )}
           {item.priceLabel && (
-            <span className="text-xs text-gray-500">{item.priceLabel}</span>
+            <span className="text-xs text-muted-foreground">{item.priceLabel}</span>
           )}
           {item.durationLabel && (
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               · {item.durationLabel}
             </span>
           )}
@@ -159,7 +159,7 @@ function SortableItemRow({
           variant="ghost"
           size="sm"
           onClick={() => onDelete(item.id)}
-          className="text-red-500 hover:text-red-700"
+          className="text-destructive hover:text-destructive/80"
           aria-label={`Delete ${item.name}`}
         >
           <Trash2 className="h-4 w-4" />
@@ -290,7 +290,7 @@ function ServiceItemFormDialog({
                 <FormItem>
                   <FormLabel>
                     Name{" "}
-                    <span className="text-red-500" aria-hidden="true">
+                    <span className="text-destructive" aria-hidden="true">
                       *
                     </span>
                   </FormLabel>
@@ -323,7 +323,7 @@ function ServiceItemFormDialog({
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="priceLabel"
@@ -552,8 +552,8 @@ export function ServiceItemsEditor({ serviceId, items: initialItems }: Props) {
 
       <CardContent>
         {items.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 p-12 text-center">
-            <p className="mb-4 text-gray-500">
+          <div className="rounded-lg border border-dashed border-border p-12 text-center">
+            <p className="mb-4 text-muted-foreground">
               No service items yet. Add the first one.
             </p>
             <Button
@@ -620,12 +620,16 @@ export function ServiceItemsEditor({ serviceId, items: initialItems }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
-              Delete
+              {deleteMutation.isPending ? "Deleting…" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

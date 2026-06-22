@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
+import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 import { TrailHeader } from "../../_components/trail-header";
 
 export const metadata = {
@@ -24,6 +25,7 @@ export default function TaxGuidePage() {
           { label: "Tax Guide" },
         ]}
       />
+      <HubSubNav hub="settings" />
 
       <div className="admin-container space-y-6">
         <div>

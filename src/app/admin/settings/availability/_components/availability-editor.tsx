@@ -95,7 +95,7 @@ export function AvailabilityEditor({
               >
                 Enable maintenance mode for my storefront
               </Label>
-              <p className="mt-0.5 text-sm text-gray-500">
+              <p className="mt-0.5 text-sm text-muted-foreground">
                 Only affects the public storefront — your admin dashboard stays
                 accessible.
               </p>
@@ -129,7 +129,7 @@ export function AvailabilityEditor({
                       className="cursor-pointer font-normal"
                     >
                       Under maintenance
-                      <span className="ml-2 text-xs text-gray-500">
+                      <span className="ml-2 text-xs text-muted-foreground">
                         — site is temporarily unavailable for updates
                       </span>
                     </Label>
@@ -144,7 +144,7 @@ export function AvailabilityEditor({
                       className="cursor-pointer font-normal"
                     >
                       Coming soon
-                      <span className="ml-2 text-xs text-gray-500">
+                      <span className="ml-2 text-xs text-muted-foreground">
                         — store is launching soon
                       </span>
                     </Label>
@@ -159,7 +159,7 @@ export function AvailabilityEditor({
                   className="text-sm font-medium"
                 >
                   Custom message{" "}
-                  <span className="font-normal text-gray-500">(optional)</span>
+                  <span className="font-normal text-muted-foreground">(optional)</span>
                 </Label>
                 <Textarea
                   id="maintenance-message"
@@ -170,7 +170,7 @@ export function AvailabilityEditor({
                   rows={3}
                   disabled={updateMutation.isPending}
                 />
-                <p className="text-right text-xs text-gray-400">
+                <p className="text-right text-xs text-muted-foreground">
                   {charCount} / 500
                 </p>
               </div>

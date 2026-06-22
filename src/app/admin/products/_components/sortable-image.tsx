@@ -28,7 +28,7 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
     <div
       ref={setNodeRef}
       style={style}
-      className="space-y-3 rounded-lg border bg-white p-4"
+      className="space-y-3 rounded-lg border bg-card p-4"
     >
       <div className="flex items-start gap-3">
         {/* Drag Handle */}
@@ -38,15 +38,16 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
           {...attributes}
           {...listeners}
         >
-          <GripVertical className="h-5 w-5 text-gray-400" />
+          <GripVertical className="h-5 w-5 text-muted-foreground" />
         </button>
 
         {/* Image Preview */}
-        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded bg-gray-100">
+        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded bg-muted">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={image.url}
             alt={image.altText ?? "Product image"}
+            loading="lazy"
             className="h-24 w-24 object-cover"
           />
         </div>
@@ -62,13 +63,13 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
             className="mt-1"
           />
           {index === 0 && (
-            <p className="mt-1 text-xs text-gray-500">Primary image</p>
+            <p className="mt-1 text-xs text-muted-foreground">Primary image</p>
           )}
         </div>
 
         {/* Remove Button */}
         <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
-          <X className="h-4 w-4 text-red-600" />
+          <X className="h-4 w-4 text-destructive" />
         </Button>
       </div>
     </div>

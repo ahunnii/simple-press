@@ -375,7 +375,7 @@ export function AnalyticsContent({
         <CardContent>
           {chartData.length === 0 ? (
             <div className="py-12 text-center">
-              <BarChart2 className="mx-auto mb-3 h-12 w-12 text-gray-400" />
+              <BarChart2 className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
               <p className="text-muted-foreground text-sm">
                 No pageview data for this period
               </p>
@@ -391,8 +391,8 @@ export function AnalyticsContent({
                     x2="0"
                     y2="1"
                   >
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--chart-1)" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -410,15 +410,15 @@ export function AnalyticsContent({
                     "Pageviews",
                   ]}
                   contentStyle={{
-                    backgroundColor: "white",
-                    border: "1px solid #e5e7eb",
+                    backgroundColor: "var(--popover)",
+                    border: "1px solid var(--border)",
                     borderRadius: "6px",
                   }}
                 />
                 <Area
                   type="monotone"
                   dataKey="pageviews"
-                  stroke="#3b82f6"
+                  stroke="var(--chart-1)"
                   strokeWidth={2}
                   fill="url(#colorPageviews)"
                 />

@@ -37,11 +37,13 @@ type Props = {
   order: Order;
 };
 
+// "Refunded" is intentionally excluded — use the Refund button in the Payment
+// panel which properly moves money and handles restock/notification.
+// "Failed" is intentionally excluded — it is set by Stripe webhooks and should
+// not be overridden manually; doing so can mislead downstream processes.
 const PAYMENT_STATUSES = [
   { value: "pending", label: "Pending" },
   { value: "paid", label: "Paid" },
-  { value: "failed", label: "Failed" },
-  { value: "refunded", label: "Refunded" },
 ] as const;
 
 const FULFILLMENT_STATUSES = [

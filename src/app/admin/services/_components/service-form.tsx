@@ -182,7 +182,7 @@ export function ServiceForm({ service, storefrontTemplateId }: Props) {
             );
           })(e)
         }
-        className="min-h-screen bg-gray-50"
+        className="min-h-screen bg-muted/40"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">
@@ -313,7 +313,7 @@ export function ServiceForm({ service, storefrontTemplateId }: Props) {
                       <FormItem>
                         <FormLabel>
                           Service name{" "}
-                          <span className="text-red-500" aria-hidden="true">
+                          <span className="text-destructive" aria-hidden="true">
                             *
                           </span>
                         </FormLabel>
@@ -404,7 +404,7 @@ export function ServiceForm({ service, storefrontTemplateId }: Props) {
                                 "flex cursor-pointer flex-col gap-1.5 rounded-lg border p-3 transition-colors",
                                 isSelected
                                   ? "border-primary bg-primary/5"
-                                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
+                                  : "border-border hover:border-border/80 hover:bg-muted",
                               )}
                             >
                               <input
@@ -418,12 +418,12 @@ export function ServiceForm({ service, storefrontTemplateId }: Props) {
                               <span
                                 className={cn(
                                   "text-sm font-medium",
-                                  isSelected ? "text-primary" : "text-gray-800",
+                                  isSelected ? "text-primary" : "text-foreground",
                                 )}
                               >
                                 {meta.label}
                               </span>
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-muted-foreground">
                                 {meta.description}
                               </span>
                             </label>

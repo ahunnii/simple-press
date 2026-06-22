@@ -706,7 +706,7 @@ export function ProductForm({
         <form
           ref={formRef}
           onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          className="min-h-screen bg-gray-50"
+          className="min-h-screen bg-muted"
         >
           <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
             <div className="toolbar-info">
@@ -912,7 +912,7 @@ export function ProductForm({
                                   <FormLabel>Price (USD)</FormLabel>
                                   <FormControl>
                                     <div className="relative">
-                                      <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                                      <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
                                         $
                                       </span>
                                       <NumberInput
@@ -939,7 +939,7 @@ export function ProductForm({
                                   <FormLabel>Compare At Price (USD)</FormLabel>
                                   <FormControl>
                                     <div className="relative">
-                                      <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                                      <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
                                         $
                                       </span>
                                       <NumberInput
@@ -1288,10 +1288,11 @@ export function ProductForm({
                           )}
 
                           <div className="relative mb-3">
-                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                               type="search"
                               placeholder="Search collections..."
+                              aria-label="Search collections"
                               value={collectionSearch}
                               onChange={(e) =>
                                 setCollectionSearch(e.target.value)
@@ -1315,7 +1316,7 @@ export function ProductForm({
 
                                 if (filtered.length === 0) {
                                   return (
-                                    <p className="py-6 text-center text-sm text-gray-400">
+                                    <p className="py-6 text-center text-sm text-muted-foreground">
                                       No collections match &ldquo;
                                       {collectionSearch}&rdquo;
                                     </p>
@@ -1325,7 +1326,7 @@ export function ProductForm({
                                 return filtered.map((collection) => (
                                   <label
                                     key={collection.id}
-                                    className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-gray-50"
+                                    className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-muted"
                                   >
                                     <Checkbox
                                       className="shrink-0"
@@ -1347,7 +1348,7 @@ export function ProductForm({
                                       <p className="font-medium">
                                         {collection.name}
                                       </p>
-                                      <p className="text-sm text-gray-500">
+                                      <p className="text-sm text-muted-foreground">
                                         {collection._count.collectionProducts}{" "}
                                         product
                                         {collection._count
@@ -1362,7 +1363,7 @@ export function ProductForm({
                             </div>
                           </ScrollArea>
 
-                          <p className="mt-4 text-sm text-gray-500">
+                          <p className="mt-4 text-sm text-muted-foreground">
                             {collectionIds.length} collection
                             {collectionIds.length !== 1 ? "s" : ""} selected
                           </p>
@@ -1393,7 +1394,7 @@ export function ProductForm({
                             form.watch("name") || "e.g., Classic White T-Shirt"
                           }
                           description={`${form.watch("metaTitle")?.length ?? 0}/60 characters — leave blank to use product name`}
-                          descriptionClassName="text-xs text-gray-500"
+                          descriptionClassName="text-xs text-muted-foreground"
                         />
 
                         <TextareaFormField
@@ -1405,7 +1406,7 @@ export function ProductForm({
                             "e.g., Soft, breathable cotton tee perfect for everyday wear."
                           }
                           description={`${form.watch("metaDescription")?.length ?? 0}/160 characters — leave blank to use product description`}
-                          descriptionClassName="text-xs text-gray-500"
+                          descriptionClassName="text-xs text-muted-foreground"
                           rows={3}
                         />
 
@@ -1415,7 +1416,7 @@ export function ProductForm({
                           label="Meta Keywords"
                           placeholder="e.g., t-shirt, cotton, classic, white"
                           description="Comma-separated keywords"
-                          descriptionClassName="text-xs text-gray-500"
+                          descriptionClassName="text-xs text-muted-foreground"
                         />
                       </CardContent>
                     </Card>

@@ -115,11 +115,11 @@ export function ProductImportWizard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-muted/30 py-8">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Import Products</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-foreground">Import Products</h1>
+          <p className="mt-2 text-muted-foreground">
             Import your products from WooCommerce
           </p>
         </div>
@@ -183,9 +183,9 @@ export function ProductImportWizard() {
                 </AlertDescription>
               </Alert>
 
-              <div className="rounded-lg border-2 border-dashed border-gray-300 p-8">
+              <div className="rounded-lg border-2 border-dashed border-border p-8">
                 <div className="text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
                   <div className="mt-4">
                     <label htmlFor="csv-upload">
                       <span className="cursor-pointer text-blue-600 hover:text-blue-500">
@@ -199,21 +199,21 @@ export function ProductImportWizard() {
                         className="hidden"
                       />
                     </label>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       or drag and drop
                     </p>
                   </div>
-                  <p className="mt-2 text-xs text-gray-500">CSV up to 10MB</p>
+                  <p className="mt-2 text-xs text-muted-foreground">CSV up to 10MB</p>
                 </div>
               </div>
 
               {file && (
-                <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
+                <div className="flex items-center justify-between rounded-lg bg-muted p-4">
                   <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-gray-400" />
+                    <FileText className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <p className="font-medium">{file.name}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {(file.size / 1024).toFixed(2)} KB
                       </p>
                     </div>
@@ -246,8 +246,8 @@ export function ProductImportWizard() {
             <CardContent className="space-y-6">
               {/* Summary */}
               <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                <div className="rounded-lg bg-gray-50 p-4">
-                  <p className="text-sm text-gray-600">Total Products</p>
+                <div className="rounded-lg bg-muted p-4">
+                  <p className="text-sm text-muted-foreground">Total Products</p>
                   <p className="text-2xl font-bold">
                     {
                       (importData as { summary: { total: number } }).summary
@@ -441,10 +441,11 @@ export function ProductImportWizard() {
         {step === "importing" && (
           <Card>
             <CardContent className="py-12">
-              <div className="text-center">
-                <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-blue-600" />
+              <div className="text-center" role="status">
+                <Loader2 aria-hidden="true" className="mx-auto mb-4 h-12 w-12 animate-spin text-blue-600" />
+                <span className="sr-only">Loading…</span>
                 <h3 className="text-lg font-medium">Importing Products...</h3>
-                <p className="mt-2 text-gray-600">
+                <p className="mt-2 text-muted-foreground">
                   This may take a few minutes depending on the number of
                   products.
                 </p>
@@ -460,7 +461,7 @@ export function ProductImportWizard() {
               <div className="text-center">
                 <CheckCircle className="mx-auto mb-4 h-12 w-12 text-green-600" />
                 <h3 className="text-lg font-medium">Import Complete!</h3>
-                <p className="mt-2 text-gray-600">
+                <p className="mt-2 text-muted-foreground">
                   Your products have been imported successfully.
                 </p>
 
@@ -491,11 +492,11 @@ function Step({
   return (
     <div className="flex items-center gap-2">
       <div
-        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${completed ? "bg-green-600 text-white" : active ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"} `}
+        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${completed ? "bg-green-600 text-white" : active ? "bg-blue-600 text-white" : "bg-muted text-muted-foreground"} `}
       >
         {completed ? <CheckCircle className="h-5 w-5" /> : number}
       </div>
-      <span className={`text-sm ${active ? "font-medium" : "text-gray-600"}`}>
+      <span className={`text-sm ${active ? "font-medium" : "text-muted-foreground"}`}>
         {label}
       </span>
     </div>

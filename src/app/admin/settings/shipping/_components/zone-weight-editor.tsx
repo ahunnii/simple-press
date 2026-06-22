@@ -417,7 +417,7 @@ export function ZoneWeightEditor() {
                             </FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
+                                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none">
                                   $
                                 </span>
                                 <Input
@@ -552,7 +552,7 @@ export function ZoneWeightEditor() {
                 <FormLabel>Fallback shipping rate (USD)</FormLabel>
                 <FormControl>
                   <div className="relative max-w-xs">
-                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500 pointer-events-none">
+                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground pointer-events-none">
                       $
                     </span>
                     <Input
@@ -582,7 +582,7 @@ export function ZoneWeightEditor() {
                 </FormLabel>
                 <FormControl>
                   <div className="relative max-w-xs">
-                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500 pointer-events-none">
+                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground pointer-events-none">
                       $
                     </span>
                     <Input

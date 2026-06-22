@@ -12,6 +12,7 @@ import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -129,10 +130,13 @@ export function EditShippingAddressDialog({ orderId, address, canAdd, allowedCou
           <DialogTitle>
             {address ? "Edit Shipping Address" : "Add Shipping Address"}
           </DialogTitle>
+          <DialogDescription>
+            Update the delivery address for this order.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="sa-firstName">First Name</Label>
               <Input id="sa-firstName" required {...field("firstName")} />
@@ -179,7 +183,7 @@ export function EditShippingAddressDialog({ orderId, address, canAdd, allowedCou
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="sa-city">City</Label>
               <Input id="sa-city" required {...field("city")} />

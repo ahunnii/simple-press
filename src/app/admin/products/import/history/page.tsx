@@ -4,6 +4,7 @@ import { checkBusiness } from "~/lib/check-business";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 import { Badge } from "~/components/ui/badge";
+import { Card } from "~/components/ui/card";
 import { TrailHeader } from "~/app/admin/_components/trail-header";
 
 export default async function ImportHistoryPage() {
@@ -26,41 +27,44 @@ export default async function ImportHistoryPage() {
       />
       <div className="admin-container">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Import History</h1>
-          <p className="mt-2 text-gray-600">View your import history</p>
+          <h1 className="text-3xl font-bold text-foreground">Import History</h1>
+          <p className="mt-2 text-muted-foreground">View your import history</p>
         </div>
-        <div>
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Filename</th>
-                <th>Status</th>
-                <th>Imported</th>
-                <th>Errors</th>
-              </tr>
-            </thead>
-            <tbody>
-              {imports.map((imp) => (
-                <tr key={imp.id}>
-                  <td>{new Date(imp.createdAt).toLocaleDateString()}</td>
-                  <td>{imp.filename}</td>
-                  <td>
-                    <Badge
-                      variant={
-                        imp.status === "completed" ? "default" : "outline"
-                      }
-                    >
-                      {imp.status}
-                    </Badge>
-                  </td>
-                  <td>{imp.importedCount}</td>
-                  <td>{imp.errorCount}</td>
+        <Card>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <caption className="sr-only">Product import history</caption>
+              <thead className="border-b">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">Date</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">Filename</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">Status</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">Imported</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">Errors</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {imports.map((imp) => (
+                  <tr key={imp.id} className="hover:bg-muted/50">
+                    <td className="px-4 py-3 text-foreground whitespace-nowrap">{new Date(imp.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-foreground">{imp.filename}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <Badge
+                        variant={
+                          imp.status === "completed" ? "default" : "outline"
+                        }
+                      >
+                        {imp.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-foreground">{imp.importedCount}</td>
+                    <td className="px-4 py-3 text-foreground">{imp.errorCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       </div>
     </>
   );

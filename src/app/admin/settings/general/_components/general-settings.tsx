@@ -112,7 +112,7 @@ export function GeneralSettings({ business }: Props) {
       <form
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(handleSubmit)(e)}
-        className="min-h-screen bg-gray-50"
+        className="min-h-screen bg-muted"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">

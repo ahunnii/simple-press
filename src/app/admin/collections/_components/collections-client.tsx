@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  FolderOpen,
   MoreVertical,
   Pencil,
   Plus,
@@ -31,7 +32,13 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -268,50 +275,54 @@ export function CollectionsClient({ collections }: Props) {
     bulkPublishMutation.isPending || bulkDeleteMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-              Collections
-            </h1>
-            <p className="mt-1 text-gray-600">
-              Organize your products into collections
-            </p>
-          </div>
-          <Button asChild className="w-full sm:w-auto">
-            <Link href="/admin/collections/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Collection
-            </Link>
-          </Button>
+    <div className="admin-container">
+      <div className="admin-header">
+        <div>
+          <h1>Collections</h1>
+          <p>Organize your products into collections</p>
         </div>
+        <Button asChild>
+          <Link href="/admin/collections/new">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Collection
+          </Link>
+        </Button>
+      </div>
 
-        {/* Absolute empty state — no collections at all */}
-        {!hasCollections ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <p className="mb-4 text-gray-500">No collections yet</p>
-              <Button asChild>
-                <Link href="/admin/collections/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Your First Collection
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
+      {/* Absolute empty state — no collections at all */}
+      {!hasCollections ? (
+        <Card>
+          <CardHeader className="items-center text-center">
+            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <FolderOpen className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <CardTitle>No collections yet</CardTitle>
+            <CardDescription>
+              Group related products together so shoppers can browse by
+              category, season, or any theme that fits your store.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center pb-8">
+            <Button asChild>
+              <Link href="/admin/collections/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Your First Collection
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
           <>
             {/* Search + Filter bar (sticky so it stays reachable while scrolling) */}
-            <div className="sticky top-0 z-20 mb-6 rounded-lg border bg-white p-4 shadow-sm">
+            <div className="sticky top-0 z-20 mb-6 rounded-lg border bg-card p-4 shadow-sm">
               <div className="flex flex-col gap-4 md:flex-row md:items-center">
                 {/* Search */}
                 <div className="relative flex-1">
-                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     type="text"
                     placeholder="Search collections..."
+                    aria-label="Search collections"
                     value={search}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     className="pl-10"
@@ -381,14 +392,14 @@ export function CollectionsClient({ collections }: Props) {
                     variant="outline"
                     onClick={() => setBulkDeleteOpen(true)}
                     disabled={isBulkPending}
-                    className="border-red-300 bg-white text-red-600 hover:bg-red-50"
+                    className="border-destructive/30 bg-card text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                     <span className="hidden sm:inline">Delete</span>
                   </Button>
                 </div>
                 <button
-                  className="ml-auto text-sm text-blue-600 underline-offset-2 hover:underline"
+                  className="ml-auto text-sm text-primary underline-offset-2 hover:underline"
                   onClick={() => setSelectedIds(new Set())}
                 >
                   Clear
@@ -399,10 +410,27 @@ export function CollectionsClient({ collections }: Props) {
             {/* No-match empty state */}
             {!hasResults ? (
               <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <p className="text-gray-500">
-                    No collections match your search or filter.
-                  </p>
+                <CardHeader className="items-center text-center">
+                  <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                    <Search className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <CardTitle>No collections match your filters</CardTitle>
+                  <CardDescription>
+                    Try adjusting your search or status filter to find what
+                    you&apos;re looking for.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center pb-8">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSearch("");
+                      setFilter("all");
+                      setPage(1);
+                    }}
+                  >
+                    Clear filters
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
@@ -471,7 +499,7 @@ export function CollectionsClient({ collections }: Props) {
                             <TableCell className="whitespace-normal">
                               <div className="flex items-center gap-3">
                                 {collection.imageUrl ? (
-                                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-gray-100">
+                                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
                                     <Image
                                       src={collection.imageUrl}
                                       alt=""
@@ -480,7 +508,7 @@ export function CollectionsClient({ collections }: Props) {
                                     />
                                   </div>
                                 ) : (
-                                  <div className="h-10 w-10 shrink-0 rounded bg-gray-100" />
+                                  <div className="h-10 w-10 shrink-0 rounded bg-muted" />
                                 )}
                                 <div className="min-w-0">
                                   <div className="flex flex-wrap items-center gap-2">
@@ -574,7 +602,7 @@ export function CollectionsClient({ collections }: Props) {
                                     Duplicate
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    className="text-red-600 focus:text-red-600"
+                                    className="text-destructive focus:text-destructive"
                                     onClick={() => setDeleteId(collection.id)}
                                   >
                                     <Trash2 className="mr-2 h-4 w-4" />
@@ -633,58 +661,63 @@ export function CollectionsClient({ collections }: Props) {
           </>
         )}
 
-        {/* Single Delete Confirmation Dialog */}
-        <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Collection?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete the collection? This will remove
-                the collection but won&apos;t delete the products in it. This
-                action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDelete}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+      {/* Single Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Collection?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the collection? This will remove
+              the collection but won&apos;t delete the products in it. This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              {deleteMutation.isPending ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-        {/* Bulk Delete Confirmation Dialog */}
-        <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                Delete {selectedIds.size}{" "}
-                {selectedIds.size === 1 ? "Collection" : "Collections"}?
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                This will delete {selectedIds.size}{" "}
-                {selectedIds.size === 1 ? "collection" : "collections"} but
-                won&apos;t delete the products in them. This action cannot be
-                undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleBulkDelete}
-                className="bg-red-600 hover:bg-red-700"
-                disabled={bulkDeleteMutation.isPending}
-              >
-                Delete {selectedIds.size}{" "}
-                {selectedIds.size === 1 ? "Collection" : "Collections"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Delete {selectedIds.size}{" "}
+              {selectedIds.size === 1 ? "Collection" : "Collections"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete {selectedIds.size}{" "}
+              {selectedIds.size === 1 ? "collection" : "collections"} but
+              won&apos;t delete the products in them. This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDelete}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              disabled={bulkDeleteMutation.isPending}
+            >
+              {bulkDeleteMutation.isPending
+                ? "Deleting…"
+                : `Delete ${selectedIds.size} ${selectedIds.size === 1 ? "Collection" : "Collections"}`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

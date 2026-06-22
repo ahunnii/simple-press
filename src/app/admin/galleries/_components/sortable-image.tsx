@@ -35,11 +35,12 @@ export function SortableImage({ image, onDelete, onEdit }: Props) {
     <div
       ref={setNodeRef}
       style={style}
-      className="group relative aspect-square overflow-hidden rounded-lg bg-gray-100"
+      className="group relative aspect-square overflow-hidden rounded-lg bg-muted"
     >
       <img
         src={image.url}
         alt={image.altText ?? ""}
+        loading="lazy"
         className="h-full w-full object-cover"
       />
 

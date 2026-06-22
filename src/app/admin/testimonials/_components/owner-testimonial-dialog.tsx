@@ -172,10 +172,10 @@ export function OwnerTestimonialDialog({
 
           <div className="space-y-5 py-4">
             {/* Attribution row */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="customerName">
-                  Customer Name <span className="text-red-500">*</span>
+                  Customer Name <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="customerName"
@@ -200,7 +200,7 @@ export function OwnerTestimonialDialog({
             </div>
 
             {/* Title & Date */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="customerTitle">Customer Title (Optional)</Label>
                 <Input
@@ -226,7 +226,7 @@ export function OwnerTestimonialDialog({
             </div>
 
             {/* Testimonial headline & date */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="title">Headline / Title (Optional)</Label>
                 <Input
@@ -246,7 +246,7 @@ export function OwnerTestimonialDialog({
                   onChange={(e) => setTestimonialDate(e.target.value)}
                   className="mt-2"
                 />
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Backdate if importing
                 </p>
               </div>
@@ -255,7 +255,7 @@ export function OwnerTestimonialDialog({
             {/* Text */}
             <div>
               <Label htmlFor="text">
-                Testimonial Text <span className="text-red-500">*</span>
+                Testimonial Text <span className="text-destructive">*</span>
               </Label>
               <Textarea
                 id="text"
@@ -271,7 +271,7 @@ export function OwnerTestimonialDialog({
             {/* Photos (Optional, max 5) — upload */}
             <div>
               <Label>Photos (Optional, max 5)</Label>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Upload images to include with this testimonial
               </p>
               <div className="mt-2 space-y-3">
@@ -280,18 +280,20 @@ export function OwnerTestimonialDialog({
                     {photoUrls.map((url, i) => (
                       <div
                         key={url}
-                        className="relative h-24 w-24 overflow-hidden rounded-lg border bg-gray-100"
+                        className="relative h-24 w-24 overflow-hidden rounded-lg border bg-muted"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element -- thumbnails from upload URLs */}
                         <img
                           src={url}
-                          alt=""
+                          alt="Testimonial photo"
+                          loading="lazy"
                           className="h-full w-full object-cover"
                         />
                         <Button
                           type="button"
                           variant="destructive"
                           size="icon"
+                          aria-label="Remove photo"
                           className="absolute top-1 right-1 h-6 w-6"
                           onClick={() =>
                             setPhotoUrls(photoUrls.filter((_, j) => j !== i))
@@ -358,7 +360,7 @@ export function OwnerTestimonialDialog({
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div>
                 <Label htmlFor="isApproved">Approve Immediately</Label>
-                <p className="mt-0.5 text-sm text-gray-500">
+                <p className="mt-0.5 text-sm text-muted-foreground">
                   Publish this testimonial right away (owner-added testimonials
                   can be approved on creation)
                 </p>

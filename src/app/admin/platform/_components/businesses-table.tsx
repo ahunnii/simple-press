@@ -12,46 +12,47 @@ type Props = {
 
 export function BusinessesTable({ businesses }: Props) {
   return (
-    <Card className="bg-linear-to-b from-gray-50 to-white">
+    <Card>
       <div className="overflow-x-auto">
         <table className="w-full">
+          <caption className="sr-only">Platform businesses</caption>
           <thead className="border-b">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Business
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Domain
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Members
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Owner
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Created
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y">
             {businesses.map((business) => (
-              <tr key={business.id} className="hover:bg-gray-50">
+              <tr key={business.id} className="hover:bg-muted/50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Link href={`/admin/platform/businesses/${business.id}`}>
-                    <div className="font-medium text-gray-900">
+                    <div className="font-medium text-foreground">
                       {business.name}
                     </div>
                   </Link>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm">
-                    <div className="text-gray-900">{business.subdomain}</div>
+                    <div className="text-foreground">{business.subdomain}</div>
                     {business.customDomain && (
-                      <div className="text-gray-500">
+                      <div className="text-muted-foreground">
                         {business.customDomain}
                       </div>
                     )}
@@ -67,14 +68,14 @@ export function BusinessesTable({ businesses }: Props) {
                   </Badge>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-sm text-gray-900">
+                  <span className="text-sm text-foreground">
                     {business._count.memberships}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
                   {business.ownerEmail}
                 </td>
-                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
                   {new Date(business.createdAt).toLocaleDateString()}
                 </td>
               </tr>

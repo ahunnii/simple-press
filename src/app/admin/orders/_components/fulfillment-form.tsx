@@ -108,7 +108,7 @@ export function FulfillmentForm({ orderId, customerEmail }: Props) {
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
+          <div className="flex items-start gap-3 rounded-lg border border-border p-4">
             <Checkbox
               id="hasTracking"
               checked={hasTracking}
@@ -211,10 +211,10 @@ function PackageEntry({
   const errors = form.formState.errors.packages?.[index];
 
   return (
-    <div className="space-y-3 rounded-lg border border-gray-200 p-4">
+    <div className="space-y-3 rounded-lg border border-border p-4">
       {index > 0 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-gray-700">
+          <p className="text-sm font-medium text-foreground">
             Package {index + 1}
           </p>
           {showRemove && (
@@ -223,7 +223,7 @@ function PackageEntry({
               variant="ghost"
               size="sm"
               onClick={onRemove}
-              className="h-7 w-7 p-0 text-gray-400 hover:text-red-500"
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -233,7 +233,7 @@ function PackageEntry({
 
       <div>
         <Label htmlFor={`carrier-${index}`}>
-          Carrier <span className="text-red-500">*</span>
+          Carrier <span className="text-destructive">*</span>
         </Label>
         <Select
           value={carrierValue ?? ""}
@@ -255,13 +255,13 @@ function PackageEntry({
           </SelectContent>
         </Select>
         {errors?.carrier && (
-          <p className="mt-1 text-sm text-red-600">{errors.carrier.message}</p>
+          <p className="mt-1 text-sm text-destructive">{errors.carrier.message}</p>
         )}
       </div>
 
       <div>
         <Label htmlFor={`trackingNumber-${index}`}>
-          Tracking Number <span className="text-red-500">*</span>
+          Tracking Number <span className="text-destructive">*</span>
         </Label>
         <Input
           id={`trackingNumber-${index}`}
@@ -270,7 +270,7 @@ function PackageEntry({
           className="mt-2"
         />
         {errors?.trackingNumber && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="mt-1 text-sm text-destructive">
             {errors.trackingNumber.message}
           </p>
         )}
@@ -286,7 +286,7 @@ function PackageEntry({
             className="mt-2"
           />
           {errors?.trackingUrl && (
-            <p className="mt-1 text-sm text-red-600">
+            <p className="mt-1 text-sm text-destructive">
               {errors.trackingUrl.message}
             </p>
           )}

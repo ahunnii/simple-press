@@ -12,6 +12,7 @@ import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -83,9 +84,12 @@ export function PoolAdjustInventory({ pool, open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Adjust: {pool.name}</DialogTitle>
+          <DialogDescription>
+            Set a new absolute quantity for this inventory pool and record a reason for the change.
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="mb-2 text-sm text-gray-500">
+        <div className="mb-2 text-sm text-muted-foreground">
           Current quantity: <strong>{pool.inventoryQty}</strong>
         </div>
 

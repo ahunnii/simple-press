@@ -268,7 +268,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
         onChange={() => console.log(form.formState.errors)}
-        className="min-h-screen bg-gray-50"
+        className="min-h-screen bg-muted/40"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">
@@ -334,7 +334,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <InputFormField
                       form={form}
                       name="customerName"
@@ -411,7 +411,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                       placeholder="123 Main St"
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <InputFormField
                         form={form}
                         name="shippingAddress.city"
@@ -620,7 +620,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="shipping"
@@ -629,7 +629,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                           <FormLabel>Shipping</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
                                 $
                               </span>
                               <NumberInput
@@ -654,7 +654,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                           <FormLabel>Tax</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
                                 $
                               </span>
                               <NumberInput
@@ -744,7 +744,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                 <div className="flex flex-col gap-1.5">
                   <Label>Subtotal</Label>
                   <div className="relative w-48">
-                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
                       $
                     </span>
                     <NumberInput
@@ -827,7 +827,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
 
                           <div className="min-w-0">
                             <Label>
-                              Quantity <span className="text-red-500">*</span>
+                              Quantity <span className="text-destructive">*</span>
                             </Label>
                             <NumberInput
                               id="quantity"

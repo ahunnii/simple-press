@@ -35,50 +35,51 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
   };
 
   return (
-    <Card className="bg-linear-to-b from-gray-50 to-white">
+    <Card>
       <div className="overflow-x-auto">
         <table className="w-full">
+          <caption className="sr-only">Discount codes</caption>
           <thead className="border-b">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                 Code
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                 Discount
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                 Usage
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                 Expires
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                 Status
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y">
             {discounts.map((discount) => (
-              <tr key={discount.id} className="hover:bg-gray-50">
+              <tr key={discount.id} className="hover:bg-muted/50">
                 <td className="px-6 py-4">
                   <Link
                     href={`/admin/discounts/${discount.id}`}
-                    className="font-mono font-semibold text-gray-900 hover:underline"
+                    className="font-mono font-semibold text-foreground hover:underline"
                   >
                     {discount.code}
                   </Link>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
+                <td className="px-6 py-4 text-sm text-foreground">
                   {formatValue(discount.type, discount.value)}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
+                <td className="px-6 py-4 text-sm text-muted-foreground">
                   {discount.usageCount}
                   {discount.usageLimit && ` / ${discount.usageLimit}`}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
+                <td className="px-6 py-4 text-sm text-muted-foreground">
                   {formatDate(discount.expiresAt)}
                   {isExpired(discount.expiresAt) && (
                     <Badge variant="destructive" className="ml-2">
@@ -99,7 +100,7 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
                       </Link>
                     </Button>
                     <Button variant="ghost" size="sm">
-                      <Trash className="h-4 w-4 text-red-600" />
+                      <Trash className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
                 </td>

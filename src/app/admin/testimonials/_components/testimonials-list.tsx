@@ -310,11 +310,11 @@ export function TestimonialsList({
   const filterBar = (resultCount: number) => {
     const isFiltering = search.trim() !== "" || sourceFilter !== "all";
     return (
-      <div className="sticky top-0 z-20 mb-4 rounded-lg border bg-white p-4 shadow-sm">
+      <div className="sticky top-0 z-20 mb-4 rounded-lg border bg-card p-4 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-center">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
               value={search}
@@ -498,7 +498,7 @@ export function TestimonialsList({
     if (totalPages <= 1) return null;
     const safePage = Math.min(page, totalPages);
     return (
-      <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
+      <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
         <span>
           Showing {(safePage - 1) * PAGE_SIZE + 1}–
           {Math.min(safePage * PAGE_SIZE, totalItems)} of {totalItems}
@@ -590,31 +590,31 @@ export function TestimonialsList({
                 </p>
               )}
 
-              <p className="mb-3 line-clamp-3 text-sm text-gray-700">
+              <p className="mb-3 line-clamp-3 text-sm text-foreground">
                 {testimonial.text}
               </p>
 
               <div className="text-sm">
                 <span className="font-medium">{testimonial.customerName}</span>
                 {testimonial.customerTitle && (
-                  <span className="text-gray-500">
+                  <span className="text-muted-foreground">
                     , {testimonial.customerTitle}
                   </span>
                 )}
                 {testimonial.customerCompany && (
-                  <span className="text-gray-500">
+                  <span className="text-muted-foreground">
                     {" "}
                     at {testimonial.customerCompany}
                   </span>
                 )}
                 {testimonial.customerEmail && (
-                  <span className="ml-2 text-xs text-gray-400">
+                  <span className="ml-2 text-xs text-muted-foreground">
                     ({testimonial.customerEmail})
                   </span>
                 )}
               </div>
 
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-1 text-xs text-muted-foreground">
                 {testimonial.source === "owner"
                   ? format(new Date(testimonial.testimonialDate), "MMM d, yyyy")
                   : formatDistanceToNow(new Date(testimonial.createdAt), {
@@ -728,7 +728,7 @@ export function TestimonialsList({
 
                 <DropdownMenuItem
                   onClick={() => setDeleteId(testimonial.id)}
-                  className="text-red-600"
+                  className="text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
@@ -743,7 +743,7 @@ export function TestimonialsList({
 
   const emptyState = (message: string) => (
     <Card>
-      <CardContent className="py-12 text-center text-gray-500">
+      <CardContent className="py-12 text-center text-muted-foreground">
         <p>{message}</p>
       </CardContent>
     </Card>
@@ -784,13 +784,13 @@ export function TestimonialsList({
                   </Badge>
                 )}
               </div>
-              <p className="mb-1 font-medium text-gray-900">
+              <p className="mb-1 font-medium text-foreground">
                 {displayName ?? invite.email}
               </p>
               {displayName && (
-                <p className="mb-2 text-sm text-gray-500">{invite.email}</p>
+                <p className="mb-2 text-sm text-muted-foreground">{invite.email}</p>
               )}
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 <span>
                   Sent {format(new Date(invite.createdAt), "MMM d, yyyy")}
                 </span>
@@ -802,7 +802,7 @@ export function TestimonialsList({
                 )}
               </div>
               {status === "completed" && invite.usedAt && (
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Used {format(new Date(invite.usedAt), "MMM d, yyyy")}
                 </p>
               )}
@@ -833,7 +833,7 @@ export function TestimonialsList({
                   size="sm"
                   disabled={isResending || isCancelling}
                   onClick={() => setCancelInviteId(invite.id)}
-                  className="text-red-600 hover:text-red-700"
+                  className="text-destructive hover:text-destructive"
                   aria-label="Cancel invite"
                 >
                   {isCancelling ? (
@@ -1037,7 +1037,7 @@ export function TestimonialsList({
               onClick={() =>
                 deleteId && deleteMutation.mutate({ id: deleteId })
               }
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
               disabled={deleteMutation.isPending}
             >
               {deleteMutation.isPending ? (
@@ -1068,7 +1068,7 @@ export function TestimonialsList({
               onClick={() =>
                 bulkDeleteMutation.mutate({ ids: Array.from(selectedIds) })
               }
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
               disabled={bulkDeleteMutation.isPending}
             >
               {bulkDeleteMutation.isPending ? (
@@ -1101,7 +1101,7 @@ export function TestimonialsList({
                 setPendingCancelId(cancelInviteId);
                 cancelInviteMutation.mutate({ id: cancelInviteId });
               }}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
               disabled={cancelInviteMutation.isPending}
             >
               {cancelInviteMutation.isPending ? (

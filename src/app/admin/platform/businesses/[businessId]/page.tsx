@@ -37,6 +37,9 @@ export default async function BusinessDetailPage({ params }: Props) {
       />
       <div className="admin-container">
         <div className="space-y-6">
+          <div className="admin-header">
+            <h1 className="text-2xl font-bold">{business.name}</h1>
+          </div>
           <Card>
             <CardHeader>
               <div className="flex items-start justify-between">

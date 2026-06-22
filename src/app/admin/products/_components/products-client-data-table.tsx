@@ -141,8 +141,8 @@ export function ProductsTable({ products }: Props) {
     <div className="space-y-2">
       {/* ── Bulk action toolbar ── */}
       {selectedCount > 0 && (
-        <div className="flex items-center gap-3 rounded-lg border bg-white px-4 py-2 shadow-sm">
-          <span className="text-sm font-medium text-gray-700">
+        <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-2 shadow-sm">
+          <span className="text-sm font-medium text-foreground">
             {selectedCount} selected
           </span>
           <div className="ml-auto flex items-center gap-2">
@@ -185,12 +185,13 @@ export function ProductsTable({ products }: Props) {
         </div>
       )}
 
-      <Card className="bg-linear-to-b from-gray-50 to-white">
+      <Card>
         <div className="overflow-x-auto">
           <table className="w-full">
+            <caption className="sr-only">Products</caption>
             <thead className="border-b">
               <tr>
-                <th className="px-4 py-3 text-left">
+                <th scope="col" className="px-4 py-3 text-left">
                   <Checkbox
                     checked={
                       allSelected
@@ -203,24 +204,24 @@ export function ProductsTable({ products }: Props) {
                     aria-label="Select all products on this page"
                   />
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                   Product
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                   Price
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                   Variants
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-border bg-card">
               {products.map((product) => {
                 let displayPrice = "N/A";
                 if (
@@ -246,7 +247,7 @@ export function ProductsTable({ products }: Props) {
                   displayPrice = formatPrice(product.price);
                 }
                 return (
-                  <tr key={product.id} className="hover:bg-gray-50">
+                  <tr key={product.id} className="hover:bg-muted/50">
                     <td className="px-4 py-4 whitespace-nowrap">
                       <Checkbox
                         checked={selected.has(product.id)}
@@ -258,26 +259,27 @@ export function ProductsTable({ products }: Props) {
                       <Link href={`/admin/products/${product.id}`}>
                         <div className="flex items-center">
                           {product.images[0] ? (
-                            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-gray-100">
+                            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
                               <Image
                                 src={product.images[0].url}
                                 alt={product.images[0].altText ?? product.name}
                                 fill
+                                sizes="40px"
                                 className="object-cover"
                               />
                             </div>
                           ) : (
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-gray-200">
-                              <span className="text-xs text-gray-400">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted">
+                              <span className="text-xs text-muted-foreground">
                                 No img
                               </span>
                             </div>
                           )}
                           <div className="ml-4">
-                            <div className="font-medium text-gray-900">
+                            <div className="font-medium text-foreground">
                               {product.name}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-muted-foreground">
                               {product.slug}
                             </div>
                           </div>
@@ -291,10 +293,10 @@ export function ProductsTable({ products }: Props) {
                         <Badge variant="secondary">Draft</Badge>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                    <td className="px-6 py-4 text-sm whitespace-nowrap text-foreground">
                       {displayPrice}
                     </td>
-                    <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                    <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
                       {product._count.variants > 0
                         ? `${product._count.variants} variant${product._count.variants !== 1 ? "s" : ""}`
                         : "No variants"}
@@ -304,6 +306,7 @@ export function ProductsTable({ products }: Props) {
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
                             <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Actions for {product.name}</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -330,7 +333,7 @@ export function ProductsTable({ products }: Props) {
                             Duplicate
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            className="text-red-600"
+                            className="text-destructive focus:text-destructive"
                             onClick={() => {
                               setDeleteId(product.id);
                               setProductName(product.name);
@@ -356,6 +359,7 @@ export function ProductsTable({ products }: Props) {
           setOpen={setOpen}
           productName={productName}
           onDelete={() => deleteProduct.mutate(deleteId ?? "")}
+          isPending={deleteProduct.isPending}
         />
       </Card>
 
@@ -373,15 +377,18 @@ export function ProductsTable({ products }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={bulkDelete.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
+              disabled={bulkDelete.isPending}
+              onClick={(e) => {
+                e.preventDefault();
                 bulkDelete.mutate({ ids: [...selected] });
-                setBulkDeleteOpen(false);
               }}
             >
-              Delete {selectedCount} product{selectedCount !== 1 ? "s" : ""}
+              {bulkDelete.isPending
+                ? "Deleting…"
+                : `Delete ${selectedCount} product${selectedCount !== 1 ? "s" : ""}`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

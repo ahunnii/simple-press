@@ -5,7 +5,7 @@ import { checkBusiness } from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
 import { db } from "~/server/db";
 
-import { SiteHeader } from "../_components/site-header";
+import { TrailHeader } from "../_components/trail-header";
 import { QuickActions } from "./_components/quick-actions";
 import { SetupChecklist } from "./_components/setup-checklist";
 import { WelcomeHeader } from "./_components/welcome-header";
@@ -44,7 +44,7 @@ export default async function AdminWelcomePage() {
 
   return (
     <>
-      <SiteHeader title="Welcome!" />
+      <TrailHeader breadcrumbs={[{ label: "Welcome" }]} />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <WelcomeHeader
           businessName={business.name}

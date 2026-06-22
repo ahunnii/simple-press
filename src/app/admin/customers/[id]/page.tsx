@@ -98,22 +98,22 @@ export default async function CustomerDetailPage({ params }: Props) {
               <CardContent className="space-y-4">
                 {name && (
                   <div>
-                    <p className="text-sm text-gray-500">Name</p>
+                    <p className="text-sm text-muted-foreground">Name</p>
                     <p className="font-medium">{name}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="text-sm text-muted-foreground">Email</p>
                   <p className="font-medium">{customer.email}</p>
                 </div>
                 {customer.phone && (
                   <div>
-                    <p className="text-sm text-gray-500">Phone</p>
+                    <p className="text-sm text-muted-foreground">Phone</p>
                     <p className="font-medium">{customer.phone}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-sm text-gray-500">Marketing</p>
+                  <p className="text-sm text-muted-foreground">Marketing</p>
                   <Badge
                     variant={
                       customer.acceptsMarketing ? "default" : "secondary"
@@ -131,11 +131,11 @@ export default async function CustomerDetailPage({ params }: Props) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-500">Total Orders</p>
+                  <p className="text-sm text-muted-foreground">Total Orders</p>
                   <p className="text-2xl font-bold">{customer.orderCount}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Total Spent</p>
+                  <p className="text-sm text-muted-foreground">Total Spent</p>
                   <p className="text-2xl font-bold">
                     {formatPrice(
                       customer.orders.reduce((sum, o) => sum + o.total, 0),

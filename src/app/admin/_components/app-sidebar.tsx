@@ -3,25 +3,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import {
-  IconChartBar,
-  IconCreditCard,
-  IconDashboard,
-  IconDiscount,
-  IconFolder,
-  IconHelp,
-  IconImageInPicture,
-  IconLanguage,
-  IconMail,
-  IconPackage,
-  IconPackages,
-  IconSettings,
-  IconShoppingCart,
-  IconSparkles,
-  IconStar,
-  IconTerminal,
-  IconUsers,
-} from "@tabler/icons-react";
+import { IconHelp, IconMail, IconSettings, IconTerminal } from "@tabler/icons-react";
 import { Building2, Globe, Users } from "lucide-react";
 
 import type { Session } from "~/server/better-auth/config";
@@ -36,97 +18,26 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
+import {
+  NAV_ITEMS,
+  NAV_SECTION_LABELS,
+  type NavSection,
+} from "~/app/admin/_lib/admin-nav";
 import { NavMain } from "~/app/admin/_components/nav-main";
 import { NavSecondary } from "~/app/admin/_components/nav-secondary";
 import { NavUser } from "~/app/admin/_components/nav-user";
 
 import WelcomeNotification from "./welcome-notification";
 
-const getNavData = (session: Session | null) => {
-  const navMain = [
-    {
-      title: "Dashboard",
-      url: "/admin/dashboard",
-      icon: IconDashboard,
-    },
-    {
-      title: "Orders",
-      url: "/admin/orders",
-      icon: IconShoppingCart,
-      featureKey: "orders",
-    },
-    {
-      title: "Customers",
-      url: "/admin/customers",
-      icon: IconUsers,
-    },
-    {
-      title: "Payments",
-      url: "/admin/payments",
-      icon: IconCreditCard,
-      featureKey: "payments",
-    },
-    {
-      title: "Products",
-      url: "/admin/products",
-      icon: IconPackage,
-      featureKey: "products",
-    },
-    {
-      title: "Inventory",
-      url: "/admin/inventory",
-      icon: IconPackages,
-      featureKey: "inventory",
-    },
-    {
-      title: "Collections",
-      url: "/admin/collections",
-      icon: IconFolder,
-      featureKey: "collections",
-    },
-    {
-      title: "Services",
-      url: "/admin/services",
-      icon: IconSparkles,
-      featureKey: "services",
-    },
-    {
-      title: "Site content",
-      url: "/admin/content",
-      icon: IconLanguage,
-    },
-    {
-      title: "Discounts",
-      url: "/admin/discounts",
-      icon: IconDiscount,
-      featureKey: "coupons",
-    },
-    {
-      title: "Galleries",
-      url: "/admin/galleries",
-      icon: IconImageInPicture,
-      featureKey: "galleries",
-    },
-    {
-      title: "Testimonials",
-      url: "/admin/testimonials",
-      icon: IconStar,
-      featureKey: "testimonials",
-    },
-    {
-      title: "Reviews",
-      url: "/admin/reviews",
-      icon: IconStar,
-      featureKey: "reviews",
-    },
-    {
-      title: "Analytics",
-      url: "/admin/analytics",
-      icon: IconChartBar,
-      featureKey: "analytics",
-    },
-  ];
+const NAV_SECTION_ORDER: NavSection[] = [
+  "sell",
+  "catalog",
+  "marketing",
+  "content",
+  "insights",
+];
 
+const getNavData = (session: Session | null) => {
   const navPlatformAdmin:
     | {
         title: string;
@@ -155,7 +66,6 @@ const getNavData = (session: Session | null) => {
       : [];
 
   return {
-    navMain,
     navPlatformAdmin,
     navSecondary: [
       {
@@ -195,14 +105,21 @@ export function AppSidebar({
 
   const navData = getNavData(session ?? null);
 
-  const filteredNavMain = useMemo(() => {
-    return navData.navMain.filter((item) => {
-      if (!item.featureKey) return true;
-      return (
-        isEnabled(item.featureKey) && !isDisabledByDependency(item.featureKey)
-      );
-    });
-  }, [navData.navMain, isEnabled, isDisabledByDependency]);
+  const groupedNav = useMemo(() => {
+    return NAV_SECTION_ORDER.map((section) => {
+      const items = NAV_ITEMS.filter((item) => {
+        if (item.section !== section) return false;
+        if (!item.featureKey) return true;
+        return isEnabled(item.featureKey) && !isDisabledByDependency(item.featureKey);
+      }).map((item) => ({
+        title: item.title,
+        url: item.href,
+        icon: item.icon,
+      }));
+
+      return { section, label: NAV_SECTION_LABELS[section], items };
+    }).filter((group) => group.items.length > 0);
+  }, [isEnabled, isDisabledByDependency]);
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -218,7 +135,7 @@ export function AppSidebar({
                   <IconTerminal className="size-8" />
                   simple_press
                 </span>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-muted-foreground">
                   {businessName ?? "Business"}
                 </span>
               </Link>
@@ -227,9 +144,11 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={filteredNavMain} />
+        {groupedNav.map((group) => (
+          <NavMain key={group.section} items={group.items} label={group.label} />
+        ))}
         {navData.navPlatformAdmin.length > 0 && (
-          <NavMain items={navData.navPlatformAdmin} />
+          <NavMain items={navData.navPlatformAdmin} label="Platform" />
         )}
         <NavSecondary items={navData.navSecondary} className="mt-auto" />
       </SidebarContent>

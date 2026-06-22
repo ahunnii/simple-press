@@ -108,13 +108,13 @@ export function ProductExporter() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-muted/30 py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-foreground">
             Export to WordPress
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-muted-foreground">
             Select products to export to WooCommerce
           </p>
         </div>
@@ -156,9 +156,10 @@ export function ProductExporter() {
             {/* Filters */}
             <div className="flex gap-4">
               <div className="relative flex-1">
-                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search products..."
+                  aria-label="Search products"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
@@ -196,14 +197,15 @@ export function ProductExporter() {
 
             {/* Products Table */}
             {isLoading ? (
-              <div className="py-12 text-center">
-                <Loader2 className="mx-auto h-8 w-8 animate-spin text-gray-400" />
-                <p className="mt-4 text-gray-600">Loading products...</p>
+              <div className="py-12 text-center" role="status">
+                <Loader2 aria-hidden="true" className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+                <span className="sr-only">Loading…</span>
+                <p className="mt-4 text-muted-foreground" aria-hidden="true">Loading products...</p>
               </div>
             ) : !products || products.length === 0 ? (
               <div className="py-12 text-center">
-                <Package className="mx-auto h-12 w-12 text-gray-400" />
-                <p className="mt-4 text-gray-600">No products found</p>
+                <Package className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-4 text-muted-foreground">No products found</p>
                 {search && (
                   <Button
                     variant="link"
@@ -217,20 +219,22 @@ export function ProductExporter() {
             ) : (
               <div className="overflow-hidden rounded-lg border">
                 <Table>
+                  <caption className="sr-only">Products available for export</caption>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-12">
+                      <TableHead scope="col" className="w-12">
                         <Checkbox
                           checked={selectedProducts.size === products.length}
                           onCheckedChange={handleSelectAll}
+                          aria-label="Select all products"
                         />
                       </TableHead>
-                      <TableHead>Product</TableHead>
-                      <TableHead>SKU</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Stock</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead scope="col">Product</TableHead>
+                      <TableHead scope="col">SKU</TableHead>
+                      <TableHead scope="col">Price</TableHead>
+                      <TableHead scope="col">Stock</TableHead>
+                      <TableHead scope="col">Type</TableHead>
+                      <TableHead scope="col">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -250,11 +254,12 @@ export function ProductExporter() {
                               <img
                                 src={product.images[0].url}
                                 alt={product.name}
+                                loading="lazy"
                                 className="h-10 w-10 rounded object-cover"
                               />
                             ) : (
-                              <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-200">
-                                <Package className="h-5 w-5 text-gray-400" />
+                              <div className="flex h-10 w-10 items-center justify-center rounded bg-muted">
+                                <Package className="h-5 w-5 text-muted-foreground" />
                               </div>
                             )}
                             <div>
@@ -268,7 +273,7 @@ export function ProductExporter() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="font-mono text-sm text-gray-600">
+                          <span className="font-mono text-sm text-muted-foreground">
                             {product.sku ?? "—"}
                           </span>
                         </TableCell>
@@ -279,7 +284,7 @@ export function ProductExporter() {
                               {product.inventoryQty} in stock
                             </span>
                           ) : (
-                            <span className="text-gray-500">Out of stock</span>
+                            <span className="text-muted-foreground">Out of stock</span>
                           )}
                         </TableCell>
                         <TableCell>

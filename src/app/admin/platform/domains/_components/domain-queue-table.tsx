@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Clock, ExternalLink, XCircle } from "lucide-react";
+import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
@@ -32,8 +33,17 @@ export function DomainQueueTable({ entries }: Props) {
   const [actioningId, setActioningId] = useState<string | null>(null);
 
   const updateStatus = api.platform.updateDomainStatus.useMutation({
+    onMutate: () => {
+      toast.loading("Updating domain...");
+    },
     onSuccess: () => {
+      toast.dismiss();
+      toast.success("Domain updated");
       router.refresh();
+    },
+    onError: (err) => {
+      toast.dismiss();
+      toast.error(err.message ?? "Failed to update domain");
     },
     onSettled: () => {
       setActioningId(null);
@@ -94,7 +104,7 @@ export function DomainQueueTable({ entries }: Props) {
 
   if (entries.length === 0) {
     return (
-      <Card className="p-12 text-center text-gray-500">
+      <Card className="p-12 text-center text-muted-foreground">
         No pending domain requests.
       </Card>
     );
@@ -104,41 +114,42 @@ export function DomainQueueTable({ entries }: Props) {
     <Card className="overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="border-b bg-gray-50">
+          <caption className="sr-only">Domain queue entries</caption>
+          <thead className="border-b bg-muted">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Business
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Custom Domain
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Queue Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Domain Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Requested
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y">
             {entries.map((entry) => {
               const isActioning = actioningId === entry.businessId;
               const b = entry.business;
 
               return (
-                <tr key={entry.id} className="hover:bg-gray-50">
+                <tr key={entry.id} className="hover:bg-muted/50">
                   <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">
+                    <div className="font-medium text-foreground">
                       {b?.name ?? "Unknown"}
                     </div>
-                    <div className="text-sm text-gray-500">{b?.ownerEmail}</div>
-                    <div className="mt-0.5 font-mono text-xs text-gray-400">
+                    <div className="text-sm text-muted-foreground">{b?.ownerEmail}</div>
+                    <div className="mt-0.5 font-mono text-xs text-muted-foreground/70">
                       {b?.subdomain}.{process.env.NEXT_PUBLIC_PLATFORM_DOMAIN}
                     </div>
                   </td>
@@ -149,13 +160,13 @@ export function DomainQueueTable({ entries }: Props) {
                         href={`https://${entry.domain}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-blue-600"
+                        className="text-muted-foreground/60 hover:text-blue-600"
                       >
                         <ExternalLink className="h-3 w-3" />
                       </a>
                     </div>
                     {entry.lastError && (
-                      <div className="mt-1 text-xs text-red-500">
+                      <div className="mt-1 text-xs text-destructive">
                         {entry.lastError}
                       </div>
                     )}
@@ -164,7 +175,7 @@ export function DomainQueueTable({ entries }: Props) {
                   <td className="px-6 py-4">
                     {domainStatusBadge(b?.domainStatus ?? "NONE")}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
+                  <td className="px-6 py-4 text-sm text-muted-foreground">
                     {new Date(entry.createdAt).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",

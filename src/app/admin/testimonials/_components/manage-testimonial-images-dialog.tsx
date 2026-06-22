@@ -73,7 +73,7 @@ export function ManageTestimonialImagesDialog({
 
         <div className="py-4">
           {localUrls.length === 0 ? (
-            <p className="rounded-lg border border-dashed py-8 text-center text-sm text-gray-500">
+            <p className="rounded-lg border border-dashed py-8 text-center text-sm text-muted-foreground">
               No images. Remove the last one to hide all images for this
               testimonial.
             </p>
@@ -84,7 +84,7 @@ export function ManageTestimonialImagesDialog({
                   key={`${url}-${i}`}
                   className="flex items-center gap-3 rounded-lg border p-3"
                 >
-                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded bg-gray-100">
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded bg-muted">
                     <Image
                       src={url}
                       alt=""
@@ -93,7 +93,7 @@ export function ManageTestimonialImagesDialog({
                       sizes="56px"
                     />
                   </div>
-                  <span className="block w-full flex-1 overflow-hidden text-sm text-ellipsis text-gray-600">
+                  <span className="block w-full flex-1 overflow-hidden text-sm text-ellipsis text-muted-foreground">
                     Image {i + 1}
                   </span>
                   <Button

@@ -477,7 +477,7 @@ export function PoliciesManager({ business }: Props) {
   const isDirty = allForms.some((form) => form.formState.isDirty);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted/40">
       <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
         <div className="toolbar-info">
           <Button variant="ghost" size="sm" asChild className="shrink-0">
@@ -539,7 +539,7 @@ export function PoliciesManager({ business }: Props) {
           onValueChange={setActivePolicy}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
             <TabsTrigger value="terms">Terms</TabsTrigger>
             <TabsTrigger value="refund">Returns</TabsTrigger>

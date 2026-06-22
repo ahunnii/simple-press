@@ -104,6 +104,7 @@ export function BusinessMembersTable({ memberships }: Props) {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon">
                       <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">Member actions</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">

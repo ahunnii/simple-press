@@ -63,7 +63,7 @@ export function FeatureFlagsEditor({ initialFlags }: Props) {
       <div className="admin-container space-y-8">
         <div>
           <h1 className="text-3xl font-bold">Features</h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-muted-foreground">
             Enable or disable features for your business. Disabled features are
             hidden from your admin panel and storefront.
           </p>
@@ -118,7 +118,7 @@ export function FeatureFlagsEditor({ initialFlags }: Props) {
                             </Tooltip>
                           )}
                         </div>
-                        <p className="mt-0.5 text-sm text-gray-500">
+                        <p className="mt-0.5 text-sm text-muted-foreground">
                           {feature.description}
                         </p>
                       </div>

@@ -6,7 +6,7 @@ import { db } from "~/server/db";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { DashboardContent } from "~/app/admin/dashboard/_components/dashboard-content";
 
-import { SiteHeader } from "../_components/site-header";
+import { TrailHeader } from "../_components/trail-header";
 
 export default async function AdminDashboardPage() {
   const business = await checkBusiness();
@@ -234,7 +234,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <>
-      <SiteHeader title="Dashboard" />
+      <TrailHeader breadcrumbs={[]} />
 
       {!flags.isEnabled("cart") && (
         <Alert className="mx-auto my-4 w-full max-w-5xl">

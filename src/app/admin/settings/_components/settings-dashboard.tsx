@@ -1,14 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import {
-  FileText,
-  Home,
-  Package,
-  PowerOff,
-  Shield,
-  Wrench,
-} from "lucide-react";
 
 import {
   Card,
@@ -17,154 +9,74 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { getHubCards } from "~/app/admin/_lib/admin-nav";
+
+const settingsCards = getHubCards("settings");
+
+// Tailwind color maps — must be static strings so the compiler includes them
+const bgMap: Record<string, string> = {
+  slate: "bg-slate-100",
+  emerald: "bg-emerald-100",
+  yellow: "bg-yellow-100",
+  orange: "bg-orange-100",
+  indigo: "bg-indigo-100",
+  purple: "bg-purple-100",
+  red: "bg-red-100",
+};
+
+const textMap: Record<string, string> = {
+  slate: "text-slate-600",
+  emerald: "text-emerald-600",
+  yellow: "text-yellow-600",
+  orange: "text-orange-600",
+  indigo: "text-indigo-600",
+  purple: "text-purple-600",
+  red: "text-red-600",
+};
+
+const borderMap: Record<string, string> = {
+  slate: "hover:border-slate-500",
+  emerald: "hover:border-emerald-500",
+  yellow: "hover:border-yellow-500",
+  orange: "hover:border-orange-500",
+  indigo: "hover:border-indigo-500",
+  purple: "hover:border-purple-500",
+  red: "hover:border-red-500",
+};
 
 export function SettingsDashboard() {
   return (
     <>
-      {/* Main Content Sections */}
       <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* General */}
-        <Link href="/admin/settings/general">
-          <Card className="h-full cursor-pointer transition-all hover:border-slate-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-slate-100 p-3">
-                  <Home className="h-6 w-6 text-slate-600" />
-                </div>
-                <div>
-                  <CardTitle>General</CardTitle>
-                  <CardDescription>Name, email, address, phone</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Edit general settings for your business
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
+        {settingsCards.map((card) => {
+          const bg = bgMap[card.color] ?? "bg-slate-100";
+          const text = textMap[card.color] ?? "text-slate-600";
+          const border = borderMap[card.color] ?? "hover:border-slate-500";
+          const Icon = card.icon;
 
-        {/* Shipping */}
-        <Link href="/admin/settings/shipping">
-          <Card className="h-full cursor-pointer transition-all hover:border-emerald-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-emerald-100 p-3">
-                  <Package className="h-6 w-6 text-emerald-600" />
-                </div>
-                <div>
-                  <CardTitle>Shipping</CardTitle>
-                  <CardDescription>
-                    Rates, free-shipping thresholds, in-store pickup
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Configure how customers are charged for delivery
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Integrations */}
-        <Link href="/admin/settings/integrations">
-          <Card className="h-full cursor-pointer transition-all hover:border-purple-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-purple-100 p-3">
-                    <FileText className="h-6 w-6 text-purple-600" />
+          return (
+            <Link key={card.key} href={card.href}>
+              <Card
+                className={`h-full cursor-pointer transition-all hover:shadow-lg ${border}`}
+              >
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className={`rounded-lg p-3 ${bg}`}>
+                      <Icon className={`h-6 w-6 ${text}`} />
+                    </div>
+                    <div>
+                      <CardTitle>{card.title}</CardTitle>
+                      <CardDescription>{card.description}</CardDescription>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle>Integrations</CardTitle>
-                    <CardDescription>
-                      Payment gateways, email marketing, analytics, and more.
-                    </CardDescription>
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-3 text-sm text-gray-600">
-                Connect your business to third-party services
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Domain */}
-        <Link href="/admin/settings/domain">
-          <Card className="h-full cursor-pointer transition-all hover:border-orange-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-orange-100 p-3">
-                  <Shield className="h-6 w-6 text-orange-600" />
-                </div>
-                <div>
-                  <CardTitle>Domain</CardTitle>
-                  <CardDescription>
-                    Your business domain and custom domain
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-3 text-sm text-gray-600">
-                Manage your business domain and custom domain
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Features */}
-        <Link href="/admin/settings/features">
-          <Card className="h-full cursor-pointer transition-all hover:border-indigo-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-indigo-100 p-3">
-                  <Wrench className="h-6 w-6 text-indigo-600" />
-                </div>
-                <div>
-                  <CardTitle>Features</CardTitle>
-                  <CardDescription>Fine tune your business</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-3 text-sm text-gray-600">
-                Enable or disable features for your business
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Storefront Availability */}
-        <Link href="/admin/settings/availability">
-          <Card className="h-full cursor-pointer transition-all hover:border-red-500 hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-red-100 p-3">
-                  <PowerOff className="h-6 w-6 text-red-600" />
-                </div>
-                <div>
-                  <CardTitle>Storefront Availability</CardTitle>
-                  <CardDescription>
-                    Maintenance mode and coming soon
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Temporarily take your storefront offline for maintenance or
-                launch preparation
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">{card.body}</p>
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
     </>
   );

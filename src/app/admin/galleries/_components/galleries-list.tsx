@@ -168,9 +168,9 @@ export function GalleriesList({ galleries }: Props) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <Images className="mx-auto h-12 w-12 text-gray-400" />
+          <Images className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-medium">No galleries yet</h3>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-muted-foreground">
             Create your first gallery to get started
           </p>
           <Button className="mt-4" asChild>
@@ -184,14 +184,15 @@ export function GalleriesList({ galleries }: Props) {
   return (
     <>
       {/* Search + Layout filter bar */}
-      <div className="sticky top-0 z-20 mb-6 rounded-lg border bg-white p-4 shadow-sm">
+      <div className="sticky top-0 z-20 mb-6 rounded-lg border bg-card p-4 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-center">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search galleries..."
+              aria-label="Search galleries"
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10"
@@ -245,7 +246,7 @@ export function GalleriesList({ galleries }: Props) {
       {!hasResults ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-gray-500">
+            <p className="text-muted-foreground">
               No galleries match your search or filter.
             </p>
           </CardContent>
@@ -256,22 +257,23 @@ export function GalleriesList({ galleries }: Props) {
             {paginated.map((gallery) => (
               <Card key={gallery.id} className="overflow-hidden">
                 {/* Preview Images */}
-                <div className="grid grid-cols-2 gap-1 bg-gray-100 p-2">
+                <div className="grid grid-cols-2 gap-1 bg-muted p-2">
                   {gallery.images.slice(0, 4).map((image) => (
                     <div
                       key={image.id}
-                      className="aspect-square overflow-hidden rounded bg-white"
+                      className="aspect-square overflow-hidden rounded bg-card"
                     >
                       <img
                         src={image.url}
                         alt={image.altText ?? ""}
+                        loading="lazy"
                         className="h-full w-full object-cover"
                       />
                     </div>
                   ))}
                   {gallery.images.length === 0 && (
-                    <div className="col-span-2 flex aspect-square items-center justify-center rounded bg-gray-200">
-                      <Images className="h-8 w-8 text-gray-400" />
+                    <div className="col-span-2 flex aspect-square items-center justify-center rounded bg-muted">
+                      <Images className="h-8 w-8 text-muted-foreground" />
                     </div>
                   )}
                 </div>
@@ -281,7 +283,7 @@ export function GalleriesList({ galleries }: Props) {
                     <div className="min-w-0 flex-1">
                       <h3 className="truncate font-medium">{gallery.name}</h3>
                       {gallery.description && (
-                        <p className="mt-1 truncate text-sm text-gray-600">
+                        <p className="mt-1 truncate text-sm text-muted-foreground">
                           {gallery.description}
                         </p>
                       )}
@@ -327,7 +329,7 @@ export function GalleriesList({ galleries }: Props) {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setDeleteId(gallery.id)}
-                          className="text-red-600 focus:text-red-600"
+                          className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete
@@ -392,12 +394,16 @@ export function GalleriesList({ galleries }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteId && deleteMutation.mutate(deleteId)}
-              className="bg-red-600 hover:bg-red-700"
+              onClick={(e) => {
+                e.preventDefault();
+                if (deleteId) deleteMutation.mutate(deleteId);
+              }}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
-              Delete
+              {deleteMutation.isPending ? "Deleting…" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

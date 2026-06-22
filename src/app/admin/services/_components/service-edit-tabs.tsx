@@ -20,7 +20,7 @@ export function ServiceEditTabs({
 }: Props) {
   return (
     <Tabs defaultValue="details" className="w-full">
-      <div className="border-b bg-white px-4 py-2 sm:px-6">
+      <div className="border-b bg-card px-4 py-2 sm:px-6">
         <TabsList>
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="items">Specific services</TabsTrigger>

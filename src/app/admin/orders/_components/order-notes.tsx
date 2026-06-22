@@ -77,9 +77,9 @@ export function OrderNotes({ orderId, internalNote, customerNote }: Props) {
       <CardContent className="space-y-4">
         {/* Internal note — always shown, editable */}
         <div>
-          <p className="mb-1.5 text-xs font-medium tracking-wide text-gray-500 uppercase">
+          <p className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
             Internal Note
-            <span className="ml-1 text-gray-400 normal-case">
+            <span className="ml-1 text-muted-foreground/70 normal-case">
               (not visible to customer)
             </span>
           </p>
@@ -116,11 +116,11 @@ export function OrderNotes({ orderId, internalNote, customerNote }: Props) {
             </div>
           ) : (
             <p
-              className="min-h-8 cursor-text text-sm whitespace-pre-wrap text-gray-900"
+              className="min-h-8 cursor-text text-sm whitespace-pre-wrap text-foreground"
               onClick={() => setIsEditing(true)}
             >
               {internalNote ?? (
-                <span className="text-gray-400 italic">No internal note</span>
+                <span className="text-muted-foreground italic">No internal note</span>
               )}
             </p>
           )}
@@ -129,10 +129,10 @@ export function OrderNotes({ orderId, internalNote, customerNote }: Props) {
         {/* Customer note — read-only, only shown if present */}
         {customerNote && (
           <div className="border-t pt-4">
-            <p className="mb-1.5 text-xs font-medium tracking-wide text-gray-500 uppercase">
+            <p className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
               Customer Note
             </p>
-            <p className="text-sm whitespace-pre-wrap text-gray-900">
+            <p className="text-sm whitespace-pre-wrap text-foreground">
               {customerNote}
             </p>
           </div>

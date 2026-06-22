@@ -85,15 +85,15 @@ export function ConnectStripeButton({
         </div>
 
         <div>
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-foreground">
             Account ID
           </label>
-          <div className="mt-1 rounded border bg-gray-50 p-3 font-mono text-sm">
+          <div className="mt-1 rounded border bg-muted p-3 font-mono text-sm">
             {stripeAccountId}
           </div>
         </div>
 
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Your Stripe account is connected. Payments are deposited directly to
           your bank.
         </p>
@@ -138,7 +138,7 @@ export function ConnectStripeButton({
         </Badge>
       </div>
 
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-muted-foreground">
         Connect your Stripe account to start accepting payments.
       </p>
 
